@@ -16,7 +16,7 @@
     <script src="../../../_static/doctools.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" />
-    <link rel="next" title="AH - Authentication Header" href="ah.html" />
+    <link rel="next" title="Base Protocol" href="internet.html" />
     <link rel="prev" title="VLAN - 802.1Q Customer VLAN Tag Type" href="../link/vlan.html" />
    
   <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
@@ -36,119 +36,27 @@
             
   <section id="module-pcapkit.protocols.internet">
 <span id="internet-layer-protocols"></span><h1>Internet Layer Protocols<a class="headerlink" href="#module-pcapkit.protocols.internet" title="Permalink to this heading">¶</a></h1>
-<p><a class="reference internal" href="#module-pcapkit.protocols.internet" title="pcapkit.protocols.internet"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.internet</span></code></a> is collection of all protocols in
+<span class="target" id="module-pcapkit.protocols.data.internet"></span><p><a class="reference internal" href="#module-pcapkit.protocols.internet" title="pcapkit.protocols.internet"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.internet</span></code></a> is collection of all protocols in
 internet layer, with detailed implementation and methods.</p>
 <div class="toctree-wrapper compound">
 <ul>
+<li class="toctree-l1"><a class="reference internal" href="internet.html">Base Protocol</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ah.html">AH - Authentication Header</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="ah.html#data-structure">Data Structure</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ah.html#data-structures">Data Structures</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="hip.html">HIP - Host Identity Protocol</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="hip.html#data-structure">Data Structure</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="hip.html#hip-unassigned-parameters">HIP Unassigned Parameters</a></li>
-<li class="toctree-l3"><a class="reference internal" href="hip.html#hip-esp-info-parameter">HIP <code class="docutils literal notranslate"><span class="pre">ESP_INFO</span></code> Parameter</a></li>
-<li class="toctree-l3"><a class="reference internal" href="hip.html#hip-r1-counter-parameter">HIP <code class="docutils literal notranslate"><span class="pre">R1_COUNTER</span></code> Parameter</a></li>
-<li class="toctree-l3"><a class="reference internal" href="hip.html#hip-locator-set-parameter">HIP <code class="docutils literal notranslate"><span class="pre">LOCATOR_SET</span></code> Parameter</a></li>
-<li class="toctree-l3"><a class="reference internal" href="hip.html#hip-puzzle-parameter">HIP <code class="docutils literal notranslate"><span class="pre">PUZZLE</span></code> Parameter</a></li>
-<li class="toctree-l3"><a class="reference internal" href="hip.html#hip-solution-parameter">HIP <code class="docutils literal notranslate"><span class="pre">SOLUTION</span></code> Parameter</a></li>
-<li class="toctree-l3"><a class="reference internal" href="hip.html#hip-seq-parameter">HIP <code class="docutils literal notranslate"><span class="pre">SEQ</span></code> Parameter</a></li>
-<li class="toctree-l3"><a class="reference internal" href="hip.html#hip-ack-parameter">HIP <code class="docutils literal notranslate"><span class="pre">ACK</span></code> Parameter</a></li>
-<li class="toctree-l3"><a class="reference internal" href="hip.html#hip-dh-group-list-parameter">HIP <code class="docutils literal notranslate"><span class="pre">DH_GROUP_LIST</span></code> Parameter</a></li>
-<li class="toctree-l3"><a class="reference internal" href="hip.html#hip-deffie-hellman-parameter">HIP <code class="docutils literal notranslate"><span class="pre">DEFFIE_HELLMAN</span></code> Parameter</a></li>
-<li class="toctree-l3"><a class="reference internal" href="hip.html#hip-hip-transform-parameter">HIP <code class="docutils literal notranslate"><span class="pre">HIP_TRANSFORM</span></code> Parameter</a></li>
-<li class="toctree-l3"><a class="reference internal" href="hip.html#hip-hip-cipher-parameter">HIP <code class="docutils literal notranslate"><span class="pre">HIP_CIPHER</span></code> Parameter</a></li>
-<li class="toctree-l3"><a class="reference internal" href="hip.html#hip-nat-traversal-mode-parameter">HIP <code class="docutils literal notranslate"><span class="pre">NAT_TRAVERSAL_MODE</span></code> Parameter</a></li>
-<li class="toctree-l3"><a class="reference internal" href="hip.html#hip-transaction-pacing-parameter">HIP <code class="docutils literal notranslate"><span class="pre">TRANSACTION_PACING</span></code> Parameter</a></li>
-<li class="toctree-l3"><a class="reference internal" href="hip.html#hip-encrypted-parameter">HIP <code class="docutils literal notranslate"><span class="pre">ENCRYPTED</span></code> Parameter</a></li>
-<li class="toctree-l3"><a class="reference internal" href="hip.html#hip-host-id-parameter">HIP <code class="docutils literal notranslate"><span class="pre">HOST_ID</span></code> Parameter</a></li>
-<li class="toctree-l3"><a class="reference internal" href="hip.html#hip-hit-suite-list-parameter">HIP <code class="docutils literal notranslate"><span class="pre">HIT_SUITE_LIST</span></code> Parameter</a></li>
-<li class="toctree-l3"><a class="reference internal" href="hip.html#hip-cert-parameter">HIP <code class="docutils literal notranslate"><span class="pre">CERT</span></code> Parameter</a></li>
-<li class="toctree-l3"><a class="reference internal" href="hip.html#hip-notification-parameter">HIP <code class="docutils literal notranslate"><span class="pre">NOTIFICATION</span></code> Parameter</a></li>
-<li class="toctree-l3"><a class="reference internal" href="hip.html#hip-echo-request-signed-parameter">HIP <code class="docutils literal notranslate"><span class="pre">ECHO_REQUEST_SIGNED</span></code> Parameter</a></li>
-<li class="toctree-l3"><a class="reference internal" href="hip.html#hip-reg-info-parameter">HIP <code class="docutils literal notranslate"><span class="pre">REG_INFO</span></code> Parameter</a></li>
-<li class="toctree-l3"><a class="reference internal" href="hip.html#hip-reg-request-parameter">HIP <code class="docutils literal notranslate"><span class="pre">REG_REQUEST</span></code> Parameter</a></li>
-<li class="toctree-l3"><a class="reference internal" href="hip.html#hip-reg-response-parameter">HIP <code class="docutils literal notranslate"><span class="pre">REG_RESPONSE</span></code> Parameter</a></li>
-<li class="toctree-l3"><a class="reference internal" href="hip.html#hip-reg-failed-parameter">HIP <code class="docutils literal notranslate"><span class="pre">REG_FAILED</span></code> Parameter</a></li>
-<li class="toctree-l3"><a class="reference internal" href="hip.html#hip-reg-from-parameter">HIP <code class="docutils literal notranslate"><span class="pre">REG_FROM</span></code> Parameter</a></li>
-<li class="toctree-l3"><a class="reference internal" href="hip.html#hip-echo-response-signed-parameter">HIP <code class="docutils literal notranslate"><span class="pre">ECHO_RESPONSE_SIGNED</span></code> Parameter</a></li>
-<li class="toctree-l3"><a class="reference internal" href="hip.html#hip-transport-format-list-parameter">HIP <code class="docutils literal notranslate"><span class="pre">TRANSPORT_FORMAT_LIST</span></code> Parameter</a></li>
-<li class="toctree-l3"><a class="reference internal" href="hip.html#hip-esp-transform-parameter">HIP <code class="docutils literal notranslate"><span class="pre">ESP_TRANSFORM</span></code> Parameter</a></li>
-<li class="toctree-l3"><a class="reference internal" href="hip.html#hip-seq-data-parameter">HIP <code class="docutils literal notranslate"><span class="pre">SEQ_DATA</span></code> Parameter</a></li>
-<li class="toctree-l3"><a class="reference internal" href="hip.html#hip-ack-data-parameter">HIP <code class="docutils literal notranslate"><span class="pre">ACK_DATA</span></code> Parameter</a></li>
-<li class="toctree-l3"><a class="reference internal" href="hip.html#hip-payload-mic-parameter">HIP <code class="docutils literal notranslate"><span class="pre">PAYLOAD_MIC</span></code> Parameter</a></li>
-<li class="toctree-l3"><a class="reference internal" href="hip.html#hip-transaction-id-parameter">HIP <code class="docutils literal notranslate"><span class="pre">TRANSACTION_ID</span></code> Parameter</a></li>
-<li class="toctree-l3"><a class="reference internal" href="hip.html#hip-overlay-id-parameter">HIP <code class="docutils literal notranslate"><span class="pre">OVERLAY_ID</span></code> Parameter</a></li>
-<li class="toctree-l3"><a class="reference internal" href="hip.html#hip-route-dst-parameter">HIP <code class="docutils literal notranslate"><span class="pre">ROUTE_DST</span></code> Parameter</a></li>
-<li class="toctree-l3"><a class="reference internal" href="hip.html#hip-hip-transport-mode-parameter">HIP <code class="docutils literal notranslate"><span class="pre">HIP_TRANSPORT_MODE</span></code> Parameter</a></li>
-<li class="toctree-l3"><a class="reference internal" href="hip.html#hip-hip-mac-parameter">HIP <code class="docutils literal notranslate"><span class="pre">HIP_MAC</span></code> Parameter</a></li>
-<li class="toctree-l3"><a class="reference internal" href="hip.html#hip-hip-mac-2-parameter">HIP <code class="docutils literal notranslate"><span class="pre">HIP_MAC_2</span></code> Parameter</a></li>
-<li class="toctree-l3"><a class="reference internal" href="hip.html#hip-hip-signature-2-parameter">HIP <code class="docutils literal notranslate"><span class="pre">HIP_SIGNATURE_2</span></code> Parameter</a></li>
-<li class="toctree-l3"><a class="reference internal" href="hip.html#hip-hip-signature-parameter">HIP <code class="docutils literal notranslate"><span class="pre">HIP_SIGNATURE</span></code> Parameter</a></li>
-<li class="toctree-l3"><a class="reference internal" href="hip.html#hip-echo-request-unsigned-parameter">HIP <code class="docutils literal notranslate"><span class="pre">ECHO_REQUEST_UNSIGNED</span></code> Parameter</a></li>
-<li class="toctree-l3"><a class="reference internal" href="hip.html#hip-echo-response-unsigned-parameter">HIP <code class="docutils literal notranslate"><span class="pre">ECHO_RESPONSE_UNSIGNED</span></code> Parameter</a></li>
-<li class="toctree-l3"><a class="reference internal" href="hip.html#hip-relay-from-parameter">HIP <code class="docutils literal notranslate"><span class="pre">RELAY_FROM</span></code> Parameter</a></li>
-<li class="toctree-l3"><a class="reference internal" href="hip.html#hip-relay-to-parameter">HIP <code class="docutils literal notranslate"><span class="pre">RELAY_TO</span></code> Parameter</a></li>
-<li class="toctree-l3"><a class="reference internal" href="hip.html#hip-overlay-ttl-parameter">HIP <code class="docutils literal notranslate"><span class="pre">OVERLAY_TTL</span></code> Parameter</a></li>
-<li class="toctree-l3"><a class="reference internal" href="hip.html#hip-route-via-parameter">HIP <code class="docutils literal notranslate"><span class="pre">ROUTE_VIA</span></code> Parameter</a></li>
-<li class="toctree-l3"><a class="reference internal" href="hip.html#hip-from-parameter">HIP <code class="docutils literal notranslate"><span class="pre">FROM</span></code> Parameter</a></li>
-<li class="toctree-l3"><a class="reference internal" href="hip.html#hip-rvs-hmac-parameter">HIP <code class="docutils literal notranslate"><span class="pre">RVS_HMAC</span></code> Parameter</a></li>
-<li class="toctree-l3"><a class="reference internal" href="hip.html#hip-via-rvs-parameter">HIP <code class="docutils literal notranslate"><span class="pre">VIA_RVS</span></code> Parameter</a></li>
-<li class="toctree-l3"><a class="reference internal" href="hip.html#hip-relay-hmac-parameter">HIP <code class="docutils literal notranslate"><span class="pre">RELAY_HMAC</span></code> Parameter</a></li>
-</ul>
-</li>
+<li class="toctree-l2"><a class="reference internal" href="hip.html#data-structures">Data Structures</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="hopopt.html">HOPOPT - IPv6 Hop-by-Hop Options</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="hopopt.html#data-structure">Data Structure</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="hopopt.html#hopopt-option-type">HOPOPT Option Type</a></li>
-<li class="toctree-l3"><a class="reference internal" href="hopopt.html#hopopt-unassigned-options">HOPOPT Unassigned Options</a></li>
-<li class="toctree-l3"><a class="reference internal" href="hopopt.html#hopopt-padding-options">HOPOPT Padding Options</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="hopopt.html#pad1-option"><code class="docutils literal notranslate"><span class="pre">Pad1</span></code> Option</a></li>
-<li class="toctree-l4"><a class="reference internal" href="hopopt.html#padn-option"><code class="docutils literal notranslate"><span class="pre">PadN</span></code> Option</a></li>
-</ul>
-</li>
-<li class="toctree-l3"><a class="reference internal" href="hopopt.html#hopopt-tunnel-encapsulation-limit-option">HOPOPT Tunnel Encapsulation Limit Option</a></li>
-<li class="toctree-l3"><a class="reference internal" href="hopopt.html#hopopt-router-alert-option">HOPOPT Router Alert Option</a></li>
-<li class="toctree-l3"><a class="reference internal" href="hopopt.html#hopopt-calipso-option">HOPOPT <code class="docutils literal notranslate"><span class="pre">CALIPSO</span></code> Option</a></li>
-<li class="toctree-l3"><a class="reference internal" href="hopopt.html#hopopt-smf-dpd-option">HOPOPT <code class="docutils literal notranslate"><span class="pre">SMF_DPD</span></code> Option</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="hopopt.html#i-dpd-mode">I-DPD Mode</a></li>
-<li class="toctree-l4"><a class="reference internal" href="hopopt.html#h-dpd-mode">H-DPD Mode</a></li>
-</ul>
-</li>
-<li class="toctree-l3"><a class="reference internal" href="hopopt.html#hopopt-pdm-option">HOPOPT <code class="docutils literal notranslate"><span class="pre">PDM</span></code> Option</a></li>
-<li class="toctree-l3"><a class="reference internal" href="hopopt.html#hopopt-quick-start-option">HOPOPT Quick Start Option</a></li>
-<li class="toctree-l3"><a class="reference internal" href="hopopt.html#hopopt-rpl-option">HOPOPT <code class="docutils literal notranslate"><span class="pre">RPL</span></code> Option</a></li>
-<li class="toctree-l3"><a class="reference internal" href="hopopt.html#hopopt-mpl-option">HOPOPT <code class="docutils literal notranslate"><span class="pre">MPL</span></code> Option</a></li>
-<li class="toctree-l3"><a class="reference internal" href="hopopt.html#hopopt-ilnp-nounce-option">HOPOPT <code class="docutils literal notranslate"><span class="pre">ILNP</span></code> Nounce Option</a></li>
-<li class="toctree-l3"><a class="reference internal" href="hopopt.html#hopopt-line-identification-option">HOPOPT Line-Identification Option</a></li>
-<li class="toctree-l3"><a class="reference internal" href="hopopt.html#hopopt-jumbo-payload-option">HOPOPT Jumbo Payload Option</a></li>
-<li class="toctree-l3"><a class="reference internal" href="hopopt.html#hopopt-home-address-option">HOPOPT Home Address Option</a></li>
-<li class="toctree-l3"><a class="reference internal" href="hopopt.html#hopopt-ip-dff-option">HOPOPT <code class="docutils literal notranslate"><span class="pre">IP_DFF</span></code> Option</a></li>
-</ul>
-</li>
+<li class="toctree-l2"><a class="reference internal" href="hopopt.html#data-structures">Data Structures</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="ip.html">IP - Internet Protocol</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ipsec.html">IPsec - Internet Protocol Security</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ipv4.html">IPv4 - Internet Protocol version 4</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="ipv4.html#data-structure">Data Structure</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="ipv4.html#ipv4-option-type">IPv4 Option Type</a></li>
-<li class="toctree-l3"><a class="reference internal" href="ipv4.html#ipv4-miscellaneous-options">IPv4 Miscellaneous Options</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="ipv4.html#byte-options">1-Byte Options</a></li>
-<li class="toctree-l4"><a class="reference internal" href="ipv4.html#permission-options">Permission Options</a></li>
-<li class="toctree-l4"><a class="reference internal" href="ipv4.html#no-process-options">No Process Options</a></li>
-<li class="toctree-l4"><a class="reference internal" href="ipv4.html#unpack-process-options">Unpack Process Options</a></li>
-</ul>
-</li>
-<li class="toctree-l3"><a class="reference internal" href="ipv4.html#ipv4-options-with-route-data">IPv4 Options with Route Data</a></li>
-<li class="toctree-l3"><a class="reference internal" href="ipv4.html#ipv4-quick-start-options">IPv4 Quick Start Options</a></li>
-<li class="toctree-l3"><a class="reference internal" href="ipv4.html#ipv4-time-stamp-option">IPv4 Time Stamp Option</a></li>
-<li class="toctree-l3"><a class="reference internal" href="ipv4.html#ipv4-traceroute-option">IPv4 Traceroute Option</a></li>
-<li class="toctree-l3"><a class="reference internal" href="ipv4.html#ipv4-options-with-security-info">IPv4 Options with Security Info</a></li>
-<li class="toctree-l3"><a class="reference internal" href="ipv4.html#id2">IPv4 Traceroute Option</a></li>
-</ul>
-</li>
+<li class="toctree-l2"><a class="reference internal" href="ipv4.html#data-structure">Data Structure</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="ipv6_frag.html">IPv6-Frag - Fragment Header for IPv6</a><ul>
@@ -156,43 +64,11 @@ internet layer, with detailed implementation and methods.</p>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="ipv6_opts.html">IPv6-Opts - Destination Options for IPv6</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="ipv6_opts.html#data-structure">Data Structure</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="ipv6_opts.html#ipv6-opts-option-type">IPv6-Opts Option Type</a></li>
-<li class="toctree-l3"><a class="reference internal" href="ipv6_opts.html#ipv6-opts-unassigned-options">IPv6-Opts Unassigned Options</a></li>
-<li class="toctree-l3"><a class="reference internal" href="ipv6_opts.html#ipv6-opts-padding-options">IPv6-Opts Padding Options</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="ipv6_opts.html#pad1-option"><code class="docutils literal notranslate"><span class="pre">Pad1</span></code> Option</a></li>
-<li class="toctree-l4"><a class="reference internal" href="ipv6_opts.html#padn-option"><code class="docutils literal notranslate"><span class="pre">PadN</span></code> Option</a></li>
-</ul>
-</li>
-<li class="toctree-l3"><a class="reference internal" href="ipv6_opts.html#ipv6-opts-tunnel-encapsulation-limit-option">IPv6-Opts Tunnel Encapsulation Limit Option</a></li>
-<li class="toctree-l3"><a class="reference internal" href="ipv6_opts.html#ipv6-opts-router-alert-option">IPv6-Opts Router Alert Option</a></li>
-<li class="toctree-l3"><a class="reference internal" href="ipv6_opts.html#ipv6-opts-calipso-option">IPv6-Opts <code class="docutils literal notranslate"><span class="pre">CALIPSO</span></code> Option</a></li>
-<li class="toctree-l3"><a class="reference internal" href="ipv6_opts.html#ipv6-opts-smf-dpd-option">IPv6-Opts <code class="docutils literal notranslate"><span class="pre">SMF_DPD</span></code> Option</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="ipv6_opts.html#i-dpd-mode">I-DPD Mode</a></li>
-<li class="toctree-l4"><a class="reference internal" href="ipv6_opts.html#h-dpd-mode">H-DPD Mode</a></li>
-</ul>
-</li>
-<li class="toctree-l3"><a class="reference internal" href="ipv6_opts.html#ipv6-opts-pdm-option">IPv6-Opts <code class="docutils literal notranslate"><span class="pre">PDM</span></code> Option</a></li>
-<li class="toctree-l3"><a class="reference internal" href="ipv6_opts.html#ipv6-opts-quick-start-option">IPv6-Opts Quick Start Option</a></li>
-<li class="toctree-l3"><a class="reference internal" href="ipv6_opts.html#ipv6-opts-rpl-option">IPv6-Opts <code class="docutils literal notranslate"><span class="pre">RPL</span></code> Option</a></li>
-<li class="toctree-l3"><a class="reference internal" href="ipv6_opts.html#ipv6-opts-mpl-option">IPv6-Opts <code class="docutils literal notranslate"><span class="pre">MPL</span></code> Option</a></li>
-<li class="toctree-l3"><a class="reference internal" href="ipv6_opts.html#ipv6-opts-ilnp-nounce-option">IPv6-Opts <code class="docutils literal notranslate"><span class="pre">ILNP</span></code> Nounce Option</a></li>
-<li class="toctree-l3"><a class="reference internal" href="ipv6_opts.html#ipv6-opts-line-identification-option">IPv6-Opts Line-Identification Option</a></li>
-<li class="toctree-l3"><a class="reference internal" href="ipv6_opts.html#ipv6-opts-jumbo-payload-option">IPv6-Opts Jumbo Payload Option</a></li>
-<li class="toctree-l3"><a class="reference internal" href="ipv6_opts.html#ipv6-opts-home-address-option">IPv6-Opts Home Address Option</a></li>
-<li class="toctree-l3"><a class="reference internal" href="ipv6_opts.html#ipv6-opts-ip-dff-option">IPv6-Opts <code class="docutils literal notranslate"><span class="pre">IP_DFF</span></code> Option</a></li>
-</ul>
-</li>
+<li class="toctree-l2"><a class="reference internal" href="ipv6_opts.html#data-structure">Data Structure</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="ipv6_route.html">IPv6-Route - Routing Header for IPv6</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="ipv6_route.html#data-structure">Data Structure</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="ipv6_route.html#ipv6-route-unknown-type">IPv6-Route Unknown Type</a></li>
-<li class="toctree-l3"><a class="reference internal" href="ipv6_route.html#ipv6-route-source-route">IPv6-Route Source Route</a></li>
-<li class="toctree-l3"><a class="reference internal" href="ipv6_route.html#ipv6-route-type-2">IPv6-Route Type 2</a></li>
-<li class="toctree-l3"><a class="reference internal" href="ipv6_route.html#ipv6-route-rpl-source">IPv6-Route RPL Source</a></li>
-</ul>
-</li>
+<li class="toctree-l2"><a class="reference internal" href="ipv6_route.html#data-structure">Data Structure</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="ipv6.html">IPv6 - Internet Protocol version 6</a><ul>
@@ -209,274 +85,16 @@ internet layer, with detailed implementation and methods.</p>
 </li>
 </ul>
 </div>
-<section id="base-protocol">
-<h2>Base Protocol<a class="headerlink" href="#base-protocol" title="Permalink to this heading">¶</a></h2>
-<p><a class="reference internal" href="#module-pcapkit.protocols.internet.internet" title="pcapkit.protocols.internet.internet"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.internet.internet</span></code></a> contains <a class="reference internal" href="#pcapkit.protocols.internet.internet.Internet" title="pcapkit.protocols.internet.internet.Internet"><code class="xref py py-class docutils literal notranslate"><span class="pre">Internet</span></code></a>,
-which is a base class for internet layer protocols, eg. <a class="reference internal" href="ah.html#pcapkit.protocols.internet.ah.AH" title="pcapkit.protocols.internet.ah.AH"><code class="xref py py-class docutils literal notranslate"><span class="pre">AH</span></code></a>,
-<a class="reference internal" href="ipsec.html#pcapkit.protocols.internet.ipsec.IPsec" title="pcapkit.protocols.internet.ipsec.IPsec"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPsec</span></code></a>, <a class="reference internal" href="ipv4.html#pcapkit.protocols.internet.ipv4.IPv4" title="pcapkit.protocols.internet.ipv4.IPv4"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv4</span></code></a>,
-<a class="reference internal" href="ipv6.html#pcapkit.protocols.internet.ipv6.IPv6" title="pcapkit.protocols.internet.ipv6.IPv6"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6</span></code></a>, <a class="reference internal" href="ipx.html#pcapkit.protocols.internet.ipx.IPX" title="pcapkit.protocols.internet.ipx.IPX"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPX</span></code></a>, and etc.</p>
-<span class="target" id="module-pcapkit.protocols.internet.internet"></span><dl class="py class">
-<dt class="sig sig-object py" id="pcapkit.protocols.internet.internet.Internet">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.internet.internet.</span></span><span class="sig-name descname"><span class="pre">Internet</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/internet/internet.html#Internet"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.internet.Internet" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.Protocol" title="pcapkit.protocols.protocol.Protocol"><code class="xref py py-class docutils literal notranslate"><span class="pre">Protocol</span></code></a>[<code class="xref py py-obj docutils literal notranslate"><span class="pre">PT</span></code>], <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Generic" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Generic</span></code></a>[<code class="xref py py-obj docutils literal notranslate"><span class="pre">PT</span></code>]</p>
-<p>Abstract base class for internet layer protocol family.</p>
-<p>This class currently supports parsing of the following protocols, which are
-registered in the <code class="xref py py-attr docutils literal notranslate"><span class="pre">self.__proto__</span></code>
-attribute:</p>
-<table class="docutils align-default">
-<thead>
-<tr class="row-odd"><th class="head"><p>Index</p></th>
-<th class="head"><p>Protocol</p></th>
-</tr>
-</thead>
-<tbody>
-<tr class="row-even"><td><p>0</p></td>
-<td><p><a class="reference internal" href="hopopt.html#pcapkit.protocols.internet.hopopt.HOPOPT" title="pcapkit.protocols.internet.hopopt.HOPOPT"><code class="xref py py-class docutils literal notranslate"><span class="pre">HOPOPT</span></code></a></p></td>
-</tr>
-<tr class="row-odd"><td><p>4</p></td>
-<td><p><a class="reference internal" href="ipv4.html#pcapkit.protocols.internet.ipv4.IPv4" title="pcapkit.protocols.internet.ipv4.IPv4"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv4</span></code></a></p></td>
-</tr>
-<tr class="row-even"><td><p>6</p></td>
-<td><p><a class="reference internal" href="../transport/tcp.html#pcapkit.protocols.transport.tcp.TCP" title="pcapkit.protocols.transport.tcp.TCP"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code></a></p></td>
-</tr>
-<tr class="row-odd"><td><p>17</p></td>
-<td><p><a class="reference internal" href="../transport/udp.html#pcapkit.protocols.transport.udp.UDP" title="pcapkit.protocols.transport.udp.UDP"><code class="xref py py-class docutils literal notranslate"><span class="pre">UDP</span></code></a></p></td>
-</tr>
-<tr class="row-even"><td><p>41</p></td>
-<td><p><a class="reference internal" href="ipv6.html#pcapkit.protocols.internet.ipv6.IPv6" title="pcapkit.protocols.internet.ipv6.IPv6"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6</span></code></a></p></td>
-</tr>
-<tr class="row-odd"><td><p>43</p></td>
-<td><p><a class="reference internal" href="ipv6_route.html#pcapkit.protocols.internet.ipv6_route.IPv6_Route" title="pcapkit.protocols.internet.ipv6_route.IPv6_Route"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6_Route</span></code></a></p></td>
-</tr>
-<tr class="row-even"><td><p>44</p></td>
-<td><p><a class="reference internal" href="ipv6_frag.html#pcapkit.protocols.internet.ipv6_frag.IPv6_Frag" title="pcapkit.protocols.internet.ipv6_frag.IPv6_Frag"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6_Frag</span></code></a></p></td>
-</tr>
-<tr class="row-odd"><td><p>51</p></td>
-<td><p><a class="reference internal" href="ah.html#pcapkit.protocols.internet.ah.AH" title="pcapkit.protocols.internet.ah.AH"><code class="xref py py-class docutils literal notranslate"><span class="pre">AH</span></code></a></p></td>
-</tr>
-<tr class="row-even"><td><p>59</p></td>
-<td><p><a class="reference internal" href="../misc/raw.html#pcapkit.protocols.misc.raw.Raw" title="pcapkit.protocols.misc.raw.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a></p></td>
-</tr>
-<tr class="row-odd"><td><p>60</p></td>
-<td><p><a class="reference internal" href="ipv6_opts.html#pcapkit.protocols.internet.ipv6_opts.IPv6_Opts" title="pcapkit.protocols.internet.ipv6_opts.IPv6_Opts"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6_Opts</span></code></a></p></td>
-</tr>
-<tr class="row-even"><td><p>111</p></td>
-<td><p><a class="reference internal" href="ipx.html#pcapkit.protocols.internet.ipx.IPX" title="pcapkit.protocols.internet.ipx.IPX"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPX</span></code></a></p></td>
-</tr>
-<tr class="row-odd"><td><p>135</p></td>
-<td><p><a class="reference internal" href="mh.html#pcapkit.protocols.internet.mh.MH" title="pcapkit.protocols.internet.mh.MH"><code class="xref py py-class docutils literal notranslate"><span class="pre">MH</span></code></a></p></td>
-</tr>
-<tr class="row-even"><td><p>139</p></td>
-<td><p><a class="reference internal" href="hip.html#pcapkit.protocols.internet.hip.HIP" title="pcapkit.protocols.internet.hip.HIP"><code class="xref py py-class docutils literal notranslate"><span class="pre">HIP</span></code></a></p></td>
-</tr>
-</tbody>
-</table>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>args</strong> (<em>Any</em>) – </p></li>
-<li><p><strong>kwargs</strong> (<em>Any</em>) – </p></li>
-</ul>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.Protocol" title="pcapkit.protocols.protocol.Protocol">Protocol</a>[PT]</p>
-</dd>
-</dl>
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.protocols.internet.internet.Internet.__layer__">
-<span class="sig-name descname"><span class="pre">__layer__</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'Internet'</span></span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'Internet'</span></em><a class="headerlink" href="#pcapkit.protocols.internet.internet.Internet.__layer__" title="Permalink to this definition">¶</a></dt>
-<dd><p>Layer of protocol.</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.protocols.internet.internet.Internet.__proto__">
-<span class="sig-name descname"><span class="pre">__proto__</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">DefaultDict</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pcapkit.protocols.internet.internet.Internet.__proto__" title="Permalink to this definition">¶</a></dt>
-<dd><p>Protocol index mapping for decoding next layer,
-c.f. <a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.Protocol._decode_next_layer" title="pcapkit.protocols.protocol.Protocol._decode_next_layer"><code class="xref py py-meth docutils literal notranslate"><span class="pre">self._decode_next_layer</span></code></a>
-&amp; <a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.Protocol._import_next_layer" title="pcapkit.protocols.protocol.Protocol._import_next_layer"><code class="xref py py-meth docutils literal notranslate"><span class="pre">self._import_next_layer</span></code></a>.
-The values should be a tuple representing the module name and class name.</p>
-<table class="docutils align-default">
-<thead>
-<tr class="row-odd"><th class="head"><p>Code</p></th>
-<th class="head"><p>Module</p></th>
-<th class="head"><p>Class</p></th>
-</tr>
-</thead>
-<tbody>
-<tr class="row-even"><td><p>0</p></td>
-<td><p><a class="reference internal" href="hopopt.html#module-pcapkit.protocols.internet.hopopt" title="pcapkit.protocols.internet.hopopt"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.internet.hopopt</span></code></a></p></td>
-<td><p><a class="reference internal" href="hopopt.html#pcapkit.protocols.internet.hopopt.HOPOPT" title="pcapkit.protocols.internet.hopopt.HOPOPT"><code class="xref py py-class docutils literal notranslate"><span class="pre">HOPOPT</span></code></a></p></td>
-</tr>
-<tr class="row-odd"><td><p>4</p></td>
-<td><p><a class="reference internal" href="ipv4.html#module-pcapkit.protocols.internet.ipv4" title="pcapkit.protocols.internet.ipv4"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.internet.ipv4</span></code></a></p></td>
-<td><p><a class="reference internal" href="ipv4.html#pcapkit.protocols.internet.ipv4.IPv4" title="pcapkit.protocols.internet.ipv4.IPv4"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv4</span></code></a></p></td>
-</tr>
-<tr class="row-even"><td><p>6</p></td>
-<td><p><a class="reference internal" href="../transport/tcp.html#module-pcapkit.protocols.transport.tcp" title="pcapkit.protocols.transport.tcp"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.transport.tcp</span></code></a></p></td>
-<td><p><a class="reference internal" href="../transport/tcp.html#pcapkit.protocols.transport.tcp.TCP" title="pcapkit.protocols.transport.tcp.TCP"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code></a></p></td>
-</tr>
-<tr class="row-odd"><td><p>17</p></td>
-<td><p><a class="reference internal" href="../transport/udp.html#module-pcapkit.protocols.transport.udp" title="pcapkit.protocols.transport.udp"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.transport.udp</span></code></a></p></td>
-<td><p><a class="reference internal" href="../transport/udp.html#pcapkit.protocols.transport.udp.UDP" title="pcapkit.protocols.transport.udp.UDP"><code class="xref py py-class docutils literal notranslate"><span class="pre">UDP</span></code></a></p></td>
-</tr>
-<tr class="row-even"><td><p>41</p></td>
-<td><p><a class="reference internal" href="ipv6.html#module-pcapkit.protocols.internet.ipv6" title="pcapkit.protocols.internet.ipv6"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.internet.ipv6</span></code></a></p></td>
-<td><p><a class="reference internal" href="ipv6.html#pcapkit.protocols.internet.ipv6.IPv6" title="pcapkit.protocols.internet.ipv6.IPv6"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6</span></code></a></p></td>
-</tr>
-<tr class="row-odd"><td><p>43</p></td>
-<td><p><a class="reference internal" href="ipv6_route.html#module-pcapkit.protocols.internet.ipv6_route" title="pcapkit.protocols.internet.ipv6_route"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.internet.ipv6_route</span></code></a></p></td>
-<td><p><a class="reference internal" href="ipv6_route.html#pcapkit.protocols.internet.ipv6_route.IPv6_Route" title="pcapkit.protocols.internet.ipv6_route.IPv6_Route"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6_Route</span></code></a></p></td>
-</tr>
-<tr class="row-even"><td><p>44</p></td>
-<td><p><a class="reference internal" href="ipv6_frag.html#module-pcapkit.protocols.internet.ipv6_frag" title="pcapkit.protocols.internet.ipv6_frag"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.internet.ipv6_frag</span></code></a></p></td>
-<td><p><a class="reference internal" href="ipv6_frag.html#pcapkit.protocols.internet.ipv6_frag.IPv6_Frag" title="pcapkit.protocols.internet.ipv6_frag.IPv6_Frag"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6_Frag</span></code></a></p></td>
-</tr>
-<tr class="row-odd"><td><p>51</p></td>
-<td><p><a class="reference internal" href="ah.html#module-pcapkit.protocols.internet.ah" title="pcapkit.protocols.internet.ah"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.internet.ah</span></code></a></p></td>
-<td><p><a class="reference internal" href="ah.html#pcapkit.protocols.internet.ah.AH" title="pcapkit.protocols.internet.ah.AH"><code class="xref py py-class docutils literal notranslate"><span class="pre">AH</span></code></a></p></td>
-</tr>
-<tr class="row-even"><td><p>60</p></td>
-<td><p><a class="reference internal" href="ipv6_opts.html#module-pcapkit.protocols.internet.ipv6_opts" title="pcapkit.protocols.internet.ipv6_opts"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.internet.ipv6_opts</span></code></a></p></td>
-<td><p><a class="reference internal" href="ipv6_opts.html#pcapkit.protocols.internet.ipv6_opts.IPv6_Opts" title="pcapkit.protocols.internet.ipv6_opts.IPv6_Opts"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6_Opts</span></code></a></p></td>
-</tr>
-<tr class="row-odd"><td><p>111</p></td>
-<td><p><a class="reference internal" href="ipx.html#module-pcapkit.protocols.internet.ipx" title="pcapkit.protocols.internet.ipx"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.internet.ipx</span></code></a></p></td>
-<td><p><a class="reference internal" href="ipx.html#pcapkit.protocols.internet.ipx.IPX" title="pcapkit.protocols.internet.ipx.IPX"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPX</span></code></a></p></td>
-</tr>
-<tr class="row-even"><td><p>135</p></td>
-<td><p><a class="reference internal" href="mh.html#module-pcapkit.protocols.internet.mh" title="pcapkit.protocols.internet.mh"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.internet.mh</span></code></a></p></td>
-<td><p><a class="reference internal" href="mh.html#pcapkit.protocols.internet.mh.MH" title="pcapkit.protocols.internet.mh.MH"><code class="xref py py-class docutils literal notranslate"><span class="pre">MH</span></code></a></p></td>
-</tr>
-<tr class="row-odd"><td><p>139</p></td>
-<td><p><a class="reference internal" href="hip.html#module-pcapkit.protocols.internet.hip" title="pcapkit.protocols.internet.hip"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.internet.hip</span></code></a></p></td>
-<td><p><a class="reference internal" href="hip.html#pcapkit.protocols.internet.hip.HIP" title="pcapkit.protocols.internet.hip.HIP"><code class="xref py py-class docutils literal notranslate"><span class="pre">HIP</span></code></a></p></td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="pcapkit.protocols.internet.internet.Internet.layer">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">layer</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'Internet'</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pcapkit.protocols.internet.internet.Internet.layer" title="Permalink to this definition">¶</a></dt>
-<dd><p>Protocol layer.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Literal" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Literal</span></code></a>[‘Internet’]</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.protocols.internet.internet.Internet.register">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">register</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">code</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">module</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">class_</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/internet/internet.html#Internet.register"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.internet.Internet.register" title="Permalink to this definition">¶</a></dt>
-<dd><p>Register a new protocol class.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>code</strong> (<a class="reference internal" href="../../const/reg.html#pcapkit.const.reg.transtype.TransType" title="pcapkit.const.reg.transtype.TransType"><code class="xref py py-class docutils literal notranslate"><span class="pre">TransType</span></code></a>) – protocol code as in <a class="reference internal" href="../../const/reg.html#pcapkit.const.reg.transtype.TransType" title="pcapkit.const.reg.transtype.TransType"><code class="xref py py-class docutils literal notranslate"><span class="pre">TransType</span></code></a></p></li>
-<li><p><strong>module</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>) – module name</p></li>
-<li><p><strong>class</strong> – class name</p></li>
-<li><p><strong>class_</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – </p></li>
-</ul>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>None</p>
-</dd>
-</dl>
-<div class="admonition-notes admonition">
-<p class="admonition-title">Notes</p>
-<p>The full qualified class name of the new protocol class
-should be as <code class="docutils literal notranslate"><span class="pre">{module}.{class_}</span></code>.</p>
+<div class="admonition-todo admonition" id="id1">
+<p class="admonition-title">Todo</p>
+<p>Implements ECN, ESP, ICMP, ICMPv6, IGMP, Shim6.</p>
 </div>
-<dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></p>
-</dd>
-<dt class="field-even">Parameters<span class="colon">:</span></dt>
-<dd class="field-even"><ul class="simple">
-<li><p><strong>code</strong> (<a class="reference internal" href="../../const/reg.html#pcapkit.const.reg.transtype.TransType" title="pcapkit.const.reg.transtype.TransType"><em>TransType</em></a>) – </p></li>
-<li><p><strong>module</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – </p></li>
-<li><p><strong>class_</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – </p></li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.protocols.internet.internet.Internet._read_protos">
-<span class="sig-name descname"><span class="pre">_read_protos</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">size</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/internet/internet.html#Internet._read_protos"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.internet.Internet._read_protos" title="Permalink to this definition">¶</a></dt>
-<dd><p>Read next layer protocol type.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>size</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>) – buffer size</p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference internal" href="../../const/reg.html#pcapkit.const.reg.transtype.TransType" title="pcapkit.const.reg.transtype.TransType"><code class="xref py py-class docutils literal notranslate"><span class="pre">TransType</span></code></a></p>
-</dd>
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Next layer’s protocol enumeration.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.protocols.internet.internet.Internet._decode_next_layer">
-<span class="sig-name descname"><span class="pre">_decode_next_layer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dict_</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">proto</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">version</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">4</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ipv6_exthdr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/internet/internet.html#Internet._decode_next_layer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.internet.Internet._decode_next_layer" title="Permalink to this definition">¶</a></dt>
-<dd><p>Decode next layer extractor.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>dict</strong> – info buffer</p></li>
-<li><p><strong>proto</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>]) – next layer protocol index</p></li>
-<li><p><strong>length</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>]) – valid (<em>non-padding</em>) length</p></li>
-<li><p><strong>dict_</strong> (<em>PT</em>) – </p></li>
-<li><p><strong>version</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Literal" title="(in Python v3.10)"><em>Literal</em></a><em>[</em><em>4</em><em>, </em><em>6</em><em>]</em>) – </p></li>
-<li><p><strong>ipv6_exthdr</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.10)"><em>Optional</em></a><em>[</em><a class="reference internal" href="../../corekit/protochain.html#pcapkit.corekit.protochain.ProtoChain" title="pcapkit.corekit.protochain.ProtoChain"><em>ProtoChain</em></a><em>]</em>) – </p></li>
-</ul>
-</dd>
-<dt class="field-even">Keyword Arguments<span class="colon">:</span></dt>
-<dd class="field-even"><ul class="simple">
-<li><p><strong>version</strong> – IP version</p></li>
-<li><p><strong>ipv6_exthdr</strong> – protocol chain of IPv6 extension headers</p></li>
-</ul>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.TypeVar" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">TypeVar</span></code></a>(<code class="docutils literal notranslate"><span class="pre">PT</span></code>, bound= Info)</p>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>Current protocol with next layer extracted.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.protocols.internet.internet.Internet._import_next_layer">
-<span class="sig-name descname"><span class="pre">_import_next_layer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">proto</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">version</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">4</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extension</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/internet/internet.html#Internet._import_next_layer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.internet.Internet._import_next_layer" title="Permalink to this definition">¶</a></dt>
-<dd><p>Import next layer extractor.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>proto</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>) – next layer protocol index</p></li>
-<li><p><strong>length</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>]) – valid (<em>non-padding</em>) length</p></li>
-<li><p><strong>version</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Literal" title="(in Python v3.10)"><em>Literal</em></a><em>[</em><em>4</em><em>, </em><em>6</em><em>]</em>) – </p></li>
-<li><p><strong>extension</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><em>bool</em></a>) – </p></li>
-</ul>
-</dd>
-<dt class="field-even">Keyword Arguments<span class="colon">:</span></dt>
-<dd class="field-even"><ul class="simple">
-<li><p><strong>version</strong> – IP protocol version</p></li>
-<li><p><strong>extension</strong> – if is extension header</p></li>
-</ul>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.Protocol" title="pcapkit.protocols.protocol.Protocol"><code class="xref py py-class docutils literal notranslate"><span class="pre">Protocol</span></code></a></p>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>Instance of next layer.</p>
-</dd>
-</dl>
-</dd></dl>
-
+<section id="protocol-registry">
+<h2>Protocol Registry<a class="headerlink" href="#protocol-registry" title="Permalink to this heading">¶</a></h2>
+<dl class="py data">
+<dt class="sig sig-object py" id="pcapkit.protocols.data.internet.pcapkit.protocols.internet.ETHERTYPE">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.internet.</span></span><span class="sig-name descname"><span class="pre">ETHERTYPE</span></span><a class="headerlink" href="#pcapkit.protocols.data.internet.pcapkit.protocols.internet.ETHERTYPE" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias of <a class="reference internal" href="../../const/reg.html#pcapkit.const.reg.ethertype.EtherType" title="pcapkit.const.reg.ethertype.EtherType"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.const.reg.ethertype.EtherType</span></code></a>.</p>
 </dd></dl>
 
 </section>
@@ -541,7 +159,7 @@ should be as <code class="docutils literal notranslate"><span class="pre">{modul
   <li><a href="../../index.html">Module Documentation</a><ul>
   <li><a href="../index.html">Protocol Family</a><ul>
       <li>Previous: <a href="../link/vlan.html" title="previous chapter">VLAN - 802.1Q Customer VLAN Tag Type</a></li>
-      <li>Next: <a href="ah.html" title="next chapter">AH - Authentication Header</a></li>
+      <li>Next: <a href="internet.html" title="next chapter">Base Protocol</a></li>
   </ul></li>
   </ul></li>
   </ul></li>

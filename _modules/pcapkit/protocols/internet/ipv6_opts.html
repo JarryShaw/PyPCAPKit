@@ -82,7 +82,7 @@
 <span class="kn">from</span> <span class="nn">pcapkit.protocols.data.internet.ipv6_opts</span> <span class="kn">import</span> <span class="n">PDMOption</span> <span class="k">as</span> <span class="n">DataType_PDMOption</span>
 <span class="kn">from</span> <span class="nn">pcapkit.protocols.data.internet.ipv6_opts</span> <span class="kn">import</span> <span class="n">QuickStartOption</span> <span class="k">as</span> <span class="n">DataType_QuickStartOption</span>
 <span class="kn">from</span> <span class="nn">pcapkit.protocols.data.internet.ipv6_opts</span> <span class="kn">import</span> \
-    <span class="n">RouterAlterOption</span> <span class="k">as</span> <span class="n">DataType_RouterAlterOption</span>
+    <span class="n">RouterAlertOption</span> <span class="k">as</span> <span class="n">DataType_RouterAlertOption</span>
 <span class="kn">from</span> <span class="nn">pcapkit.protocols.data.internet.ipv6_opts</span> <span class="kn">import</span> <span class="n">RPLFlags</span> <span class="k">as</span> <span class="n">DataType_RPLFlags</span>
 <span class="kn">from</span> <span class="nn">pcapkit.protocols.data.internet.ipv6_opts</span> <span class="kn">import</span> <span class="n">RPLOption</span> <span class="k">as</span> <span class="n">DataType_RPLOption</span>
 <span class="kn">from</span> <span class="nn">pcapkit.protocols.data.internet.ipv6_opts</span> <span class="kn">import</span> \
@@ -524,7 +524,7 @@
         <span class="k">return</span> <span class="n">opt</span></div>
 
 <div class="viewcode-block" id="IPv6_Opts._read_opt_ra"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/ipv6_opts.html#pcapkit.protocols.internet.ipv6_opts.IPv6_Opts._read_opt_ra">[docs]</a>    <span class="k">def</span> <span class="nf">_read_opt_ra</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">&#39;RegType_Option&#39;</span><span class="p">,</span> <span class="n">acts</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">cflg</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
-                     <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_RouterAlterOption&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
+                     <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_RouterAlertOption&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
         <span class="sd">&quot;&quot;&quot;Read IPv6-Opts Router Alert option.</span>
 
 <span class="sd">        Structure of IPv6-Opts Router Alert option [:rfc:`2711`]:</span>
@@ -556,7 +556,7 @@
         <span class="n">_rval</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_unpack</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
 
         <span class="n">_enum</span> <span class="o">=</span> <span class="n">RegType_RouterAlert</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">_rval</span><span class="p">)</span>
-        <span class="n">opt</span> <span class="o">=</span> <span class="n">DataType_RouterAlterOption</span><span class="p">(</span>
+        <span class="n">opt</span> <span class="o">=</span> <span class="n">DataType_RouterAlertOption</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">code</span><span class="p">,</span>
             <span class="n">action</span><span class="o">=</span><span class="n">acts</span><span class="p">,</span>
             <span class="n">change</span><span class="o">=</span><span class="n">cflg</span><span class="p">,</span>

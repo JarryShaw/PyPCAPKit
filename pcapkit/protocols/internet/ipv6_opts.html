@@ -70,7 +70,7 @@ as below:</p>
 <br /><dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.protocols.internet.ipv6_opts.IPv6_Opts">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.internet.ipv6_opts.</span></span><span class="sig-name descname"><span class="pre">IPv6_Opts</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/internet/ipv6_opts.html#IPv6_Opts"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.ipv6_opts.IPv6_Opts" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="index.html#pcapkit.protocols.internet.internet.Internet" title="pcapkit.protocols.internet.internet.Internet"><code class="xref py py-class docutils literal notranslate"><span class="pre">Internet</span></code></a>[<code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6_Opts</span></code>]</p>
+<dd><p>Bases: <a class="reference internal" href="internet.html#pcapkit.protocols.internet.internet.Internet" title="pcapkit.protocols.internet.internet.Internet"><code class="xref py py-class docutils literal notranslate"><span class="pre">Internet</span></code></a>[<code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6_Opts</span></code>]</p>
 <p>This class implements Destination Options for IPv6.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -400,7 +400,7 @@ action and change flag), c.f. [<span class="target" id="index-1"></span><a class
 <dd class="field-odd"><p>parsed option data</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>Union[<a class="reference internal" href="hopopt.html#pcapkit.protocols.internet.hopopt.DataType_Opt_Pad1" title="pcapkit.protocols.internet.hopopt.DataType_Opt_Pad1">DataType_Opt_Pad1</a>, <a class="reference internal" href="hopopt.html#pcapkit.protocols.internet.hopopt.DataType_Opt_PadN" title="pcapkit.protocols.internet.hopopt.DataType_Opt_PadN">DataType_Opt_PadN</a>]</p>
+<dd class="field-even"><p>Union[DataType_Opt_Pad1, DataType_Opt_PadN]</p>
 </dd>
 <dt class="field-odd">Raises<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><strong>ProtocolError</strong></a> – If <code class="docutils literal notranslate"><span class="pre">code</span></code> is <strong>NOT</strong> <code class="docutils literal notranslate"><span class="pre">0</span></code> or <code class="docutils literal notranslate"><span class="pre">1</span></code>.</p>
@@ -467,7 +467,7 @@ action and change flag), c.f. [<span class="target" id="index-1"></span><a class
 <dd class="field-even"><p><strong>options</strong> – extracted IPv6-Opts options</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>DataType_RouterAlterOption</p>
+<dd class="field-odd"><p>DataType_RouterAlertOption</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>Parsed option data.</p>

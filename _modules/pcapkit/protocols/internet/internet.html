@@ -33,7 +33,8 @@
             
   <h1>Source code for pcapkit.protocols.internet.internet</h1><div class="highlight"><pre>
 <span></span><span class="c1"># -*- coding: utf-8 -*-</span>
-<span class="sd">&quot;&quot;&quot;root internet layer protocol</span>
+<span class="sd">&quot;&quot;&quot;Base Protocol</span>
+<span class="sd">===================</span>
 
 <span class="sd">:mod:`pcapkit.protocols.internet.internet` contains :class:`~pcapkit.protocols.internet.internet.Internet`,</span>
 <span class="sd">which is a base class for internet layer protocols, eg. :class:`~pcapkit.protocols.internet.ah.AH`,</span>
@@ -58,11 +59,11 @@
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Internet&#39;</span><span class="p">]</span>
 
 
-<div class="viewcode-block" id="Internet"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/index.html#pcapkit.protocols.internet.internet.Internet">[docs]</a><span class="k">class</span> <span class="nc">Internet</span><span class="p">(</span><span class="n">Protocol</span><span class="p">[</span><span class="n">PT</span><span class="p">],</span> <span class="n">Generic</span><span class="p">[</span><span class="n">PT</span><span class="p">]):</span>  <span class="c1"># pylint: disable=abstract-method</span>
+<div class="viewcode-block" id="Internet"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/internet.html#pcapkit.protocols.internet.internet.Internet">[docs]</a><span class="k">class</span> <span class="nc">Internet</span><span class="p">(</span><span class="n">Protocol</span><span class="p">[</span><span class="n">PT</span><span class="p">],</span> <span class="n">Generic</span><span class="p">[</span><span class="n">PT</span><span class="p">]):</span>  <span class="c1"># pylint: disable=abstract-method</span>
     <span class="sd">&quot;&quot;&quot;Abstract base class for internet layer protocol family.</span>
 
 <span class="sd">    This class currently supports parsing of the following protocols, which are</span>
-<span class="sd">    registered in the :attr:`self.__proto__ &lt;pcapkit.protocols.link.Link.__proto__&gt;`</span>
+<span class="sd">    registered in the :attr:`self.__proto__ &lt;pcapkit.protocols.internet.internet.Internet.__proto__&gt;`</span>
 <span class="sd">    attribute:</span>
 
 <span class="sd">    .. list-table::</span>
@@ -70,32 +71,32 @@
 
 <span class="sd">       * - Index</span>
 <span class="sd">         - Protocol</span>
-<span class="sd">       * - 0</span>
-<span class="sd">         - :class:`~pcapkit.protocols.internet.hopopt.HOPOPT`</span>
-<span class="sd">       * - 4</span>
-<span class="sd">         - :class:`~pcapkit.protocols.internet.ipv4.IPv4`</span>
-<span class="sd">       * - 6</span>
-<span class="sd">         - :class:`~pcapkit.protocols.transport.tcp.TCP`</span>
-<span class="sd">       * - 17</span>
-<span class="sd">         - :class:`~pcapkit.protocols.transport.udp.UDP`</span>
-<span class="sd">       * - 41</span>
-<span class="sd">         - :class:`~pcapkit.protocols.internet.ipv6.IPv6`</span>
-<span class="sd">       * - 43</span>
-<span class="sd">         - :class:`~pcapkit.protocols.internet.ipv6_route.IPv6_Route`</span>
-<span class="sd">       * - 44</span>
-<span class="sd">         - :class:`~pcapkit.protocols.internet.ipv6_frag.IPv6_Frag`</span>
-<span class="sd">       * - 51</span>
-<span class="sd">         - :class:`~pcapkit.protocols.internet.ah.AH`</span>
-<span class="sd">       * - 59</span>
-<span class="sd">         - :class:`~pcapkit.protocols.misc.raw.Raw`</span>
-<span class="sd">       * - 60</span>
-<span class="sd">         - :class:`~pcapkit.protocols.internet.ipv6_opts.IPv6_Opts`</span>
-<span class="sd">       * - 111</span>
-<span class="sd">         - :class:`~pcapkit.protocols.internet.ipx.IPX`</span>
-<span class="sd">       * - 135</span>
-<span class="sd">         - :class:`~pcapkit.protocols.internet.mh.MH`</span>
-<span class="sd">       * - 139</span>
-<span class="sd">         - :class:`~pcapkit.protocols.internet.hip.HIP`</span>
+<span class="sd">       * - :attr:`pcapkit.const.reg.transtype.TransType.HOPOPT`</span>
+<span class="sd">         - :class:`pcapkit.protocols.internet.hopopt.HOPOPT`</span>
+<span class="sd">       * - :attr:`pcapkit.const.reg.transtype.TransType.IPv4`</span>
+<span class="sd">         - :class:`pcapkit.protocols.internet.ipv4.IPv4`</span>
+<span class="sd">       * - :attr:`pcapkit.const.reg.transtype.TransType.TCP`</span>
+<span class="sd">         - :class:`pcapkit.protocols.transport.tcp.TCP`</span>
+<span class="sd">       * - :attr:`pcapkit.const.reg.transtype.TransType.UDP`</span>
+<span class="sd">         - :class:`pcapkit.protocols.transport.udp.UDP`</span>
+<span class="sd">       * - :attr:`pcapkit.const.reg.transtype.TransType.IPv6`</span>
+<span class="sd">         - :class:`pcapkit.protocols.internet.ipv6.IPv6`</span>
+<span class="sd">       * - :attr:`pcapkit.const.reg.transtype.TransType.IPv6_Route`</span>
+<span class="sd">         - :class:`pcapkit.protocols.internet.ipv6_route.IPv6_Route`</span>
+<span class="sd">       * - :attr:`pcapkit.const.reg.transtype.TransType.IPv6_Frag`</span>
+<span class="sd">         - :class:`pcapkit.protocols.internet.ipv6_frag.IPv6_Frag`</span>
+<span class="sd">       * - :attr:`pcapkit.const.reg.transtype.TransType.AH`</span>
+<span class="sd">         - :class:`pcapkit.protocols.internet.ah.AH`</span>
+<span class="sd">       * - :attr:`pcapkit.const.reg.transtype.TransType.IPv6_NoNxt`</span>
+<span class="sd">         - :class:`pcapkit.protocols.misc.raw.Raw`</span>
+<span class="sd">       * - :attr:`pcapkit.const.reg.transtype.TransType.IPv6_Opts`</span>
+<span class="sd">         - :class:`pcapkit.protocols.internet.ipv6_opts.IPv6_Opts`</span>
+<span class="sd">       * - :attr:`pcapkit.const.reg.transtype.TransType.IPX_in_IP`</span>
+<span class="sd">         - :class:`pcapkit.protocols.internet.ipx.IPX`</span>
+<span class="sd">       * - :attr:`pcapkit.const.reg.transtype.TransType.Mobility_Header`</span>
+<span class="sd">         - :class:`pcapkit.protocols.internet.mh.MH`</span>
+<span class="sd">       * - :attr:`pcapkit.const.reg.transtype.TransType.HIP`</span>
+<span class="sd">         - :class:`pcapkit.protocols.internet.hip.HIP`</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
 
@@ -107,8 +108,8 @@
     <span class="n">__layer__</span> <span class="o">=</span> <span class="s1">&#39;Internet&#39;</span>  <span class="c1"># type: Literal[&#39;Internet&#39;]</span>
 
     <span class="c1">#: DefaultDict[int, Tuple[str, str]]: Protocol index mapping for decoding next layer,</span>
-    <span class="c1">#: c.f. :meth:`self._decode_next_layer &lt;pcapkit.protocols.protocol.Protocol._decode_next_layer&gt;`</span>
-    <span class="c1">#: &amp; :meth:`self._import_next_layer &lt;pcapkit.protocols.internet.link.Link._import_next_layer&gt;`.</span>
+    <span class="c1">#: c.f. :meth:`self._decode_next_layer &lt;pcapkit.protocols.internet.internet.Internet._decode_next_layer&gt;`</span>
+    <span class="c1">#: &amp; :meth:`self._import_next_layer &lt;pcapkit.protocols.internet.internet.Internet._import_next_layer&gt;`.</span>
     <span class="n">__proto__</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">defaultdict</span><span class="p">(</span>
         <span class="k">lambda</span><span class="p">:</span> <span class="p">(</span><span class="s1">&#39;pcapkit.protocols.misc.raw&#39;</span><span class="p">,</span> <span class="s1">&#39;Raw&#39;</span><span class="p">),</span>
         <span class="p">{</span>
@@ -142,18 +143,18 @@
     <span class="c1"># Methods.</span>
     <span class="c1">##########################################################################</span>
 
-<div class="viewcode-block" id="Internet.register"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/index.html#pcapkit.protocols.internet.internet.Internet.register">[docs]</a>    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="Internet.register"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/internet.html#pcapkit.protocols.internet.internet.Internet.register">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">register</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">&#39;RegType_TransType&#39;</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">class_</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Register a new protocol class.</span>
-
-<span class="sd">        Arguments:</span>
-<span class="sd">            code: protocol code as in :class:`~pcapkit.const.reg.transtype.TransType`</span>
-<span class="sd">            module: module name</span>
-<span class="sd">            class_: class name</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Register a new protocol class.</span>
 
 <span class="sd">        Notes:</span>
 <span class="sd">            The full qualified class name of the new protocol class</span>
 <span class="sd">            should be as ``{module}.{class_}``.</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            code: protocol code as in :class:`~pcapkit.const.reg.transtype.TransType`</span>
+<span class="sd">            module: module name</span>
+<span class="sd">            class\_: class name</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">cls</span><span class="o">.</span><span class="n">__proto__</span><span class="p">[</span><span class="n">code</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="n">class_</span><span class="p">)</span></div>
@@ -162,7 +163,7 @@
     <span class="c1"># Utilities.</span>
     <span class="c1">##########################################################################</span>
 
-<div class="viewcode-block" id="Internet._read_protos"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/index.html#pcapkit.protocols.internet.internet.Internet._read_protos">[docs]</a>    <span class="k">def</span> <span class="nf">_read_protos</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">size</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;RegType_TransType&#39;</span><span class="p">:</span>
+<div class="viewcode-block" id="Internet._read_protos"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/internet.html#pcapkit.protocols.internet.internet.Internet._read_protos">[docs]</a>    <span class="k">def</span> <span class="nf">_read_protos</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">size</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;RegType_TransType&#39;</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Read next layer protocol type.</span>
 
 <span class="sd">        Arguments:</span>
@@ -176,17 +177,15 @@
         <span class="n">_prot</span> <span class="o">=</span> <span class="n">RegType_TransType</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">_byte</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">_prot</span></div>
 
-<div class="viewcode-block" id="Internet._decode_next_layer"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/index.html#pcapkit.protocols.internet.internet.Internet._decode_next_layer">[docs]</a>    <span class="k">def</span> <span class="nf">_decode_next_layer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dict_</span><span class="p">:</span> <span class="s1">&#39;PT&#39;</span><span class="p">,</span> <span class="n">proto</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># pylint: disable=arguments-differ</span>
+<div class="viewcode-block" id="Internet._decode_next_layer"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/internet.html#pcapkit.protocols.internet.internet.Internet._decode_next_layer">[docs]</a>    <span class="k">def</span> <span class="nf">_decode_next_layer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dict_</span><span class="p">:</span> <span class="s1">&#39;PT&#39;</span><span class="p">,</span> <span class="n">proto</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># pylint: disable=arguments-differ</span>
                            <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">version</span><span class="p">:</span> <span class="s1">&#39;Literal[4, 6]&#39;</span> <span class="o">=</span> <span class="mi">4</span><span class="p">,</span>
                            <span class="n">ipv6_exthdr</span><span class="p">:</span> <span class="s1">&#39;Optional[ProtoChain]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;PT&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Decode next layer extractor.</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Decode next layer extractor.</span>
 
 <span class="sd">        Arguments:</span>
-<span class="sd">            dict_: info buffer</span>
+<span class="sd">            dict\_: info buffer</span>
 <span class="sd">            proto: next layer protocol index</span>
 <span class="sd">            length: valid (*non-padding*) length</span>
-
-<span class="sd">        Keyword Arguments:</span>
 <span class="sd">            version: IP version</span>
 <span class="sd">            ipv6_exthdr: protocol chain of IPv6 extension headers</span>
 
@@ -212,7 +211,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_protos</span> <span class="o">=</span> <span class="n">ProtoChain</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="p">,</span> <span class="n">basis</span><span class="o">=</span><span class="n">chain</span><span class="p">)</span>  <span class="c1"># pylint: disable=attribute-defined-outside-init</span>
         <span class="k">return</span> <span class="n">dict_</span></div>
 
-<div class="viewcode-block" id="Internet._import_next_layer"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/index.html#pcapkit.protocols.internet.internet.Internet._import_next_layer">[docs]</a>    <span class="nd">@beholder</span>  <span class="c1"># type: ignore[arg-type]</span>
+<div class="viewcode-block" id="Internet._import_next_layer"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/internet.html#pcapkit.protocols.internet.internet.Internet._import_next_layer">[docs]</a>    <span class="nd">@beholder</span>  <span class="c1"># type: ignore[arg-type]</span>
     <span class="k">def</span> <span class="nf">_import_next_layer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">proto</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>  <span class="c1"># pylint: disable=arguments-differ</span>
                            <span class="n">version</span><span class="p">:</span> <span class="s1">&#39;Literal[4, 6]&#39;</span> <span class="o">=</span> <span class="mi">4</span><span class="p">,</span> <span class="n">extension</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Protocol&#39;</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Import next layer extractor.</span>
@@ -220,8 +219,6 @@
 <span class="sd">        Arguments:</span>
 <span class="sd">            proto: next layer protocol index</span>
 <span class="sd">            length: valid (*non-padding*) length</span>
-
-<span class="sd">        Keyword Arguments:</span>
 <span class="sd">            version: IP protocol version</span>
 <span class="sd">            extension: if is extension header</span>
 

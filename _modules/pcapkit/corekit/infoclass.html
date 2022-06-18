@@ -237,7 +237,7 @@
 
 <div class="viewcode-block" id="Info.from_dict"><a class="viewcode-back" href="../../../pcapkit/corekit/infoclass.html#pcapkit.corekit.infoclass.Info.from_dict">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">from_dict</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">dict_</span><span class="p">:</span> <span class="s1">&#39;Optional[Mapping[str, VT] | Iterable[tuple[str, VT]]]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                  <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;VT&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Info&#39;</span><span class="p">:</span>
+                  <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;VT&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Info[VT]&#39;</span><span class="p">:</span>
         <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Create a new instance.</span>
 
 <span class="sd">        * If ``dict_`` is present and has a ``.keys()`` method, then does:</span>

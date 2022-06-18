@@ -1,6 +1,9 @@
 HIP - Host Identity Protocol
 ============================
 
+.. module:: pcapkit.protocols.internet.hip
+.. module:: pcapkit.protocols.data.internet.hip
+
 :mod:`pcapkit.protocols.internet.hip` contains
 :class:`~pcapkit.protocols.internet.hip.HIP` only,
 which implements extractor for Host Identity
@@ -28,1978 +31,649 @@ Octets      Bits        Name                    Description
 
    <br />
 
-.. automodule:: pcapkit.protocols.internet.hip
-   :members:
-   :undoc-members:
-   :private-members:
+.. autoclass:: pcapkit.protocols.internet.hip.HIP
+   :no-members:
    :show-inheritance:
 
-Data Structure
---------------
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
+   .. automethod:: __post_init__
+   .. automethod:: __index__
+
+   .. autoproperty:: name
+   .. autoproperty:: alias
+   .. autoproperty:: length
+   .. autoproperty:: payload
+   .. autoproperty:: protocol
+   .. autoproperty:: protochain
+
+   .. automethod:: read
+   .. automethod:: make
+
+   .. automethod:: _read_hip_param
+   .. automethod:: _read_param_unassigned
+   .. automethod:: _read_param_esp_info
+   .. automethod:: _read_param_r1_counter
+   .. automethod:: _read_param_locator_set
+   .. automethod:: _read_param_puzzle
+   .. automethod:: _read_param_solution
+   .. automethod:: _read_param_seq
+   .. automethod:: _read_param_ack
+   .. automethod:: _read_param_dh_group_list
+   .. automethod:: _read_param_diffie_hellman
+   .. automethod:: _read_param_hip_transform
+   .. automethod:: _read_param_hip_cipher
+   .. automethod:: _read_param_nat_traversal_mode
+   .. automethod:: _read_param_transaction_pacing
+   .. automethod:: _read_param_encrypted
+   .. automethod:: _read_param_host_id
+   .. automethod:: _read_param_hit_suite_list
+   .. automethod:: _read_param_cert
+   .. automethod:: _read_param_notification
+   .. automethod:: _read_param_echo_request_signed
+   .. automethod:: _read_param_reg_info
+   .. automethod:: _read_param_reg_request
+   .. automethod:: _read_param_reg_response
+   .. automethod:: _read_param_reg_failed
+   .. automethod:: _read_param_reg_from
+   .. automethod:: _read_param_echo_response_signed
+   .. automethod:: _read_param_transport_format_list
+   .. automethod:: _read_param_esp_transform
+   .. automethod:: _read_param_seq_data
+   .. automethod:: _read_param_ack_data
+   .. automethod:: _read_param_payload_mic
+   .. automethod:: _read_param_transaction_id
+   .. automethod:: _read_param_overlay_id
+   .. automethod:: _read_param_route_dst
+   .. automethod:: _read_param_hip_transport_mode
+   .. automethod:: _read_param_hip_mac
+   .. automethod:: _read_param_hip_mac_2
+   .. automethod:: _read_param_hip_signature_2
+   .. automethod:: _read_param_hip_signature
+   .. automethod:: _read_param_echo_request_unsigned
+   .. automethod:: _read_param_echo_response_unsigned
+   .. automethod:: _read_param_relay_from
+   .. automethod:: _read_param_relay_to
+   .. automethod:: _read_param_overlay_ttl
+   .. automethod:: _read_param_route_via
+   .. automethod:: _read_param_from
+   .. automethod:: _read_param_rvs_hmac
+   .. automethod:: _read_param_via_rvs
+   .. automethod:: _read_param_relay_hmac
+
+Data Structures
+---------------
+
+.. autoclass:: pcapkit.protocols.data.internet.hip.HIP(next, length, type, version, chksum, control, shit, rhit)
+   :no-members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
+   .. autoattribute:: next
+   .. autoattribute:: length
+   .. autoattribute:: type
+   .. autoattribute:: version
+   .. autoattribute:: chksum
+   .. autoattribute:: control
+   .. autoattribute:: shit
+   .. autoattribute:: rhit
+   .. autoattribute:: parameters
+
+.. autoclass:: pcapkit.protocols.data.internet.hip.Control(anonymous)
+   :no-members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
+   .. autoattribute:: anonymous
+
+.. autoclass:: pcapkit.protocols.data.internet.hip.Parameter(type, critical, length)
+   :no-members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
 
-.. important::
+   .. autoattribute:: type
+   .. autoattribute:: critical
+   .. autoattribute:: length
 
-   Following classes are only for *documentation* purpose.
-   They do **NOT** exist in the :mod:`pcapkit` module.
+.. autoclass:: pcapkit.protocols.data.internet.hip.UnassignedParameter(type, critical, length, contents)
+   :no-members:
+   :show-inheritance:
 
-.. class:: DataType_HIP
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
 
-   :bases: TypedDict
+   .. autoattribute:: contents
 
-   HIP header [:rfc:`5201`][:rfc:`7401`].
+.. autoclass:: pcapkit.protocols.data.internet.hip.ESPInfoParameter(type, critical, length, index, old_spi, new_spi)
+   :no-members:
+   :show-inheritance:
 
-   .. attribute:: next
-      :type: pcapkit.const.reg.transtype.TransType
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
 
-      Next header.
+   .. autoattribute:: index
+   .. autoattribute:: old_spi
+   .. autoattribute:: new_spi
 
-   .. attribute:: length
-      :type: int
+.. autoclass:: pcapkit.protocols.data.internet.hip.R1CounterParameter(type, critical, length, counter)
+   :no-members:
+   :show-inheritance:
 
-      Header length.
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. attribute:: type
-      :type: pcapkit.const.hip.packet.Packet
+   .. autoattribute:: counter
 
-      Packet type.
+.. autoclass:: pcapkit.protocols.data.internet.hip.LocatorSetParameter(type, critical, length, locator_set)
+   :no-members:
+   :show-inheritance:
 
-   .. attribute:: version
-      :type: Literal[1, 2]
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
 
-      Version.
+   .. autoattribute:: locator_set
 
-   .. attribute:: chksum
-      :type: bytes
+.. autoclass:: pcapkit.protocols.data.internet.hip.Locator(traffic, type, length, preferred, lifetime, locator)
+   :no-members:
+   :show-inheritance:
 
-      Checksum.
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. attribute:: control
-      :type: DataType_Control
+   .. autoattribute:: traffic
+   .. autoattribute:: type
+   .. autoattribute:: length
+   .. autoattribute:: preferred
+   .. autoattribute:: lifetime
+   .. autoattribute:: locator
 
-      Controls.
+.. autoclass:: pcapkit.protocols.data.internet.hip.LocatorData(spi, ip)
+   :no-members:
+   :show-inheritance:
 
-   .. attribute:: shit
-      :type: int
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
 
-      Sender's host identity tag.
+   .. autoattribute:: spi
+   .. autoattribute:: ip
 
-   .. attribute:: rhit
-      :type: int
+.. autoclass:: pcapkit.protocols.data.internet.hip.PuzzleParameter(type, critical, length, index, lifetime, opaque, random)
+   :no-members:
+   :show-inheritance:
 
-      Receiver's host identity tag.
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. attribute:: parameters
-      :type: Optional[Tuple[pcapkit.const.hip.parameter.Parameter]]
+   .. autoattribute:: index
+   .. autoattribute:: lifetime
+   .. autoattribute:: opaque
+   .. autoattribute:: random
 
-      HIP parameters.
+.. autoclass:: pcapkit.protocols.data.internet.hip.SolutionParameter(type, critical, length, index, lifetime, opaque, random, solution)
+   :no-members:
+   :show-inheritance:
 
-.. class:: DataType_Control
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
 
-   :bases: TypedDict
+   .. autoattribute:: index
+   .. autoattribute:: lifetime
+   .. autoattribute:: opaque
+   .. autoattribute:: random
+   .. autoattribute:: solution
 
-   HIP controls.
+.. autoclass:: pcapkit.protocols.data.internet.hip.SEQParameter(type, critical, length, id)
+   :no-members:
+   :show-inheritance:
 
-   .. attribute:: anonymous
-      :type: bool
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
 
-      Anonymous.
+   .. autoattribute:: id
 
-.. class:: DataType_Parameter
+.. autoclass:: pcapkit.protocols.data.internet.hip.ACKParameter(type, critical, length, update_id)
+   :no-members:
+   :show-inheritance:
 
-   :bases: TypedDict
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
 
-   HIP parameters.
+   .. autoattribute:: update_id
 
-   .. attribute:: type
-      :type: pcapkit.const.hip.parameter.Parameter
+.. autoclass:: pcapkit.protocols.data.internet.hip.DHGroupListParameter(type, critical, length, group_id)
+   :no-members:
+   :show-inheritance:
 
-      Parameter type.
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. attribute:: critical
-      :type: bool
+   .. autoattribute:: group_id
 
-      Critical bit.
+.. autoclass:: pcapkit.protocols.data.internet.hip.DeffieHellmanParameter(type, critical, length, group_id, pub_len, pub_val)
+   :no-members:
+   :show-inheritance:
 
-   .. attribute:: length
-      :type: int
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
 
-      Length of contents.
+   .. autoattribute:: group_id
+   .. autoattribute:: pub_len
+   .. autoattribute:: pub_val
 
-HIP Unassigned Parameters
-~~~~~~~~~~~~~~~~~~~~~~~~~
+.. autoclass:: pcapkit.protocols.data.internet.hip.HIPTransformParameter(type, critical, length, suite_id)
+   :no-members:
+   :show-inheritance:
 
-For HIP unassigned parameters as described in :rfc:`5201`
-and :rfc:`7401`, its structure is described as below:
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
 
-======= ========= ==================== ========================
-Octets      Bits        Name                    Description
-======= ========= ==================== ========================
- 0           0    ``para.type``            Parameter Type
- 1          15    ``para.critical``        Critical Bit
- 2          16    ``para.length``          Length of Contents
- 4          32    ``para.contents``        Contents
-                                           Padding
-======= ========= ==================== ========================
+   .. autoattribute:: suite_id
 
-.. raw:: html
+.. autoclass:: pcapkit.protocols.data.internet.hip.HIPCipherParameter(type, critical, length, cipher_id)
+   :no-members:
+   :show-inheritance:
 
-   <br />
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
 
-.. class:: DataType_Param_Unassigned
+   .. autoattribute:: cipher_id
 
-   :bases: DataType_Parameter
+.. autoclass:: pcapkit.protocols.data.internet.hip.NATTraversalModeParameter(type, critical, length, mode_id)
+   :no-members:
+   :show-inheritance:
 
-   Structure of HIP unassigned parameters [:rfc:`5201`][:rfc:`7401`].
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. attribute:: contents
-      :type: bytes
+   .. autoattribute:: mode_id
 
-      Contents.
+.. autoclass:: pcapkit.protocols.data.internet.hip.TransactionPacingParameter(type, critical, length, min_ta)
+   :no-members:
+   :show-inheritance:
 
-HIP ``ESP_INFO`` Parameter
-~~~~~~~~~~~~~~~~~~~~~~~~~~
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
 
-For HIP ``ESP_INFO`` parameter as described in :rfc:`7402`,
-its structure is described as below:
+   .. autoattribute:: min_ta
 
-======= ========= ====================== =======================
-Octets      Bits        Name                    Description
-======= ========= ====================== =======================
-  0           0   ``esp_info.type``         Parameter Type
-  1          15   ``esp_info.critical``     Critical Bit
-  2          16   ``esp_info.length``       Length of Contents
-  4          32                             Reserved
-  6          48   ``esp_info.index``        KEYMAT Index
-  8          64   ``esp_info.old_spi``      OLD SPI
-  12         96   ``esp_info.new_spi``      NEW SPI
-======= ========= ====================== =======================
+.. autoclass:: pcapkit.protocols.data.internet.hip.EncryptedParameter(type, critical, length, raw)
+   :no-members:
+   :show-inheritance:
 
-.. raw:: html
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
 
-   <br />
+   .. autoattribute:: raw
 
-.. class:: DataType_Param_ESP_Info
+.. autoclass:: pcapkit.protocols.data.internet.hip.HostIDParameter(type, critical, length, hi_len, di_type, di_len, algorithm, hi, di)
+   :no-members:
+   :show-inheritance:
 
-   :bases: DataType_Parameter
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
 
-   Structure of HIP ``ESP_INFO`` parameter [:rfc:`7402`].
+   .. autoattribute:: hi_len
+   .. autoattribute:: di_type
+   .. autoattribute:: di_len
+   .. autoattribute:: algorithm
+   .. autoattribute:: hi
+   .. autoattribute:: di
 
-   .. attribute:: index
-      :type: int
+.. autoclass:: pcapkit.protocols.data.internet.hip.HostIdentity(curve, pubkey)
+   :no-members:
+   :show-inheritance:
 
-      ``KEYMAT`` index.
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. attribute:: old_spi
-      :type: int
+   .. autoattribute:: curve
+   .. autoattribute:: pubkey
 
-      Old SPI.
+.. autoclass:: pcapkit.protocols.data.internet.hip.HITSuiteListParameter(type, critical, length, suite_id)
+   :no-members:
+   :show-inheritance:
 
-   .. attribute:: new_spi
-      :type: int
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
 
-      New SPI.
+   .. autoattribute:: suite_id
 
-HIP ``R1_COUNTER`` Parameter
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.. autoclass:: pcapkit.protocols.data.internet.hip.CertParameter(type, critical, length, cert_group, cert_count, cert_id, cert_type, cert)
+   :no-members:
+   :show-inheritance:
 
-For HIP ``R1_COUNTER`` parameter as described in :rfc:`5201` and :rfc:`7401`,
-its structure is described as below:
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
 
-======= ========= ======================= ===============================
-Octets      Bits        Name                    Description
-======= ========= ======================= ===============================
-  0           0   ``ri_counter.type``       Parameter Type
-  1          15   ``ri_counter.critical``   Critical Bit
-  2          16   ``ri_counter.length``     Length of Contents
-  4          32                             Reserved
-  8          64   ``ri_counter.count``      Generation of Valid Puzzles
-======= ========= ======================= ===============================
+   .. autoattribute:: cert_group
+   .. autoattribute:: cert_count
+   .. autoattribute:: cert_id
+   .. autoattribute:: cert_type
+   .. autoattribute:: cert
 
-.. raw:: html
+.. autoclass:: pcapkit.protocols.data.internet.hip.NotificationParameter(type, critical, length, msg_type, msg)
+   :no-members:
+   :show-inheritance:
 
-   <br />
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
 
-.. class:: DataType_Param_R1_Counter
+   .. autoattribute:: msg_type
+   .. autoattribute:: msg
 
-   :bases: DataType_Parameter
+.. autoclass:: pcapkit.protocols.data.internet.hip.EchoRequestSignedParameter(type, critical, length, opaque)
+   :no-members:
+   :show-inheritance:
 
-   Structure of HIP ``R1_COUNTER`` parameter [:rfc:`5201`][:rfc:`7401`].
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. attribute:: count
-      :type: int
+   .. autoattribute:: opaque
 
-      Generation of valid puzzles.
+.. autoclass:: pcapkit.protocols.data.internet.hip.RegInfoParameter(type, critical, length, lifetime, reg_type)
+   :no-members:
+   :show-inheritance:
 
-HIP ``LOCATOR_SET`` Parameter
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
 
-For HIP ``LOCATOR_SET`` parameter as described in :rfc:`8046`,
-its structure is described as below:
+   .. autoattribute:: lifetime
+   .. autoattribute:: reg_type
 
-======= ========= =========================== =======================
-Octets      Bits        Name                    Description
-======= ========= =========================== =======================
-  0           0     ``locator_set.type``       Parameter Type
-  1          15     ``locator_set.critical``   Critical Bit
-  2          16     ``locator_set.length``     Length of Contents
-  ?           ?     ...                        ...
-  4          32     ``locator.traffic``        Traffic Type
-  5          40     ``locator.type``           Locator Type
-  6          48     ``locator.length``         Locator Length
-  7          56                                Reserved
-  7          63     ``locator.preferred``      Preferred Locator
-  8          64     ``locator.lifetime``       Locator Lifetime
-  12         96     ``locator.object``         Locator
-  ?           ?     ...                        ...
-======= ========= =========================== =======================
+.. autoclass:: pcapkit.protocols.data.internet.hip.Lifetime(min, max)
+   :no-members:
+   :show-inheritance:
 
-.. raw:: html
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
 
-   <br />
+   .. autoattribute:: min
+   .. autoattribute:: max
 
-.. class:: DataType_Param_Locator_Set
+.. autoclass:: pcapkit.protocols.data.internet.hip.RegRequestParameter(type, critical, length, lifetime, reg_type)
+   :no-members:
+   :show-inheritance:
 
-   :bases: DataType_Parameter
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
 
-   Structure of HIP ``LOCATOR_SET`` parameter [:rfc:`8046`].
+   .. autoattribute:: lifetime
+   .. autoattribute:: reg_type
 
-   .. attribute:: locator
-      :type: Tuple[DataType_Locator]
+.. autoclass:: pcapkit.protocols.data.internet.hip.RegResponseParameter(type, critical, length, lifetime, reg_type)
+   :no-members:
+   :show-inheritance:
 
-      Locator set.
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
 
-.. class:: DataType_Locator
+   .. autoattribute:: lifetime
+   .. autoattribute:: reg_type
 
-   :bases: TypedDict
+.. autoclass:: pcapkit.protocols.data.internet.hip.RegFailedParameter(type, critical, length, lifetime, reg_type)
+   :no-members:
+   :show-inheritance:
 
-   Locator.
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. attribute:: traffic
-      :type: int
+   .. autoattribute:: lifetime
+   .. autoattribute:: reg_type
 
-      Traffic type.
+.. autoclass:: pcapkit.protocols.data.internet.hip.RegFromParameter(type, critical, length, port, protocol, address)
+   :no-members:
+   :show-inheritance:
 
-   .. attribute:: type
-      :type: int
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
 
-      Locator type.
+   .. autoattribute:: port
+   .. autoattribute:: protocol
+   .. autoattribute:: address
 
-   .. attribute:: length
-      :type: int
+.. autoclass:: pcapkit.protocols.data.internet.hip.EchoResponseSignedParameter(type, critical, length, opaque)
+   :no-members:
+   :show-inheritance:
 
-      Locator length.
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. attribute:: preferred
-      :type: int
+   .. autoattribute:: opaque
 
-      Preferred length.
+.. autoclass:: pcapkit.protocols.data.internet.hip.TransportFormatListParameter(type, critical, length, tf_type)
+   :no-members:
+   :show-inheritance:
 
-   .. attribute:: lifetime
-      :type: int
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
 
-      Locator lifetime.
+   .. autoattribute:: tf_type
 
-   .. attribute:: object
-      :type: DataType_Locator_Dict
+.. autoclass:: pcapkit.protocols.data.internet.hip.ESPTransformParameter(type, critical, length, suite_id)
+   :no-members:
+   :show-inheritance:
 
-      Locator.
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
 
-.. class:: DataType_Locator_Dict
+   .. autoattribute:: suite_id
 
-   :bases: TypedDict
+.. autoclass:: pcapkit.protocols.data.internet.hip.SeqDataParameter(type, critical, length, seq)
+   :no-members:
+   :show-inheritance:
 
-   Locator type 2.
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. attribute:: spi
-      :type: int
+   .. autoattribute:: seq
 
-      SPI.
+.. autoclass:: pcapkit.protocols.data.internet.hip.AckDataParameter(type, critical, length, ack)
+   :no-members:
+   :show-inheritance:
 
-   .. attribute:: ip
-      :type: ipaddress.IPv4Address
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
 
-HIP ``PUZZLE`` Parameter
-~~~~~~~~~~~~~~~~~~~~~~~~
+   .. autoattribute:: ack
 
-For HIP ``PUZZLE`` parameter as described in :rfc:`5201` and :rfc:`7401`,
-its structure is described as below:
+.. autoclass:: pcapkit.protocols.data.internet.hip.PayloadMICParameter(type, critical, length, next, payload, mic)
+   :no-members:
+   :show-inheritance:
 
-======= ========= ===================== ==============================
-Octets      Bits        Name                    Description
-======= ========= ===================== ==============================
-  0           0   ``puzzle.type``           Parameter Type
-  1          15   ``puzzle.critical``       Critical Bit
-  2          16   ``puzzle.length``         Length of Contents
-  4          32   ``puzzle.number``         Number of Verified Bits
-  5          40   ``puzzle.lifetime``       Lifetime
-  6          48   ``puzzle.opaque``         Opaque
-  8          64   ``puzzle.random``         Random Number
-======= ========= ===================== ==============================
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
 
-.. raw:: html
+   .. autoattribute:: next
+   .. autoattribute:: payload
+   .. autoattribute:: mic
 
-   <br />
+.. autoclass:: pcapkit.protocols.data.internet.hip.TransactionIDParameter(type, critical, length, id)
+   :no-members:
+   :show-inheritance:
 
-.. class:: DataType_Param_Puzzle
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
 
-   :bases: DataType_Parameter
+   .. autoattribute:: id
 
-   Structure of HIP ``PUZZLE`` parameter [:rfc:`5201`][:rfc:`7401`].
+.. autoclass:: pcapkit.protocols.data.internet.hip.OverlayIDParameter(type, critical, length, id)
+   :no-members:
+   :show-inheritance:
 
-   .. attribute:: number
-      :type: int
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
 
-      Number of verified bits.
+   .. autoattribute:: id
 
-   .. attribute:: lifetime
-      :type: int
+.. autoclass:: pcapkit.protocols.data.internet.hip.RouteDstParameter(type, critical, length, flags, hit)
+   :no-members:
+   :show-inheritance:
 
-      Lifetime.
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. attribute:: opaque
-      :type: bytes
+   .. autoattribute:: flags
+   .. autoattribute:: hit
 
-      Opaque.
+.. autoclass:: pcapkit.protocols.data.internet.hip.Flags(symmetric, must_follow)
+   :no-members:
+   :show-inheritance:
 
-   .. attribute:: random
-      :type: int
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
 
-      Random number.
+   .. autoattribute:: symmetric
+   .. autoattribute:: must_follow
 
-HIP ``SOLUTION`` Parameter
-~~~~~~~~~~~~~~~~~~~~~~~~~~
+.. autoclass:: pcapkit.protocols.data.internet.hip.HIPTransportModeParameter(type, critical, length, port, mode_id)
+   :no-members:
+   :show-inheritance:
 
-For HIP ``SOLUTION`` parameter as described in :rfc:`5201` and :rfc:`7401`,
-its structure is described as below:
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
 
-======= ========= ===================== =============================
-Octets      Bits        Name                    Description
-======= ========= ===================== =============================
-  0           0   ``solution.type``         Parameter Type
-  1          15   ``solution.critical``     Critical Bit
-  2          16   ``solution.length``       Length of Contents
-  4          32   ``solution.number``       Number of Verified Bits
-  5          40   ``solution.lifetime``     Lifetime
-  6          48   ``solution.opaque``       Opaque
-  8          64   ``solution.random``       Random Number
-  ?           ?   ``solution.solution``     Puzzle Solution
-======= ========= ===================== =============================
+   .. autoattribute:: port
+   .. autoattribute:: mode_id
 
-.. raw:: html
+.. autoclass:: pcapkit.protocols.data.internet.hip.HIPMACParameter(type, critical, length, hmac)
+   :no-members:
+   :show-inheritance:
 
-   <br />
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
 
-.. class:: DataType_Param_Solution
+   .. autoattribute:: hmac
 
-   :bases: DataType_Parameter
+.. autoclass:: pcapkit.protocols.data.internet.hip.HIPMAC2Parameter(type, critical, length, hmac)
+   :no-members:
+   :show-inheritance:
 
-   Structure of HIP ``SOLUTION`` parameter [:rfc:`5201`][:rfc:`7401`].
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. attribute:: number
-      :type: number
+   .. autoattribute:: hmac
 
-      Number of verified bits.
+.. autoclass:: pcapkit.protocols.data.internet.hip.HIPSignature2Parameter(type, critical, length, algorithm, signature)
+   :no-members:
+   :show-inheritance:
 
-   .. attribute:: lifetime
-      :type: int
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
 
-      Lifetime.
+   .. autoattribute:: algorithm
+   .. autoattribute:: signature
 
-   .. attribute:: opaque
-      :type: bytes
+.. autoclass:: pcapkit.protocols.data.internet.hip.HIPSignatureParameter(type, critical, length, algorithm, signature)
+   :no-members:
+   :show-inheritance:
 
-      Opaque.
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. attribute:: random
-      :type: int
+   .. autoattribute:: algorithm
+   .. autoattribute:: signature
 
-      Random number.
+.. autoclass:: pcapkit.protocols.data.internet.hip.EchoRequestUnsignedParameter(type, critical, length, opaque)
+   :no-members:
+   :show-inheritance:
 
-   .. attribute:: solution
-      :type: int
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
 
-      Puzzle solution.
+   .. autoattribute:: opaque
 
-HIP ``SEQ`` Parameter
-~~~~~~~~~~~~~~~~~~~~~
+.. autoclass:: pcapkit.protocols.data.internet.hip.EchoResponseUnsignedParameter(type, critical, length, opaque)
+   :no-members:
+   :show-inheritance:
 
-For HIP ``SEQ`` parameter as described in :rfc:`7401`,
-its structure is described as below:
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
 
-======= ========= ================= =================================
-Octets      Bits        Name                    Description
-======= ========= ================= =================================
-  0           0   ``seq.type``              Parameter Type
-  1          15   ``seq.critical``          Critical Bit
-  2          16   ``seq.length``            Length of Contents
-  4          32   ``seq.id``                Update ID
-======= ========= ================= =================================
+   .. autoattribute:: opaque
 
-.. raw:: html
+.. autoclass:: pcapkit.protocols.data.internet.hip.RelayFromParameter(type, critical, length, port, protocol, address)
+   :no-members:
+   :show-inheritance:
 
-   <br />
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
 
-.. class:: DataType_Param_SEQ
+   .. autoattribute:: port
+   .. autoattribute:: protocol
+   .. autoattribute:: address
 
-   :bases: DataType_Parameter
+.. autoclass:: pcapkit.protocols.data.internet.hip.RelayToParameter(type, critical, length, port, protocol, address)
+   :no-members:
+   :show-inheritance:
 
-   Structure of HIP ``SEQ`` parameter [:rfc:`7401`].
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. attribute:: id
-      :type: int
+   .. autoattribute:: port
+   .. autoattribute:: protocol
+   .. autoattribute:: address
 
-      Update ID.
+.. autoclass:: pcapkit.protocols.data.internet.hip.OverlayTTLParameter(type, critical, length, ttl)
+   :no-members:
+   :show-inheritance:
 
-HIP ``ACK`` Parameter
-~~~~~~~~~~~~~~~~~~~~~
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
 
-For HIP ``ACK`` parameter as described in :rfc:`7401`,
-its structure is described as below:
+   .. autoattribute:: ttl
 
-======= ========= ================== =============================
-Octets      Bits        Name                    Description
-======= ========= ================== =============================
-  0           0   ``ack.type``              Parameter Type
-  1          15   ``ack.critical``          Critical Bit
-  2          16   ``ack.length``            Length of Contents
-  4          32   ``ack.id``                Peer Update ID
-======= ========= ================== =============================
+.. autoclass:: pcapkit.protocols.data.internet.hip.RouteViaParameter(type, critical, length, flags, hit)
+   :no-members:
+   :show-inheritance:
 
-.. raw:: html
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
 
-   <br />
+   .. autoattribute:: flags
+   .. autoattribute:: hit
 
-.. class:: DataType_Param_ACK
+.. autoclass:: pcapkit.protocols.data.internet.hip.FromParameter(type, critical, length, address)
+   :no-members:
+   :show-inheritance:
 
-   :bases: DataType_Parameter
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. attribute:: id
-      :type: Tuple[int]
+   .. autoattribute:: address
 
-      Array of peer update IDs.
+.. autoclass:: pcapkit.protocols.data.internet.hip.RVSHMACParameter(type, critical, length, hmac)
+   :no-members:
+   :show-inheritance:
 
-HIP ``DH_GROUP_LIST`` Parameter
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
 
-For HIP ``DH_GROUP_LIST`` parameter as described in :rfc:`7401`,
-its structure is described as below:
+   .. autoattribute:: hmac
 
-======= ========= ========================== ===================
-Octets      Bits        Name                    Description
-======= ========= ========================== ===================
-  0           0   ``dh_group_list.type``     Parameter Type
-  1          15   ``dh_group_list.critical`` Critical Bit
-  2          16   ``dh_group_list.length``   Length of Contents
-  4          32   ``dh_group_list.id``       DH GROUP ID
-======= ========= ========================== ===================
+.. autoclass:: pcapkit.protocols.data.internet.hip.ViaRVSParameter(type, critical, length, address)
+   :no-members:
+   :show-inheritance:
 
-.. raw:: html
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
 
-   <br />
+   .. autoattribute:: address
 
-.. class:: DataType_Param_DH_Group_List
+.. autoclass:: pcapkit.protocols.data.internet.hip.RelayHMACParameter(type, critical, length, hmac)
+   :no-members:
+   :show-inheritance:
 
-   :bases: DataType_Parameter
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
 
-   Structure of HIP ``DH_GROUP_LIST`` parameter [:rfc:`7401`].
-
-   .. attribute:: id
-      :type: Tuple[pcapkit.const.hip.group.Group]
-
-      Array of DH group IDs.
-
-HIP ``DEFFIE_HELLMAN`` Parameter
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-For HIP ``DEFFIE_HELLMAN`` parameter as described in :rfc:`7401`,
-its structure is described as below:
-
-======= ========= =========================== ===================
-Octets      Bits        Name                    Description
-======= ========= =========================== ===================
-  0           0   ``diffie_hellman.type``     Parameter Type
-  1          15   ``diffie_hellman.critical`` Critical Bit
-  2          16   ``diffie_hellman.length``   Length of Contents
-  4          32   ``diffie_hellman.id``       Group ID
-  5          40   ``diffie_hellman.pub_len``  Public Value Length
-  6          48   ``diffie_hellman.pub_val``  Public Value
-  ?           ?                               Padding
-======= ========= =========================== ===================
-
-.. raw:: html
-
-   <br />
-
-.. class:: DataType_Param_Deffie_Hellman
-
-   :bases: DataType_Parameter
-
-   Structure of HIP ``DEFFIE_HELLMAN`` parameter [:rfc:`7401`].
-
-   .. attribute:: id
-      :type: pcapkit.const.hip.group.Group
-
-      Group ID.
-
-   .. attribute:: pub_len
-      :type: int
-
-      Public value length.
-
-   .. attribute:: pub_val
-      :type: bytes
-
-      Public value.
-
-HIP ``HIP_TRANSFORM`` Parameter
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-For HIP ``HIP_TRANSFORM`` parameter as described in :rfc:`5201`,
-its structure is described as below:
-
-======= ========= ========================== ====================
-Octets      Bits        Name                    Description
-======= ========= ========================== ====================
-  0           0   ``hip_transform.type``      Parameter Type
-  1          15   ``hip_transform.critical``  Critical Bit
-  2          16   ``hip_transform.length``    Length of Contents
-  4          32   ``hip_transform.id``        Group ID
-  ?           ?   ...                         ...
-  ?           ?                               Padding
-======= ========= ========================== ====================
-
-.. raw:: html
-
-   <br />
-
-.. class:: DataType_Param_Transform
-
-   :bases: DataType_Parameter
-
-   Structure of HIP ``HIP_TRANSFORM`` parameter [:rfc:`5201`].
-
-   .. attribute:: id
-      :type: Tuple[pcapkit.const.hip.suite.Suite]
-
-      Array of group IDs.
-
-HIP ``HIP_CIPHER`` Parameter
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-For HIP ``HIP_CIPHER`` parameter as described in :rfc:`7401`,
-its structure is described as below:
-
-======= ========= ======================== ======================
-Octets      Bits        Name                    Description
-======= ========= ======================== ======================
-  0           0     hip_cipher.type         Parameter Type
-  1          15     hip_cipher.critical     Critical Bit
-  2          16     hip_cipher.length       Length of Contents
-  4          32     hip_cipher.id           Cipher ID
-  ?           ?     ...                     ...
-  ?           ?     -                       Padding
-======= ========= ======================== ======================
-
-.. raw:: html
-
-   <br />
-
-.. class:: DataType_Param_Cipher
-
-   :bases: DataType_Parameter
-
-   Structure of HIP ``HIP_CIPHER`` parameter [:rfc:`7401`].
-
-   .. attribute:: id
-      :type: Tuple[pcapkit.const.hip.cipher.Cipher]
-
-      Array of cipher IDs.
-
-HIP ``NAT_TRAVERSAL_MODE`` Parameter
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-For HIP ``NAT_TRAVERSAL_MODE`` parameter as described in :rfc:`5770`,
-its structure is described as below:
-
-======= ========= =============================== ====================
-Octets      Bits        Name                        Description
-======= ========= =============================== ====================
-  0           0   ``nat_traversal_mode.type``      Parameter Type
-  1          15   ``nat_traversal_mode.critical``  Critical Bit
-  2          16   ``nat_traversal_mode.length``    Length of Contents
-  4          32                                    Reserved
-  6          48   ``nat_traversal_mode.id``        Mode ID
-  ?           ?     ...                            ...
-  ?           ?                                    Padding
-======= ========= =============================== ====================
-
-.. raw:: html
-
-   <br />
-
-.. class:: DataType_Param_NET_Traversal_Mode
-
-   :bases: DataType_Parameter
-
-   Structure of HIP ``NAT_TRAVERSAL_MODE`` parameter [:rfc:`5770`].
-
-   .. attribute:: id
-      :type: Tuple[pcapkit.const.hip.nat_traversal.NETTraversal]
-
-      Array of mode IDs.
-
-HIP ``TRANSACTION_PACING`` Parameter
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-For HIP ``TRANSACTION_PACING`` parameter as described in :rfc:`5770`,
-its structure is described as below:
-
-======= ========= =============================== ====================
-Octets      Bits        Name                        Description
-======= ========= =============================== ====================
-  0           0   ``transaction_pacing.type``     Parameter Type
-  1          15   ``transaction_pacing.critical`` Critical Bit
-  2          16   ``transaction_pacing.length``   Length of Contents
-  4          32   ``transaction_pacing.min_ta``   Min Ta
-======= ========= =============================== ====================
-
-.. raw:: html
-
-   <br />
-
-.. class:: DataType_Param_Transaction_Pacing
-
-   :bases: DataType_Parameter
-
-   Structure of HIP ``TRANSACTION_PACING`` parameter [:rfc:`5770`].
-
-   .. attribute:: min_ta
-      :type: int
-
-      Min Ta.
-
-HIP ``ENCRYPTED`` Parameter
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-For HIP ``ENCRYPTED`` parameter as described in :rfc:`7401`,
-its structure is described as below:
-
-======= ========= ======================= ====================
-Octets      Bits        Name                Description
-======= ========= ======================= ====================
-  0           0   ``encrypted.type``      Parameter Type
-  1          15   ``encrypted.critical``  Critical Bit
-  2          16   ``encrypted.length``    Length of Contents
-  4          32                           Reserved
-  8          48   ``encrypted.iv``        Initialization Vector
-  ?           ?   ``encrypted.data``      Encrypted data
-  ?           ?                           Padding
-======= ========= ======================= ====================
-
-.. raw:: html
-
-   <br />
-
-.. class:: DataType_Param_Encrypted
-
-   :bases: DataType_Parameter
-
-   Structure of HIP ``ENCRYPTED`` parameter [:rfc:`7401`].
-
-   .. attribute:: raw
-      :type: bytes
-
-      Raw content data.
-
-HIP ``HOST_ID`` Parameter
-~~~~~~~~~~~~~~~~~~~~~~~~~
-
-For HIP ``HOST_ID`` parameter as described in :rfc:`7401`,
-its structure is described as below:
-
-======= ========= ======================= ====================
-Octets      Bits        Name                Description
-======= ========= ======================= ====================
-  0           0   ``host_id.type``        Parameter Type
-  1          15   ``host_id.critical``    Critical Bit
-  2          16   ``host_id.length``      Length of Contents
-  4          32   ``host_id.id_len``      Host Identity Length
-  6          48   ``host_id.di_type``     Domain Identifier Type
-  6          52   ``host_id.di_len``      Domain Identifier Length
-  8          64   ``host_id.algorithm``   Algorithm
-  10         80   ``host_id.host_id``     Host Identity
-  ?           ?   ``host_id.domain_id``   Domain Identifier
-  ?           ?                           Padding
-======= ========= ======================= ====================
-
-.. raw:: html
-
-   <br />
-
-.. class:: DataType_Param_Host_ID
-
-   :bases: DataType_Parameter
-
-   Structure of HIP ``HOST_ID`` parameter [:rfc:`7401`].
-
-   .. attribute:: id_len
-      :type: int
-
-      Host identity length.
-
-   .. attribute:: di_type
-      :type: pcapkit.const.hip.di_type.DIType
-
-      Domain identifier type.
-
-   .. attribute:: di_len
-      :type: int
-
-      Domain identifier length.
-
-   .. attribute:: algorithm
-      :type: pcapkit.const.hip.hi_algorithm.HIAlgorithm
-
-      Algorithm.
-
-   .. attribute:: host_id
-      :type: Union[bytes, DataType_Host_ID_ECDSA_Curve, DataType_Host_ID_ECDSA_LOW_Curve]
-
-      Host identity.
-
-   .. attribute:: domain_id
-      :type: bytes
-
-      Domain identifier.
-
-.. class:: DataType_Host_ID_ECDSA_Curve
-
-   :bases: TypedDict
-
-   Host identity data.
-
-   .. attribute:: curve
-      :type: pcapkit.const.hip.ecdsa_curve.ECDSACurve
-
-      ECDSA curve.
-
-   .. attribute:: pubkey
-      :type: bytes
-
-      Public key.
-
-.. class:: DataType_Host_ID_ECDSA_LOW_Curve
-
-   :bases: TypedDict
-
-   Host identity data.
-
-   .. attribute:: curve
-      :type: pcapkit.const.hip.ecdsa_low_curve.ECDSALowCurve
-
-      ECDSA_Low curve.
-
-   .. attribute:: pubkey
-      :type: bytes
-
-      Public key.
-
-HIP ``HIT_SUITE_LIST`` Parameter
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-For HIP ``HIT_SUITE_LIST`` parameter as described in :rfc:`7401`,
-its structure is described as below:
-
-======= ========= ============================== =====================
-Octets      Bits        Name                     Description
-======= ========= ============================== =====================
-  0           0   ``hit_suite_list.type``        Parameter Type
-  1          15   ``hit_suite_list.critical``    Critical Bit
-  2          16   ``hit_suite_list.length``      Length of Contents
-  4          32   ``hit_suite_list.id``          HIT Suite ID
-  ?           ?   ...                            ...
-  ?           ?                                  Padding
-======= ========= ============================== =====================
-
-.. raw:: html
-
-   <br />
-
-.. class:: DataType_Param_HIT_Suite_List
-
-   :bases: DataType_Parameter
-
-   Structure of HIP ``HIT_SUITE_LIST`` parameter [:rfc:`7401`].
-
-   .. attribute:: id
-      :type: Tuple[pcapkit.const.hip.hit_suite.HITSuite]
-
-      Array of HIT suite IDs.
-
-HIP ``CERT`` Parameter
-~~~~~~~~~~~~~~~~~~~~~~
-
-For HIP ``CERT`` parameter as described in :rfc:`7401`,
-its structure is described as below:
-
-======= ======== ===================== ======================
-Octets      Bits        Name                Description
-======= ======== ===================== ======================
-  0           0   ``cert.type``         Parameter Type
-  1          15   ``cert.critical``     Critical Bit
-  2          16   ``cert.length``       Length of Contents
-  4          32   ``cert.group``        ``CERT`` Group
-  5          40   ``cert.count``        ``CERT`` Count
-  6          48   ``cert.id``           ``CERT`` ID
-  7          56   ``cert.cert_type``    ``CERT`` Type
-  8          64   ``cert.certificate``  Certificate
-  ?           ?                         Padding
-======= ======== ===================== ======================
-
-.. raw:: html
-
-   <br />
-
-.. class:: DataType_Param_Cert
-
-   :bases: DataType_Parameter
-
-   Structure of HIP ``CERT`` parameter [:rfc:`7401`].
-
-   .. attribute:: group
-      :type: pcapkit.const.hip.group.Group
-
-      ``CERT`` group.
-
-   .. attribute:: count
-      :type: int
-
-      ``CERT`` count.
-
-   .. attribute:: id
-      :type: int
-
-      ``CERT`` ID.
-
-   .. attribute:: cert_type
-      :type: pcapkit.const.hip.certificate.Certificate
-
-   .. attribute:: certificate
-      :type: bytes
-
-      Certificate.
-
-HIP ``NOTIFICATION`` Parameter
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-For HIP ``NOTIFICATION`` parameter as described in :rfc:`7401`,
-its structure is described as below:
-
-======= ======== ========================== =====================
-Octets      Bits        Name                    Description
-======= ======== ========================== =====================
-  0           0   ``notification.type``     Parameter Type
-  1          15   ``notification.critical`` Critical Bit
-  2          16   ``notification.length``   Length of Contents
-  4          32                             Reserved
-  6          48   ``notification.msg_type`` Notify Message Type
-  8          64   ``notification.data``     Notification Data
-  ?           ?                             Padding
-======= ======== ========================== =====================
-
-.. raw:: html
-
-   <br />
-
-.. class:: DataType_Param_Notification
-
-   :bases: DataType_Parameter
-
-   Structure of HIP ``NOTIFICATION`` parameter [:rfc:`7401`].
-
-   .. attribute:: msg_type
-      :type: pcapkit.const.hip.notify_message.NotifyMessage
-
-      Notify message type.
-
-   .. attribute:: data
-      :type: bytes
-
-      Notification data.
-
-HIP ``ECHO_REQUEST_SIGNED`` Parameter
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-For HIP ``ECHO_REQUEST_SIGNED`` parameter as described in :rfc:`7401`,
-its structure is described as below:
-
-======= ========= ================================ ====================
-Octets      Bits        Name                            Description
-======= ========= ================================ ====================
-  0           0   ``echo_request_signed.type``      Parameter Type
-  1          15   ``echo_request_signed.critical``  Critical Bit
-  2          16   ``echo_request_signed.length``    Length of Contents
-  4          32   ``echo_request_signed.data``      Opaque Data
-======= ========= ================================ ====================
-
-.. raw:: html
-
-   <br />
-
-.. class:: DataType_Param_Echo_Request_Signed
-
-   :bases: DataType_Parameter
-
-   Structure of HIP ``ECHO_REQUEST_SIGNED`` parameter [:rfc:`7401`].
-
-   .. attribute:: data
-      :type: bytes
-
-      Opaque data.
-
-HIP ``REG_INFO`` Parameter
-~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-For HIP ``REG_INFO`` parameter as described in :rfc:`8003`,
-its structure is described as below:
-
-====== ========= ========================== ========================
-Octets      Bits        Name                            Description
-====== ========= ========================== ========================
-  0           0   ``reg_info.type``           Parameter Type
-  1          15   ``reg_info.critical``       Critical Bit
-  2          16   ``reg_info.length``         Length of Contents
-  4          32   ``reg_info.lifetime``       Lifetime
-  4          32   ``reg_info.lifetime.min``   Min Lifetime
-  5          40   ``reg_info.lifetime.max``   Max Lifetime
-  6          48   ``reg_info.reg_type``       Reg Type
-  ?           ?     ...                       ...
-  ?           ?                               Padding
-====== ========= ========================== ========================
-
-.. raw:: html
-
-   <br />
-
-.. class:: DataType_Param_Reg_Info
-
-   :bases: DataType_Parameter
-
-   Structure of HIP ``REG_INFO`` parameter [:rfc:`8003`].
-
-   .. attribute:: lifetime
-      :type: DataType_Lifetime
-
-      Lifetime.
-
-   .. attribute:: reg_type
-      :type: Tuple[pcapkit.const.hip.registration.Registration]
-
-      Array of registration type.
-
-.. class:: DataType_Lifetime
-
-   :bases: NamedTuple
-
-   Lifetime.
-
-   .. attribute:: min
-      :type: int
-
-      Minimum lifetime.
-
-   .. attribute:: maz
-      :type: int
-
-      Maximum lifetime.
-
-HIP ``REG_REQUEST`` Parameter
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-For HIP ``REG_REQUEST`` parameter as described in :rfc:`8003`,
-its structure is described as below:
-
-======= ========= ============================ ========================
-Octets      Bits        Name                            Description
-======= ========= ============================ ========================
-  0           0   ``reg_request.type``            Parameter Type
-  1          15   ``reg_request.critical``        Critical Bit
-  2          16   ``reg_request.length``          Length of Contents
-  4          32   ``reg_request.lifetime``        Lifetime
-  4          32   ``reg_request.lifetime.min``    Min Lifetime
-  5          40   ``reg_request.lifetime.max``    Max Lifetime
-  6          48   ``reg_request.reg_type``        Reg Type
-  ?           ?     ...                           ...
-  ?           ?                                   Padding
-======= ========= ============================ ========================
-
-.. raw:: html
-
-   <br />
-
-.. class:: DataType_Param_Reg_Request
-
-   :bases: DataType_Parameter
-
-   Structure of HIP ``REG_REQUEST`` parameter [:rfc:`8003`].
-
-   .. attribute:: lifetime
-      :type: DataType_Lifetime
-
-      Lifetime.
-
-   .. attribute:: reg_type
-      :type: Tuple[pcapkit.const.hip.registration.Registration]
-
-      Array of registration type.
-
-HIP ``REG_RESPONSE`` Parameter
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-For HIP ``REG_RESPONSE`` parameter as described in :rfc:`8003`,
-its structure is described as below:
-
-======= ========= ============================= =======================
-Octets      Bits        Name                            Description
-======= ========= ============================= =======================
-  0           0   ``reg_response.type``           Parameter Type
-  1          15   ``reg_response.critical``       Critical Bit
-  2          16   ``reg_response.length``         Length of Contents
-  4          32   ``reg_response.lifetime``       Lifetime
-  4          32   ``reg_response.lifetime.min``   Min Lifetime
-  5          40   ``reg_response.lifetime.max``   Max Lifetime
-  6          48   ``reg_response.reg_type``       Reg Type
-  ?           ?     ...                           ...
-  ?           ?                                   Padding
-======= ========= ============================= =======================
-
-.. raw:: html
-
-   <br />
-
-.. class:: DataType_Param_Reg_Response
-
-   :bases: DataType_Parameter
-
-   Structure of HIP ``REG_RESPONSE`` parameter [:rfc:`8003`].
-
-   .. attribute:: lifetime
-      :type: DataType_Lifetime
-
-      Lifetime.
-
-   .. attribute:: reg_type
-      :type: Tuple[pcapkit.const.hip.registration.Registration]
-
-      Array of registration type.
-
-HIP ``REG_FAILED`` Parameter
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-For HIP ``REG_FAILED`` parameter as described in :rfc:`8003`,
-its structure is described as below:
-
-======= ========= ============================= =======================
-Octets      Bits        Name                            Description
-======= ========= ============================= =======================
-  0           0   ``reg_failed.type``             Parameter Type
-  1          15   ``reg_failed.critical``         Critical Bit
-  2          16   ``reg_failed.length``           Length of Contents
-  4          32   ``reg_failed.lifetime``         Lifetime
-  4          32   ``reg_failed.lifetime.min``     Min Lifetime
-  5          40   ``reg_failed.lifetime.max``     Max Lifetime
-  6          48   ``reg_failed.reg_type``         Reg Type
-  ?           ?     ...                           ...
-  ?           ?                                   Padding
-======= ========= ============================= =======================
-
-.. raw:: html
-
-   <br />
-
-.. class:: DataType_Param_Reg_Failed
-
-   :bases: DataType_Parameter
-
-   Structure of HIP ``REG_FAILED`` parameter [:rfc:`8003`].
-
-   .. attribute:: lifetime
-      :type: DataType_Lifetime
-
-      Lifetime.
-
-   .. attribute:: reg_type
-      :type: Tuple[pcapkit.const.hip.registration.Registration]
-
-      Array of registration type.
-
-HIP ``REG_FROM`` Parameter
-~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-For HIP ``REG_FROM`` parameter as described in :rfc:`5770`,
-its structure is described as below:
-
-======= ======== ======================== =============================
-Octets      Bits        Name                            Description
-======= ======== ======================== =============================
-  0           0   ``reg_from.type``             Parameter Type
-  1          15   ``reg_from.critical``         Critical Bit
-  2          16   ``reg_from.length``           Length of Contents
-  4          32   ``reg_from.port``             Port
-  6          48   ``reg_from.protocol``         Protocol
-  7          56                                 Reserved
-  8          64   ``reg_from.ip``               Address (IPv6)
-======= ======== ======================== =============================
-
-.. raw:: html
-
-   <br />
-
-.. class:: DataType_Param_Reg_From
-
-   :bases: DataType_Parameter
-
-   Structure of HIP ``REG_FROM`` parameter [:rfc:`5770`].
-
-   .. attribute:: port
-      :type: int
-
-      Port.
-
-   .. attribute:: protocol
-      :type: pcapkit.const.reg.transtype.TransType
-
-      Protocol.
-
-   .. attribute:: ip
-      :type: ipaddress.IPv6Address
-
-      IPv6 address.
-
-HIP ``ECHO_RESPONSE_SIGNED`` Parameter
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-For HIP ``ECHO_RESPONSE_SIGNED`` parameter as described in :rfc:`7401`,
-its structure is described as below:
-
-======= ========= ================================= ===================
-Octets      Bits        Name                            Description
-======= ========= ================================= ===================
-  0           0   ``echo_response_signed.type``     Parameter Type
-  1          15   ``echo_response_signed.critical`` Critical Bit
-  2          16   ``echo_response_signed.length``   Length of Contents
-  4          32   ``echo_response_signed.data``     Opaque Data
-======= ========= ================================= ===================
-
-.. raw:: html
-
-   <br />
-
-.. class:: DataType_Param_Echo_Response_Signed
-
-   :bases: DataType_Parameter
-
-   Structure of HIP ``ECHO_RESPONSE_SIGNED`` parameter [:rfc:`7401`].
-
-   .. attribute:: data
-      :type: bytes
-
-      Opaque data.
-
-HIP ``TRANSPORT_FORMAT_LIST`` Parameter
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-For HIP ``TRANSPORT_FORMAT_LIST`` parameter as described in :rfc:`7401`,
-its structure is described as below:
-
-======= ========= =================================== =====================
-Octets      Bits        Name                            Description
-======= ========= =================================== =====================
-  0           0   ``transport_format_list.type``      Parameter Type
-  1          15   ``transport_format_list.critical``  Critical Bit
-  2          16   ``transport_format_list.length``    Length of Contents
-  4          32   ``transport_format_list.tf_type``   TF Type
-  ?           ?     ...                               ...
-  ?           ?                                       Padding
-======= ========= =================================== =====================
-
-.. raw:: html
-
-   <br />
-
-.. class:: DataType_Param_Transform_Format_List
-
-   :bases: DataType_Parameter
-
-   Structure of HIP ``TRANSPORT_FORMAT_LIST`` parameter [:rfc:`7401`].
-
-   .. attribute:: tf_type
-      :type: Tuple[int]
-
-      Array of TF types.
-
-HIP ``ESP_TRANSFORM`` Parameter
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-For HIP ``ESP_TRANSFORM`` parameter as described in :rfc:`7402`,
-its structure is described as below:
-
-======= ========= =================================== =====================
-Octets      Bits        Name                            Description
-======= ========= =================================== =====================
-  0           0   ``esp_transform.type``              Parameter Type
-  1          15   ``esp_transform.critical``          Critical Bit
-  2          16   ``esp_transform.length``            Length of Contents
-  4          32                                       Reserved
-  6          48   ``esp_transform.id``                Suite ID
-  ?           ?   ...                                 ...
-  ?           ?                                       Padding
-======= ========= =================================== =====================
-
-.. raw:: html
-
-   <br />
-
-.. class:: DataType_Param_ESP_Transform
-
-   :bases: DataType_Parameter
-
-   Structure of HIP ``ESP_TRANSFORM`` parameter [:rfc:`7402`].
-
-   .. attribute:: id
-      :type: Tuple[pcapkit.const.hip.esp_transform_suite.ESPTransformSuite]
-
-      Array of suite IDs.
-
-HIP ``SEQ_DATA`` Parameter
-~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-For HIP ``SEQ_DATA`` parameter as described in :rfc:`6078`,
-its structure is described as below:
-
-======= ========= =================================== =====================
-Octets      Bits        Name                            Description
-======= ========= =================================== =====================
-  0           0   ``seq_data.type``                   Parameter Type
-  1          15   ``seq_data.critical``               Critical Bit
-  2          16   ``seq_data.length``                 Length of Contents
-  4          32   ``seq_data.seq``                    Sequence number
-======= ========= =================================== =====================
-
-.. raw:: html
-
-   <br />
-
-.. class:: DataType_Param_SEQ_Data
-
-   :bases: DataType_Parameter
-
-   Structure of HIP ``SEQ_DATA`` parameter [:rfc:`6078`].
-
-   .. attribute:: seq
-      :type: int
-
-      Sequence number.
-
-HIP ``ACK_DATA`` Parameter
-~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-For HIP ``ACK_DATA`` parameter as described in :rfc:`6078`,
-its structure is described as below:
-
-======= ========= ======================= ================================
-Octets      Bits        Name                            Description
-======= ========= ======================= ================================
-  0           0   ``ack_data.type``                 Parameter Type
-  1          15   ``ack_data.critical``             Critical Bit
-  2          16   ``ack_data.length``               Length of Contents
-  4          32   ``ack_data.ack``                  Acked Sequence number
-======= ========= ======================= ================================
-
-.. raw:: html
-
-   <br />
-
-.. class:: DataType_Param_ACK_Data
-
-   :bases: DataType_Parameter
-
-   Structure of HIP ``ACK_DATA`` parameter [:rfc:`6078`].
-
-   .. attribute:: ack
-      :type: Tuple[int]
-
-      Array of ACKed sequence number.
-
-HIP ``PAYLOAD_MIC`` Parameter
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-For HIP ``PAYLOAD_MIC`` parameter as described in :rfc:`6078`,
-its structure is described as below:
-
-======= ========= ======================== ================================
-Octets      Bits        Name                            Description
-======= ========= ======================== ================================
-  0           0   ``payload_mic.type``                Parameter Type
-  1          15   ``payload_mic.critical``            Critical Bit
-  2          16   ``payload_mic.length``              Length of Contents
-  4          32   ``payload_mic.next``                Next Header
-  5          40                                       Reserved
-  8          64   ``payload_mic.data``                Payload Data
-  12         96   ``payload_mic.value``               MIC Value
-  ?           ?                                       Padding
-======= ========= ======================== ================================
-
-.. raw:: html
-
-   <br />
-
-.. class:: DataType_Param_Payload_MIC
-
-   :bases: DataType_Parameter
-
-   Structure of HIP ``PAYLOAD_MIC`` parameter [:rfc:`6078`].
-
-   .. attribute:: next
-      :type: pcapkit.const.reg.transtype.TransType
-
-      Next header.
-
-   .. attribute:: data
-      :type: bytes
-
-      Payload data.
-
-   .. attribute:: value
-      :type: bytes
-
-      MIC value.
-
-HIP ``TRANSACTION_ID`` Parameter
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-For HIP ``TRANSACTION_ID`` parameter as described in :rfc:`6078`,
-its structure is described as below:
-
-======= ========= =========================== ================================
-Octets      Bits        Name                            Description
-======= ========= =========================== ================================
-  0           0   ``transaction_id.type``             Parameter Type
-  1          15   ``transaction_id.critical``         Critical Bit
-  2          16   ``transaction_id.length``           Length of Contents
-  4          32   ``transaction_id.id``               Identifier
-======= ========= =========================== ================================
-
-.. raw:: html
-
-   <br />
-
-.. class:: DataType_Param_Transaction_ID
-
-   :bases: DataType_Parameter
-
-   Structure of HIP ``TRANSACTION_ID`` parameter [:rfc:`6078`].
-
-   .. attribute:: id
-      :type: int
-
-      Identifier.
-
-HIP ``OVERLAY_ID`` Parameter
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-For HIP ``OVERLAY_ID`` parameter as described in :rfc:`6079`,
-its structure is described as below:
-
-======= ========= =========================== ================================
-Octets      Bits        Name                            Description
-======= ========= =========================== ================================
-  0           0   ``overlay_id.type``                 Parameter Type
-  1          15   ``overlay_id.critical``             Critical Bit
-  2          16   ``overlay_id.length``               Length of Contents
-  4          32   ``overlay_id.id``                   Identifier
-======= ========= =========================== ================================
-
-.. raw:: html
-
-   <br />
-
-.. class:: DataType_Param_Overlay_ID
-
-   :bases: DataType_Parameter
-
-   Structure of HIP ``OVERLAT_ID`` parameter [:rfc:`6079`].
-
-   .. attribute:: id
-      :type: int
-
-      Identifier.
-
-HIP ``ROUTE_DST`` Parameter
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-For HIP ``ROUTE_DST`` parameter as described in :rfc:`6079`,
-its structure is described as below:
-
-======= ========= ================================ ================================
-Octets      Bits        Name                            Description
-======= ========= ================================ ================================
-  0           0   ``route_dst.type``                  Parameter Type
-  1          15   ``route_dst.critical``              Critical Bit
-  2          16   ``route_dst.length``                Length of Contents
-  4          32   ``route_dst.flags``                 Flags
-  4          32   ``route_dst.flags.symmetric``       SYMMETRIC [:rfc:`6028`]
-  4          33   ``route_dst.flags.must_follow``     MUST_FOLLOW [:rfc:`6028`]
-  6          48                                       Reserved
-  8          64   ``route_dst.ip``                    HIT
-  ?           ?   ...                                 ...
-======= ========= ================================ ================================
-
-.. raw:: html
-
-   <br />
-
-.. class:: DataType_Param_Route_Dst
-
-   :bases: DataType_Parameter
-
-   Structure of HIP ``ROUTE_DST`` parameter [:rfc:`6028`].
-
-   .. attribute:: flags
-      :type: DataType_Flags
-
-      Flags.
-
-   .. attribute:: ip
-      :type: Tuple[ipaddress.IPv6Address]
-
-      Array of HIT addresses.
-
-.. class:: DataType_Flags
-
-   :bases: TypedDict
-
-   Flags.
-
-   .. attribute:: symmetric
-      :type: bool
-
-      ``SYMMETRIC`` flag [:rfc:`6028`].
-
-   .. attribute:: must_follow
-      :type: bool
-
-      ``MUST_FOLLOW`` flag [:rfc:`6028`].
-
-HIP ``HIP_TRANSPORT_MODE`` Parameter
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-For HIP ``HIP_TRANSPORT_MODE`` parameter as described in :rfc:`6261`,
-its structure is described as below:
-
-======= ========= ================================ =====================
-Octets      Bits        Name                            Description
-======= ========= ================================ =====================
-  0           0   ``hip_transport_mode.type``       Parameter Type
-  1          15   ``hip_transport_mode.critical``   Critical Bit
-  2          16   ``hip_transport_mode.length``     Length of Contents
-  4          32   ``hip_transport_mode.port``       Port
-  6          48   ``hip_transport_mode.id``         Mode ID
-  ?           ?   ...                               ...
-  ?           ?                                     Padding
-======= ========= ================================ =====================
-
-.. raw:: html
-
-   <br />
-
-.. class:: DataType_Param_Transport_Mode
-
-   :bases: DataType_Parameter
-
-   Structure of HIP ``HIP_TRANSPORT_MODE`` parameter [:rfc:`6261`].
-
-   .. attribute:: port
-      :type: int
-
-      Port.
-
-   .. attribute:: id
-      :type: Tuple[pcapkit.const.hip.transport.Transport]
-
-      Array of transport mode IDs.
-
-HIP ``HIP_MAC`` Parameter
-~~~~~~~~~~~~~~~~~~~~~~~~~
-
-For HIP ``HIP_MAC`` parameter as described in :rfc:`7401`,
-its structure is described as below:
-
-======= ========= ================================ =====================
-Octets      Bits        Name                            Description
-======= ========= ================================ =====================
-  0           0   ``hip_mac.type``                  Parameter Type
-  1          15   ``hip_mac.critical``              Critical Bit
-  2          16   ``hip_mac.length``                Length of Contents
-  4          32   ``hip_mac.hmac``                  HMAC
-  ?           ?                                     Padding
-======= ========= ================================ =====================
-
-.. raw:: html
-
-   <br />
-
-.. class:: DataType_Param_HMAC
-
-   :bases: DataType_Parameter
-
-   Structure of HIP ``HIP_MAC`` parameter [:rfc:`7401`].
-
-   .. attribute:: hmac
-      :type: bytes
-
-      HMAC.
-
-HIP ``HIP_MAC_2`` Parameter
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-For HIP ``HIP_MAC_2`` parameter as described in :rfc:`7401`,
-its structure is described as below:
-
-======= ========= ================================ =====================
-Octets      Bits        Name                            Description
-======= ========= ================================ =====================
-  0           0   ``hip_mac_2.type``                Parameter Type
-  1          15   ``hip_mac_2.critical``            Critical Bit
-  2          16   ``hip_mac_2.length``              Length of Contents
-  4          32   ``hip_mac_2.hmac``                HMAC
-  ?           ?                                     Padding
-======= ========= ================================ =====================
-
-.. raw:: html
-
-   <br />
-
-.. class:: DataType_Param_HMAC_2
-
-   :bases: DataType_Parameter
-
-   Structure of HIP ``HIP_MAC_2`` parameter [:rfc:`7401`].
-
-   .. attribute:: hmac
-      :type: bytes
-
-      HMAC.
-
-HIP ``HIP_SIGNATURE_2`` Parameter
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-For HIP ``HIP_SIGNATURE_2`` parameter as described in :rfc:`7401`,
-its structure is described as below:
-
-======= ========= ================================ =====================
-Octets      Bits        Name                            Description
-======= ========= ================================ =====================
-  0           0   ``hip_signature_2.type``          Parameter Type
-  1          15   ``hip_signature_2.critical``      Critical Bit
-  2          16   ``hip_signature_2.length``        Length of Contents
-  4          32   ``hip_signature_2.algorithm``     SIG Algorithm
-  6          48   ``hip_signature_2.signature``     Signature
-  ?           ?                                     Padding
-======= ========= ================================ =====================
-
-.. raw:: html
-
-   <br />
-
-.. class:: DataType_Param_Signature_2
-
-   :bases: DataType_Parameter
-
-   Structure of HIP ``HIP_SIGNATURE_2`` parameter [:rfc:`7401`].
-
-   .. attribute:: algorithm
-      :type: pcapkit.const.hip.hi_algorithm.HIAlgorithm
-
-      SIG algorithm.
-
-   .. attribute:: signature
-      :type: bytes
-
-      Signature.
-
-HIP ``HIP_SIGNATURE`` Parameter
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-For HIP ``HIP_SIGNATURE`` parameter as described in :rfc:`7401`,
-its structure is described as below:
-
-======= ========= ============================== =====================
-Octets      Bits        Name                          Description
-======= ========= ============================== =====================
-  0           0   ``hip_signature.type``          Parameter Type
-  1          15   ``hip_signature.critical``      Critical Bit
-  2          16   ``hip_signature.length``        Length of Contents
-  4          32   ``hip_signature.algorithm``     SIG Algorithm
-  6          48   ``hip_signature.signature``     Signature
-  ?           ?                                   Padding
-======= ========= ============================== =====================
-
-.. raw:: html
-
-   <br />
-
-.. class:: DataType_Param_Signature
-
-   :bases: DataType_Parameter
-
-   Structure of HIP ``HIP_SIGNATURE`` parameter [:rfc:`7401`].
-
-   .. attribute:: algorithm
-      :type: pcapkit.const.hip.hi_algorithm.HIAlgorithm
-
-      SIG algorithm.
-
-   .. attribute:: signature
-      :type: bytes
-
-      Signature.
-
-HIP ``ECHO_REQUEST_UNSIGNED`` Parameter
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-For HIP ``ECHO_REQUEST_UNSIGNED`` parameter as described in :rfc:`7401`,
-its structure is described as below:
-
-======= ========= ================================== =====================
-Octets      Bits        Name                            Description
-======= ========= ================================== =====================
-  0           0   ``echo_request_unsigned.type``      Parameter Type
-  1          15   ``echo_request_unsigned.critical``  Critical Bit
-  2          16   ``echo_request_unsigned.length``    Length of Contents
-  4          32   ``echo_request_unsigned.data``      Opaque Data
-======= ========= ================================== =====================
-
-.. raw:: html
-
-   <br />
-
-.. class:: DataType_Param_Echo_Request_Unsigned
-
-   :bases: DataType_Parameter
-
-   Structure of HIP ``ECHO_REQUEST_UNSIGNED`` parameter [:rfc:`7401`].
-
-   .. attribute:: data
-      :type: bytes
-
-      Opaque data.
-
-HIP ``ECHO_RESPONSE_UNSIGNED`` Parameter
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-For HIP ``ECHO_RESPONSE_UNSIGNED`` parameter as described in :rfc:`7401`,
-its structure is described as below:
-
-======= ========= =================================== =====================
-Octets      Bits        Name                            Description
-======= ========= =================================== =====================
-  0           0   ``echo_response_unsigned.type``     Parameter Type
-  1          15   ``echo_response_unsigned.critical`` Critical Bit
-  2          16   ``echo_response_unsigned.length``   Length of Contents
-  4          32   ``echo_response_unsigned.data``     Opaque Data
-======= ========= =================================== =====================
-
-.. raw:: html
-
-   <br />
-
-.. class:: DataType_Param_Echo_Response_Unsigned
-
-   :bases: DataType_Parameter
-
-   Structure of HIP ``ECHO_RESPONSE_UNSIGNED`` parameter [:rfc:`7401`].
-
-   .. attribute:: data
-      :type: bytes
-
-      Opaque data.
-
-HIP ``RELAY_FROM`` Parameter
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-For HIP ``RELAY_FROM`` parameter as described in :rfc:`5770`,
-its structure is described as below:
-
-======= ========= ======================== =============================
-Octets      Bits        Name                            Description
-======= ========= ======================== =============================
-  0           0   ``relay_from.type``             Parameter Type
-  1          15   ``relay_from.critical``         Critical Bit
-  2          16   ``relay_from.length``           Length of Contents
-  4          32   ``relay_from.port``             Port
-  6          48   ``relay_from.protocol``         Protocol
-  7          56                                   Reserved
-  8          64   ``relay_from.ip``               Address (IPv6)
-======= ========= ======================== =============================
-
-.. raw:: html
-
-   <br />
-
-.. class:: DataType_Param_Relay_From
-
-   :bases: DataType_Parameter
-
-   Structure of HIP ``RELAY_FROM`` parameter [:rfc:`5770`].
-
-   .. attribute:: port
-      :type: int
-
-      Port.
-
-   .. attribute:: protocol
-      :type: pcapkit.const.reg.transtype.TransType
-
-      Protocol.
-
-   .. attribute:: ip
-      :type: ipaddress.IPv6Address
-
-      IPv6 address.
-
-HIP ``RELAY_TO`` Parameter
-~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-For HIP ``RELAY_TO`` parameter as described in :rfc:`5770`,
-its structure is described as below:
-
-======= ========= ======================== =============================
-Octets      Bits        Name                            Description
-======= ========= ======================== =============================
-  0           0   ``relay_to.type``             Parameter Type
-  1          15   ``relay_to.critical``         Critical Bit
-  2          16   ``relay_to.length``           Length of Contents
-  4          32   ``relay_to.port``             Port
-  6          48   ``relay_to.protocol``         Protocol
-  7          56                                 Reserved
-  8          64   ``relay_to.ip``               Address (IPv6)
-======= ========= ======================== =============================
-
-.. raw:: html
-
-   <br />
-
-.. class:: DataType_Param_Relay_To
-
-   :bases: DataType_Parameter
-
-   Structure of HIP ``RELAY_TO`` parameter [:rfc:`5770`].
-
-   .. attribute:: port
-      :type: in
-
-      Port.
-
-   .. attribute:: protocol
-      :type: pcapkit.const.reg.transtype.TransType
-
-      Protocol.
-
-   .. attribute:: ip
-      :type: ipaddress.IPv6Address
-
-      IPv6 address.
-
-HIP ``OVERLAY_TTL`` Parameter
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-For HIP ``OVERLAY_TTL`` parameter as described in :rfc:`6078`,
-its structure is described as below:
-
-======= ========= ======================== =============================
-Octets      Bits        Name                            Description
-======= ========= ======================== =============================
-  0           0   ``overlay_ttl.type``              Parameter Type
-  1          15   ``overlay_ttl.critical``          Critical Bit
-  2          16   ``overlay_ttl.length``            Length of Contents
-  4          32   ``overlay_ttl.ttl``               TTL
-  6          48                                     Reserved
-======= ========= ======================== =============================
-
-.. raw:: html
-
-   <br />
-
-.. class:: DataType_Param_Overlay_TTL
-
-   :bases: DataType_Parameter
-
-   .. attribute:: ttl
-      :type: int
-
-      TTL.
-
-HIP ``ROUTE_VIA`` Parameter
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-For HIP ``ROUTE_VIA`` parameter as described in :rfc:`6028`,
-its structure is described as below:
-
-======= ========= ================================ ===============================
-Octets      Bits        Name                            Description
-======= ========= ================================ ===============================
-  0           0   ``route_via.type``                Parameter Type
-  1          15   ``route_via.critical``            Critical Bit
-  2          16   ``route_via.length``              Length of Contents
-  4          32   ``route_via.flags``               Flags
-  4          32   ``route_via.flags.symmetric``     ``SYMMETRIC`` [:rfc:`6028`]
-  4          33   ``route_via.flags.must_follow``   ``MUST_FOLLOW`` [:rfc:`6028`]
-  6          48     -                               Reserved
-  8          64   ``route_dst.ip``                  HIT
-  ?           ?   ...                               ...
-======= ========= ================================ ===============================
-
-.. raw:: html
-
-   <br />
-
-.. class:: DataType_Param_Route_Via
-
-   :bases: DataType_Parameter
-
-   Structure of HIP ``ROUTE_VIA`` parameter [:rfc:`6028`].
-
-   .. attribute:: flags
-      :type: DataType_Flags
-
-      Flags.
-
-   .. attribute:: ip
-      :type: Tuple[ipaddress.IPv6Address]
-
-      Array of HITs.
-
-HIP ``FROM`` Parameter
-~~~~~~~~~~~~~~~~~~~~~~
-
-For HIP ``FROM`` parameter as described in :rfc:`8004`,
-its structure is described as below:
-
-======= ========= ================================ ===============================
-Octets      Bits        Name                            Description
-======= ========= ================================ ===============================
-  0           0   ``from.type``                     Parameter Type
-  1          15   ``from.critical``                 Critical Bit
-  2          16   ``from.length``                   Length of Contents
-  4          32   ``from.ip``                       Address
-======= ========= ================================ ===============================
-
-.. raw:: html
-
-   <br />
-
-.. class:: DataType_Param_From
-
-   :bases: DataType_Parameter
-
-   Structure of HIP ``FROM`` parameter [:rfc:`8004`].
-
-   .. attribute:: ip
-      :type: ipaddress.IPv6Address
-
-      IPv6 address.
-
-HIP ``RVS_HMAC`` Parameter
-~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-For HIP ``RVS_HMAC`` parameter as described in :rfc:`8004`,
-its structure is described as below:
-
-======= ========= ================================ ===============================
-Octets      Bits        Name                            Description
-======= ========= ================================ ===============================
-  0           0   ``rvs_hmac.type``                   Parameter Type
-  1          15   ``rvs_hmac.critical``               Critical Bit
-  2          16   ``rvs_hmac.length``                 Length of Contents
-  4          32   ``rvs_hmac.hmac``                   HMAC
-  ?           ?                                       Padding
-======= ========= ================================ ===============================
-
-.. raw:: html
-
-   <br />
-
-.. class:: DataType_Param_RVS_HMAC
-
-   :bases: DataType_Parameter
-
-   Structure of HIP ``RVS_HMAC`` parameter [:rfc:`8004`].
-
-   .. attribute:: hmac
-      :type: bytes
-
-      HMAC.
-
-HIP ``VIA_RVS`` Parameter
-~~~~~~~~~~~~~~~~~~~~~~~~~
-
-For HIP ``VIA_RVS`` parameter as described in :rfc:`6028`,
-its structure is described as below:
-
-======= ========= ================================ ===============================
-Octets      Bits        Name                            Description
-======= ========= ================================ ===============================
-  0           0   ``via_rvs.type``                    Parameter Type
-  1          15   ``via_rvs.critical``                Critical Bit
-  2          16   ``via_rvs.length``                  Length of Contents
-  4          32   ``via_rvs.ip``                      Address
-  ?           ?   ...                                 ...
-======= ========= ================================ ===============================
-
-.. raw:: html
-
-   <br />
-
-.. class:: DataType_Param_Via_RVS
-
-   :bases: DataType_Parameter
-
-   Structure of HIP ``VIA_RVS`` parameter [:rfc:`6028`].
-
-   .. attribute:: ip
-      :type: Tuple[ipaddress.IPv6]
-
-      Array of IPv6 addresses.
-
-HIP ``RELAY_HMAC`` Parameter
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-For HIP ``RELAY_HMAC`` parameter as described in :rfc:`5770`,
-its structure is described as below:
-
-======= ========= ================================ ===============================
-Octets      Bits        Name                            Description
-======= ========= ================================ ===============================
-  0           0   ``relay_hmac.type``                 Parameter Type
-  1          15   ``relay_hmac.critical``             Critical Bit
-  2          16   ``relay_hmac.length``               Length of Contents
-  4          32   ``relay_hmac.hmac``                 HMAC
-  ?           ?                                       Padding
-======= ========= ================================ ===============================
-
-.. raw:: html
-
-   <br />
-
-.. class:: DataType_Param_Relay_HMAC
-
-   :bases: DataType_Parameter
-
-   .. attribute:: hmac
-      :type: bytes
-
-      HMAC.
+   .. autoattribute:: hmac
 
 .. raw:: html
 

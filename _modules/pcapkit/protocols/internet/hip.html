@@ -33,7 +33,8 @@
             
   <h1>Source code for pcapkit.protocols.internet.hip</h1><div class="highlight"><pre>
 <span></span><span class="c1"># -*- coding: utf-8 -*-</span>
-<span class="sd">&quot;&quot;&quot;host identity protocol</span>
+<span class="sd">&quot;&quot;&quot;HIP - Host Identity Protocol</span>
+<span class="sd">==================================</span>
 
 <span class="sd">:mod:`pcapkit.protocols.internet.hip` contains</span>
 <span class="sd">:class:`~pcapkit.protocols.internet.hip.HIP` only,</span>
@@ -181,7 +182,115 @@
 
 
 <div class="viewcode-block" id="HIP"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.internet.hip.HIP">[docs]</a><span class="k">class</span> <span class="nc">HIP</span><span class="p">(</span><span class="n">Internet</span><span class="p">[</span><span class="n">DataType_HIP</span><span class="p">]):</span>
-    <span class="sd">&quot;&quot;&quot;This class implements Host Identity Protocol.&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;This class implements Host Identity Protocol.</span>
+
+<span class="sd">    This class currently supports parsing of the following HIP parameters,</span>
+<span class="sd">    which are directly mapped to the :class:`pcapkit.const.hip.parameter.Parameter`</span>
+<span class="sd">    enumeration:</span>
+
+<span class="sd">    .. list-table::</span>
+<span class="sd">       :header-rows: 1</span>
+
+<span class="sd">       * - Parameter Code</span>
+<span class="sd">         - Parameter Parser</span>
+<span class="sd">       * - :attr:`pcapkit.const.hip.parameter.Parameter.ESP_INFO`</span>
+<span class="sd">         - :meth:`~pcapkit.protocols.internet.hip.HIP._read_param_esp_info`</span>
+<span class="sd">       * - :attr:`pcapkit.const.hip.parameter.Parameter.R1_COUNTER`</span>
+<span class="sd">         - :meth:`~pcapkit.protocols.internet.hip.HIP._read_param_r1_counter`</span>
+<span class="sd">       * - :attr:`pcapkit.const.hip.parameter.Parameter.LOCATOR_SET`</span>
+<span class="sd">         - :meth:`~pcapkit.protocols.internet.hip.HIP._read_param_locator_set`</span>
+<span class="sd">       * - :attr:`pcapkit.const.hip.parameter.Parameter.PUZZLE`</span>
+<span class="sd">         - :meth:`~pcapkit.protocols.internet.hip.HIP._read_param_puzzle`</span>
+<span class="sd">       * - :attr:`pcapkit.const.hip.parameter.Parameter.SOLUTION`</span>
+<span class="sd">         - :meth:`~pcapkit.protocols.internet.hip.HIP._read_param_solution`</span>
+<span class="sd">       * - :attr:`pcapkit.const.hip.parameter.Parameter.SEQ`</span>
+<span class="sd">         - :meth:`~pcapkit.protocols.internet.hip.HIP._read_param_seq`</span>
+<span class="sd">       * - :attr:`pcapkit.const.hip.parameter.Parameter.ACK`</span>
+<span class="sd">         - :meth:`~pcapkit.protocols.internet.hip.HIP._read_param_ack`</span>
+<span class="sd">       * - :attr:`pcapkit.const.hip.parameter.Parameter.DH_GROUP_LIST`</span>
+<span class="sd">         - :meth:`~pcapkit.protocols.internet.hip.HIP._read_param_dh_group_list`</span>
+<span class="sd">       * - :attr:`pcapkit.const.hip.parameter.Parameter.DIFFIE_HELLMAN`</span>
+<span class="sd">         - :meth:`~pcapkit.protocols.internet.hip.HIP._read_param_diffie_hellman`</span>
+<span class="sd">       * - :attr:`pcapkit.const.hip.parameter.Parameter.HIP_TRANSFORM`</span>
+<span class="sd">         - :meth:`~pcapkit.protocols.internet.hip.HIP._read_param_hip_transform`</span>
+<span class="sd">       * - :attr:`pcapkit.const.hip.parameter.Parameter.HIP_CIPHER`</span>
+<span class="sd">         - :meth:`~pcapkit.protocols.internet.hip.HIP._read_param_hip_cipher`</span>
+<span class="sd">       * - :attr:`pcapkit.const.hip.parameter.Parameter.NAT_TRAVERSAL_MODE`</span>
+<span class="sd">         - :meth:`~pcapkit.protocols.internet.hip.HIP._read_param_nat_traversal_mode`</span>
+<span class="sd">       * - :attr:`pcapkit.const.hip.parameter.Parameter.TRANSACTION_PACING`</span>
+<span class="sd">         - :meth:`~pcapkit.protocols.internet.hip.HIP._read_param_transaction_pacing`</span>
+<span class="sd">       * - :attr:`pcapkit.const.hip.parameter.Parameter.ENCRYPTED`</span>
+<span class="sd">         - :meth:`~pcapkit.protocols.internet.hip.HIP._read_param_encrypted`</span>
+<span class="sd">       * - :attr:`pcapkit.const.hip.parameter.Parameter.HOST_ID`</span>
+<span class="sd">         - :meth:`~pcapkit.protocols.internet.hip.HIP._read_param_host_id`</span>
+<span class="sd">       * - :attr:`pcapkit.const.hip.parameter.Parameter.HIT_SUITE_LIST`</span>
+<span class="sd">         - :meth:`~pcapkit.protocols.internet.hip.HIP._read_param_hit_suite_list`</span>
+<span class="sd">       * - :attr:`pcapkit.const.hip.parameter.Parameter.CERT`</span>
+<span class="sd">         - :meth:`~pcapkit.protocols.internet.hip.HIP._read_param_cert`</span>
+<span class="sd">       * - :attr:`pcapkit.const.hip.parameter.Parameter.NOTIFICATION`</span>
+<span class="sd">         - :meth:`~pcapkit.protocols.internet.hip.HIP._read_param_notification`</span>
+<span class="sd">       * - :attr:`pcapkit.const.hip.parameter.Parameter.ECHO_REQUEST_SIGNED`</span>
+<span class="sd">         - :meth:`~pcapkit.protocols.internet.hip.HIP._read_param_echo_request_signed`</span>
+<span class="sd">       * - :attr:`pcapkit.const.hip.parameter.Parameter.REG_INFO`</span>
+<span class="sd">         - :meth:`~pcapkit.protocols.internet.hip.HIP._read_param_reg_info`</span>
+<span class="sd">       * - :attr:`pcapkit.const.hip.parameter.Parameter.REG_REQUEST`</span>
+<span class="sd">         - :meth:`~pcapkit.protocols.internet.hip.HIP._read_param_reg_request`</span>
+<span class="sd">       * - :attr:`pcapkit.const.hip.parameter.Parameter.REG_RESPONSE`</span>
+<span class="sd">         - :meth:`~pcapkit.protocols.internet.hip.HIP._read_param_reg_response`</span>
+<span class="sd">       * - :attr:`pcapkit.const.hip.parameter.Parameter.REG_FAILED`</span>
+<span class="sd">         - :meth:`~pcapkit.protocols.internet.hip.HIP._read_param_reg_failed`</span>
+<span class="sd">       * - :attr:`pcapkit.const.hip.parameter.Parameter.REG_FROM`</span>
+<span class="sd">         - :meth:`~pcapkit.protocols.internet.hip.HIP._read_param_reg_from`</span>
+<span class="sd">       * - :attr:`pcapkit.const.hip.parameter.Parameter.ECHO_RESPONSE_SIGNEED`</span>
+<span class="sd">         - :meth:`~pcapkit.protocols.internet.hip.HIP._read_param_echo_response_signed`</span>
+<span class="sd">       * - :attr:`pcapkit.const.hip.parameter.Parameter.TRANSPORT_FORMAT_LIST`</span>
+<span class="sd">         - :meth:`~pcapkit.protocols.internet.hip.HIP._read_param_transport_format_list`</span>
+<span class="sd">       * - :attr:`pcapkit.const.hip.parameter.Parameter.ESP_TRANSFORM`</span>
+<span class="sd">         - :meth:`~pcapkit.protocols.internet.hip.HIP._read_param_esp_transform`</span>
+<span class="sd">       * - :attr:`pcapkit.const.hip.parameter.Parameter.SEQ_DATA`</span>
+<span class="sd">         - :meth:`~pcapkit.protocols.internet.hip.HIP._read_param_seq_data`</span>
+<span class="sd">       * - :attr:`pcapkit.const.hip.parameter.Parameter.ACK_DATA`</span>
+<span class="sd">         - :meth:`~pcapkit.protocols.internet.hip.HIP._read_param_ack_data`</span>
+<span class="sd">       * - :attr:`pcapkit.const.hip.parameter.Parameter.PAYLOAD_MIC`</span>
+<span class="sd">         - :meth:`~pcapkit.protocols.internet.hip.HIP._read_param_payload_mic`</span>
+<span class="sd">       * - :attr:`pcapkit.const.hip.parameter.Parameter.TRANSACTION_ID`</span>
+<span class="sd">         - :meth:`~pcapkit.protocols.internet.hip.HIP._read_param_transaction_id`</span>
+<span class="sd">       * - :attr:`pcapkit.const.hip.parameter.Parameter.OVERLAY_ID`</span>
+<span class="sd">         - :meth:`~pcapkit.protocols.internet.hip.HIP._read_param_overlay_id`</span>
+<span class="sd">       * - :attr:`pcapkit.const.hip.parameter.Parameter.ROUTE_DST`</span>
+<span class="sd">         - :meth:`~pcapkit.protocols.internet.hip.HIP._read_param_route_dst`</span>
+<span class="sd">       * - :attr:`pcapkit.const.hip.parameter.Parameter.HIP_TRANSPORT_MODE`</span>
+<span class="sd">         - :meth:`~pcapkit.protocols.internet.hip.HIP._read_param_hip_transport_mode`</span>
+<span class="sd">       * - :attr:`pcapkit.const.hip.parameter.Parameter.HIP_MAC`</span>
+<span class="sd">         - :meth:`~pcapkit.protocols.internet.hip.HIP._read_param_hip_mac`</span>
+<span class="sd">       * - :attr:`pcapkit.const.hip.parameter.Parameter.HIP_MAC_2`</span>
+<span class="sd">         - :meth:`~pcapkit.protocols.internet.hip.HIP._read_param_hip_mac_2`</span>
+<span class="sd">       * - :attr:`pcapkit.const.hip.parameter.Parameter.HIP_SIGNATURE_2`</span>
+<span class="sd">         - :meth:`~pcapkit.protocols.internet.hip.HIP._read_param_hip_signature_2`</span>
+<span class="sd">       * - :attr:`pcapkit.const.hip.parameter.Parameter.HIP_SIGNATURE`</span>
+<span class="sd">         - :meth:`~pcapkit.protocols.internet.hip.HIP._read_param_hip_signature`</span>
+<span class="sd">       * - :attr:`pcapkit.const.hip.parameter.Parameter.ECHO_REQUEST_UNSIGNED`</span>
+<span class="sd">         - :meth:`~pcapkit.protocols.internet.hip.HIP._read_param_echo_request_unsigned`</span>
+<span class="sd">       * - :attr:`pcapkit.const.hip.parameter.Parameter.ECHO_RESPONSE_UNSIGNED`</span>
+<span class="sd">         - :meth:`~pcapkit.protocols.internet.hip.HIP._read_param_echo_response_unsigned`</span>
+<span class="sd">       * - :attr:`pcapkit.const.hip.parameter.Parameter.RELAY_FROM`</span>
+<span class="sd">         - :meth:`~pcapkit.protocols.internet.hip.HIP._read_param_relay_from`</span>
+<span class="sd">       * - :attr:`pcapkit.const.hip.parameter.Parameter.RELAY_TO`</span>
+<span class="sd">         - :meth:`~pcapkit.protocols.internet.hip.HIP._read_param_relay_to`</span>
+<span class="sd">       * - :attr:`pcapkit.const.hip.parameter.Parameter.OVERLAY_TTL`</span>
+<span class="sd">         - :meth:`~pcapkit.protocols.internet.hip.HIP._read_param_overlay_ttl`</span>
+<span class="sd">       * - :attr:`pcapkit.const.hip.parameter.Parameter.ROUTE_VIA`</span>
+<span class="sd">         - :meth:`~pcapkit.protocols.internet.hip.HIP._read_param_route_via`</span>
+<span class="sd">       * - :attr:`pcapkit.const.hip.parameter.Parameter.FROM`</span>
+<span class="sd">         - :meth:`~pcapkit.protocols.internet.hip.HIP._read_param_from`</span>
+<span class="sd">       * - :attr:`pcapkit.const.hip.parameter.Parameter.RVS_HMAC`</span>
+<span class="sd">         - :meth:`~pcapkit.protocols.internet.hip.HIP._read_param_rvs_hmac`</span>
+<span class="sd">       * - :attr:`pcapkit.const.hip.parameter.Parameter.VIA_RVS`</span>
+<span class="sd">         - :meth:`~pcapkit.protocols.internet.hip.HIP._read_param_via_rvs`</span>
+<span class="sd">       * - :attr:`pcapkit.const.hip.parameter.Parameter.RELAY_HMAC`</span>
+<span class="sd">         - :meth:`~pcapkit.protocols.internet.hip.HIP._read_param_relay_hmac`</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="c1">##########################################################################</span>
     <span class="c1"># Properties.</span>
@@ -275,8 +384,6 @@
 
 <span class="sd">        Args:</span>
 <span class="sd">            length: Length of packet data.</span>
-
-<span class="sd">        Keyword Args:</span>
 <span class="sd">            extension: If the packet is used as an IPv6 extension header.</span>
 <span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
 
@@ -329,7 +436,7 @@
 <div class="viewcode-block" id="HIP.make"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.internet.hip.HIP.make">[docs]</a>    <span class="k">def</span> <span class="nf">make</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;NoReturn&#39;</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Make (construct) packet data.</span>
 
-<span class="sd">        Keyword Args:</span>
+<span class="sd">        Args:</span>
 <span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
 
 <span class="sd">        Returns:</span>
@@ -356,8 +463,6 @@
 <span class="sd">        Args:</span>
 <span class="sd">            file: Source packet stream.</span>
 <span class="sd">            length: Length of packet data.</span>
-
-<span class="sd">        Keyword Args:</span>
 <span class="sd">            extension: If the protocol is used as an IPv6 extension header.</span>
 <span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
 
@@ -371,9 +476,9 @@
         <span class="c1"># call super __post_init__</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__post_init__</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="n">extension</span><span class="o">=</span><span class="n">extension</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>  <span class="c1"># type: ignore[arg-type]</span></div>
 
-<div class="viewcode-block" id="HIP.__length_hint__"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.internet.hip.HIP.__length_hint__">[docs]</a>    <span class="k">def</span> <span class="fm">__length_hint__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Literal[40]&#39;</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__length_hint__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Literal[40]&#39;</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Return an estimated length for the object.&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="mi">40</span></div>
+        <span class="k">return</span> <span class="mi">40</span>
 
 <div class="viewcode-block" id="HIP.__index__"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.internet.hip.HIP.__index__">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="fm">__index__</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;RegType_TransType&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=invalid-index-returned</span>
@@ -396,8 +501,6 @@
 
 <span class="sd">        Arguments:</span>
 <span class="sd">            length: length of parameters</span>
-
-<span class="sd">        Keyword arguments:</span>
 <span class="sd">            version: HIP version</span>
 
 <span class="sd">        Returns:</span>
@@ -465,8 +568,6 @@
 <span class="sd">            code: parameter code</span>
 <span class="sd">            cbit: critical bit</span>
 <span class="sd">            clen: length of contents</span>
-
-<span class="sd">        Keyword Args:</span>
 <span class="sd">            desc: parameter type</span>
 <span class="sd">            length: remaining packet length</span>
 <span class="sd">            version: HIP protocol version</span>
@@ -514,8 +615,6 @@
 <span class="sd">            code: parameter code</span>
 <span class="sd">            cbit: critical bit</span>
 <span class="sd">            clen: length of contents</span>
-
-<span class="sd">        Keyword Args:</span>
 <span class="sd">            desc: parameter type</span>
 <span class="sd">            length: remaining packet length</span>
 <span class="sd">            version: HIP protocol version</span>
@@ -571,8 +670,6 @@
 <span class="sd">            code: parameter code</span>
 <span class="sd">            cbit: critical bit</span>
 <span class="sd">            clen: length of contents</span>
-
-<span class="sd">        Keyword Args:</span>
 <span class="sd">            desc: parameter type</span>
 <span class="sd">            length: remaining packet length</span>
 <span class="sd">            version: HIP protocol version</span>
@@ -642,8 +739,6 @@
 <span class="sd">            code: parameter code</span>
 <span class="sd">            cbit: critical bit</span>
 <span class="sd">            clen: length of contents</span>
-
-<span class="sd">        Keyword Args:</span>
 <span class="sd">            desc: parameter type</span>
 <span class="sd">            length: remaining packet length</span>
 <span class="sd">            version: HIP protocol version</span>
@@ -660,8 +755,8 @@
             <span class="sd">&quot;&quot;&quot;Parse locator data.</span>
 
 <span class="sd">            Args:</span>
-<span class="sd">                kind (int): locator type</span>
-<span class="sd">                size (int): locator length</span>
+<span class="sd">                kind: locator type</span>
+<span class="sd">                size: locator length</span>
 
 <span class="sd">            Returns:</span>
 <span class="sd">                * If ``kind`` is ``0`` and ``size`` is ``16``,</span>
@@ -737,8 +832,6 @@
 <span class="sd">            code: parameter code</span>
 <span class="sd">            cbit: critical bit</span>
 <span class="sd">            clen: length of contents</span>
-
-<span class="sd">        Keyword Args:</span>
 <span class="sd">            desc: parameter type</span>
 <span class="sd">            length: remaining packet length</span>
 <span class="sd">            version: HIP protocol version</span>
@@ -802,8 +895,6 @@
 <span class="sd">            code: parameter code</span>
 <span class="sd">            cbit: critical bit</span>
 <span class="sd">            clen: length of contents</span>
-
-<span class="sd">        Keyword Args:</span>
 <span class="sd">            desc: parameter type</span>
 <span class="sd">            length: remaining packet length</span>
 <span class="sd">            version: HIP protocol version</span>
@@ -867,8 +958,6 @@
 <span class="sd">            code: parameter code</span>
 <span class="sd">            cbit: critical bit</span>
 <span class="sd">            clen: length of contents</span>
-
-<span class="sd">        Keyword Args:</span>
 <span class="sd">            desc: parameter type</span>
 <span class="sd">            length: remaining packet length</span>
 <span class="sd">            version: HIP protocol version</span>
@@ -918,8 +1007,6 @@
 <span class="sd">            code: parameter code</span>
 <span class="sd">            cbit: critical bit</span>
 <span class="sd">            clen: length of contents</span>
-
-<span class="sd">        Keyword Args:</span>
 <span class="sd">            desc: parameter type</span>
 <span class="sd">            length: remaining packet length</span>
 <span class="sd">            version: HIP protocol version</span>
@@ -971,8 +1058,6 @@
 <span class="sd">            code: parameter code</span>
 <span class="sd">            cbit: critical bit</span>
 <span class="sd">            clen: length of contents</span>
-
-<span class="sd">        Keyword Args:</span>
 <span class="sd">            desc: parameter type</span>
 <span class="sd">            length: remaining packet length</span>
 <span class="sd">            version: HIP protocol version</span>
@@ -1024,8 +1109,6 @@
 <span class="sd">            code: parameter code</span>
 <span class="sd">            cbit: critical bit</span>
 <span class="sd">            clen: length of contents</span>
-
-<span class="sd">        Keyword Args:</span>
 <span class="sd">            desc: parameter type</span>
 <span class="sd">            length: remaining packet length</span>
 <span class="sd">            version: HIP protocol version</span>
@@ -1077,8 +1160,6 @@
 <span class="sd">            code: parameter code</span>
 <span class="sd">            cbit: critical bit</span>
 <span class="sd">            clen: length of contents</span>
-
-<span class="sd">        Keyword Args:</span>
 <span class="sd">            desc: parameter type</span>
 <span class="sd">            length: remaining packet length</span>
 <span class="sd">            version: HIP protocol version</span>
@@ -1136,8 +1217,6 @@
 <span class="sd">            code: parameter code</span>
 <span class="sd">            cbit: critical bit</span>
 <span class="sd">            clen: length of contents</span>
-
-<span class="sd">        Keyword Args:</span>
 <span class="sd">            desc: parameter type</span>
 <span class="sd">            length: remaining packet length</span>
 <span class="sd">            version: HIP protocol version</span>
@@ -1200,8 +1279,6 @@
 <span class="sd">            code: parameter code</span>
 <span class="sd">            cbit: critical bit</span>
 <span class="sd">            clen: length of contents</span>
-
-<span class="sd">        Keyword Args:</span>
 <span class="sd">            desc: parameter type</span>
 <span class="sd">            length: remaining packet length</span>
 <span class="sd">            version: HIP protocol version</span>
@@ -1256,8 +1333,6 @@
 <span class="sd">            code: parameter code</span>
 <span class="sd">            cbit: critical bit</span>
 <span class="sd">            clen: length of contents</span>
-
-<span class="sd">        Keyword Args:</span>
 <span class="sd">            desc: parameter type</span>
 <span class="sd">            length: remaining packet length</span>
 <span class="sd">            version: HIP protocol version</span>
@@ -1314,8 +1389,6 @@
 <span class="sd">            code: parameter code</span>
 <span class="sd">            cbit: critical bit</span>
 <span class="sd">            clen: length of contents</span>
-
-<span class="sd">        Keyword Args:</span>
 <span class="sd">            desc: parameter type</span>
 <span class="sd">            length: remaining packet length</span>
 <span class="sd">            version: HIP protocol version</span>
@@ -1368,8 +1441,6 @@
 <span class="sd">            code: parameter code</span>
 <span class="sd">            cbit: critical bit</span>
 <span class="sd">            clen: length of contents</span>
-
-<span class="sd">        Keyword Args:</span>
 <span class="sd">            desc: parameter type</span>
 <span class="sd">            length: remaining packet length</span>
 <span class="sd">            version: HIP protocol version</span>
@@ -1412,7 +1483,7 @@
             <span class="sd">&quot;&quot;&quot;Read domain identifier.</span>
 
 <span class="sd">            Args:</span>
-<span class="sd">                di_data (str): bit string of DI information byte</span>
+<span class="sd">                di_data: bit string of DI information byte</span>
 
 <span class="sd">            Returns:</span>
 <span class="sd">                A :data:`tuple` of DI type enumeration, DI content length and DI data.</span>
@@ -1470,8 +1541,6 @@
 <span class="sd">            code: parameter code</span>
 <span class="sd">            cbit: critical bit</span>
 <span class="sd">            clen: length of contents</span>
-
-<span class="sd">        Keyword Args:</span>
 <span class="sd">            desc: parameter type</span>
 <span class="sd">            length: remaining packet length</span>
 <span class="sd">            version: HIP protocol version</span>
@@ -1523,8 +1592,6 @@
 <span class="sd">            code: parameter code</span>
 <span class="sd">            cbit: critical bit</span>
 <span class="sd">            clen: length of contents</span>
-
-<span class="sd">        Keyword Args:</span>
 <span class="sd">            desc: parameter type</span>
 <span class="sd">            length: remaining packet length</span>
 <span class="sd">            version: HIP protocol version</span>
@@ -1583,8 +1650,6 @@
 <span class="sd">            code: parameter code</span>
 <span class="sd">            cbit: critical bit</span>
 <span class="sd">            clen: length of contents</span>
-
-<span class="sd">        Keyword Args:</span>
 <span class="sd">            desc: parameter type</span>
 <span class="sd">            length: remaining packet length</span>
 <span class="sd">            version: HIP protocol version</span>
@@ -1635,8 +1700,6 @@
 <span class="sd">            code: parameter code</span>
 <span class="sd">            cbit: critical bit</span>
 <span class="sd">            clen: length of contents</span>
-
-<span class="sd">        Keyword Args:</span>
 <span class="sd">            desc: parameter type</span>
 <span class="sd">            length: remaining packet length</span>
 <span class="sd">            version: HIP protocol version</span>
@@ -1686,8 +1749,6 @@
 <span class="sd">            code: parameter code</span>
 <span class="sd">            cbit: critical bit</span>
 <span class="sd">            clen: length of contents</span>
-
-<span class="sd">        Keyword Args:</span>
 <span class="sd">            desc: parameter type</span>
 <span class="sd">            length: remaining packet length</span>
 <span class="sd">            version: HIP protocol version</span>
@@ -1751,8 +1812,6 @@
 <span class="sd">            code: parameter code</span>
 <span class="sd">            cbit: critical bit</span>
 <span class="sd">            clen: length of contents</span>
-
-<span class="sd">        Keyword Args:</span>
 <span class="sd">            desc: parameter type</span>
 <span class="sd">            length: remaining packet length</span>
 <span class="sd">            version: HIP protocol version</span>
@@ -1816,8 +1875,6 @@
 <span class="sd">            code: parameter code</span>
 <span class="sd">            cbit: critical bit</span>
 <span class="sd">            clen: length of contents</span>
-
-<span class="sd">        Keyword Args:</span>
 <span class="sd">            desc: parameter type</span>
 <span class="sd">            length: remaining packet length</span>
 <span class="sd">            version: HIP protocol version</span>
@@ -1881,8 +1938,6 @@
 <span class="sd">            code: parameter code</span>
 <span class="sd">            cbit: critical bit</span>
 <span class="sd">            clen: length of contents</span>
-
-<span class="sd">        Keyword Args:</span>
 <span class="sd">            desc: parameter type</span>
 <span class="sd">            length: remaining packet length</span>
 <span class="sd">            version: HIP protocol version</span>
@@ -1947,8 +2002,6 @@
 <span class="sd">            code: parameter code</span>
 <span class="sd">            cbit: critical bit</span>
 <span class="sd">            clen: length of contents</span>
-
-<span class="sd">        Keyword Args:</span>
 <span class="sd">            desc: parameter type</span>
 <span class="sd">            length: remaining packet length</span>
 <span class="sd">            version: HIP protocol version</span>
@@ -2001,8 +2054,6 @@
 <span class="sd">            code: parameter code</span>
 <span class="sd">            cbit: critical bit</span>
 <span class="sd">            clen: length of contents</span>
-
-<span class="sd">        Keyword Args:</span>
 <span class="sd">            desc: parameter type</span>
 <span class="sd">            length: remaining packet length</span>
 <span class="sd">            version: HIP protocol version</span>
@@ -2050,8 +2101,6 @@
 <span class="sd">            code: parameter code</span>
 <span class="sd">            cbit: critical bit</span>
 <span class="sd">            clen: length of contents</span>
-
-<span class="sd">        Keyword Args:</span>
 <span class="sd">            desc: parameter type</span>
 <span class="sd">            length: remaining packet length</span>
 <span class="sd">            version: HIP protocol version</span>
@@ -2109,8 +2158,6 @@
 <span class="sd">            code: parameter code</span>
 <span class="sd">            cbit: critical bit</span>
 <span class="sd">            clen: length of contents</span>
-
-<span class="sd">        Keyword Args:</span>
 <span class="sd">            desc: parameter type</span>
 <span class="sd">            length: remaining packet length</span>
 <span class="sd">            version: HIP protocol version</span>
@@ -2166,8 +2213,6 @@
 <span class="sd">            code: parameter code</span>
 <span class="sd">            cbit: critical bit</span>
 <span class="sd">            clen: length of contents</span>
-
-<span class="sd">        Keyword Args:</span>
 <span class="sd">            desc: parameter type</span>
 <span class="sd">            length: remaining packet length</span>
 <span class="sd">            version: HIP protocol version</span>
@@ -2216,8 +2261,6 @@
 <span class="sd">            code: parameter code</span>
 <span class="sd">            cbit: critical bit</span>
 <span class="sd">            clen: length of contents</span>
-
-<span class="sd">        Keyword Args:</span>
 <span class="sd">            desc: parameter type</span>
 <span class="sd">            length: remaining packet length</span>
 <span class="sd">            version: HIP protocol version</span>
@@ -2274,8 +2317,6 @@
 <span class="sd">            code: parameter code</span>
 <span class="sd">            cbit: critical bit</span>
 <span class="sd">            clen: length of contents</span>
-
-<span class="sd">        Keyword Args:</span>
 <span class="sd">            desc: parameter type</span>
 <span class="sd">            length: remaining packet length</span>
 <span class="sd">            version: HIP protocol version</span>
@@ -2328,8 +2369,6 @@
 <span class="sd">            code: parameter code</span>
 <span class="sd">            cbit: critical bit</span>
 <span class="sd">            clen: length of contents</span>
-
-<span class="sd">        Keyword Args:</span>
 <span class="sd">            desc: parameter type</span>
 <span class="sd">            length: remaining packet length</span>
 <span class="sd">            version: HIP protocol version</span>
@@ -2377,8 +2416,6 @@
 <span class="sd">            code: parameter code</span>
 <span class="sd">            cbit: critical bit</span>
 <span class="sd">            clen: length of contents</span>
-
-<span class="sd">        Keyword Args:</span>
 <span class="sd">            desc: parameter type</span>
 <span class="sd">            length: remaining packet length</span>
 <span class="sd">            version: HIP protocol version</span>
@@ -2437,8 +2474,6 @@
 <span class="sd">            code: parameter code</span>
 <span class="sd">            cbit: critical bit</span>
 <span class="sd">            clen: length of contents</span>
-
-<span class="sd">        Keyword Args:</span>
 <span class="sd">            desc: parameter type</span>
 <span class="sd">            length: remaining packet length</span>
 <span class="sd">            version: HIP protocol version</span>
@@ -2499,8 +2534,6 @@
 <span class="sd">            code: parameter code</span>
 <span class="sd">            cbit: critical bit</span>
 <span class="sd">            clen: length of contents</span>
-
-<span class="sd">        Keyword Args:</span>
 <span class="sd">            desc: parameter type</span>
 <span class="sd">            length: remaining packet length</span>
 <span class="sd">            version: HIP protocol version</span>
@@ -2562,8 +2595,6 @@
 <span class="sd">            code: parameter code</span>
 <span class="sd">            cbit: critical bit</span>
 <span class="sd">            clen: length of contents</span>
-
-<span class="sd">        Keyword Args:</span>
 <span class="sd">            desc: parameter type</span>
 <span class="sd">            length: remaining packet length</span>
 <span class="sd">            version: HIP protocol version</span>
@@ -2613,8 +2644,6 @@
 <span class="sd">            code: parameter code</span>
 <span class="sd">            cbit: critical bit</span>
 <span class="sd">            clen: length of contents</span>
-
-<span class="sd">        Keyword Args:</span>
 <span class="sd">            desc: parameter type</span>
 <span class="sd">            length: remaining packet length</span>
 <span class="sd">            version: HIP protocol version</span>
@@ -2662,8 +2691,6 @@
 <span class="sd">            code: parameter code</span>
 <span class="sd">            cbit: critical bit</span>
 <span class="sd">            clen: length of contents</span>
-
-<span class="sd">        Keyword Args:</span>
 <span class="sd">            desc: parameter type</span>
 <span class="sd">            length: remaining packet length</span>
 <span class="sd">            version: HIP protocol version</span>
@@ -2713,8 +2740,6 @@
 <span class="sd">            code: parameter code</span>
 <span class="sd">            cbit: critical bit</span>
 <span class="sd">            clen: length of contents</span>
-
-<span class="sd">        Keyword Args:</span>
 <span class="sd">            desc: parameter type</span>
 <span class="sd">            length: remaining packet length</span>
 <span class="sd">            version: HIP protocol version</span>
@@ -2762,8 +2787,6 @@
 <span class="sd">            code: parameter code</span>
 <span class="sd">            cbit: critical bit</span>
 <span class="sd">            clen: length of contents</span>
-
-<span class="sd">        Keyword Args:</span>
 <span class="sd">            desc: parameter type</span>
 <span class="sd">            length: remaining packet length</span>
 <span class="sd">            version: HIP protocol version</span>
@@ -2809,8 +2832,6 @@
 <span class="sd">            code: parameter code</span>
 <span class="sd">            cbit: critical bit</span>
 <span class="sd">            clen: length of contents</span>
-
-<span class="sd">        Keyword Args:</span>
 <span class="sd">            desc: parameter type</span>
 <span class="sd">            length: remaining packet length</span>
 <span class="sd">            version: HIP protocol version</span>
@@ -2861,8 +2882,6 @@
 <span class="sd">            code: parameter code</span>
 <span class="sd">            cbit: critical bit</span>
 <span class="sd">            clen: length of contents</span>
-
-<span class="sd">        Keyword Args:</span>
 <span class="sd">            desc: parameter type</span>
 <span class="sd">            length: remaining packet length</span>
 <span class="sd">            version: HIP protocol version</span>
@@ -2920,8 +2939,6 @@
 <span class="sd">            code: parameter code</span>
 <span class="sd">            cbit: critical bit</span>
 <span class="sd">            clen: length of contents</span>
-
-<span class="sd">        Keyword Args:</span>
 <span class="sd">            desc: parameter type</span>
 <span class="sd">            length: remaining packet length</span>
 <span class="sd">            version: HIP protocol version</span>
@@ -2974,8 +2991,6 @@
 <span class="sd">            code: parameter code</span>
 <span class="sd">            cbit: critical bit</span>
 <span class="sd">            clen: length of contents</span>
-
-<span class="sd">        Keyword Args:</span>
 <span class="sd">            desc: parameter type</span>
 <span class="sd">            length: remaining packet length</span>
 <span class="sd">            version: HIP protocol version</span>
@@ -3036,8 +3051,6 @@
 <span class="sd">            code: parameter code</span>
 <span class="sd">            cbit: critical bit</span>
 <span class="sd">            clen: length of contents</span>
-
-<span class="sd">        Keyword Args:</span>
 <span class="sd">            desc: parameter type</span>
 <span class="sd">            length: remaining packet length</span>
 <span class="sd">            version: HIP protocol version</span>
@@ -3097,8 +3110,6 @@
 <span class="sd">            code: parameter code</span>
 <span class="sd">            cbit: critical bit</span>
 <span class="sd">            clen: length of contents</span>
-
-<span class="sd">        Keyword Args:</span>
 <span class="sd">            desc: parameter type</span>
 <span class="sd">            length: remaining packet length</span>
 <span class="sd">            version: HIP protocol version</span>
@@ -3148,8 +3159,6 @@
 <span class="sd">            code: parameter code</span>
 <span class="sd">            cbit: critical bit</span>
 <span class="sd">            clen: length of contents</span>
-
-<span class="sd">        Keyword Args:</span>
 <span class="sd">            desc: parameter type</span>
 <span class="sd">            length: remaining packet length</span>
 <span class="sd">            version: HIP protocol version</span>
@@ -3206,8 +3215,6 @@
 <span class="sd">            code: parameter code</span>
 <span class="sd">            cbit: critical bit</span>
 <span class="sd">            clen: length of contents</span>
-
-<span class="sd">        Keyword Args:</span>
 <span class="sd">            desc: parameter type</span>
 <span class="sd">            length: remaining packet length</span>
 <span class="sd">            version: HIP protocol version</span>
@@ -3259,8 +3266,6 @@
 <span class="sd">            code: parameter code</span>
 <span class="sd">            cbit: critical bit</span>
 <span class="sd">            clen: length of contents</span>
-
-<span class="sd">        Keyword Args:</span>
 <span class="sd">            desc: parameter type</span>
 <span class="sd">            length: remaining packet length</span>
 <span class="sd">            version: HIP protocol version</span>

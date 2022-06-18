@@ -1,6 +1,9 @@
 AH - Authentication Header
 ==========================
 
+.. module:: pcapkit.protocols.internet.ah
+.. module:: pcapkit.protocols.data.internet.ah
+
 :mod:`pcapkit.protocols.internet.ah` contains
 :class:`~pcapkit.protocols.internet.AH` only,
 which implements extractor for Authentication
@@ -22,50 +25,41 @@ Octets      Bits        Name                    Description
 
    <br />
 
-.. automodule:: pcapkit.protocols.internet.ah
-   :members:
-   :undoc-members:
-   :private-members:
+.. autoclass:: pcapkit.protocols.internet.ah.AH
+   :no-members:
    :show-inheritance:
 
-Data Structure
---------------
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
 
-.. important::
+   .. automethod:: __post_init__
+   .. automethod:: __index__
 
-   Following classes are only for *documentation* purpose.
-   They do **NOT** exist in the :mod:`pcapkit` module.
+   .. autoproperty:: name
+   .. autoproperty:: length
+   .. autoproperty:: payload
+   .. autoproperty:: protocol
+   .. autoproperty:: protochain
 
-.. class:: DataType_AH
+   .. automethod:: read
+   .. automethod:: make
+   .. automethod:: id
 
-   :bases: TypedDict
+Data Structures
+---------------
 
-   Authentication header [:rfc:`4302`].
+.. autoclass:: pcapkit.protocols.data.internet.ah.AH(next, length, spi, seq, icv)
+   :no-members:
+   :show-inheritance:
 
-   .. attribute:: next
-      :type: pcapkit.const.reg.transtype.TransType
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
 
-      Next header.
-
-   .. attribute:: length
-      :type: int
-
-      Payload length.
-
-   .. attribute:: spi
-      :type: int
-
-      Security parameters index (SPI).
-
-   .. attribute:: seq
-      :type: int
-
-      Sequence number field.
-
-   .. attribute:: icv
-      :type: int
-
-      Integrity check value (ICV).
+   .. autoattribute:: next
+   .. autoattribute:: length
+   .. autoattribute:: spi
+   .. autoattribute:: seq
+   .. autoattribute:: icv
 
 .. raw:: html
 
