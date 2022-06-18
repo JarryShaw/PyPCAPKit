@@ -62,10 +62,10 @@ py38 = ((version_info := sys.version_info).major >= 3 and version_info.minor >= 
 class ARP(Link[DataType_ARP]):
     """This class implements all protocols in ARP family.
 
-    - Address Resolution Protocol (ARP) [:rfc:`826`]
-    - Reverse Address Resolution Protocol (RARP) [:rfc:`903`]
-    - Dynamic Reverse Address Resolution Protocol (DRARP) [:rfc:`1931`]
-    - Inverse Address Resolution Protocol (InARP) [:rfc:`2390`]
+    - Address Resolution Protocol (:class:`~pcapkit.protocols.link.arp.ARP`) [:rfc:`826`]
+    - Reverse Address Resolution Protocol (:class:`~pcapkit.protocols.link.rarp.RARP`) [:rfc:`903`]
+    - Dynamic Reverse Address Resolution Protocol (:class:`~pcapkit.protocols.link.DRARP`) [:rfc:`1931`]
+    - Inverse Address Resolution Protocol (:class:`~pcapkit.protocols.link.InARP`) [:rfc:`2390`]
 
     """
     #: Name of corresponding protocol.
