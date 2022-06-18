@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
-"""IPv6 hop-by-hop options
+"""HOPOPT - IPv6 Hop-by-Hop Options
+======================================
 
 :mod:`pcapkit.protocols.internet.hopopt` contains
 :class:`~pcapkit.protocols.internet.hopopt.HOPOPT`
@@ -45,7 +46,7 @@ from pcapkit.protocols.data.internet.hopopt import MPLOption as DataType_MPLOpti
 from pcapkit.protocols.data.internet.hopopt import PadOption as DataType_PadOption
 from pcapkit.protocols.data.internet.hopopt import PDMOption as DataType_PDMOption
 from pcapkit.protocols.data.internet.hopopt import QuickStartOption as DataType_QuickStartOption
-from pcapkit.protocols.data.internet.hopopt import RouterAlterOption as DataType_RouterAlterOption
+from pcapkit.protocols.data.internet.hopopt import RouterAlertOption as DataType_RouterAlertOption
 from pcapkit.protocols.data.internet.hopopt import RPLFlags as DataType_RPLFlags
 from pcapkit.protocols.data.internet.hopopt import RPLOption as DataType_RPLOption
 from pcapkit.protocols.data.internet.hopopt import \
@@ -75,7 +76,49 @@ __all__ = ['HOPOPT']
 
 
 class HOPOPT(Internet[DataType_HOPOPT]):
-    """This class implements IPv6 Hop-by-Hop Options."""
+    """This class implements IPv6 Hop-by-Hop Options.
+
+    This class currently supports parsing of the following IPv6 Hop-by-Hop
+    options, which are registered in the :attr:`self.__option__ <pcapkit.protocols.internet.hopopt.HOPOPT.__option__>`
+    attribute:
+
+    .. list-table::
+       :header-rows: 1
+
+       * - Option Code
+         - Option Parser
+       * - :attr:`pcapkit.const.ipv6.option.Option.Pad1`
+         - :meth:`~pcapkit.protocols.internet.hopopt.HOPOPT._read_opt_pad`
+       * - :attr:`pcapkit.const.ipv6.option.Option.PadN`
+         - :meth:`~pcapkit.protocols.internet.hopopt.HOPOPT._read_opt_pad`
+       * - :attr:`pcapkit.const.ipv6.option.Option.Tunnel_Encapsulation_Limit`
+         - :meth:`~pcapkit.protocols.internet.hopopt.HOPOPT._read_opt_tun`
+       * - :attr:`pcapkit.const.ipv6.option.Option.Router_Alert`
+         - :meth:`~pcapkit.protocols.internet.hopopt.HOPOPT._read_opt_ra`
+       * - :attr:`pcapkit.const.ipv6.option.Option.CALIPSO`
+         - :meth:`~pcapkit.protocols.internet.hopopt.HOPOPT._read_opt_calipso`
+       * - :attr:`pcapkit.const.ipv6.option.Option.SMF_DPD`
+         - :meth:`~pcapkit.protocols.internet.hopopt.HOPOPT._read_opt_smf_dpd`
+       * - :attr:`pcapkit.const.ipv6.option.Option.PDM`
+         - :meth:`~pcapkit.protocols.internet.hopopt.HOPOPT._read_opt_pdm`
+       * - :attr:`pcapkit.const.ipv6.option.Option.Quick_Start`
+         - :meth:`~pcapkit.protocols.internet.hopopt.HOPOPT._read_opt_qs`
+       * - :attr:`pcapkit.const.ipv6.option.Option.RPL_Option_0x63`
+         - :meth:`~pcapkit.protocols.internet.hopopt.HOPOPT._read_opt_rpl`
+       * - :attr:`pcapkit.const.ipv6.option.Option.MPL_Option`
+         - :meth:`~pcapkit.protocols.internet.hopopt.HOPOPT._read_opt_mpl`
+       * - :attr:`pcapkit.const.ipv6.option.Option.ILNP_Nonce`
+         - :meth:`~pcapkit.protocols.internet.hopopt.HOPOPT._read_opt_ilnp`
+       * - :attr:`pcapkit.const.ipv6.option.Option.Line_Identification_Option`
+         - :meth:`~pcapkit.protocols.internet.hopopt.HOPOPT._read_opt_lio`
+       * - :attr:`pcapkit.const.ipv6.option.Option.Jumbo_Payload`
+         - :meth:`~pcapkit.protocols.internet.hopopt.HOPOPT._read_opt_jumbo`
+       * - :attr:`pcapkit.const.ipv6.option.Option.Home_Address`
+         - :meth:`~pcapkit.protocols.internet.hopopt.HOPOPT._read_opt_home`
+       * - :attr:`pcapkit.const.ipv6.option.Option.IP_DFF`
+         - :meth:`~pcapkit.protocols.internet.hopopt.HOPOPT._read_opt_ip_dff`
+
+    """
 
     ##########################################################################
     # Defaults.
@@ -181,8 +224,6 @@ class HOPOPT(Internet[DataType_HOPOPT]):
 
         Args:
             length: Length of packet data.
-
-        Keyword Args:
             extension: If the packet is used as an IPv6 extension header.
             **kwargs: Arbitrary keyword arguments.
 
@@ -210,7 +251,7 @@ class HOPOPT(Internet[DataType_HOPOPT]):
     def make(self, **kwargs: 'Any') -> 'NoReturn':
         """Make (construct) packet data.
 
-        Keyword Args:
+        Args:
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
@@ -248,8 +289,6 @@ class HOPOPT(Internet[DataType_HOPOPT]):
         Args:
             file: Source packet stream.
             length: Length of packet data.
-
-        Keyword Args:
             extension: If the protocol is used as an IPv6 extension header.
             **kwargs: Arbitrary keyword arguments.
 
@@ -283,7 +322,7 @@ class HOPOPT(Internet[DataType_HOPOPT]):
     # Utilities.
     ##########################################################################
 
-    def _read_opt_type(self, kind: 'int') -> 'tuple[int, bool]':  # pylint: disable=no-self-use
+    def _read_opt_type(self, kind: 'int') -> 'tuple[int, bool]':
         """Read option type field.
 
         Arguments:
@@ -361,8 +400,6 @@ class HOPOPT(Internet[DataType_HOPOPT]):
             code: option type value
             acts: unknown option action value
             cflg: change flag value
-
-        Keyword Args:
             options: extracted HOPOPT options
 
         Returns:
@@ -408,12 +445,10 @@ class HOPOPT(Internet[DataType_HOPOPT]):
             code: option type value
             acts: unknown option action value
             cflg: change flag value
-
-        Keyword Args:
             options: extracted HOPOPT options
 
         Returns:
-            Union[DataType_Opt_Pad1, DataType_Opt_PadN]: parsed option data
+            Parsed option data.
 
         Raises:
             ProtocolError: If ``code`` is **NOT** ``0`` or ``1``.
@@ -454,8 +489,6 @@ class HOPOPT(Internet[DataType_HOPOPT]):
             code: option type value
             acts: unknown option action value
             cflg: change flag value
-
-        Keyword Args:
             options: extracted HOPOPT options
 
         Returns:
@@ -481,7 +514,7 @@ class HOPOPT(Internet[DataType_HOPOPT]):
         return opt
 
     def _read_opt_ra(self, code: 'RegType_Option', acts: 'int', cflg: 'bool', *,
-                     options: 'Option') -> 'DataType_RouterAlterOption':  # pylint: disable=unused-argument
+                     options: 'Option') -> 'DataType_RouterAlertOption':  # pylint: disable=unused-argument
         """Read HOPOPT Router Alert option.
 
         Structure of HOPOPT Router Alert option [:rfc:`2711`]:
@@ -496,8 +529,6 @@ class HOPOPT(Internet[DataType_HOPOPT]):
             code: option type value
             acts: unknown option action value
             cflg: change flag value
-
-        Keyword Args:
             options: extracted HOPOPT options
 
         Returns:
@@ -513,7 +544,7 @@ class HOPOPT(Internet[DataType_HOPOPT]):
         _rval = self._read_unpack(2)
 
         _enum = RegType_RouterAlert.get(_rval)
-        opt = DataType_RouterAlterOption(
+        opt = DataType_RouterAlertOption(
             type=code,
             action=acts,
             change=cflg,
@@ -545,8 +576,6 @@ class HOPOPT(Internet[DataType_HOPOPT]):
             code: option type value
             acts: unknown option action value
             cflg: change flag value
-
-        Keyword Args:
             options: extracted HOPOPT options
 
         Returns:
@@ -628,8 +657,6 @@ class HOPOPT(Internet[DataType_HOPOPT]):
             code: option type value
             acts: unknown option action value
             cflg: change flag value
-
-        Keyword Args:
             options: extracted HOPOPT options
 
         Returns:
@@ -753,8 +780,6 @@ class HOPOPT(Internet[DataType_HOPOPT]):
             code: option type value
             acts: unknown option action value
             cflg: change flag value
-
-        Keyword Args:
             options: extracted HOPOPT options
 
         Returns:
@@ -825,8 +850,6 @@ class HOPOPT(Internet[DataType_HOPOPT]):
             code: option type value
             acts: unknown option action value
             cflg: change flag value
-
-        Keyword Args:
             options: extracted HOPOPT options
 
         Returns:
@@ -886,8 +909,6 @@ class HOPOPT(Internet[DataType_HOPOPT]):
             code: option type value
             acts: unknown option action value
             cflg: change flag value
-
-        Keyword Args:
             options: extracted HOPOPT options
 
         Returns:
@@ -940,8 +961,6 @@ class HOPOPT(Internet[DataType_HOPOPT]):
             code: option type value
             acts: unknown option action value
             cflg: change flag value
-
-        Keyword Args:
             options: extracted HOPOPT options
 
         Returns:
@@ -1021,8 +1040,6 @@ class HOPOPT(Internet[DataType_HOPOPT]):
             code: option type value
             acts: unknown option action value
             cflg: change flag value
-
-        Keyword Args:
             options: extracted HOPOPT options
 
         Returns:
@@ -1062,8 +1079,6 @@ class HOPOPT(Internet[DataType_HOPOPT]):
             code: option type value
             acts: unknown option action value
             cflg: change flag value
-
-        Keyword Args:
             options: extracted HOPOPT options
 
         Returns:
@@ -1107,8 +1122,6 @@ class HOPOPT(Internet[DataType_HOPOPT]):
             code: option type value
             acts: unknown option action value
             cflg: change flag value
-
-        Keyword Args:
             options: extracted HOPOPT options
 
         Returns:
@@ -1159,8 +1172,6 @@ class HOPOPT(Internet[DataType_HOPOPT]):
             code: option type value
             acts: unknown option action value
             cflg: change flag value
-
-        Keyword Args:
             options: extracted HOPOPT options
 
         Returns:
@@ -1205,8 +1216,6 @@ class HOPOPT(Internet[DataType_HOPOPT]):
             code: option type value
             acts: unknown option action value
             cflg: change flag value
-
-        Keyword Args:
             options: extracted HOPOPT options
 
         Returns:

@@ -25,7 +25,7 @@ __all__ = [
     'RPLFlags', 'MPLFlags', 'DFFFlags',
 
     'UnassignedOption', 'PadOption', 'TunnelEncapsulationLimitOption',
-    'RouterAlterOption', 'CALIPSOOption', 'SMFIdentificationBasedDPDOption',
+    'RouterAlertOption', 'CALIPSOOption', 'SMFIdentificationBasedDPDOption',
     'SMFHashBasedDPDOption', 'PDMOption', 'QuickStartOption',
     'RPLOption', 'MPLOption', 'ILNPOption',
     'LineIdentificationOption', 'JumboPayloadOption', 'HomeAddressOption',
@@ -87,7 +87,7 @@ class TunnelEncapsulationLimitOption(Option):
         def __init__(self, type: 'RegType_Option', action: 'int', change: 'bool', length: 'int', limit: 'int') -> 'None': ...  # pylint: disable=super-init-not-called,unused-argument,redefined-builtin,multiple-statements,line-too-long
 
 
-class RouterAlterOption(Option):
+class RouterAlertOption(Option):
     """Data model for HOPOPT router alter option."""
 
     #: Router alter value.
@@ -125,7 +125,7 @@ class SMFDPDOption(Option):
     tid_type: 'TaggerID'
 
 
-class SMFIdentificationBasedDPDOption(Option):
+class SMFIdentificationBasedDPDOption(SMFDPDOption):
     """Data model for HOPOPT **I-DPD** (Identification-Based DPD) option."""
 
     #: TaggerID length.
@@ -139,7 +139,7 @@ class SMFIdentificationBasedDPDOption(Option):
         def __init__(self, type: 'RegType_Option', action: 'int', change: 'bool', length: 'int', dpd_type: 'SMFDPDMode', tid_type: 'TaggerID', tid_len: 'int', tid: 'Optional[int | IPv4Address | IPv6Address]', id: 'int') -> 'None': ...  # pylint: disable=super-init-not-called,unused-argument,redefined-builtin,multiple-statements,line-too-long
 
 
-class SMFHashBasedDPDOption(Option):
+class SMFHashBasedDPDOption(SMFDPDOption):
     """Data model for HOPOPT **H-DPD** (Hash-Based DPD) option."""
 
     #: Hash assist value.
@@ -155,7 +155,7 @@ class PDMOption(Option):
     #: Scale delta time last received.
     scaledtlr: 'timedelta'
     #: Scale delta time last sent.
-    sacledtls: 'timedelta'
+    scaledtls: 'timedelta'
     #: Packet sequence number this packet.
     psntp: 'int'
     #: Packet sequence number last received.
