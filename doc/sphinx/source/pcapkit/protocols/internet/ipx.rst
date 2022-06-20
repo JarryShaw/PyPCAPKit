@@ -1,6 +1,9 @@
 IPX - Internetwork Packet Exchange
 ==================================
 
+.. module:: pcapkit.protocols.internet.ipx
+.. module:: pcapkit.protocols.data.internet.ipx
+
 :mod:`pcapkit.protocols.internet.ipx` contains
 :class:`~pcapkit.protocols.internet.ipx.IPX` only,
 which implements extractor for Internetwork Packet
@@ -22,95 +25,54 @@ Octets      Bits        Name                    Description
 
    <br />
 
-.. automodule:: pcapkit.protocols.internet.ipx
-   :members:
-   :undoc-members:
-   :private-members:
+.. autoclass:: pcapkit.protocols.internet.ipx.IPX
+   :no-members:
    :show-inheritance:
 
-Data Structure
---------------
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
 
-.. important::
+   .. automethod:: __index__
 
-   Following classes are only for *documentation* purpose.
-   They do **NOT** exist in the :mod:`pcapkit` module.
+   .. autoproperty:: name
+   .. autoproperty:: length
+   .. autoproperty:: protocol
+   .. autoproperty:: src
+   .. autoproperty:: dst
 
-.. class:: DataType_IPX
+   .. automethod:: read
+   .. automethod:: make
 
-   :bases: TypedDict
+   .. automethod:: _read_ipx_address
 
-   Structure of IPX header [:rfc:`1132`].
+Data Structures
+---------------
 
-   .. attribute:: chksum
-      :type: bytes
+.. autoclass:: pcapkit.protocols.data.internet.ipx.IPX(chksum, len, count, type, dst, src)
+   :no-members:
+   :show-inheritance:
 
-      Checksum.
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. attribute:: len
-      :type: int
+   .. autoattribute:: chksum
+   .. autoattribute:: len
+   .. autoattribute:: count
+   .. autoattribute:: type
+   .. autoattribute:: dst
+   .. autoattribute:: src
 
-      Packet length (header includes).
+.. autoclass:: pcapkit.protocols.data.internet.ipx.Address(network, node, socket, addr)
+   :no-members:
+   :show-inheritance:
 
-   .. attribute:: count
-      :type: int
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
 
-      Transport control (hop count).
-
-   .. attribute:: type
-      :type: pcapkit.const.ipx.packet.Packet
-
-      Packet type.
-
-   .. attribute:: dst
-      :type: DataType_IPX_Address
-
-      Destination address.
-
-   .. attribute:: src
-      :type: DataType_IPX_Address
-
-      Source address.
-
-For IPX address field, its structure is described as below:
-
-======= ========= ======================= ========================
-Octets      Bits        Name                    Description
-======= ========= ======================= ========================
-  0           0   ``ipx.addr.network``        Network Number
-  4          32   ``ipx.addr.node``           Node Number
-  10         80   ``ipx.addr.socket``         Socket Number
-======= ========= ======================= ========================
-
-.. raw:: html
-
-   <br />
-
-.. class:: DataType_IPX_Address
-
-   :bases: TypedDict
-
-   Structure of IPX address.
-
-   .. attribute:: network
-      :type: str
-
-      Network number (``:`` separated).
-
-   .. attribute:: node
-      :type: str
-
-      Node number (``-`` separated).
-
-   .. attribute:: socket
-      :type: pcapkit.const.ipx.socket.Socket
-
-      Socket number.
-
-   .. attribute:: addr
-      :type: str
-
-      Full address (``:`` separated).
+   .. autoattribute:: network
+   .. autoattribute:: node
+   .. autoattribute:: socket
+   .. autoattribute:: addr
 
 .. raw:: html
 

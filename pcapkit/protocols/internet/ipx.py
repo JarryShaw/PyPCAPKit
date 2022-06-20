@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
-"""internetwork packet exchange
+"""IPX - Internetwork Packet Exchange
+========================================
 
 :mod:`pcapkit.protocols.internet.ipx` contains
 :class:`~pcapkit.protocols.internet.ipx.IPX` only,
@@ -79,9 +80,7 @@ class IPX(Internet[DataType_IPX]):
         """Read Internetwork Packet Exchange.
 
          Args:
-            length (Optional[int]): Length of packet data.
-
-        Keyword Args:
+            length: Length of packet data.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
@@ -112,7 +111,7 @@ class IPX(Internet[DataType_IPX]):
     def make(self, **kwargs: 'Any') -> 'NoReturn':
         """Make (construct) packet data.
 
-        Keyword Args:
+        Args:
             **kwargs: Arbitrary keyword arguments.
 
         Returns:

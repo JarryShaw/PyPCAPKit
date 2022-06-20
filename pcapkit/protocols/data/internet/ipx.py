@@ -29,7 +29,7 @@ class Address(Info):
     addr: 'str'
 
     if TYPE_CHECKING:
-        def __init__(self, network: 'str', node: 'str', socket: 'Socket') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements
+        def __init__(self, network: 'str', node: 'str', socket: 'Socket', addr: 'str') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements
 
 
 class IPX(Info):
