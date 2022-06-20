@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
-"""routing header for IPv6
+"""IPv6-Route - Routing Header for IPv6
+==========================================
 
 :mod:`pcapkit.protocols.internet.ipv6_route` contains
 :class:`~pcapkit.protocols.internet.ipv6_route.IPv6_Route`
@@ -49,7 +50,26 @@ __all__ = ['IPv6_Route']
 
 
 class IPv6_Route(Internet[DataType_IPv6_Route]):
-    """This class implements Routing Header for IPv6."""
+    """This class implements Routing Header for IPv6.
+
+    This class currently supports parsing of the following Routing Header for IPv6
+    routing data types, which are registered in the
+    :attr:`self.__routing__ <pcapkit.protocols.internet.ipv6_route.IPv6_Route.__routing__>`
+    attribute:
+
+    .. list-table::
+       :header-rows: 1
+
+       * - Routing Code
+         - Data Parser
+       * - :attr:`pcapkit.const.ipv6.routing.Routing.Source_Route`
+         - :meth:`~pcapkit.protocols.internet.ipv6_route.IPv6_Route._read_data_type_src`
+       * - :attr:`pcapkit.const.ipv6.routing.Routing.Type_2_Routing_Header`
+         - :meth:`~pcapkit.protocols.internet.ipv6_route.IPv6_Route._read_data_type_2`
+       * - :attr:`pcapkit.const.ipv6.routing.Routing.RPL_Source_Route_Header`
+         - :meth:`~pcapkit.protocols.internet.ipv6_route.IPv6_Route._read_data_type_rpl`
+
+    """
 
     ##########################################################################
     # Defaults.
@@ -148,8 +168,6 @@ class IPv6_Route(Internet[DataType_IPv6_Route]):
 
         Args:
             length: Length of packet data.
-
-        Keyword Args:
             extension: If the packet is used as an IPv6 extension header.
             **kwargs: Arbitrary keyword arguments.
 
@@ -190,7 +208,7 @@ class IPv6_Route(Internet[DataType_IPv6_Route]):
     def make(self, **kwargs: 'Any') -> 'NoReturn':
         """Make (construct) packet data.
 
-        Keyword Args:
+        Args:
             **kwargs: Arbitrary keyword arguments.
 
         Returns:

@@ -20,7 +20,16 @@ __all__ = [
 
 
 class IPv6_Route(Info):
-    """Data model for IPv6-Route protocol."""
+    """Data model for IPv6-Route protocol.
+
+    .. seealso::
+
+       The type-specific routing data is stored directly in the top-level
+       :class:`~pcapkit.protocols.data.internet.ipv6_route.IPv6_Route` object.
+       Please refer to the :class:`~pcapkit.protocols.data.internet.ipv6_route.RoutingType`
+       subclasses for the details.
+
+    """
 
     #: Next header.
     next: 'TransType'
