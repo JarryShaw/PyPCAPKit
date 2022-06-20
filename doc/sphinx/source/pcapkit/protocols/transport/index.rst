@@ -8,7 +8,7 @@ Transport Layer Protocols
 transport layer, with detailed implementation and methods.
 
 .. toctree::
-   :maxdepth: 5
+   :maxdepth: 2
 
    transport
    tcp

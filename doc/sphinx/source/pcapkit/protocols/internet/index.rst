@@ -18,10 +18,10 @@ internet layer, with detailed implementation and methods.
    ipv6_opts
    ipv6_route
    hopopt
-   mh
    ipsec
    ah
    hip
+   mh
    ipx
 
 .. todo::

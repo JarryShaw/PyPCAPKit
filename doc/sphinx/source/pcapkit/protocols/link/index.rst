@@ -11,11 +11,11 @@ link layer, with detailed implementation and methods.
    :maxdepth: 2
 
    link
-   arp
    ethernet
+   arp
+   rarp
    l2tp
    ospf
-   rarp
    vlan
 
 .. todo::
