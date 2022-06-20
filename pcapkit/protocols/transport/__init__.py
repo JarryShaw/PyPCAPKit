@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 # pylint: disable=unused-import,unused-wildcard-import,fixme
-"""transport layer protocols
+"""Transport Layer Protocols
+===============================
 
-`pcapkit.protocols.transport` is collection of all protocols
-in transport layer, with detailed implementation and
-methods.
+:mod:`pcapkit.protocols.transport` is collection of all protocols in
+transport layer, with detailed implementation and methods.
 
 """
 # TODO: Implements DCCP, RSVP, SCTP.
