@@ -37,31 +37,31 @@ class Internet(Protocol[PT], Generic[PT]):  # pylint: disable=abstract-method
 
        * - Index
          - Protocol
-       * - :attr:`pcapkit.const.reg.transtype.TransType.HOPOPT`
+       * - :attr:`~pcapkit.const.reg.transtype.TransType.HOPOPT`
          - :class:`pcapkit.protocols.internet.hopopt.HOPOPT`
-       * - :attr:`pcapkit.const.reg.transtype.TransType.IPv4`
+       * - :attr:`~pcapkit.const.reg.transtype.TransType.IPv4`
          - :class:`pcapkit.protocols.internet.ipv4.IPv4`
-       * - :attr:`pcapkit.const.reg.transtype.TransType.TCP`
+       * - :attr:`~pcapkit.const.reg.transtype.TransType.TCP`
          - :class:`pcapkit.protocols.transport.tcp.TCP`
-       * - :attr:`pcapkit.const.reg.transtype.TransType.UDP`
+       * - :attr:`~pcapkit.const.reg.transtype.TransType.UDP`
          - :class:`pcapkit.protocols.transport.udp.UDP`
-       * - :attr:`pcapkit.const.reg.transtype.TransType.IPv6`
+       * - :attr:`~pcapkit.const.reg.transtype.TransType.IPv6`
          - :class:`pcapkit.protocols.internet.ipv6.IPv6`
-       * - :attr:`pcapkit.const.reg.transtype.TransType.IPv6_Route`
+       * - :attr:`~pcapkit.const.reg.transtype.TransType.IPv6_Route`
          - :class:`pcapkit.protocols.internet.ipv6_route.IPv6_Route`
-       * - :attr:`pcapkit.const.reg.transtype.TransType.IPv6_Frag`
+       * - :attr:`~pcapkit.const.reg.transtype.TransType.IPv6_Frag`
          - :class:`pcapkit.protocols.internet.ipv6_frag.IPv6_Frag`
-       * - :attr:`pcapkit.const.reg.transtype.TransType.AH`
+       * - :attr:`~pcapkit.const.reg.transtype.TransType.AH`
          - :class:`pcapkit.protocols.internet.ah.AH`
-       * - :attr:`pcapkit.const.reg.transtype.TransType.IPv6_NoNxt`
+       * - :attr:`~pcapkit.const.reg.transtype.TransType.IPv6_NoNxt`
          - :class:`pcapkit.protocols.misc.raw.Raw`
-       * - :attr:`pcapkit.const.reg.transtype.TransType.IPv6_Opts`
+       * - :attr:`~pcapkit.const.reg.transtype.TransType.IPv6_Opts`
          - :class:`pcapkit.protocols.internet.ipv6_opts.IPv6_Opts`
-       * - :attr:`pcapkit.const.reg.transtype.TransType.IPX_in_IP`
+       * - :attr:`~pcapkit.const.reg.transtype.TransType.IPX_in_IP`
          - :class:`pcapkit.protocols.internet.ipx.IPX`
-       * - :attr:`pcapkit.const.reg.transtype.TransType.Mobility_Header`
+       * - :attr:`~pcapkit.const.reg.transtype.TransType.Mobility_Header`
          - :class:`pcapkit.protocols.internet.mh.MH`
-       * - :attr:`pcapkit.const.reg.transtype.TransType.HIP`
+       * - :attr:`~pcapkit.const.reg.transtype.TransType.HIP`
          - :class:`pcapkit.protocols.internet.hip.HIP`
 
     """

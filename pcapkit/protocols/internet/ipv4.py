@@ -102,33 +102,33 @@ class IPv4(IP[DataType_IPv4]):
 
        * - Option Code
          - Option Parser
-       * - :attr:`pcapkit.const.ipv4.option_number.OptionNumber.EOOL`
+       * - :attr:`~pcapkit.const.ipv4.option_number.OptionNumber.EOOL`
          - :meth:`~pcapkit.protocols.internet.ipv4.IPv4._read_opt_eool`
-       * - :attr:`pcapkit.const.ipv4.option_number.OptionNumber.NOP`
+       * - :attr:`~pcapkit.const.ipv4.option_number.OptionNumber.NOP`
          - :meth:`~pcapkit.protocols.internet.ipv4.IPv4._read_opt_nop`
-       * - :attr:`pcapkit.const.ipv4.option_number.OptionNumber.SEC`
+       * - :attr:`~pcapkit.const.ipv4.option_number.OptionNumber.SEC`
          - :meth:`~pcapkit.protocols.internet.ipv4.IPv4._read_opt_sec`
-       * - :attr:`pcapkit.const.ipv4.option_number.OptionNumber.LSR`
+       * - :attr:`~pcapkit.const.ipv4.option_number.OptionNumber.LSR`
          - :meth:`~pcapkit.protocols.internet.ipv4.IPv4._read_opt_lsr`
-       * - :attr:`pcapkit.const.ipv4.option_number.OptionNumber.TS`
+       * - :attr:`~pcapkit.const.ipv4.option_number.OptionNumber.TS`
          - :meth:`~pcapkit.protocols.internet.ipv4.IPv4._read_opt_ts`
-       * - :attr:`pcapkit.const.ipv4.option_number.OptionNumber.ESEC`
+       * - :attr:`~pcapkit.const.ipv4.option_number.OptionNumber.ESEC`
          - :meth:`~pcapkit.protocols.internet.ipv4.IPv4._read_opt_esec`
-       * - :attr:`pcapkit.const.ipv4.option_number.OptionNumber.RR`
+       * - :attr:`~pcapkit.const.ipv4.option_number.OptionNumber.RR`
          - :meth:`~pcapkit.protocols.internet.ipv4.IPv4._read_opt_rr`
-       * - :attr:`pcapkit.const.ipv4.option_number.OptionNumber.SID`
+       * - :attr:`~pcapkit.const.ipv4.option_number.OptionNumber.SID`
          - :meth:`~pcapkit.protocols.internet.ipv4.IPv4._read_opt_sid`
-       * - :attr:`pcapkit.const.ipv4.option_number.OptionNumber.SSR`
+       * - :attr:`~pcapkit.const.ipv4.option_number.OptionNumber.SSR`
          - :meth:`~pcapkit.protocols.internet.ipv4.IPv4._read_opt_ssr`
-       * - :attr:`pcapkit.const.ipv4.option_number.OptionNumber.MTUP`
+       * - :attr:`~pcapkit.const.ipv4.option_number.OptionNumber.MTUP`
          - :meth:`~pcapkit.protocols.internet.ipv4.IPv4._read_opt_mtup`
-       * - :attr:`pcapkit.const.ipv4.option_number.OptionNumber.MTUR`
+       * - :attr:`~pcapkit.const.ipv4.option_number.OptionNumber.MTUR`
          - :meth:`~pcapkit.protocols.internet.ipv4.IPv4._read_opt_mtur`
-       * - :attr:`pcapkit.const.ipv4.option_number.OptionNumber.TR`
+       * - :attr:`~pcapkit.const.ipv4.option_number.OptionNumber.TR`
          - :meth:`~pcapkit.protocols.internet.ipv4.IPv4._read_opt_tr`
-       * - :attr:`pcapkit.const.ipv4.option_number.OptionNumber.RTRALT`
+       * - :attr:`~pcapkit.const.ipv4.option_number.OptionNumber.RTRALT`
          - :meth:`~pcapkit.protocols.internet.ipv4.IPv4._read_opt_rtralt`
-       * - :attr:`pcapkit.const.ipv4.option_number.OptionNumber.QS`
+       * - :attr:`~pcapkit.const.ipv4.option_number.OptionNumber.QS`
          - :meth:`~pcapkit.protocols.internet.ipv4.IPv4._read_opt_qs`
 
     """

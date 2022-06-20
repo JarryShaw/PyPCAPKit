@@ -61,7 +61,8 @@ below:
    .. .. automethod:: _read_addr_resolve
    .. .. automethod:: _read_proto_resolve
 
-.. class:: pcapkit.protocols.link.InARP
+.. currentmodule:: pcapkit.protocols.link
+.. class:: InARP
 
    Alias of :class:`pcapkit.protocols.link.arp.ARP`.
 

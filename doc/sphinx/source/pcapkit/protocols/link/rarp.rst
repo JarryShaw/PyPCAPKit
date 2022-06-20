@@ -39,7 +39,8 @@ Octets      Bits        Name                    Description
 
    .. automethod:: id
 
-.. class:: pcapkit.protocols.data.link.DRARP
+.. currentmodule:: pcapkit.protocols.link
+.. class:: DRARP
 
    Alias of :class:`pcapkit.protocols.link.rarp.RARP`.
 

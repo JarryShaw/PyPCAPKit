@@ -62,11 +62,11 @@ class IPv6_Route(Internet[DataType_IPv6_Route]):
 
        * - Routing Code
          - Data Parser
-       * - :attr:`pcapkit.const.ipv6.routing.Routing.Source_Route`
+       * - :attr:`~pcapkit.const.ipv6.routing.Routing.Source_Route`
          - :meth:`~pcapkit.protocols.internet.ipv6_route.IPv6_Route._read_data_type_src`
-       * - :attr:`pcapkit.const.ipv6.routing.Routing.Type_2_Routing_Header`
+       * - :attr:`~pcapkit.const.ipv6.routing.Routing.Type_2_Routing_Header`
          - :meth:`~pcapkit.protocols.internet.ipv6_route.IPv6_Route._read_data_type_2`
-       * - :attr:`pcapkit.const.ipv6.routing.Routing.RPL_Source_Route_Header`
+       * - :attr:`~pcapkit.const.ipv6.routing.Routing.RPL_Source_Route_Header`
          - :meth:`~pcapkit.protocols.internet.ipv6_route.IPv6_Route._read_data_type_rpl`
 
     """

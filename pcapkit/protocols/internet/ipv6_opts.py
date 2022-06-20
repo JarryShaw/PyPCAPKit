@@ -91,35 +91,35 @@ class IPv6_Opts(Internet[DataType_IPv6_Opts]):
 
        * - Option Code
          - Option Parser
-       * - :attr:`pcapkit.const.ipv6.option.Option.Pad1`
+       * - :attr:`~pcapkit.const.ipv6.option.Option.Pad1`
          - :meth:`~pcapkit.protocols.internet.ipv6_opts.IPv6_Opts._read_opt_pad`
-       * - :attr:`pcapkit.const.ipv6.option.Option.PadN`
+       * - :attr:`~pcapkit.const.ipv6.option.Option.PadN`
          - :meth:`~pcapkit.protocols.internet.ipv6_opts.IPv6_Opts._read_opt_pad`
-       * - :attr:`pcapkit.const.ipv6.option.Option.Tunnel_Encapsulation_Limit`
+       * - :attr:`~pcapkit.const.ipv6.option.Option.Tunnel_Encapsulation_Limit`
          - :meth:`~pcapkit.protocols.internet.ipv6_opts.IPv6_Opts._read_opt_tun`
-       * - :attr:`pcapkit.const.ipv6.option.Option.Router_Alert`
+       * - :attr:`~pcapkit.const.ipv6.option.Option.Router_Alert`
          - :meth:`~pcapkit.protocols.internet.ipv6_opts.IPv6_Opts._read_opt_ra`
-       * - :attr:`pcapkit.const.ipv6.option.Option.CALIPSO`
+       * - :attr:`~pcapkit.const.ipv6.option.Option.CALIPSO`
          - :meth:`~pcapkit.protocols.internet.ipv6_opts.IPv6_Opts._read_opt_calipso`
-       * - :attr:`pcapkit.const.ipv6.option.Option.SMF_DPD`
+       * - :attr:`~pcapkit.const.ipv6.option.Option.SMF_DPD`
          - :meth:`~pcapkit.protocols.internet.ipv6_opts.IPv6_Opts._read_opt_smf_dpd`
-       * - :attr:`pcapkit.const.ipv6.option.Option.PDM`
+       * - :attr:`~pcapkit.const.ipv6.option.Option.PDM`
          - :meth:`~pcapkit.protocols.internet.ipv6_opts.IPv6_Opts._read_opt_pdm`
-       * - :attr:`pcapkit.const.ipv6.option.Option.Quick_Start`
+       * - :attr:`~pcapkit.const.ipv6.option.Option.Quick_Start`
          - :meth:`~pcapkit.protocols.internet.ipv6_opts.IPv6_Opts._read_opt_qs`
-       * - :attr:`pcapkit.const.ipv6.option.Option.RPL_Option_0x63`
+       * - :attr:`~pcapkit.const.ipv6.option.Option.RPL_Option_0x63`
          - :meth:`~pcapkit.protocols.internet.ipv6_opts.IPv6_Opts._read_opt_rpl`
-       * - :attr:`pcapkit.const.ipv6.option.Option.MPL_Option`
+       * - :attr:`~pcapkit.const.ipv6.option.Option.MPL_Option`
          - :meth:`~pcapkit.protocols.internet.ipv6_opts.IPv6_Opts._read_opt_mpl`
-       * - :attr:`pcapkit.const.ipv6.option.Option.ILNP_Nonce`
+       * - :attr:`~pcapkit.const.ipv6.option.Option.ILNP_Nonce`
          - :meth:`~pcapkit.protocols.internet.ipv6_opts.IPv6_Opts._read_opt_ilnp`
-       * - :attr:`pcapkit.const.ipv6.option.Option.Line_Identification_Option`
+       * - :attr:`~pcapkit.const.ipv6.option.Option.Line_Identification_Option`
          - :meth:`~pcapkit.protocols.internet.ipv6_opts.IPv6_Opts._read_opt_lio`
-       * - :attr:`pcapkit.const.ipv6.option.Option.Jumbo_Payload`
+       * - :attr:`~pcapkit.const.ipv6.option.Option.Jumbo_Payload`
          - :meth:`~pcapkit.protocols.internet.ipv6_opts.IPv6_Opts._read_opt_jumbo`
-       * - :attr:`pcapkit.const.ipv6.option.Option.Home_Address`
+       * - :attr:`~pcapkit.const.ipv6.option.Option.Home_Address`
          - :meth:`~pcapkit.protocols.internet.ipv6_opts.IPv6_Opts._read_opt_home`
-       * - :attr:`pcapkit.const.ipv6.option.Option.IP_DFF`
+       * - :attr:`~pcapkit.const.ipv6.option.Option.IP_DFF`
          - :meth:`~pcapkit.protocols.internet.ipv6_opts.IPv6_Opts._read_opt_ip_dff`
 
     """

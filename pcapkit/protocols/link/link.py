@@ -32,15 +32,15 @@ class Link(Protocol[PT], Generic[PT]):  # pylint: disable=abstract-method
 
        * - Index
          - Protocol
-       * - :attr:`pcapkit.const.reg.ethertype.EtherType.Address_Resolution_Protocol`
+       * - :attr:`~pcapkit.const.reg.ethertype.EtherType.Address_Resolution_Protocol`
          - :class:`pcapkit.protocols.link.arp.ARP`
-       * - :attr:`pcapkit.const.reg.ethertype.EtherType.Reverse_Address_Resolution_Protocol`
+       * - :attr:`~pcapkit.const.reg.ethertype.EtherType.Reverse_Address_Resolution_Protocol`
          - :class:`pcapkit.protocols.link.rarp.RARP`
-       * - :attr:`pcapkit.const.reg.ethertype.EtherType.Customer_VLAN_Tag_Type`
+       * - :attr:`~pcapkit.const.reg.ethertype.EtherType.Customer_VLAN_Tag_Type`
          - :class:`pcapkit.protocols.link.vlan.VLAN`
-       * - :attr:`pcapkit.const.reg.ethertype.EtherType.Internet_Protocol_version_4`
+       * - :attr:`~pcapkit.const.reg.ethertype.EtherType.Internet_Protocol_version_4`
          - :class:`pcapkit.protocols.internet.ipv4.IPv4`
-       * - :attr:`pcapkit.const.reg.ethertype.EtherType.Internet_Protocol_version_6`
+       * - :attr:`~pcapkit.const.reg.ethertype.EtherType.Internet_Protocol_version_6`
          - :class:`pcapkit.protocols.internet.ipv6.IPv6`
        * - 0x8137
          - :class:`pcapkit.protocols.internet.ipx.IPX`
