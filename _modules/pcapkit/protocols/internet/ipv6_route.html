@@ -33,7 +33,8 @@
             
   <h1>Source code for pcapkit.protocols.internet.ipv6_route</h1><div class="highlight"><pre>
 <span></span><span class="c1"># -*- coding: utf-8 -*-</span>
-<span class="sd">&quot;&quot;&quot;routing header for IPv6</span>
+<span class="sd">&quot;&quot;&quot;IPv6-Route - Routing Header for IPv6</span>
+<span class="sd">==========================================</span>
 
 <span class="sd">:mod:`pcapkit.protocols.internet.ipv6_route` contains</span>
 <span class="sd">:class:`~pcapkit.protocols.internet.ipv6_route.IPv6_Route`</span>
@@ -83,7 +84,26 @@
 
 
 <div class="viewcode-block" id="IPv6_Route"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/ipv6_route.html#pcapkit.protocols.internet.ipv6_route.IPv6_Route">[docs]</a><span class="k">class</span> <span class="nc">IPv6_Route</span><span class="p">(</span><span class="n">Internet</span><span class="p">[</span><span class="n">DataType_IPv6_Route</span><span class="p">]):</span>
-    <span class="sd">&quot;&quot;&quot;This class implements Routing Header for IPv6.&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;This class implements Routing Header for IPv6.</span>
+
+<span class="sd">    This class currently supports parsing of the following Routing Header for IPv6</span>
+<span class="sd">    routing data types, which are registered in the</span>
+<span class="sd">    :attr:`self.__routing__ &lt;pcapkit.protocols.internet.ipv6_route.IPv6_Route.__routing__&gt;`</span>
+<span class="sd">    attribute:</span>
+
+<span class="sd">    .. list-table::</span>
+<span class="sd">       :header-rows: 1</span>
+
+<span class="sd">       * - Routing Code</span>
+<span class="sd">         - Data Parser</span>
+<span class="sd">       * - :attr:`~pcapkit.const.ipv6.routing.Routing.Source_Route`</span>
+<span class="sd">         - :meth:`~pcapkit.protocols.internet.ipv6_route.IPv6_Route._read_data_type_src`</span>
+<span class="sd">       * - :attr:`~pcapkit.const.ipv6.routing.Routing.Type_2_Routing_Header`</span>
+<span class="sd">         - :meth:`~pcapkit.protocols.internet.ipv6_route.IPv6_Route._read_data_type_2`</span>
+<span class="sd">       * - :attr:`~pcapkit.const.ipv6.routing.Routing.RPL_Source_Route_Header`</span>
+<span class="sd">         - :meth:`~pcapkit.protocols.internet.ipv6_route.IPv6_Route._read_data_type_rpl`</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="c1">##########################################################################</span>
     <span class="c1"># Defaults.</span>
@@ -182,8 +202,6 @@
 
 <span class="sd">        Args:</span>
 <span class="sd">            length: Length of packet data.</span>
-
-<span class="sd">        Keyword Args:</span>
 <span class="sd">            extension: If the packet is used as an IPv6 extension header.</span>
 <span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
 
@@ -224,7 +242,7 @@
 <div class="viewcode-block" id="IPv6_Route.make"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/ipv6_route.html#pcapkit.protocols.internet.ipv6_route.IPv6_Route.make">[docs]</a>    <span class="k">def</span> <span class="nf">make</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;NoReturn&#39;</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Make (construct) packet data.</span>
 
-<span class="sd">        Keyword Args:</span>
+<span class="sd">        Args:</span>
 <span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
 
 <span class="sd">        Returns:</span>
@@ -277,9 +295,9 @@
         <span class="c1"># call super __post_init__</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__post_init__</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="n">extension</span><span class="o">=</span><span class="n">extension</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>  <span class="c1"># type: ignore[arg-type]</span></div>
 
-<div class="viewcode-block" id="IPv6_Route.__length_hint__"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/ipv6_route.html#pcapkit.protocols.internet.ipv6_route.IPv6_Route.__length_hint__">[docs]</a>    <span class="k">def</span> <span class="fm">__length_hint__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Literal[4]&#39;</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__length_hint__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Literal[4]&#39;</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Return an estimated length for the object.&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="mi">4</span></div>
+        <span class="k">return</span> <span class="mi">4</span>
 
 <div class="viewcode-block" id="IPv6_Route.__index__"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/ipv6_route.html#pcapkit.protocols.internet.ipv6_route.IPv6_Route.__index__">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="fm">__index__</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;RegType_TransType&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=invalid-index-returned</span>

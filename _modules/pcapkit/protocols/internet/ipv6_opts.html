@@ -33,7 +33,8 @@
             
   <h1>Source code for pcapkit.protocols.internet.ipv6_opts</h1><div class="highlight"><pre>
 <span></span><span class="c1"># -*- coding: utf-8 -*-</span>
-<span class="sd">&quot;&quot;&quot;destination options for IPv6</span>
+<span class="sd">&quot;&quot;&quot;IPv6-Opts - Destination Options for IPv6</span>
+<span class="sd">==============================================</span>
 
 <span class="sd">:mod:`pcapkit.protocols.internet.ipv6_opts` contains</span>
 <span class="sd">:class:`~pcapkit.protocols.internet.ipv6_opts.IPv6_Opts`</span>
@@ -112,7 +113,50 @@
 
 
 <div class="viewcode-block" id="IPv6_Opts"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/ipv6_opts.html#pcapkit.protocols.internet.ipv6_opts.IPv6_Opts">[docs]</a><span class="k">class</span> <span class="nc">IPv6_Opts</span><span class="p">(</span><span class="n">Internet</span><span class="p">[</span><span class="n">DataType_IPv6_Opts</span><span class="p">]):</span>
-    <span class="sd">&quot;&quot;&quot;This class implements Destination Options for IPv6.&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;This class implements Destination Options for IPv6.</span>
+
+<span class="sd">    This class currently supports parsing of the following IPv6 Hop-by-Hop</span>
+<span class="sd">    options, which are registered in the</span>
+<span class="sd">    :attr:`self.__option__ &lt;pcapkit.protocols.internet.ipv6_opts.IPv6_Opts.__option__&gt;`</span>
+<span class="sd">    attribute:</span>
+
+<span class="sd">    .. list-table::</span>
+<span class="sd">       :header-rows: 1</span>
+
+<span class="sd">       * - Option Code</span>
+<span class="sd">         - Option Parser</span>
+<span class="sd">       * - :attr:`~pcapkit.const.ipv6.option.Option.Pad1`</span>
+<span class="sd">         - :meth:`~pcapkit.protocols.internet.ipv6_opts.IPv6_Opts._read_opt_pad`</span>
+<span class="sd">       * - :attr:`~pcapkit.const.ipv6.option.Option.PadN`</span>
+<span class="sd">         - :meth:`~pcapkit.protocols.internet.ipv6_opts.IPv6_Opts._read_opt_pad`</span>
+<span class="sd">       * - :attr:`~pcapkit.const.ipv6.option.Option.Tunnel_Encapsulation_Limit`</span>
+<span class="sd">         - :meth:`~pcapkit.protocols.internet.ipv6_opts.IPv6_Opts._read_opt_tun`</span>
+<span class="sd">       * - :attr:`~pcapkit.const.ipv6.option.Option.Router_Alert`</span>
+<span class="sd">         - :meth:`~pcapkit.protocols.internet.ipv6_opts.IPv6_Opts._read_opt_ra`</span>
+<span class="sd">       * - :attr:`~pcapkit.const.ipv6.option.Option.CALIPSO`</span>
+<span class="sd">         - :meth:`~pcapkit.protocols.internet.ipv6_opts.IPv6_Opts._read_opt_calipso`</span>
+<span class="sd">       * - :attr:`~pcapkit.const.ipv6.option.Option.SMF_DPD`</span>
+<span class="sd">         - :meth:`~pcapkit.protocols.internet.ipv6_opts.IPv6_Opts._read_opt_smf_dpd`</span>
+<span class="sd">       * - :attr:`~pcapkit.const.ipv6.option.Option.PDM`</span>
+<span class="sd">         - :meth:`~pcapkit.protocols.internet.ipv6_opts.IPv6_Opts._read_opt_pdm`</span>
+<span class="sd">       * - :attr:`~pcapkit.const.ipv6.option.Option.Quick_Start`</span>
+<span class="sd">         - :meth:`~pcapkit.protocols.internet.ipv6_opts.IPv6_Opts._read_opt_qs`</span>
+<span class="sd">       * - :attr:`~pcapkit.const.ipv6.option.Option.RPL_Option_0x63`</span>
+<span class="sd">         - :meth:`~pcapkit.protocols.internet.ipv6_opts.IPv6_Opts._read_opt_rpl`</span>
+<span class="sd">       * - :attr:`~pcapkit.const.ipv6.option.Option.MPL_Option`</span>
+<span class="sd">         - :meth:`~pcapkit.protocols.internet.ipv6_opts.IPv6_Opts._read_opt_mpl`</span>
+<span class="sd">       * - :attr:`~pcapkit.const.ipv6.option.Option.ILNP_Nonce`</span>
+<span class="sd">         - :meth:`~pcapkit.protocols.internet.ipv6_opts.IPv6_Opts._read_opt_ilnp`</span>
+<span class="sd">       * - :attr:`~pcapkit.const.ipv6.option.Option.Line_Identification_Option`</span>
+<span class="sd">         - :meth:`~pcapkit.protocols.internet.ipv6_opts.IPv6_Opts._read_opt_lio`</span>
+<span class="sd">       * - :attr:`~pcapkit.const.ipv6.option.Option.Jumbo_Payload`</span>
+<span class="sd">         - :meth:`~pcapkit.protocols.internet.ipv6_opts.IPv6_Opts._read_opt_jumbo`</span>
+<span class="sd">       * - :attr:`~pcapkit.const.ipv6.option.Option.Home_Address`</span>
+<span class="sd">         - :meth:`~pcapkit.protocols.internet.ipv6_opts.IPv6_Opts._read_opt_home`</span>
+<span class="sd">       * - :attr:`~pcapkit.const.ipv6.option.Option.IP_DFF`</span>
+<span class="sd">         - :meth:`~pcapkit.protocols.internet.ipv6_opts.IPv6_Opts._read_opt_ip_dff`</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="c1">##########################################################################</span>
     <span class="c1"># Defaults.</span>
@@ -224,8 +268,6 @@
 
 <span class="sd">        Args:</span>
 <span class="sd">            length: Length of packet data.</span>
-
-<span class="sd">        Keyword Args:</span>
 <span class="sd">            extension: If the packet is used as an IPv6 extension header.</span>
 <span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
 
@@ -253,7 +295,7 @@
 <div class="viewcode-block" id="IPv6_Opts.make"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/ipv6_opts.html#pcapkit.protocols.internet.ipv6_opts.IPv6_Opts.make">[docs]</a>    <span class="k">def</span> <span class="nf">make</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;NoReturn&#39;</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Make (construct) packet data.</span>
 
-<span class="sd">        Keyword Args:</span>
+<span class="sd">        Args:</span>
 <span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
 
 <span class="sd">        Returns:</span>
@@ -291,8 +333,6 @@
 <span class="sd">        Args:</span>
 <span class="sd">            file: Source packet stream.</span>
 <span class="sd">            length: Length of packet data.</span>
-
-<span class="sd">        Keyword Args:</span>
 <span class="sd">            extension: If the protocol is used as an IPv6 extension header.</span>
 <span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
 
@@ -306,9 +346,9 @@
         <span class="c1"># call super __post_init__</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__post_init__</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="n">extension</span><span class="o">=</span><span class="n">extension</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>  <span class="c1"># type: ignore[arg-type]</span></div>
 
-<div class="viewcode-block" id="IPv6_Opts.__length_hint__"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/ipv6_opts.html#pcapkit.protocols.internet.ipv6_opts.IPv6_Opts.__length_hint__">[docs]</a>    <span class="k">def</span> <span class="fm">__length_hint__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Literal[2]&#39;</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__length_hint__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Literal[2]&#39;</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Return an estimated length for the object.&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="mi">2</span></div>
+        <span class="k">return</span> <span class="mi">2</span>
 
 <div class="viewcode-block" id="IPv6_Opts.__index__"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/ipv6_opts.html#pcapkit.protocols.internet.ipv6_opts.IPv6_Opts.__index__">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="fm">__index__</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;RegType_TransType&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=invalid-index-returned</span>
@@ -326,7 +366,7 @@
     <span class="c1"># Utilities.</span>
     <span class="c1">##########################################################################</span>
 
-<div class="viewcode-block" id="IPv6_Opts._read_opt_type"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/ipv6_opts.html#pcapkit.protocols.internet.ipv6_opts.IPv6_Opts._read_opt_type">[docs]</a>    <span class="k">def</span> <span class="nf">_read_opt_type</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;tuple[int, bool]&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=no-self-use</span>
+<div class="viewcode-block" id="IPv6_Opts._read_opt_type"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/ipv6_opts.html#pcapkit.protocols.internet.ipv6_opts.IPv6_Opts._read_opt_type">[docs]</a>    <span class="k">def</span> <span class="nf">_read_opt_type</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;tuple[int, bool]&#39;</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Read option type field.</span>
 
 <span class="sd">        Arguments:</span>
@@ -404,8 +444,6 @@
 <span class="sd">            code: option type value</span>
 <span class="sd">            acts: unknown option action value</span>
 <span class="sd">            cflg: change flag value</span>
-
-<span class="sd">        Keyword Args:</span>
 <span class="sd">            options: extracted IPv6-Opts options</span>
 
 <span class="sd">        Returns:</span>
@@ -451,8 +489,6 @@
 <span class="sd">            code: option type value</span>
 <span class="sd">            acts: unknown option action value</span>
 <span class="sd">            cflg: change flag value</span>
-
-<span class="sd">        Keyword Args:</span>
 <span class="sd">            options: extracted IPv6-Opts options</span>
 
 <span class="sd">        Returns:</span>
@@ -497,8 +533,6 @@
 <span class="sd">            code: option type value</span>
 <span class="sd">            acts: unknown option action value</span>
 <span class="sd">            cflg: change flag value</span>
-
-<span class="sd">        Keyword Args:</span>
 <span class="sd">            options: extracted IPv6-Opts options</span>
 
 <span class="sd">        Returns:</span>
@@ -539,8 +573,6 @@
 <span class="sd">            code: option type value</span>
 <span class="sd">            acts: unknown option action value</span>
 <span class="sd">            cflg: change flag value</span>
-
-<span class="sd">        Keyword Args:</span>
 <span class="sd">            options: extracted IPv6-Opts options</span>
 
 <span class="sd">        Returns:</span>
@@ -588,8 +620,6 @@
 <span class="sd">            code: option type value</span>
 <span class="sd">            acts: unknown option action value</span>
 <span class="sd">            cflg: change flag value</span>
-
-<span class="sd">        Keyword Args:</span>
 <span class="sd">            options: extracted IPv6-Opts options</span>
 
 <span class="sd">        Returns:</span>
@@ -671,8 +701,6 @@
 <span class="sd">            code: option type value</span>
 <span class="sd">            acts: unknown option action value</span>
 <span class="sd">            cflg: change flag value</span>
-
-<span class="sd">        Keyword Args:</span>
 <span class="sd">            options: extracted IPv6-Opts options</span>
 
 <span class="sd">        Returns:</span>
@@ -796,8 +824,6 @@
 <span class="sd">            code: option type value</span>
 <span class="sd">            acts: unknown option action value</span>
 <span class="sd">            cflg: change flag value</span>
-
-<span class="sd">        Keyword Args:</span>
 <span class="sd">            options: extracted IPv6-Opts options</span>
 
 <span class="sd">        Returns:</span>
@@ -868,8 +894,6 @@
 <span class="sd">            code: option type value</span>
 <span class="sd">            acts: unknown option action value</span>
 <span class="sd">            cflg: change flag value</span>
-
-<span class="sd">        Keyword Args:</span>
 <span class="sd">            options: extracted IPv6-Opts options</span>
 
 <span class="sd">        Returns:</span>
@@ -929,8 +953,6 @@
 <span class="sd">            code: option type value</span>
 <span class="sd">            acts: unknown option action value</span>
 <span class="sd">            cflg: change flag value</span>
-
-<span class="sd">        Keyword Args:</span>
 <span class="sd">            options: extracted IPv6-Opts options</span>
 
 <span class="sd">        Returns:</span>
@@ -983,8 +1005,6 @@
 <span class="sd">            code: option type value</span>
 <span class="sd">            acts: unknown option action value</span>
 <span class="sd">            cflg: change flag value</span>
-
-<span class="sd">        Keyword Args:</span>
 <span class="sd">            options: extracted IPv6-Opts options</span>
 
 <span class="sd">        Returns:</span>
@@ -1064,8 +1084,6 @@
 <span class="sd">            code: option type value</span>
 <span class="sd">            acts: unknown option action value</span>
 <span class="sd">            cflg: change flag value</span>
-
-<span class="sd">        Keyword Args:</span>
 <span class="sd">            options: extracted IPv6-Opts options</span>
 
 <span class="sd">        Returns:</span>
@@ -1105,8 +1123,6 @@
 <span class="sd">            code: option type value</span>
 <span class="sd">            acts: unknown option action value</span>
 <span class="sd">            cflg: change flag value</span>
-
-<span class="sd">        Keyword Args:</span>
 <span class="sd">            options: extracted IPv6-Opts options</span>
 
 <span class="sd">        Returns:</span>
@@ -1150,8 +1166,6 @@
 <span class="sd">            code: option type value</span>
 <span class="sd">            acts: unknown option action value</span>
 <span class="sd">            cflg: change flag value</span>
-
-<span class="sd">        Keyword Args:</span>
 <span class="sd">            options: extracted IPv6-Opts options</span>
 
 <span class="sd">        Returns:</span>
@@ -1202,8 +1216,6 @@
 <span class="sd">            code: option type value</span>
 <span class="sd">            acts: unknown option action value</span>
 <span class="sd">            cflg: change flag value</span>
-
-<span class="sd">        Keyword Args:</span>
 <span class="sd">            options: extracted IPv6-Opts options</span>
 
 <span class="sd">        Returns:</span>
@@ -1248,8 +1260,6 @@
 <span class="sd">            code: option type value</span>
 <span class="sd">            acts: unknown option action value</span>
 <span class="sd">            cflg: change flag value</span>
-
-<span class="sd">        Keyword Args:</span>
 <span class="sd">            options: extracted IPv6-Opts options</span>
 
 <span class="sd">        Returns:</span>

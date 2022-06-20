@@ -33,7 +33,8 @@
             
   <h1>Source code for pcapkit.protocols.internet.ipv6_frag</h1><div class="highlight"><pre>
 <span></span><span class="c1"># -*- coding: utf-8 -*-</span>
-<span class="sd">&quot;&quot;&quot;fragment header for IPv6</span>
+<span class="sd">&quot;&quot;&quot;IPv6-Frag - Fragment Header for IPv6</span>
+<span class="sd">==========================================</span>
 
 <span class="sd">:mod:`pcapkit.protocols.internet.ipv6_frag` contains</span>
 <span class="sd">:class:`~pcapkit.protocols.internet.ipv6_frag.IPv6_Frag`</span>
@@ -102,7 +103,6 @@
 <span class="sd">        Raises:</span>
 <span class="sd">            UnsupportedCall: if the protocol is used as an IPv6 extension header</span>
 
-<span class="sd">        :rtype: pcapkit.protocols.protocol.Protocol</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_extf</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">UnsupportedCall</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">&#39; object has no attribute &#39;payload&#39;&quot;</span><span class="p">)</span>
@@ -152,8 +152,6 @@
 
 <span class="sd">        Args:</span>
 <span class="sd">            length: Length of packet data.</span>
-
-<span class="sd">        Keyword Args:</span>
 <span class="sd">            extension: If the packet is used as an IPv6 extension header.</span>
 <span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
 
@@ -183,7 +181,7 @@
 <div class="viewcode-block" id="IPv6_Frag.make"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/ipv6_frag.html#pcapkit.protocols.internet.ipv6_frag.IPv6_Frag.make">[docs]</a>    <span class="k">def</span> <span class="nf">make</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;NoReturn&#39;</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Make (construct) packet data.</span>
 
-<span class="sd">        Keyword Args:</span>
+<span class="sd">        Args:</span>
 <span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
 
 <span class="sd">        Returns:</span>
@@ -224,9 +222,9 @@
         <span class="c1"># call super __post_init__</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__post_init__</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="n">extension</span><span class="o">=</span><span class="n">extension</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>  <span class="c1"># type: ignore[arg-type]</span></div>
 
-<div class="viewcode-block" id="IPv6_Frag.__length_hint__"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/ipv6_frag.html#pcapkit.protocols.internet.ipv6_frag.IPv6_Frag.__length_hint__">[docs]</a>    <span class="k">def</span> <span class="fm">__length_hint__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Literal[8]&#39;</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__length_hint__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Literal[8]&#39;</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Return an estimated length for the object.&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="mi">8</span></div>
+        <span class="k">return</span> <span class="mi">8</span>
 
 <div class="viewcode-block" id="IPv6_Frag.__index__"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/ipv6_frag.html#pcapkit.protocols.internet.ipv6_frag.IPv6_Frag.__index__">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="fm">__index__</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;RegType_TransType&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=invalid-index-returned</span>

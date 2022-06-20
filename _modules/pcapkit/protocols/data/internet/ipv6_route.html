@@ -1,0 +1,204 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>pcapkit.protocols.data.internet.ipv6_route &#8212; PyPCAPKit 0.16.1 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../../../_static/alabaster.css" />
+    <script data-url_root="../../../../../" id="documentation_options" src="../../../../../_static/documentation_options.js"></script>
+    <script src="../../../../../_static/jquery.js"></script>
+    <script src="../../../../../_static/underscore.js"></script>
+    <script src="../../../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../../../../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../../search.html" />
+   
+  <link rel="stylesheet" href="../../../../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for pcapkit.protocols.data.internet.ipv6_route</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="sd">&quot;&quot;&quot;data model for IPv6 Routing Header&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
+
+<span class="kn">from</span> <span class="nn">pcapkit.corekit.infoclass</span> <span class="kn">import</span> <span class="n">Info</span>
+
+<span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">ipaddress</span> <span class="kn">import</span> <span class="n">IPv6Address</span>
+
+    <span class="kn">from</span> <span class="nn">pcapkit.const.ipv6.routing</span> <span class="kn">import</span> <span class="n">Routing</span>
+    <span class="kn">from</span> <span class="nn">pcapkit.const.reg.transtype</span> <span class="kn">import</span> <span class="n">TransType</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s1">&#39;IPv6_Route&#39;</span><span class="p">,</span>
+
+    <span class="s1">&#39;RoutingType&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;UnknownType&#39;</span><span class="p">,</span> <span class="s1">&#39;SourceRoute&#39;</span><span class="p">,</span> <span class="s1">&#39;Type2&#39;</span><span class="p">,</span> <span class="s1">&#39;RPL&#39;</span><span class="p">,</span>
+<span class="p">]</span>
+
+
+<div class="viewcode-block" id="IPv6_Route"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/ipv6_route.html#pcapkit.protocols.data.internet.ipv6_route.IPv6_Route">[docs]</a><span class="k">class</span> <span class="nc">IPv6_Route</span><span class="p">(</span><span class="n">Info</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Data model for IPv6-Route protocol.</span>
+
+<span class="sd">    .. seealso::</span>
+
+<span class="sd">       The type-specific routing data is stored directly in the top-level</span>
+<span class="sd">       :class:`~pcapkit.protocols.data.internet.ipv6_route.IPv6_Route` object.</span>
+<span class="sd">       Please refer to the :class:`~pcapkit.protocols.data.internet.ipv6_route.RoutingType`</span>
+<span class="sd">       subclasses for the details.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1">#: Next header.</span>
+    <span class="nb">next</span><span class="p">:</span> <span class="s1">&#39;TransType&#39;</span>
+    <span class="c1">#: Header extension length.</span>
+    <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span>
+    <span class="c1">#: Routing type.</span>
+    <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Routing&#39;</span>
+    <span class="c1">#: Segments left.</span>
+    <span class="n">seg_left</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span>
+
+    <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+        <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">next</span><span class="p">:</span> <span class="s1">&#39;TransType&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Routing&#39;</span><span class="p">,</span> <span class="n">seg_left</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">):</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,multiple-statements,super-init-not-called,redefined-builtin,line-too-long</span></div>
+
+
+<div class="viewcode-block" id="RoutingType"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/ipv6_route.html#pcapkit.protocols.data.internet.ipv6_route.RoutingType">[docs]</a><span class="k">class</span> <span class="nc">RoutingType</span><span class="p">(</span><span class="n">Info</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Data model for Routing Type.&quot;&quot;&quot;</span></div>
+
+
+<div class="viewcode-block" id="UnknownType"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/ipv6_route.html#pcapkit.protocols.data.internet.ipv6_route.UnknownType">[docs]</a><span class="k">class</span> <span class="nc">UnknownType</span><span class="p">(</span><span class="n">RoutingType</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Data model for IPv6-Route unknown type.&quot;&quot;&quot;</span>
+
+    <span class="c1">#: Data.</span>
+    <span class="n">data</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span>
+
+    <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+        <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,multiple-statements,super-init-not-called,redefined-builtin,line-too-long</span></div>
+
+
+<div class="viewcode-block" id="SourceRoute"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/ipv6_route.html#pcapkit.protocols.data.internet.ipv6_route.SourceRoute">[docs]</a><span class="k">class</span> <span class="nc">SourceRoute</span><span class="p">(</span><span class="n">RoutingType</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Data model for IPv6-Route Source Route data type.&quot;&quot;&quot;</span>
+
+    <span class="c1">#: Source addresses.</span>
+    <span class="n">ip</span><span class="p">:</span> <span class="s1">&#39;tuple[IPv6Address, ...]&#39;</span>
+
+    <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+        <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ip</span><span class="p">:</span> <span class="s1">&#39;tuple[IPv6Address, ...]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,multiple-statements,super-init-not-called,redefined-builtin,line-too-long</span></div>
+
+
+<div class="viewcode-block" id="Type2"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/ipv6_route.html#pcapkit.protocols.data.internet.ipv6_route.Type2">[docs]</a><span class="k">class</span> <span class="nc">Type2</span><span class="p">(</span><span class="n">RoutingType</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Data model for IPv6-Route Type 2 data type.&quot;&quot;&quot;</span>
+
+    <span class="c1">#: Address.</span>
+    <span class="n">ip</span><span class="p">:</span> <span class="s1">&#39;IPv6Address&#39;</span>
+
+    <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+        <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ip</span><span class="p">:</span> <span class="s1">&#39;IPv6Address&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,multiple-statements,super-init-not-called,redefined-builtin,line-too-long</span></div>
+
+
+<div class="viewcode-block" id="RPL"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/ipv6_route.html#pcapkit.protocols.data.internet.ipv6_route.RPL">[docs]</a><span class="k">class</span> <span class="nc">RPL</span><span class="p">(</span><span class="n">RoutingType</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Data model for RPL Source data type.&quot;&quot;&quot;</span>
+
+    <span class="c1">#: CmprI.</span>
+    <span class="n">cmpr_i</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span>
+    <span class="c1">#: CmprE.</span>
+    <span class="n">cmpr_e</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span>
+    <span class="c1">#: Pad.</span>
+    <span class="n">pad</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span>
+    <span class="c1">#: IPv6 addresses.</span>
+    <span class="n">ip</span><span class="p">:</span> <span class="s1">&#39;tuple[IPv6Address, ...]&#39;</span>
+
+    <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+        <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cmpr_i</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">cmpr_e</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">pad</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">ip</span><span class="p">:</span> <span class="s1">&#39;tuple[IPv6Address, ...]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,multiple-statements,super-init-not-called,redefined-builtin,line-too-long</span></div>
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../../../../index.html">PyPCAPKit</a></h1>
+
+
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=JarryShaw&repo=PyPCAPKit&type=star&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../pcapkit/index.html">Module Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../demo.html">How to …</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../pep.html">Help Wanted</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../../../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017-2022, Jarry Shaw.
+      
+    </div>
+
+    
+    <a href="https://github.com/JarryShaw/PyPCAPKit" class="github">
+        <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"  class="github"/>
+    </a>
+    
+
+    
+  </body>
+</html>

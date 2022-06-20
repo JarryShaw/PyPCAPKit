@@ -36,7 +36,7 @@
             
   <section id="module-pcapkit.protocols.internet.ipv6_route">
 <span id="ipv6-route-routing-header-for-ipv6"></span><h1>IPv6-Route - Routing Header for IPv6<a class="headerlink" href="#module-pcapkit.protocols.internet.ipv6_route" title="Permalink to this heading">¶</a></h1>
-<p><a class="reference internal" href="#module-pcapkit.protocols.internet.ipv6_route" title="pcapkit.protocols.internet.ipv6_route"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.internet.ipv6_route</span></code></a> contains
+<span class="target" id="module-pcapkit.protocols.data.internet.ipv6_route"></span><p><a class="reference internal" href="#module-pcapkit.protocols.internet.ipv6_route" title="pcapkit.protocols.internet.ipv6_route"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.internet.ipv6_route</span></code></a> contains
 <a class="reference internal" href="#pcapkit.protocols.internet.ipv6_route.IPv6_Route" title="pcapkit.protocols.internet.ipv6_route.IPv6_Route"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6_Route</span></code></a>
 only, which implements extractor for Routing Header for IPv6
 (IPv6-Route) <a class="footnote-reference brackets" href="#id2" id="id1" role="doc-noteref"><span class="fn-bracket">[</span>*<span class="fn-bracket">]</span></a>, whose structure is described as below:</p>
@@ -79,22 +79,89 @@ only, which implements extractor for Routing Header for IPv6
 <br /><dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.protocols.internet.ipv6_route.IPv6_Route">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.internet.ipv6_route.</span></span><span class="sig-name descname"><span class="pre">IPv6_Route</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/internet/ipv6_route.html#IPv6_Route"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.ipv6_route.IPv6_Route" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="internet.html#pcapkit.protocols.internet.internet.Internet" title="pcapkit.protocols.internet.internet.Internet"><code class="xref py py-class docutils literal notranslate"><span class="pre">Internet</span></code></a>[<code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6_Route</span></code>]</p>
+<dd><p>Bases: <a class="reference internal" href="internet.html#pcapkit.protocols.internet.internet.Internet" title="pcapkit.protocols.internet.internet.Internet"><code class="xref py py-class docutils literal notranslate"><span class="pre">Internet</span></code></a>[<a class="reference internal" href="#pcapkit.protocols.data.internet.ipv6_route.IPv6_Route" title="pcapkit.protocols.data.internet.ipv6_route.IPv6_Route"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6_Route</span></code></a>]</p>
 <p>This class implements Routing Header for IPv6.</p>
+<p>This class currently supports parsing of the following Routing Header for IPv6
+routing data types, which are registered in the
+<code class="xref py py-attr docutils literal notranslate"><span class="pre">self.__routing__</span></code>
+attribute:</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Routing Code</p></th>
+<th class="head"><p>Data Parser</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference internal" href="../../const/ipv6.html#pcapkit.const.ipv6.routing.Routing.Source_Route" title="pcapkit.const.ipv6.routing.Routing.Source_Route"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Source_Route</span></code></a></p></td>
+<td><p><a class="reference internal" href="#pcapkit.protocols.internet.ipv6_route.IPv6_Route._read_data_type_src" title="pcapkit.protocols.internet.ipv6_route.IPv6_Route._read_data_type_src"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_read_data_type_src()</span></code></a></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../../const/ipv6.html#pcapkit.const.ipv6.routing.Routing.Type_2_Routing_Header" title="pcapkit.const.ipv6.routing.Routing.Type_2_Routing_Header"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Type_2_Routing_Header</span></code></a></p></td>
+<td><p><a class="reference internal" href="#pcapkit.protocols.internet.ipv6_route.IPv6_Route._read_data_type_2" title="pcapkit.protocols.internet.ipv6_route.IPv6_Route._read_data_type_2"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_read_data_type_2()</span></code></a></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../../const/ipv6.html#pcapkit.const.ipv6.routing.Routing.RPL_Source_Route_Header" title="pcapkit.const.ipv6.routing.Routing.RPL_Source_Route_Header"><code class="xref py py-attr docutils literal notranslate"><span class="pre">RPL_Source_Route_Header</span></code></a></p></td>
+<td><p><a class="reference internal" href="#pcapkit.protocols.internet.ipv6_route.IPv6_Route._read_data_type_rpl" title="pcapkit.protocols.internet.ipv6_route.IPv6_Route._read_data_type_rpl"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_read_data_type_rpl()</span></code></a></p></td>
+</tr>
+</tbody>
+</table>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>args</strong> (<em>Any</em>) – </p></li>
-<li><p><strong>kwargs</strong> (<em>Any</em>) – </p></li>
+<li><p><strong>*args</strong> (<em>Any</em>) – Arbitrary positional arguments.</p></li>
+<li><p><strong>**kwargs</strong> (<em>Any</em>) – Arbitrary keyword arguments.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.Protocol" title="pcapkit.protocols.protocol.Protocol">Protocol</a>[PT]</p>
 </dd>
 </dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.protocols.internet.ipv6_route.IPv6_Route.__post_init__">
+<span class="sig-name descname"><span class="pre">__post_init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">BinaryIO</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extension</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.10)"><span class="pre">None</span></a></span></span><a class="reference internal" href="../../../_modules/pcapkit/protocols/internet/ipv6_route.html#IPv6_Route.__post_init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.ipv6_route.IPv6_Route.__post_init__" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">__post_init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.10)"><span class="pre">None</span></a></span></span></dt>
+<dd><p>Post initialisation hook.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>file</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.BinaryIO" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">BinaryIO</span></code></a>]) – Source packet stream.</p></li>
+<li><p><strong>length</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>]) – Length of packet data.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Keyword Arguments<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>extension</strong> – If the protocol is used as an IPv6 extension header.</p></li>
+<li><p><strong>**kwargs</strong> – Arbitrary keyword arguments.</p></li>
+</ul>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p>For construction argument, please refer to <a class="reference internal" href="#pcapkit.protocols.internet.ipv6_route.IPv6_Route.make" title="pcapkit.protocols.internet.ipv6_route.IPv6_Route.make"><code class="xref py py-meth docutils literal notranslate"><span class="pre">make()</span></code></a>.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.protocols.internet.ipv6_route.IPv6_Route.__index__">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">__index__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/internet/ipv6_route.html#IPv6_Route.__index__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.ipv6_route.IPv6_Route.__index__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Numeral registry index of the protocol.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="../../const/reg.html#pcapkit.const.reg.transtype.TransType" title="pcapkit.const.reg.transtype.TransType"><code class="xref py py-class docutils literal notranslate"><span class="pre">TransType</span></code></a></p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Numeral registry index of the protocol in <a class="reference external" href="https://www.iana.org/assignments/protocol-numbers/protocol-numbers.xhtml">IANA</a>.</p>
+</dd>
+</dl>
+</dd></dl>
+
 <dl class="py property">
 <dt class="sig sig-object py" id="pcapkit.protocols.internet.ipv6_route.IPv6_Route.name">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'Routing</span> <span class="pre">Header</span> <span class="pre">for</span> <span class="pre">IPv6'</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pcapkit.protocols.internet.ipv6_route.IPv6_Route.name" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Literal" title="(in Python v3.10)"><span class="pre">Literal</span></a><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'Routing</span> <span class="pre">Header</span> <span class="pre">for</span> <span class="pre">IPv6'</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pcapkit.protocols.internet.ipv6_route.IPv6_Route.name" title="Permalink to this definition">¶</a></dt>
 <dd><p>Name of current protocol.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
@@ -187,21 +254,15 @@ only, which implements extractor for Routing Header for IPv6
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>length</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>]) – Length of packet data.</p></li>
-<li><p><strong>extension</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><em>bool</em></a>) – </p></li>
-<li><p><strong>kwargs</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.10)"><em>Any</em></a>) – </p></li>
-</ul>
-</dd>
-<dt class="field-even">Keyword Arguments<span class="colon">:</span></dt>
-<dd class="field-even"><ul class="simple">
-<li><p><strong>extension</strong> – If the packet is used as an IPv6 extension header.</p></li>
+<li><p><strong>extension</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a>) – If the packet is used as an IPv6 extension header.</p></li>
 <li><p><strong>**kwargs</strong> – Arbitrary keyword arguments.</p></li>
 </ul>
 </dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6_Route</span></code></p>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#pcapkit.protocols.data.internet.ipv6_route.IPv6_Route" title="pcapkit.protocols.data.internet.ipv6_route.IPv6_Route"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6_Route</span></code></a></p>
 </dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>Parsed packet data.</p>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Parsed packet data.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -211,17 +272,14 @@ only, which implements extractor for Routing Header for IPv6
 <span class="sig-name descname"><span class="pre">make</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/internet/ipv6_route.html#IPv6_Route.make"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.ipv6_route.IPv6_Route.make" title="Permalink to this definition">¶</a></dt>
 <dd><p>Make (construct) packet data.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Keyword Arguments<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>**kwargs</strong> – Arbitrary keyword arguments.</p>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>**kwargs</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.10)"><em>Any</em></a>) – Arbitrary keyword arguments.</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.NoReturn" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">NoReturn</span></code></a></p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Constructed packet data.</p>
-</dd>
-<dt class="field-even">Parameters<span class="colon">:</span></dt>
-<dd class="field-even"><p><strong>kwargs</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.10)"><em>Any</em></a>) – </p>
 </dd>
 </dl>
 </dd></dl>
@@ -234,67 +292,11 @@ only, which implements extractor for Routing Header for IPv6
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>code</strong> (<a class="reference internal" href="../../const/ipv6.html#pcapkit.const.ipv6.routing.Routing" title="pcapkit.const.ipv6.routing.Routing"><code class="xref py py-class docutils literal notranslate"><span class="pre">Routing</span></code></a>) – IPv6-Route data type code.</p></li>
-<li><p><strong>meth</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Union" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Callable</span></code></a>[[<a class="reference internal" href="#pcapkit.protocols.internet.ipv6_route.IPv6_Route" title="pcapkit.protocols.internet.ipv6_route.IPv6_Route"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6_Route</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>], <code class="xref py py-class docutils literal notranslate"><span class="pre">RoutingType</span></code>]]) – Method name or callable to parse the data.</p></li>
+<li><p><strong>meth</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Union" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Callable</span></code></a>[[<a class="reference internal" href="#pcapkit.protocols.internet.ipv6_route.IPv6_Route" title="pcapkit.protocols.internet.ipv6_route.IPv6_Route"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6_Route</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>], <a class="reference internal" href="#pcapkit.protocols.data.internet.ipv6_route.RoutingType" title="pcapkit.protocols.data.internet.ipv6_route.RoutingType"><code class="xref py py-class docutils literal notranslate"><span class="pre">RoutingType</span></code></a>]]) – Method name or callable to parse the data.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.protocols.internet.ipv6_route.IPv6_Route.__post_init__">
-<span class="sig-name descname"><span class="pre">__post_init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.BinaryIO" title="(in Python v3.10)"><span class="pre">BinaryIO</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">length</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.10)"><span class="pre">Optional</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extension</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.10)"><span class="pre">Any</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.10)"><span class="pre">None</span></a></span></span><a class="reference internal" href="../../../_modules/pcapkit/protocols/internet/ipv6_route.html#IPv6_Route.__post_init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.ipv6_route.IPv6_Route.__post_init__" title="Permalink to this definition">¶</a></dt>
-<dt class="sig sig-object py">
-<span class="sig-name descname"><span class="pre">__post_init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.10)"><span class="pre">Any</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.10)"><span class="pre">None</span></a></span></span></dt>
-<dd><p>Post initialisation hook.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>file</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.BinaryIO" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">BinaryIO</span></code></a>]) – Source packet stream.</p></li>
-<li><p><strong>length</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>]) – Length of packet data.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Keyword Arguments<span class="colon">:</span></dt>
-<dd class="field-even"><ul class="simple">
-<li><p><strong>extension</strong> – If the protocol is used as an IPv6 extension header.</p></li>
-<li><p><strong>**kwargs</strong> – Arbitrary keyword arguments.</p></li>
-</ul>
-</dd>
-</dl>
-<div class="admonition seealso">
-<p class="admonition-title">See also</p>
-<p>For construction argument, please refer to <a class="reference internal" href="#pcapkit.protocols.internet.ipv6_route.IPv6_Route.make" title="pcapkit.protocols.internet.ipv6_route.IPv6_Route.make"><code class="xref py py-meth docutils literal notranslate"><span class="pre">make()</span></code></a>.</p>
-</div>
-<dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.protocols.internet.ipv6_route.IPv6_Route.__length_hint__">
-<span class="sig-name descname"><span class="pre">__length_hint__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/internet/ipv6_route.html#IPv6_Route.__length_hint__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.ipv6_route.IPv6_Route.__length_hint__" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return an estimated length for the object.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Literal" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Literal</span></code></a>[4]</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.protocols.internet.ipv6_route.IPv6_Route.__index__">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">__index__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/internet/ipv6_route.html#IPv6_Route.__index__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.ipv6_route.IPv6_Route.__index__" title="Permalink to this definition">¶</a></dt>
-<dd><p>Numeral registry index of the protocol.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference internal" href="../../const/reg.html#pcapkit.const.reg.transtype.TransType" title="pcapkit.const.reg.transtype.TransType"><code class="xref py py-class docutils literal notranslate"><span class="pre">TransType</span></code></a></p>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>Numeral registry index of the protocol in <a class="reference external" href="https://www.iana.org/assignments/protocol-numbers/protocol-numbers.xhtml">IANA</a>.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -320,7 +322,7 @@ only, which implements extractor for Routing Header for IPv6
 <dd class="field-odd"><p><strong>length</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>) – route data length</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">UnknownType</span></code></p>
+<dd class="field-even"><p><a class="reference internal" href="#pcapkit.protocols.data.internet.ipv6_route.UnknownType" title="pcapkit.protocols.data.internet.ipv6_route.UnknownType"><code class="xref py py-class docutils literal notranslate"><span class="pre">UnknownType</span></code></a></p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Parsed route data.</p>
@@ -373,7 +375,7 @@ only, which implements extractor for Routing Header for IPv6
 <dd class="field-odd"><p><strong>length</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>) – route data length</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">SourceRoute</span></code></p>
+<dd class="field-even"><p><a class="reference internal" href="#pcapkit.protocols.data.internet.ipv6_route.SourceRoute" title="pcapkit.protocols.data.internet.ipv6_route.SourceRoute"><code class="xref py py-class docutils literal notranslate"><span class="pre">SourceRoute</span></code></a></p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Parsed route data.</p>
@@ -406,7 +408,7 @@ only, which implements extractor for Routing Header for IPv6
 <dd class="field-odd"><p><strong>length</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>) – route data length</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Type2</span></code></p>
+<dd class="field-even"><p><a class="reference internal" href="#pcapkit.protocols.data.internet.ipv6_route.Type2" title="pcapkit.protocols.data.internet.ipv6_route.Type2"><code class="xref py py-class docutils literal notranslate"><span class="pre">Type2</span></code></a></p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Parsed route data.</p>
@@ -442,7 +444,7 @@ only, which implements extractor for Routing Header for IPv6
 <dd class="field-odd"><p><strong>length</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>) – route data length</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">RPL</span></code></p>
+<dd class="field-even"><p><a class="reference internal" href="#pcapkit.protocols.data.internet.ipv6_route.RPL" title="pcapkit.protocols.data.internet.ipv6_route.RPL"><code class="xref py py-class docutils literal notranslate"><span class="pre">RPL</span></code></a></p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Parsed route data.</p>
@@ -455,352 +457,185 @@ only, which implements extractor for Routing Header for IPv6
 
 </dd></dl>
 
-<dl class="py data">
-<dt class="sig sig-object py" id="pcapkit.protocols.internet.ipv6_route.pcapkit.protocols.internet.ipv6_route._ROUTE_PROC">
-<span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.internet.ipv6_route.</span></span><span class="sig-name descname"><span class="pre">_ROUTE_PROC</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pcapkit.protocols.internet.ipv6_route.pcapkit.protocols.internet.ipv6_route._ROUTE_PROC" title="Permalink to this definition">¶</a></dt>
-<dd><p>IPv6 routing processors.</p>
-<table class="docutils align-default">
-<thead>
-<tr class="row-odd"><th class="head"><p>Code</p></th>
-<th class="head"><p>Processor</p></th>
-<th class="head"><p>Note</p></th>
-</tr>
-</thead>
-<tbody>
-<tr class="row-even"><td><p>0</p></td>
-<td><p><a class="reference internal" href="#pcapkit.protocols.internet.ipv6_route.IPv6_Route._read_data_type_src" title="pcapkit.protocols.internet.ipv6_route.IPv6_Route._read_data_type_src"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_read_data_type_src()</span></code></a></p></td>
-<td><p>[<span class="target" id="index-7"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5095.html"><strong>RFC 5095</strong></a>] <strong>DEPRECATED</strong></p></td>
-</tr>
-<tr class="row-odd"><td><p>2</p></td>
-<td><p><a class="reference internal" href="#pcapkit.protocols.internet.ipv6_route.IPv6_Route._read_data_type_2" title="pcapkit.protocols.internet.ipv6_route.IPv6_Route._read_data_type_2"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_read_data_type_2()</span></code></a></p></td>
-<td><p>[<span class="target" id="index-8"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6275.html"><strong>RFC 6275</strong></a>]</p></td>
-</tr>
-<tr class="row-even"><td><p>3</p></td>
-<td><p><a class="reference internal" href="#pcapkit.protocols.internet.ipv6_route.IPv6_Route._read_data_type_rpl" title="pcapkit.protocols.internet.ipv6_route.IPv6_Route._read_data_type_rpl"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_read_data_type_rpl()</span></code></a></p></td>
-<td><p>[<span class="target" id="index-9"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6554.html"><strong>RFC 6554</strong></a>]</p></td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<section id="data-structure">
-<h2>Data Structure<a class="headerlink" href="#data-structure" title="Permalink to this heading">¶</a></h2>
-<div class="admonition important">
-<p class="admonition-title">Important</p>
-<p>Following classes are only for <em>documentation</em> purpose.
-They do <strong>NOT</strong> exist in the <a class="reference internal" href="../../index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> module.</p>
-</div>
+<section id="data-structures">
+<h2>Data Structures<a class="headerlink" href="#data-structures" title="Permalink to this heading">¶</a></h2>
 <dl class="py class">
-<dt class="sig sig-object py" id="pcapkit.protocols.internet.ipv6_route.DataType_IPv6_Route">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.internet.ipv6_route.</span></span><span class="sig-name descname"><span class="pre">DataType_IPv6_Route</span></span><a class="headerlink" href="#pcapkit.protocols.internet.ipv6_route.DataType_IPv6_Route" title="Permalink to this definition">¶</a></dt>
-<dd><p>Structure of IPv6-Route header [<span class="target" id="index-10"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8200.html"><strong>RFC 8200</strong></a>][<span class="target" id="index-11"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5095.html"><strong>RFC 5095</strong></a>].</p>
+<dt class="sig sig-object py" id="pcapkit.protocols.data.internet.ipv6_route.IPv6_Route">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.data.internet.ipv6_route.</span></span><span class="sig-name descname"><span class="pre">IPv6_Route</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dict_</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/data/internet/ipv6_route.html#IPv6_Route"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.data.internet.ipv6_route.IPv6_Route" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="../../corekit/infoclass.html#pcapkit.corekit.infoclass.Info" title="pcapkit.corekit.infoclass.Info"><code class="xref py py-class docutils literal notranslate"><span class="pre">Info</span></code></a></p>
+<p>Data model for IPv6-Route protocol.</p>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p>The type-specific routing data is stored directly in the top-level
+<a class="reference internal" href="#pcapkit.protocols.data.internet.ipv6_route.IPv6_Route" title="pcapkit.protocols.data.internet.ipv6_route.IPv6_Route"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6_Route</span></code></a> object.
+Please refer to the <a class="reference internal" href="#pcapkit.protocols.data.internet.ipv6_route.RoutingType" title="pcapkit.protocols.data.internet.ipv6_route.RoutingType"><code class="xref py py-class docutils literal notranslate"><span class="pre">RoutingType</span></code></a>
+subclasses for the details.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>*args</strong> (<em>VT</em>) – Arbitrary positional arguments.</p></li>
+<li><p><strong>**kwargs</strong> (<em>VT</em>) – Arbitrary keyword arguments.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="../../corekit/infoclass.html#pcapkit.corekit.infoclass.Info" title="pcapkit.corekit.infoclass.Info">Info</a></p>
+</dd>
+</dl>
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.protocols.internet.ipv6_route.DataType_IPv6_Route.next">
-<span class="sig-name descname"><span class="pre">next</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="../../const/reg.html#pcapkit.const.reg.transtype.TransType" title="pcapkit.const.reg.transtype.TransType"><span class="pre">pcapkit.const.reg.transtype.TransType</span></a></em><a class="headerlink" href="#pcapkit.protocols.internet.ipv6_route.DataType_IPv6_Route.next" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.protocols.data.internet.ipv6_route.IPv6_Route.next">
+<span class="sig-name descname"><span class="pre">next</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="../../const/reg.html#pcapkit.const.reg.transtype.TransType" title="pcapkit.const.reg.transtype.TransType"><span class="pre">TransType</span></a></em><a class="headerlink" href="#pcapkit.protocols.data.internet.ipv6_route.IPv6_Route.next" title="Permalink to this definition">¶</a></dt>
 <dd><p>Next header.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.protocols.internet.ipv6_route.DataType_IPv6_Route.length">
-<span class="sig-name descname"><span class="pre">length</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></em><a class="headerlink" href="#pcapkit.protocols.internet.ipv6_route.DataType_IPv6_Route.length" title="Permalink to this definition">¶</a></dt>
-<dd><p>Header extensive length.</p>
+<dt class="sig sig-object py" id="pcapkit.protocols.data.internet.ipv6_route.IPv6_Route.length">
+<span class="sig-name descname"><span class="pre">length</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></em><a class="headerlink" href="#pcapkit.protocols.data.internet.ipv6_route.IPv6_Route.length" title="Permalink to this definition">¶</a></dt>
+<dd><p>Header extension length.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.protocols.internet.ipv6_route.DataType_IPv6_Route.type">
-<span class="sig-name descname"><span class="pre">type</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="../../const/ipv6.html#pcapkit.const.ipv6.routing.Routing" title="pcapkit.const.ipv6.routing.Routing"><span class="pre">pcapkit.const.ipv6.routing.Routing</span></a></em><a class="headerlink" href="#pcapkit.protocols.internet.ipv6_route.DataType_IPv6_Route.type" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.protocols.data.internet.ipv6_route.IPv6_Route.type">
+<span class="sig-name descname"><span class="pre">type</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="../../const/ipv6.html#pcapkit.const.ipv6.routing.Routing" title="pcapkit.const.ipv6.routing.Routing"><span class="pre">Routing</span></a></em><a class="headerlink" href="#pcapkit.protocols.data.internet.ipv6_route.IPv6_Route.type" title="Permalink to this definition">¶</a></dt>
 <dd><p>Routing type.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.protocols.internet.ipv6_route.DataType_IPv6_Route.seg_left">
-<span class="sig-name descname"><span class="pre">seg_left</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></em><a class="headerlink" href="#pcapkit.protocols.internet.ipv6_route.DataType_IPv6_Route.seg_left" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.protocols.data.internet.ipv6_route.IPv6_Route.seg_left">
+<span class="sig-name descname"><span class="pre">seg_left</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></em><a class="headerlink" href="#pcapkit.protocols.data.internet.ipv6_route.IPv6_Route.seg_left" title="Permalink to this definition">¶</a></dt>
 <dd><p>Segments left.</p>
 </dd></dl>
 
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.protocols.internet.ipv6_route.DataType_IPv6_Route.packet">
-<span class="sig-name descname"><span class="pre">packet</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.10)"><span class="pre">bytes</span></a></em><a class="headerlink" href="#pcapkit.protocols.internet.ipv6_route.DataType_IPv6_Route.packet" title="Permalink to this definition">¶</a></dt>
-<dd><p>Raw packet data.</p>
 </dd></dl>
 
-</dd></dl>
-
-<section id="ipv6-route-unknown-type">
-<h3>IPv6-Route Unknown Type<a class="headerlink" href="#ipv6-route-unknown-type" title="Permalink to this heading">¶</a></h3>
-<p>For IPv6-Route unknown type data as described in <span class="target" id="index-12"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8200.html"><strong>RFC 8200</strong></a> and <span class="target" id="index-13"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5095.html"><strong>RFC 5095</strong></a>,
-its structure is described as below:</p>
-<table class="docutils align-default">
-<thead>
-<tr class="row-odd"><th class="head"><p>Octets</p></th>
-<th class="head"><p>Bits</p></th>
-<th class="head"><p>Name</p></th>
-<th class="head"><p>Description</p></th>
-</tr>
-</thead>
-<tbody>
-<tr class="row-even"><td><p>0</p></td>
-<td><p>0</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">route.next</span></code></p></td>
-<td><p>Next Header</p></td>
-</tr>
-<tr class="row-odd"><td><p>1</p></td>
-<td><p>8</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">route.length</span></code></p></td>
-<td><p>Header Extensive Length</p></td>
-</tr>
-<tr class="row-even"><td><p>2</p></td>
-<td><p>16</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">route.type</span></code></p></td>
-<td><p>Routing Type</p></td>
-</tr>
-<tr class="row-odd"><td><p>3</p></td>
-<td><p>24</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">route.seg_left</span></code></p></td>
-<td><p>Segments Left</p></td>
-</tr>
-<tr class="row-even"><td><p>4</p></td>
-<td><p>32</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">route.data</span></code></p></td>
-<td><p>Type-Specific Data</p></td>
-</tr>
-</tbody>
-</table>
-<br /><dl class="py class">
-<dt class="sig sig-object py" id="pcapkit.protocols.internet.ipv6_route.DataType_IPv6_Route_None">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.internet.ipv6_route.</span></span><span class="sig-name descname"><span class="pre">DataType_IPv6_Route_None</span></span><a class="headerlink" href="#pcapkit.protocols.internet.ipv6_route.DataType_IPv6_Route_None" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="field-list simple">
-<dt class="field-odd">Bases<span class="colon">:</span></dt>
-<dd class="field-odd"><p>TypedDict</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="pcapkit.protocols.data.internet.ipv6_route.RoutingType">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.data.internet.ipv6_route.</span></span><span class="sig-name descname"><span class="pre">RoutingType</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dict_</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/data/internet/ipv6_route.html#RoutingType"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.data.internet.ipv6_route.RoutingType" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="../../corekit/infoclass.html#pcapkit.corekit.infoclass.Info" title="pcapkit.corekit.infoclass.Info"><code class="xref py py-class docutils literal notranslate"><span class="pre">Info</span></code></a></p>
+<p>Data model for Routing Type.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>*args</strong> (<em>VT</em>) – Arbitrary positional arguments.</p></li>
+<li><p><strong>**kwargs</strong> (<em>VT</em>) – Arbitrary keyword arguments.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="../../corekit/infoclass.html#pcapkit.corekit.infoclass.Info" title="pcapkit.corekit.infoclass.Info">Info</a></p>
 </dd>
 </dl>
-<p>Structure of IPv6-Route unknown type data [<span class="target" id="index-14"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8200.html"><strong>RFC 8200</strong></a>][<span class="target" id="index-15"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5095.html"><strong>RFC 5095</strong></a>].</p>
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.protocols.internet.ipv6_route.DataType_IPv6_Route_None.data">
-<span class="sig-name descname"><span class="pre">data</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.10)"><span class="pre">bytes</span></a></em><a class="headerlink" href="#pcapkit.protocols.internet.ipv6_route.DataType_IPv6_Route_None.data" title="Permalink to this definition">¶</a></dt>
-<dd><p>Type-specific data.</p>
 </dd></dl>
 
-</dd></dl>
-
-</section>
-<section id="ipv6-route-source-route">
-<h3>IPv6-Route Source Route<a class="headerlink" href="#ipv6-route-source-route" title="Permalink to this heading">¶</a></h3>
-<p>For IPv6-Route Source Route data as described in <span class="target" id="index-16"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5095.html"><strong>RFC 5095</strong></a>,
-its structure is described as below:</p>
-<table class="docutils align-default">
-<thead>
-<tr class="row-odd"><th class="head"><p>Octets</p></th>
-<th class="head"><p>Bits</p></th>
-<th class="head"><p>Name</p></th>
-<th class="head"><p>Description</p></th>
-</tr>
-</thead>
-<tbody>
-<tr class="row-even"><td><p>0</p></td>
-<td><p>0</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">route.next</span></code></p></td>
-<td><p>Next Header</p></td>
-</tr>
-<tr class="row-odd"><td><p>1</p></td>
-<td><p>8</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">route.length</span></code></p></td>
-<td><p>Header Extensive Length</p></td>
-</tr>
-<tr class="row-even"><td><p>2</p></td>
-<td><p>16</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">route.type</span></code></p></td>
-<td><p>Routing Type</p></td>
-</tr>
-<tr class="row-odd"><td><p>3</p></td>
-<td><p>24</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">route.seg_left</span></code></p></td>
-<td><p>Segments Left</p></td>
-</tr>
-<tr class="row-even"><td><p>4</p></td>
-<td><p>32</p></td>
-<td></td>
-<td><p>Reserved</p></td>
-</tr>
-<tr class="row-odd"><td><p>8</p></td>
-<td><p>64</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">route.ip</span></code></p></td>
-<td><p>Address</p></td>
-</tr>
-</tbody>
-</table>
-<br /><dl class="py class">
-<dt class="sig sig-object py" id="pcapkit.protocols.internet.ipv6_route.DataType_IPv6_Route_Source">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.internet.ipv6_route.</span></span><span class="sig-name descname"><span class="pre">DataType_IPv6_Route_Source</span></span><a class="headerlink" href="#pcapkit.protocols.internet.ipv6_route.DataType_IPv6_Route_Source" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="field-list simple">
-<dt class="field-odd">Bases<span class="colon">:</span></dt>
-<dd class="field-odd"><p>TypedDict</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="pcapkit.protocols.data.internet.ipv6_route.UnknownType">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.data.internet.ipv6_route.</span></span><span class="sig-name descname"><span class="pre">UnknownType</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dict_</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/data/internet/ipv6_route.html#UnknownType"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.data.internet.ipv6_route.UnknownType" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pcapkit.protocols.data.internet.ipv6_route.RoutingType" title="pcapkit.protocols.data.internet.ipv6_route.RoutingType"><code class="xref py py-class docutils literal notranslate"><span class="pre">RoutingType</span></code></a></p>
+<p>Data model for IPv6-Route unknown type.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>*args</strong> (<em>VT</em>) – Arbitrary positional arguments.</p></li>
+<li><p><strong>**kwargs</strong> (<em>VT</em>) – Arbitrary keyword arguments.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="../../corekit/infoclass.html#pcapkit.corekit.infoclass.Info" title="pcapkit.corekit.infoclass.Info">Info</a></p>
 </dd>
 </dl>
-<p>Structure of IPv6-Route Source Route data [<span class="target" id="index-17"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5095.html"><strong>RFC 5095</strong></a>].</p>
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.protocols.internet.ipv6_route.DataType_IPv6_Route_Source.ip">
-<span class="sig-name descname"><span class="pre">ip</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/ipaddress.html#ipaddress.IPv6Address" title="(in Python v3.10)"><span class="pre">ipaddress.IPv6Address</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pcapkit.protocols.internet.ipv6_route.DataType_IPv6_Route_Source.ip" title="Permalink to this definition">¶</a></dt>
-<dd><p>Array of IPv6 addresses.</p>
+<dt class="sig sig-object py" id="pcapkit.protocols.data.internet.ipv6_route.UnknownType.data">
+<span class="sig-name descname"><span class="pre">data</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.10)"><span class="pre">bytes</span></a></em><a class="headerlink" href="#pcapkit.protocols.data.internet.ipv6_route.UnknownType.data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Data.</p>
 </dd></dl>
 
 </dd></dl>
 
-</section>
-<section id="ipv6-route-type-2">
-<h3>IPv6-Route Type 2<a class="headerlink" href="#ipv6-route-type-2" title="Permalink to this heading">¶</a></h3>
-<p>For IPv6-Route Type 2 data as described in <span class="target" id="index-18"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6275.html"><strong>RFC 6275</strong></a>,
-its structure is described as below:</p>
-<table class="docutils align-default">
-<thead>
-<tr class="row-odd"><th class="head"><p>Octets</p></th>
-<th class="head"><p>Bits</p></th>
-<th class="head"><p>Name</p></th>
-<th class="head"><p>Description</p></th>
-</tr>
-</thead>
-<tbody>
-<tr class="row-even"><td><p>0</p></td>
-<td><p>0</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">route.next</span></code></p></td>
-<td><p>Next Header</p></td>
-</tr>
-<tr class="row-odd"><td><p>1</p></td>
-<td><p>8</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">route.length</span></code></p></td>
-<td><p>Header Extensive Length</p></td>
-</tr>
-<tr class="row-even"><td><p>2</p></td>
-<td><p>16</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">route.type</span></code></p></td>
-<td><p>Routing Type</p></td>
-</tr>
-<tr class="row-odd"><td><p>3</p></td>
-<td><p>24</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">route.seg_left</span></code></p></td>
-<td><p>Segments Left</p></td>
-</tr>
-<tr class="row-even"><td><p>4</p></td>
-<td><p>32</p></td>
-<td></td>
-<td><p>Reserved</p></td>
-</tr>
-<tr class="row-odd"><td><p>8</p></td>
-<td><p>64</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">route.ip</span></code></p></td>
-<td><p>Home Address</p></td>
-</tr>
-</tbody>
-</table>
-<br /><dl class="py class">
-<dt class="sig sig-object py" id="pcapkit.protocols.internet.ipv6_route.DataType_IPv6_Route_2">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.internet.ipv6_route.</span></span><span class="sig-name descname"><span class="pre">DataType_IPv6_Route_2</span></span><a class="headerlink" href="#pcapkit.protocols.internet.ipv6_route.DataType_IPv6_Route_2" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="field-list simple">
-<dt class="field-odd">Bases<span class="colon">:</span></dt>
-<dd class="field-odd"><p>TypedDict</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="pcapkit.protocols.data.internet.ipv6_route.SourceRoute">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.data.internet.ipv6_route.</span></span><span class="sig-name descname"><span class="pre">SourceRoute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dict_</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/data/internet/ipv6_route.html#SourceRoute"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.data.internet.ipv6_route.SourceRoute" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pcapkit.protocols.data.internet.ipv6_route.RoutingType" title="pcapkit.protocols.data.internet.ipv6_route.RoutingType"><code class="xref py py-class docutils literal notranslate"><span class="pre">RoutingType</span></code></a></p>
+<p>Data model for IPv6-Route Source Route data type.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>*args</strong> (<em>VT</em>) – Arbitrary positional arguments.</p></li>
+<li><p><strong>**kwargs</strong> (<em>VT</em>) – Arbitrary keyword arguments.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="../../corekit/infoclass.html#pcapkit.corekit.infoclass.Info" title="pcapkit.corekit.infoclass.Info">Info</a></p>
 </dd>
 </dl>
-<p>Structure of IPv6-Route Type 2 data [<span class="target" id="index-19"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6275.html"><strong>RFC 6275</strong></a>].</p>
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.protocols.internet.ipv6_route.DataType_IPv6_Route_2.ip">
-<span class="sig-name descname"><span class="pre">ip</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/ipaddress.html#ipaddress.IPv6Address" title="(in Python v3.10)"><span class="pre">ipaddress.IPv6Address</span></a></em><a class="headerlink" href="#pcapkit.protocols.internet.ipv6_route.DataType_IPv6_Route_2.ip" title="Permalink to this definition">¶</a></dt>
-<dd><p>Home IPv6 addresses.</p>
+<dt class="sig sig-object py" id="pcapkit.protocols.data.internet.ipv6_route.SourceRoute.ip">
+<span class="sig-name descname"><span class="pre">ip</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.10)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><span class="pre">IPv6Address</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pcapkit.protocols.data.internet.ipv6_route.SourceRoute.ip" title="Permalink to this definition">¶</a></dt>
+<dd><p>Source addresses.</p>
 </dd></dl>
 
 </dd></dl>
 
-</section>
-<section id="ipv6-route-rpl-source">
-<h3>IPv6-Route RPL Source<a class="headerlink" href="#ipv6-route-rpl-source" title="Permalink to this heading">¶</a></h3>
-<p>For IPv6-Route RPL Source data as described in <span class="target" id="index-20"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6554.html"><strong>RFC 6554</strong></a>,
-its structure is described as below:</p>
-<table class="docutils align-default">
-<thead>
-<tr class="row-odd"><th class="head"><p>Octets</p></th>
-<th class="head"><p>Bits</p></th>
-<th class="head"><p>Name</p></th>
-<th class="head"><p>Description</p></th>
-</tr>
-</thead>
-<tbody>
-<tr class="row-even"><td><p>0</p></td>
-<td><p>0</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">route.next</span></code></p></td>
-<td><p>Next Header</p></td>
-</tr>
-<tr class="row-odd"><td><p>1</p></td>
-<td><p>8</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">route.length</span></code></p></td>
-<td><p>Header Extensive Length</p></td>
-</tr>
-<tr class="row-even"><td><p>2</p></td>
-<td><p>16</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">route.type</span></code></p></td>
-<td><p>Routing Type</p></td>
-</tr>
-<tr class="row-odd"><td><p>3</p></td>
-<td><p>24</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">route.seg_left</span></code></p></td>
-<td><p>Segments Left</p></td>
-</tr>
-<tr class="row-even"><td><p>4</p></td>
-<td><p>32</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">route.cmpr_i</span></code></p></td>
-<td><p>CmprI</p></td>
-</tr>
-<tr class="row-odd"><td><p>4</p></td>
-<td><p>36</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">route.cmpr_e</span></code></p></td>
-<td><p>CmprE</p></td>
-</tr>
-<tr class="row-even"><td><p>5</p></td>
-<td><p>40</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">route.pad</span></code></p></td>
-<td><p>Pad Size</p></td>
-</tr>
-<tr class="row-odd"><td><p>5</p></td>
-<td><p>44</p></td>
-<td></td>
-<td><p>Reserved</p></td>
-</tr>
-<tr class="row-even"><td><p>8</p></td>
-<td><p>64</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">route.ip</span></code></p></td>
-<td><p>Addresses</p></td>
-</tr>
-</tbody>
-</table>
-<br /><dl class="py class">
-<dt class="sig sig-object py" id="pcapkit.protocols.internet.ipv6_route.DataType_IPv6_Route_RPL">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.internet.ipv6_route.</span></span><span class="sig-name descname"><span class="pre">DataType_IPv6_Route_RPL</span></span><a class="headerlink" href="#pcapkit.protocols.internet.ipv6_route.DataType_IPv6_Route_RPL" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="field-list simple">
-<dt class="field-odd">Bases<span class="colon">:</span></dt>
-<dd class="field-odd"><p>TypedDict</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="pcapkit.protocols.data.internet.ipv6_route.Type2">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.data.internet.ipv6_route.</span></span><span class="sig-name descname"><span class="pre">Type2</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dict_</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/data/internet/ipv6_route.html#Type2"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.data.internet.ipv6_route.Type2" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pcapkit.protocols.data.internet.ipv6_route.RoutingType" title="pcapkit.protocols.data.internet.ipv6_route.RoutingType"><code class="xref py py-class docutils literal notranslate"><span class="pre">RoutingType</span></code></a></p>
+<p>Data model for IPv6-Route Type 2 data type.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>*args</strong> (<em>VT</em>) – Arbitrary positional arguments.</p></li>
+<li><p><strong>**kwargs</strong> (<em>VT</em>) – Arbitrary keyword arguments.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="../../corekit/infoclass.html#pcapkit.corekit.infoclass.Info" title="pcapkit.corekit.infoclass.Info">Info</a></p>
 </dd>
 </dl>
-<p>Structure of IPv6-Route RPL Source data [<span class="target" id="index-21"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6554.html"><strong>RFC 6554</strong></a>].</p>
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.protocols.internet.ipv6_route.DataType_IPv6_Route_RPL.cmpr_i">
-<span class="sig-name descname"><span class="pre">cmpr_i</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></em><a class="headerlink" href="#pcapkit.protocols.internet.ipv6_route.DataType_IPv6_Route_RPL.cmpr_i" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.protocols.data.internet.ipv6_route.Type2.ip">
+<span class="sig-name descname"><span class="pre">ip</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">IPv6Address</span></em><a class="headerlink" href="#pcapkit.protocols.data.internet.ipv6_route.Type2.ip" title="Permalink to this definition">¶</a></dt>
+<dd><p>Address.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pcapkit.protocols.data.internet.ipv6_route.RPL">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.data.internet.ipv6_route.</span></span><span class="sig-name descname"><span class="pre">RPL</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dict_</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/data/internet/ipv6_route.html#RPL"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.data.internet.ipv6_route.RPL" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pcapkit.protocols.data.internet.ipv6_route.RoutingType" title="pcapkit.protocols.data.internet.ipv6_route.RoutingType"><code class="xref py py-class docutils literal notranslate"><span class="pre">RoutingType</span></code></a></p>
+<p>Data model for RPL Source data type.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>*args</strong> (<em>VT</em>) – Arbitrary positional arguments.</p></li>
+<li><p><strong>**kwargs</strong> (<em>VT</em>) – Arbitrary keyword arguments.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="../../corekit/infoclass.html#pcapkit.corekit.infoclass.Info" title="pcapkit.corekit.infoclass.Info">Info</a></p>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.data.internet.ipv6_route.RPL.cmpr_i">
+<span class="sig-name descname"><span class="pre">cmpr_i</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></em><a class="headerlink" href="#pcapkit.protocols.data.internet.ipv6_route.RPL.cmpr_i" title="Permalink to this definition">¶</a></dt>
 <dd><p>CmprI.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.protocols.internet.ipv6_route.DataType_IPv6_Route_RPL.cmpr_e">
-<span class="sig-name descname"><span class="pre">cmpr_e</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></em><a class="headerlink" href="#pcapkit.protocols.internet.ipv6_route.DataType_IPv6_Route_RPL.cmpr_e" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.protocols.data.internet.ipv6_route.RPL.cmpr_e">
+<span class="sig-name descname"><span class="pre">cmpr_e</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></em><a class="headerlink" href="#pcapkit.protocols.data.internet.ipv6_route.RPL.cmpr_e" title="Permalink to this definition">¶</a></dt>
 <dd><p>CmprE.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.protocols.internet.ipv6_route.DataType_IPv6_Route_RPL.pad">
-<span class="sig-name descname"><span class="pre">pad</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></em><a class="headerlink" href="#pcapkit.protocols.internet.ipv6_route.DataType_IPv6_Route_RPL.pad" title="Permalink to this definition">¶</a></dt>
-<dd><p>Pad size.</p>
+<dt class="sig sig-object py" id="pcapkit.protocols.data.internet.ipv6_route.RPL.pad">
+<span class="sig-name descname"><span class="pre">pad</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></em><a class="headerlink" href="#pcapkit.protocols.data.internet.ipv6_route.RPL.pad" title="Permalink to this definition">¶</a></dt>
+<dd><p>Pad.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.protocols.internet.ipv6_route.DataType_IPv6_Route_RPL.ip">
-<span class="sig-name descname"><span class="pre">ip</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/ipaddress.html#ipaddress.IPv4Address" title="(in Python v3.10)"><span class="pre">ipaddress.IPv4Address</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/ipaddress.html#ipaddress.IPv6Address" title="(in Python v3.10)"><span class="pre">ipaddress.IPv6Address</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pcapkit.protocols.internet.ipv6_route.DataType_IPv6_Route_RPL.ip" title="Permalink to this definition">¶</a></dt>
-<dd><p>Array of IPv4 and/or IPv6 addresses.</p>
+<dt class="sig sig-object py" id="pcapkit.protocols.data.internet.ipv6_route.RPL.ip">
+<span class="sig-name descname"><span class="pre">ip</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.10)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><span class="pre">IPv6Address</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pcapkit.protocols.data.internet.ipv6_route.RPL.ip" title="Permalink to this definition">¶</a></dt>
+<dd><p>IPv6 addresses.</p>
 </dd></dl>
 
 </dd></dl>
@@ -809,7 +644,6 @@ its structure is described as below:</p>
 <span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id1">*</a><span class="fn-bracket">]</span></span>
 <p><a class="reference external" href="https://en.wikipedia.org/wiki/IPv6_packet#Routing">https://en.wikipedia.org/wiki/IPv6_packet#Routing</a></p>
 </aside>
-</section>
 </section>
 </section>
 

@@ -2,6 +2,7 @@ IPv6-Route - Routing Header for IPv6
 ====================================
 
 .. module:: pcapkit.protocols.internet.ipv6_route
+.. module:: pcapkit.protocols.data.internet.ipv6_route
 
 :mod:`pcapkit.protocols.internet.ipv6_route` contains
 :class:`~pcapkit.protocols.internet.ipv6_route.IPv6_Route`
@@ -23,205 +24,91 @@ Octets      Bits        Name                    Description
    <br />
 
 .. autoclass:: pcapkit.protocols.internet.ipv6_route.IPv6_Route
-   :members:
-   :undoc-members:
-   :private-members:
+   :no-members:
    :show-inheritance:
 
-.. data:: pcapkit.protocols.internet.ipv6_route._ROUTE_PROC
-   :type: Dict[int, str]
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
 
-   IPv6 routing processors.
+   .. automethod:: __post_init__
+   .. automethod:: __index__
 
-   ==== ============================================================================= ============================
-   Code Processor                                                                     Note
-   ==== ============================================================================= ============================
-   0    :meth:`~pcapkit.protocols.internet.ipv6_route.IPv6_Route._read_data_type_src` [:rfc:`5095`] **DEPRECATED**
-   2    :meth:`~pcapkit.protocols.internet.ipv6_route.IPv6_Route._read_data_type_2`   [:rfc:`6275`]
-   3    :meth:`~pcapkit.protocols.internet.ipv6_route.IPv6_Route._read_data_type_rpl` [:rfc:`6554`]
-   ==== ============================================================================= ============================
+   .. autoproperty:: name
+   .. autoproperty:: alias
+   .. autoproperty:: length
+   .. autoproperty:: payload
+   .. autoproperty:: protocol
+   .. autoproperty:: protochain
 
-Data Structure
---------------
+   .. automethod:: read
+   .. automethod:: make
+   .. automethod:: register_routing
 
-.. important::
+   .. automethod:: _read_data_type_none
+   .. automethod:: _read_data_type_src
+   .. automethod:: _read_data_type_2
+   .. automethod:: _read_data_type_rpl
 
-   Following classes are only for *documentation* purpose.
-   They do **NOT** exist in the :mod:`pcapkit` module.
+Data Structures
+---------------
 
-.. class:: DataType_IPv6_Route
+.. autoclass:: pcapkit.protocols.data.internet.ipv6_route.IPv6_Route(next, length, type, seg_left)
+   :no-members:
+   :show-inheritance:
 
-   Structure of IPv6-Route header [:rfc:`8200`][:rfc:`5095`].
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. attribute:: next
-      :type: pcapkit.const.reg.transtype.TransType
+   .. autoattribute:: next
+   .. autoattribute:: length
+   .. autoattribute:: type
+   .. autoattribute:: seg_left
 
-      Next header.
+.. autoclass:: pcapkit.protocols.data.internet.ipv6_route.RoutingType()
+   :no-members:
+   :show-inheritance:
 
-   .. attribute:: length
-      :type: int
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
 
-      Header extensive length.
+.. autoclass:: pcapkit.protocols.data.internet.ipv6_route.UnknownType(data)
+   :no-members:
+   :show-inheritance:
 
-   .. attribute:: type
-      :type: pcapkit.const.ipv6.routing.Routing
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
 
-      Routing type.
+   .. autoattribute:: data
 
-   .. attribute:: seg_left
-      :type: int
+.. autoclass:: pcapkit.protocols.data.internet.ipv6_route.SourceRoute(ip)
+   :no-members:
+   :show-inheritance:
 
-      Segments left.
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. attribute:: packet
-      :type: bytes
+   .. autoattribute:: ip
 
-      Raw packet data.
+.. autoclass:: pcapkit.protocols.data.internet.ipv6_route.Type2(ip)
+   :no-members:
+   :show-inheritance:
 
-IPv6-Route Unknown Type
-~~~~~~~~~~~~~~~~~~~~~~~
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
 
-For IPv6-Route unknown type data as described in :rfc:`8200` and :rfc:`5095`,
-its structure is described as below:
+   .. autoattribute:: ip
 
-======= ========= ============================= ========================
-Octets      Bits        Name                    Description
-======= ========= ============================= ========================
-  0           0   ``route.next``                Next Header
-  1           8   ``route.length``              Header Extensive Length
-  2          16   ``route.type``                Routing Type
-  3          24   ``route.seg_left``            Segments Left
-  4          32   ``route.data``                Type-Specific Data
-======= ========= ============================= ========================
+.. autoclass:: pcapkit.protocols.data.internet.ipv6_route.RPL(cmpr_i, cmpr_e, pad, ip)
+   :no-members:
+   :show-inheritance:
 
-.. raw:: html
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
 
-   <br />
-
-.. class:: DataType_IPv6_Route_None
-
-   :bases: TypedDict
-
-   Structure of IPv6-Route unknown type data [:rfc:`8200`][:rfc:`5095`].
-
-   .. attribute:: data
-      :type: bytes
-
-      Type-specific data.
-
-IPv6-Route Source Route
-~~~~~~~~~~~~~~~~~~~~~~~
-
-For IPv6-Route Source Route data as described in :rfc:`5095`,
-its structure is described as below:
-
-======= ========= ============================= ========================
-Octets      Bits        Name                    Description
-======= ========= ============================= ========================
-  0           0   ``route.next``                Next Header
-  1           8   ``route.length``              Header Extensive Length
-  2          16   ``route.type``                Routing Type
-  3          24   ``route.seg_left``            Segments Left
-  4          32                                 Reserved
-  8          64   ``route.ip``                  Address
-======= ========= ============================= ========================
-
-.. raw:: html
-
-   <br />
-
-.. class:: DataType_IPv6_Route_Source
-
-   :bases: TypedDict
-
-   Structure of IPv6-Route Source Route data [:rfc:`5095`].
-
-   .. attribute:: ip
-      :type: Tuple[ipaddress.IPv6Address]
-
-      Array of IPv6 addresses.
-
-IPv6-Route Type 2
-~~~~~~~~~~~~~~~~~
-
-For IPv6-Route Type 2 data as described in :rfc:`6275`,
-its structure is described as below:
-
-======= ========= ============================= ========================
-Octets      Bits        Name                    Description
-======= ========= ============================= ========================
-  0           0   ``route.next``                Next Header
-  1           8   ``route.length``              Header Extensive Length
-  2          16   ``route.type``                Routing Type
-  3          24   ``route.seg_left``            Segments Left
-  4          32                                 Reserved
-  8          64   ``route.ip``                  Home Address
-======= ========= ============================= ========================
-
-.. raw:: html
-
-   <br />
-
-.. class:: DataType_IPv6_Route_2
-
-   :bases: TypedDict
-
-   Structure of IPv6-Route Type 2 data [:rfc:`6275`].
-
-   .. attribute:: ip
-      :type: ipaddress.IPv6Address
-
-      Home IPv6 addresses.
-
-IPv6-Route RPL Source
-~~~~~~~~~~~~~~~~~~~~~
-
-For IPv6-Route RPL Source data as described in :rfc:`6554`,
-its structure is described as below:
-
-======= ========= ============================= ========================
-Octets      Bits        Name                    Description
-======= ========= ============================= ========================
-  0           0   ``route.next``                Next Header
-  1           8   ``route.length``              Header Extensive Length
-  2          16   ``route.type``                Routing Type
-  3          24   ``route.seg_left``            Segments Left
-  4          32   ``route.cmpr_i``              CmprI
-  4          36   ``route.cmpr_e``              CmprE
-  5          40   ``route.pad``                 Pad Size
-  5          44                                 Reserved
-  8          64   ``route.ip``                  Addresses
-======= ========= ============================= ========================
-
-.. raw:: html
-
-   <br />
-
-.. class:: DataType_IPv6_Route_RPL
-
-   :bases: TypedDict
-
-   Structure of IPv6-Route RPL Source data [:rfc:`6554`].
-
-   .. attribute:: cmpr_i
-      :type: int
-
-      CmprI.
-
-   .. attribute:: cmpr_e
-      :type: int
-
-      CmprE.
-
-   .. attribute:: pad
-      :type: int
-
-      Pad size.
-
-   .. attribute:: ip
-      :type: Tuple[Union[ipaddress.IPv4Address, ipaddress.IPv6Address]]
-
-      Array of IPv4 and/or IPv6 addresses.
+   .. autoattribute:: cmpr_i
+   .. autoattribute:: cmpr_e
+   .. autoattribute:: pad
+   .. autoattribute:: ip
 
 .. raw:: html
 
