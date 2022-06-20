@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
-"""destination options for IPv6
+"""IPv6-Opts - Destination Options for IPv6
+==============================================
 
 :mod:`pcapkit.protocols.internet.ipv6_opts` contains
 :class:`~pcapkit.protocols.internet.ipv6_opts.IPv6_Opts`
@@ -78,7 +79,50 @@ __all__ = ['IPv6_Opts']
 
 
 class IPv6_Opts(Internet[DataType_IPv6_Opts]):
-    """This class implements Destination Options for IPv6."""
+    """This class implements Destination Options for IPv6.
+
+    This class currently supports parsing of the following IPv6 Hop-by-Hop
+    options, which are registered in the
+    :attr:`self.__option__ <pcapkit.protocols.internet.ipv6_opts.IPv6_Opts.__option__>`
+    attribute:
+
+    .. list-table::
+       :header-rows: 1
+
+       * - Option Code
+         - Option Parser
+       * - :attr:`pcapkit.const.ipv6.option.Option.Pad1`
+         - :meth:`~pcapkit.protocols.internet.ipv6_opts.IPv6_Opts._read_opt_pad`
+       * - :attr:`pcapkit.const.ipv6.option.Option.PadN`
+         - :meth:`~pcapkit.protocols.internet.ipv6_opts.IPv6_Opts._read_opt_pad`
+       * - :attr:`pcapkit.const.ipv6.option.Option.Tunnel_Encapsulation_Limit`
+         - :meth:`~pcapkit.protocols.internet.ipv6_opts.IPv6_Opts._read_opt_tun`
+       * - :attr:`pcapkit.const.ipv6.option.Option.Router_Alert`
+         - :meth:`~pcapkit.protocols.internet.ipv6_opts.IPv6_Opts._read_opt_ra`
+       * - :attr:`pcapkit.const.ipv6.option.Option.CALIPSO`
+         - :meth:`~pcapkit.protocols.internet.ipv6_opts.IPv6_Opts._read_opt_calipso`
+       * - :attr:`pcapkit.const.ipv6.option.Option.SMF_DPD`
+         - :meth:`~pcapkit.protocols.internet.ipv6_opts.IPv6_Opts._read_opt_smf_dpd`
+       * - :attr:`pcapkit.const.ipv6.option.Option.PDM`
+         - :meth:`~pcapkit.protocols.internet.ipv6_opts.IPv6_Opts._read_opt_pdm`
+       * - :attr:`pcapkit.const.ipv6.option.Option.Quick_Start`
+         - :meth:`~pcapkit.protocols.internet.ipv6_opts.IPv6_Opts._read_opt_qs`
+       * - :attr:`pcapkit.const.ipv6.option.Option.RPL_Option_0x63`
+         - :meth:`~pcapkit.protocols.internet.ipv6_opts.IPv6_Opts._read_opt_rpl`
+       * - :attr:`pcapkit.const.ipv6.option.Option.MPL_Option`
+         - :meth:`~pcapkit.protocols.internet.ipv6_opts.IPv6_Opts._read_opt_mpl`
+       * - :attr:`pcapkit.const.ipv6.option.Option.ILNP_Nonce`
+         - :meth:`~pcapkit.protocols.internet.ipv6_opts.IPv6_Opts._read_opt_ilnp`
+       * - :attr:`pcapkit.const.ipv6.option.Option.Line_Identification_Option`
+         - :meth:`~pcapkit.protocols.internet.ipv6_opts.IPv6_Opts._read_opt_lio`
+       * - :attr:`pcapkit.const.ipv6.option.Option.Jumbo_Payload`
+         - :meth:`~pcapkit.protocols.internet.ipv6_opts.IPv6_Opts._read_opt_jumbo`
+       * - :attr:`pcapkit.const.ipv6.option.Option.Home_Address`
+         - :meth:`~pcapkit.protocols.internet.ipv6_opts.IPv6_Opts._read_opt_home`
+       * - :attr:`pcapkit.const.ipv6.option.Option.IP_DFF`
+         - :meth:`~pcapkit.protocols.internet.ipv6_opts.IPv6_Opts._read_opt_ip_dff`
+
+    """
 
     ##########################################################################
     # Defaults.
@@ -190,8 +234,6 @@ class IPv6_Opts(Internet[DataType_IPv6_Opts]):
 
         Args:
             length: Length of packet data.
-
-        Keyword Args:
             extension: If the packet is used as an IPv6 extension header.
             **kwargs: Arbitrary keyword arguments.
 
@@ -219,7 +261,7 @@ class IPv6_Opts(Internet[DataType_IPv6_Opts]):
     def make(self, **kwargs: 'Any') -> 'NoReturn':
         """Make (construct) packet data.
 
-        Keyword Args:
+        Args:
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
@@ -257,8 +299,6 @@ class IPv6_Opts(Internet[DataType_IPv6_Opts]):
         Args:
             file: Source packet stream.
             length: Length of packet data.
-
-        Keyword Args:
             extension: If the protocol is used as an IPv6 extension header.
             **kwargs: Arbitrary keyword arguments.
 
@@ -292,7 +332,7 @@ class IPv6_Opts(Internet[DataType_IPv6_Opts]):
     # Utilities.
     ##########################################################################
 
-    def _read_opt_type(self, kind: 'int') -> 'tuple[int, bool]':  # pylint: disable=no-self-use
+    def _read_opt_type(self, kind: 'int') -> 'tuple[int, bool]':
         """Read option type field.
 
         Arguments:
@@ -370,8 +410,6 @@ class IPv6_Opts(Internet[DataType_IPv6_Opts]):
             code: option type value
             acts: unknown option action value
             cflg: change flag value
-
-        Keyword Args:
             options: extracted IPv6-Opts options
 
         Returns:
@@ -417,8 +455,6 @@ class IPv6_Opts(Internet[DataType_IPv6_Opts]):
             code: option type value
             acts: unknown option action value
             cflg: change flag value
-
-        Keyword Args:
             options: extracted IPv6-Opts options
 
         Returns:
@@ -463,8 +499,6 @@ class IPv6_Opts(Internet[DataType_IPv6_Opts]):
             code: option type value
             acts: unknown option action value
             cflg: change flag value
-
-        Keyword Args:
             options: extracted IPv6-Opts options
 
         Returns:
@@ -505,8 +539,6 @@ class IPv6_Opts(Internet[DataType_IPv6_Opts]):
             code: option type value
             acts: unknown option action value
             cflg: change flag value
-
-        Keyword Args:
             options: extracted IPv6-Opts options
 
         Returns:
@@ -554,8 +586,6 @@ class IPv6_Opts(Internet[DataType_IPv6_Opts]):
             code: option type value
             acts: unknown option action value
             cflg: change flag value
-
-        Keyword Args:
             options: extracted IPv6-Opts options
 
         Returns:
@@ -637,8 +667,6 @@ class IPv6_Opts(Internet[DataType_IPv6_Opts]):
             code: option type value
             acts: unknown option action value
             cflg: change flag value
-
-        Keyword Args:
             options: extracted IPv6-Opts options
 
         Returns:
@@ -762,8 +790,6 @@ class IPv6_Opts(Internet[DataType_IPv6_Opts]):
             code: option type value
             acts: unknown option action value
             cflg: change flag value
-
-        Keyword Args:
             options: extracted IPv6-Opts options
 
         Returns:
@@ -834,8 +860,6 @@ class IPv6_Opts(Internet[DataType_IPv6_Opts]):
             code: option type value
             acts: unknown option action value
             cflg: change flag value
-
-        Keyword Args:
             options: extracted IPv6-Opts options
 
         Returns:
@@ -895,8 +919,6 @@ class IPv6_Opts(Internet[DataType_IPv6_Opts]):
             code: option type value
             acts: unknown option action value
             cflg: change flag value
-
-        Keyword Args:
             options: extracted IPv6-Opts options
 
         Returns:
@@ -949,8 +971,6 @@ class IPv6_Opts(Internet[DataType_IPv6_Opts]):
             code: option type value
             acts: unknown option action value
             cflg: change flag value
-
-        Keyword Args:
             options: extracted IPv6-Opts options
 
         Returns:
@@ -1030,8 +1050,6 @@ class IPv6_Opts(Internet[DataType_IPv6_Opts]):
             code: option type value
             acts: unknown option action value
             cflg: change flag value
-
-        Keyword Args:
             options: extracted IPv6-Opts options
 
         Returns:
@@ -1071,8 +1089,6 @@ class IPv6_Opts(Internet[DataType_IPv6_Opts]):
             code: option type value
             acts: unknown option action value
             cflg: change flag value
-
-        Keyword Args:
             options: extracted IPv6-Opts options
 
         Returns:
@@ -1116,8 +1132,6 @@ class IPv6_Opts(Internet[DataType_IPv6_Opts]):
             code: option type value
             acts: unknown option action value
             cflg: change flag value
-
-        Keyword Args:
             options: extracted IPv6-Opts options
 
         Returns:
@@ -1168,8 +1182,6 @@ class IPv6_Opts(Internet[DataType_IPv6_Opts]):
             code: option type value
             acts: unknown option action value
             cflg: change flag value
-
-        Keyword Args:
             options: extracted IPv6-Opts options
 
         Returns:
@@ -1214,8 +1226,6 @@ class IPv6_Opts(Internet[DataType_IPv6_Opts]):
             code: option type value
             acts: unknown option action value
             cflg: change flag value
-
-        Keyword Args:
             options: extracted IPv6-Opts options
 
         Returns:

@@ -34,7 +34,7 @@ __all__ = [
 
 
 class Option(Info):
-    """Data model for IPv6_Opts option data."""
+    """Data model for IPv6-Opts option data."""
 
     #: Option type.
     type: 'RegType_Option'
@@ -47,13 +47,13 @@ class Option(Info):
 
 
 class IPv6_Opts(Info):
-    """Data model for IPv6_Opts protocol."""
+    """Data model for IPv6-Opts protocol."""
 
     #: Next header.
     next: 'TransType'
     #: Header extension length.
     length: 'int'
-    #: IPv6_Opts options.
+    #: IPv6-Opts options.
     options: 'OrderedMultiDict[RegType_Option, Option]'
 
     if TYPE_CHECKING:
@@ -61,7 +61,7 @@ class IPv6_Opts(Info):
 
 
 class UnassignedOption(Option):
-    """Data model for IPv6_Opts unassigned option."""
+    """Data model for IPv6-Opts unassigned option."""
 
     #: Option data.
     data: 'bytes'
@@ -71,14 +71,14 @@ class UnassignedOption(Option):
 
 
 class PadOption(Option):
-    """Data model for IPv6_Opts padding options."""
+    """Data model for IPv6-Opts padding options."""
 
     if TYPE_CHECKING:
         def __init__(self, type: 'RegType_Option', action: 'int', change: 'bool', length: 'int') -> 'None': ...  # pylint: disable=super-init-not-called,unused-argument,redefined-builtin,multiple-statements,line-too-long
 
 
 class TunnelEncapsulationLimitOption(Option):
-    """Data model for IPv6_Opts tunnel encapsulation limit option."""
+    """Data model for IPv6-Opts tunnel encapsulation limit option."""
 
     #: Tunnel encapsulation limit.
     limit: 'int'
@@ -88,7 +88,7 @@ class TunnelEncapsulationLimitOption(Option):
 
 
 class RouterAlertOption(Option):
-    """Data model for IPv6_Opts router alter option."""
+    """Data model for IPv6-Opts router alter option."""
 
     #: Router alter value.
     value: 'RouterAlert'
@@ -98,7 +98,7 @@ class RouterAlertOption(Option):
 
 
 class CALIPSOOption(Option):
-    """Data model for IPv6_Opts Common Architecture Label IPv6 Security Option (CALIPSO) option."""
+    """Data model for IPv6-Opts Common Architecture Label IPv6 Security Option (CALIPSO) option."""
 
     #: CALIPSO domain of interpretation.
     domain: 'int'
@@ -117,7 +117,7 @@ class CALIPSOOption(Option):
 
 
 class SMFDPDOption(Option):
-    """Data model for IPv6_Opts Simplified Multicast Forwarding Duplicate Packet Detection (``SMF_DPD``) option."""
+    """Data model for IPv6-Opts Simplified Multicast Forwarding Duplicate Packet Detection (``SMF_DPD``) option."""
 
     #: DPD type.
     dpd_type: 'SMFDPDMode'
@@ -126,7 +126,7 @@ class SMFDPDOption(Option):
 
 
 class SMFIdentificationBasedDPDOption(Option):
-    """Data model for IPv6_Opts **I-DPD** (Identification-Based DPD) option."""
+    """Data model for IPv6-Opts **I-DPD** (Identification-Based DPD) option."""
 
     #: TaggerID length.
     tid_len: 'int'
@@ -140,7 +140,7 @@ class SMFIdentificationBasedDPDOption(Option):
 
 
 class SMFHashBasedDPDOption(Option):
-    """Data model for IPv6_Opts **H-DPD** (Hash-Based DPD) option."""
+    """Data model for IPv6-Opts **H-DPD** (Hash-Based DPD) option."""
 
     #: Hash assist value.
     hav: 'bytes'
@@ -150,7 +150,7 @@ class SMFHashBasedDPDOption(Option):
 
 
 class PDMOption(Option):
-    """Data model for IPv6_Opts Performance Diagnostic Metrics (PDM) option."""
+    """Data model for IPv6-Opts Performance Diagnostic Metrics (PDM) option."""
 
     #: Scale delta time last received.
     scaledtlr: 'timedelta'
@@ -170,7 +170,7 @@ class PDMOption(Option):
 
 
 class QuickStartOption(Option):
-    """Data model for IPv6_Opts Quick Start option."""
+    """Data model for IPv6-Opts Quick Start option."""
 
     #: QS function.
     func: 'QSFunction'
@@ -186,7 +186,7 @@ class QuickStartOption(Option):
 
 
 class RPLFlags(Info):
-    """Data model for IPv6_Opts RPL option flags fields."""
+    """Data model for IPv6-Opts RPL option flags fields."""
 
     #: Down flag.
     down: 'bool'
@@ -200,7 +200,7 @@ class RPLFlags(Info):
 
 
 class RPLOption(Option):
-    """Data model for IPv6_Opts Routing Protocol for Low-Power and Lossy Networks (RPL) option."""
+    """Data model for IPv6-Opts Routing Protocol for Low-Power and Lossy Networks (RPL) option."""
 
     #: Flags.
     flags: 'RPLFlags'
@@ -214,7 +214,7 @@ class RPLOption(Option):
 
 
 class MPLFlags(Info):
-    """Data model for IPv6_Opts MPL option flags fields."""
+    """Data model for IPv6-Opts MPL option flags fields."""
 
     #: Max flag.
     max: 'bool'
@@ -226,7 +226,7 @@ class MPLFlags(Info):
 
 
 class MPLOption(Option):
-    """Data model for IPv6_Opts Multicast Protocol for Low-Power and Lossy Networks (MPL) option."""
+    """Data model for IPv6-Opts Multicast Protocol for Low-Power and Lossy Networks (MPL) option."""
 
     #: Seed length.
     seed_type: 'SeedID'
@@ -242,7 +242,7 @@ class MPLOption(Option):
 
 
 class ILNPOption(Option):
-    """Data model for IPv6_Opts Identifier-Locator Network Protocol (ILNP) Nonce option."""
+    """Data model for IPv6-Opts Identifier-Locator Network Protocol (ILNP) Nonce option."""
 
     #: Nonce value.
     nounce: 'bytes'
@@ -252,7 +252,7 @@ class ILNPOption(Option):
 
 
 class LineIdentificationOption(Option):
-    """Data model for IPv6_Opts Line-Identification option."""
+    """Data model for IPv6-Opts Line-Identification option."""
 
     #: Line ID length.
     line_id_len: 'int'
@@ -274,7 +274,7 @@ class JumboPayloadOption(Option):
 
 
 class HomeAddressOption(Option):
-    """Data model for IPv6_Opts Home Address option."""
+    """Data model for IPv6-Opts Home Address option."""
 
     #: Home address.
     address: 'IPv6Address'
@@ -284,7 +284,7 @@ class HomeAddressOption(Option):
 
 
 class DFFFlags(Info):
-    """Data model for IPv6_Opts ``IP_DFF`` option flags."""
+    """Data model for IPv6-Opts ``IP_DFF`` option flags."""
 
     #: Duplicate flag.
     dup: 'bool'
@@ -296,7 +296,7 @@ class DFFFlags(Info):
 
 
 class IPDFFOption(Option):
-    """Data model for IPv6_Opts Depth-First Forwarding (``IP_DFF``) option."""
+    """Data model for IPv6-Opts Depth-First Forwarding (``IP_DFF``) option."""
 
     #: Version.
     version: 'int'
