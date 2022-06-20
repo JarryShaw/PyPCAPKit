@@ -23,15 +23,9 @@ __all__ = [
 class IPv6(Info):
     """Data model for Internet Protocol version 6.
 
-    .. attribute:: class
-       :type: int
-
-       Traffic class.
-
-       .. note::
-
-          This field is conflict with ``class`` keyword. To access this field,
-          directly use :func:`getattr` instead.
+    Important:
+        Due to the preserved keyword conflict, please use :meth:`from_dict`
+        to create an instance of this data model.
 
     """
 

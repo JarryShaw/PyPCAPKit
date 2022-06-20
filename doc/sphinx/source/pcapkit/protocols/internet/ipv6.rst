@@ -1,6 +1,9 @@
 IPv6 - Internet Protocol version 6
 ==================================
 
+.. module:: pcapkit.protocols.internet.ipv6
+.. module:: pcapkit.protocols.data.internet.ipv6
+
 :mod:`pcapkit.protocols.internet.ipv6` contains
 :class:`~pcapkit.protocols.internet.ipv6.IPv6` only,
 which implements extractor for Internet Protocol
@@ -24,72 +27,63 @@ Octets      Bits        Name                    Description
 
    <br />
 
-.. automodule:: pcapkit.protocols.internet.ipv6
-   :members:
-   :undoc-members:
-   :private-members:
+.. autoclass:: pcapkit.protocols.internet.ipv6.IPv6
+   :no-members:
    :show-inheritance:
 
-Data Structure
---------------
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
 
-.. important::
+   .. automethod:: __index__
 
-   Following classes are only for *documentation* purpose.
-   They do **NOT** exist in the :mod:`pcapkit` module.
+   .. autoproperty:: name
+   .. autoproperty:: length
+   .. autoproperty:: protocol
+   .. autoproperty:: src
+   .. autoproperty:: dst
+   .. autoproperty:: extension_headers
 
-.. class:: DataType_IPv6
+   .. automethod:: read
+   .. automethod:: make
+   .. automethod:: id
 
-   :bases: TypedDict
+   .. automethod:: _read_ip_hextet
+   .. automethod:: _read_ip_addr
+   .. automethod:: _decode_next_layer
 
-   Structure of IPv6 header [:rfc:`2460`].
+Data Structures
+---------------
 
-   .. attribute:: version
-      :type: Literal[6]
+.. autoclass:: pcapkit.protocols.data.internet.ipv6.IPv6(version, class, label, payload, next, limit, src, dst)
+   :no-members:
+   :show-inheritance:
 
-      Version.
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
+   .. autoattribute:: version
 
    .. attribute:: class
       :type: int
 
       Traffic class.
 
-   .. attribute:: label
-      :type: int
+      .. note::
 
-      Flow label.
+         This field is conflict with :keyword:`class` keyword. To access this field,
+         directly use :func:`getattr` instead.
 
-   .. attribute:: payload
-      :type: int
+   .. autoattribute:: label
+   .. autoattribute:: payload
+   .. autoattribute:: next
+   .. autoattribute:: limit
+   .. autoattribute:: src
+   .. autoattribute:: dst
 
-      Payload length.
-
-   .. attribute:: next
-      :type: pcapkit.const.reg.transtype.TransType
-
-      Next header.
-
-   .. attribute:: limit
-      :type: int
-
-      Hop limit.
-
-   .. attribute:: src
-      :type: ipaddress.IPv6Address
-
-      Source address.
-
-   .. attribute:: dst
-      :type: ipaddress.IPv6Address
-
-      Destination address.
-
-   .. attribute:: packet
-      :type: bytes
-
-      Raw packet data.
-
-
+   .. autoattribute:: fragment
+   .. autoattribute:: protocol
+   .. autoattribute:: hdr_len
+   .. autoattribute:: raw_len
 
 .. raw:: html
 

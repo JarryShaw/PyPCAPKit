@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
-"""internet protocol version 6
+"""IPv6 - Internet Protocol version 6
+========================================
 
 :mod:`pcapkit.protocols.internet.ipv6` contains
 :class:`~pcapkit.protocols.internet.ipv6.IPv6` only,
@@ -120,8 +121,6 @@ class IPv6(IP[DataType_IPv6]):
 
         Args:
             length: Length of packet data.
-
-        Keyword Args:
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
@@ -154,7 +153,7 @@ class IPv6(IP[DataType_IPv6]):
     def make(self, **kwargs: 'Any') -> 'NoReturn':
         """Make (construct) packet data.
 
-        Keyword Args:
+        Args:
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
