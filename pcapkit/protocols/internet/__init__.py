@@ -3,9 +3,8 @@
 """Internet Layer Protocols
 ==============================
 
-`pcapkit.protocols.internet` is collection of all protocols
-in internet layer, with detailed implementation and
-methods.
+:mod:`pcapkit.protocols.internet` is collection of all protocols
+in internet layer, with detailed implementation and methods.
 
 """
 # TODO: Implements ECN, ESP, ICMP, ICMPv6, IGMP, Shim6.

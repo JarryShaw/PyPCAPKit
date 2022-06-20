@@ -11,18 +11,18 @@ internet layer, with detailed implementation and methods.
    :maxdepth: 2
 
    internet
-   ah
-   hip
-   hopopt
    ip
-   ipsec
    ipv4
+   ipv6
    ipv6_frag
    ipv6_opts
    ipv6_route
-   ipv6
-   ipx
+   hopopt
    mh
+   ipsec
+   ah
+   hip
+   ipx
 
 .. todo::
 

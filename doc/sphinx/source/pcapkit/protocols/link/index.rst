@@ -18,6 +18,10 @@ link layer, with detailed implementation and methods.
    rarp
    vlan
 
+.. todo::
+
+   Implements DSL, EAPOL, FDDI, ISDN, NDP, PPP.
+
 Protocol Registry
 -----------------
 
