@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
-"""internet protocol version 4
+"""IPv4 - Internet Protocol version 4
+========================================
 
 :mod:`pcapkit.protocols.internet.ipv4` contains
 :class:`~pcapkit.protocols.internet.ipv4.IPv4` only,
@@ -90,7 +91,47 @@ __all__ = ['IPv4']
 
 
 class IPv4(IP[DataType_IPv4]):
-    """This class implements Internet Protocol version 4."""
+    """This class implements Internet Protocol version 4.
+
+    This class currently supports parsing of the following IPv4 options,
+    which are directly mapped to the :class:`pcapkit.const.ipv4.option_number.OptionNumber`
+    enumeration:
+
+    .. list-table::
+       :header-rows: 1
+
+       * - Option Code
+         - Option Parser
+       * - :attr:`pcapkit.const.ipv4.option_number.OptionNumber.EOOL`
+         - :meth:`~pcapkit.protocols.internet.ipv4.IPv4._read_opt_eool`
+       * - :attr:`pcapkit.const.ipv4.option_number.OptionNumber.NOP`
+         - :meth:`~pcapkit.protocols.internet.ipv4.IPv4._read_opt_nop`
+       * - :attr:`pcapkit.const.ipv4.option_number.OptionNumber.SEC`
+         - :meth:`~pcapkit.protocols.internet.ipv4.IPv4._read_opt_sec`
+       * - :attr:`pcapkit.const.ipv4.option_number.OptionNumber.LSR`
+         - :meth:`~pcapkit.protocols.internet.ipv4.IPv4._read_opt_lsr`
+       * - :attr:`pcapkit.const.ipv4.option_number.OptionNumber.TS`
+         - :meth:`~pcapkit.protocols.internet.ipv4.IPv4._read_opt_ts`
+       * - :attr:`pcapkit.const.ipv4.option_number.OptionNumber.ESEC`
+         - :meth:`~pcapkit.protocols.internet.ipv4.IPv4._read_opt_esec`
+       * - :attr:`pcapkit.const.ipv4.option_number.OptionNumber.RR`
+         - :meth:`~pcapkit.protocols.internet.ipv4.IPv4._read_opt_rr`
+       * - :attr:`pcapkit.const.ipv4.option_number.OptionNumber.SID`
+         - :meth:`~pcapkit.protocols.internet.ipv4.IPv4._read_opt_sid`
+       * - :attr:`pcapkit.const.ipv4.option_number.OptionNumber.SSR`
+         - :meth:`~pcapkit.protocols.internet.ipv4.IPv4._read_opt_ssr`
+       * - :attr:`pcapkit.const.ipv4.option_number.OptionNumber.MTUP`
+         - :meth:`~pcapkit.protocols.internet.ipv4.IPv4._read_opt_mtup`
+       * - :attr:`pcapkit.const.ipv4.option_number.OptionNumber.MTUR`
+         - :meth:`~pcapkit.protocols.internet.ipv4.IPv4._read_opt_mtur`
+       * - :attr:`pcapkit.const.ipv4.option_number.OptionNumber.TR`
+         - :meth:`~pcapkit.protocols.internet.ipv4.IPv4._read_opt_tr`
+       * - :attr:`pcapkit.const.ipv4.option_number.OptionNumber.RTRALT`
+         - :meth:`~pcapkit.protocols.internet.ipv4.IPv4._read_opt_rtralt`
+       * - :attr:`pcapkit.const.ipv4.option_number.OptionNumber.QS`
+         - :meth:`~pcapkit.protocols.internet.ipv4.IPv4._read_opt_qs`
+
+    """
 
     ##########################################################################
     # Properties.
@@ -152,8 +193,6 @@ class IPv4(IP[DataType_IPv4]):
 
         Args:
             length: Length of packet data.
-
-        Keyword Args:
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
@@ -181,7 +220,7 @@ class IPv4(IP[DataType_IPv4]):
         ipv4 = DataType_IPv4(
             version=_vers,  # type: ignore[arg-type]
             hdr_len=int(_vihl[1], base=16) * 4,
-            tos=DataType_ToSField.from_dict({  # type: ignore[arg-type]
+            tos=DataType_ToSField.from_dict({
                 'pre': RegType_ToSPrecedence.get(int(_dscp[:3], base=2)),
                 'del': RegType_ToSDelay.get(int(_dscp[3], base=2)),
                 'thr': RegType_ToSThroughput.get(int(_dscp[4], base=2)),
@@ -213,7 +252,7 @@ class IPv4(IP[DataType_IPv4]):
     def make(self, **kwargs: 'Any') -> 'NoReturn':
         """Make (construct) packet data.
 
-        Keyword Args:
+        Args:
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
@@ -268,7 +307,7 @@ class IPv4(IP[DataType_IPv4]):
         # return _addr
         return ipaddress.ip_address(_byte)  # type: ignore[return-value]
 
-    def _read_ipv4_opt_type(self, code: 'int') -> 'DataType_OptionType':  # pylint: disable=no-self-use
+    def _read_ipv4_opt_type(self, code: 'int') -> 'DataType_OptionType':
         """Read option type field.
 
         Arguments:
@@ -289,7 +328,7 @@ class IPv4(IP[DataType_IPv4]):
             'change': oflg,
             'class': ocls,
             'number': onum,
-        })  # type: ignore[return-value]
+        })
 
     def _read_ipv4_options(self, length: 'int') -> 'Option':
         """Read IPv4 option list.
@@ -350,8 +389,6 @@ class IPv4(IP[DataType_IPv4]):
 
         Arguments:
             kind: option type code
-
-        Keyword Args:
             options: extracted IPv4 options
 
         Returns:
@@ -388,8 +425,6 @@ class IPv4(IP[DataType_IPv4]):
 
         Arguments:
             kind: option type code
-
-        Keyword Args:
             options: extracted IPv4 options
 
         Returns:
@@ -418,8 +453,6 @@ class IPv4(IP[DataType_IPv4]):
 
         Arguments:
             kind: option type code
-
-        Keyword Args:
             options: extracted IPv4 options
 
         Returns:
@@ -451,8 +484,6 @@ class IPv4(IP[DataType_IPv4]):
 
         Arguments:
             kind: option type code
-
-        Keyword Args:
             options: extracted IPv4 options
 
         Returns:
@@ -505,8 +536,6 @@ class IPv4(IP[DataType_IPv4]):
 
         Arguments:
             kind: option type code
-
-        Keyword Args:
             options: extracted IPv4 options
 
         Returns:
@@ -561,8 +590,6 @@ class IPv4(IP[DataType_IPv4]):
 
         Arguments:
             kind: option type code
-
-        Keyword Args:
             options: extracted IPv4 options
 
         Returns:
@@ -641,8 +668,6 @@ class IPv4(IP[DataType_IPv4]):
 
         Arguments:
             kind: option type code
-
-        Keyword Args:
             options: extracted IPv4 options
 
         Returns:
@@ -696,8 +721,6 @@ class IPv4(IP[DataType_IPv4]):
 
         Arguments:
             kind: option type code
-
-        Keyword Args:
             options: extracted IPv4 options
 
         Returns:
@@ -746,8 +769,6 @@ class IPv4(IP[DataType_IPv4]):
 
         Arguments:
             kind: option type code
-
-        Keyword Args:
             options: extracted IPv4 options
 
         Returns:
@@ -784,8 +805,6 @@ class IPv4(IP[DataType_IPv4]):
 
         Arguments:
             kind: option type code
-
-        Keyword Args:
             options: extracted IPv4 options
 
         Returns:
@@ -833,8 +852,6 @@ class IPv4(IP[DataType_IPv4]):
 
         Arguments:
             kind: option type code
-
-        Keyword Args:
             options: extracted IPv4 options
 
         Returns:
@@ -870,8 +887,6 @@ class IPv4(IP[DataType_IPv4]):
 
         Arguments:
             kind: option type code
-
-        Keyword Args:
             options: extracted IPv4 options
 
         Returns:
@@ -912,8 +927,6 @@ class IPv4(IP[DataType_IPv4]):
 
         Arguments:
             kind: option type code
-
-        Keyword Args:
             options: extracted IPv4 options
 
         Returns:
@@ -942,9 +955,9 @@ class IPv4(IP[DataType_IPv4]):
             'originator': _ipad,
         })
 
-        return data  # type: ignore[return-value]
+        return data
 
-    def _read_opt_rsralt(self, kind: 'RegType_OptionNumber', *, options: 'Option') -> 'DataType_RTRALTOption':  # pylint: disable=unused-argument
+    def _read_opt_rtralt(self, kind: 'RegType_OptionNumber', *, options: 'Option') -> 'DataType_RTRALTOption':  # pylint: disable=unused-argument
         """Read IPv4 Router Alert (``RTRALT``) option.
 
         Structure of IPv4 Router Alert (``RTRALT``) option [:rfc:`2113`]:
@@ -957,8 +970,6 @@ class IPv4(IP[DataType_IPv4]):
 
         Arguments:
             kind: option type code
-
-        Keyword Args:
             options: extracted IPv4 options
 
         Returns:
@@ -1016,8 +1027,6 @@ class IPv4(IP[DataType_IPv4]):
 
         Arguments:
             kind: option type code
-
-        Keyword Args:
             options: extracted IPv4 options
 
         Returns:

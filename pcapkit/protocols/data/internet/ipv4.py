@@ -49,20 +49,11 @@ class ToSField(Info):
         Due to the preserved keyword conflict, please use :meth:`from_dict`
         to create an instance of this data model.
 
-    .. attribute:: del
-       :type: :class:`~pcapkit.const.ipv4.tos_del.ToSDelay`
-
-       Delay.
-
-       .. note::
-
-          This field is conflict with ``del`` keyword. To access this field,
-          directly use :func:`getattr` instead.
-
     """
 
     #: Precedence.
     pre: 'ToSPrecedence'
+    #: Delay.
     #del: 'ToSDelay'
     #: Throughput.
     thr: 'ToSThroughput'
@@ -128,22 +119,11 @@ class IPv4(Info):
 
 
 class OptionType(Info):
-    """Data model for IPv4 option type data.
-
-    .. attribute:: class
-       :type: :class:`~pcapkit.const.ipv4.option_class.OptionClass`
-
-       Option class.
-
-       .. note::
-
-          This field is conflict with ``class`` keyword. To access this field,
-          directly use :func:`getattr` instead.
-
-    """
+    """Data model for IPv4 option type data."""
 
     #: Change flag.
     change: 'bool'
+    #: Option class.
     #class: 'int'
     #: Number.
     number: 'int'
@@ -302,15 +282,9 @@ class MTUROption(Option):
 class TROption(Option):
     """Data model for IPv4 Traceroute (``TR``) option.
 
-    .. attribute:: return
-       :type: :obj:`int`
-
-       Return hop count.
-
-       .. note::
-
-          This field is conflict with ``return`` keyword. To access this field,
-          directly use :func:`getattr` instead.
+    Important:
+        Due to the preserved keyword conflict, please use :meth:`from_dict`
+        to create an instance of this data model.
 
     """
 
@@ -318,6 +292,7 @@ class TROption(Option):
     id: 'int'
     #: Outbound hop count.
     outbound: 'int'
+    #: Return hop count.
     #return: 'int'
     originator: 'IPv4Address'
 
