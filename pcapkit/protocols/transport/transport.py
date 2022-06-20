@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
-"""root transport layer protocol
+"""Base Protocol
+===================
 
 :mod:`pcapkit.protocols.transport.transport` contains
 :class:`~pcapkit.protocols.transport.transport.Transport`,
@@ -79,8 +80,6 @@ class Transport(Protocol[PT], Generic[PT]):  # pylint: disable=abstract-method
         Args:
             ports: Source & destination port numbers.
             payload: Packet payload.
-
-        Keyword Args:
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
@@ -117,6 +116,10 @@ class Transport(Protocol[PT], Generic[PT]):  # pylint: disable=abstract-method
     def _decode_next_layer(self, dict_: 'PT', ports: 'tuple[int, int]', length: 'Optional[int]' = None) -> 'PT':  # type: ignore[override] # pylint: disable=arguments-renamed
         """Decode next layer protocol.
 
+        The method will check if the next layer protocol is supported based on
+        the source and destination port numbers. We will use the lower port
+        number from both ports as the primary key to lookup the next layer.
+
         Arguments:
             dict_: info buffer
             ports: source & destination port numbers
@@ -126,5 +129,6 @@ class Transport(Protocol[PT], Generic[PT]):  # pylint: disable=abstract-method
             Current protocol with next layer extracted.
 
         """
-        proto = ports[0] if ports[0] in self.__proto__ else ports[1]
+        sort_port = sorted(ports)
+        proto = sort_port[0] if sort_port[0] in self.__proto__ else sort_port[1]
         return super()._decode_next_layer(dict_, proto, length)
