@@ -1,6 +1,9 @@
 MH - Mobility Header
 ====================
 
+.. module:: pcapkit.protocols.internet.mh
+.. module:: pcapkit.protocols.data.internet.mh
+
 :mod:`pcapkit.protocols.internet.mh` contains
 :class:`~pcapkit.protocols.internet.mh.MH` only,
 which implements extractor for Mobility Header
@@ -21,48 +24,44 @@ Octets      Bits        Name                    Description
 
    <br />
 
-.. automodule:: pcapkit.protocols.internet.mh
-   :members:
-   :undoc-members:
-   :private-members:
+.. todo::
+
+   Implements extractor for message data of all MH types.
+
+.. autoclass:: pcapkit.protocols.internet.mh.MH
+   :no-members:
    :show-inheritance:
 
-Data Structure
---------------
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
 
-.. important::
+   .. automethod:: __post_init__
+   .. automethod:: __index__
 
-   Following classes are only for *documentation* purpose.
-   They do **NOT** exist in the :mod:`pcapkit` module.
+   .. autoproperty:: name
+   .. autoproperty:: length
+   .. autoproperty:: payload
+   .. autoproperty:: protocol
+   .. autoproperty:: protochain
 
-.. class:: DataType_MH
+   .. automethod:: read
+   .. automethod:: make
 
-   :bases: TypedDict
+Data Structures
+---------------
 
-   .. attribute:: next
-      :type: pcapkit.const.reg.transtype.TransType
+.. autoclass:: pcapkit.protocols.data.internet.mh.MH(next, length, type, chksum, data)
+   :no-members:
+   :show-inheritance:
 
-      Next header.
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. attribute:: length
-      :type: int
-
-      Header length.
-
-   .. attribute:: type
-      :type: pcapkit.const.mh.packet.Packet
-
-      Mobility header type.
-
-   .. attribute:: chksum
-      :type: bytes
-
-      Checksum.
-
-   .. attribute:: data
-      :type: bytes
-
-      Message data.
+   .. autoattribute:: next
+   .. autoattribute:: length
+   .. autoattribute:: type
+   .. autoattribute:: chksum
+   .. autoattribute:: data
 
 .. raw:: html
 

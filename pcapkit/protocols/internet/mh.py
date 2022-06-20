@@ -121,8 +121,6 @@ class MH(Internet[DataType_MH]):
 
         Args:
             length: Length of packet data.
-
-        Keyword Args:
             version: IP protocol version.
             extension: If the protocol is used as an IPv6 extension header.
             **kwargs: Arbitrary keyword arguments.
@@ -156,7 +154,7 @@ class MH(Internet[DataType_MH]):
     def make(self, **kwargs: 'Any') -> 'NoReturn':
         """Make (construct) packet data.
 
-        Keyword Args:
+        Args:
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
@@ -184,8 +182,6 @@ class MH(Internet[DataType_MH]):
         Args:
             file: Source packet stream.
             length: Length of packet data.
-
-        Keyword Args:
             version: IP protocol version.
             extension: If the protocol is used as an IPv6 extension header.
             **kwargs: Arbitrary keyword arguments.
