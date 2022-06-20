@@ -1,6 +1,9 @@
 IPv6-Frag - Fragment Header for IPv6
 ====================================
 
+.. module:: pcapkit.protocols.internet.ipv6_frag
+.. module:: pcapkit.protocols.data.internet.ipv6_frag
+
 :mod:`pcapkit.protocols.internet.ipv6_frag` contains
 :class:`~pcapkit.protocols.internet.ipv6_frag.IPv6_Frag`
 only, which implements extractor for Fragment Header for
@@ -22,45 +25,40 @@ Octets      Bits        Name                    Description
 
    <br />
 
-.. automodule:: pcapkit.protocols.internet.ipv6_frag
-   :members:
-   :undoc-members:
-   :private-members:
+.. autoclass:: pcapkit.protocols.internet.ipv6_frag.IPv6_Frag
+   :no-members:
    :show-inheritance:
 
-Data Structure
---------------
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
 
-.. important::
+   .. automethod:: __post_init__
+   .. automethod:: __index__
 
-   Following classes are only for *documentation* purpose.
-   They do **NOT** exist in the :mod:`pcapkit` module.
+   .. autoproperty:: name
+   .. autoproperty:: alias
+   .. autoproperty:: length
+   .. autoproperty:: payload
+   .. autoproperty:: protocol
+   .. autoproperty:: protochain
 
-.. class:: DataType_IPv6_Frag
+   .. automethod:: read
+   .. automethod:: make
 
-   :bases: TypedDict
+Data Structures
+---------------
 
-   Structure of IPv6-Frag header [:rfc:`8200`].
+.. autoclass:: pcapkit.protocols.data.internet.ipv6_frag.IPv6_Frag(next, offset, mf, id)
+   :no-members:
+   :show-inheritance:
 
-   .. attribute:: next
-      :type: pcapkit.const.reg.transtype.TransType
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
 
-      Next header.
-
-   .. attribute:: offset
-      :type: int
-
-      Fragment offset.
-
-   .. attribute:: mf
-      :type: bool
-
-      More flag.
-
-   .. attribute:: id
-      :type: int
-
-      Identification.
+   .. autoattribute:: next
+   .. autoattribute:: offset
+   .. autoattribute:: mf
+   .. autoattribute:: id
 
 .. raw:: html
 

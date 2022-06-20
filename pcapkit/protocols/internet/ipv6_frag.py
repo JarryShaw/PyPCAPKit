@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
-"""fragment header for IPv6
+"""IPv6-Frag - Fragment Header for IPv6
+==========================================
 
 :mod:`pcapkit.protocols.internet.ipv6_frag` contains
 :class:`~pcapkit.protocols.internet.ipv6_frag.IPv6_Frag`
@@ -68,7 +69,6 @@ class IPv6_Frag(Internet[DataType_IPv6_Frag]):
         Raises:
             UnsupportedCall: if the protocol is used as an IPv6 extension header
 
-        :rtype: pcapkit.protocols.protocol.Protocol
         """
         if self._extf:
             raise UnsupportedCall(f"'{self.__class__.__name__}' object has no attribute 'payload'")
@@ -118,8 +118,6 @@ class IPv6_Frag(Internet[DataType_IPv6_Frag]):
 
         Args:
             length: Length of packet data.
-
-        Keyword Args:
             extension: If the packet is used as an IPv6 extension header.
             **kwargs: Arbitrary keyword arguments.
 
@@ -149,7 +147,7 @@ class IPv6_Frag(Internet[DataType_IPv6_Frag]):
     def make(self, **kwargs: 'Any') -> 'NoReturn':
         """Make (construct) packet data.
 
-        Keyword Args:
+        Args:
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
