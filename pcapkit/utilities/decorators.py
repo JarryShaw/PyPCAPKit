@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # pylint: disable=protected-access
-"""decorator functions
+"""Decorator Functions
+=========================
 
 :mod:`pcapkit.utilities.decorators` contains several useful
 decorators, including :func:`~pcapkit.utilities.decorators.seekset`
@@ -33,9 +34,9 @@ def seekset(func: 'Callable[Concatenate[Protocol, P], R]') -> 'Callable[P, R]':
     Important:
         This decorator function is designed for decorating *class methods*.
 
-    The decorator will keep the current offset of :attr:`self._file`, then
-    call the decorated function. Afterwards, it will rewind the  offset of
-    :attr:`self._file` to the original and returns the return value from
+    The decorator will keep the current offset of :attr:`self._file <pcapkit.protocols.protocol.Protocol._file>`,
+    then call the decorated function. Afterwards, it will rewind the  offset of
+    :attr:`self._file <pcapkit.protocols.protocol.Protocol._file>` to the original and returns the return value from
     the decorated function.
 
     Note:
@@ -46,6 +47,7 @@ def seekset(func: 'Callable[Concatenate[Protocol, P], R]') -> 'Callable[P, R]':
     See Also:
         :meth:`pcapkit.protocols.protocol.Protocol._read_packet`
 
+    :param func: decorated function
     :meta decorator:
     """
     @functools.wraps(func)
@@ -86,6 +88,7 @@ def beholder(func: 'Callable[Concatenate[Protocol, int, Optional[int], P], R]') 
     See Also:
         :meth:`pcapkit.protocols.protocol.Protocol._decode_next_layer`
 
+    :param func: decorated function
     :meta decorator:
     """
     @functools.wraps(func)

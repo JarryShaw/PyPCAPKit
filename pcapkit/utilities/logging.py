@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
-"""logging system
+"""Logging System
+====================
 
 :mod:`pcapkit.utilities.logging` contains naïve integration
 of the Python logging system, i.e. a :class:`logging.Logger`
@@ -22,7 +23,7 @@ BOOLEAN_STATES = {'1': True, '0': False,
                   'true': True, 'false': False,
                   'on': True, 'off': False}
 
-#: Development mode (``DEVMODE``) flag.
+#: Development mode flag.
 DEVMODE = BOOLEAN_STATES.get(os.environ.get('PCAPKIT_DEVMODE', 'false').casefold(), False)
 
 ###############################################################################

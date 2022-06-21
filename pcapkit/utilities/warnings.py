@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
-"""user defined warnings
+"""User Defined Warnings
+===========================
 
 :mod:`pcapkit.warnings` refined built-in warnings.
 
