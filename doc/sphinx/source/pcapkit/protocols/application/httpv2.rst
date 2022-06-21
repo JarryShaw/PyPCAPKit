@@ -2,9 +2,10 @@ HTTP/2 - Hypertext Transfer Protocol
 ====================================
 
 .. module:: pcapkit.protocols.application.httpv2
+.. module:: pcapkit.protocols.data.application.httpv2
 
 :mod:`pcapkit.protocols.application.httpv2` contains
-:class:`~pcapkit.protocols.application.httpv2.HTTPv2`
+:class:`~pcapkit.protocols.application.httpv2.HTTP`
 only, which implements extractor for Hypertext Transfer
 Protocol (HTTP/2) [*]_, whose structure is described as
 below:
@@ -24,643 +25,237 @@ Octets      Bits        Name                    Description
 
    <br />
 
-.. autoclass:: pcapkit.protocols.application.httpv2.HTTPv2
-   :members:
-   :undoc-members:
-   :private-members:
+.. autoclass:: pcapkit.protocols.application.httpv2.HTTP
+   :no-members:
    :show-inheritance:
 
-.. data:: pcapkit.protocols.application.httpv2._HTTP_FUNC
-   :type: Dict[int, Callable[[pcapkit.protocols.application.httpv2.HTTPv2, int, int, str], DataType_HTTPv2_Frame]]
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
+   .. autoproperty:: alias
+   .. autoproperty:: length
+   .. autoproperty:: version
+
+   .. automethod:: read
+   .. automethod:: make
+   .. automethod:: id
+   .. automethod:: register_frame
+
+   .. automethod:: _read_http_none
+   .. automethod:: _read_http_data
+   .. automethod:: _read_http_headers
+   .. automethod:: _read_http_priority
+   .. automethod:: _read_http_rst_stream
+   .. automethod:: _read_http_settings
+   .. automethod:: _read_http_push_promise
+   .. automethod:: _read_http_ping
+   .. automethod:: _read_http_goaway
+   .. automethod:: _read_http_window_update
+   .. automethod:: _read_http_continuation
+
+   .. autoattribute:: __frame__
+      :no-value:
+
+Data Structures
+---------------
+
+.. autoclass:: pcapkit.protocols.data.application.httpv2.HTTP(length, type, flags, sid)
+   :no-members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
 
-   Process method for HTTP/2 packets.
+   .. autoattribute:: length
+   .. autoattribute:: type
+   .. autoattribute:: flags
+   .. autoattribute:: sid
 
-   .. list-table::
-      :header-rows: 1
+.. autoclass:: pcapkit.protocols.data.application.httpv2.Flags()
+   :no-members:
+   :show-inheritance:
 
-      * - Code
-        - Method
-        - Description
-      * - N/A
-        - :meth:`~pcapkit.protocols.application.httpv2.HTTPv2._read_http_none`
-        - Unsigned
-      * - 0x00
-        - :meth:`~pcapkit.protocols.application.httpv2.HTTPv2._read_http_data`
-        - ``DATA``
-      * - 0x01
-        - :meth:`~pcapkit.protocols.application.httpv2.HTTPv2._read_http_headers`
-        - ``HEADERS``
-      * - 0x02
-        - :meth:`~pcapkit.protocols.application.httpv2.HTTPv2._read_http_priority`
-        - ``PRIORITY``
-      * - 0x03
-        - :meth:`~pcapkit.protocols.application.httpv2.HTTPv2._read_http_rst_stream`
-        - ``RST_STREAM``
-      * - 0x04
-        - :meth:`~pcapkit.protocols.application.httpv2.HTTPv2._read_http_settings`
-        - ``SETTINGS``
-      * - 0x05
-        - :meth:`~pcapkit.protocols.application.httpv2.HTTPv2._read_http_push_promise`
-        - ``PUSH_PROMISE``
-      * - 0x06
-        - :meth:`~pcapkit.protocols.application.httpv2.HTTPv2._read_http_ping`
-        - ``PING``
-      * - 0x07
-        - :meth:`~pcapkit.protocols.application.httpv2.HTTPv2._read_http_goaway`
-        - ``GOAWAY``
-      * - 0x08
-        - :meth:`~pcapkit.protocols.application.httpv2.HTTPv2._read_http_window_update`
-        - ``WINDOW_UPDATE``
-      * - 0x09
-        - :meth:`~pcapkit.protocols.application.httpv2.HTTPv2._read_http_continuation`
-        - ``CONTINUATION``
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
 
-Data Structure
---------------
+.. autoclass:: pcapkit.protocols.data.application.httpv2.UnassignedFrame(length, type, flags, sid, data)
+   :no-members:
+   :show-inheritance:
 
-.. important::
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
 
-   Following classes are only for *documentation* purpose.
-   They do **NOT** exist in the :mod:`pcapkit` module.
+   .. autoattribute:: data
 
-.. class:: DataType_HTTPv2
+.. autoclass:: pcapkit.protocols.data.application.httpv2.DataFrame(length, type, flags, sid, pad_len, data)
+   :no-members:
+   :show-inheritance:
 
-   :bases: TypedDict
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
 
-   Structure of HTTP/2 packet [:rfc:`7540`].
+   .. autoattribute:: flags
+   .. autoattribute:: pad_len
+   .. autoattribute:: data
 
-   .. attribute:: length
-      :type: int
+.. autoclass:: pcapkit.protocols.data.application.httpv2.DataFrameFlags(END_STREAM, PADDED)
+   :no-members:
+   :show-inheritance:
 
-      Length.
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. attribute:: type
-      :type: pcapkit.const.http.frame.Frame
+   .. autoattribute:: END_STREAM
+   .. autoattribute:: PADDED
 
-      Type.
+.. autoclass:: pcapkit.protocols.data.application.httpv2.HeadersFrame(length, type, flags, sid, pad_len, excl_dependency, stream_dependency, weight, fragment)
+   :no-members:
+   :show-inheritance:
 
-   .. attribute:: sid
-      :type: int
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
 
-      Stream identifier.
+   .. autoattribute:: flags
+   .. autoattribute:: pad_len
+   .. autoattribute:: excl_dependency
+   .. autoattribute:: stream_dependency
+   .. autoattribute:: weight
+   .. autoattribute:: fragment
 
-   .. attribute:: packet
-      :type: bytes
+.. autoclass:: pcapkit.protocols.data.application.httpv2.HeadersFrameFlags(END_STREAM, END_HEADERS, PADDED, PRIORITY)
+   :no-members:
+   :show-inheritance:
 
-      Raw packet data.
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
 
-.. class:: DataType_HTTPv2_Frame
+   .. autoattribute:: END_STREAM
+   .. autoattribute:: END_HEADERS
+   .. autoattribute:: PADDED
+   .. autoattribute:: PRIORITY
 
-   :bases: TypedDict
+.. autoclass:: pcapkit.protocols.data.application.httpv2.PriorityFrame(length, type, flags, sid, excl_dependency, stream_dependency, weight)
+   :no-members:
+   :show-inheritance:
 
-   HTTP/2 packet data.
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
 
-HTTP/2 Unassigned Frame
-~~~~~~~~~~~~~~~~~~~~~~~
+   .. autoattribute:: flags
+   .. autoattribute:: excl_dependency
+   .. autoattribute:: stream_dependency
+   .. autoattribute:: weight
 
-.. class:: DataType_HTTPv2_Unassigned
+.. autoclass:: pcapkit.protocols.data.application.httpv2.RstStreamFrame(length, type, flags, sid, error)
+   :no-members:
+   :show-inheritance:
 
-   :bases: DataType_HTTPv2_Frame
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. attribute:: flags
-      :type: Literal[None]
+   .. autoattribute:: flags
+   .. autoattribute:: error
 
-      HTTP/2 packet flags.
+.. autoclass:: pcapkit.protocols.data.application.httpv2.SettingsFrame(length, type, flags, sid, settings)
+   :no-members:
+   :show-inheritance:
 
-   .. attribute:: payload
-      :type: Optional[types]
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
 
-      Raw packet payload.
+   .. autoattribute:: flags
+   .. autoattribute:: settings
 
-HTTP/2 ``DATA`` Frame
-~~~~~~~~~~~~~~~~~~~~~
+.. autoclass:: pcapkit.protocols.data.application.httpv2.SettingsFrameFlags(ACK)
+   :no-members:
+   :show-inheritance:
 
-For HTTP/2 ``DATA`` frame as described in :rfc:`7540`,
-its structure is described as below:
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
 
-======= ========= ===================== ==========================
-Octets      Bits        Name                    Description
-======= ========= ===================== ==========================
-  0           0   ``http.length``             Length
-  3          24   ``http.type``               Type (``0``)
-  4          32   ``http.flags``              Flags
-  5          40                               Reserved
-  5          41   ``http.sid``                Stream Identifier
-  9          72   ``http.pad_len``            Pad Length (Optional)
-  10         80   ``http.data``               Data
-  ?           ?                               Padding (Optional)
-======= ========= ===================== ==========================
+   .. autoattribute:: ACK
 
-.. raw:: html
+.. autoclass:: pcapkit.protocols.data.application.httpv2.PushPromiseFrame(length, type, flags, sid, pad_len, promised_sid, fragment)
+   :no-members:
+   :show-inheritance:
 
-   <br />
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
 
-.. class:: DataType_HTTPv2_DATA
+   .. autoattribute:: flags
+   .. autoattribute:: pad_len
+   .. autoattribute:: promised_sid
+   .. autoattribute:: fragment
 
-   :bases: DataType_HTTPv2_Frame
+.. autoclass:: pcapkit.protocols.data.application.httpv2.PushPromiseFrameFlags(END_HEADERS, PADDED)
+   :no-members:
+   :show-inheritance:
 
-   Structure of HTTP/2 ``DATA`` frame [:rfc:`7540`].
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. attribute:: flags
-      :type: DataType_HTTPv2_DATA_Flags
+   .. autoattribute:: END_HEADERS
+   .. autoattribute:: PADDED
 
-      HTTP/2 packet flags.
+.. autoclass:: pcapkit.protocols.data.application.httpv2.PingFrame(length, type, flags, sid, data)
+   :no-members:
+   :show-inheritance:
 
-   .. attribute:: data
-      :type: bytes
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
 
-      HTTP/2 transferred data.
+   .. autoattribute:: flags
+   .. autoattribute:: data
 
-.. class:: DataType_HTTPv2_DATA_Flags
+.. autoclass:: pcapkit.protocols.data.application.httpv2.PingFrameFlags(ACK)
+   :no-members:
+   :show-inheritance:
 
-   :bases: TypedDict
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
 
-   HTTP/2 ``DATA`` frame packet flags.
+   .. autoattribute:: ACK
 
-   .. attribute:: END_STREAM
-      :type: bool
+.. autoclass:: pcapkit.protocols.data.application.httpv2.GoawayFrame(length, type, flags, sid, last_sid, error, debug_data)
+   :no-members:
+   :show-inheritance:
 
-      :bit: 0
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. attribute:: PADDED
-      :type: bool
+   .. autoattribute:: flags
+   .. autoattribute:: last_sid
+   .. autoattribute:: error
+   .. autoattribute:: debug_data
 
-      :bit: 3
+.. autoclass:: pcapkit.protocols.data.application.httpv2.WindowUpdateFrame(length, type, flags, sid, increment)
+   :no-members:
+   :show-inheritance:
 
-HTTP/2 ``HEADERS`` Frame
-~~~~~~~~~~~~~~~~~~~~~~~~
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
 
-For HTTP/2 ``HEADERS`` frame as described in :rfc:`7540`,
-its structure is described as below:
+   .. autoattribute:: flags
+   .. autoattribute:: increment
 
-======= ========= ===================== ====================================
-Octets      Bits        Name                    Description
-======= ========= ===================== ====================================
-  0           0   ``http.length``             Length
-  3          24   ``http.type``               Type (``1``)
-  4          32   ``http.flags``              Flags
-  5          40                               Reserved
-  5          41   ``http.sid``                Stream Identifier
-  9          72   ``http.pad_len``            Pad Length (Optional)
-  10         80   ``http.exclusive``          Exclusive Flag
-  10         81   ``http.deps``               Stream Dependency (Optional)
-  14        112   ``http.weight``             Weight (Optional)
-  15        120   ``http.frag``               Header Block Fragment
-  ?           ?                               Padding (Optional)
-======= ========= ===================== ====================================
+.. autoclass:: pcapkit.protocols.data.application.httpv2.ContinuationFrame(length, type, flags, sid, fragment)
+   :no-members:
+   :show-inheritance:
 
-.. raw:: html
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
 
-   <br />
+   .. autoattribute:: flags
+   .. autoattribute:: fragment
 
-.. class:: DataType_HTTPv2_HEADERS
+.. autoclass:: pcapkit.protocols.data.application.httpv2.ContinuationFrameFlags(END_HEADERS)
+   :no-members:
+   :show-inheritance:
 
-   :bases: DataType_HTTPv2_Frame
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
 
-   Structure of HTTP/2 ``HEADERS`` frame [:rfc:`7540`].
-
-   .. attribute:: flags
-      :type: DataType_HTTPv2_HEADERS_Flags
-
-      HTTP/2 packet flags.
-
-   .. attribute:: frag
-      :type: Optional[bytes]
-
-      Header block fragment.
-
-   .. attribute:: pad_len
-      :type: int
-
-      Pad length.
-
-   .. attribute:: exclusive
-      :type: bool
-
-      Exclusive flag.
-
-   .. attribute:: deps
-      :type: int
-
-      Stream dependency.
-
-   .. attribute:: weight
-      :type: int
-
-      Weight.
-
-.. class:: DataType_HTTPv2_HEADERS_Flags
-
-   :bases: TypedDict
-
-   HTTP/2 ``HEADERS`` frame packet flags.
-
-   .. attribute:: END_STREAM
-      :type: bool
-
-      :bit: 0
-
-   .. attribute:: END_HEADERS
-      :type: bool
-
-      :bit: 2
-
-   .. attribute:: PADDED
-      :type: bool
-
-      :bit: 3
-
-   .. attribute:: PRIORITY
-      :type: bool
-
-      :bit: 5
-
-HTTP/2 ``PRIORITY`` Frame
-~~~~~~~~~~~~~~~~~~~~~~~~~
-
-For HTTP/2 ``PRIORITY`` frame as described in :rfc:`7540`,
-its structure is described as below:
-
-======= ========= ===================== ====================================
-Octets      Bits        Name                    Description
-======= ========= ===================== ====================================
-  0           0   ``http.length``             Length
-  3          24   ``http.type``               Type (``2``)
-  4          32   ``http.flags``              Flags
-  5          40                               Reserved
-  5          41   ``http.sid``                Stream Identifier
-  9          72   ``http.exclusive``          Exclusive Flag
-  9          73   ``http.deps``               Stream Dependency
-  13        104   ``http.weight``             Weight
-======= ========= ===================== ====================================
-
-.. raw:: html
-
-   <br />
-
-.. class:: DataType_HTTPv2_PRIORITY
-
-   :bases: DataType_HTTPv2_Frame
-
-   Structure of HTTP/2 ``PRIORITY`` frame [:rfc:`7540`].
-
-   .. attribute:: flags
-      :type: Literal[None]
-
-      HTTP/2 packet flags.
-
-   .. attribute:: exclusive
-      :type: bool
-
-      Exclusive flag.
-
-   .. attribute:: deps
-      :type: int
-
-      Stream dependency.
-
-   .. attribute:: weight
-      :type: int
-
-      Weight.
-
-HTTP/2 ``RST_STREAM`` Frame
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-For HTTP/2 ``RST_STREAM`` frame as described in :rfc:`7540`,
-its structure is described as below:
-
-======= ========= ===================== ====================================
-Octets      Bits        Name                    Description
-======= ========= ===================== ====================================
-  0           0   ``http.length``             Length
-  3          24   ``http.type``               Type (``3``)
-  4          32   ``http.flags``              Flags
-  5          40                               Reserved
-  5          41   ``http.sid``                Stream Identifier
-  9          72   ``http.error``              Error Code
-======= ========= ===================== ====================================
-
-.. raw:: html
-
-   <br />
-
-.. class:: DataType_HTTPv2_RST_STREAM
-
-   :bases: DataType_HTTPv2_Frame
-
-   Structure of HTTP/2 ``PRIORITY`` frame [:rfc:`7540`].
-
-   .. attribute:: flags
-      :type: Literal[None]
-
-      HTTP/2 packet flags.
-
-   .. attribute:: error
-      :type: pcapkit.const.http.error_code.ErrorCode
-
-      Error code.
-
-HTTP/2 ``SETTINGS`` Frame
-~~~~~~~~~~~~~~~~~~~~~~~~~
-
-For HTTP/2 ``SETTINGS`` frame as described in :rfc:`7540`,
-its structure is described as below:
-
-======= ========= ======================== ====================================
-Octets      Bits        Name                    Description
-======= ========= ======================== ====================================
-  0           0   ``http.length``             Length
-  3          24   ``http.type``               Type (``4``)
-  4          32   ``http.flags``              Flags
-  5          40                               Reserved
-  5          41   ``http.sid``                Stream Identifier
-  9          72   ``http.settings``           Settings
-  9          72   ``http.settings.id``        Identifier
-  10         80   ``http.settings.value``     Value
-======= ========= ======================== ====================================
-
-.. raw:: html
-
-   <br />
-
-.. class:: DataType_HTTPv2_SETTINGS
-
-   :bases: DataType_HTTPv2_Frame
-
-   Structure of HTTP/2 ``SETTINGS`` frame [:rfc:`7540`].
-
-   .. attribute:: flags
-      :type: DataType_HTTPv2_SETTINGS_Flags
-
-      HTTP/2 packet flags.
-
-   .. attribute:: settings
-      :type: Tuple[pcapkit.const.http.setting.Setting]
-
-      Array of HTTP/2 settings.
-
-.. class:: DataType_HTTPv2_SETTINGS_Flags
-
-   :bases: TypedDict
-
-   HTTP/2 packet flags.
-
-   .. attribute:: ACK
-      :type: bool
-
-      :bit: 0
-
-HTTP/2 ``PUSH_PROMISE`` Frame
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-For HTTP/2 ``PUSH_PROMISE`` frame as described in :rfc:`7540`,
-its structure is described as below:
-
-======= ========= ======================== ====================================
-Octets      Bits        Name                    Description
-======= ========= ======================== ====================================
-  0           0   ``http.length``             Length
-  3          24   ``http.type``               Type (``5``)
-  4          32   ``http.flags``              Flags
-  5          40                               Reserved
-  5          41   ``http.sid``                Stream Identifier
-  9          72   ``http.pad_len``            Pad Length (Optional)
-  10         80                               Reserved
-  10         81   ``http.pid``                Promised Stream ID
-  14        112   ``http.frag``               Header Block Fragment
-  ?           ?                               Padding (Optional)
-======= ========= ======================== ====================================
-
-.. raw:: html
-
-   <br />
-
-.. class:: DataType_HTTPv2_PUSH_PROMISE
-
-   :bases: DataType_HTTPv2_Frame
-
-   Structure of HTTP/2 ``PUSH_PROMISE`` frame [:rfc:`7540`].
-
-   .. attribute:: flags
-      :type: DataType_HTTPv2_PUSH_PROMISE_Flags
-
-      HTTP/2 packet flags.
-
-   .. attribute:: pid
-      :type: int
-
-      Promised stream ID.
-
-   .. attribute:: frag
-      :type: Optional[bytes]
-
-      Header block fragment.
-
-   .. attribute:: pad_len
-      :type: int
-
-      Pad length.
-
-.. class:: DataType_HTTPv2_PUSH_PROMISE_Flags
-
-   :bases: TypedDict
-
-   HTTP/2 packet flags.
-
-   .. attribute:: END_HEADERS
-      :type: bool
-
-      :bit: 2
-
-   .. attribute:: PADDED
-      :type: bool
-
-      :bit: 3
-
-HTTP/2 ``PING`` Frame
-~~~~~~~~~~~~~~~~~~~~~
-
-For HTTP/2 ``PING`` frame as described in :rfc:`7540`,
-its structure is described as below:
-
-======= ========= ======================== ====================================
-Octets      Bits        Name                    Description
-======= ========= ======================== ====================================
-  0           0   ``http.length``             Length
-  3          24   ``http.type``               Type (``6``)
-  4          32   ``http.flags``              Flags
-  5          40                               Reserved
-  5          41   ``http.sid``                Stream Identifier
-  9          72   ``http.data``               Opaque Data
-======= ========= ======================== ====================================
-
-.. raw:: html
-
-   <br />
-
-.. class:: DataType_HTTPv2_PING
-
-   :bases: DataType_HTTPv2_Frame
-
-   Structure of HTTP/2 ``PING`` frame [:rfc:`7540`].
-
-   .. attribute:: flags
-      :type: DataType_HTTPv2_PING_Flags
-
-      HTTP/2 packet flags.
-
-   .. attribute:: data
-      :type: bytes
-
-      Opaque data.
-
-.. class:: DataType_HTTPv2_PING_Flags
-
-   :bases: TypedDict
-
-   HTTP/2 packet flags.
-
-   .. attribute:: ACK
-      :type: bool
-
-      :bit: 0
-
-HTTP/2 ``GOAWAY`` Frame
-~~~~~~~~~~~~~~~~~~~~~~~
-
-For HTTP/2 ``GOAWAY`` frame as described in :rfc:`7540`,
-its structure is described as below:
-
-======= ========= ======================== ====================================
-Octets      Bits        Name                    Description
-======= ========= ======================== ====================================
-  0           0   ``http.length``             Length
-  3          24   ``http.type``               Type (``7``)
-  4          32   ``http.flags``              Flags
-  5          40                               Reserved
-  5          41   ``http.sid``                Stream Identifier
-  9          72                               Reserved
-  9          73   ``http.last_sid``           Last Stream ID
-  13        104   ``http.error``              Error Code
-  17        136   ``http.data``               Additional Debug Data (Optional)
-======= ========= ======================== ====================================
-
-.. raw:: html
-
-   <br />
-
-.. class:: DataType_HTTPv2_GOAWAY
-
-   :bases: DataType_HTTPv2_Frame
-
-   Structure of HTTP/2 ``GOAWAY`` frame [:rfc:`7540`].
-
-   .. attribute:: flags
-      :type: Literal[None]
-
-      HTTP/2 packet flags.
-
-   .. attribute:: last_sid
-      :type: int
-
-      Last stream ID.
-
-   .. attribute:: error
-      :type: pcapkit.const.http.error_code.ErrorCode
-
-      Error code.
-
-   .. attribute:: data
-      :type: Optional[None]
-
-      Additional debug data.
-
-HTTP/2 ``WINDOW_UPDATE`` Frame
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-For HTTP/2 ``WINDOW_UPDATE`` frame as described in :rfc:`7540`,
-its structure is described as below:
-
-======= ========= ======================== ====================================
-Octets      Bits        Name                    Description
-======= ========= ======================== ====================================
-  0           0   ``http.length``             Length
-  3          24   ``http.type``               Type (``8``)
-  4          32   ``http.flags``              Flags
-  5          40                               Reserved
-  5          41   ``http.sid``                Stream Identifier
-  9          72                               Reserved
-  9          73   ``http.window``             Window Size Increment
-======= ========= ======================== ====================================
-
-.. raw:: html
-
-   <br />
-
-.. class:: DataType_HTTPv2_WINDOW_UPDATE
-
-   :bases: DataType_HTTPv2_Frame
-
-   Structure of HTTP/2 ``WINDOW_UPDATE`` frame [:rfc:`7540`].
-
-   .. attribute:: flags
-      :type: Literal[None]
-
-      HTTP/2 packet flags.
-
-   .. attribute:: window
-      :type: int
-
-      Window size increment.
-
-HTTP/2 ``CONTINUATION`` Frame
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-For HTTP/2 ``CONTINUATION`` frame as described in :rfc:`7540`,
-its structure is described as below:
-
-======= ========= ======================== ====================================
-Octets      Bits        Name                    Description
-======= ========= ======================== ====================================
-  0           0   ``http.length``             Length
-  3          24   ``http.type``               Type (``9``)
-  4          32   ``http.flags``              Flags
-  5          40                               Reserved
-  5          41   ``http.sid``                Stream Identifier
-  9          73   ``http.frag``               Header Block Fragment
-======= ========= ======================== ====================================
-
-.. raw:: html
-
-   <br />
-
-.. class:: DataType_HTTPv2_CONTINUATION
-
-   :bases: DataType_HTTPv2_Frame
-
-   Structure of HTTP/2 ``CONTINUATION`` frame [:rfc:`7540`].
-
-   .. attribute:: flags
-      :type: DataType_HTTPv2_CONTINUATION_Flags
-
-      HTTP/2 packet flags.
-
-   .. attribute:: frag
-      :type: bytes
-
-      Header block fragment.
-
-.. class:: DataType_HTTPv2_CONTINUATION_Flags
-
-   :bases: TypedDict
-
-   HTTP/2 packet flags.
-
-   .. attribute:: END_HEADERS
-      :type: bool
-
-      :bit: 2
+   .. autoattribute:: END_HEADERS
 
 .. raw:: html
 

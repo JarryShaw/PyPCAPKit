@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
-"""hypertext transfer protocol (HTTP/2)
+"""HTTP/2 - Hypertext Transfer Protocol
+==========================================
 
 :mod:`pcapkit.protocols.application.httpv2` contains
-:class:`~pcapkit.protocols.application.httpv2.HTTPv2`
+:class:`~pcapkit.protocols.application.httpv2.HTTP`
 only, which implements extractor for Hypertext Transfer
 Protocol (HTTP/2) [*]_, whose structure is described as
 below:
@@ -28,7 +29,7 @@ from pcapkit.const.http.error_code import ErrorCode as RegType_ErrorCode
 from pcapkit.const.http.frame import Frame as RegType_Frame
 from pcapkit.const.http.setting import Setting as RegType_Setting
 from pcapkit.corekit.multidict import OrderedMultiDict
-from pcapkit.protocols.application.http import HTTP
+from pcapkit.protocols.application.http import HTTP as HTTPBase
 from pcapkit.protocols.data.application.httpv2 import HTTP as DataType_HTTP
 from pcapkit.protocols.data.application.httpv2 import \
     ContinuationFrame as DataType_ContinuationFrame
@@ -60,13 +61,45 @@ if TYPE_CHECKING:
 
     from typing_extensions import Literal
 
-    FrameParser = Callable[['HTTPv2', RegType_Frame, int, str, int], DataType_HTTP]
+    FrameParser = Callable[['HTTP', RegType_Frame, int, str, int], DataType_HTTP]
 
-__all__ = ['HTTPv2']
+__all__ = ['HTTP']
 
 
-class HTTPv2(HTTP[DataType_HTTP]):
-    """This class implements Hypertext Transfer Protocol (HTTP/2)."""
+class HTTP(HTTPBase[DataType_HTTP]):
+    """This class implements Hypertext Transfer Protocol (HTTP/2).
+
+    This class currently supports parsing of the following HTTP/2 frames,
+    which are directly mapped to the :class:`pcapkit.const.http.frame.Frame`
+    enumeration:
+
+    .. list-table::
+       :header-rows: 1
+
+       * - Frame Code
+         - Frame Parser
+       * - :attr:`~pcapkit.const.http.frame.Frame.DATA`
+         - :meth:`~pcapkit.protocols.application.httpv2.HTTP._read_http_data`
+       * - :attr:`~pcapkit.const.http.frame.Frame.HEADERS`
+         - :meth:`~pcapkit.protocols.application.httpv2.HTTP._read_http_headers`
+       * - :attr:`~pcapkit.const.http.frame.Frame.PRIORITY`
+         - :meth:`~pcapkit.protocols.application.httpv2.HTTP._read_http_priority`
+       * - :attr:`~pcapkit.const.http.frame.Frame.RST_STREAM`
+         - :meth:`~pcapkit.protocols.application.httpv2.HTTP._read_http_rst_stream`
+       * - :attr:`~pcapkit.const.http.frame.Frame.SETTINGS`
+         - :meth:`~pcapkit.protocols.application.httpv2.HTTP._read_http_settings`
+       * - :attr:`~pcapkit.const.http.frame.Frame.PUSH_PROMISE`
+         - :meth:`~pcapkit.protocols.application.httpv2.HTTP._read_http_push_promise`
+       * - :attr:`~pcapkit.const.http.frame.Frame.PING`
+         - :meth:`~pcapkit.protocols.application.httpv2.HTTP._read_http_ping`
+       * - :attr:`~pcapkit.const.http.frame.Frame.GOAWAY`
+         - :meth:`~pcapkit.protocols.application.httpv2.HTTP._read_http_goaway`
+       * - :attr:`~pcapkit.const.http.frame.Frame.WINDOW_UPDATE`
+         - :meth:`~pcapkit.protocols.application.httpv2.HTTP._read_http_window_update`
+       * - :attr:`~pcapkit.const.http.frame.Frame.CONTINUATION`
+         - :meth:`~pcapkit.protocols.application.httpv2.HTTP._read_http_continuation`
+
+    """
 
     ##########################################################################
     # Defaults.
@@ -134,8 +167,6 @@ class HTTPv2(HTTP[DataType_HTTP]):
 
         Args:
             length: Length of packet data.
-
-        Keyword Args:
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
@@ -181,7 +212,7 @@ class HTTPv2(HTTP[DataType_HTTP]):
     def make(self, **kwargs: 'Any') -> 'NoReturn':
         """Make (construct) packet data.
 
-        Keyword Args:
+        Args:
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
@@ -191,7 +222,7 @@ class HTTPv2(HTTP[DataType_HTTP]):
         raise NotImplementedError
 
     @classmethod
-    def id(cls) -> 'tuple[Literal["HTTPv2"]]':  # type: ignore[override]
+    def id(cls) -> 'tuple[Literal["HTTP"]]':  # type: ignore[override]
         """Index ID of the protocol.
 
         Returns:
