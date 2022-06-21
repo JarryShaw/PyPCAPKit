@@ -59,8 +59,6 @@ class FTP(Application[DataType_FTP]):
 
         Args:
             length: Length of packet data.
-
-        Keyword Args:
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
@@ -118,7 +116,7 @@ class FTP(Application[DataType_FTP]):
     def make(self, **kwargs: 'Any') -> 'NoReturn':
         """Make (construct) packet data.
 
-        Keyword Args:
+        Args:
             Arbitrary keyword arguments.
 
         Returns:
