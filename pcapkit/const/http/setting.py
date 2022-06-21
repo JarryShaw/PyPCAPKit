@@ -45,8 +45,7 @@ class Setting(IntEnum):
     #: ``SETTINGS_ENABLE_CONNECT_PROTOCOL`` [:rfc:`8441`] (Initial Value: 0)
     SETTINGS_ENABLE_CONNECT_PROTOCOL = 0x0008
 
-    #: ``SETTINGS_NO_RFC7540_PRIORITIES`` [RFC-ietf-httpbis-priority-12] (Initial
-    #: Value: 0)
+    #: ``SETTINGS_NO_RFC7540_PRIORITIES`` [:rfc:`9218`] (Initial Value: 0)
     SETTINGS_NO_RFC7540_PRIORITIES = 0x0009
 
     #: ``TLS_RENEG_PERMITTED`` [MS-HTTP2E][Gabriel Montenegro] (Initial Value:

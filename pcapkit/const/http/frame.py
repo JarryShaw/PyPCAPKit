@@ -55,7 +55,7 @@ class Frame(IntEnum):
     #: ``ORIGIN`` [:rfc:`8336`]
     ORIGIN = 0x0C
 
-    #: ``PRIORITY_UPDATE`` [RFC-ietf-httpbis-priority-12]
+    #: ``PRIORITY_UPDATE`` [:rfc:`9218`]
     PRIORITY_UPDATE = 0x10
 
     @staticmethod
