@@ -14,6 +14,9 @@ and etc.
    :no-members:
    :show-inheritance:
 
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
    .. automethod:: __post_init__
    .. automethod:: __index__
 
