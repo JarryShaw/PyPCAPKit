@@ -16,3 +16,22 @@ several user-refined exceptions and warnings.
    decorators
    exceptions
    warnings
+
+Version Compatibility
+---------------------
+
+.. module:: pcapkit.utilities.compat
+
+:mod:`pcapkit` further provides a compatibility layer for the
+following objects and functions:
+
+.. list-table::
+
+   * - :exc:`ModuleNotFoundError`
+     - Python 3.6+
+   * - :class:`collections.abc.Collection`
+     - Python 3.6+
+   * - :mod:`pathlib`
+     - Python 3.5+
+   * - :func:`functools.cached_property`
+     - Python 3.8+

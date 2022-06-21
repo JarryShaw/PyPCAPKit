@@ -17,9 +17,6 @@ __all__ = [
 
     # modules
     'pathlib',
-
-    # functions
-    'cached_property',
 ]
 
 version = sys.version_info[:2]
