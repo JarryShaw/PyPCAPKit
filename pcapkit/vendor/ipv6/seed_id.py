@@ -2,6 +2,7 @@
 """IPv6 Seed-ID Types"""
 
 import collections
+import sys
 from typing import TYPE_CHECKING
 
 from pcapkit.vendor.default import Vendor

@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 """OSPF Authentication Types"""
 
+import sys
+
 from pcapkit.vendor.default import Vendor
 
 __all__ = ['Authentication']

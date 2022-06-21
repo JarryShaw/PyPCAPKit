@@ -2,6 +2,7 @@
 """IPv4 Option Classes"""
 
 import collections
+import sys
 from typing import TYPE_CHECKING
 
 from pcapkit.vendor.default import Vendor

@@ -2,6 +2,7 @@
 """IPv4 ToS ECN Field"""
 
 import collections
+import sys
 from typing import TYPE_CHECKING
 
 from pcapkit.vendor.default import Vendor

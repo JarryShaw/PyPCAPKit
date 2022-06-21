@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 """OSPF Packet Types"""
 
+import sys
+
 from pcapkit.vendor.default import Vendor
 
 __all__ = ['Packet']

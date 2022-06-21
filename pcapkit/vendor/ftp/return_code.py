@@ -8,6 +8,7 @@ which is automatically generating :class:`pcapkit.const.ftp.return_code.ReturnCo
 """
 
 import collections
+import sys
 from typing import TYPE_CHECKING
 
 import bs4

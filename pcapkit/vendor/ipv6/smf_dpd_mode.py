@@ -2,6 +2,7 @@
 """IPv6 Simplified Multicast Forwarding Duplicate Packet Detection (``SMF_DPD``) Options"""
 
 import collections
+import sys
 from typing import TYPE_CHECKING
 
 from pcapkit.vendor.default import Vendor

@@ -28,6 +28,7 @@ except ModuleNotFoundError:
          VendorWarning, stacklevel=stacklevel())
 
 # base crawler
+import sys
 from pcapkit.vendor.default import Vendor
 
 # IANA registration

@@ -9,6 +9,7 @@ which is automatically generating :class:`pcapkit.const.hip.group.Group`.
 
 import csv
 import re
+import sys
 
 from pcapkit.vendor.default import Vendor
 

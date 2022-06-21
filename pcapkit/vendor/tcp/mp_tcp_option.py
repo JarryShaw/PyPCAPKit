@@ -2,6 +2,7 @@
 """Multipath TCP options [:rfc:`6824`]"""
 
 import collections
+import sys
 from typing import TYPE_CHECKING
 
 from pcapkit.vendor.default import Vendor

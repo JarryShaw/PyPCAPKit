@@ -3,6 +3,7 @@
 
 import csv
 import re
+import sys
 
 from pcapkit.vendor.default import Vendor
 

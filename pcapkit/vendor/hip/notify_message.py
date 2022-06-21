@@ -7,6 +7,8 @@ which is automatically generating :class:`pcapkit.const.hip.notify_message.Notif
 
 """
 
+import sys
+
 from pcapkit.vendor.default import Vendor
 
 __all__ = ['NotifyMessage']

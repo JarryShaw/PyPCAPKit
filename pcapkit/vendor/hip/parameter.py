@@ -9,6 +9,7 @@ which is automatically generating :class:`pcapkit.const.hip.parameter.Parameter`
 
 import csv
 import re
+import sys
 
 from pcapkit.vendor.default import Vendor
 

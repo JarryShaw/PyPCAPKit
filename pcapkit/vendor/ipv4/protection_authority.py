@@ -2,6 +2,7 @@
 """IPv4 Protection Authority Bit Assignments"""
 
 import collections
+import sys
 from typing import TYPE_CHECKING
 
 from pcapkit.vendor.default import Vendor

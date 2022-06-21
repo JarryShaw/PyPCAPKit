@@ -7,6 +7,8 @@ which is automatically generating :class:`pcapkit.const.hip.ecdsa_curve.ECDSACur
 
 """
 
+import sys
+
 from pcapkit.vendor.default import Vendor
 
 __all__ = ['ECDSACurve']

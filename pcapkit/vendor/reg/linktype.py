@@ -3,6 +3,7 @@
 
 import collections
 import re
+import sys
 from typing import TYPE_CHECKING
 
 import bs4

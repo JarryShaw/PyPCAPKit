@@ -7,6 +7,8 @@ which is automatically generating :class:`pcapkit.const.hip.esp_transform_suite.
 
 """
 
+import sys
+
 from pcapkit.vendor.default import Vendor
 
 __all__ = ['ESPTransformSuite']

@@ -11,6 +11,7 @@ path = sys.path.pop(0)
 
 import collections
 import re
+import sys
 from typing import TYPE_CHECKING
 
 import bs4

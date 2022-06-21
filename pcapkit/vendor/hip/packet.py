@@ -9,6 +9,7 @@ which is automatically generating :class:`pcapkit.const.hip.packet.Packet`.
 
 import csv
 import re
+import sys
 
 from pcapkit.vendor.default import Vendor
 
