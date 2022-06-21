@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
-"""root application layer protocol
+"""Base Protocol
+===================
 
 :mod:`pcapkit.protocols.application.application` contains only
 :class:`~pcapkit.protocols.application.application.Application`,
@@ -60,8 +61,6 @@ class Application(Protocol[PT], Generic[PT]):  # pylint: disable=abstract-method
         Args:
             file: Source packet stream.
             length: Length of packet data.
-
-        Keyword Args:
             **kwargs: Arbitrary keyword arguments.
 
         See Also:
