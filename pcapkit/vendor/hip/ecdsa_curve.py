@@ -1,5 +1,11 @@
 # -*- coding: utf-8 -*-
-"""HIP ECDSA Curve Label"""
+"""ECDSA Curve Label
+=======================
+
+This module contains the vendor crawler for **ECDSA Curve Label**,
+which is automatically generating :class:`pcapkit.const.hip.ecdsa_curve.ECDSACurve`.
+
+"""
 
 from pcapkit.vendor.default import Vendor
 
@@ -15,5 +21,5 @@ class ECDSACurve(Vendor):
     LINK = 'https://www.iana.org/assignments/hip-parameters/ecdsa-curve-label.csv'
 
 
-if __name__ == "__main__":
-    ECDSACurve()
+if __name__ == '__main__':
+    sys.exit(ECDSACurve())

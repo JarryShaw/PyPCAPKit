@@ -1,5 +1,11 @@
 # -*- coding: utf-8 -*-
-"""HIP Registration Failure Types"""
+"""Registration Failure Types
+================================
+
+This module contains the vendor crawler for **Registration Failure Types**,
+which is automatically generating :class:`pcapkit.const.hip.registration_failure.RegistrationFailure`.
+
+"""
 
 from pcapkit.vendor.default import Vendor
 
@@ -15,5 +21,5 @@ class RegistrationFailure(Vendor):
     LINK = 'https://www.iana.org/assignments/hip-parameters/hip-parameters-13.csv'
 
 
-if __name__ == "__main__":
-    RegistrationFailure()
+if __name__ == '__main__':
+    sys.exit(RegistrationFailure())

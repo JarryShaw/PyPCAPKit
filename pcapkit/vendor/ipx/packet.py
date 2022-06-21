@@ -112,5 +112,5 @@ class Packet(Vendor):
         return enum, miss
 
 
-if __name__ == "__main__":
-    Packet()
+if __name__ == '__main__':
+    sys.exit(Packet())

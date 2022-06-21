@@ -1,5 +1,11 @@
 # -*- coding: utf-8 -*-
-"""Default vendor generation."""
+"""Base Crawler
+==================
+
+:mod:`pcapkit.vendor.default` contains :class:`~pcapkit.vendor.default.Vendor`
+only, which is the base meta class for all vendor crawlers.
+
+"""
 
 import abc
 import collections
@@ -104,7 +110,7 @@ class Vendor(metaclass=abc.ABCMeta):
     """Default vendor generator.
 
     Inherit this class with :attr:`~Vendor.FLAG` &
-    :attr:`~Vendor.LINK` attributes, etc. to implement
+    :attr:`~Vendor.LINK` attributes, etc., to implement
     a new vendor generator.
 
     """
@@ -175,8 +181,6 @@ class Vendor(metaclass=abc.ABCMeta):
         Args:
             name: Field name.
             code: Field code.
-
-        Keyword Args:
             original: Original field name (extracted from CSV records).
 
         Returns:
@@ -299,7 +303,8 @@ class Vendor(metaclass=abc.ABCMeta):
         """Subclassing checkpoint.
 
         Raises:
-            VendorNotImplemented: If ``cls`` is not a subclass of :class:`~pcapkit.vendor.default.Vendor`.
+            VendorNotImplemented: If ``cls`` is not a subclass of
+                :class:`~pcapkit.vendor.default.Vendor`.
 
         """
         if cls is Vendor:

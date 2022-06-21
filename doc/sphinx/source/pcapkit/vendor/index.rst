@@ -1,35 +1,70 @@
-Web Crawlers for Constant Enumerations
-======================================
+Vendor Crawlers
+===============
 
 .. module:: pcapkit.vendor
+
+This module contains all web crawlers of :mod:`pcapkit`, which are
+automatically generating from the :mod:`pcapkit.const` module's constant
+enumerations.
+
+Base Crawler
+------------
+
+.. toctree::
+   :maxdepth: 2
+
+   default
+
+Protocol Numbers
+----------------
+
+.. toctree::
+   :maxdepth: 2
+
+   reg
+
+Link Layer
+----------
 
 .. toctree::
    :maxdepth: 2
 
    arp
-   ftp
+   l2tp
+   ospf
+   vlan
+
+Internet Layer
+--------------
+
+.. toctree::
+   :maxdepth: 2
+
    hip
-   http
    ipv4
    ipv6
    ipx
    mh
-   ospf
-   reg
+
+Transport Layer
+---------------
+
+.. toctree::
+   :maxdepth: 2
+
    tcp
-   vlan
 
-Base Generator
---------------
-
-.. automodule:: pcapkit.vendor.default
-   :members:
-   :undoc-members:
-   :private-members:
-   :show-inheritance:
-
-Command Line Tool
+Application Layer
 -----------------
+
+.. toctree::
+   :maxdepth: 2
+
+   ftp
+   http
+
+.. automodule:: pcapkit.vendor.__main__
+   :no-members:
 
 .. code-block::
 
@@ -43,9 +78,3 @@ Command Line Tool
    optional arguments:
      -h, --help     show this help message and exit
      -V, --version  show program's version number and exit
-
-.. automodule:: pcapkit.vendor.__main__
-   :members:
-   :undoc-members:
-   :private-members:
-   :show-inheritance:

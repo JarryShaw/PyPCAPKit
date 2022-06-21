@@ -109,5 +109,5 @@ class EtherType(Vendor):
         return enum, miss
 
 
-if __name__ == "__main__":
-    EtherType()
+if __name__ == '__main__':
+    sys.exit(EtherType())

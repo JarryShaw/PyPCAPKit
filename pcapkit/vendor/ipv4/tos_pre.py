@@ -72,5 +72,5 @@ class ToSPrecedence(Vendor):
         return enum, miss
 
 
-if __name__ == "__main__":
-    ToSPrecedence()
+if __name__ == '__main__':
+    sys.exit(ToSPrecedence())

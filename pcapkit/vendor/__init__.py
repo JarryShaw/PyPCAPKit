@@ -1,6 +1,13 @@
 # -*- coding: utf-8 -*-
 # pylint: disable=unused-import, unused-wildcard-import
-"""Web crawlers for constant enumerations."""
+"""Vendor Crawlers
+=====================
+
+This module contains all web crawlers of :mod:`pcapkit`, which are
+automatically generating the :mod:`pcapkit.const` module's constant.
+enumerations.
+
+"""
 
 from pcapkit.utilities.compat import ModuleNotFoundError  # pylint: disable=redefined-builtin
 from pcapkit.utilities.exceptions import stacklevel

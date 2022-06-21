@@ -1,5 +1,13 @@
 # -*- coding: utf-8 -*-
-"""ARP Hardware Types [:rfc:`826`][:rfc:`5494`]"""
+"""Hardware Types
+====================
+
+This module contains the vendor crawler for **Hardware Types**,
+which is automatically generating :class:`pcapkit.const.arp.hardware.Hardware`.
+
+"""
+
+import sys
 
 from pcapkit.vendor.default import Vendor
 
@@ -16,4 +24,4 @@ class Hardware(Vendor):
 
 
 if __name__ == '__main__':
-    Hardware()
+    sys.exit(Hardware())

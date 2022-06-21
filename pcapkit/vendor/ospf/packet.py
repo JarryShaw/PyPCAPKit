@@ -15,5 +15,5 @@ class Packet(Vendor):
     LINK = 'https://www.iana.org/assignments/ospfv2-parameters/ospfv2-parameters-3.csv'
 
 
-if __name__ == "__main__":
-    Packet()
+if __name__ == '__main__':
+    sys.exit(Packet())

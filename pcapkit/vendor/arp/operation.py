@@ -1,5 +1,13 @@
 # -*- coding: utf-8 -*-
-"""ARP Operation Codes [:rfc:`826`][:rfc:`5494`]"""
+"""Operation Codes
+=====================
+
+This module contains the vendor crawler for **Operation Codes**,
+which is automatically generating :class:`pcapkit.const.arp.operation.Operation`.
+
+"""
+
+import sys
 
 from pcapkit.vendor.default import Vendor
 
@@ -15,5 +23,5 @@ class Operation(Vendor):
     LINK = 'https://www.iana.org/assignments/arp-parameters/arp-parameters-1.csv'
 
 
-if __name__ == "__main__":
-    Operation()
+if __name__ == '__main__':
+    sys.exit(Operation())

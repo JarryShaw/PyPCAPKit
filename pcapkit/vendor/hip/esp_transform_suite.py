@@ -1,5 +1,11 @@
 # -*- coding: utf-8 -*-
-"""HIP ESP Transform Suite IDs"""
+"""ESP Transform Suite IDs
+=============================
+
+This module contains the vendor crawler for **ESP Transform Suite IDs**,
+which is automatically generating :class:`pcapkit.const.hip.esp_transform_suite.ESPTransformSuite`.
+
+"""
 
 from pcapkit.vendor.default import Vendor
 
@@ -15,5 +21,5 @@ class ESPTransformSuite(Vendor):
     LINK = 'https://www.iana.org/assignments/hip-parameters/esp-transform-suite-ids.csv'
 
 
-if __name__ == "__main__":
-    ESPTransformSuite()
+if __name__ == '__main__':
+    sys.exit(ESPTransformSuite())

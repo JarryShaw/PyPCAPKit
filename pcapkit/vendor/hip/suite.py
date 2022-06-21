@@ -1,5 +1,11 @@
 # -*- coding: utf-8 -*-
-"""HIP Suite IDs"""
+"""Suite IDs
+===============
+
+This module contains the vendor crawler for **Suite IDs**,
+which is automatically generating :class:`pcapkit.const.hip.suite.Suite`.
+
+"""
 
 from pcapkit.vendor.default import Vendor
 
@@ -15,5 +21,5 @@ class Suite(Vendor):
     LINK = 'https://www.iana.org/assignments/hip-parameters/hip-parameters-6.csv'
 
 
-if __name__ == "__main__":
-    Suite()
+if __name__ == '__main__':
+    sys.exit(Suite())

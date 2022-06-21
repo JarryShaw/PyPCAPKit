@@ -66,5 +66,5 @@ class Type(Vendor):
         return enum, miss
 
 
-if __name__ == "__main__":
-    Type()
+if __name__ == '__main__':
+    sys.exit(Type())

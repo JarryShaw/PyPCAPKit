@@ -69,5 +69,5 @@ class SeedID(Vendor):
         return enum, miss
 
 
-if __name__ == "__main__":
-    SeedID()
+if __name__ == '__main__':
+    sys.exit(SeedID())

@@ -20,7 +20,7 @@ enumerations include:
 .. autoclass:: pcapkit.const.arp.hardware.Hardware
    :members:
    :undoc-members:
-   :private-members:
+   :exclude-members: get, _missing_
    :show-inheritance:
 
 .. automodule:: pcapkit.const.arp.operation
@@ -30,6 +30,7 @@ enumerations include:
    :members:
    :undoc-members:
    :private-members:
+   :exclude-members: get, _missing_
    :show-inheritance:
 
 .. raw:: html

@@ -1,5 +1,11 @@
 # -*- coding: utf-8 -*-
-"""HIP Certificate Types"""
+"""HIP Certificate Types
+===========================
+
+This module contains the vendor crawler for **HIP Certificate Types**,
+which is automatically generating :class:`pcapkit.const.hip.certificate.Certificate`.
+
+"""
 
 from pcapkit.vendor.default import Vendor
 
@@ -15,5 +21,5 @@ class Certificate(Vendor):
     LINK = 'https://www.iana.org/assignments/hip-parameters/certificate-types.csv'
 
 
-if __name__ == "__main__":
-    Certificate()
+if __name__ == '__main__':
+    sys.exit(Certificate())

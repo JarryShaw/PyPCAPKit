@@ -1,5 +1,11 @@
 # -*- coding: utf-8 -*-
-"""HIP Parameter Types"""
+"""HIP Parameter Types
+=========================
+
+This module contains the vendor crawler for **HIP Parameter Types**,
+which is automatically generating :class:`pcapkit.const.hip.parameter.Parameter`.
+
+"""
 
 import csv
 import re
@@ -76,5 +82,5 @@ class Parameter(Vendor):
         return enum, miss
 
 
-if __name__ == "__main__":
-    Parameter()
+if __name__ == '__main__':
+    sys.exit(Parameter())

@@ -15,5 +15,5 @@ class Authentication(Vendor):
     LINK = 'https://www.iana.org/assignments/ospf-authentication-codes/authentication-codes.csv'
 
 
-if __name__ == "__main__":
-    Authentication()
+if __name__ == '__main__':
+    sys.exit(Authentication())

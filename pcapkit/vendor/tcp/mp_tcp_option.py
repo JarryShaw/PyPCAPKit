@@ -72,5 +72,5 @@ class MPTCPOption(Vendor):
         return enum, miss
 
 
-if __name__ == "__main__":
-    MPTCPOption()
+if __name__ == '__main__':
+    sys.exit(MPTCPOption())

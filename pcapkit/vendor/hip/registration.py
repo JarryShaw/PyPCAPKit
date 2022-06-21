@@ -1,5 +1,11 @@
 # -*- coding: utf-8 -*-
-"""HIP Registration Types"""
+"""Registration Types
+========================
+
+This module contains the vendor crawler for **Registration Types**,
+which is automatically generating :class:`pcapkit.const.hip.registration.Registration`.
+
+"""
 
 from pcapkit.vendor.default import Vendor
 
@@ -15,5 +21,5 @@ class Registration(Vendor):
     LINK = 'https://www.iana.org/assignments/hip-parameters/hip-parameters-11.csv'
 
 
-if __name__ == "__main__":
-    Registration()
+if __name__ == '__main__':
+    sys.exit(Registration())

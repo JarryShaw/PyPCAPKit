@@ -3,28 +3,40 @@ Protocol Type Registry Vendor Crawlers
 
 .. module:: pcapkit.vendor.reg
 
-LINK-LAYER HEADER TYPES [*]_
-----------------------------
+This module contains all vendor crawlers of protocol type registry
+implementations. Available enumerations include:
+
+.. list-table::
+
+   * - :class:`LINKTYPE <pcapkit.vendor.reg.linktype.LinkType>`
+     - Link-Layer Header Type Values [*]_
+   * - :class:`ETHERTYPE <pcapkit.vendor.reg.ethertype.EtherType>`
+     - Ethertype IEEE 802 Numbers [*]_
+   * - :class:`TRANSTYPE <pcapkit.vendor.reg.transtype.TransType>`
+     - Transport Layer Protocol Numbers [*]_
 
 .. automodule:: pcapkit.vendor.reg.linktype
+   :no-members:
+
+.. autoclass:: pcapkit.vendor.reg.linktype.LinkType
    :members:
    :undoc-members:
    :private-members:
    :show-inheritance:
-
-ETHER TYPES [*]_
-----------------
 
 .. automodule:: pcapkit.vendor.reg.ethertype
+   :no-members:
+
+.. autoclass:: pcapkit.vendor.reg.ethertype.EtherType
    :members:
    :undoc-members:
    :private-members:
    :show-inheritance:
 
-Assigned Internet Protocol Numbers [*]_
----------------------------------------
-
 .. automodule:: pcapkit.vendor.reg.transtype
+   :no-members:
+
+.. autoclass:: pcapkit.vendor.reg.transtype.TransType
    :members:
    :undoc-members:
    :private-members:

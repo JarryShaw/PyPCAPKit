@@ -19,4 +19,5 @@ enumerations include:
    :members:
    :undoc-members:
    :private-members:
+   :exclude-members: get, _missing_
    :show-inheritance:

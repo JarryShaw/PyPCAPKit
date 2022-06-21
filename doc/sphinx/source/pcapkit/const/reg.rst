@@ -22,6 +22,7 @@ implementations. Available enumerations include:
    :members:
    :undoc-members:
    :private-members:
+   :exclude-members: get, _missing_
    :show-inheritance:
 
 .. automodule:: pcapkit.const.reg.ethertype
@@ -31,6 +32,7 @@ implementations. Available enumerations include:
    :members:
    :undoc-members:
    :private-members:
+   :exclude-members: get, _missing_
    :show-inheritance:
 
 .. automodule:: pcapkit.const.reg.transtype
@@ -40,6 +42,7 @@ implementations. Available enumerations include:
    :members:
    :undoc-members:
    :private-members:
+   :exclude-members: get, _missing_
    :show-inheritance:
 
 .. raw:: html

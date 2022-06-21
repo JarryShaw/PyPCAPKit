@@ -66,5 +66,5 @@ class QSFunction(Vendor):
         return enum, miss
 
 
-if __name__ == "__main__":
-    QSFunction()
+if __name__ == '__main__':
+    sys.exit(QSFunction())

@@ -1,5 +1,11 @@
 # -*- coding: utf-8 -*-
-"""FTP Command"""
+"""FTP Command
+=================
+
+This module contains the vendor crawler for **FTP Command**,
+which is automatically generating :class:`pcapkit.const.ftp.command.Command`.
+
+"""
 
 import csv
 import re
@@ -176,5 +182,5 @@ class Command(Vendor):
         return LINE(self.NAME, self.DOCS, INFO, MISS, self.__module__)
 
 
-if __name__ == "__main__":
-    Command()
+if __name__ == '__main__':
+    sys.exit(Command())

@@ -66,5 +66,5 @@ class ToSDelay(Vendor):
         return enum, miss
 
 
-if __name__ == "__main__":
-    ToSDelay()
+if __name__ == '__main__':
+    sys.exit(ToSDelay())

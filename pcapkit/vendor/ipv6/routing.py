@@ -75,5 +75,5 @@ class Routing(Vendor):
         return enum, miss
 
 
-if __name__ == "__main__":
-    Routing()
+if __name__ == '__main__':
+    sys.exit(Routing())

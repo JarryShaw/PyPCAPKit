@@ -1,12 +1,21 @@
-MH Vendor Crawler
-=================
+:class:`~pcapkit.protocols.internet.mh.MH` Vendor Crawlers
+==========================================================
 
 .. module:: pcapkit.vendor.mh
 
-Mobility Header Types [*]_
---------------------------
+This module contains all vendor crawlers of
+:class:`~pcapkit.protocols.internet.mh.MH` implementations. Available
+enumerations include:
+
+.. list-table::
+
+   * - :class:`MH_Packet <pcapkit.vendor.mh.packet.Packet>`
+     - Mobility Header Types [*]_
 
 .. automodule:: pcapkit.vendor.mh.packet
+   :no-members:
+
+.. autoclass:: pcapkit.vendor.mh.packet.Packet
    :members:
    :undoc-members:
    :private-members:

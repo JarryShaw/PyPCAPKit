@@ -1,5 +1,11 @@
 # -*- coding: utf-8 -*-
-"""HIP DI-Types"""
+"""DI-Types
+==============
+
+This module contains the vendor crawler for **DI-Types**,
+which is automatically generating :class:`pcapkit.const.hip.di.DITypes`.
+
+"""
 
 from pcapkit.vendor.default import Vendor
 
@@ -15,5 +21,5 @@ class DITypes(Vendor):
     LINK = 'https://www.iana.org/assignments/hip-parameters/hip-parameters-7.csv'
 
 
-if __name__ == "__main__":
-    DITypes()
+if __name__ == '__main__':
+    sys.exit(DITypes())

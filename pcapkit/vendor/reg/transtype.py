@@ -99,5 +99,5 @@ class TransType(Vendor):
         return enum, miss
 
 
-if __name__ == "__main__":
-    TransType()
+if __name__ == '__main__':
+    sys.exit(TransType())

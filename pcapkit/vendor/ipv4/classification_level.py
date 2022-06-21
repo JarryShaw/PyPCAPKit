@@ -79,5 +79,5 @@ class ClassificationLevel(Vendor):
         return enum, miss
 
 
-if __name__ == "__main__":
-    ClassificationLevel()
+if __name__ == '__main__':
+    sys.exit(ClassificationLevel())

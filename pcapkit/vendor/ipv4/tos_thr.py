@@ -65,5 +65,5 @@ class ToSThroughput(Vendor):
         return enum, miss
 
 
-if __name__ == "__main__":
-    ToSThroughput()
+if __name__ == '__main__':
+    sys.exit(ToSThroughput())

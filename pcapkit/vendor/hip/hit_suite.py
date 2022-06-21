@@ -1,5 +1,11 @@
 # -*- coding: utf-8 -*-
-"""HIP HIT Suite ID"""
+"""HIT Suite ID
+==================
+
+This module contains the vendor crawler for **HIT Suite ID**,
+which is automatically generating :class:`pcapkit.const.hip.hit_suite.HITSuite`.
+
+"""
 
 from pcapkit.vendor.default import Vendor
 
@@ -15,5 +21,5 @@ class HITSuite(Vendor):
     LINK = 'https://www.iana.org/assignments/hip-parameters/hit-suite-id.csv'
 
 
-if __name__ == "__main__":
-    HITSuite()
+if __name__ == '__main__':
+    sys.exit(HITSuite())

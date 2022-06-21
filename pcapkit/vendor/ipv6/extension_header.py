@@ -151,4 +151,4 @@ class ExtensionHeader(Vendor):
 
 
 if __name__ == '__main__':
-    ExtensionHeader()
+    sys.exit(ExtensionHeader())

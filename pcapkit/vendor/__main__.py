@@ -1,5 +1,11 @@
 # -*- coding: utf-8 -*-
-"""CLI for web crawlers."""
+"""Command Line Tool
+=======================
+
+:mod:`pcapkit.vendor.__main__` is a command line tool for updating
+constant enumerations.
+
+"""
 
 import argparse
 import importlib
@@ -78,5 +84,5 @@ def main() -> 'int':
     return 0
 
 
-if __name__ == "__main__":
-    sys.exit(main())
+if __name__ == '__main__':
+    sys.exit(sys.exit(main()))

@@ -82,4 +82,4 @@ class RouterAlert(Vendor):
 
 
 if __name__ == '__main__':
-    RouterAlert()
+    sys.exit(RouterAlert())

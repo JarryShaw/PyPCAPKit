@@ -92,5 +92,5 @@ class LinkType(Vendor):
         return enum, miss
 
 
-if __name__ == "__main__":
-    LinkType()
+if __name__ == '__main__':
+    sys.exit(LinkType())

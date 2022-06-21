@@ -66,5 +66,5 @@ class ToSReliability(Vendor):
         return enum, miss
 
 
-if __name__ == "__main__":
-    ToSReliability()
+if __name__ == '__main__':
+    sys.exit(ToSReliability())

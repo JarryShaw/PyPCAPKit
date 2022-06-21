@@ -1,5 +1,11 @@
 # -*- coding: utf-8 -*-
-"""HIP Transport Modes"""
+"""HIP Transport Modes
+=========================
+
+This module contains the vendor crawler for **HIP Transport Modes**,
+which is automatically generating :class:`pcapkit.const.hip.transport.Transport`.
+
+"""
 
 from pcapkit.vendor.default import Vendor
 
@@ -15,5 +21,5 @@ class Transport(Vendor):
     LINK = 'https://www.iana.org/assignments/hip-parameters/transport-modes.csv'
 
 
-if __name__ == "__main__":
-    Transport()
+if __name__ == '__main__':
+    sys.exit(Transport())

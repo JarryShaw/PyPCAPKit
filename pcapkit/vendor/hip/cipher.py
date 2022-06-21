@@ -1,5 +1,11 @@
 # -*- coding: utf-8 -*-
-"""HIP Cipher IDs"""
+"""Cipher IDs
+================
+
+This module contains the vendor crawler for **Cipher IDs**,
+which is automatically generating :class:`pcapkit.const.hip.cipher.Cipher`.
+
+"""
 
 from pcapkit.vendor.default import Vendor
 
@@ -15,5 +21,5 @@ class Cipher(Vendor):
     LINK = 'https://www.iana.org/assignments/hip-parameters/hip-cipher-id.csv'
 
 
-if __name__ == "__main__":
-    Cipher()
+if __name__ == '__main__':
+    sys.exit(Cipher())

@@ -68,5 +68,5 @@ class Checksum(Vendor):
         return enum, miss
 
 
-if __name__ == "__main__":
-    Checksum()
+if __name__ == '__main__':
+    sys.exit(Checksum())

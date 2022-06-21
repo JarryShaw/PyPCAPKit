@@ -1,5 +1,11 @@
 # -*- coding: utf-8 -*-
-"""HIP HI Algorithm"""
+"""HI Algorithm
+==================
+
+This module contains the vendor crawler for **HI Algorithm**,
+which is automatically generating :class:`pcapkit.const.hip.hi_algorithm.HIAlgorithm`.
+
+"""
 
 from pcapkit.vendor.default import Vendor
 
@@ -15,5 +21,5 @@ class HIAlgorithm(Vendor):
     LINK = 'https://www.iana.org/assignments/hip-parameters/hi-algorithm.csv'
 
 
-if __name__ == "__main__":
-    HIAlgorithm()
+if __name__ == '__main__':
+    sys.exit(HIAlgorithm())

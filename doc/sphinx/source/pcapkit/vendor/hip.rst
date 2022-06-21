@@ -1,159 +1,183 @@
-HIP Vendor Crawler
-==================
+:class:`~pcapkit.protocols.internet.hip.HIP` Vendor Crawlers
+============================================================
 
 .. module:: pcapkit.vendor.hip
 
-HIP Certificate Types [*]_
---------------------------
+This module contains all vendor crawlers of
+:class:`~pcapkit.protocols.internet.hip.HIP` implementations. Available
+crawlers include:
+
+.. list-table::
+
+   * - :class:`HIP_Certificate <pcapkit.vendor.hip.certificate.Certificate>`
+     - HIP Certificate Types [*]_
+   * - :class:`HIP_Cipher <pcapkit.vendor.hip.cipher.Cipher>`
+     - HIP Cipher IDs [*]_
+   * - :class:`HIP_DITypes <pcapkit.vendor.hip.di.DITypes>`
+     - DI-Types [*]_
+   * - :class:`HIP_ECDSACurve <pcapkit.vendor.hip.ecdsa_curve.ECDSACurve>`
+     - ECDSA Curve Label [*]_
+   * - :class:`HIP_ECDSALowCurve <pcapkit.vendor.hip.ecdsa_low_curve.ECDSALowCurve>`
+     - ECDSA_LOW Curve Label [*]_
+   * - :class:`HIP_ESPTransformSuite <pcapkit.vendor.hip.esp_transform_suite.ESPTransformSuite>`
+     - ESP Transform Suite IDs [*]_
+   * - :class:`HIP_Group <pcapkit.vendor.hip.group.Group>`
+     - Group IDs [*]_
+   * - :class:`HIP_HIAlgorithm <pcapkit.vendor.hip.hi_algorithm.HIAlgorithm>`
+     - HI Algorithm [*]_
+   * - :class:`HIP_HITSuite <pcapkit.vendor.hip.hit_suite.HITSuite>`
+     - HIT Suite IDs [*]_
+   * - :class:`HIP_NATTraversal <pcapkit.vendor.hip.nat_traversal.NATTraversal>`
+     - HIP NAT Traversal Modes [*]_
+   * - :class:`HIP_NotifyMessage <pcapkit.vendor.hip.notify_message.NotifyMessage>`
+     - Notify Message Types [*]_
+   * - :class:`HIP_Packet <pcapkit.vendor.hip.packet.Packet>`
+     - Packet Types [*]_
+   * - :class:`HIP_Parameter <pcapkit.vendor.hip.parameter.Parameter>`
+     - Parameter Types [*]_
+   * - :class:`HIP_Registration <pcapkit.vendor.hip.registration.Registration>`
+     - Registration Types [*]_
+   * - :class:`HIP_RegistrationFailure <pcapkit.vendor.hip.registration_failure.RegistrationFailure>`
+     - Registration Failure Types [*]_
+   * - :class:`HIP_Suite <pcapkit.vendor.hip.suite.Suite>`
+     - Suite IDs [*]_
+   * - :class:`HIP_Transport <pcapkit.vendor.hip.transport.Transport>`
+     - HIP Transport Modes [*]_
 
 .. automodule:: pcapkit.vendor.hip.certificate
-   :members:
-   :undoc-members:
-   :private-members:
-   :show-inheritance:
+   :no-members:
 
-HIP Cipher IDs [*]_
--------------------
+.. autoclass:: pcapkit.vendor.hip.certificate.Certificate
+   :noindex:
+   :members: FLAG, LINK
+   :show-inheritance:
 
 .. automodule:: pcapkit.vendor.hip.cipher
-   :members:
-   :undoc-members:
-   :private-members:
-   :show-inheritance:
+   :no-members:
 
-DI-Types [*]_
--------------
+.. autoclass:: pcapkit.vendor.hip.cipher.Cipher
+   :noindex:
+   :members: FLAG, LINK
+   :show-inheritance:
 
 .. automodule:: pcapkit.vendor.hip.di
-   :members:
-   :undoc-members:
-   :private-members:
-   :show-inheritance:
+   :no-members:
 
-ECDSA Curve Label [*]_
-----------------------
+.. autoclass:: pcapkit.vendor.hip.di.DITypes
+   :noindex:
+   :members: FLAG, LINK
+   :show-inheritance:
 
 .. automodule:: pcapkit.vendor.hip.ecdsa_curve
-   :members:
-   :undoc-members:
-   :private-members:
-   :show-inheritance:
+   :no-members:
 
-ECDSA_LOW Curve Label [*]_
---------------------------
+.. autoclass:: pcapkit.vendor.hip.ecdsa_curve.ECDSACurve
+   :noindex:
+   :members: FLAG, LINK
+   :show-inheritance:
 
 .. automodule:: pcapkit.vendor.hip.ecdsa_low_curve
-   :members:
-   :undoc-members:
-   :private-members:
-   :show-inheritance:
+   :no-members:
 
-ESP Transform Suite IDs [*]_
-----------------------------
+.. autoclass:: pcapkit.vendor.hip.ecdsa_low_curve.ECDSALowCurve
+   :noindex:
+   :members: FLAG, LINK
+   :show-inheritance:
 
 .. automodule:: pcapkit.vendor.hip.esp_transform_suite
-   :members:
-   :undoc-members:
-   :private-members:
-   :show-inheritance:
+   :no-members:
 
-Group IDs [*]_
---------------
+.. autoclass:: pcapkit.vendor.hip.esp_transform_suite.ESPTransformSuite
+   :noindex:
+   :members: FLAG, LINK
+   :show-inheritance:
 
 .. automodule:: pcapkit.vendor.hip.group
-   :members:
-   :undoc-members:
-   :private-members:
-   :show-inheritance:
+   :no-members:
 
-HI Algorithm [*]_
------------------
+.. autoclass:: pcapkit.vendor.hip.group.Group
+   :noindex:
+   :members: FLAG, LINK
+   :show-inheritance:
 
 .. automodule:: pcapkit.vendor.hip.hi_algorithm
-   :members:
-   :undoc-members:
-   :private-members:
-   :show-inheritance:
+   :no-members:
 
-HIT Suite ID [*]_
------------------
+.. autoclass:: pcapkit.vendor.hip.hi_algorithm.HIAlgorithm
+   :noindex:
+   :members: FLAG, LINK
+   :show-inheritance:
 
 .. automodule:: pcapkit.vendor.hip.hit_suite
-   :members:
-   :undoc-members:
-   :private-members:
-   :show-inheritance:
+   :no-members:
 
-HIP NAT Traversal Modes [*]_
-----------------------------
+.. autoclass:: pcapkit.vendor.hip.hit_suite.HITSuite
+   :noindex:
+   :members: FLAG, LINK
+   :show-inheritance:
 
 .. automodule:: pcapkit.vendor.hip.nat_traversal
-   :members:
-   :undoc-members:
-   :private-members:
-   :show-inheritance:
+   :no-members:
 
-Notify Message Types [*]_
--------------------------
+.. autoclass:: pcapkit.vendor.hip.nat_traversal.NATTraversal
+   :noindex:
+   :members: FLAG, LINK
+   :show-inheritance:
 
 .. automodule:: pcapkit.vendor.hip.notify_message
-   :members:
-   :undoc-members:
-   :private-members:
-   :show-inheritance:
+   :no-members:
 
-Packet Types [*]_
------------------
+.. autoclass:: pcapkit.vendor.hip.notify_message.NotifyMessage
+   :noindex:
+   :members: FLAG, LINK
+   :show-inheritance:
 
 .. automodule:: pcapkit.vendor.hip.packet
-   :members:
-   :undoc-members:
-   :private-members:
-   :show-inheritance:
+   :no-members:
 
-Parameter Types [*]_
---------------------
+.. autoclass:: pcapkit.vendor.hip.packet.Packet
+   :noindex:
+   :members: FLAG, LINK
+   :show-inheritance:
 
 .. automodule:: pcapkit.vendor.hip.parameter
-   :members:
-   :undoc-members:
-   :private-members:
-   :show-inheritance:
+   :no-members:
 
-Registration Types [*]_
------------------------
+.. autoclass:: pcapkit.vendor.hip.parameter.Parameter
+   :noindex:
+   :members: FLAG, LINK
+   :show-inheritance:
 
 .. automodule:: pcapkit.vendor.hip.registration
-   :members:
-   :undoc-members:
-   :private-members:
-   :show-inheritance:
+   :no-members:
 
-Registration Failure Types [*]_
--------------------------------
+.. autoclass:: pcapkit.vendor.hip.registration.Registration
+   :noindex:
+   :members: FLAG, LINK
+   :show-inheritance:
 
 .. automodule:: pcapkit.vendor.hip.registration_failure
-   :members:
-   :undoc-members:
-   :private-members:
-   :show-inheritance:
+   :no-members:
 
-Suite IDs [*]_
---------------
+.. autoclass:: pcapkit.vendor.hip.registration_failure.RegistrationFailure
+   :noindex:
+   :members: FLAG, LINK
+   :show-inheritance:
 
 .. automodule:: pcapkit.vendor.hip.suite
-   :members:
-   :undoc-members:
-   :private-members:
+   :no-members:
+
+.. autoclass:: pcapkit.vendor.hip.suite.Suite
+   :noindex:
+   :members: FLAG, LINK
    :show-inheritance:
 
-HIP Transport Modes [*]_
-------------------------
-
 .. automodule:: pcapkit.vendor.hip.transport
-   :members:
-   :undoc-members:
-   :private-members:
+   :no-members:
+
+.. autoclass:: pcapkit.vendor.hip.transport.Transport
+   :noindex:
+   :members: FLAG, LINK
    :show-inheritance:
 
 .. raw:: html

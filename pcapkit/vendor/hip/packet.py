@@ -1,5 +1,11 @@
 # -*- coding: utf-8 -*-
-"""HIP Packet Types"""
+"""HIP Packet Types
+======================
+
+This module contains the vendor crawler for **HIP Packet Types**,
+which is automatically generating :class:`pcapkit.const.hip.packet.Packet`.
+
+"""
 
 import csv
 import re
@@ -76,5 +82,5 @@ class Packet(Vendor):
         return enum, miss
 
 
-if __name__ == "__main__":
-    Packet()
+if __name__ == '__main__':
+    sys.exit(Packet())

@@ -72,5 +72,5 @@ class ProtectionAuthority(Vendor):
         return enum, miss
 
 
-if __name__ == "__main__":
-    ProtectionAuthority()
+if __name__ == '__main__':
+    sys.exit(ProtectionAuthority())

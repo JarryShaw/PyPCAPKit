@@ -92,5 +92,5 @@ class Option(Vendor):
         return enum, miss
 
 
-if __name__ == "__main__":
-    Option()
+if __name__ == '__main__':
+    sys.exit(Option())

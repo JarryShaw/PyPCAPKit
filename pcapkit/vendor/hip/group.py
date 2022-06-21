@@ -1,5 +1,11 @@
 # -*- coding: utf-8 -*-
-"""HIP Group IDs"""
+"""Group IDs
+===============
+
+This module contains the vendor crawler for **Group IDs**,
+which is automatically generating :class:`pcapkit.const.hip.group.Group`.
+
+"""
 
 import csv
 import re
@@ -75,5 +81,5 @@ class Group(Vendor):
         return enum, miss
 
 
-if __name__ == "__main__":
-    Group()
+if __name__ == '__main__':
+    sys.exit(Group())

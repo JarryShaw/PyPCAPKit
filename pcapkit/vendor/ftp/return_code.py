@@ -1,5 +1,11 @@
 # -*- coding: utf-8 -*-
-"""FTP Server Return Code"""
+"""FTP Server Return Code
+============================
+
+This module contains the vendor crawler for **FTP Server Return Code**,
+which is automatically generating :class:`pcapkit.const.ftp.return_code.ReturnCode`.
+
+"""
 
 import collections
 from typing import TYPE_CHECKING
@@ -102,7 +108,7 @@ class ReturnCode(Vendor):
         """Fetch registry data.
 
         Args:
-            text (str): Context from :attr:`~ReturnCode.LINK`.
+            text: Context from :attr:`~ReturnCode.LINK`.
 
         Returns:
             Parsed HTML source.
@@ -174,5 +180,5 @@ class ReturnCode(Vendor):
         return collections.Counter()
 
 
-if __name__ == "__main__":
-    ReturnCode()
+if __name__ == '__main__':
+    sys.exit(ReturnCode())

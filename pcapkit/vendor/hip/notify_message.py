@@ -1,5 +1,11 @@
 # -*- coding: utf-8 -*-
-"""HIP Notify Message Types"""
+"""Notify Message Types
+==========================
+
+This module contains the vendor crawler for **Notify Message Types**,
+which is automatically generating :class:`pcapkit.const.hip.notify_message.NotifyMessage`.
+
+"""
 
 from pcapkit.vendor.default import Vendor
 
@@ -15,5 +21,5 @@ class NotifyMessage(Vendor):
     LINK = 'https://www.iana.org/assignments/hip-parameters/hip-parameters-9.csv'
 
 
-if __name__ == "__main__":
-    NotifyMessage()
+if __name__ == '__main__':
+    sys.exit(NotifyMessage())

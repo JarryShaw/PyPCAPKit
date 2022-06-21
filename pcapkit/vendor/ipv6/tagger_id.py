@@ -70,4 +70,4 @@ class TaggerID(Vendor):
 
 
 if __name__ == '__main__':
-    TaggerID()
+    sys.exit(TaggerID())

@@ -77,5 +77,5 @@ class Setting(Vendor):
         return enum, miss
 
 
-if __name__ == "__main__":
-    Setting()
+if __name__ == '__main__':
+    sys.exit(Setting())

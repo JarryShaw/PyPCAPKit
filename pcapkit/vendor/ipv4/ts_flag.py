@@ -67,5 +67,5 @@ class TSFlag(Vendor):
         return enum, miss
 
 
-if __name__ == "__main__":
-    TSFlag()
+if __name__ == '__main__':
+    sys.exit(TSFlag())

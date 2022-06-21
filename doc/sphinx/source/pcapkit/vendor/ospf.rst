@@ -1,21 +1,32 @@
-OSPF Vendor Crawler
-===================
+:class:`~pcapkit.protocols.link.ospf.OSPF` Vendor Crawlers
+==========================================================
 
 .. module:: pcapkit.vendor.ospf
 
-Authentication Codes [*]_
--------------------------
+This module contains all vendor crawlers of
+:class:`~pcapkit.protocols.link.ospf.OSPF` implementations. Available
+enumerations include:
+
+.. list-table::
+
+   * - :class:`OSPF_Authentication <pcapkit.vendor.ospf.authentication.Authentication>`
+     - Authentication Codes [*]_
+   * - :class:`OSPF_Packet <pcapkit.vendor.ospf.packet.Packet>`
+     - OSPF Packet Types [*]_
 
 .. automodule:: pcapkit.vendor.ospf.authentication
+   :no-members:
+
+.. autoclass:: pcapkit.vendor.ospf.authentication.Authentication
    :members:
    :undoc-members:
    :private-members:
    :show-inheritance:
 
-OSPF Packet Type [*]_
----------------------
-
 .. automodule:: pcapkit.vendor.ospf.packet
+   :no-members:
+
+.. autoclass:: pcapkit.vendor.ospf.packet.Packet
    :members:
    :undoc-members:
    :private-members:

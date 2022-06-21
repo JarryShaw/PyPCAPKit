@@ -45,105 +45,173 @@ enumerations include:
      - HIP Transport Modes [*]_
 
 .. automodule:: pcapkit.const.hip.certificate
+   :no-members:
+
+.. autoclass:: pcapkit.const.hip.certificate.Certificate
    :members:
    :undoc-members:
    :private-members:
+   :exclude-members: get, _missing_
    :show-inheritance:
 
 .. automodule:: pcapkit.const.hip.cipher
+   :no-members:
+
+.. autoclass:: pcapkit.const.hip.cipher.Cipher
    :members:
    :undoc-members:
    :private-members:
+   :exclude-members: get, _missing_
    :show-inheritance:
 
 .. automodule:: pcapkit.const.hip.di
+   :no-members:
+
+.. autoclass:: pcapkit.const.hip.di.DITypes
    :members:
    :undoc-members:
    :private-members:
+   :exclude-members: get, _missing_
    :show-inheritance:
 
 .. automodule:: pcapkit.const.hip.ecdsa_curve
+   :no-members:
+
+.. autoclass:: pcapkit.const.hip.ecdsa_curve.ECDSACurve
    :members:
    :undoc-members:
    :private-members:
+   :exclude-members: get, _missing_
    :show-inheritance:
 
 .. automodule:: pcapkit.const.hip.ecdsa_low_curve
+   :no-members:
+
+.. autoclass:: pcapkit.const.hip.ecdsa_low_curve.ECDSALowCurve
    :members:
    :undoc-members:
    :private-members:
+   :exclude-members: get, _missing_
    :show-inheritance:
 
 .. automodule:: pcapkit.const.hip.esp_transform_suite
+   :no-members:
+
+.. autoclass:: pcapkit.const.hip.esp_transform_suite.ESPTransformSuite
    :members:
    :undoc-members:
    :private-members:
+   :exclude-members: get, _missing_
    :show-inheritance:
 
 .. automodule:: pcapkit.const.hip.group
+   :no-members:
+
+.. autoclass:: pcapkit.const.hip.group.Group
    :members:
    :undoc-members:
    :private-members:
+   :exclude-members: get, _missing_
    :show-inheritance:
 
 .. automodule:: pcapkit.const.hip.hi_algorithm
+   :no-members:
+
+.. autoclass:: pcapkit.const.hip.hi_algorithm.HIAlgorithm
    :members:
    :undoc-members:
    :private-members:
+   :exclude-members: get, _missing_
    :show-inheritance:
 
 .. automodule:: pcapkit.const.hip.hit_suite
+   :no-members:
+
+.. autoclass:: pcapkit.const.hip.hit_suite.HITSuite
    :members:
    :undoc-members:
    :private-members:
+   :exclude-members: get, _missing_
    :show-inheritance:
 
 .. automodule:: pcapkit.const.hip.nat_traversal
+   :no-members:
+
+.. autoclass:: pcapkit.const.hip.nat_traversal.NATTraversal
    :members:
    :undoc-members:
    :private-members:
+   :exclude-members: get, _missing_
    :show-inheritance:
 
 .. automodule:: pcapkit.const.hip.notify_message
+   :no-members:
+
+.. autoclass:: pcapkit.const.hip.notify_message.NotifyMessage
    :members:
    :undoc-members:
    :private-members:
+   :exclude-members: get, _missing_
    :show-inheritance:
 
 .. automodule:: pcapkit.const.hip.packet
+   :no-members:
+
+.. autoclass:: pcapkit.const.hip.packet.Packet
    :members:
    :undoc-members:
    :private-members:
+   :exclude-members: get, _missing_
    :show-inheritance:
 
 .. automodule:: pcapkit.const.hip.parameter
+   :no-members:
+
+.. autoclass:: pcapkit.const.hip.parameter.Parameter
    :members:
    :undoc-members:
    :private-members:
+   :exclude-members: get, _missing_
    :show-inheritance:
 
 .. automodule:: pcapkit.const.hip.registration
+   :no-members:
+
+.. autoclass:: pcapkit.const.hip.registration.Registration
    :members:
    :undoc-members:
    :private-members:
+   :exclude-members: get, _missing_
    :show-inheritance:
 
 .. automodule:: pcapkit.const.hip.registration_failure
+   :no-members:
+
+.. autoclass:: pcapkit.const.hip.registration_failure.RegistrationFailure
    :members:
    :undoc-members:
    :private-members:
+   :exclude-members: get, _missing_
    :show-inheritance:
 
 .. automodule:: pcapkit.const.hip.suite
+   :no-members:
+
+.. autoclass:: pcapkit.const.hip.suite.Suite
    :members:
    :undoc-members:
    :private-members:
+   :exclude-members: get, _missing_
    :show-inheritance:
 
 .. automodule:: pcapkit.const.hip.transport
+   :no-members:
+
+.. autoclass:: pcapkit.const.hip.transport.Transport
    :members:
    :undoc-members:
    :private-members:
+   :exclude-members: get, _missing_
    :show-inheritance:
 
 .. raw:: html

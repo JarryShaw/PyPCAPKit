@@ -83,5 +83,5 @@ class ToSECN(Vendor):
         return enum, miss
 
 
-if __name__ == "__main__":
-    ToSECN()
+if __name__ == '__main__':
+    sys.exit(ToSECN())

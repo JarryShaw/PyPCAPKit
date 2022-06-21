@@ -79,5 +79,5 @@ class ErrorCode(Vendor):
         return enum, miss
 
 
-if __name__ == "__main__":
-    ErrorCode()
+if __name__ == '__main__':
+    sys.exit(ErrorCode())

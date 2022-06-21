@@ -6,7 +6,8 @@
 .. module:: pcapkit.const.hip
 
 This module contains all constant enumerations of
-:class:`~pcapkit.protocols.internet.hip.HIP` enumerations include:
+:class:`~pcapkit.protocols.internet.hip.HIP` implementations. Available
+enumerations include:
 
 .. list-table::
 

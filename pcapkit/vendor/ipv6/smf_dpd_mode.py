@@ -66,5 +66,5 @@ class SMFDPDMode(Vendor):
         return enum, miss
 
 
-if __name__ == "__main__":
-    SMFDPDMode()
+if __name__ == '__main__':
+    sys.exit(SMFDPDMode())

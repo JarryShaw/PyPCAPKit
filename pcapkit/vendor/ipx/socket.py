@@ -114,5 +114,5 @@ class Socket(Vendor):
         return enum, miss
 
 
-if __name__ == "__main__":
-    Socket()
+if __name__ == '__main__':
+    sys.exit(Socket())

@@ -85,5 +85,5 @@ class PriorityLevel(Vendor):
         return enum, miss
 
 
-if __name__ == "__main__":
-    PriorityLevel()
+if __name__ == '__main__':
+    sys.exit(PriorityLevel())
