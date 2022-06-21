@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
-"""Scapy tools
+""":mod:`Scapy <scapy>` Tools
+================================
 
 :mod:`pcapkit.toolkit.scapy` contains all you need for
 :mod:`pcapkit` handy usage with `Scapy`_ engine. All reforming
@@ -8,8 +9,9 @@ its caller.
 
 .. _Scapy: https://scapy.net
 
-Warns:
-    ScapyWarning: If `Scapy`_ is not installed.
+.. warning::
+
+   This module requires installed `Scapy`_ engine.
 
 """
 import ipaddress
@@ -104,8 +106,6 @@ def ipv4_reassembly(packet: 'Packet', *, count: 'int' = -1) -> 'IP_Packet[IPv4Ad
 
     Args:
         packet: Scapy packet.
-
-    Keyword Args:
         count: Packet index. If not provided, default to ``-1``.
 
     Returns:
@@ -152,8 +152,6 @@ def ipv6_reassembly(packet: 'Packet', *, count: 'int' = -1) -> 'IP_Packet[IPv6Ad
 
     Args:
         packet: Scapy packet.
-
-    Keyword Args:
         count: Packet index. If not provided, default to ``-1``.
 
     Returns:
@@ -207,8 +205,6 @@ def tcp_reassembly(packet: 'Packet', *, count: 'int' = -1) -> 'TCP_Packet | None
 
     Args:
         packet: Scapy packet.
-
-    Keyword Args:
         count: Packet index. If not provided, default to ``-1``.
 
     Returns:
@@ -262,8 +258,6 @@ def tcp_traceflow(packet: 'Packet', *, count: 'int' = -1) -> 'TF_Packet | None':
 
     Args:
         packet: Scapy packet.
-
-    Keyword Args:
         count: Packet index. If not provided, default to ``-1``.
 
     Returns:
