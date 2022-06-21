@@ -1,81 +1,63 @@
 FTP - File Transfer Protocol
 ============================
 
+.. module:: pcapkit.protocols.application.ftp
+.. module:: pcapkit.protocols.data.application.ftp
+
 :mod:`pcapkit.protocols.application.ftp` contains
 :class:`~pcapkit.protocols.application.ftp.FTP` only,
 which implements extractor for File Transfer Protocol
 (FTP) [*]_.
 
-.. automodule:: pcapkit.protocols.application.ftp
-   :members:
-   :undoc-members:
-   :private-members:
+.. autoclass:: pcapkit.protocols.application.ftp.FTP
+   :no-members:
    :show-inheritance:
 
-Data Structure
---------------
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
 
-.. important::
+   .. autoproperty:: name
+   .. autoproperty:: length
 
-   Following classes are only for *documentation* purpose.
-   They do **NOT** exist in the :mod:`pcapkit` module.
+   .. automethod:: read
+   .. automethod:: make
 
-.. class:: DataType_FTP_Request
+Data Structures
+---------------
 
-   :bases: TypedDict
+.. autoclass:: pcapkit.protocols.data.application.ftp.FTP(type)
+   :no-members:
+   :show-inheritance:
 
-   Structure of FTP request packet [:rfc:`959`].
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. attribute:: type
-      :type: Literal['request']
+   .. autoattribute:: type
 
-      Packet type.
+.. autoclass:: pcapkit.protocols.data.application.ftp.Request(type, command, arg, raw)
+   :no-members:
+   :show-inheritance:
 
-   .. attribute:: command
-      :type: pcapkit.corekit.infoclass.Info
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
 
-      FTP command.
+   .. autoattribute:: type
+   .. autoattribute:: command
+   .. autoattribute:: arg
+   .. autoattribute:: raw
 
-   .. attribute:: arg
-      :type: Optional[str]
+.. autoclass:: pcapkit.protocols.data.application.ftp.Response(type, code, arg, mf, raw)
+   :no-members:
+   :show-inheritance:
 
-      FTP command arguments.
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. attribute:: raw
-      :type:  bytes
-
-      Raw packet data.
-
-.. class:: DataType_FTP_Response
-
-   :bases: TypedDict
-
-   Structure of FTP response packet [:rfc:`959`].
-
-   .. attribute:: type
-      :type: Literal['response']
-
-      Packet type.
-
-   .. attribute:: code
-      :type: pcapkit.const.ftp.return_code.ReturnCode
-
-      FTP response code.
-
-   .. attribute:: arg
-      :type: Optional[str]
-
-      FTP response arguments (messages).
-
-   .. attribute:: mf
-      :type: bool
-
-      More fragmented messages flag.
-
-   .. attribute:: raw
-      :type:  bytes
-
-      Raw packet data.
+   .. autoattribute:: type
+   .. autoattribute:: code
+   .. autoattribute:: arg
+   .. autoattribute:: mf
+   .. autoattribute:: raw
 
 .. raw:: html
 

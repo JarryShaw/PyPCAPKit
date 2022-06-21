@@ -48,7 +48,7 @@
 <span class="kn">from</span> <span class="nn">pcapkit.foundation.extraction</span> <span class="kn">import</span> <span class="n">Extractor</span>
 <span class="kn">from</span> <span class="nn">pcapkit.foundation.traceflow</span> <span class="kn">import</span> <span class="n">TraceFlow</span>
 <span class="kn">from</span> <span class="nn">pcapkit.protocols</span> <span class="kn">import</span> <span class="n">__proto__</span> <span class="k">as</span> <span class="n">protocol_registry</span>
-<span class="kn">from</span> <span class="nn">pcapkit.protocols.application.httpv2</span> <span class="kn">import</span> <span class="n">HTTPv2</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.application.httpv2</span> <span class="kn">import</span> <span class="n">HTTP</span> <span class="k">as</span> <span class="n">HTTPv2</span>
 <span class="kn">from</span> <span class="nn">pcapkit.protocols.internet.hopopt</span> <span class="kn">import</span> <span class="n">HOPOPT</span>
 <span class="kn">from</span> <span class="nn">pcapkit.protocols.internet.internet</span> <span class="kn">import</span> <span class="n">Internet</span>
 <span class="kn">from</span> <span class="nn">pcapkit.protocols.internet.ipv6_opts</span> <span class="kn">import</span> <span class="n">IPv6_Opts</span>
@@ -62,8 +62,9 @@
 <span class="kn">from</span> <span class="nn">pcapkit.utilities.logging</span> <span class="kn">import</span> <span class="n">logger</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-    <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Type</span>
+    <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Type</span>
 
+    <span class="kn">from</span> <span class="nn">mypy_extensions</span> <span class="kn">import</span> <span class="n">NamedArg</span>
     <span class="kn">from</span> <span class="nn">typing_extensions</span> <span class="kn">import</span> <span class="n">Literal</span>
 
     <span class="kn">from</span> <span class="nn">pcapkit.const.http.frame</span> <span class="kn">import</span> <span class="n">Frame</span> <span class="k">as</span> <span class="n">HTTP_Frame</span>
@@ -74,12 +75,35 @@
     <span class="kn">from</span> <span class="nn">pcapkit.const.reg.transtype</span> <span class="kn">import</span> <span class="n">TransType</span>
     <span class="kn">from</span> <span class="nn">pcapkit.const.tcp.mp_tcp_option</span> <span class="kn">import</span> <span class="n">MPTCPOption</span> <span class="k">as</span> <span class="n">TCP_MPTCPOption</span>
     <span class="kn">from</span> <span class="nn">pcapkit.const.tcp.option</span> <span class="kn">import</span> <span class="n">Option</span> <span class="k">as</span> <span class="n">TCP_Option</span>
-    <span class="kn">from</span> <span class="nn">pcapkit.protocols.application.httpv2</span> <span class="kn">import</span> <span class="n">FrameParser</span> <span class="k">as</span> <span class="n">HTTP_FrameParser</span>
-    <span class="kn">from</span> <span class="nn">pcapkit.protocols.internet.hopopt</span> <span class="kn">import</span> <span class="n">OptionParser</span> <span class="k">as</span> <span class="n">HOPOPT_OptionParser</span>
-    <span class="kn">from</span> <span class="nn">pcapkit.protocols.internet.ipv6_opts</span> <span class="kn">import</span> <span class="n">OptionParser</span> <span class="k">as</span> <span class="n">IPv6_Opts_OptionParser</span>
-    <span class="kn">from</span> <span class="nn">pcapkit.protocols.internet.ipv6_route</span> <span class="kn">import</span> <span class="n">TypeParser</span> <span class="k">as</span> <span class="n">IPv6_Route_TypeParser</span>
-    <span class="kn">from</span> <span class="nn">pcapkit.protocols.transport.tcp</span> <span class="kn">import</span> <span class="n">MPOptionParser</span> <span class="k">as</span> <span class="n">TCP_MPOptionParser</span>
-    <span class="kn">from</span> <span class="nn">pcapkit.protocols.transport.tcp</span> <span class="kn">import</span> <span class="n">OptionParser</span> <span class="k">as</span> <span class="n">TCP_OptionParser</span>
+    <span class="kn">from</span> <span class="nn">pcapkit.corekit.multidict</span> <span class="kn">import</span> <span class="n">OrderedMultiDict</span>
+    <span class="kn">from</span> <span class="nn">pcapkit.protocols.data.application.httpv2</span> <span class="kn">import</span> <span class="n">HTTP</span> <span class="k">as</span> <span class="n">DataType_HTTPv2</span>
+    <span class="kn">from</span> <span class="nn">pcapkit.protocols.data.internet.hopopt</span> <span class="kn">import</span> <span class="n">Option</span> <span class="k">as</span> <span class="n">DataType_HOPOPT_Option</span>
+    <span class="kn">from</span> <span class="nn">pcapkit.protocols.data.internet.ipv6_opts</span> <span class="kn">import</span> <span class="n">Option</span> <span class="k">as</span> <span class="n">DataType_IPv6_Opts_Option</span>
+    <span class="kn">from</span> <span class="nn">pcapkit.protocols.data.internet.ipv6_route</span> <span class="kn">import</span> \
+        <span class="n">RoutingType</span> <span class="k">as</span> <span class="n">DataType_IPv6_Route_RoutingType</span>
+    <span class="kn">from</span> <span class="nn">pcapkit.protocols.data.transport.tcp</span> <span class="kn">import</span> <span class="n">MPTCP</span> <span class="k">as</span> <span class="n">DataType_TCP_MPTCP</span>
+    <span class="kn">from</span> <span class="nn">pcapkit.protocols.data.transport.tcp</span> <span class="kn">import</span> <span class="n">Option</span> <span class="k">as</span> <span class="n">DataType_TCP_Option</span>
+
+    <span class="c1">#from pcapkit.protocols.application.httpv2 import FrameParser as HTTP_FrameParser</span>
+    <span class="n">HTTP_FrameParser</span> <span class="o">=</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">HTTPv2</span><span class="p">,</span> <span class="n">HTTP_Frame</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">],</span> <span class="n">DataType_HTTPv2</span><span class="p">]</span>
+    <span class="c1">#from pcapkit.protocols.internet.hopopt import OptionParser as HOPOPT_OptionParser</span>
+    <span class="n">HOPOPT_OptionParser</span> <span class="o">=</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">HOPOPT</span><span class="p">,</span> <span class="n">IPv6_Option</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">bool</span><span class="p">,</span>
+                                    <span class="n">NamedArg</span><span class="p">(</span><span class="n">OrderedMultiDict</span><span class="p">[</span><span class="n">IPv6_Option</span><span class="p">,</span> <span class="n">DataType_HOPOPT_Option</span><span class="p">],</span> <span class="s1">&#39;options&#39;</span><span class="p">)],</span>
+                                   <span class="n">DataType_HOPOPT_Option</span><span class="p">]</span>
+    <span class="c1">#from pcapkit.protocols.internet.ipv6_opts import OptionParser as IPv6_Opts_OptionParser</span>
+    <span class="n">IPv6_Opts_OptionParser</span> <span class="o">=</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">IPv6_Opts</span><span class="p">,</span> <span class="n">IPv6_Option</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">bool</span><span class="p">,</span>
+                                       <span class="n">NamedArg</span><span class="p">(</span><span class="n">OrderedMultiDict</span><span class="p">[</span><span class="n">IPv6_Option</span><span class="p">,</span> <span class="n">DataType_IPv6_Opts_Option</span><span class="p">],</span> <span class="s1">&#39;options&#39;</span><span class="p">)],</span>
+                                      <span class="n">DataType_IPv6_Opts_Option</span><span class="p">]</span>
+    <span class="c1">#from pcapkit.protocols.internet.ipv6_route import TypeParser as IPv6_Route_TypeParser</span>
+    <span class="n">IPv6_Route_TypeParser</span> <span class="o">=</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">IPv6_Route</span><span class="p">,</span> <span class="nb">int</span><span class="p">],</span> <span class="n">DataType_IPv6_Route_RoutingType</span><span class="p">]</span>
+    <span class="c1">#from pcapkit.protocols.transport.tcp import MPOptionParser as TCP_MPOptionParser</span>
+    <span class="n">TCP_MPOptionParser</span> <span class="o">=</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">TCP</span><span class="p">,</span> <span class="n">TCP_MPTCPOption</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span>
+                                   <span class="n">NamedArg</span><span class="p">(</span><span class="n">OrderedMultiDict</span><span class="p">[</span><span class="n">TCP_Option</span><span class="p">,</span> <span class="n">DataType_TCP_Option</span><span class="p">],</span> <span class="s1">&#39;options&#39;</span><span class="p">)],</span>
+                                  <span class="n">DataType_TCP_MPTCP</span><span class="p">]</span>
+    <span class="c1">#from pcapkit.protocols.transport.tcp import OptionParser as TCP_OptionParser</span>
+    <span class="n">TCP_OptionParser</span> <span class="o">=</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">TCP</span><span class="p">,</span> <span class="n">TCP_Option</span><span class="p">,</span>
+                                 <span class="n">NamedArg</span><span class="p">(</span><span class="n">OrderedMultiDict</span><span class="p">[</span><span class="n">TCP_Option</span><span class="p">,</span> <span class="n">DataType_TCP_Option</span><span class="p">],</span> <span class="s1">&#39;options&#39;</span><span class="p">)],</span>
+                                <span class="n">DataType_TCP_Option</span><span class="p">]</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
     <span class="s1">&#39;register_protocol&#39;</span><span class="p">,</span>

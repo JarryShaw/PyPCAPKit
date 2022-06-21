@@ -69,7 +69,21 @@
 
 
 <div class="viewcode-block" id="UDP"><a class="viewcode-back" href="../../../../pcapkit/protocols/transport/udp.html#pcapkit.protocols.transport.udp.UDP">[docs]</a><span class="k">class</span> <span class="nc">UDP</span><span class="p">(</span><span class="n">Transport</span><span class="p">[</span><span class="n">DataType_UDP</span><span class="p">]):</span>
-    <span class="sd">&quot;&quot;&quot;This class implements User Datagram Protocol.&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;This class implements User Datagram Protocol.</span>
+
+<span class="sd">    This class currently supports parsing of the following protocols, which are</span>
+<span class="sd">    registered in the :attr:`self.__proto__ &lt;pcapkit.protocols.transport.udp.UDP.__proto__&gt;`</span>
+<span class="sd">    attribute:</span>
+
+<span class="sd">    .. list-table::</span>
+<span class="sd">       :header-rows: 1</span>
+
+<span class="sd">       * - Port Number</span>
+<span class="sd">         - Protocol</span>
+<span class="sd">       * - 80</span>
+<span class="sd">         - :class:`pcapkit.protocols.application.http.HTTP`</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="c1">##########################################################################</span>
     <span class="c1"># Defaults.</span>
