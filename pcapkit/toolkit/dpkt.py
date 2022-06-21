@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
-"""DPKT tools
+""":mod:`DPKT <dpkt>` Tools
+==============================
 
 :mod:`pcapkit.toolkit.dpkt` contains all you need for
 :mod:`pcapkit` handy usage with `DPKT`_ engine. All reforming
@@ -82,7 +83,9 @@ def packet2dict(packet: 'Packet', timestamp: 'float', *,
     """Convert DPKT packet into :obj:`dict`.
 
     Args:
-        packet (dpkt.dpkt.Packet): Scapy packet.
+        packet: Scapy packet.
+        timestamp: Timestamp of packet.
+        data_link: Data link type.
 
     Returns:
         Dict[str, Any]: A :obj:`dict` mapping of packet data.
@@ -109,8 +112,6 @@ def ipv4_reassembly(packet: 'Packet', *, count: 'int' = -1) -> 'IP_Packet[IPv4Ad
 
     Args:
         packet: DPKT packet.
-
-    Keyword Args:
         count: Packet index. If not provided, default to ``-1``.
 
     Returns:
@@ -157,8 +158,6 @@ def ipv6_reassembly(packet: 'Packet', *, count: 'int' = -1) -> 'IP_Packet[IPv6Ad
 
     Args:
         packet: DPKT packet.
-
-    Keyword Args:
         count: Packet index. If not provided, default to ``-1``.
 
     Returns:
@@ -207,8 +206,6 @@ def tcp_reassembly(packet: 'Packet', *, count: 'int' = -1) -> 'TCP_Packet | None
 
     Args:
         packet: DPKT packet.
-
-    Keyword Args:
         count: Packet index. If not provided, default to ``-1``.
 
     Returns:
@@ -265,8 +262,6 @@ def tcp_traceflow(packet: 'Packet', timestamp: 'float', *,
     Args:
         packet: DPKT packet.
         timestamp: Timestamp of the packet.
-
-    Keyword Args:
         data_link: Data link layer protocol (from global header).
         count: Packet index. If not provided, default to ``-1``.
 
