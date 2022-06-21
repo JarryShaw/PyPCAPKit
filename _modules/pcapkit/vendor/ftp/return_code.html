@@ -33,7 +33,13 @@
             
   <h1>Source code for pcapkit.vendor.ftp.return_code</h1><div class="highlight"><pre>
 <span></span><span class="c1"># -*- coding: utf-8 -*-</span>
-<span class="sd">&quot;&quot;&quot;FTP Server Return Code&quot;&quot;&quot;</span>
+<span class="sd">&quot;&quot;&quot;FTP Server Return Code</span>
+<span class="sd">============================</span>
+
+<span class="sd">This module contains the vendor crawler for **FTP Server Return Code**,</span>
+<span class="sd">which is automatically generating :class:`pcapkit.const.ftp.return_code.ReturnCode`.</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
 
 <span class="kn">import</span> <span class="nn">collections</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
@@ -132,19 +138,19 @@
     <span class="c1">#: Link to registry.</span>
     <span class="n">LINK</span> <span class="o">=</span> <span class="s1">&#39;https://en.wikipedia.org/wiki/List_of_FTP_server_return_codes&#39;</span>
 
-<div class="viewcode-block" id="ReturnCode.request"><a class="viewcode-back" href="../../../../pcapkit/vendor/ftp.html#pcapkit.vendor.ftp.return_code.ReturnCode.request">[docs]</a>    <span class="k">def</span> <span class="nf">request</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;BeautifulSoup&#39;</span><span class="p">:</span>  <span class="c1"># type: ignore[override] # pylint: disable=signature-differs</span>
+    <span class="k">def</span> <span class="nf">request</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;BeautifulSoup&#39;</span><span class="p">:</span>  <span class="c1"># type: ignore[override] # pylint: disable=signature-differs</span>
         <span class="sd">&quot;&quot;&quot;Fetch registry data.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            text (str): Context from :attr:`~ReturnCode.LINK`.</span>
+<span class="sd">            text: Context from :attr:`~ReturnCode.LINK`.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            Parsed HTML source.</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="n">bs4</span><span class="o">.</span><span class="n">BeautifulSoup</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="s1">&#39;html5lib&#39;</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="n">bs4</span><span class="o">.</span><span class="n">BeautifulSoup</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="s1">&#39;html5lib&#39;</span><span class="p">)</span>
 
-<div class="viewcode-block" id="ReturnCode.context"><a class="viewcode-back" href="../../../../pcapkit/vendor/ftp.html#pcapkit.vendor.ftp.return_code.ReturnCode.context">[docs]</a>    <span class="k">def</span> <span class="nf">context</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">soup</span><span class="p">:</span> <span class="s1">&#39;BeautifulSoup&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;str&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=arguments-differ,arguments-renamed</span>
+    <span class="k">def</span> <span class="nf">context</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">soup</span><span class="p">:</span> <span class="s1">&#39;BeautifulSoup&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;str&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=arguments-differ,arguments-renamed</span>
         <span class="sd">&quot;&quot;&quot;Generate constant context.</span>
 
 <span class="sd">        Args:</span>
@@ -156,9 +162,9 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">enum</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">process</span><span class="p">(</span><span class="n">soup</span><span class="p">)</span>
         <span class="n">ENUM</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="se">\n\n</span><span class="s1">    &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">s</span><span class="p">:</span> <span class="n">s</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(),</span> <span class="n">enum</span><span class="p">))</span>
-        <span class="k">return</span> <span class="n">LINE</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">NAME</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">DOCS</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">FLAG</span><span class="p">,</span> <span class="n">ENUM</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__module__</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="n">LINE</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">NAME</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">DOCS</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">FLAG</span><span class="p">,</span> <span class="n">ENUM</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__module__</span><span class="p">)</span>
 
-<div class="viewcode-block" id="ReturnCode.process"><a class="viewcode-back" href="../../../../pcapkit/vendor/ftp.html#pcapkit.vendor.ftp.return_code.ReturnCode.process">[docs]</a>    <span class="k">def</span> <span class="nf">process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">soup</span><span class="p">:</span> <span class="s1">&#39;BeautifulSoup&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;list[str]&#39;</span><span class="p">:</span>  <span class="c1"># type: ignore[override] # pylint: disable=arguments-differ,arguments-renamed</span>
+    <span class="k">def</span> <span class="nf">process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">soup</span><span class="p">:</span> <span class="s1">&#39;BeautifulSoup&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;list[str]&#39;</span><span class="p">:</span>  <span class="c1"># type: ignore[override] # pylint: disable=arguments-differ,arguments-renamed</span>
         <span class="sd">&quot;&quot;&quot;Process registry data.</span>
 
 <span class="sd">        Args:</span>
@@ -187,9 +193,9 @@
             <span class="n">pref</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;CODE_</span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s2"> = </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s2">&quot;</span>
 
             <span class="n">enum</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;#: </span><span class="si">{</span><span class="n">sufs</span><span class="si">}</span><span class="se">\n</span><span class="s1">    </span><span class="si">{</span><span class="n">pref</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">enum</span></div>
+        <span class="k">return</span> <span class="n">enum</span>
 
-<div class="viewcode-block" id="ReturnCode.count"><a class="viewcode-back" href="../../../../pcapkit/vendor/ftp.html#pcapkit.vendor.ftp.return_code.ReturnCode.count">[docs]</a>    <span class="k">def</span> <span class="nf">count</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">soup</span><span class="p">:</span> <span class="s1">&#39;BeautifulSoup&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Counter[str]&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=arguments-differ,arguments-renamed,unused-argument</span>
+    <span class="k">def</span> <span class="nf">count</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">soup</span><span class="p">:</span> <span class="s1">&#39;BeautifulSoup&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Counter[str]&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=arguments-differ,arguments-renamed,unused-argument</span>
         <span class="sd">&quot;&quot;&quot;Count field records.&quot;&quot;&quot;</span>
         <span class="c1">#table = soup.find_all(&#39;table&#39;, class_=&#39;wikitable&#39;)[2]</span>
         <span class="c1">#content = filter(lambda item: isinstance(item, bs4.element.Tag), table.tbody)</span>
@@ -205,11 +211,11 @@
         <span class="c1">#    desc = f&quot;{&#39; &#39;.join(line[1].stripped_strings).split(&#39;.&#39;)[0].strip()}.&quot;</span>
         <span class="c1">#    temp.append(desc)</span>
         <span class="c1">#return collections.Counter(temp)</span>
-        <span class="k">return</span> <span class="n">collections</span><span class="o">.</span><span class="n">Counter</span><span class="p">()</span></div></div>
+        <span class="k">return</span> <span class="n">collections</span><span class="o">.</span><span class="n">Counter</span><span class="p">()</span></div>
 
 
-<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
-    <span class="n">ReturnCode</span><span class="p">()</span>
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="n">ReturnCode</span><span class="p">())</span>
 </pre></div>
 
           </div>

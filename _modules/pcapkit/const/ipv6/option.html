@@ -139,7 +139,7 @@
     <span class="c1">#: RFC3692-style Experiment [:rfc:`4727`]</span>
     <span class="n">RFC3692_style_Experiment_0xFE</span> <span class="o">=</span> <span class="mh">0xFE</span>
 
-<div class="viewcode-block" id="Option.get"><a class="viewcode-back" href="../../../../pcapkit/const/ipv6.html#pcapkit.const.ipv6.option.Option.get">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="n">key</span><span class="p">:</span> <span class="s1">&#39;int | str&#39;</span><span class="p">,</span> <span class="n">default</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Option&#39;</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Backport support for original codes.</span>
 
@@ -152,7 +152,7 @@
             <span class="k">return</span> <span class="n">Option</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">Option</span><span class="o">.</span><span class="n">_member_map_</span><span class="p">:</span>  <span class="c1"># pylint: disable=no-member</span>
             <span class="n">extend_enum</span><span class="p">(</span><span class="n">Option</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">default</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">Option</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>  <span class="c1"># type: ignore[misc]</span></div>
+        <span class="k">return</span> <span class="n">Option</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>  <span class="c1"># type: ignore[misc]</span>
 
 <div class="viewcode-block" id="Option._missing_"><a class="viewcode-back" href="../../../../pcapkit/const/ipv6.html#pcapkit.const.ipv6.option.Option._missing_">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">_missing_</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Option&#39;</span><span class="p">:</span>

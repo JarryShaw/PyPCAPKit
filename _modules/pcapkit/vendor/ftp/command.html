@@ -33,7 +33,13 @@
             
   <h1>Source code for pcapkit.vendor.ftp.command</h1><div class="highlight"><pre>
 <span></span><span class="c1"># -*- coding: utf-8 -*-</span>
-<span class="sd">&quot;&quot;&quot;FTP Command&quot;&quot;&quot;</span>
+<span class="sd">&quot;&quot;&quot;FTP Command</span>
+<span class="sd">=================</span>
+
+<span class="sd">This module contains the vendor crawler for **FTP Command**,</span>
+<span class="sd">which is automatically generating :class:`pcapkit.const.ftp.command.Command`.</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
 
 <span class="kn">import</span> <span class="nn">csv</span>
 <span class="kn">import</span> <span class="nn">re</span>
@@ -150,7 +156,7 @@
     <span class="c1">#: Link to registry.</span>
     <span class="n">LINK</span> <span class="o">=</span> <span class="s1">&#39;https://www.iana.org/assignments/ftp-commands-extensions/ftp-commands-extensions-2.csv&#39;</span>
 
-<div class="viewcode-block" id="Command.process"><a class="viewcode-back" href="../../../../pcapkit/vendor/ftp.html#pcapkit.vendor.ftp.command.Command.process">[docs]</a>    <span class="k">def</span> <span class="nf">process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">&#39;list[str]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;tuple[dict[str, str], str]&#39;</span><span class="p">:</span>  <span class="c1"># type: ignore[override]</span>
+    <span class="k">def</span> <span class="nf">process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">&#39;list[str]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;tuple[dict[str, str], str]&#39;</span><span class="p">:</span>  <span class="c1"># type: ignore[override]</span>
         <span class="sd">&quot;&quot;&quot;Process CSV data.</span>
 
 <span class="sd">        Args:</span>
@@ -193,9 +199,9 @@
                                             <span class="sa">f</span><span class="s1">&#39;note=</span><span class="si">{</span><span class="n">rfcs</span><span class="si">!r}</span><span class="s1">)&#39;</span><span class="p">))</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">info</span><span class="p">[</span><span class="n">cmmd</span><span class="p">]</span> <span class="o">=</span> <span class="n">make</span><span class="p">(</span><span class="n">cmmd</span><span class="p">,</span> <span class="n">feat</span><span class="p">,</span> <span class="n">desc</span><span class="p">,</span> <span class="n">kind</span><span class="p">,</span> <span class="n">conf</span><span class="p">,</span> <span class="n">rfcs</span><span class="p">,</span> <span class="n">cmmt</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">info</span><span class="p">,</span> <span class="n">MISS</span></div>
+        <span class="k">return</span> <span class="n">info</span><span class="p">,</span> <span class="n">MISS</span>
 
-<div class="viewcode-block" id="Command.context"><a class="viewcode-back" href="../../../../pcapkit/vendor/ftp.html#pcapkit.vendor.ftp.command.Command.context">[docs]</a>    <span class="k">def</span> <span class="nf">context</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">&#39;list[str]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;str&#39;</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">context</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">&#39;list[str]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;str&#39;</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Generate constant context.</span>
 
 <span class="sd">        Args:</span>
@@ -207,11 +213,11 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">info</span><span class="p">,</span> <span class="n">MISS</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">process</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
         <span class="n">INFO</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">    &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">s</span><span class="p">:</span> <span class="n">s</span><span class="o">.</span><span class="n">strip</span><span class="p">(),</span> <span class="n">info</span><span class="o">.</span><span class="n">values</span><span class="p">()))</span>
-        <span class="k">return</span> <span class="n">LINE</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">NAME</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">DOCS</span><span class="p">,</span> <span class="n">INFO</span><span class="p">,</span> <span class="n">MISS</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__module__</span><span class="p">)</span></div></div>
+        <span class="k">return</span> <span class="n">LINE</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">NAME</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">DOCS</span><span class="p">,</span> <span class="n">INFO</span><span class="p">,</span> <span class="n">MISS</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__module__</span><span class="p">)</span></div>
 
 
-<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
-    <span class="n">Command</span><span class="p">()</span>
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="n">Command</span><span class="p">())</span>
 </pre></div>
 
           </div>

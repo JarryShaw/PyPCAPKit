@@ -39,6 +39,7 @@ enumerations include:
    :members:
    :undoc-members:
    :private-members:
+   :exclude-members: get, _missing_
    :show-inheritance:
 
 .. automodule:: pcapkit.const.ipv4.option_class
@@ -48,6 +49,7 @@ enumerations include:
    :members:
    :undoc-members:
    :private-members:
+   :exclude-members: get, _missing_
    :show-inheritance:
 
 .. automodule:: pcapkit.const.ipv4.option_number
@@ -57,6 +59,7 @@ enumerations include:
    :members:
    :undoc-members:
    :private-members:
+   :exclude-members: get, _missing_
    :show-inheritance:
 
 .. automodule:: pcapkit.const.ipv4.protection_authority
@@ -66,6 +69,7 @@ enumerations include:
    :members:
    :undoc-members:
    :private-members:
+   :exclude-members: get, _missing_
    :show-inheritance:
 
 .. automodule:: pcapkit.const.ipv4.qs_function
@@ -75,6 +79,7 @@ enumerations include:
    :members:
    :undoc-members:
    :private-members:
+   :exclude-members: get, _missing_
    :show-inheritance:
 
 .. automodule:: pcapkit.const.ipv4.router_alert
@@ -84,6 +89,7 @@ enumerations include:
    :members:
    :undoc-members:
    :private-members:
+   :exclude-members: get, _missing_
    :show-inheritance:
 
 .. automodule:: pcapkit.const.ipv4.tos_del
@@ -93,6 +99,7 @@ enumerations include:
    :members:
    :undoc-members:
    :private-members:
+   :exclude-members: get, _missing_
    :show-inheritance:
 
 .. automodule:: pcapkit.const.ipv4.tos_ecn
@@ -102,6 +109,7 @@ enumerations include:
    :members:
    :undoc-members:
    :private-members:
+   :exclude-members: get, _missing_
    :show-inheritance:
 
 .. automodule:: pcapkit.const.ipv4.tos_pre
@@ -111,6 +119,7 @@ enumerations include:
    :members:
    :undoc-members:
    :private-members:
+   :exclude-members: get, _missing_
    :show-inheritance:
 
 .. automodule:: pcapkit.const.ipv4.tos_rel
@@ -120,6 +129,7 @@ enumerations include:
    :members:
    :undoc-members:
    :private-members:
+   :exclude-members: get, _missing_
    :show-inheritance:
 
 .. automodule:: pcapkit.const.ipv4.tos_thr
@@ -129,6 +139,7 @@ enumerations include:
    :members:
    :undoc-members:
    :private-members:
+   :exclude-members: get, _missing_
    :show-inheritance:
 
 .. raw:: html

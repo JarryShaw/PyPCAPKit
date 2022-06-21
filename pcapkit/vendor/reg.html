@@ -16,8 +16,8 @@
     <script src="../../_static/doctools.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="TCP Vendor Crawler" href="tcp.html" />
-    <link rel="prev" title="OSPF Vendor Crawler" href="ospf.html" />
+    <link rel="next" title="ARP Vendor Crawlers" href="arp.html" />
+    <link rel="prev" title="Base Crawler" href="default.html" />
    
   <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
   
@@ -36,17 +36,30 @@
             
   <section id="module-pcapkit.vendor.reg">
 <span id="protocol-type-registry-vendor-crawlers"></span><h1>Protocol Type Registry Vendor Crawlers<a class="headerlink" href="#module-pcapkit.vendor.reg" title="Permalink to this heading">¶</a></h1>
-<section id="module-pcapkit.vendor.reg.linktype">
-<span id="link-layer-header-types"></span><h2>LINK-LAYER HEADER TYPES <a class="footnote-reference brackets" href="#id4" id="id1" role="doc-noteref"><span class="fn-bracket">[</span>*<span class="fn-bracket">]</span></a><a class="headerlink" href="#module-pcapkit.vendor.reg.linktype" title="Permalink to this heading">¶</a></h2>
-<p>Link-Layer Header Type Values</p>
+<p>This module contains all vendor crawlers of protocol type registry
+implementations. Available enumerations include:</p>
+<table class="docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#pcapkit.vendor.reg.linktype.LinkType" title="pcapkit.vendor.reg.linktype.LinkType"><code class="xref py py-class docutils literal notranslate"><span class="pre">LINKTYPE</span></code></a></p></td>
+<td><p>Link-Layer Header Type Values <a class="footnote-reference brackets" href="#id4" id="id1" role="doc-noteref"><span class="fn-bracket">[</span>*<span class="fn-bracket">]</span></a></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#pcapkit.vendor.reg.ethertype.EtherType" title="pcapkit.vendor.reg.ethertype.EtherType"><code class="xref py py-class docutils literal notranslate"><span class="pre">ETHERTYPE</span></code></a></p></td>
+<td><p>Ethertype IEEE 802 Numbers <a class="footnote-reference brackets" href="#id5" id="id2" role="doc-noteref"><span class="fn-bracket">[</span>†<span class="fn-bracket">]</span></a></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#pcapkit.vendor.reg.transtype.TransType" title="pcapkit.vendor.reg.transtype.TransType"><code class="xref py py-class docutils literal notranslate"><span class="pre">TRANSTYPE</span></code></a></p></td>
+<td><p>Transport Layer Protocol Numbers <a class="footnote-reference brackets" href="#id6" id="id3" role="doc-noteref"><span class="fn-bracket">[</span>‡<span class="fn-bracket">]</span></a></p></td>
+</tr>
+</tbody>
+</table>
+<span class="target" id="module-pcapkit.vendor.reg.linktype"></span><p>Link-Layer Header Type Values</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.vendor.reg.linktype.LinkType">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.vendor.reg.linktype.</span></span><span class="sig-name descname"><span class="pre">LinkType</span></span><a class="reference internal" href="../../_modules/pcapkit/vendor/reg/linktype.html#LinkType"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.vendor.reg.linktype.LinkType" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="index.html#pcapkit.vendor.default.Vendor" title="pcapkit.vendor.default.Vendor"><code class="xref py py-class docutils literal notranslate"><span class="pre">Vendor</span></code></a></p>
+<dd><p>Bases: <a class="reference internal" href="default.html#pcapkit.vendor.default.Vendor" title="pcapkit.vendor.default.Vendor"><code class="xref py py-class docutils literal notranslate"><span class="pre">Vendor</span></code></a></p>
 <p>Link-Layer Header Type Values</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference internal" href="index.html#pcapkit.vendor.default.Vendor" title="pcapkit.vendor.default.Vendor">Vendor</a></p>
+<dd class="field-odd"><p><a class="reference internal" href="default.html#pcapkit.vendor.default.Vendor" title="pcapkit.vendor.default.Vendor">Vendor</a></p>
 </dd>
 </dl>
 <dl class="py attribute">
@@ -111,18 +124,15 @@
 
 </dd></dl>
 
-</section>
-<section id="module-pcapkit.vendor.reg.ethertype">
-<span id="ether-types"></span><h2>ETHER TYPES <a class="footnote-reference brackets" href="#id5" id="id2" role="doc-noteref"><span class="fn-bracket">[</span>†<span class="fn-bracket">]</span></a><a class="headerlink" href="#module-pcapkit.vendor.reg.ethertype" title="Permalink to this heading">¶</a></h2>
-<p>Ethertype IEEE 802 Numbers</p>
+<span class="target" id="module-pcapkit.vendor.reg.ethertype"></span><p>Ethertype IEEE 802 Numbers</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.vendor.reg.ethertype.EtherType">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.vendor.reg.ethertype.</span></span><span class="sig-name descname"><span class="pre">EtherType</span></span><a class="reference internal" href="../../_modules/pcapkit/vendor/reg/ethertype.html#EtherType"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.vendor.reg.ethertype.EtherType" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="index.html#pcapkit.vendor.default.Vendor" title="pcapkit.vendor.default.Vendor"><code class="xref py py-class docutils literal notranslate"><span class="pre">Vendor</span></code></a></p>
+<dd><p>Bases: <a class="reference internal" href="default.html#pcapkit.vendor.default.Vendor" title="pcapkit.vendor.default.Vendor"><code class="xref py py-class docutils literal notranslate"><span class="pre">Vendor</span></code></a></p>
 <p>Ethertype IEEE 802 Numbers</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference internal" href="index.html#pcapkit.vendor.default.Vendor" title="pcapkit.vendor.default.Vendor">Vendor</a></p>
+<dd class="field-odd"><p><a class="reference internal" href="default.html#pcapkit.vendor.default.Vendor" title="pcapkit.vendor.default.Vendor">Vendor</a></p>
 </dd>
 </dl>
 <dl class="py attribute">
@@ -197,18 +207,15 @@
 
 </dd></dl>
 
-</section>
-<section id="module-pcapkit.vendor.reg.transtype">
-<span id="assigned-internet-protocol-numbers"></span><h2>Assigned Internet Protocol Numbers <a class="footnote-reference brackets" href="#id6" id="id3" role="doc-noteref"><span class="fn-bracket">[</span>‡<span class="fn-bracket">]</span></a><a class="headerlink" href="#module-pcapkit.vendor.reg.transtype" title="Permalink to this heading">¶</a></h2>
-<p>Transport Layer Protocol Numbers</p>
+<span class="target" id="module-pcapkit.vendor.reg.transtype"></span><p>Transport Layer Protocol Numbers</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.vendor.reg.transtype.TransType">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.vendor.reg.transtype.</span></span><span class="sig-name descname"><span class="pre">TransType</span></span><a class="reference internal" href="../../_modules/pcapkit/vendor/reg/transtype.html#TransType"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.vendor.reg.transtype.TransType" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="index.html#pcapkit.vendor.default.Vendor" title="pcapkit.vendor.default.Vendor"><code class="xref py py-class docutils literal notranslate"><span class="pre">Vendor</span></code></a></p>
+<dd><p>Bases: <a class="reference internal" href="default.html#pcapkit.vendor.default.Vendor" title="pcapkit.vendor.default.Vendor"><code class="xref py py-class docutils literal notranslate"><span class="pre">Vendor</span></code></a></p>
 <p>Transport Layer Protocol Numbers</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference internal" href="index.html#pcapkit.vendor.default.Vendor" title="pcapkit.vendor.default.Vendor">Vendor</a></p>
+<dd class="field-odd"><p><a class="reference internal" href="default.html#pcapkit.vendor.default.Vendor" title="pcapkit.vendor.default.Vendor">Vendor</a></p>
 </dd>
 </dl>
 <dl class="py attribute">
@@ -272,7 +279,6 @@
 <p><a class="reference external" href="https://www.iana.org/assignments/protocol-numbers/protocol-numbers.xhtml#protocol-numbers-1">https://www.iana.org/assignments/protocol-numbers/protocol-numbers.xhtml#protocol-numbers-1</a></p>
 </aside>
 </section>
-</section>
 
 
           </div>
@@ -308,21 +314,13 @@
 <li class="toctree-l2"><a class="reference internal" href="../dumpkit/index.html">Dump Utilities</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../utilities/index.html">Utility Functions &amp; Classes</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../const/index.html">Constant Enumerations</a></li>
-<li class="toctree-l2 current"><a class="reference internal" href="index.html">Web Crawlers for Constant Enumerations</a><ul class="current">
-<li class="toctree-l3"><a class="reference internal" href="arp.html">ARP Vendor Crawlers</a></li>
-<li class="toctree-l3"><a class="reference internal" href="ftp.html">FTP Vendor Crawlers</a></li>
-<li class="toctree-l3"><a class="reference internal" href="hip.html">HIP Vendor Crawler</a></li>
-<li class="toctree-l3"><a class="reference internal" href="http.html">HTTP Vendor Crawler</a></li>
-<li class="toctree-l3"><a class="reference internal" href="ipv4.html">IPv4 Vendor Crawler</a></li>
-<li class="toctree-l3"><a class="reference internal" href="ipv6.html">IPv6 Vendor Crawler</a></li>
-<li class="toctree-l3"><a class="reference internal" href="ipx.html">IPX Vendor Crawler</a></li>
-<li class="toctree-l3"><a class="reference internal" href="mh.html">MH Vendor Crawler</a></li>
-<li class="toctree-l3"><a class="reference internal" href="ospf.html">OSPF Vendor Crawler</a></li>
-<li class="toctree-l3 current"><a class="current reference internal" href="#">Protocol Type Registry Vendor Crawlers</a></li>
-<li class="toctree-l3"><a class="reference internal" href="tcp.html">TCP Vendor Crawler</a></li>
-<li class="toctree-l3"><a class="reference internal" href="vlan.html">VLAN Vendor Crawler</a></li>
-<li class="toctree-l3"><a class="reference internal" href="index.html#module-pcapkit.vendor.default">Base Generator</a></li>
-<li class="toctree-l3"><a class="reference internal" href="index.html#command-line-tool">Command Line Tool</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="index.html">Vendor Crawlers</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="index.html#base-crawler">Base Crawler</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="index.html#protocol-numbers">Protocol Numbers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="index.html#link-layer">Link Layer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="index.html#internet-layer">Internet Layer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="index.html#transport-layer">Transport Layer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="index.html#application-layer">Application Layer</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../index.html#command-line-tool">Command Line Tool</a></li>
@@ -338,9 +336,9 @@
 <ul>
   <li><a href="../../index.html">Documentation overview</a><ul>
   <li><a href="../index.html">Module Documentation</a><ul>
-  <li><a href="index.html">Web Crawlers for Constant Enumerations</a><ul>
-      <li>Previous: <a href="ospf.html" title="previous chapter">OSPF Vendor Crawler</a></li>
-      <li>Next: <a href="tcp.html" title="next chapter">TCP Vendor Crawler</a></li>
+  <li><a href="index.html">Vendor Crawlers</a><ul>
+      <li>Previous: <a href="default.html" title="previous chapter">Base Crawler</a></li>
+      <li>Next: <a href="arp.html" title="next chapter"><code class="xref py py-class docutils literal notranslate"><span class="pre">ARP</span></code> Vendor Crawlers</a></li>
   </ul></li>
   </ul></li>
   </ul></li>

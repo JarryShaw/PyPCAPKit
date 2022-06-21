@@ -33,6 +33,7 @@ enumerations include:
    :members:
    :undoc-members:
    :private-members:
+   :exclude-members: get, _missing_
    :show-inheritance:
 
 .. automodule:: pcapkit.const.ipv6.option
@@ -42,6 +43,7 @@ enumerations include:
    :members:
    :undoc-members:
    :private-members:
+   :exclude-members: get, _missing_
    :show-inheritance:
 
 .. automodule:: pcapkit.const.ipv6.qs_function
@@ -51,6 +53,7 @@ enumerations include:
    :members:
    :undoc-members:
    :private-members:
+   :exclude-members: get, _missing_
    :show-inheritance:
 
 .. automodule:: pcapkit.const.ipv6.router_alert
@@ -60,6 +63,7 @@ enumerations include:
    :members:
    :undoc-members:
    :private-members:
+   :exclude-members: get, _missing_
    :show-inheritance:
 
 .. automodule:: pcapkit.const.ipv6.routing
@@ -69,6 +73,7 @@ enumerations include:
    :members:
    :undoc-members:
    :private-members:
+   :exclude-members: get, _missing_
    :show-inheritance:
 
 .. automodule:: pcapkit.const.ipv6.seed_id
@@ -78,6 +83,7 @@ enumerations include:
    :members:
    :undoc-members:
    :private-members:
+   :exclude-members: get, _missing_
    :show-inheritance:
 
 .. automodule:: pcapkit.const.ipv6.smf_dpd_mode
@@ -87,6 +93,7 @@ enumerations include:
    :members:
    :undoc-members:
    :private-members:
+   :exclude-members: get, _missing_
    :show-inheritance:
 
 .. automodule:: pcapkit.const.ipv6.tagger_id
@@ -96,6 +103,7 @@ enumerations include:
    :members:
    :undoc-members:
    :private-members:
+   :exclude-members: get, _missing_
    :show-inheritance:
 
 .. raw:: html

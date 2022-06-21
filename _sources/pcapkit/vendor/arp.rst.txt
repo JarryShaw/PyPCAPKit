@@ -1,24 +1,33 @@
-ARP Vendor Crawlers
-===================
+:class:`~pcapkit.protocols.link.arp.ARP` Vendor Crawlers
+========================================================
 
 .. module:: pcapkit.vendor.arp
 
-ARP Hardware Types [*]_
------------------------
+This module contains all vendor crawlers of :class:`~pcapkit.protocols.link.arp.ARP`
+and :class:`~pcapkit.protocols.link.rarp.RARP` implementations. Available
+vendor crawlers include:
+
+.. list-table::
+
+   * - :class:`ARP_Hardware <pcapkit.vendor.arp.hardware.Hardware>`
+     - ARP Hardware Types [*]_
+   * - :class:`ARP_Operation <pcapkit.vendor.arp.operation.Operation>`
+     - Operation Codes [*]_
 
 .. automodule:: pcapkit.vendor.arp.hardware
-   :members:
-   :undoc-members:
-   :private-members:
+   :no-members:
+
+.. autoclass:: pcapkit.vendor.arp.hardware.Hardware
+   :noindex:
+   :members: FLAG, LINK
    :show-inheritance:
 
-Operation Codes [*]_
---------------------
-
 .. automodule:: pcapkit.vendor.arp.operation
-   :members:
-   :undoc-members:
-   :private-members:
+   :no-members:
+
+.. autoclass:: pcapkit.vendor.arp.operation.Operation
+   :noindex:
+   :members: FLAG, LINK
    :show-inheritance:
 
 .. raw:: html

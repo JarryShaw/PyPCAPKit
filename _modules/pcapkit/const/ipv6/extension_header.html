@@ -83,12 +83,12 @@
     <span class="c1">#: Use for experimentation and testing [:rfc:`3692`]</span>
     <span class="n">Use_for_experimentation_and_testing_254</span> <span class="o">=</span> <span class="mi">254</span>
 
-<div class="viewcode-block" id="ExtensionHeader.get"><a class="viewcode-back" href="../../../../pcapkit/const/ipv6.html#pcapkit.const.ipv6.extension_header.ExtensionHeader.get">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="n">key</span><span class="p">:</span> <span class="s1">&#39;int | str&#39;</span><span class="p">,</span> <span class="n">default</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;ExtensionHeader&#39;</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Backport support for original codes.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
             <span class="k">return</span> <span class="n">ExtensionHeader</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">ExtensionHeader</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>  <span class="c1"># type: ignore[misc]</span></div></div>
+        <span class="k">return</span> <span class="n">ExtensionHeader</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>  <span class="c1"># type: ignore[misc]</span></div>
 </pre></div>
 
           </div>

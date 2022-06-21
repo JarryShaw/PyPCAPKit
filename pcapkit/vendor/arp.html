@@ -16,8 +16,8 @@
     <script src="../../_static/doctools.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="FTP Vendor Crawlers" href="ftp.html" />
-    <link rel="prev" title="Web Crawlers for Constant Enumerations" href="index.html" />
+    <link rel="next" title="L2TP Vendor Crawlers" href="l2tp.html" />
+    <link rel="prev" title="Protocol Type Registry Vendor Crawlers" href="reg.html" />
    
   <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
   
@@ -35,57 +35,73 @@
           <div class="body" role="main">
             
   <section id="module-pcapkit.vendor.arp">
-<span id="arp-vendor-crawlers"></span><h1>ARP Vendor Crawlers<a class="headerlink" href="#module-pcapkit.vendor.arp" title="Permalink to this heading">¶</a></h1>
-<section id="module-pcapkit.vendor.arp.hardware">
-<span id="arp-hardware-types"></span><h2>ARP Hardware Types <a class="footnote-reference brackets" href="#id3" id="id1" role="doc-noteref"><span class="fn-bracket">[</span>*<span class="fn-bracket">]</span></a><a class="headerlink" href="#module-pcapkit.vendor.arp.hardware" title="Permalink to this heading">¶</a></h2>
-<p>ARP Hardware Types [<span class="target" id="index-0"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc826.html"><strong>RFC 826</strong></a>][<span class="target" id="index-1"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5494.html"><strong>RFC 5494</strong></a>]</p>
+<span id="arp-vendor-crawlers"></span><h1><a class="reference internal" href="../protocols/link/arp.html#pcapkit.protocols.link.arp.ARP" title="pcapkit.protocols.link.arp.ARP"><code class="xref py py-class docutils literal notranslate"><span class="pre">ARP</span></code></a> Vendor Crawlers<a class="headerlink" href="#module-pcapkit.vendor.arp" title="Permalink to this heading">¶</a></h1>
+<p>This module contains all vendor crawlers of <a class="reference internal" href="../protocols/link/arp.html#pcapkit.protocols.link.arp.ARP" title="pcapkit.protocols.link.arp.ARP"><code class="xref py py-class docutils literal notranslate"><span class="pre">ARP</span></code></a>
+and <a class="reference internal" href="../protocols/link/rarp.html#pcapkit.protocols.link.rarp.RARP" title="pcapkit.protocols.link.rarp.RARP"><code class="xref py py-class docutils literal notranslate"><span class="pre">RARP</span></code></a> implementations. Available
+vendor crawlers include:</p>
+<table class="docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-class docutils literal notranslate"><span class="pre">ARP_Hardware</span></code></p></td>
+<td><p>ARP Hardware Types <a class="footnote-reference brackets" href="#id3" id="id1" role="doc-noteref"><span class="fn-bracket">[</span>*<span class="fn-bracket">]</span></a></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-class docutils literal notranslate"><span class="pre">ARP_Operation</span></code></p></td>
+<td><p>Operation Codes <a class="footnote-reference brackets" href="#id4" id="id2" role="doc-noteref"><span class="fn-bracket">[</span>†<span class="fn-bracket">]</span></a></p></td>
+</tr>
+</tbody>
+</table>
+<span class="target" id="module-pcapkit.vendor.arp.hardware"></span><section id="hardware-types">
+<h2>Hardware Types<a class="headerlink" href="#hardware-types" title="Permalink to this heading">¶</a></h2>
+<p>This module contains the vendor crawler for <strong>Hardware Types</strong>,
+which is automatically generating <a class="reference internal" href="../const/arp.html#pcapkit.const.arp.hardware.Hardware" title="pcapkit.const.arp.hardware.Hardware"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.const.arp.hardware.Hardware</span></code></a>.</p>
+</section>
 <dl class="py class">
-<dt class="sig sig-object py" id="pcapkit.vendor.arp.hardware.Hardware">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.vendor.arp.hardware.</span></span><span class="sig-name descname"><span class="pre">Hardware</span></span><a class="reference internal" href="../../_modules/pcapkit/vendor/arp/hardware.html#Hardware"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.vendor.arp.hardware.Hardware" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="index.html#pcapkit.vendor.default.Vendor" title="pcapkit.vendor.default.Vendor"><code class="xref py py-class docutils literal notranslate"><span class="pre">Vendor</span></code></a></p>
-<p>Hardware Types [<span class="target" id="index-2"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc826.html"><strong>RFC 826</strong></a>][<span class="target" id="index-3"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5494.html"><strong>RFC 5494</strong></a>]</p>
+<dt class="sig sig-object py">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.vendor.arp.hardware.</span></span><span class="sig-name descname"><span class="pre">Hardware</span></span><a class="reference internal" href="../../_modules/pcapkit/vendor/arp/hardware.html#Hardware"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Bases: <a class="reference internal" href="default.html#pcapkit.vendor.default.Vendor" title="pcapkit.vendor.default.Vendor"><code class="xref py py-class docutils literal notranslate"><span class="pre">Vendor</span></code></a></p>
+<p>Hardware Types [<span class="target" id="index-0"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc826.html"><strong>RFC 826</strong></a>][<span class="target" id="index-1"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5494.html"><strong>RFC 5494</strong></a>]</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference internal" href="index.html#pcapkit.vendor.default.Vendor" title="pcapkit.vendor.default.Vendor">Vendor</a></p>
+<dd class="field-odd"><p><a class="reference internal" href="default.html#pcapkit.vendor.default.Vendor" title="pcapkit.vendor.default.Vendor">Vendor</a></p>
 </dd>
 </dl>
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.vendor.arp.hardware.Hardware.FLAG">
-<span class="sig-name descname"><span class="pre">FLAG</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'isinstance(value,</span> <span class="pre">int)</span> <span class="pre">and</span> <span class="pre">0</span> <span class="pre">&lt;=</span> <span class="pre">value</span> <span class="pre">&lt;=</span> <span class="pre">65535'</span></em><a class="headerlink" href="#pcapkit.vendor.arp.hardware.Hardware.FLAG" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">FLAG</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'isinstance(value,</span> <span class="pre">int)</span> <span class="pre">and</span> <span class="pre">0</span> <span class="pre">&lt;=</span> <span class="pre">value</span> <span class="pre">&lt;=</span> <span class="pre">65535'</span></em></dt>
 <dd><p>Value limit checker.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.vendor.arp.hardware.Hardware.LINK">
-<span class="sig-name descname"><span class="pre">LINK</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'https://www.iana.org/assignments/arp-parameters/arp-parameters-2.csv'</span></em><a class="headerlink" href="#pcapkit.vendor.arp.hardware.Hardware.LINK" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">LINK</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'https://www.iana.org/assignments/arp-parameters/arp-parameters-2.csv'</span></em></dt>
 <dd><p>Link to registry.</p>
 </dd></dl>
 
 </dd></dl>
 
+<span class="target" id="module-pcapkit.vendor.arp.operation"></span><section id="operation-codes">
+<h2>Operation Codes<a class="headerlink" href="#operation-codes" title="Permalink to this heading">¶</a></h2>
+<p>This module contains the vendor crawler for <strong>Operation Codes</strong>,
+which is automatically generating <a class="reference internal" href="../const/arp.html#pcapkit.const.arp.operation.Operation" title="pcapkit.const.arp.operation.Operation"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.const.arp.operation.Operation</span></code></a>.</p>
 </section>
-<section id="module-pcapkit.vendor.arp.operation">
-<span id="operation-codes"></span><h2>Operation Codes <a class="footnote-reference brackets" href="#id4" id="id2" role="doc-noteref"><span class="fn-bracket">[</span>†<span class="fn-bracket">]</span></a><a class="headerlink" href="#module-pcapkit.vendor.arp.operation" title="Permalink to this heading">¶</a></h2>
-<p>ARP Operation Codes [<span class="target" id="index-4"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc826.html"><strong>RFC 826</strong></a>][<span class="target" id="index-5"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5494.html"><strong>RFC 5494</strong></a>]</p>
 <dl class="py class">
-<dt class="sig sig-object py" id="pcapkit.vendor.arp.operation.Operation">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.vendor.arp.operation.</span></span><span class="sig-name descname"><span class="pre">Operation</span></span><a class="reference internal" href="../../_modules/pcapkit/vendor/arp/operation.html#Operation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.vendor.arp.operation.Operation" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="index.html#pcapkit.vendor.default.Vendor" title="pcapkit.vendor.default.Vendor"><code class="xref py py-class docutils literal notranslate"><span class="pre">Vendor</span></code></a></p>
-<p>Operation Codes [<span class="target" id="index-6"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc826.html"><strong>RFC 826</strong></a>][<span class="target" id="index-7"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5494.html"><strong>RFC 5494</strong></a>]</p>
+<dt class="sig sig-object py">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.vendor.arp.operation.</span></span><span class="sig-name descname"><span class="pre">Operation</span></span><a class="reference internal" href="../../_modules/pcapkit/vendor/arp/operation.html#Operation"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Bases: <a class="reference internal" href="default.html#pcapkit.vendor.default.Vendor" title="pcapkit.vendor.default.Vendor"><code class="xref py py-class docutils literal notranslate"><span class="pre">Vendor</span></code></a></p>
+<p>Operation Codes [<span class="target" id="index-2"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc826.html"><strong>RFC 826</strong></a>][<span class="target" id="index-3"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5494.html"><strong>RFC 5494</strong></a>]</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference internal" href="index.html#pcapkit.vendor.default.Vendor" title="pcapkit.vendor.default.Vendor">Vendor</a></p>
+<dd class="field-odd"><p><a class="reference internal" href="default.html#pcapkit.vendor.default.Vendor" title="pcapkit.vendor.default.Vendor">Vendor</a></p>
 </dd>
 </dl>
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.vendor.arp.operation.Operation.FLAG">
-<span class="sig-name descname"><span class="pre">FLAG</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'isinstance(value,</span> <span class="pre">int)</span> <span class="pre">and</span> <span class="pre">0</span> <span class="pre">&lt;=</span> <span class="pre">value</span> <span class="pre">&lt;=</span> <span class="pre">65535'</span></em><a class="headerlink" href="#pcapkit.vendor.arp.operation.Operation.FLAG" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">FLAG</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'isinstance(value,</span> <span class="pre">int)</span> <span class="pre">and</span> <span class="pre">0</span> <span class="pre">&lt;=</span> <span class="pre">value</span> <span class="pre">&lt;=</span> <span class="pre">65535'</span></em></dt>
 <dd><p>Value limit checker.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.vendor.arp.operation.Operation.LINK">
-<span class="sig-name descname"><span class="pre">LINK</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'https://www.iana.org/assignments/arp-parameters/arp-parameters-1.csv'</span></em><a class="headerlink" href="#pcapkit.vendor.arp.operation.Operation.LINK" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">LINK</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'https://www.iana.org/assignments/arp-parameters/arp-parameters-1.csv'</span></em></dt>
 <dd><p>Link to registry.</p>
 </dd></dl>
 
@@ -99,7 +115,6 @@
 <span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id2">†</a><span class="fn-bracket">]</span></span>
 <p><a class="reference external" href="https://www.iana.org/assignments/arp-parameters/arp-parameters.xhtml#arp-parameters-1">https://www.iana.org/assignments/arp-parameters/arp-parameters.xhtml#arp-parameters-1</a></p>
 </aside>
-</section>
 </section>
 
 
@@ -136,21 +151,13 @@
 <li class="toctree-l2"><a class="reference internal" href="../dumpkit/index.html">Dump Utilities</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../utilities/index.html">Utility Functions &amp; Classes</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../const/index.html">Constant Enumerations</a></li>
-<li class="toctree-l2 current"><a class="reference internal" href="index.html">Web Crawlers for Constant Enumerations</a><ul class="current">
-<li class="toctree-l3 current"><a class="current reference internal" href="#">ARP Vendor Crawlers</a></li>
-<li class="toctree-l3"><a class="reference internal" href="ftp.html">FTP Vendor Crawlers</a></li>
-<li class="toctree-l3"><a class="reference internal" href="hip.html">HIP Vendor Crawler</a></li>
-<li class="toctree-l3"><a class="reference internal" href="http.html">HTTP Vendor Crawler</a></li>
-<li class="toctree-l3"><a class="reference internal" href="ipv4.html">IPv4 Vendor Crawler</a></li>
-<li class="toctree-l3"><a class="reference internal" href="ipv6.html">IPv6 Vendor Crawler</a></li>
-<li class="toctree-l3"><a class="reference internal" href="ipx.html">IPX Vendor Crawler</a></li>
-<li class="toctree-l3"><a class="reference internal" href="mh.html">MH Vendor Crawler</a></li>
-<li class="toctree-l3"><a class="reference internal" href="ospf.html">OSPF Vendor Crawler</a></li>
-<li class="toctree-l3"><a class="reference internal" href="reg.html">Protocol Type Registry Vendor Crawlers</a></li>
-<li class="toctree-l3"><a class="reference internal" href="tcp.html">TCP Vendor Crawler</a></li>
-<li class="toctree-l3"><a class="reference internal" href="vlan.html">VLAN Vendor Crawler</a></li>
-<li class="toctree-l3"><a class="reference internal" href="index.html#module-pcapkit.vendor.default">Base Generator</a></li>
-<li class="toctree-l3"><a class="reference internal" href="index.html#command-line-tool">Command Line Tool</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="index.html">Vendor Crawlers</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="index.html#base-crawler">Base Crawler</a></li>
+<li class="toctree-l3"><a class="reference internal" href="index.html#protocol-numbers">Protocol Numbers</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="index.html#link-layer">Link Layer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="index.html#internet-layer">Internet Layer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="index.html#transport-layer">Transport Layer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="index.html#application-layer">Application Layer</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../index.html#command-line-tool">Command Line Tool</a></li>
@@ -166,9 +173,9 @@
 <ul>
   <li><a href="../../index.html">Documentation overview</a><ul>
   <li><a href="../index.html">Module Documentation</a><ul>
-  <li><a href="index.html">Web Crawlers for Constant Enumerations</a><ul>
-      <li>Previous: <a href="index.html" title="previous chapter">Web Crawlers for Constant Enumerations</a></li>
-      <li>Next: <a href="ftp.html" title="next chapter">FTP Vendor Crawlers</a></li>
+  <li><a href="index.html">Vendor Crawlers</a><ul>
+      <li>Previous: <a href="reg.html" title="previous chapter">Protocol Type Registry Vendor Crawlers</a></li>
+      <li>Next: <a href="l2tp.html" title="next chapter"><code class="xref py py-class docutils literal notranslate"><span class="pre">L2TP</span></code> Vendor Crawlers</a></li>
   </ul></li>
   </ul></li>
   </ul></li>

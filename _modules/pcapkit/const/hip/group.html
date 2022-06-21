@@ -86,7 +86,7 @@
     <span class="c1">#: 2048-bit MODP group [:rfc:`7401`]</span>
     <span class="n">Group_2048_bit_MODP_group</span> <span class="o">=</span> <span class="mi">11</span>
 
-<div class="viewcode-block" id="Group.get"><a class="viewcode-back" href="../../../../pcapkit/const/hip.html#pcapkit.const.hip.group.Group.get">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="n">key</span><span class="p">:</span> <span class="s1">&#39;int | str&#39;</span><span class="p">,</span> <span class="n">default</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Group&#39;</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Backport support for original codes.</span>
 
@@ -99,7 +99,7 @@
             <span class="k">return</span> <span class="n">Group</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">Group</span><span class="o">.</span><span class="n">_member_map_</span><span class="p">:</span>  <span class="c1"># pylint: disable=no-member</span>
             <span class="n">extend_enum</span><span class="p">(</span><span class="n">Group</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">default</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">Group</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>  <span class="c1"># type: ignore[misc]</span></div>
+        <span class="k">return</span> <span class="n">Group</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>  <span class="c1"># type: ignore[misc]</span>
 
 <div class="viewcode-block" id="Group._missing_"><a class="viewcode-back" href="../../../../pcapkit/const/hip.html#pcapkit.const.hip.group.Group._missing_">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">_missing_</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Group&#39;</span><span class="p">:</span>

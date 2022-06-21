@@ -6,7 +6,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
-    <title>HIP Vendor Crawler &#8212; PyPCAPKit 0.16.1 documentation</title>
+    <title>HIP Vendor Crawlers &#8212; PyPCAPKit 0.16.1 documentation</title>
     <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css" />
     <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
@@ -16,8 +16,8 @@
     <script src="../../_static/doctools.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="HTTP Vendor Crawler" href="http.html" />
-    <link rel="prev" title="FTP Vendor Crawlers" href="ftp.html" />
+    <link rel="next" title="IPv4 Vendor Crawlers" href="ipv4.html" />
+    <link rel="prev" title="VLAN Vendor Crawlers" href="vlan.html" />
    
   <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
   
@@ -35,528 +35,553 @@
           <div class="body" role="main">
             
   <section id="module-pcapkit.vendor.hip">
-<span id="hip-vendor-crawler"></span><h1>HIP Vendor Crawler<a class="headerlink" href="#module-pcapkit.vendor.hip" title="Permalink to this heading">¶</a></h1>
-<section id="module-pcapkit.vendor.hip.certificate">
-<span id="hip-certificate-types"></span><h2>HIP Certificate Types <a class="footnote-reference brackets" href="#id18" id="id1" role="doc-noteref"><span class="fn-bracket">[</span>*<span class="fn-bracket">]</span></a><a class="headerlink" href="#module-pcapkit.vendor.hip.certificate" title="Permalink to this heading">¶</a></h2>
-<p>HIP Certificate Types</p>
+<span id="hip-vendor-crawlers"></span><h1><a class="reference internal" href="../protocols/internet/hip.html#pcapkit.protocols.internet.hip.HIP" title="pcapkit.protocols.internet.hip.HIP"><code class="xref py py-class docutils literal notranslate"><span class="pre">HIP</span></code></a> Vendor Crawlers<a class="headerlink" href="#module-pcapkit.vendor.hip" title="Permalink to this heading">¶</a></h1>
+<p>This module contains all vendor crawlers of
+<a class="reference internal" href="../protocols/internet/hip.html#pcapkit.protocols.internet.hip.HIP" title="pcapkit.protocols.internet.hip.HIP"><code class="xref py py-class docutils literal notranslate"><span class="pre">HIP</span></code></a> implementations. Available
+crawlers include:</p>
+<table class="docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-class docutils literal notranslate"><span class="pre">HIP_Certificate</span></code></p></td>
+<td><p>HIP Certificate Types <a class="footnote-reference brackets" href="#id18" id="id1" role="doc-noteref"><span class="fn-bracket">[</span>*<span class="fn-bracket">]</span></a></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-class docutils literal notranslate"><span class="pre">HIP_Cipher</span></code></p></td>
+<td><p>HIP Cipher IDs <a class="footnote-reference brackets" href="#id19" id="id2" role="doc-noteref"><span class="fn-bracket">[</span>†<span class="fn-bracket">]</span></a></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-class docutils literal notranslate"><span class="pre">HIP_DITypes</span></code></p></td>
+<td><p>DI-Types <a class="footnote-reference brackets" href="#id20" id="id3" role="doc-noteref"><span class="fn-bracket">[</span>‡<span class="fn-bracket">]</span></a></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-class docutils literal notranslate"><span class="pre">HIP_ECDSACurve</span></code></p></td>
+<td><p>ECDSA Curve Label <a class="footnote-reference brackets" href="#id21" id="id4" role="doc-noteref"><span class="fn-bracket">[</span>§<span class="fn-bracket">]</span></a></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-class docutils literal notranslate"><span class="pre">HIP_ECDSALowCurve</span></code></p></td>
+<td><p>ECDSA_LOW Curve Label <a class="footnote-reference brackets" href="#id22" id="id5" role="doc-noteref"><span class="fn-bracket">[</span>¶<span class="fn-bracket">]</span></a></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-class docutils literal notranslate"><span class="pre">HIP_ESPTransformSuite</span></code></p></td>
+<td><p>ESP Transform Suite IDs <a class="footnote-reference brackets" href="#id23" id="id6" role="doc-noteref"><span class="fn-bracket">[</span>#<span class="fn-bracket">]</span></a></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-class docutils literal notranslate"><span class="pre">HIP_Group</span></code></p></td>
+<td><p>Group IDs <a class="footnote-reference brackets" href="#id24" id="id7" role="doc-noteref"><span class="fn-bracket">[</span>♠<span class="fn-bracket">]</span></a></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-class docutils literal notranslate"><span class="pre">HIP_HIAlgorithm</span></code></p></td>
+<td><p>HI Algorithm <a class="footnote-reference brackets" href="#id25" id="id8" role="doc-noteref"><span class="fn-bracket">[</span>♥<span class="fn-bracket">]</span></a></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-class docutils literal notranslate"><span class="pre">HIP_HITSuite</span></code></p></td>
+<td><p>HIT Suite IDs <a class="footnote-reference brackets" href="#id26" id="id9" role="doc-noteref"><span class="fn-bracket">[</span>♦<span class="fn-bracket">]</span></a></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-class docutils literal notranslate"><span class="pre">HIP_NATTraversal</span></code></p></td>
+<td><p>HIP NAT Traversal Modes <a class="footnote-reference brackets" href="#id27" id="id10" role="doc-noteref"><span class="fn-bracket">[</span>♣<span class="fn-bracket">]</span></a></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-class docutils literal notranslate"><span class="pre">HIP_NotifyMessage</span></code></p></td>
+<td><p>Notify Message Types <a class="footnote-reference brackets" href="#id28" id="id11" role="doc-noteref"><span class="fn-bracket">[</span>**<span class="fn-bracket">]</span></a></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-class docutils literal notranslate"><span class="pre">HIP_Packet</span></code></p></td>
+<td><p>Packet Types <a class="footnote-reference brackets" href="#id29" id="id12" role="doc-noteref"><span class="fn-bracket">[</span>††<span class="fn-bracket">]</span></a></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-class docutils literal notranslate"><span class="pre">HIP_Parameter</span></code></p></td>
+<td><p>Parameter Types <a class="footnote-reference brackets" href="#id30" id="id13" role="doc-noteref"><span class="fn-bracket">[</span>‡‡<span class="fn-bracket">]</span></a></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-class docutils literal notranslate"><span class="pre">HIP_Registration</span></code></p></td>
+<td><p>Registration Types <a class="footnote-reference brackets" href="#id31" id="id14" role="doc-noteref"><span class="fn-bracket">[</span>§§<span class="fn-bracket">]</span></a></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-class docutils literal notranslate"><span class="pre">HIP_RegistrationFailure</span></code></p></td>
+<td><p>Registration Failure Types <a class="footnote-reference brackets" href="#id32" id="id15" role="doc-noteref"><span class="fn-bracket">[</span>¶¶<span class="fn-bracket">]</span></a></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-class docutils literal notranslate"><span class="pre">HIP_Suite</span></code></p></td>
+<td><p>Suite IDs <a class="footnote-reference brackets" href="#id33" id="id16" role="doc-noteref"><span class="fn-bracket">[</span>##<span class="fn-bracket">]</span></a></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-class docutils literal notranslate"><span class="pre">HIP_Transport</span></code></p></td>
+<td><p>HIP Transport Modes <a class="footnote-reference brackets" href="#id34" id="id17" role="doc-noteref"><span class="fn-bracket">[</span>♠♠<span class="fn-bracket">]</span></a></p></td>
+</tr>
+</tbody>
+</table>
+<span class="target" id="module-pcapkit.vendor.hip.certificate"></span><section id="hip-certificate-types">
+<h2>HIP Certificate Types<a class="headerlink" href="#hip-certificate-types" title="Permalink to this heading">¶</a></h2>
+<p>This module contains the vendor crawler for <strong>HIP Certificate Types</strong>,
+which is automatically generating <a class="reference internal" href="../const/hip.html#pcapkit.const.hip.certificate.Certificate" title="pcapkit.const.hip.certificate.Certificate"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.const.hip.certificate.Certificate</span></code></a>.</p>
+</section>
 <dl class="py class">
-<dt class="sig sig-object py" id="pcapkit.vendor.hip.certificate.Certificate">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.vendor.hip.certificate.</span></span><span class="sig-name descname"><span class="pre">Certificate</span></span><a class="reference internal" href="../../_modules/pcapkit/vendor/hip/certificate.html#Certificate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.vendor.hip.certificate.Certificate" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="index.html#pcapkit.vendor.default.Vendor" title="pcapkit.vendor.default.Vendor"><code class="xref py py-class docutils literal notranslate"><span class="pre">Vendor</span></code></a></p>
+<dt class="sig sig-object py">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.vendor.hip.certificate.</span></span><span class="sig-name descname"><span class="pre">Certificate</span></span><a class="reference internal" href="../../_modules/pcapkit/vendor/hip/certificate.html#Certificate"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Bases: <a class="reference internal" href="default.html#pcapkit.vendor.default.Vendor" title="pcapkit.vendor.default.Vendor"><code class="xref py py-class docutils literal notranslate"><span class="pre">Vendor</span></code></a></p>
 <p>HIP Certificate Types</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference internal" href="index.html#pcapkit.vendor.default.Vendor" title="pcapkit.vendor.default.Vendor">Vendor</a></p>
+<dd class="field-odd"><p><a class="reference internal" href="default.html#pcapkit.vendor.default.Vendor" title="pcapkit.vendor.default.Vendor">Vendor</a></p>
 </dd>
 </dl>
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.vendor.hip.certificate.Certificate.FLAG">
-<span class="sig-name descname"><span class="pre">FLAG</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'isinstance(value,</span> <span class="pre">int)</span> <span class="pre">and</span> <span class="pre">0</span> <span class="pre">&lt;=</span> <span class="pre">value</span> <span class="pre">&lt;=</span> <span class="pre">255'</span></em><a class="headerlink" href="#pcapkit.vendor.hip.certificate.Certificate.FLAG" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">FLAG</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'isinstance(value,</span> <span class="pre">int)</span> <span class="pre">and</span> <span class="pre">0</span> <span class="pre">&lt;=</span> <span class="pre">value</span> <span class="pre">&lt;=</span> <span class="pre">255'</span></em></dt>
 <dd><p>Value limit checker.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.vendor.hip.certificate.Certificate.LINK">
-<span class="sig-name descname"><span class="pre">LINK</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'https://www.iana.org/assignments/hip-parameters/certificate-types.csv'</span></em><a class="headerlink" href="#pcapkit.vendor.hip.certificate.Certificate.LINK" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">LINK</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'https://www.iana.org/assignments/hip-parameters/certificate-types.csv'</span></em></dt>
 <dd><p>Link to registry.</p>
 </dd></dl>
 
 </dd></dl>
 
+<span class="target" id="module-pcapkit.vendor.hip.cipher"></span><section id="cipher-ids">
+<h2>Cipher IDs<a class="headerlink" href="#cipher-ids" title="Permalink to this heading">¶</a></h2>
+<p>This module contains the vendor crawler for <strong>Cipher IDs</strong>,
+which is automatically generating <a class="reference internal" href="../const/hip.html#pcapkit.const.hip.cipher.Cipher" title="pcapkit.const.hip.cipher.Cipher"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.const.hip.cipher.Cipher</span></code></a>.</p>
 </section>
-<section id="module-pcapkit.vendor.hip.cipher">
-<span id="hip-cipher-ids"></span><h2>HIP Cipher IDs <a class="footnote-reference brackets" href="#id19" id="id2" role="doc-noteref"><span class="fn-bracket">[</span>†<span class="fn-bracket">]</span></a><a class="headerlink" href="#module-pcapkit.vendor.hip.cipher" title="Permalink to this heading">¶</a></h2>
-<p>HIP Cipher IDs</p>
 <dl class="py class">
-<dt class="sig sig-object py" id="pcapkit.vendor.hip.cipher.Cipher">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.vendor.hip.cipher.</span></span><span class="sig-name descname"><span class="pre">Cipher</span></span><a class="reference internal" href="../../_modules/pcapkit/vendor/hip/cipher.html#Cipher"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.vendor.hip.cipher.Cipher" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="index.html#pcapkit.vendor.default.Vendor" title="pcapkit.vendor.default.Vendor"><code class="xref py py-class docutils literal notranslate"><span class="pre">Vendor</span></code></a></p>
+<dt class="sig sig-object py">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.vendor.hip.cipher.</span></span><span class="sig-name descname"><span class="pre">Cipher</span></span><a class="reference internal" href="../../_modules/pcapkit/vendor/hip/cipher.html#Cipher"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Bases: <a class="reference internal" href="default.html#pcapkit.vendor.default.Vendor" title="pcapkit.vendor.default.Vendor"><code class="xref py py-class docutils literal notranslate"><span class="pre">Vendor</span></code></a></p>
 <p>Cipher IDs</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference internal" href="index.html#pcapkit.vendor.default.Vendor" title="pcapkit.vendor.default.Vendor">Vendor</a></p>
+<dd class="field-odd"><p><a class="reference internal" href="default.html#pcapkit.vendor.default.Vendor" title="pcapkit.vendor.default.Vendor">Vendor</a></p>
 </dd>
 </dl>
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.vendor.hip.cipher.Cipher.FLAG">
-<span class="sig-name descname"><span class="pre">FLAG</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'isinstance(value,</span> <span class="pre">int)</span> <span class="pre">and</span> <span class="pre">0</span> <span class="pre">&lt;=</span> <span class="pre">value</span> <span class="pre">&lt;=</span> <span class="pre">65535'</span></em><a class="headerlink" href="#pcapkit.vendor.hip.cipher.Cipher.FLAG" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">FLAG</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'isinstance(value,</span> <span class="pre">int)</span> <span class="pre">and</span> <span class="pre">0</span> <span class="pre">&lt;=</span> <span class="pre">value</span> <span class="pre">&lt;=</span> <span class="pre">65535'</span></em></dt>
 <dd><p>Value limit checker.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.vendor.hip.cipher.Cipher.LINK">
-<span class="sig-name descname"><span class="pre">LINK</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'https://www.iana.org/assignments/hip-parameters/hip-cipher-id.csv'</span></em><a class="headerlink" href="#pcapkit.vendor.hip.cipher.Cipher.LINK" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">LINK</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'https://www.iana.org/assignments/hip-parameters/hip-cipher-id.csv'</span></em></dt>
 <dd><p>Link to registry.</p>
 </dd></dl>
 
 </dd></dl>
 
+<span class="target" id="module-pcapkit.vendor.hip.di"></span><section id="di-types">
+<h2>DI-Types<a class="headerlink" href="#di-types" title="Permalink to this heading">¶</a></h2>
+<p>This module contains the vendor crawler for <strong>DI-Types</strong>,
+which is automatically generating <a class="reference internal" href="../const/hip.html#pcapkit.const.hip.di.DITypes" title="pcapkit.const.hip.di.DITypes"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.const.hip.di.DITypes</span></code></a>.</p>
 </section>
-<section id="module-pcapkit.vendor.hip.di">
-<span id="di-types"></span><h2>DI-Types <a class="footnote-reference brackets" href="#id20" id="id3" role="doc-noteref"><span class="fn-bracket">[</span>‡<span class="fn-bracket">]</span></a><a class="headerlink" href="#module-pcapkit.vendor.hip.di" title="Permalink to this heading">¶</a></h2>
-<p>HIP DI-Types</p>
 <dl class="py class">
-<dt class="sig sig-object py" id="pcapkit.vendor.hip.di.DITypes">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.vendor.hip.di.</span></span><span class="sig-name descname"><span class="pre">DITypes</span></span><a class="reference internal" href="../../_modules/pcapkit/vendor/hip/di.html#DITypes"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.vendor.hip.di.DITypes" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="index.html#pcapkit.vendor.default.Vendor" title="pcapkit.vendor.default.Vendor"><code class="xref py py-class docutils literal notranslate"><span class="pre">Vendor</span></code></a></p>
+<dt class="sig sig-object py">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.vendor.hip.di.</span></span><span class="sig-name descname"><span class="pre">DITypes</span></span><a class="reference internal" href="../../_modules/pcapkit/vendor/hip/di.html#DITypes"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Bases: <a class="reference internal" href="default.html#pcapkit.vendor.default.Vendor" title="pcapkit.vendor.default.Vendor"><code class="xref py py-class docutils literal notranslate"><span class="pre">Vendor</span></code></a></p>
 <p>DI-Types</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference internal" href="index.html#pcapkit.vendor.default.Vendor" title="pcapkit.vendor.default.Vendor">Vendor</a></p>
+<dd class="field-odd"><p><a class="reference internal" href="default.html#pcapkit.vendor.default.Vendor" title="pcapkit.vendor.default.Vendor">Vendor</a></p>
 </dd>
 </dl>
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.vendor.hip.di.DITypes.FLAG">
-<span class="sig-name descname"><span class="pre">FLAG</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'isinstance(value,</span> <span class="pre">int)</span> <span class="pre">and</span> <span class="pre">0</span> <span class="pre">&lt;=</span> <span class="pre">value</span> <span class="pre">&lt;=</span> <span class="pre">15'</span></em><a class="headerlink" href="#pcapkit.vendor.hip.di.DITypes.FLAG" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">FLAG</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'isinstance(value,</span> <span class="pre">int)</span> <span class="pre">and</span> <span class="pre">0</span> <span class="pre">&lt;=</span> <span class="pre">value</span> <span class="pre">&lt;=</span> <span class="pre">15'</span></em></dt>
 <dd><p>Value limit checker.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.vendor.hip.di.DITypes.LINK">
-<span class="sig-name descname"><span class="pre">LINK</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'https://www.iana.org/assignments/hip-parameters/hip-parameters-7.csv'</span></em><a class="headerlink" href="#pcapkit.vendor.hip.di.DITypes.LINK" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">LINK</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'https://www.iana.org/assignments/hip-parameters/hip-parameters-7.csv'</span></em></dt>
 <dd><p>Link to registry.</p>
 </dd></dl>
 
 </dd></dl>
 
+<span class="target" id="module-pcapkit.vendor.hip.ecdsa_curve"></span><section id="ecdsa-curve-label">
+<h2>ECDSA Curve Label<a class="headerlink" href="#ecdsa-curve-label" title="Permalink to this heading">¶</a></h2>
+<p>This module contains the vendor crawler for <strong>ECDSA Curve Label</strong>,
+which is automatically generating <a class="reference internal" href="../const/hip.html#pcapkit.const.hip.ecdsa_curve.ECDSACurve" title="pcapkit.const.hip.ecdsa_curve.ECDSACurve"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.const.hip.ecdsa_curve.ECDSACurve</span></code></a>.</p>
 </section>
-<section id="module-pcapkit.vendor.hip.ecdsa_curve">
-<span id="ecdsa-curve-label"></span><h2>ECDSA Curve Label <a class="footnote-reference brackets" href="#id21" id="id4" role="doc-noteref"><span class="fn-bracket">[</span>§<span class="fn-bracket">]</span></a><a class="headerlink" href="#module-pcapkit.vendor.hip.ecdsa_curve" title="Permalink to this heading">¶</a></h2>
-<p>HIP ECDSA Curve Label</p>
 <dl class="py class">
-<dt class="sig sig-object py" id="pcapkit.vendor.hip.ecdsa_curve.ECDSACurve">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.vendor.hip.ecdsa_curve.</span></span><span class="sig-name descname"><span class="pre">ECDSACurve</span></span><a class="reference internal" href="../../_modules/pcapkit/vendor/hip/ecdsa_curve.html#ECDSACurve"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.vendor.hip.ecdsa_curve.ECDSACurve" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="index.html#pcapkit.vendor.default.Vendor" title="pcapkit.vendor.default.Vendor"><code class="xref py py-class docutils literal notranslate"><span class="pre">Vendor</span></code></a></p>
+<dt class="sig sig-object py">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.vendor.hip.ecdsa_curve.</span></span><span class="sig-name descname"><span class="pre">ECDSACurve</span></span><a class="reference internal" href="../../_modules/pcapkit/vendor/hip/ecdsa_curve.html#ECDSACurve"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Bases: <a class="reference internal" href="default.html#pcapkit.vendor.default.Vendor" title="pcapkit.vendor.default.Vendor"><code class="xref py py-class docutils literal notranslate"><span class="pre">Vendor</span></code></a></p>
 <p>ECDSA Curve Label</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference internal" href="index.html#pcapkit.vendor.default.Vendor" title="pcapkit.vendor.default.Vendor">Vendor</a></p>
+<dd class="field-odd"><p><a class="reference internal" href="default.html#pcapkit.vendor.default.Vendor" title="pcapkit.vendor.default.Vendor">Vendor</a></p>
 </dd>
 </dl>
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.vendor.hip.ecdsa_curve.ECDSACurve.FLAG">
-<span class="sig-name descname"><span class="pre">FLAG</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'isinstance(value,</span> <span class="pre">int)</span> <span class="pre">and</span> <span class="pre">0</span> <span class="pre">&lt;=</span> <span class="pre">value</span> <span class="pre">&lt;=</span> <span class="pre">65535'</span></em><a class="headerlink" href="#pcapkit.vendor.hip.ecdsa_curve.ECDSACurve.FLAG" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">FLAG</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'isinstance(value,</span> <span class="pre">int)</span> <span class="pre">and</span> <span class="pre">0</span> <span class="pre">&lt;=</span> <span class="pre">value</span> <span class="pre">&lt;=</span> <span class="pre">65535'</span></em></dt>
 <dd><p>Value limit checker.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.vendor.hip.ecdsa_curve.ECDSACurve.LINK">
-<span class="sig-name descname"><span class="pre">LINK</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'https://www.iana.org/assignments/hip-parameters/ecdsa-curve-label.csv'</span></em><a class="headerlink" href="#pcapkit.vendor.hip.ecdsa_curve.ECDSACurve.LINK" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">LINK</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'https://www.iana.org/assignments/hip-parameters/ecdsa-curve-label.csv'</span></em></dt>
 <dd><p>Link to registry.</p>
 </dd></dl>
 
 </dd></dl>
 
+<span class="target" id="module-pcapkit.vendor.hip.ecdsa_low_curve"></span><section id="ecdsa-low-curve-label">
+<h2>ECDSA_LOW Curve Label<a class="headerlink" href="#ecdsa-low-curve-label" title="Permalink to this heading">¶</a></h2>
+<p>This module contains the vendor crawler for <strong>ECDSA_LOW Curve Label</strong>,
+which is automatically generating <a class="reference internal" href="../const/hip.html#pcapkit.const.hip.ecdsa_low_curve.ECDSALowCurve" title="pcapkit.const.hip.ecdsa_low_curve.ECDSALowCurve"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.const.hip.ecdsa_low_curve.ECDSALowCurve</span></code></a>.</p>
 </section>
-<section id="module-pcapkit.vendor.hip.ecdsa_low_curve">
-<span id="ecdsa-low-curve-label"></span><h2>ECDSA_LOW Curve Label <a class="footnote-reference brackets" href="#id22" id="id5" role="doc-noteref"><span class="fn-bracket">[</span>¶<span class="fn-bracket">]</span></a><a class="headerlink" href="#module-pcapkit.vendor.hip.ecdsa_low_curve" title="Permalink to this heading">¶</a></h2>
-<p>HIP ECDSA_LOW Curve Label</p>
 <dl class="py class">
-<dt class="sig sig-object py" id="pcapkit.vendor.hip.ecdsa_low_curve.ECDSALowCurve">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.vendor.hip.ecdsa_low_curve.</span></span><span class="sig-name descname"><span class="pre">ECDSALowCurve</span></span><a class="reference internal" href="../../_modules/pcapkit/vendor/hip/ecdsa_low_curve.html#ECDSALowCurve"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.vendor.hip.ecdsa_low_curve.ECDSALowCurve" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="index.html#pcapkit.vendor.default.Vendor" title="pcapkit.vendor.default.Vendor"><code class="xref py py-class docutils literal notranslate"><span class="pre">Vendor</span></code></a></p>
+<dt class="sig sig-object py">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.vendor.hip.ecdsa_low_curve.</span></span><span class="sig-name descname"><span class="pre">ECDSALowCurve</span></span><a class="reference internal" href="../../_modules/pcapkit/vendor/hip/ecdsa_low_curve.html#ECDSALowCurve"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Bases: <a class="reference internal" href="default.html#pcapkit.vendor.default.Vendor" title="pcapkit.vendor.default.Vendor"><code class="xref py py-class docutils literal notranslate"><span class="pre">Vendor</span></code></a></p>
 <p>ECDSA_LOW Curve Label</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference internal" href="index.html#pcapkit.vendor.default.Vendor" title="pcapkit.vendor.default.Vendor">Vendor</a></p>
+<dd class="field-odd"><p><a class="reference internal" href="default.html#pcapkit.vendor.default.Vendor" title="pcapkit.vendor.default.Vendor">Vendor</a></p>
 </dd>
 </dl>
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.vendor.hip.ecdsa_low_curve.ECDSALowCurve.FLAG">
-<span class="sig-name descname"><span class="pre">FLAG</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'isinstance(value,</span> <span class="pre">int)</span> <span class="pre">and</span> <span class="pre">0</span> <span class="pre">&lt;=</span> <span class="pre">value</span> <span class="pre">&lt;=</span> <span class="pre">65535'</span></em><a class="headerlink" href="#pcapkit.vendor.hip.ecdsa_low_curve.ECDSALowCurve.FLAG" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">FLAG</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'isinstance(value,</span> <span class="pre">int)</span> <span class="pre">and</span> <span class="pre">0</span> <span class="pre">&lt;=</span> <span class="pre">value</span> <span class="pre">&lt;=</span> <span class="pre">65535'</span></em></dt>
 <dd><p>Value limit checker.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.vendor.hip.ecdsa_low_curve.ECDSALowCurve.LINK">
-<span class="sig-name descname"><span class="pre">LINK</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'https://www.iana.org/assignments/hip-parameters/ecdsa-low-curve-label.csv'</span></em><a class="headerlink" href="#pcapkit.vendor.hip.ecdsa_low_curve.ECDSALowCurve.LINK" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">LINK</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'https://www.iana.org/assignments/hip-parameters/ecdsa-low-curve-label.csv'</span></em></dt>
 <dd><p>Link to registry.</p>
 </dd></dl>
 
 </dd></dl>
 
+<span class="target" id="module-pcapkit.vendor.hip.esp_transform_suite"></span><section id="esp-transform-suite-ids">
+<h2>ESP Transform Suite IDs<a class="headerlink" href="#esp-transform-suite-ids" title="Permalink to this heading">¶</a></h2>
+<p>This module contains the vendor crawler for <strong>ESP Transform Suite IDs</strong>,
+which is automatically generating <a class="reference internal" href="../const/hip.html#pcapkit.const.hip.esp_transform_suite.ESPTransformSuite" title="pcapkit.const.hip.esp_transform_suite.ESPTransformSuite"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.const.hip.esp_transform_suite.ESPTransformSuite</span></code></a>.</p>
 </section>
-<section id="module-pcapkit.vendor.hip.esp_transform_suite">
-<span id="esp-transform-suite-ids"></span><h2>ESP Transform Suite IDs <a class="footnote-reference brackets" href="#id23" id="id6" role="doc-noteref"><span class="fn-bracket">[</span>#<span class="fn-bracket">]</span></a><a class="headerlink" href="#module-pcapkit.vendor.hip.esp_transform_suite" title="Permalink to this heading">¶</a></h2>
-<p>HIP ESP Transform Suite IDs</p>
 <dl class="py class">
-<dt class="sig sig-object py" id="pcapkit.vendor.hip.esp_transform_suite.ESPTransformSuite">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.vendor.hip.esp_transform_suite.</span></span><span class="sig-name descname"><span class="pre">ESPTransformSuite</span></span><a class="reference internal" href="../../_modules/pcapkit/vendor/hip/esp_transform_suite.html#ESPTransformSuite"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.vendor.hip.esp_transform_suite.ESPTransformSuite" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="index.html#pcapkit.vendor.default.Vendor" title="pcapkit.vendor.default.Vendor"><code class="xref py py-class docutils literal notranslate"><span class="pre">Vendor</span></code></a></p>
+<dt class="sig sig-object py">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.vendor.hip.esp_transform_suite.</span></span><span class="sig-name descname"><span class="pre">ESPTransformSuite</span></span><a class="reference internal" href="../../_modules/pcapkit/vendor/hip/esp_transform_suite.html#ESPTransformSuite"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Bases: <a class="reference internal" href="default.html#pcapkit.vendor.default.Vendor" title="pcapkit.vendor.default.Vendor"><code class="xref py py-class docutils literal notranslate"><span class="pre">Vendor</span></code></a></p>
 <p>ESP Transform Suite IDs</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference internal" href="index.html#pcapkit.vendor.default.Vendor" title="pcapkit.vendor.default.Vendor">Vendor</a></p>
+<dd class="field-odd"><p><a class="reference internal" href="default.html#pcapkit.vendor.default.Vendor" title="pcapkit.vendor.default.Vendor">Vendor</a></p>
 </dd>
 </dl>
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.vendor.hip.esp_transform_suite.ESPTransformSuite.FLAG">
-<span class="sig-name descname"><span class="pre">FLAG</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'isinstance(value,</span> <span class="pre">int)</span> <span class="pre">and</span> <span class="pre">0</span> <span class="pre">&lt;=</span> <span class="pre">value</span> <span class="pre">&lt;=</span> <span class="pre">65535'</span></em><a class="headerlink" href="#pcapkit.vendor.hip.esp_transform_suite.ESPTransformSuite.FLAG" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">FLAG</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'isinstance(value,</span> <span class="pre">int)</span> <span class="pre">and</span> <span class="pre">0</span> <span class="pre">&lt;=</span> <span class="pre">value</span> <span class="pre">&lt;=</span> <span class="pre">65535'</span></em></dt>
 <dd><p>Value limit checker.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.vendor.hip.esp_transform_suite.ESPTransformSuite.LINK">
-<span class="sig-name descname"><span class="pre">LINK</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'https://www.iana.org/assignments/hip-parameters/esp-transform-suite-ids.csv'</span></em><a class="headerlink" href="#pcapkit.vendor.hip.esp_transform_suite.ESPTransformSuite.LINK" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">LINK</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'https://www.iana.org/assignments/hip-parameters/esp-transform-suite-ids.csv'</span></em></dt>
 <dd><p>Link to registry.</p>
 </dd></dl>
 
 </dd></dl>
 
+<span class="target" id="module-pcapkit.vendor.hip.group"></span><section id="group-ids">
+<h2>Group IDs<a class="headerlink" href="#group-ids" title="Permalink to this heading">¶</a></h2>
+<p>This module contains the vendor crawler for <strong>Group IDs</strong>,
+which is automatically generating <a class="reference internal" href="../const/hip.html#pcapkit.const.hip.group.Group" title="pcapkit.const.hip.group.Group"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.const.hip.group.Group</span></code></a>.</p>
 </section>
-<section id="module-pcapkit.vendor.hip.group">
-<span id="group-ids"></span><h2>Group IDs <a class="footnote-reference brackets" href="#id24" id="id7" role="doc-noteref"><span class="fn-bracket">[</span>♠<span class="fn-bracket">]</span></a><a class="headerlink" href="#module-pcapkit.vendor.hip.group" title="Permalink to this heading">¶</a></h2>
-<p>HIP Group IDs</p>
 <dl class="py class">
-<dt class="sig sig-object py" id="pcapkit.vendor.hip.group.Group">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.vendor.hip.group.</span></span><span class="sig-name descname"><span class="pre">Group</span></span><a class="reference internal" href="../../_modules/pcapkit/vendor/hip/group.html#Group"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.vendor.hip.group.Group" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="index.html#pcapkit.vendor.default.Vendor" title="pcapkit.vendor.default.Vendor"><code class="xref py py-class docutils literal notranslate"><span class="pre">Vendor</span></code></a></p>
+<dt class="sig sig-object py">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.vendor.hip.group.</span></span><span class="sig-name descname"><span class="pre">Group</span></span><a class="reference internal" href="../../_modules/pcapkit/vendor/hip/group.html#Group"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Bases: <a class="reference internal" href="default.html#pcapkit.vendor.default.Vendor" title="pcapkit.vendor.default.Vendor"><code class="xref py py-class docutils literal notranslate"><span class="pre">Vendor</span></code></a></p>
 <p>Group IDs</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference internal" href="index.html#pcapkit.vendor.default.Vendor" title="pcapkit.vendor.default.Vendor">Vendor</a></p>
+<dd class="field-odd"><p><a class="reference internal" href="default.html#pcapkit.vendor.default.Vendor" title="pcapkit.vendor.default.Vendor">Vendor</a></p>
 </dd>
 </dl>
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.vendor.hip.group.Group.FLAG">
-<span class="sig-name descname"><span class="pre">FLAG</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'isinstance(value,</span> <span class="pre">int)</span> <span class="pre">and</span> <span class="pre">0</span> <span class="pre">&lt;=</span> <span class="pre">value</span> <span class="pre">&lt;=</span> <span class="pre">255'</span></em><a class="headerlink" href="#pcapkit.vendor.hip.group.Group.FLAG" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">FLAG</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'isinstance(value,</span> <span class="pre">int)</span> <span class="pre">and</span> <span class="pre">0</span> <span class="pre">&lt;=</span> <span class="pre">value</span> <span class="pre">&lt;=</span> <span class="pre">255'</span></em></dt>
 <dd><p>Value limit checker.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.vendor.hip.group.Group.LINK">
-<span class="sig-name descname"><span class="pre">LINK</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'https://www.iana.org/assignments/hip-parameters/hip-parameters-5.csv'</span></em><a class="headerlink" href="#pcapkit.vendor.hip.group.Group.LINK" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">LINK</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'https://www.iana.org/assignments/hip-parameters/hip-parameters-5.csv'</span></em></dt>
 <dd><p>Link to registry.</p>
 </dd></dl>
 
-<dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.vendor.hip.group.Group.process">
-<span class="sig-name descname"><span class="pre">process</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/vendor/hip/group.html#Group.process"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.vendor.hip.group.Group.process" title="Permalink to this definition">¶</a></dt>
-<dd><p>Process CSV data.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>data</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>]) – CSV data.</p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>], <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>]]</p>
-</dd>
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Enumeration fields and missing fields.</p>
-</dd>
-</dl>
 </dd></dl>
 
-</dd></dl>
-
+<span class="target" id="module-pcapkit.vendor.hip.hi_algorithm"></span><section id="hi-algorithm">
+<h2>HI Algorithm<a class="headerlink" href="#hi-algorithm" title="Permalink to this heading">¶</a></h2>
+<p>This module contains the vendor crawler for <strong>HI Algorithm</strong>,
+which is automatically generating <a class="reference internal" href="../const/hip.html#pcapkit.const.hip.hi_algorithm.HIAlgorithm" title="pcapkit.const.hip.hi_algorithm.HIAlgorithm"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.const.hip.hi_algorithm.HIAlgorithm</span></code></a>.</p>
 </section>
-<section id="module-pcapkit.vendor.hip.hi_algorithm">
-<span id="hi-algorithm"></span><h2>HI Algorithm <a class="footnote-reference brackets" href="#id25" id="id8" role="doc-noteref"><span class="fn-bracket">[</span>♥<span class="fn-bracket">]</span></a><a class="headerlink" href="#module-pcapkit.vendor.hip.hi_algorithm" title="Permalink to this heading">¶</a></h2>
-<p>HIP HI Algorithm</p>
 <dl class="py class">
-<dt class="sig sig-object py" id="pcapkit.vendor.hip.hi_algorithm.HIAlgorithm">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.vendor.hip.hi_algorithm.</span></span><span class="sig-name descname"><span class="pre">HIAlgorithm</span></span><a class="reference internal" href="../../_modules/pcapkit/vendor/hip/hi_algorithm.html#HIAlgorithm"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.vendor.hip.hi_algorithm.HIAlgorithm" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="index.html#pcapkit.vendor.default.Vendor" title="pcapkit.vendor.default.Vendor"><code class="xref py py-class docutils literal notranslate"><span class="pre">Vendor</span></code></a></p>
+<dt class="sig sig-object py">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.vendor.hip.hi_algorithm.</span></span><span class="sig-name descname"><span class="pre">HIAlgorithm</span></span><a class="reference internal" href="../../_modules/pcapkit/vendor/hip/hi_algorithm.html#HIAlgorithm"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Bases: <a class="reference internal" href="default.html#pcapkit.vendor.default.Vendor" title="pcapkit.vendor.default.Vendor"><code class="xref py py-class docutils literal notranslate"><span class="pre">Vendor</span></code></a></p>
 <p>HI Algorithm</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference internal" href="index.html#pcapkit.vendor.default.Vendor" title="pcapkit.vendor.default.Vendor">Vendor</a></p>
+<dd class="field-odd"><p><a class="reference internal" href="default.html#pcapkit.vendor.default.Vendor" title="pcapkit.vendor.default.Vendor">Vendor</a></p>
 </dd>
 </dl>
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.vendor.hip.hi_algorithm.HIAlgorithm.FLAG">
-<span class="sig-name descname"><span class="pre">FLAG</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'isinstance(value,</span> <span class="pre">int)</span> <span class="pre">and</span> <span class="pre">0</span> <span class="pre">&lt;=</span> <span class="pre">value</span> <span class="pre">&lt;=</span> <span class="pre">65535'</span></em><a class="headerlink" href="#pcapkit.vendor.hip.hi_algorithm.HIAlgorithm.FLAG" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">FLAG</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'isinstance(value,</span> <span class="pre">int)</span> <span class="pre">and</span> <span class="pre">0</span> <span class="pre">&lt;=</span> <span class="pre">value</span> <span class="pre">&lt;=</span> <span class="pre">65535'</span></em></dt>
 <dd><p>Value limit checker.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.vendor.hip.hi_algorithm.HIAlgorithm.LINK">
-<span class="sig-name descname"><span class="pre">LINK</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'https://www.iana.org/assignments/hip-parameters/hi-algorithm.csv'</span></em><a class="headerlink" href="#pcapkit.vendor.hip.hi_algorithm.HIAlgorithm.LINK" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">LINK</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'https://www.iana.org/assignments/hip-parameters/hi-algorithm.csv'</span></em></dt>
 <dd><p>Link to registry.</p>
 </dd></dl>
 
 </dd></dl>
 
+<span class="target" id="module-pcapkit.vendor.hip.hit_suite"></span><section id="hit-suite-id">
+<h2>HIT Suite ID<a class="headerlink" href="#hit-suite-id" title="Permalink to this heading">¶</a></h2>
+<p>This module contains the vendor crawler for <strong>HIT Suite ID</strong>,
+which is automatically generating <a class="reference internal" href="../const/hip.html#pcapkit.const.hip.hit_suite.HITSuite" title="pcapkit.const.hip.hit_suite.HITSuite"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.const.hip.hit_suite.HITSuite</span></code></a>.</p>
 </section>
-<section id="module-pcapkit.vendor.hip.hit_suite">
-<span id="hit-suite-id"></span><h2>HIT Suite ID <a class="footnote-reference brackets" href="#id26" id="id9" role="doc-noteref"><span class="fn-bracket">[</span>♦<span class="fn-bracket">]</span></a><a class="headerlink" href="#module-pcapkit.vendor.hip.hit_suite" title="Permalink to this heading">¶</a></h2>
-<p>HIP HIT Suite ID</p>
 <dl class="py class">
-<dt class="sig sig-object py" id="pcapkit.vendor.hip.hit_suite.HITSuite">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.vendor.hip.hit_suite.</span></span><span class="sig-name descname"><span class="pre">HITSuite</span></span><a class="reference internal" href="../../_modules/pcapkit/vendor/hip/hit_suite.html#HITSuite"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.vendor.hip.hit_suite.HITSuite" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="index.html#pcapkit.vendor.default.Vendor" title="pcapkit.vendor.default.Vendor"><code class="xref py py-class docutils literal notranslate"><span class="pre">Vendor</span></code></a></p>
+<dt class="sig sig-object py">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.vendor.hip.hit_suite.</span></span><span class="sig-name descname"><span class="pre">HITSuite</span></span><a class="reference internal" href="../../_modules/pcapkit/vendor/hip/hit_suite.html#HITSuite"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Bases: <a class="reference internal" href="default.html#pcapkit.vendor.default.Vendor" title="pcapkit.vendor.default.Vendor"><code class="xref py py-class docutils literal notranslate"><span class="pre">Vendor</span></code></a></p>
 <p>HIT Suite ID</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference internal" href="index.html#pcapkit.vendor.default.Vendor" title="pcapkit.vendor.default.Vendor">Vendor</a></p>
+<dd class="field-odd"><p><a class="reference internal" href="default.html#pcapkit.vendor.default.Vendor" title="pcapkit.vendor.default.Vendor">Vendor</a></p>
 </dd>
 </dl>
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.vendor.hip.hit_suite.HITSuite.FLAG">
-<span class="sig-name descname"><span class="pre">FLAG</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'isinstance(value,</span> <span class="pre">int)</span> <span class="pre">and</span> <span class="pre">0</span> <span class="pre">&lt;=</span> <span class="pre">value</span> <span class="pre">&lt;=</span> <span class="pre">15'</span></em><a class="headerlink" href="#pcapkit.vendor.hip.hit_suite.HITSuite.FLAG" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">FLAG</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'isinstance(value,</span> <span class="pre">int)</span> <span class="pre">and</span> <span class="pre">0</span> <span class="pre">&lt;=</span> <span class="pre">value</span> <span class="pre">&lt;=</span> <span class="pre">15'</span></em></dt>
 <dd><p>Value limit checker.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.vendor.hip.hit_suite.HITSuite.LINK">
-<span class="sig-name descname"><span class="pre">LINK</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'https://www.iana.org/assignments/hip-parameters/hit-suite-id.csv'</span></em><a class="headerlink" href="#pcapkit.vendor.hip.hit_suite.HITSuite.LINK" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">LINK</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'https://www.iana.org/assignments/hip-parameters/hit-suite-id.csv'</span></em></dt>
 <dd><p>Link to registry.</p>
 </dd></dl>
 
 </dd></dl>
 
+<span class="target" id="module-pcapkit.vendor.hip.nat_traversal"></span><section id="hip-nat-traversal-modes">
+<h2>HIP NAT Traversal Modes<a class="headerlink" href="#hip-nat-traversal-modes" title="Permalink to this heading">¶</a></h2>
+<p>This module contains the vendor crawler for <strong>HIP NAT Traversal Modes</strong>,
+which is automatically generating <a class="reference internal" href="../const/hip.html#pcapkit.const.hip.nat_traversal.NATTraversal" title="pcapkit.const.hip.nat_traversal.NATTraversal"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.const.hip.nat_traversal.NATTraversal</span></code></a>.</p>
 </section>
-<section id="module-pcapkit.vendor.hip.nat_traversal">
-<span id="hip-nat-traversal-modes"></span><h2>HIP NAT Traversal Modes <a class="footnote-reference brackets" href="#id27" id="id10" role="doc-noteref"><span class="fn-bracket">[</span>♣<span class="fn-bracket">]</span></a><a class="headerlink" href="#module-pcapkit.vendor.hip.nat_traversal" title="Permalink to this heading">¶</a></h2>
-<p>HIP NAT Traversal Modes</p>
 <dl class="py class">
-<dt class="sig sig-object py" id="pcapkit.vendor.hip.nat_traversal.NATTraversal">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.vendor.hip.nat_traversal.</span></span><span class="sig-name descname"><span class="pre">NATTraversal</span></span><a class="reference internal" href="../../_modules/pcapkit/vendor/hip/nat_traversal.html#NATTraversal"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.vendor.hip.nat_traversal.NATTraversal" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="index.html#pcapkit.vendor.default.Vendor" title="pcapkit.vendor.default.Vendor"><code class="xref py py-class docutils literal notranslate"><span class="pre">Vendor</span></code></a></p>
+<dt class="sig sig-object py">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.vendor.hip.nat_traversal.</span></span><span class="sig-name descname"><span class="pre">NATTraversal</span></span><a class="reference internal" href="../../_modules/pcapkit/vendor/hip/nat_traversal.html#NATTraversal"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Bases: <a class="reference internal" href="default.html#pcapkit.vendor.default.Vendor" title="pcapkit.vendor.default.Vendor"><code class="xref py py-class docutils literal notranslate"><span class="pre">Vendor</span></code></a></p>
 <p>HIP NAT Traversal Modes</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference internal" href="index.html#pcapkit.vendor.default.Vendor" title="pcapkit.vendor.default.Vendor">Vendor</a></p>
+<dd class="field-odd"><p><a class="reference internal" href="default.html#pcapkit.vendor.default.Vendor" title="pcapkit.vendor.default.Vendor">Vendor</a></p>
 </dd>
 </dl>
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.vendor.hip.nat_traversal.NATTraversal.FLAG">
-<span class="sig-name descname"><span class="pre">FLAG</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'isinstance(value,</span> <span class="pre">int)</span> <span class="pre">and</span> <span class="pre">0</span> <span class="pre">&lt;=</span> <span class="pre">value</span> <span class="pre">&lt;=</span> <span class="pre">65535'</span></em><a class="headerlink" href="#pcapkit.vendor.hip.nat_traversal.NATTraversal.FLAG" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">FLAG</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'isinstance(value,</span> <span class="pre">int)</span> <span class="pre">and</span> <span class="pre">0</span> <span class="pre">&lt;=</span> <span class="pre">value</span> <span class="pre">&lt;=</span> <span class="pre">65535'</span></em></dt>
 <dd><p>Value limit checker.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.vendor.hip.nat_traversal.NATTraversal.LINK">
-<span class="sig-name descname"><span class="pre">LINK</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'https://www.iana.org/assignments/hip-parameters/nat-traversal.csv'</span></em><a class="headerlink" href="#pcapkit.vendor.hip.nat_traversal.NATTraversal.LINK" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">LINK</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'https://www.iana.org/assignments/hip-parameters/nat-traversal.csv'</span></em></dt>
 <dd><p>Link to registry.</p>
 </dd></dl>
 
 </dd></dl>
 
+<span class="target" id="module-pcapkit.vendor.hip.notify_message"></span><section id="notify-message-types">
+<h2>Notify Message Types<a class="headerlink" href="#notify-message-types" title="Permalink to this heading">¶</a></h2>
+<p>This module contains the vendor crawler for <strong>Notify Message Types</strong>,
+which is automatically generating <a class="reference internal" href="../const/hip.html#pcapkit.const.hip.notify_message.NotifyMessage" title="pcapkit.const.hip.notify_message.NotifyMessage"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.const.hip.notify_message.NotifyMessage</span></code></a>.</p>
 </section>
-<section id="module-pcapkit.vendor.hip.notify_message">
-<span id="notify-message-types"></span><h2>Notify Message Types <a class="footnote-reference brackets" href="#id28" id="id11" role="doc-noteref"><span class="fn-bracket">[</span>**<span class="fn-bracket">]</span></a><a class="headerlink" href="#module-pcapkit.vendor.hip.notify_message" title="Permalink to this heading">¶</a></h2>
-<p>HIP Notify Message Types</p>
 <dl class="py class">
-<dt class="sig sig-object py" id="pcapkit.vendor.hip.notify_message.NotifyMessage">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.vendor.hip.notify_message.</span></span><span class="sig-name descname"><span class="pre">NotifyMessage</span></span><a class="reference internal" href="../../_modules/pcapkit/vendor/hip/notify_message.html#NotifyMessage"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.vendor.hip.notify_message.NotifyMessage" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="index.html#pcapkit.vendor.default.Vendor" title="pcapkit.vendor.default.Vendor"><code class="xref py py-class docutils literal notranslate"><span class="pre">Vendor</span></code></a></p>
+<dt class="sig sig-object py">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.vendor.hip.notify_message.</span></span><span class="sig-name descname"><span class="pre">NotifyMessage</span></span><a class="reference internal" href="../../_modules/pcapkit/vendor/hip/notify_message.html#NotifyMessage"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Bases: <a class="reference internal" href="default.html#pcapkit.vendor.default.Vendor" title="pcapkit.vendor.default.Vendor"><code class="xref py py-class docutils literal notranslate"><span class="pre">Vendor</span></code></a></p>
 <p>Notify Message Types</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference internal" href="index.html#pcapkit.vendor.default.Vendor" title="pcapkit.vendor.default.Vendor">Vendor</a></p>
+<dd class="field-odd"><p><a class="reference internal" href="default.html#pcapkit.vendor.default.Vendor" title="pcapkit.vendor.default.Vendor">Vendor</a></p>
 </dd>
 </dl>
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.vendor.hip.notify_message.NotifyMessage.FLAG">
-<span class="sig-name descname"><span class="pre">FLAG</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'isinstance(value,</span> <span class="pre">int)</span> <span class="pre">and</span> <span class="pre">0</span> <span class="pre">&lt;=</span> <span class="pre">value</span> <span class="pre">&lt;=</span> <span class="pre">65535'</span></em><a class="headerlink" href="#pcapkit.vendor.hip.notify_message.NotifyMessage.FLAG" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">FLAG</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'isinstance(value,</span> <span class="pre">int)</span> <span class="pre">and</span> <span class="pre">0</span> <span class="pre">&lt;=</span> <span class="pre">value</span> <span class="pre">&lt;=</span> <span class="pre">65535'</span></em></dt>
 <dd><p>Value limit checker.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.vendor.hip.notify_message.NotifyMessage.LINK">
-<span class="sig-name descname"><span class="pre">LINK</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'https://www.iana.org/assignments/hip-parameters/hip-parameters-9.csv'</span></em><a class="headerlink" href="#pcapkit.vendor.hip.notify_message.NotifyMessage.LINK" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">LINK</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'https://www.iana.org/assignments/hip-parameters/hip-parameters-9.csv'</span></em></dt>
 <dd><p>Link to registry.</p>
 </dd></dl>
 
 </dd></dl>
 
+<span class="target" id="module-pcapkit.vendor.hip.packet"></span><section id="hip-packet-types">
+<h2>HIP Packet Types<a class="headerlink" href="#hip-packet-types" title="Permalink to this heading">¶</a></h2>
+<p>This module contains the vendor crawler for <strong>HIP Packet Types</strong>,
+which is automatically generating <a class="reference internal" href="../const/hip.html#pcapkit.const.hip.packet.Packet" title="pcapkit.const.hip.packet.Packet"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.const.hip.packet.Packet</span></code></a>.</p>
 </section>
-<section id="module-pcapkit.vendor.hip.packet">
-<span id="packet-types"></span><h2>Packet Types <a class="footnote-reference brackets" href="#id29" id="id12" role="doc-noteref"><span class="fn-bracket">[</span>††<span class="fn-bracket">]</span></a><a class="headerlink" href="#module-pcapkit.vendor.hip.packet" title="Permalink to this heading">¶</a></h2>
-<p>HIP Packet Types</p>
 <dl class="py class">
-<dt class="sig sig-object py" id="pcapkit.vendor.hip.packet.Packet">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.vendor.hip.packet.</span></span><span class="sig-name descname"><span class="pre">Packet</span></span><a class="reference internal" href="../../_modules/pcapkit/vendor/hip/packet.html#Packet"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.vendor.hip.packet.Packet" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="index.html#pcapkit.vendor.default.Vendor" title="pcapkit.vendor.default.Vendor"><code class="xref py py-class docutils literal notranslate"><span class="pre">Vendor</span></code></a></p>
+<dt class="sig sig-object py">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.vendor.hip.packet.</span></span><span class="sig-name descname"><span class="pre">Packet</span></span><a class="reference internal" href="../../_modules/pcapkit/vendor/hip/packet.html#Packet"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Bases: <a class="reference internal" href="default.html#pcapkit.vendor.default.Vendor" title="pcapkit.vendor.default.Vendor"><code class="xref py py-class docutils literal notranslate"><span class="pre">Vendor</span></code></a></p>
 <p>HIP Packet Types</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference internal" href="index.html#pcapkit.vendor.default.Vendor" title="pcapkit.vendor.default.Vendor">Vendor</a></p>
+<dd class="field-odd"><p><a class="reference internal" href="default.html#pcapkit.vendor.default.Vendor" title="pcapkit.vendor.default.Vendor">Vendor</a></p>
 </dd>
 </dl>
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.vendor.hip.packet.Packet.FLAG">
-<span class="sig-name descname"><span class="pre">FLAG</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'isinstance(value,</span> <span class="pre">int)</span> <span class="pre">and</span> <span class="pre">0</span> <span class="pre">&lt;=</span> <span class="pre">value</span> <span class="pre">&lt;=</span> <span class="pre">127'</span></em><a class="headerlink" href="#pcapkit.vendor.hip.packet.Packet.FLAG" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">FLAG</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'isinstance(value,</span> <span class="pre">int)</span> <span class="pre">and</span> <span class="pre">0</span> <span class="pre">&lt;=</span> <span class="pre">value</span> <span class="pre">&lt;=</span> <span class="pre">127'</span></em></dt>
 <dd><p>Value limit checker.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.vendor.hip.packet.Packet.LINK">
-<span class="sig-name descname"><span class="pre">LINK</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'https://www.iana.org/assignments/hip-parameters/hip-parameters-1.csv'</span></em><a class="headerlink" href="#pcapkit.vendor.hip.packet.Packet.LINK" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">LINK</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'https://www.iana.org/assignments/hip-parameters/hip-parameters-1.csv'</span></em></dt>
 <dd><p>Link to registry.</p>
 </dd></dl>
 
-<dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.vendor.hip.packet.Packet.process">
-<span class="sig-name descname"><span class="pre">process</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/vendor/hip/packet.html#Packet.process"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.vendor.hip.packet.Packet.process" title="Permalink to this definition">¶</a></dt>
-<dd><p>Process CSV data.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>data</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>]) – CSV data.</p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>], <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>]]</p>
-</dd>
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Enumeration fields and missing fields.</p>
-</dd>
-</dl>
 </dd></dl>
 
-</dd></dl>
-
+<span class="target" id="module-pcapkit.vendor.hip.parameter"></span><section id="hip-parameter-types">
+<h2>HIP Parameter Types<a class="headerlink" href="#hip-parameter-types" title="Permalink to this heading">¶</a></h2>
+<p>This module contains the vendor crawler for <strong>HIP Parameter Types</strong>,
+which is automatically generating <a class="reference internal" href="../const/hip.html#pcapkit.const.hip.parameter.Parameter" title="pcapkit.const.hip.parameter.Parameter"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.const.hip.parameter.Parameter</span></code></a>.</p>
 </section>
-<section id="module-pcapkit.vendor.hip.parameter">
-<span id="parameter-types"></span><h2>Parameter Types <a class="footnote-reference brackets" href="#id30" id="id13" role="doc-noteref"><span class="fn-bracket">[</span>‡‡<span class="fn-bracket">]</span></a><a class="headerlink" href="#module-pcapkit.vendor.hip.parameter" title="Permalink to this heading">¶</a></h2>
-<p>HIP Parameter Types</p>
 <dl class="py class">
-<dt class="sig sig-object py" id="pcapkit.vendor.hip.parameter.Parameter">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.vendor.hip.parameter.</span></span><span class="sig-name descname"><span class="pre">Parameter</span></span><a class="reference internal" href="../../_modules/pcapkit/vendor/hip/parameter.html#Parameter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.vendor.hip.parameter.Parameter" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="index.html#pcapkit.vendor.default.Vendor" title="pcapkit.vendor.default.Vendor"><code class="xref py py-class docutils literal notranslate"><span class="pre">Vendor</span></code></a></p>
+<dt class="sig sig-object py">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.vendor.hip.parameter.</span></span><span class="sig-name descname"><span class="pre">Parameter</span></span><a class="reference internal" href="../../_modules/pcapkit/vendor/hip/parameter.html#Parameter"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Bases: <a class="reference internal" href="default.html#pcapkit.vendor.default.Vendor" title="pcapkit.vendor.default.Vendor"><code class="xref py py-class docutils literal notranslate"><span class="pre">Vendor</span></code></a></p>
 <p>HIP Parameter Types</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference internal" href="index.html#pcapkit.vendor.default.Vendor" title="pcapkit.vendor.default.Vendor">Vendor</a></p>
+<dd class="field-odd"><p><a class="reference internal" href="default.html#pcapkit.vendor.default.Vendor" title="pcapkit.vendor.default.Vendor">Vendor</a></p>
 </dd>
 </dl>
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.vendor.hip.parameter.Parameter.FLAG">
-<span class="sig-name descname"><span class="pre">FLAG</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'isinstance(value,</span> <span class="pre">int)</span> <span class="pre">and</span> <span class="pre">0</span> <span class="pre">&lt;=</span> <span class="pre">value</span> <span class="pre">&lt;=</span> <span class="pre">65535'</span></em><a class="headerlink" href="#pcapkit.vendor.hip.parameter.Parameter.FLAG" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">FLAG</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'isinstance(value,</span> <span class="pre">int)</span> <span class="pre">and</span> <span class="pre">0</span> <span class="pre">&lt;=</span> <span class="pre">value</span> <span class="pre">&lt;=</span> <span class="pre">65535'</span></em></dt>
 <dd><p>Value limit checker.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.vendor.hip.parameter.Parameter.LINK">
-<span class="sig-name descname"><span class="pre">LINK</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'https://www.iana.org/assignments/hip-parameters/hip-parameters-4.csv'</span></em><a class="headerlink" href="#pcapkit.vendor.hip.parameter.Parameter.LINK" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">LINK</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'https://www.iana.org/assignments/hip-parameters/hip-parameters-4.csv'</span></em></dt>
 <dd><p>Link to registry.</p>
 </dd></dl>
 
-<dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.vendor.hip.parameter.Parameter.process">
-<span class="sig-name descname"><span class="pre">process</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/vendor/hip/parameter.html#Parameter.process"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.vendor.hip.parameter.Parameter.process" title="Permalink to this definition">¶</a></dt>
-<dd><p>Process CSV data.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>data</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>]) – CSV data.</p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>], <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>]]</p>
-</dd>
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Enumeration fields and missing fields.</p>
-</dd>
-</dl>
 </dd></dl>
 
-</dd></dl>
-
+<span class="target" id="module-pcapkit.vendor.hip.registration"></span><section id="registration-types">
+<h2>Registration Types<a class="headerlink" href="#registration-types" title="Permalink to this heading">¶</a></h2>
+<p>This module contains the vendor crawler for <strong>Registration Types</strong>,
+which is automatically generating <a class="reference internal" href="../const/hip.html#pcapkit.const.hip.registration.Registration" title="pcapkit.const.hip.registration.Registration"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.const.hip.registration.Registration</span></code></a>.</p>
 </section>
-<section id="module-pcapkit.vendor.hip.registration">
-<span id="registration-types"></span><h2>Registration Types <a class="footnote-reference brackets" href="#id31" id="id14" role="doc-noteref"><span class="fn-bracket">[</span>§§<span class="fn-bracket">]</span></a><a class="headerlink" href="#module-pcapkit.vendor.hip.registration" title="Permalink to this heading">¶</a></h2>
-<p>HIP Registration Types</p>
 <dl class="py class">
-<dt class="sig sig-object py" id="pcapkit.vendor.hip.registration.Registration">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.vendor.hip.registration.</span></span><span class="sig-name descname"><span class="pre">Registration</span></span><a class="reference internal" href="../../_modules/pcapkit/vendor/hip/registration.html#Registration"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.vendor.hip.registration.Registration" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="index.html#pcapkit.vendor.default.Vendor" title="pcapkit.vendor.default.Vendor"><code class="xref py py-class docutils literal notranslate"><span class="pre">Vendor</span></code></a></p>
+<dt class="sig sig-object py">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.vendor.hip.registration.</span></span><span class="sig-name descname"><span class="pre">Registration</span></span><a class="reference internal" href="../../_modules/pcapkit/vendor/hip/registration.html#Registration"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Bases: <a class="reference internal" href="default.html#pcapkit.vendor.default.Vendor" title="pcapkit.vendor.default.Vendor"><code class="xref py py-class docutils literal notranslate"><span class="pre">Vendor</span></code></a></p>
 <p>Registration Types</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference internal" href="index.html#pcapkit.vendor.default.Vendor" title="pcapkit.vendor.default.Vendor">Vendor</a></p>
+<dd class="field-odd"><p><a class="reference internal" href="default.html#pcapkit.vendor.default.Vendor" title="pcapkit.vendor.default.Vendor">Vendor</a></p>
 </dd>
 </dl>
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.vendor.hip.registration.Registration.FLAG">
-<span class="sig-name descname"><span class="pre">FLAG</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'isinstance(value,</span> <span class="pre">int)</span> <span class="pre">and</span> <span class="pre">0</span> <span class="pre">&lt;=</span> <span class="pre">value</span> <span class="pre">&lt;=</span> <span class="pre">255'</span></em><a class="headerlink" href="#pcapkit.vendor.hip.registration.Registration.FLAG" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">FLAG</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'isinstance(value,</span> <span class="pre">int)</span> <span class="pre">and</span> <span class="pre">0</span> <span class="pre">&lt;=</span> <span class="pre">value</span> <span class="pre">&lt;=</span> <span class="pre">255'</span></em></dt>
 <dd><p>Value limit checker.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.vendor.hip.registration.Registration.LINK">
-<span class="sig-name descname"><span class="pre">LINK</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'https://www.iana.org/assignments/hip-parameters/hip-parameters-11.csv'</span></em><a class="headerlink" href="#pcapkit.vendor.hip.registration.Registration.LINK" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">LINK</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'https://www.iana.org/assignments/hip-parameters/hip-parameters-11.csv'</span></em></dt>
 <dd><p>Link to registry.</p>
 </dd></dl>
 
 </dd></dl>
 
+<span class="target" id="module-pcapkit.vendor.hip.registration_failure"></span><section id="registration-failure-types">
+<h2>Registration Failure Types<a class="headerlink" href="#registration-failure-types" title="Permalink to this heading">¶</a></h2>
+<p>This module contains the vendor crawler for <strong>Registration Failure Types</strong>,
+which is automatically generating <a class="reference internal" href="../const/hip.html#pcapkit.const.hip.registration_failure.RegistrationFailure" title="pcapkit.const.hip.registration_failure.RegistrationFailure"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.const.hip.registration_failure.RegistrationFailure</span></code></a>.</p>
 </section>
-<section id="module-pcapkit.vendor.hip.registration_failure">
-<span id="registration-failure-types"></span><h2>Registration Failure Types <a class="footnote-reference brackets" href="#id32" id="id15" role="doc-noteref"><span class="fn-bracket">[</span>¶¶<span class="fn-bracket">]</span></a><a class="headerlink" href="#module-pcapkit.vendor.hip.registration_failure" title="Permalink to this heading">¶</a></h2>
-<p>HIP Registration Failure Types</p>
 <dl class="py class">
-<dt class="sig sig-object py" id="pcapkit.vendor.hip.registration_failure.RegistrationFailure">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.vendor.hip.registration_failure.</span></span><span class="sig-name descname"><span class="pre">RegistrationFailure</span></span><a class="reference internal" href="../../_modules/pcapkit/vendor/hip/registration_failure.html#RegistrationFailure"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.vendor.hip.registration_failure.RegistrationFailure" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="index.html#pcapkit.vendor.default.Vendor" title="pcapkit.vendor.default.Vendor"><code class="xref py py-class docutils literal notranslate"><span class="pre">Vendor</span></code></a></p>
+<dt class="sig sig-object py">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.vendor.hip.registration_failure.</span></span><span class="sig-name descname"><span class="pre">RegistrationFailure</span></span><a class="reference internal" href="../../_modules/pcapkit/vendor/hip/registration_failure.html#RegistrationFailure"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Bases: <a class="reference internal" href="default.html#pcapkit.vendor.default.Vendor" title="pcapkit.vendor.default.Vendor"><code class="xref py py-class docutils literal notranslate"><span class="pre">Vendor</span></code></a></p>
 <p>Registration Failure Types</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference internal" href="index.html#pcapkit.vendor.default.Vendor" title="pcapkit.vendor.default.Vendor">Vendor</a></p>
+<dd class="field-odd"><p><a class="reference internal" href="default.html#pcapkit.vendor.default.Vendor" title="pcapkit.vendor.default.Vendor">Vendor</a></p>
 </dd>
 </dl>
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.vendor.hip.registration_failure.RegistrationFailure.FLAG">
-<span class="sig-name descname"><span class="pre">FLAG</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'isinstance(value,</span> <span class="pre">int)</span> <span class="pre">and</span> <span class="pre">0</span> <span class="pre">&lt;=</span> <span class="pre">value</span> <span class="pre">&lt;=</span> <span class="pre">255'</span></em><a class="headerlink" href="#pcapkit.vendor.hip.registration_failure.RegistrationFailure.FLAG" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">FLAG</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'isinstance(value,</span> <span class="pre">int)</span> <span class="pre">and</span> <span class="pre">0</span> <span class="pre">&lt;=</span> <span class="pre">value</span> <span class="pre">&lt;=</span> <span class="pre">255'</span></em></dt>
 <dd><p>Value limit checker.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.vendor.hip.registration_failure.RegistrationFailure.LINK">
-<span class="sig-name descname"><span class="pre">LINK</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'https://www.iana.org/assignments/hip-parameters/hip-parameters-13.csv'</span></em><a class="headerlink" href="#pcapkit.vendor.hip.registration_failure.RegistrationFailure.LINK" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">LINK</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'https://www.iana.org/assignments/hip-parameters/hip-parameters-13.csv'</span></em></dt>
 <dd><p>Link to registry.</p>
 </dd></dl>
 
 </dd></dl>
 
+<span class="target" id="module-pcapkit.vendor.hip.suite"></span><section id="suite-ids">
+<h2>Suite IDs<a class="headerlink" href="#suite-ids" title="Permalink to this heading">¶</a></h2>
+<p>This module contains the vendor crawler for <strong>Suite IDs</strong>,
+which is automatically generating <a class="reference internal" href="../const/hip.html#pcapkit.const.hip.suite.Suite" title="pcapkit.const.hip.suite.Suite"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.const.hip.suite.Suite</span></code></a>.</p>
 </section>
-<section id="module-pcapkit.vendor.hip.suite">
-<span id="suite-ids"></span><h2>Suite IDs <a class="footnote-reference brackets" href="#id33" id="id16" role="doc-noteref"><span class="fn-bracket">[</span>##<span class="fn-bracket">]</span></a><a class="headerlink" href="#module-pcapkit.vendor.hip.suite" title="Permalink to this heading">¶</a></h2>
-<p>HIP Suite IDs</p>
 <dl class="py class">
-<dt class="sig sig-object py" id="pcapkit.vendor.hip.suite.Suite">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.vendor.hip.suite.</span></span><span class="sig-name descname"><span class="pre">Suite</span></span><a class="reference internal" href="../../_modules/pcapkit/vendor/hip/suite.html#Suite"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.vendor.hip.suite.Suite" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="index.html#pcapkit.vendor.default.Vendor" title="pcapkit.vendor.default.Vendor"><code class="xref py py-class docutils literal notranslate"><span class="pre">Vendor</span></code></a></p>
+<dt class="sig sig-object py">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.vendor.hip.suite.</span></span><span class="sig-name descname"><span class="pre">Suite</span></span><a class="reference internal" href="../../_modules/pcapkit/vendor/hip/suite.html#Suite"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Bases: <a class="reference internal" href="default.html#pcapkit.vendor.default.Vendor" title="pcapkit.vendor.default.Vendor"><code class="xref py py-class docutils literal notranslate"><span class="pre">Vendor</span></code></a></p>
 <p>Suite IDs</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference internal" href="index.html#pcapkit.vendor.default.Vendor" title="pcapkit.vendor.default.Vendor">Vendor</a></p>
+<dd class="field-odd"><p><a class="reference internal" href="default.html#pcapkit.vendor.default.Vendor" title="pcapkit.vendor.default.Vendor">Vendor</a></p>
 </dd>
 </dl>
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.vendor.hip.suite.Suite.FLAG">
-<span class="sig-name descname"><span class="pre">FLAG</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'isinstance(value,</span> <span class="pre">int)</span> <span class="pre">and</span> <span class="pre">0</span> <span class="pre">&lt;=</span> <span class="pre">value</span> <span class="pre">&lt;=</span> <span class="pre">65535'</span></em><a class="headerlink" href="#pcapkit.vendor.hip.suite.Suite.FLAG" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">FLAG</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'isinstance(value,</span> <span class="pre">int)</span> <span class="pre">and</span> <span class="pre">0</span> <span class="pre">&lt;=</span> <span class="pre">value</span> <span class="pre">&lt;=</span> <span class="pre">65535'</span></em></dt>
 <dd><p>Value limit checker.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.vendor.hip.suite.Suite.LINK">
-<span class="sig-name descname"><span class="pre">LINK</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'https://www.iana.org/assignments/hip-parameters/hip-parameters-6.csv'</span></em><a class="headerlink" href="#pcapkit.vendor.hip.suite.Suite.LINK" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">LINK</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'https://www.iana.org/assignments/hip-parameters/hip-parameters-6.csv'</span></em></dt>
 <dd><p>Link to registry.</p>
 </dd></dl>
 
 </dd></dl>
 
+<span class="target" id="module-pcapkit.vendor.hip.transport"></span><section id="hip-transport-modes">
+<h2>HIP Transport Modes<a class="headerlink" href="#hip-transport-modes" title="Permalink to this heading">¶</a></h2>
+<p>This module contains the vendor crawler for <strong>HIP Transport Modes</strong>,
+which is automatically generating <a class="reference internal" href="../const/hip.html#pcapkit.const.hip.transport.Transport" title="pcapkit.const.hip.transport.Transport"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.const.hip.transport.Transport</span></code></a>.</p>
 </section>
-<section id="module-pcapkit.vendor.hip.transport">
-<span id="hip-transport-modes"></span><h2>HIP Transport Modes <a class="footnote-reference brackets" href="#id34" id="id17" role="doc-noteref"><span class="fn-bracket">[</span>♠♠<span class="fn-bracket">]</span></a><a class="headerlink" href="#module-pcapkit.vendor.hip.transport" title="Permalink to this heading">¶</a></h2>
-<p>HIP Transport Modes</p>
 <dl class="py class">
-<dt class="sig sig-object py" id="pcapkit.vendor.hip.transport.Transport">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.vendor.hip.transport.</span></span><span class="sig-name descname"><span class="pre">Transport</span></span><a class="reference internal" href="../../_modules/pcapkit/vendor/hip/transport.html#Transport"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.vendor.hip.transport.Transport" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="index.html#pcapkit.vendor.default.Vendor" title="pcapkit.vendor.default.Vendor"><code class="xref py py-class docutils literal notranslate"><span class="pre">Vendor</span></code></a></p>
+<dt class="sig sig-object py">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.vendor.hip.transport.</span></span><span class="sig-name descname"><span class="pre">Transport</span></span><a class="reference internal" href="../../_modules/pcapkit/vendor/hip/transport.html#Transport"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Bases: <a class="reference internal" href="default.html#pcapkit.vendor.default.Vendor" title="pcapkit.vendor.default.Vendor"><code class="xref py py-class docutils literal notranslate"><span class="pre">Vendor</span></code></a></p>
 <p>HIP Transport Modes</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference internal" href="index.html#pcapkit.vendor.default.Vendor" title="pcapkit.vendor.default.Vendor">Vendor</a></p>
+<dd class="field-odd"><p><a class="reference internal" href="default.html#pcapkit.vendor.default.Vendor" title="pcapkit.vendor.default.Vendor">Vendor</a></p>
 </dd>
 </dl>
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.vendor.hip.transport.Transport.FLAG">
-<span class="sig-name descname"><span class="pre">FLAG</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'isinstance(value,</span> <span class="pre">int)</span> <span class="pre">and</span> <span class="pre">0</span> <span class="pre">&lt;=</span> <span class="pre">value</span> <span class="pre">&lt;=</span> <span class="pre">3'</span></em><a class="headerlink" href="#pcapkit.vendor.hip.transport.Transport.FLAG" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">FLAG</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'isinstance(value,</span> <span class="pre">int)</span> <span class="pre">and</span> <span class="pre">0</span> <span class="pre">&lt;=</span> <span class="pre">value</span> <span class="pre">&lt;=</span> <span class="pre">3'</span></em></dt>
 <dd><p>Value limit checker.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.vendor.hip.transport.Transport.LINK">
-<span class="sig-name descname"><span class="pre">LINK</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'https://www.iana.org/assignments/hip-parameters/transport-modes.csv'</span></em><a class="headerlink" href="#pcapkit.vendor.hip.transport.Transport.LINK" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">LINK</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'https://www.iana.org/assignments/hip-parameters/transport-modes.csv'</span></em></dt>
 <dd><p>Link to registry.</p>
 </dd></dl>
 
@@ -631,7 +656,6 @@
 <p><a class="reference external" href="https://www.iana.org/assignments/hip-parameters/hip-parameters.xhtml#transport-modes">https://www.iana.org/assignments/hip-parameters/hip-parameters.xhtml#transport-modes</a></p>
 </aside>
 </section>
-</section>
 
 
           </div>
@@ -667,21 +691,13 @@
 <li class="toctree-l2"><a class="reference internal" href="../dumpkit/index.html">Dump Utilities</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../utilities/index.html">Utility Functions &amp; Classes</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../const/index.html">Constant Enumerations</a></li>
-<li class="toctree-l2 current"><a class="reference internal" href="index.html">Web Crawlers for Constant Enumerations</a><ul class="current">
-<li class="toctree-l3"><a class="reference internal" href="arp.html">ARP Vendor Crawlers</a></li>
-<li class="toctree-l3"><a class="reference internal" href="ftp.html">FTP Vendor Crawlers</a></li>
-<li class="toctree-l3 current"><a class="current reference internal" href="#">HIP Vendor Crawler</a></li>
-<li class="toctree-l3"><a class="reference internal" href="http.html">HTTP Vendor Crawler</a></li>
-<li class="toctree-l3"><a class="reference internal" href="ipv4.html">IPv4 Vendor Crawler</a></li>
-<li class="toctree-l3"><a class="reference internal" href="ipv6.html">IPv6 Vendor Crawler</a></li>
-<li class="toctree-l3"><a class="reference internal" href="ipx.html">IPX Vendor Crawler</a></li>
-<li class="toctree-l3"><a class="reference internal" href="mh.html">MH Vendor Crawler</a></li>
-<li class="toctree-l3"><a class="reference internal" href="ospf.html">OSPF Vendor Crawler</a></li>
-<li class="toctree-l3"><a class="reference internal" href="reg.html">Protocol Type Registry Vendor Crawlers</a></li>
-<li class="toctree-l3"><a class="reference internal" href="tcp.html">TCP Vendor Crawler</a></li>
-<li class="toctree-l3"><a class="reference internal" href="vlan.html">VLAN Vendor Crawler</a></li>
-<li class="toctree-l3"><a class="reference internal" href="index.html#module-pcapkit.vendor.default">Base Generator</a></li>
-<li class="toctree-l3"><a class="reference internal" href="index.html#command-line-tool">Command Line Tool</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="index.html">Vendor Crawlers</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="index.html#base-crawler">Base Crawler</a></li>
+<li class="toctree-l3"><a class="reference internal" href="index.html#protocol-numbers">Protocol Numbers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="index.html#link-layer">Link Layer</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="index.html#internet-layer">Internet Layer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="index.html#transport-layer">Transport Layer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="index.html#application-layer">Application Layer</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../index.html#command-line-tool">Command Line Tool</a></li>
@@ -697,9 +713,9 @@
 <ul>
   <li><a href="../../index.html">Documentation overview</a><ul>
   <li><a href="../index.html">Module Documentation</a><ul>
-  <li><a href="index.html">Web Crawlers for Constant Enumerations</a><ul>
-      <li>Previous: <a href="ftp.html" title="previous chapter">FTP Vendor Crawlers</a></li>
-      <li>Next: <a href="http.html" title="next chapter">HTTP Vendor Crawler</a></li>
+  <li><a href="index.html">Vendor Crawlers</a><ul>
+      <li>Previous: <a href="vlan.html" title="previous chapter"><code class="xref py py-class docutils literal notranslate"><span class="pre">VLAN</span></code> Vendor Crawlers</a></li>
+      <li>Next: <a href="ipv4.html" title="next chapter"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv4</span></code> Vendor Crawlers</a></li>
   </ul></li>
   </ul></li>
   </ul></li>
