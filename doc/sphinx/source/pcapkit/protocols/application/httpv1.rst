@@ -1,148 +1,94 @@
 HTTP/1.* - Hypertext Transfer Protocol
 ======================================
 
+.. module:: pcapkit.protocols.application.httpv1
+.. module:: pcapkit.protocols.data.application.httpv1
+
 :mod:`pcapkit.protocols.application.httpv1` contains
-:class:`~pcapkit.protocols.application.httpv1.HTTPv1`
+:class:`~pcapkit.protocols.application.httpv1.HTTP`
 only, which implements extractor for Hypertext Transfer
 Protocol (HTTP/1.*) [*]_, whose structure is described
-as below::
+as below:
 
-    METHOD URL HTTP/VERSION\r\n :==: REQUEST LINE
-    <key> : <value>\r\n         :==: REQUEST HEADER
-    ............  (Ellipsis)    :==: REQUEST HEADER
-    \r\n                        :==: REQUEST SEPARATOR
-    <body>                      :==: REQUEST BODY (optional)
+.. code-block:: text
 
-    HTTP/VERSION CODE DESP \r\n :==: RESPONSE LINE
-    <key> : <value>\r\n         :==: RESPONSE HEADER
-    ............  (Ellipsis)    :==: RESPONSE HEADER
-    \r\n                        :==: RESPONSE SEPARATOR
-    <body>                      :==: RESPONSE BODY (optional)
+   METHOD URL HTTP/VERSION\r\n :==: REQUEST LINE
+   <key> : <value>\r\n         :==: REQUEST HEADER
+   ............  (Ellipsis)    :==: REQUEST HEADER
+   \r\n                        :==: REQUEST SEPARATOR
+   <body>                      :==: REQUEST BODY (optional)
 
-.. automodule:: pcapkit.protocols.application.httpv1
-   :members:
-   :undoc-members:
-   :private-members:
+   HTTP/VERSION CODE DESP \r\n :==: RESPONSE LINE
+   <key> : <value>\r\n         :==: RESPONSE HEADER
+   ............  (Ellipsis)    :==: RESPONSE HEADER
+   \r\n                        :==: RESPONSE SEPARATOR
+   <body>                      :==: RESPONSE BODY (optional)
+
+.. autoclass:: pcapkit.protocols.application.httpv1.HTTP
+   :no-members:
    :show-inheritance:
 
-Data Structure
---------------
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
 
-.. important::
+   .. autoproperty:: alias
+   .. autoproperty:: version
 
-   Following classes are only for *documentation* purpose.
-   They do **NOT** exist in the :mod:`pcapkit` module.
+   .. automethod:: read
+   .. automethod:: make
+   .. automethod:: id
 
-.. class:: DataType_HTTP
+   .. automethod:: _read_http_header
+   .. automethod:: _read_http_body
 
-   :bases: TypedDict
+.. autodata:: pcapkit.protocols.application.httpv1.HTTP_METHODS
 
-   Structure of HTTP/1.* packet [:rfc:`7230`].
+Data Structures
+---------------
 
-   .. attribute:: receipt
-      :type: Literal['request', 'response']
+.. autoclass:: pcapkit.protocols.data.application.httpv1.HTTP(receipt, header, body)
+   :no-members:
+   :show-inheritance:
 
-      HTTP packet receipt.
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. attribute:: header
-      :type: Union[DataType_HTTP_Request_Header, DataType_HTTP_Response_Header]
+   .. autoattribute:: receipt
+   .. autoattribute:: header
+   .. autoattribute:: body
 
-      Parsed HTTP header data.
+.. autoclass:: pcapkit.protocols.data.application.httpv1.Header(type)
+   :no-members:
+   :show-inheritance:
 
-   .. attribute:: body
-      :type: bytes
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
 
-      HTTP body data.
+   .. autoattribute:: type
 
-   .. attribute:: raw
-      :type: DataType_HTTP_Raw
+.. autoclass:: pcapkit.protocols.data.application.httpv1.RequestHeader(type, method, uri, version)
+   :no-members:
+   :show-inheritance:
 
-      Raw HTTP packet data.
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
 
-.. class:: DataType_HTTP_Raw
+   .. autoattribute:: type
+   .. autoattribute:: method
+   .. autoattribute:: uri
+   .. autoattribute:: version
 
-   :bases: TypedDict
+.. autoclass:: pcapkit.protocols.data.application.httpv1.ResponseHeader(type, version, status, message)
+   :no-members:
+   :show-inheritance:
 
-   Raw HTTP packet data.
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. attribute:: header
-      :type: bytes
-
-      Raw HTTP header data.
-
-   .. attribute:: body
-      :type: bytes
-
-      Raw HTTP body data.
-
-   .. attribute:: packet
-      :type: bytes
-
-      Raw HTTP packet data.
-
-.. class:: DataType_HTTP_Request_Header
-
-   :bases: TypedDict
-
-   HTTP request header.
-
-   .. attribute:: request
-      :type: DataType_HTTP_Request_Header_Meta
-
-      Request metadata.
-
-.. class:: DataType_HTTP_Response_Header
-
-   :bases: TypedDict
-
-   HTTP response header.
-
-   .. attribute:: response
-      :type: DataType_HTTP_Response_Header_Meta
-
-      Response metadata.
-
-.. class:: DataType_HTTP_Request_Header_Meta
-
-   :bases: TypedDict
-
-   Request metadata.
-
-   .. attribute:: method
-      :type: str
-
-      HTTP request method.
-
-   .. attribute:: target
-      :type: str
-
-      HTTP request target URI.
-
-   .. attribute:: version
-      :type: Literal['0.9', '1.0', '1.1']
-
-      HTTP version string.
-
-.. class:: DataType_HTTP_Response_Header_Meta
-
-   :bases: TypedDict
-
-   Response metadata.
-
-   .. attribute:: version
-      :type: Literal['0.9', '1.0', '1.1']
-
-      HTTP version string.
-
-   .. attribute:: status
-      :type: int
-
-      HTTP response status code.
-
-   .. attribute:: phrase
-      :type: str
-
-      HTTP response status reason.
+   .. autoattribute:: type
+   .. autoattribute:: version
+   .. autoattribute:: status
+   .. autoattribute:: message
 
 .. raw:: html
 

@@ -1,25 +1,26 @@
 # -*- coding: utf-8 -*-
-"""hypertext transfer protocol (HTTP/1.*)
+r"""HTTP/1.* - Hypertext Transfer Protocol
+============================================
 
 :mod:`pcapkit.protocols.application.httpv1` contains
-:class:`~pcapkit.protocols.application.httpv1.HTTPv1`
+:class:`~pcapkit.protocols.application.httpv1.HTTP`
 only, which implements extractor for Hypertext Transfer
 Protocol (HTTP/1.*) [*]_, whose structure is described
 as below:
 
 .. code-block:: text
 
-   METHOD URL HTTP/VERSION\\r\\n :==: REQUEST LINE
-   <key> : <value>\\r\\n         :==: REQUEST HEADER
-   ............  (Ellipsis)      :==: REQUEST HEADER
-   \\r\\n                        :==: REQUEST SEPARATOR
-   <body>                        :==: REQUEST BODY (optional)
+   METHOD URL HTTP/VERSION\r\n :==: REQUEST LINE
+   <key> : <value>\r\n         :==: REQUEST HEADER
+   ............  (Ellipsis)    :==: REQUEST HEADER
+   \r\n                        :==: REQUEST SEPARATOR
+   <body>                      :==: REQUEST BODY (optional)
 
-   HTTP/VERSION CODE DESP \\r\\n :==: RESPONSE LINE
-   <key> : <value>\\r\\n         :==: RESPONSE HEADER
-   ............  (Ellipsis)      :==: RESPONSE HEADER
-   \\r\\n                        :==: RESPONSE SEPARATOR
-   <body>                        :==: RESPONSE BODY (optional)
+   HTTP/VERSION CODE DESP \r\n :==: RESPONSE LINE
+   <key> : <value>\r\n         :==: RESPONSE HEADER
+   ............  (Ellipsis)    :==: RESPONSE HEADER
+   \r\n                        :==: RESPONSE SEPARATOR
+   <body>                      :==: RESPONSE BODY (optional)
 
 .. [*] https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol
 
@@ -28,7 +29,7 @@ import re
 from typing import TYPE_CHECKING
 
 from pcapkit.corekit.multidict import OrderedMultiDict
-from pcapkit.protocols.application.http import HTTP
+from pcapkit.protocols.application.http import HTTP as HTTPBase
 from pcapkit.protocols.data.application.httpv1 import HTTP as DataType_HTTP
 from pcapkit.protocols.data.application.httpv1 import RequestHeader as DataType_RequestHeader
 from pcapkit.protocols.data.application.httpv1 import ResponseHeader as DataType_ResponseHeader
@@ -41,7 +42,7 @@ if TYPE_CHECKING:
 
     from pcapkit.protocols.data.application.httpv1 import Header as DataType_Header
 
-__all__ = ['HTTPv1']
+__all__ = ['HTTP']
 
 #: Supported HTTP method.
 HTTP_METHODS = [
@@ -58,7 +59,7 @@ _RE_VERSION = re.compile(rb"HTTP/(?P<version>\d\.\d)")
 _RE_STATUS = re.compile(rb'\d{3}')
 
 
-class HTTPv1(HTTP[DataType_HTTP]):
+class HTTP(HTTPBase[DataType_HTTP]):
     """This class implements Hypertext Transfer Protocol (HTTP/1.*)."""
 
     ##########################################################################
@@ -66,7 +67,7 @@ class HTTPv1(HTTP[DataType_HTTP]):
     ##########################################################################
 
     #: Literal['request', 'response']: Type of HTTP receipt.
-    _receipt = None
+    _receipt: 'Literal["request", "response"]'
 
     ##########################################################################
     # Properties.
@@ -101,8 +102,6 @@ class HTTPv1(HTTP[DataType_HTTP]):
 
         Args:
             length: Length of packet data.
-
-        Keyword Args:
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
@@ -135,7 +134,7 @@ class HTTPv1(HTTP[DataType_HTTP]):
     def make(self, **kwargs: 'Any') -> 'NoReturn':
         """Make (construct) packet data.
 
-        Keyword Args:
+        Args:
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
@@ -145,7 +144,7 @@ class HTTPv1(HTTP[DataType_HTTP]):
         raise NotImplementedError
 
     @classmethod
-    def id(cls) -> 'tuple[Literal["HTTPv1"]]':  # type: ignore[override]
+    def id(cls) -> 'tuple[Literal["HTTP"]]':  # type: ignore[override]
         """Index ID of the protocol.
 
         Returns:
@@ -217,7 +216,7 @@ class HTTPv1(HTTP[DataType_HTTP]):
 
         return header_line, header_fields
 
-    def _read_http_body(self, body: 'bytes') -> 'bytes':  # pylint: disable=no-self-use
+    def _read_http_body(self, body: 'bytes') -> 'bytes':
         """Read HTTP/1.* body.
 
         Args:
