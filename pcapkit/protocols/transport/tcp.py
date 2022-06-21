@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
-"""transmission control protocol
+"""TCP - Transmission Control Protocol
+=========================================
 
 :mod:`pcapkit.protocols.transport.tcp` contains
 :class:`~pcapkit.protocols.transport.tcp.TCP` only,
@@ -108,15 +109,111 @@ __all__ = ['TCP']
 
 
 class TCP(Transport[DataType_TCP]):
-    """This class implements Transmission Control Protocol."""
+    """This class implements Transmission Control Protocol.
+
+    This class currently supports parsing of the following protocols, which are
+    registered in the :attr:`self.__proto__ <pcapkit.protocols.transport.tcp.TCP.__proto__>`
+    attribute:
+
+    .. list-table::
+       :header-rows: 1
+
+       * - Port Number
+         - Protocol
+       * - 21
+         - :class:`pcapkit.protocols.application.ftp.FTP`
+       * - 80
+         - :class:`pcapkit.protocols.application.http.HTTP`
+
+    This class currently supports parsing of the following TCP options,
+    which are directly mapped to the :class:`pcapkit.const.tcp.option.Option`
+    enumeration:
+
+    .. list-table::
+       :header-rows: 1
+
+       * - Option Code
+         - Option Parser
+       * - :attr:`~pcapkit.const.tcp.option.Option.End_of_Option_List`
+         - :meth:`~pcapkit.protocols.transport.tcp.TCP._read_mode_eool`
+       * - :attr:`~pcapkit.const.tcp.option.Option.No_Operation`
+         - :meth:`~pcapkit.protocols.transport.tcp.TCP._read_mode_nop`
+       * - :attr:`~pcapkit.const.tcp.option.Option.Maximum_Segment_Size`
+         - :meth:`~pcapkit.protocols.transport.tcp.TCP._read_mode_mss`
+       * - :attr:`~pcapkit.const.tcp.option.Option.Window_Scale`
+         - :meth:`~pcapkit.protocols.transport.tcp.TCP._read_mode_ws`
+       * - :attr:`~pcapkit.const.tcp.option.Option.SACK_Permitted`
+         - :meth:`~pcapkit.protocols.transport.tcp.TCP._read_mode_sackpmt`
+       * - :attr:`~pcapkit.const.tcp.option.Option.SACK`
+         - :meth:`~pcapkit.protocols.transport.tcp.TCP._read_mode_sack`
+       * - :attr:`~pcapkit.const.tcp.option.Option.Echo`
+         - :meth:`~pcapkit.protocols.transport.tcp.TCP._read_mode_echo`
+       * - :attr:`~pcapkit.const.tcp.option.Option.Echo_Reply`
+         - :meth:`~pcapkit.protocols.transport.tcp.TCP._read_mode_echore`
+       * - :attr:`~pcapkit.const.tcp.option.Option.Timestamps`
+         - :meth:`~pcapkit.protocols.transport.tcp.TCP._read_mode_ts`
+       * - :attr:`~pcapkit.const.tcp.option.Option.Partial_Order_Connection_Permitted`
+         - :meth:`~pcapkit.protocols.transport.tcp.TCP._read_mode_poc`
+       * - :attr:`~pcapkit.const.tcp.option.Option.Partial_Order_Service_Profile`
+         - :meth:`~pcapkit.protocols.transport.tcp.TCP._read_mode_pocsp`
+       * - :attr:`~pcapkit.const.tcp.option.Option.CC`
+         - :meth:`~pcapkit.protocols.transport.tcp.TCP._read_mode_cc`
+       * - :attr:`~pcapkit.const.tcp.option.Option.CC_NEW`
+         - :meth:`~pcapkit.protocols.transport.tcp.TCP._read_mode_ccnew`
+       * - :attr:`~pcapkit.const.tcp.option.Option.CC_ECHO`
+         - :meth:`~pcapkit.protocols.transport.tcp.TCP._read_mode_ccecho`
+       * - :attr:`~pcapkit.const.tcp.option.Option.TCP_Alternate_Checksum_Request`
+         - :meth:`~pcapkit.protocols.transport.tcp.TCP._read_mode_chkreq`
+       * - :attr:`~pcapkit.const.tcp.option.Option.TCP_Alternate_Checksum_Data`
+         - :meth:`~pcapkit.protocols.transport.tcp.TCP._read_mode_chksum`
+       * - :attr:`~pcapkit.const.tcp.option.Option.MD5_Signature_Option`
+         - :meth:`~pcapkit.protocols.transport.tcp.TCP._read_mode_sig`
+       * - :attr:`~pcapkit.const.tcp.option.Option.Quick_Start_Response`
+         - :meth:`~pcapkit.protocols.transport.tcp.TCP._read_mode_qs`
+       * - :attr:`~pcapkit.const.tcp.option.Option.User_Timeout_Option`
+         - :meth:`~pcapkit.protocols.transport.tcp.TCP._read_mode_timeout`
+       * - :attr:`~pcapkit.const.tcp.option.Option.TCP_Authentication_Option`
+         - :meth:`~pcapkit.protocols.transport.tcp.TCP._read_mode_ao`
+       * - :attr:`~pcapkit.const.tcp.option.Option.Multipath_TCP`
+         - :meth:`~pcapkit.protocols.transport.tcp.TCP._read_mode_mp`
+       * - :attr:`~pcapkit.const.tcp.option.Option.TCP_Fast_Open_Cookie`
+         - :meth:`~pcapkit.protocols.transport.tcp.TCP._read_mode_fastopen`
+
+    This class currently supports parsing of the following Multipath TCP options,
+    which are directly mapped to the :class:`pcapkit.const.tcp.mp_tcp_option.MPTCPOption`
+    enumeration:
+
+    .. list-table::
+       :header-rows: 1
+
+       * - Option Code
+         - Option Parser
+       * - :attr:`~pcapkit.const.tcp.mp_tcp_option.MPTCPOption.MP_CAPABLE`
+         - :meth:`~pcapkit.protocols.transport.tcp.TCP._read_mptcp_capable`
+       * - :attr:`~pcapkit.const.tcp.mp_tcp_option.MPTCPOption.MP_JOIN`
+         - :meth:`~pcapkit.protocols.transport.tcp.TCP._read_mptcp_join`
+       * - :attr:`~pcapkit.const.tcp.mp_tcp_option.MPTCPOption.DSS`
+         - :meth:`~pcapkit.protocols.transport.tcp.TCP._read_mptcp_dss`
+       * - :attr:`~pcapkit.const.tcp.mp_tcp_option.MPTCPOption.ADD_ADDR`
+         - :meth:`~pcapkit.protocols.transport.tcp.TCP._read_mptcp_addaddr`
+       * - :attr:`~pcapkit.const.tcp.mp_tcp_option.MPTCPOption.REMOVE_ADDR`
+         - :meth:`~pcapkit.protocols.transport.tcp.TCP._read_mptcp_remove`
+       * - :attr:`~pcapkit.const.tcp.mp_tcp_option.MPTCPOption.MP_PRIO`
+         - :meth:`~pcapkit.protocols.transport.tcp.TCP._read_mptcp_prio`
+       * - :attr:`~pcapkit.const.tcp.mp_tcp_option.MPTCPOption.MP_FAIL`
+         - :meth:`~pcapkit.protocols.transport.tcp.TCP._read_mptcp_fail`
+       * - :attr:`~pcapkit.const.tcp.mp_tcp_option.MPTCPOption.MP_FASTCLOSE`
+         - :meth:`~pcapkit.protocols.transport.tcp.TCP._read_mptcp_fastclose`
+
+    """
 
     ##########################################################################
     # Defaults.
     ##########################################################################
 
-    #: DefaultDict[int, Tuple[str, str]]: Protocol index mapping for decoding next layer,
-    #: c.f. :meth:`self._decode_next_layer <pcapkit.protocols.protocol.Protocol._decode_next_layer>`
-    #: & :meth:`self._import_next_layer <pcapkit.protocols.internet.link.Link._import_next_layer>`.
+    #: DefaultDict[int, tuple[str, str]]: Protocol index mapping for decoding next layer,
+    #: c.f. :meth:`self._decode_next_layer <pcapkit.protocols.transport.transport.Transport._decode_next_layer>`
+    #: & :meth:`self._import_next_layer <pcapkit.protocols.protocol.Protocol._import_next_layer>`.
     __proto__ = collections.defaultdict(
         lambda: ('pcapkit.protocols.misc.raw', 'Raw'),
         {
@@ -228,8 +325,6 @@ class TCP(Transport[DataType_TCP]):
 
         Args:
             length: Length of packet data.
-
-        Keyword Args:
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
@@ -287,7 +382,7 @@ class TCP(Transport[DataType_TCP]):
     def make(self, **kwargs: 'Any') -> 'NoReturn':
         """Make (construct) packet data.
 
-        Keyword Args:
+        Args:
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
@@ -401,8 +496,6 @@ class TCP(Transport[DataType_TCP]):
 
         Arguments:
             kind: option kind value
-
-        Keyword Args:
             options: extracted TCP options
 
         Returns:
@@ -433,8 +526,6 @@ class TCP(Transport[DataType_TCP]):
 
         Arguments:
             kind: option kind value
-
-        Keyword Args:
             options: extracted TCP options
 
         Returns:
@@ -460,8 +551,6 @@ class TCP(Transport[DataType_TCP]):
 
         Arguments:
             kind: option kind value
-
-        Keyword Args:
             options: extracted TCP options
 
         Returns:
@@ -487,8 +576,6 @@ class TCP(Transport[DataType_TCP]):
 
         Arguments:
             kind: option kind value
-
-        Keyword Args:
             options: extracted TCP options
 
         Returns:
@@ -524,8 +611,6 @@ class TCP(Transport[DataType_TCP]):
 
         Arguments:
             kind: option kind value
-
-        Keyword Args:
             options: extracted TCP options
 
         Returns:
@@ -560,8 +645,6 @@ class TCP(Transport[DataType_TCP]):
 
         Arguments:
             kind: option kind value
-
-        Keyword Args:
             options: extracted TCP options
 
         Returns:
@@ -605,8 +688,6 @@ class TCP(Transport[DataType_TCP]):
 
         Arguments:
             kind: option kind value
-
-        Keyword Args:
             options: extracted TCP options
 
         Returns:
@@ -642,8 +723,6 @@ class TCP(Transport[DataType_TCP]):
 
         Arguments:
             kind: option kind value
-
-        Keyword Args:
             options: extracted TCP options
 
         Returns:
@@ -678,8 +757,6 @@ class TCP(Transport[DataType_TCP]):
 
         Arguments:
             kind: option kind value
-
-        Keyword Args:
             options: extracted TCP options
 
         Returns:
@@ -715,8 +792,6 @@ class TCP(Transport[DataType_TCP]):
 
         Arguments:
             kind: option kind value
-
-        Keyword Args:
             options: extracted TCP options
 
         Returns:
@@ -754,8 +829,6 @@ class TCP(Transport[DataType_TCP]):
 
         Arguments:
             kind: option kind value
-
-        Keyword Args:
             options: extracted TCP options
 
         Returns:
@@ -789,8 +862,6 @@ class TCP(Transport[DataType_TCP]):
 
         Arguments:
             kind: option kind value
-
-        Keyword Args:
             options: extracted TCP options
 
         Returns:
@@ -828,8 +899,6 @@ class TCP(Transport[DataType_TCP]):
 
         Arguments:
             kind: option kind value
-
-        Keyword Args:
             options: extracted TCP options
 
         Returns:
@@ -865,8 +934,6 @@ class TCP(Transport[DataType_TCP]):
 
         Arguments:
             kind: option kind value
-
-        Keyword Args:
             options: extracted TCP options
 
         Returns:
@@ -902,8 +969,6 @@ class TCP(Transport[DataType_TCP]):
 
         Arguments:
             kind: option kind value
-
-        Keyword Args:
             options: extracted TCP options
 
         Returns:
@@ -938,8 +1003,6 @@ class TCP(Transport[DataType_TCP]):
 
         Arguments:
             kind: option kind value
-
-        Keyword Args:
             options: extracted TCP options
 
         Returns:
@@ -975,8 +1038,6 @@ class TCP(Transport[DataType_TCP]):
 
         Arguments:
             kind: option kind value
-
-        Keyword Args:
             options: extracted TCP options
 
         Returns:
@@ -1015,8 +1076,6 @@ class TCP(Transport[DataType_TCP]):
 
         Arguments:
             kind: option kind value
-
-        Keyword Args:
             options: extracted TCP options
 
         Returns:
@@ -1056,8 +1115,6 @@ class TCP(Transport[DataType_TCP]):
 
         Arguments:
             kind: option kind value
-
-        Keyword Args:
             options: extracted TCP options
 
         Returns:
@@ -1099,8 +1156,6 @@ class TCP(Transport[DataType_TCP]):
 
         Arguments:
             kind: option kind value
-
-        Keyword Args:
             options: extracted TCP options
 
         Returns:
@@ -1147,8 +1202,6 @@ class TCP(Transport[DataType_TCP]):
 
         Arguments:
             kind: option kind value
-
-        Keyword Args:
             options: extracted TCP options
 
         Returns:
@@ -1193,8 +1246,6 @@ class TCP(Transport[DataType_TCP]):
 
         Arguments:
             kind: option kind value
-
-        Keyword Args:
             options: extracted TCP options
 
         Returns:
@@ -1230,8 +1281,6 @@ class TCP(Transport[DataType_TCP]):
             kind: option kind value
             dlen: length of remaining data
             bits: 4-bit data
-
-        Keyword Args:
             options: extracted TCP options
 
         Returns:
@@ -1272,8 +1321,6 @@ class TCP(Transport[DataType_TCP]):
             kind: option kind value
             dlen: length of remaining data
             bits: 4-bit data
-
-        Keyword Args:
             options: extracted TCP options
 
         Returns:
@@ -1315,8 +1362,6 @@ class TCP(Transport[DataType_TCP]):
             kind: option kind value
             dlen: length of remaining data
             bits: 4-bit data
-
-        Keyword Args:
             options: extracted TCP options
 
         Returns:
@@ -1356,8 +1401,6 @@ class TCP(Transport[DataType_TCP]):
             kind: option kind value
             dlen: length of remaining data
             bits: 4-bit data
-
-        Keyword Args:
             options: extracted TCP options
 
         Returns:
@@ -1411,8 +1454,6 @@ class TCP(Transport[DataType_TCP]):
             kind: option kind value
             dlen: length of remaining data
             bits: 4-bit data
-
-        Keyword Args:
             options: extracted TCP options
 
         Returns:
@@ -1466,8 +1507,6 @@ class TCP(Transport[DataType_TCP]):
             kind: option kind value
             dlen: length of remaining data
             bits: 4-bit data
-
-        Keyword Args:
             options: extracted TCP options
 
         Returns:
@@ -1521,8 +1560,6 @@ class TCP(Transport[DataType_TCP]):
             kind: option kind value
             dlen: length of remaining data
             bits: 4-bit data
-
-        Keyword Args:
             options: extracted TCP options
 
         Returns:
@@ -1582,8 +1619,6 @@ class TCP(Transport[DataType_TCP]):
             kind: option kind value
             dlen: length of remaining data
             bits: 4-bit data
-
-        Keyword Args:
             options: extracted TCP options
 
         Returns:
@@ -1637,8 +1672,6 @@ class TCP(Transport[DataType_TCP]):
             kind: option kind value
             dlen: length of remaining data
             bits: 4-bit data
-
-        Keyword Args:
             options: extracted TCP options
 
         Returns:
@@ -1682,8 +1715,6 @@ class TCP(Transport[DataType_TCP]):
             kind: option kind value
             dlen: length of remaining data
             bits: 4-bit data
-
-        Keyword Args:
             options: extracted TCP options
 
         Returns:
@@ -1729,8 +1760,6 @@ class TCP(Transport[DataType_TCP]):
             kind: option kind value
             dlen: length of remaining data
             bits: 4-bit data
-
-        Keyword Args:
             options: extracted TCP options
 
         Returns:
@@ -1777,8 +1806,6 @@ class TCP(Transport[DataType_TCP]):
             kind: option kind value
             dlen: length of remaining data
             bits: 4-bit data
-
-        Keyword Args:
             options: extracted TCP options
 
         Returns:
@@ -1820,8 +1847,6 @@ class TCP(Transport[DataType_TCP]):
 
         Arguments:
             kind: option kind value
-
-        Keyword Args:
             options: extracted TCP options
 
         Returns:

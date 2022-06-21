@@ -247,7 +247,7 @@ class CCEcho(Option):
         def __init__(self, kind: 'OptionNumber', length: 'int', cc: 'int') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
-class AlternateChecksumRequest(Info):
+class AlternateChecksumRequest(Option):
     """Data model for TCP alternate checksum request option."""
 
     #: Checksum algorithm.
@@ -257,7 +257,7 @@ class AlternateChecksumRequest(Info):
         def __init__(self, kind: 'OptionNumber', length: 'int', chksum: 'Checksum') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
-class AlternateChecksumData(Info):
+class AlternateChecksumData(Option):
     """Data model for TCP alternate checksum data option."""
 
     #: Checksum data.
@@ -267,7 +267,7 @@ class AlternateChecksumData(Info):
         def __init__(self, kind: 'OptionNumber', length: 'int', data: 'bytes') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
-class MD5Signature(Info):
+class MD5Signature(Option):
     """Data model for TCP MD5 signature option."""
 
     #: MD5 signature.
@@ -277,7 +277,7 @@ class MD5Signature(Info):
         def __init__(self, kind: 'OptionNumber', length: 'int', digest: 'bytes') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
-class QuickStartResponse(Info):
+class QuickStartResponse(Option):
     """Data model for TCP quick start response option."""
 
     #: Rate request.
@@ -291,7 +291,7 @@ class QuickStartResponse(Info):
         def __init__(self, kind: 'OptionNumber', length: 'int', req_rate: 'int', ttl_diff: 'int', nounce: 'int') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
-class UserTimeout(Info):
+class UserTimeout(Option):
     """Data model for TCP user timeout option."""
 
     #: User timeout.
@@ -301,7 +301,7 @@ class UserTimeout(Info):
         def __init__(self, kind: 'OptionNumber', length: 'int', timeout: 'timedelta') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
-class Authentication(Info):
+class Authentication(Option):
     """Data model for TCP authentication option."""
 
     #: Key ID.
@@ -315,7 +315,7 @@ class Authentication(Info):
         def __init__(self, kind: 'OptionNumber', length: 'int', key_id: 'int', next_key_id: 'int', mac: 'bytes') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
-class FastOpenCookie(Info):
+class FastOpenCookie(Option):
     """Data model for TCP fast open cookie option."""
 
     #: Cookie.
@@ -325,7 +325,7 @@ class FastOpenCookie(Info):
         def __init__(self, kind: 'OptionNumber', length: 'int', cookie: 'bytes') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
-class MPTCP(Info):
+class MPTCP(Option):
     """Data model for TCP MPTCP option."""
 
     #: Subtype.
