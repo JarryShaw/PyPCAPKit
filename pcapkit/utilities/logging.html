@@ -16,8 +16,8 @@
     <script src="../../_static/doctools.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="User Defined Warnings" href="warnings.html" />
-    <link rel="prev" title="User Defined Exceptions" href="exceptions.html" />
+    <link rel="next" title="Decorator Functions" href="decorators.html" />
+    <link rel="prev" title="Utility Functions &amp; Classes" href="index.html" />
    
   <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
   
@@ -34,20 +34,31 @@
 
           <div class="body" role="main">
             
-  <section id="logging-system">
-<h1>Logging System<a class="headerlink" href="#logging-system" title="Permalink to this heading">¶</a></h1>
-<p><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.utilities.logging</span></code> contains naïve integration
+  <section id="module-pcapkit.utilities.logging">
+<span id="logging-system"></span><h1>Logging System<a class="headerlink" href="#module-pcapkit.utilities.logging" title="Permalink to this heading">¶</a></h1>
+<p><a class="reference internal" href="#module-pcapkit.utilities.logging" title="pcapkit.utilities.logging"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.utilities.logging</span></code></a> contains naïve integration
 of the Python logging system, i.e. a <a class="reference external" href="https://docs.python.org/3/library/logging.html#logging.Logger" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">logging.Logger</span></code></a>
 instance as <a class="reference internal" href="#pcapkit.utilities.logging.logger" title="pcapkit.utilities.logging.logger"><code class="xref py py-data docutils literal notranslate"><span class="pre">logger</span></code></a>.</p>
 <dl class="py data">
 <dt class="sig sig-object py" id="pcapkit.utilities.logging.logger">
-<span class="sig-prename descclassname"><span class="pre">pcapkit.utilities.logging.</span></span><span class="sig-name descname"><span class="pre">logger</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;Logger</span> <span class="pre">pcapkit</span> <span class="pre">(INFO)&gt;</span></em><a class="headerlink" href="#pcapkit.utilities.logging.logger" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">pcapkit.utilities.logging.</span></span><span class="sig-name descname"><span class="pre">logger</span></span><a class="headerlink" href="#pcapkit.utilities.logging.logger" title="Permalink to this definition">¶</a></dt>
 <dd><p><a class="reference external" href="https://docs.python.org/3/library/logging.html#logging.Logger" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Logger</span></code></a> instance named after <code class="docutils literal notranslate"><span class="pre">pcapkit</span></code>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/logging.html#logging.Logger" title="(in Python v3.10)">logging.Logger</a></p>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="pcapkit.utilities.logging.DEVMODE">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.utilities.logging.</span></span><span class="sig-name descname"><span class="pre">DEVMODE</span></span><a class="headerlink" href="#pcapkit.utilities.logging.DEVMODE" title="Permalink to this definition">¶</a></dt>
+<dd><p>Development mode flag.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This variable can be configured through the environment variable
+<span class="target" id="index-0"></span><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_DEVMODE</span></code>.</p>
+</div>
 </dd></dl>
 
 </section>
@@ -85,10 +96,11 @@ instance as <a class="reference internal" href="#pcapkit.utilities.logging.logge
 <li class="toctree-l2"><a class="reference internal" href="../toolkit/index.html">Compatibility Tools</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../dumpkit/index.html">Dump Utilities</a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="index.html">Utility Functions &amp; Classes</a><ul class="current">
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Logging System</a></li>
 <li class="toctree-l3"><a class="reference internal" href="decorators.html">Decorator Functions</a></li>
 <li class="toctree-l3"><a class="reference internal" href="exceptions.html">User Defined Exceptions</a></li>
-<li class="toctree-l3 current"><a class="current reference internal" href="#">Logging System</a></li>
 <li class="toctree-l3"><a class="reference internal" href="warnings.html">User Defined Warnings</a></li>
+<li class="toctree-l3"><a class="reference internal" href="index.html#module-pcapkit.utilities.compat">Version Compatibility</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../const/index.html">Constant Enumerations</a></li>
@@ -107,8 +119,8 @@ instance as <a class="reference internal" href="#pcapkit.utilities.logging.logge
   <li><a href="../../index.html">Documentation overview</a><ul>
   <li><a href="../index.html">Module Documentation</a><ul>
   <li><a href="index.html">Utility Functions &amp; Classes</a><ul>
-      <li>Previous: <a href="exceptions.html" title="previous chapter">User Defined Exceptions</a></li>
-      <li>Next: <a href="warnings.html" title="next chapter">User Defined Warnings</a></li>
+      <li>Previous: <a href="index.html" title="previous chapter">Utility Functions &amp; Classes</a></li>
+      <li>Next: <a href="decorators.html" title="next chapter">Decorator Functions</a></li>
   </ul></li>
   </ul></li>
   </ul></li>

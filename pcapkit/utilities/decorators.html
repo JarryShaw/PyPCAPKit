@@ -17,7 +17,7 @@
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
     <link rel="next" title="User Defined Exceptions" href="exceptions.html" />
-    <link rel="prev" title="Utility Functions &amp; Classes" href="index.html" />
+    <link rel="prev" title="Logging System" href="logging.html" />
    
   <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
   
@@ -34,9 +34,9 @@
 
           <div class="body" role="main">
             
-  <section id="decorator-functions">
-<h1>Decorator Functions<a class="headerlink" href="#decorator-functions" title="Permalink to this heading">¶</a></h1>
-<p><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.utilities.decorators</span></code> contains several useful
+  <section id="module-pcapkit.utilities.decorators">
+<span id="decorator-functions"></span><h1>Decorator Functions<a class="headerlink" href="#module-pcapkit.utilities.decorators" title="Permalink to this heading">¶</a></h1>
+<p><a class="reference internal" href="#module-pcapkit.utilities.decorators" title="pcapkit.utilities.decorators"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.utilities.decorators</span></code></a> contains several useful
 decorators, including <a class="reference internal" href="#pcapkit.utilities.decorators.seekset" title="pcapkit.utilities.decorators.seekset"><code class="xref py py-func docutils literal notranslate"><span class="pre">seekset()</span></code></a>
 and <a class="reference internal" href="#pcapkit.utilities.decorators.beholder" title="pcapkit.utilities.decorators.beholder"><code class="xref py py-func docutils literal notranslate"><span class="pre">beholder()</span></code></a>.</p>
 <dl class="py function">
@@ -47,9 +47,9 @@ and <a class="reference internal" href="#pcapkit.utilities.decorators.beholder" 
 <p class="admonition-title">Important</p>
 <p>This decorator function is designed for decorating <em>class methods</em>.</p>
 </div>
-<p>The decorator will keep the current offset of <code class="xref py py-attr docutils literal notranslate"><span class="pre">self._file</span></code>, then
-call the decorated function. Afterwards, it will rewind the  offset of
-<code class="xref py py-attr docutils literal notranslate"><span class="pre">self._file</span></code> to the original and returns the return value from
+<p>The decorator will keep the current offset of <a class="reference internal" href="../protocols/protocol.html#pcapkit.protocols.protocol.Protocol._file" title="pcapkit.protocols.protocol.Protocol._file"><code class="xref py py-attr docutils literal notranslate"><span class="pre">self._file</span></code></a>,
+then call the decorated function. Afterwards, it will rewind the  offset of
+<a class="reference internal" href="../protocols/protocol.html#pcapkit.protocols.protocol.Protocol._file" title="pcapkit.protocols.protocol.Protocol._file"><code class="xref py py-attr docutils literal notranslate"><span class="pre">self._file</span></code></a> to the original and returns the return value from
 the decorated function.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
@@ -63,11 +63,11 @@ the decorated function.</p>
 <p><a class="reference internal" href="../protocols/protocol.html#pcapkit.protocols.protocol.Protocol._read_packet" title="pcapkit.protocols.protocol.Protocol._read_packet"><code class="xref py py-meth docutils literal notranslate"><span class="pre">pcapkit.protocols.protocol.Protocol._read_packet()</span></code></a></p>
 </div>
 <dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Callable</span></code></a>[[<code class="xref py py-class docutils literal notranslate"><span class="pre">ParamSpec</span></code>], <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.TypeVar" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">TypeVar</span></code></a>(<code class="docutils literal notranslate"><span class="pre">R</span></code>)]</p>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>func</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Callable</span></code></a>[[<code class="xref py py-class docutils literal notranslate"><span class="pre">Concatenate</span></code>[<a class="reference internal" href="../protocols/protocol.html#pcapkit.protocols.protocol.Protocol" title="pcapkit.protocols.protocol.Protocol"><code class="xref py py-class docutils literal notranslate"><span class="pre">Protocol</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ParamSpec</span></code>]], <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.TypeVar" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">TypeVar</span></code></a>(<code class="docutils literal notranslate"><span class="pre">R</span></code>)]) – decorated function</p>
 </dd>
-<dt class="field-even">Parameters<span class="colon">:</span></dt>
-<dd class="field-even"><p><strong>func</strong> (<em>Callable</em><em>[</em><em>Concatenate</em><em>[</em><a class="reference internal" href="../protocols/protocol.html#pcapkit.protocols.protocol.Protocol" title="pcapkit.protocols.protocol.Protocol"><em>Protocol</em></a><em>, </em><em>P</em><em>]</em><em>, </em><em>R</em><em>]</em>) – </p>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Callable</span></code></a>[[<code class="xref py py-class docutils literal notranslate"><span class="pre">ParamSpec</span></code>], <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.TypeVar" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">TypeVar</span></code></a>(<code class="docutils literal notranslate"><span class="pre">R</span></code>)]</p>
 </dd>
 </dl>
 </dd></dl>
@@ -97,11 +97,11 @@ as <a class="reference internal" href="../protocols/misc/raw.html#pcapkit.protoc
 <p><a class="reference internal" href="../protocols/protocol.html#pcapkit.protocols.protocol.Protocol._decode_next_layer" title="pcapkit.protocols.protocol.Protocol._decode_next_layer"><code class="xref py py-meth docutils literal notranslate"><span class="pre">pcapkit.protocols.protocol.Protocol._decode_next_layer()</span></code></a></p>
 </div>
 <dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Callable</span></code></a>[[<code class="xref py py-class docutils literal notranslate"><span class="pre">ParamSpec</span></code>], <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.TypeVar" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">TypeVar</span></code></a>(<code class="docutils literal notranslate"><span class="pre">R</span></code>)]</p>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>func</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Callable</span></code></a>[[<code class="xref py py-class docutils literal notranslate"><span class="pre">Concatenate</span></code>[<a class="reference internal" href="../protocols/protocol.html#pcapkit.protocols.protocol.Protocol" title="pcapkit.protocols.protocol.Protocol"><code class="xref py py-class docutils literal notranslate"><span class="pre">Protocol</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>], <code class="xref py py-class docutils literal notranslate"><span class="pre">ParamSpec</span></code>]], <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.TypeVar" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">TypeVar</span></code></a>(<code class="docutils literal notranslate"><span class="pre">R</span></code>)]) – decorated function</p>
 </dd>
-<dt class="field-even">Parameters<span class="colon">:</span></dt>
-<dd class="field-even"><p><strong>func</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.10)"><em>Callable</em></a><em>[</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Concatenate" title="(in Python v3.10)"><em>Concatenate</em></a><em>[</em><a class="reference internal" href="../protocols/protocol.html#pcapkit.protocols.protocol.Protocol" title="pcapkit.protocols.protocol.Protocol"><em>Protocol</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.10)"><em>Optional</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a><em>]</em><em>, </em><em>~P</em><em>]</em><em>]</em><em>, </em><em>R</em><em>]</em>) – </p>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Callable</span></code></a>[[<code class="xref py py-class docutils literal notranslate"><span class="pre">ParamSpec</span></code>], <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.TypeVar" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">TypeVar</span></code></a>(<code class="docutils literal notranslate"><span class="pre">R</span></code>)]</p>
 </dd>
 </dl>
 </dd></dl>
@@ -147,10 +147,11 @@ for decorating <em>class methods</em>.</p>
 <li class="toctree-l2"><a class="reference internal" href="../toolkit/index.html">Compatibility Tools</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../dumpkit/index.html">Dump Utilities</a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="index.html">Utility Functions &amp; Classes</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="logging.html">Logging System</a></li>
 <li class="toctree-l3 current"><a class="current reference internal" href="#">Decorator Functions</a></li>
 <li class="toctree-l3"><a class="reference internal" href="exceptions.html">User Defined Exceptions</a></li>
-<li class="toctree-l3"><a class="reference internal" href="logging.html">Logging System</a></li>
 <li class="toctree-l3"><a class="reference internal" href="warnings.html">User Defined Warnings</a></li>
+<li class="toctree-l3"><a class="reference internal" href="index.html#module-pcapkit.utilities.compat">Version Compatibility</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../const/index.html">Constant Enumerations</a></li>
@@ -169,7 +170,7 @@ for decorating <em>class methods</em>.</p>
   <li><a href="../../index.html">Documentation overview</a><ul>
   <li><a href="../index.html">Module Documentation</a><ul>
   <li><a href="index.html">Utility Functions &amp; Classes</a><ul>
-      <li>Previous: <a href="index.html" title="previous chapter">Utility Functions &amp; Classes</a></li>
+      <li>Previous: <a href="logging.html" title="previous chapter">Logging System</a></li>
       <li>Next: <a href="exceptions.html" title="next chapter">User Defined Exceptions</a></li>
   </ul></li>
   </ul></li>

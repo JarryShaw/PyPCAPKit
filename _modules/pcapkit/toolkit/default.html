@@ -33,7 +33,8 @@
             
   <h1>Source code for pcapkit.toolkit.default</h1><div class="highlight"><pre>
 <span></span><span class="c1"># -*- coding: utf-8 -*-</span>
-<span class="sd">&quot;&quot;&quot;default tools</span>
+<span class="sd">&quot;&quot;&quot;:mod:`PyPCAPKit &lt;pcapkit&gt;` Tools</span>
+<span class="sd">======================================</span>
 
 <span class="sd">:mod:`pcapkit.toolkit.default` contains all you need for</span>
 <span class="sd">:mod:`pcapkit` handy usage. All functions returns with a</span>
@@ -109,7 +110,7 @@
     <span class="sd">&quot;&quot;&quot;Make data for IPv6 reassembly.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        frame (pcapkit.protocols.misc.pcap.frame.Frame): PCAP frame.</span>
+<span class="sd">        frame: PCAP frame.</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        Tuple[bool, Dict[str, Any]]: A tuple of data for IPv6 reassembly.</span>
@@ -157,7 +158,7 @@
     <span class="sd">&quot;&quot;&quot;Make data for TCP reassembly.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        frame (pcapkit.protocols.misc.pcap.frame.Frame): PCAP frame.</span>
+<span class="sd">        frame: PCAP frame.</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        Tuple[bool, Dict[str, Any]]: A tuple of data for TCP reassembly.</span>
@@ -206,8 +207,6 @@
 
 <span class="sd">    Args:</span>
 <span class="sd">        frame: PCAP frame.</span>
-
-<span class="sd">    Keyword Args:</span>
 <span class="sd">        data_link: Data link layer protocol (from global header).</span>
 
 <span class="sd">    Returns:</span>

@@ -16,7 +16,7 @@
     <script src="../../_static/doctools.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="Decorator Functions" href="decorators.html" />
+    <link rel="next" title="Logging System" href="logging.html" />
     <link rel="prev" title="PCAP Dumper" href="../dumpkit/pcap.html" />
    
   <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
@@ -40,15 +40,36 @@
 and classes which are fundations of <a class="reference internal" href="../index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a>, including
 decorater function <a class="reference internal" href="decorators.html#pcapkit.utilities.decorators.seekset" title="pcapkit.utilities.decorators.seekset"><code class="xref py py-func docutils literal notranslate"><span class="pre">seekset()</span></code></a>
 and <a class="reference internal" href="decorators.html#pcapkit.utilities.decorators.beholder" title="pcapkit.utilities.decorators.beholder"><code class="xref py py-func docutils literal notranslate"><span class="pre">beholder()</span></code></a>, and
-several user-refined exceptions and validations.</p>
+several user-refined exceptions and warnings.</p>
 <div class="toctree-wrapper compound">
 <ul>
+<li class="toctree-l1"><a class="reference internal" href="logging.html">Logging System</a></li>
 <li class="toctree-l1"><a class="reference internal" href="decorators.html">Decorator Functions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="exceptions.html">User Defined Exceptions</a></li>
-<li class="toctree-l1"><a class="reference internal" href="logging.html">Logging System</a></li>
 <li class="toctree-l1"><a class="reference internal" href="warnings.html">User Defined Warnings</a></li>
 </ul>
 </div>
+<section id="module-pcapkit.utilities.compat">
+<span id="version-compatibility"></span><h2>Version Compatibility<a class="headerlink" href="#module-pcapkit.utilities.compat" title="Permalink to this heading">¶</a></h2>
+<p><a class="reference internal" href="../index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> further provides a compatibility layer for the
+following objects and functions:</p>
+<table class="docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ModuleNotFoundError" title="(in Python v3.10)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ModuleNotFoundError</span></code></a></p></td>
+<td><p>Python 3.6+</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Collection" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">collections.abc.Collection</span></code></a></p></td>
+<td><p>Python 3.6+</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#module-pathlib" title="(in Python v3.10)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pathlib</span></code></a></p></td>
+<td><p>Python 3.5+</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference external" href="https://docs.python.org/3/library/functools.html#functools.cached_property" title="(in Python v3.10)"><code class="xref py py-func docutils literal notranslate"><span class="pre">functools.cached_property()</span></code></a></p></td>
+<td><p>Python 3.8+</p></td>
+</tr>
+</tbody>
+</table>
+</section>
 </section>
 
 
@@ -84,10 +105,11 @@ several user-refined exceptions and validations.</p>
 <li class="toctree-l2"><a class="reference internal" href="../toolkit/index.html">Compatibility Tools</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../dumpkit/index.html">Dump Utilities</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Utility Functions &amp; Classes</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="logging.html">Logging System</a></li>
 <li class="toctree-l3"><a class="reference internal" href="decorators.html">Decorator Functions</a></li>
 <li class="toctree-l3"><a class="reference internal" href="exceptions.html">User Defined Exceptions</a></li>
-<li class="toctree-l3"><a class="reference internal" href="logging.html">Logging System</a></li>
 <li class="toctree-l3"><a class="reference internal" href="warnings.html">User Defined Warnings</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-pcapkit.utilities.compat">Version Compatibility</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../const/index.html">Constant Enumerations</a></li>
@@ -106,7 +128,7 @@ several user-refined exceptions and validations.</p>
   <li><a href="../../index.html">Documentation overview</a><ul>
   <li><a href="../index.html">Module Documentation</a><ul>
       <li>Previous: <a href="../dumpkit/pcap.html" title="previous chapter">PCAP Dumper</a></li>
-      <li>Next: <a href="decorators.html" title="next chapter">Decorator Functions</a></li>
+      <li>Next: <a href="logging.html" title="next chapter">Logging System</a></li>
   </ul></li>
   </ul></li>
 </ul>

@@ -33,7 +33,8 @@
             
   <h1>Source code for pcapkit.toolkit.scapy</h1><div class="highlight"><pre>
 <span></span><span class="c1"># -*- coding: utf-8 -*-</span>
-<span class="sd">&quot;&quot;&quot;Scapy tools</span>
+<span class="sd">&quot;&quot;&quot;:mod:`Scapy &lt;scapy&gt;` Tools</span>
+<span class="sd">================================</span>
 
 <span class="sd">:mod:`pcapkit.toolkit.scapy` contains all you need for</span>
 <span class="sd">:mod:`pcapkit` handy usage with `Scapy`_ engine. All reforming</span>
@@ -42,8 +43,9 @@
 
 <span class="sd">.. _Scapy: https://scapy.net</span>
 
-<span class="sd">Warns:</span>
-<span class="sd">    ScapyWarning: If `Scapy`_ is not installed.</span>
+<span class="sd">.. warning::</span>
+
+<span class="sd">   This module requires installed `Scapy`_ engine.</span>
 
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="kn">import</span> <span class="nn">ipaddress</span>
@@ -138,8 +140,6 @@
 
 <span class="sd">    Args:</span>
 <span class="sd">        packet: Scapy packet.</span>
-
-<span class="sd">    Keyword Args:</span>
 <span class="sd">        count: Packet index. If not provided, default to ``-1``.</span>
 
 <span class="sd">    Returns:</span>
@@ -186,8 +186,6 @@
 
 <span class="sd">    Args:</span>
 <span class="sd">        packet: Scapy packet.</span>
-
-<span class="sd">    Keyword Args:</span>
 <span class="sd">        count: Packet index. If not provided, default to ``-1``.</span>
 
 <span class="sd">    Returns:</span>
@@ -241,8 +239,6 @@
 
 <span class="sd">    Args:</span>
 <span class="sd">        packet: Scapy packet.</span>
-
-<span class="sd">    Keyword Args:</span>
 <span class="sd">        count: Packet index. If not provided, default to ``-1``.</span>
 
 <span class="sd">    Returns:</span>
@@ -296,8 +292,6 @@
 
 <span class="sd">    Args:</span>
 <span class="sd">        packet: Scapy packet.</span>
-
-<span class="sd">    Keyword Args:</span>
 <span class="sd">        count: Packet index. If not provided, default to ``-1``.</span>
 
 <span class="sd">    Returns:</span>

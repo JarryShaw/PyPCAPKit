@@ -34,41 +34,19 @@
 
           <div class="body" role="main">
             
-  <section id="pyshark-tools">
-<h1><a class="reference external" href="https://kiminewt.github.io/pyshark">PyShark</a> Tools<a class="headerlink" href="#pyshark-tools" title="Permalink to this heading">¶</a></h1>
+  <section id="module-pcapkit.toolkit.pyshark">
+<span id="pyshark-tools"></span><h1><code class="xref py py-mod docutils literal notranslate"><span class="pre">PyShark</span></code> Tools<a class="headerlink" href="#module-pcapkit.toolkit.pyshark" title="Permalink to this heading">¶</a></h1>
 <p><a class="reference internal" href="#module-pcapkit.toolkit.pyshark" title="pcapkit.toolkit.pyshark"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.toolkit.pyshark</span></code></a> contains all you need for
 <a class="reference internal" href="../index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> handy usage with <a class="reference external" href="https://kiminewt.github.io/pyshark">PyShark</a> engine. All
 reforming functions returns with a flag to indicate if
 usable for its caller.</p>
-<span class="target" id="module-pcapkit.toolkit.pyshark"></span><p>PyShark tools</p>
-<p><a class="reference internal" href="#module-pcapkit.toolkit.pyshark" title="pcapkit.toolkit.pyshark"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.toolkit.pyshark</span></code></a> contains all you need for
-<a class="reference internal" href="../index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> handy usage with <a class="reference external" href="https://kiminewt.github.io/pyshark">PyShark</a> engine. All
-reforming functions returns with a flag to indicate if
-usable for its caller.</p>
-<dl class="py function">
-<dt class="sig sig-object py" id="pcapkit.toolkit.pyshark.packet2dict">
-<span class="sig-prename descclassname"><span class="pre">pcapkit.toolkit.pyshark.</span></span><span class="sig-name descname"><span class="pre">packet2dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">packet</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/toolkit/pyshark.html#packet2dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.toolkit.pyshark.packet2dict" title="Permalink to this definition">¶</a></dt>
-<dd><p>Convert PyShark packet into <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dict</span></code></a>.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>packet</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Packet</span></code>) – Scapy packet.</p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>]</p>
-</dd>
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>A <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dict</span></code></a> mapping of packet data.</p>
-</dd>
-</dl>
-</dd></dl>
-
 <dl class="py function">
 <dt class="sig sig-object py" id="pcapkit.toolkit.pyshark.tcp_traceflow">
 <span class="sig-prename descclassname"><span class="pre">pcapkit.toolkit.pyshark.</span></span><span class="sig-name descname"><span class="pre">tcp_traceflow</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">packet</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/toolkit/pyshark.html#tcp_traceflow"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.toolkit.pyshark.tcp_traceflow" title="Permalink to this definition">¶</a></dt>
 <dd><p>Trace packet flow for TCP.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>packet</strong> (<em>pyshark.packet.packet.Packet</em>) – Scapy packet.</p>
+<dd class="field-odd"><p><strong>packet</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Packet</span></code>) – Scapy packet.</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p><p>A tuple of data for TCP reassembly.</p>
@@ -88,6 +66,23 @@ flow tracing (<a class="reference internal" href="../foundation/traceflow.html#t
 <p class="admonition-title">See also</p>
 <p><a class="reference internal" href="../foundation/traceflow.html#pcapkit.foundation.traceflow.TraceFlow" title="pcapkit.foundation.traceflow.TraceFlow"><code class="xref py py-class docutils literal notranslate"><span class="pre">TraceFlow</span></code></a></p>
 </div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pcapkit.toolkit.pyshark.packet2dict">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.toolkit.pyshark.</span></span><span class="sig-name descname"><span class="pre">packet2dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">packet</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/toolkit/pyshark.html#packet2dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.toolkit.pyshark.packet2dict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert PyShark packet into <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dict</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>packet</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Packet</span></code>) – Scapy packet.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>]</p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dict</span></code></a> mapping of packet data.</p>
+</dd>
+</dl>
 </dd></dl>
 
 </section>
@@ -123,10 +118,10 @@ flow tracing (<a class="reference internal" href="../foundation/traceflow.html#t
 <li class="toctree-l2"><a class="reference internal" href="../protocols/index.html">Protocol Family</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../corekit/index.html">Core Utilities</a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="index.html">Compatibility Tools</a><ul class="current">
-<li class="toctree-l3"><a class="reference internal" href="default.html">Default (PyPCAPKit) Tools</a></li>
-<li class="toctree-l3"><a class="reference internal" href="dpkt.html">DPKT Tools</a></li>
-<li class="toctree-l3 current"><a class="current reference internal" href="#">PyShark Tools</a></li>
-<li class="toctree-l3"><a class="reference internal" href="scapy.html">Scapy Tools</a></li>
+<li class="toctree-l3"><a class="reference internal" href="default.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">PyPCAPKit</span></code> Tools</a></li>
+<li class="toctree-l3"><a class="reference internal" href="dpkt.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">DPKT</span></code> Tools</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#"><code class="xref py py-mod docutils literal notranslate"><span class="pre">PyShark</span></code> Tools</a></li>
+<li class="toctree-l3"><a class="reference internal" href="scapy.html"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Scapy</span></code> Tools</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../dumpkit/index.html">Dump Utilities</a></li>
@@ -147,8 +142,8 @@ flow tracing (<a class="reference internal" href="../foundation/traceflow.html#t
   <li><a href="../../index.html">Documentation overview</a><ul>
   <li><a href="../index.html">Module Documentation</a><ul>
   <li><a href="index.html">Compatibility Tools</a><ul>
-      <li>Previous: <a href="dpkt.html" title="previous chapter">DPKT Tools</a></li>
-      <li>Next: <a href="scapy.html" title="next chapter">Scapy Tools</a></li>
+      <li>Previous: <a href="dpkt.html" title="previous chapter"><code class="xref py py-mod docutils literal notranslate"><span class="pre">DPKT</span></code> Tools</a></li>
+      <li>Next: <a href="scapy.html" title="next chapter"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Scapy</span></code> Tools</a></li>
   </ul></li>
   </ul></li>
   </ul></li>

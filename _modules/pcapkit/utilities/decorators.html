@@ -34,7 +34,8 @@
   <h1>Source code for pcapkit.utilities.decorators</h1><div class="highlight"><pre>
 <span></span><span class="c1"># -*- coding: utf-8 -*-</span>
 <span class="c1"># pylint: disable=protected-access</span>
-<span class="sd">&quot;&quot;&quot;decorator functions</span>
+<span class="sd">&quot;&quot;&quot;Decorator Functions</span>
+<span class="sd">=========================</span>
 
 <span class="sd">:mod:`pcapkit.utilities.decorators` contains several useful</span>
 <span class="sd">decorators, including :func:`~pcapkit.utilities.decorators.seekset`</span>
@@ -67,9 +68,9 @@
 <span class="sd">    Important:</span>
 <span class="sd">        This decorator function is designed for decorating *class methods*.</span>
 
-<span class="sd">    The decorator will keep the current offset of :attr:`self._file`, then</span>
-<span class="sd">    call the decorated function. Afterwards, it will rewind the  offset of</span>
-<span class="sd">    :attr:`self._file` to the original and returns the return value from</span>
+<span class="sd">    The decorator will keep the current offset of :attr:`self._file &lt;pcapkit.protocols.protocol.Protocol._file&gt;`,</span>
+<span class="sd">    then call the decorated function. Afterwards, it will rewind the  offset of</span>
+<span class="sd">    :attr:`self._file &lt;pcapkit.protocols.protocol.Protocol._file&gt;` to the original and returns the return value from</span>
 <span class="sd">    the decorated function.</span>
 
 <span class="sd">    Note:</span>
@@ -80,6 +81,7 @@
 <span class="sd">    See Also:</span>
 <span class="sd">        :meth:`pcapkit.protocols.protocol.Protocol._read_packet`</span>
 
+<span class="sd">    :param func: decorated function</span>
 <span class="sd">    :meta decorator:</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="nd">@functools</span><span class="o">.</span><span class="n">wraps</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
@@ -120,6 +122,7 @@
 <span class="sd">    See Also:</span>
 <span class="sd">        :meth:`pcapkit.protocols.protocol.Protocol._decode_next_layer`</span>
 
+<span class="sd">    :param func: decorated function</span>
 <span class="sd">    :meta decorator:</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="nd">@functools</span><span class="o">.</span><span class="n">wraps</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
