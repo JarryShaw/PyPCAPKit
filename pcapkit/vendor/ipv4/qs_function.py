@@ -1,5 +1,11 @@
 # -*- coding: utf-8 -*-
-"""IPv4 QS Functions"""
+"""QS Functions
+==================
+
+This module contains the vendor crawler for **QS Functions**,
+which is automatically generating :class:`pcapkit.const.ipv4.qs_function.QSFunction`.
+
+"""
 
 import collections
 import sys

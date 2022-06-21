@@ -1,5 +1,11 @@
 # -*- coding: utf-8 -*-
-"""IPv6 Destination Options and Hop-by-Hop Options"""
+"""Destination Options and Hop-by-Hop Options
+================================================
+
+This module contains the vendor crawler for **Destination Options and Hop-by-Hop Options**,
+which is automatically generating :class:`pcapkit.const.ipv6.option.Option`.
+
+"""
 
 import collections
 import csv

@@ -1,5 +1,11 @@
 # -*- coding: utf-8 -*-
-"""IPv4 ToS (DS Field) Precedence"""
+"""ToS (DS Field) Precedence
+===============================
+
+This module contains the vendor crawler for **ToS (DS Field) Precedence**,
+which is automatically generating :class:`pcapkit.const.ipv4.tos_pre.ToSPrecedence`.
+
+"""
 
 import collections
 import sys

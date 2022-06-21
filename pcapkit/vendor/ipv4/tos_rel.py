@@ -1,5 +1,11 @@
 # -*- coding: utf-8 -*-
-"""IPv4 ToS (DS Field) Reliability"""
+"""ToS (DS Field) Reliability
+================================
+
+This module contains the vendor crawler for **ToS (DS Field) Reliability**,
+which is automatically generating :class:`pcapkit.const.ipv4.tos_rel.ToSReliability`.
+
+"""
 
 import collections
 import sys

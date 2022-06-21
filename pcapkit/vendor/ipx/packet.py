@@ -1,6 +1,12 @@
 # -*- coding: utf-8 -*-
 # pylint: disable=wrong-import-position
-"""IPX Packet Types"""
+"""IPX Packet Types
+======================
+
+This module contains the vendor crawler for **IPX Packet Types**,
+which is automatically generating :class:`pcapkit.const.ipx.packet.Packet`.
+
+"""
 
 ###############################################################################
 # NOTE: fix duplicated name of ``socket```
@@ -11,7 +17,6 @@ path = sys.path.pop(0)
 
 import collections
 import re
-import sys
 from typing import TYPE_CHECKING
 
 import bs4

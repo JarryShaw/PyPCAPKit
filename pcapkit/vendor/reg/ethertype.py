@@ -1,5 +1,11 @@
 # -*- coding: utf-8 -*-
-"""Ethertype IEEE 802 Numbers"""
+"""Ethertype IEEE 802 Numbers
+================================
+
+This module contains the vendor crawler for **Ethertype IEEE 802 Numbers**,
+which is automatically generating :class:`pcapkit.const.reg.ethertype.EtherType`.
+
+"""
 
 import collections
 import csv
@@ -24,7 +30,7 @@ class EtherType(Vendor):
     #: Link to registry.
     LINK = 'https://www.iana.org/assignments/ieee-802-numbers/ieee-802-numbers-1.csv'
 
-    def count(self, data: 'list[str]') -> 'Counter[str]':  # pylint: disable=no-self-use
+    def count(self, data: 'list[str]') -> 'Counter[str]':
         """Count field records.
 
         Args:

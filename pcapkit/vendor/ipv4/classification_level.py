@@ -1,5 +1,11 @@
 # -*- coding: utf-8 -*-
-"""IPv4 Classification Level Encodings"""
+"""Classification Level Encodings
+====================================
+
+This module contains the vendor crawler for **Classification Level Encodings**,
+which is automatically generating :class:`pcapkit.const.ipv4.classification_level.ClassificationLevel`.
+
+"""
 
 import collections
 import sys

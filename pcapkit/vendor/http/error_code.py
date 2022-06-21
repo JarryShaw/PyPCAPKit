@@ -1,5 +1,11 @@
 # -*- coding: utf-8 -*-
-"""HTTP/2 Error Code"""
+"""HTTP/2 Error Code
+=======================
+
+This module contains the vendor crawler for **HTTP/2 Error Code**,
+which is automatically generating :class:`pcapkit.const.http.error_code.ErrorCode`.
+
+"""
 
 import csv
 import re

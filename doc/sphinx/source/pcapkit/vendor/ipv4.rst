@@ -1,5 +1,5 @@
 :class:`~pcapkit.protocols.internet.ipv4.IPv4` Vendor Crawlers
-====================================================================
+==============================================================
 
 .. module:: pcapkit.vendor.ipv4
 
@@ -36,100 +36,127 @@ crawlers include:
    :no-members:
 
 .. autoclass:: pcapkit.vendor.ipv4.classification_level.ClassificationLevel
-   :members:
-   :undoc-members:
-   :private-members:
+   :noindex:
+   :members: FLAG
    :show-inheritance:
+
+.. autodata:: pcapkit.vendor.ipv4.classification_level.DATA
+   :no-value:
 
 .. automodule:: pcapkit.vendor.ipv4.option_class
    :no-members:
 
 .. autoclass:: pcapkit.vendor.ipv4.option_class.OptionClass
-   :members:
-   :undoc-members:
-   :private-members:
+   :noindex:
+   :members: FLAG
    :show-inheritance:
+
+.. autodata:: pcapkit.vendor.ipv4.option_class.DATA
+   :no-value:
 
 .. automodule:: pcapkit.vendor.ipv4.option_number
    :no-members:
 
 .. autoclass:: pcapkit.vendor.ipv4.option_number.OptionNumber
-   :members:
-   :undoc-members:
-   :private-members:
+   :noindex:
+   :members: FLAG, LINK
    :show-inheritance:
 
 .. automodule:: pcapkit.vendor.ipv4.protection_authority
    :no-members:
 
 .. autoclass:: pcapkit.vendor.ipv4.protection_authority.ProtectionAuthority
-   :members:
-   :undoc-members:
-   :private-members:
+   :noindex:
+   :members: FLAG
    :show-inheritance:
+
+.. autodata:: pcapkit.vendor.ipv4.protection_authority.DATA
+   :no-value:
 
 .. automodule:: pcapkit.vendor.ipv4.qs_function
    :no-members:
 
 .. autoclass:: pcapkit.vendor.ipv4.qs_function.QSFunction
-   :members:
-   :undoc-members:
-   :private-members:
+   :noindex:
+   :members: FLAG
    :show-inheritance:
+
+.. autodata:: pcapkit.vendor.ipv4.qs_function.DATA
+   :no-value:
 
 .. automodule:: pcapkit.vendor.ipv4.router_alert
    :no-members:
 
 .. autoclass:: pcapkit.vendor.ipv4.router_alert.RouterAlert
-   :members:
-   :undoc-members:
-   :private-members:
+   :noindex:
+   :members: FLAG, LINK
    :show-inheritance:
 
 .. automodule:: pcapkit.vendor.ipv4.tos_del
    :no-members:
 
 .. autoclass:: pcapkit.vendor.ipv4.tos_del.ToSDelay
-   :members:
-   :undoc-members:
-   :private-members:
+   :noindex:
+   :members: FLAG
    :show-inheritance:
+
+.. autodata:: pcapkit.vendor.ipv4.tos_del.DATA
+   :no-value:
 
 .. automodule:: pcapkit.vendor.ipv4.tos_ecn
    :no-members:
 
 .. autoclass:: pcapkit.vendor.ipv4.tos_ecn.ToSECN
-   :members:
-   :undoc-members:
-   :private-members:
+   :noindex:
+   :members: FLAG
    :show-inheritance:
+
+.. autodata:: pcapkit.vendor.ipv4.tos_ecn.DATA
+   :no-value:
 
 .. automodule:: pcapkit.vendor.ipv4.tos_pre
    :no-members:
 
 .. autoclass:: pcapkit.vendor.ipv4.tos_pre.ToSPrecedence
-   :members:
-   :undoc-members:
-   :private-members:
+   :noindex:
+   :members: FLAG
    :show-inheritance:
+
+.. autodata:: pcapkit.vendor.ipv4.tos_pre.DATA
+   :no-value:
 
 .. automodule:: pcapkit.vendor.ipv4.tos_rel
    :no-members:
 
 .. autoclass:: pcapkit.vendor.ipv4.tos_rel.ToSReliability
-   :members:
-   :undoc-members:
-   :private-members:
+   :noindex:
+   :members: FLAG
    :show-inheritance:
+
+.. autodata:: pcapkit.vendor.ipv4.tos_rel.DATA
+   :no-value:
 
 .. automodule:: pcapkit.vendor.ipv4.tos_thr
    :no-members:
 
 .. autoclass:: pcapkit.vendor.ipv4.tos_thr.ToSThroughput
-   :members:
-   :undoc-members:
-   :private-members:
+   :noindex:
+   :members: FLAG
    :show-inheritance:
+
+.. autodata:: pcapkit.vendor.ipv4.tos_thr.DATA
+   :no-value:
+
+.. automodule:: pcapkit.vendor.ipv4.ts_flag
+   :no-members:
+
+.. autoclass:: pcapkit.vendor.ipv4.ts_flag.TSFlag
+   :noindex:
+   :members: FLAG
+   :show-inheritance:
+
+.. autodata:: pcapkit.vendor.ipv4.ts_flag.DATA
+   :no-value:
 
 .. raw:: html
 

@@ -1,5 +1,11 @@
 # -*- coding: utf-8 -*-
-"""IPv6 Seed-ID Types"""
+"""Seed-ID Types
+===================
+
+This module contains the vendor crawler for **Seed-ID Types**,
+which is automatically generating :class:`pcapkit.const.ipv6.seed_id.SeedID`.
+
+"""
 
 import collections
 import sys

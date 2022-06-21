@@ -1,5 +1,11 @@
 # -*- coding: utf-8 -*-
-"""IPv4 ToS (DS Field) Delay"""
+"""ToS (DS Field) Delay
+==========================
+
+This module contains the vendor crawler for **ToS (DS Field) Delay**,
+which is automatically generating :class:`pcapkit.const.ipv4.tos_del.ToSDelay`.
+
+"""
 
 import collections
 import sys

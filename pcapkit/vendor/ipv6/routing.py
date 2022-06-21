@@ -1,5 +1,11 @@
 # -*- coding: utf-8 -*-
-"""IPv6 Routing Types"""
+"""IPv6 Routing Types
+========================
+
+This module contains the vendor crawler for **IPv6 Routing Types**,
+which is automatically generating :class:`pcapkit.const.ipv6.routing.Routing`.
+
+"""
 
 import csv
 import re

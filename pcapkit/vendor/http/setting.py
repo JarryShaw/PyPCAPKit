@@ -1,5 +1,11 @@
 # -*- coding: utf-8 -*-
-"""HTTP/2 Settings"""
+"""HTTP/2 Settings
+=====================
+
+This module contains the vendor crawler for **HTTP/2 Settings**,
+which is automatically generating :class:`pcapkit.const.http.setting.Setting`.
+
+"""
 
 import csv
 import re
@@ -73,7 +79,7 @@ class Setting(Vendor):
 
                 miss.append(f'if {hexlify(start)} <= value <= {hexlify(stop)}:')
                 miss.append(f'    #: {desc}')
-                miss.append(f"    extend_enum(cls, '{self.safe_name(name)}_0x%s' % hex(value)[2:].upper().zfill(4), value)")  # pytype: disable=line-too-long
+                miss.append(f"    extend_enum(cls, '{self.safe_name(name)}_0x%s' % hex(value)[2:].upper().zfill(4), value)")  # pylint: disable=line-too-long
                 miss.append('    return cls(value)')
         return enum, miss
 

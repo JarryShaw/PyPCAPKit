@@ -1,5 +1,11 @@
 # -*- coding: utf-8 -*-
-"""IPv6 Extension Header Types"""
+"""IPv6 Extension Header Types
+=================================
+
+This module contains the vendor crawler for **IPv6 Extension Header Types**,
+which is automatically generating :class:`pcapkit.const.ipv6.extension_header.ExtensionHeader`.
+
+"""
 
 import collections
 import csv

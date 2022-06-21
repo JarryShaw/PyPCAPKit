@@ -1,5 +1,11 @@
 # -*- coding: utf-8 -*-
-"""L2TP Type"""
+"""L2TP Type
+===============
+
+This module contains the vendor crawler for **L2TP Type**,
+which is automatically generating :class:`pcapkit.const.l2tp.type.Type`.
+
+"""
 
 import collections
 import sys

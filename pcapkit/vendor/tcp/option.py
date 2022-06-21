@@ -1,5 +1,11 @@
 # -*- coding: utf-8 -*-
-"""TCP Option Kind Numbers"""
+"""TCP Option Kind Numbers
+=============================
+
+This module contains the vendor crawler for **TCP Option Kind Numbers**,
+which is automatically generating :class:`pcapkit.const.tcp.option.Option`.
+
+"""
 
 import collections
 import csv

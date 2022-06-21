@@ -1,5 +1,11 @@
 # -*- coding: utf-8 -*-
-"""Mobility Header Types - for the MH Type field in the Mobility Header"""
+"""Mobility Header Types - for the MH Type field in the Mobility Header
+==========================================================================
+
+This module contains the vendor crawler for **Mobility Header Types - for the MH Type field in the Mobility Header**,
+which is automatically generating :class:`pcapkit.const.mh.packet.Packet`.
+
+"""
 
 import csv
 import re

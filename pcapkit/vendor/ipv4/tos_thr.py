@@ -1,5 +1,11 @@
 # -*- coding: utf-8 -*-
-"""IPv4 ToS (DS Field) Throughput"""
+"""ToS (DS Field) Throughput
+===============================
+
+This module contains the vendor crawler for **ToS (DS Field) Throughput**,
+which is automatically generating :class:`pcapkit.const.ipv4.tos_thr.ToSThroughput`.
+
+"""
 
 import collections
 import sys

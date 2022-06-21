@@ -1,5 +1,11 @@
 # -*- coding: utf-8 -*-
-"""HTTP/2 Frame Type"""
+"""HTTP/2 Frame Type
+=======================
+
+This module contains the vendor crawler for **HTTP/2 Frame Type**,
+which is automatically generating :class:`pcapkit.const.http.frame.Frame`.
+
+"""
 
 import csv
 import re

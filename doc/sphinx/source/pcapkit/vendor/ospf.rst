@@ -18,18 +18,16 @@ enumerations include:
    :no-members:
 
 .. autoclass:: pcapkit.vendor.ospf.authentication.Authentication
-   :members:
-   :undoc-members:
-   :private-members:
+   :noindex:
+   :members: FLAG, LINK
    :show-inheritance:
 
 .. automodule:: pcapkit.vendor.ospf.packet
    :no-members:
 
 .. autoclass:: pcapkit.vendor.ospf.packet.Packet
-   :members:
-   :undoc-members:
-   :private-members:
+   :noindex:
+   :members: FLAG, LINK
    :show-inheritance:
 
 .. raw:: html

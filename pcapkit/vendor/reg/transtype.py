@@ -1,5 +1,11 @@
 # -*- coding: utf-8 -*-
-"""Transport Layer Protocol Numbers"""
+"""Transport Layer Protocol Numbers
+======================================
+
+This module contains the vendor crawler for **Transport Layer Protocol Numbers**,
+which is automatically generating :class:`pcapkit.const.reg.transtype.TransType`.
+
+"""
 
 import collections
 import csv
@@ -23,7 +29,7 @@ class TransType(Vendor):
     #: Link to registry.
     LINK = 'https://www.iana.org/assignments/protocol-numbers/protocol-numbers-1.csv'
 
-    def count(self, data: 'list[str]') -> 'Counter[str]':  # pylint: disable=no-self-use
+    def count(self, data: 'list[str]') -> 'Counter[str]':
         """Count field records.
 
         Args:

@@ -19,27 +19,24 @@ implementations. Available enumerations include:
    :no-members:
 
 .. autoclass:: pcapkit.vendor.reg.linktype.LinkType
-   :members:
-   :undoc-members:
-   :private-members:
+   :noindex:
+   :members: FLAG, LINK
    :show-inheritance:
 
 .. automodule:: pcapkit.vendor.reg.ethertype
    :no-members:
 
 .. autoclass:: pcapkit.vendor.reg.ethertype.EtherType
-   :members:
-   :undoc-members:
-   :private-members:
+   :noindex:
+   :members: FLAG, LINK
    :show-inheritance:
 
 .. automodule:: pcapkit.vendor.reg.transtype
    :no-members:
 
 .. autoclass:: pcapkit.vendor.reg.transtype.TransType
-   :members:
-   :undoc-members:
-   :private-members:
+   :noindex:
+   :members: FLAG, LINK
    :show-inheritance:
 
 .. raw:: html

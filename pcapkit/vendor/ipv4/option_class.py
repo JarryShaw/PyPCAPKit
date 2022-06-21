@@ -1,5 +1,11 @@
 # -*- coding: utf-8 -*-
-"""IPv4 Option Classes"""
+"""Option Classes
+====================
+
+This module contains the vendor crawler for **Option Classes**,
+which is automatically generating :class:`pcapkit.const.ipv4.option_class.OptionClass`.
+
+"""
 
 import collections
 import sys

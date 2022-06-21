@@ -1,5 +1,11 @@
 # -*- coding: utf-8 -*-
-"""Multipath TCP options [:rfc:`6824`]"""
+"""Multipath TCP options
+===========================
+
+This module contains the vendor crawler for **Multipath TCP options**,
+which is automatically generating :class:`pcapkit.const.tcp.mp_tcp_option.MPTCPOption`.
+
+"""
 
 import collections
 import sys

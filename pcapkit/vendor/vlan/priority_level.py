@@ -1,5 +1,11 @@
 # -*- coding: utf-8 -*-
-"""VLAN priority levels defined in IEEE 802.1p."""
+"""Priority levels defined in IEEE 802.1p.
+=============================================
+
+This module contains the vendor crawler for **Priority levels defined in IEEE 802.1p.**,
+which is automatically generating :class:`pcapkit.const.vlan.priority_level.PriorityLevel`.
+
+"""
 
 import collections
 import re

@@ -1,5 +1,11 @@
 # -*- coding: utf-8 -*-
-"""IPv6 Router Alert Option Values"""
+"""IPv6 Router Alert Option Values
+=====================================
+
+This module contains the vendor crawler for **IPv6 Router Alert Option Values**,
+which is automatically generating :class:`pcapkit.const.ipv6.router_alert.RouterAlert`.
+
+"""
 
 import csv
 import re

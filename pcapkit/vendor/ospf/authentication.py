@@ -1,5 +1,11 @@
 # -*- coding: utf-8 -*-
-"""OSPF Authentication Types"""
+"""Authentication Types
+==========================
+
+This module contains the vendor crawler for **Authentication Types**,
+which is automatically generating :class:`pcapkit.const.ospf.authentication.Authentication`.
+
+"""
 
 import sys
 

@@ -1,5 +1,11 @@
 # -*- coding: utf-8 -*-
-"""IPv6 Simplified Multicast Forwarding Duplicate Packet Detection (``SMF_DPD``) Options"""
+"""Simplified Multicast Forwarding Duplicate Packet Detection (``SMF_DPD``) Options
+======================================================================================
+
+This module contains the vendor crawler for **Simplified Multicast Forwarding Duplicate Packet Detection (``SMF_DPD``) Options**,
+which is automatically generating :class:`pcapkit.const.ipv6.smf_dpd_mode.SMFDPDMode`.
+
+"""
 
 import collections
 import sys

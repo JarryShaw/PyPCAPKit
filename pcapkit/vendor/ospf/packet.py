@@ -1,5 +1,11 @@
 # -*- coding: utf-8 -*-
-"""OSPF Packet Types"""
+"""OSPF Packet Types
+=======================
+
+This module contains the vendor crawler for **OSPF Packet Types**,
+which is automatically generating :class:`pcapkit.const.ospf.packet.Packet`.
+
+"""
 
 import sys
 

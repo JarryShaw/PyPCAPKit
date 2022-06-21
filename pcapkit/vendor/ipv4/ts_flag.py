@@ -1,5 +1,11 @@
 # -*- coding: utf-8 -*-
-"""IPv4 TS Flag"""
+"""TS Flag
+=============
+
+This module contains the vendor crawler for **TS Flag**,
+which is automatically generating :class:`pcapkit.const.ipv4.ts_flag.TSFlag`.
+
+"""
 
 import collections
 import sys

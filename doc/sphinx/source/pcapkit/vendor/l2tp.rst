@@ -16,7 +16,9 @@ enumerations include:
    :no-members:
 
 .. autoclass:: pcapkit.vendor.l2tp.type.Type
-   :members:
-   :undoc-members:
-   :private-members:
+   :noindex:
+   :members: FLAG
    :show-inheritance:
+
+.. autodata:: pcapkit.vendor.l2tp.type.DATA
+   :no-value:

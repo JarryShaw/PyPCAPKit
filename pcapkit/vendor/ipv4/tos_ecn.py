@@ -1,5 +1,11 @@
 # -*- coding: utf-8 -*-
-"""IPv4 ToS ECN Field"""
+"""ToS ECN Field
+===================
+
+This module contains the vendor crawler for **ToS ECN Field**,
+which is automatically generating :class:`pcapkit.const.ipv4.tos_ecn.ToSECN`.
+
+"""
 
 import collections
 import sys

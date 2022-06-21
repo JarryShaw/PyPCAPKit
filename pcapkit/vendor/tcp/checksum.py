@@ -1,5 +1,11 @@
 # -*- coding: utf-8 -*-
-"""TCP Checksum [:rfc:`1146`]"""
+"""TCP Checksum
+==================
+
+This module contains the vendor crawler for **TCP Checksum**,
+which is automatically generating :class:`pcapkit.const.tcp.checksum.Checksum`.
+
+"""
 
 import collections
 import sys

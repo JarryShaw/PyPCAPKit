@@ -1,5 +1,11 @@
 # -*- coding: utf-8 -*-
-"""IPv6 TaggerID Types"""
+"""TaggerID Types
+====================
+
+This module contains the vendor crawler for **TaggerID Types**,
+which is automatically generating :class:`pcapkit.const.ipv6.tagger_id.TaggerID`.
+
+"""
 
 import csv
 import re

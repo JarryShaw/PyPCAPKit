@@ -1,5 +1,5 @@
 :class:`~pcapkit.protocols.link.vlan.VLAN` Vendor Crawlers
-================================================================
+==========================================================
 
 .. module:: pcapkit.const.vlan
 
@@ -16,9 +16,8 @@ enumerations include:
    :no-members:
 
 .. autoclass:: pcapkit.const.vlan.priority_level.PriorityLevel
-   :members:
-   :undoc-members:
-   :private-members:
+   :noindex:
+   :members: FLAG, LINK
    :show-inheritance:
 
 .. raw:: html

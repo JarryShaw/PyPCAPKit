@@ -1,5 +1,11 @@
 # -*- coding: utf-8 -*-
-"""IPv4 Protection Authority Bit Assignments"""
+"""Protection Authority Bit Assignments
+==========================================
+
+This module contains the vendor crawler for **Protection Authority Bit Assignments**,
+which is automatically generating :class:`pcapkit.const.ipv4.protection_authority.ProtectionAuthority`.
+
+"""
 
 import collections
 import sys

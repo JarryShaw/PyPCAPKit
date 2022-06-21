@@ -1,6 +1,23 @@
 # -*- coding: utf-8 -*-
 # pylint: disable=unused-import, wrong-import-position
-"""IPX vendor crawler for constant enumerations."""
+""":class:`~pcapkit.protocols.internet.ipx.IPX` Vendor Crawlers
+==================================================================
+
+This module contains all vendor crawlers of
+:class:`~pcapkit.protocols.internet.ipx.IPX` implementations. Available
+crawlers include:
+
+.. list-table::
+
+   * - :class:`IPX_Packet <pcapkit.vendor.ipx.packet.Packet>`
+     - IPX Packet Types [*]_
+   * - :class:`IPX_Socket <pcapkit.vendor.ipx.socket.Socket>`
+     - IPX Socket Types [*]_
+
+.. [*] https://en.wikipedia.org/wiki/Internetwork_Packet_Exchange#IPX_packet_structure
+.. [*] https://en.wikipedia.org/wiki/Internetwork_Packet_Exchange#Socket_number
+
+"""
 
 ###############################################################################
 import sys

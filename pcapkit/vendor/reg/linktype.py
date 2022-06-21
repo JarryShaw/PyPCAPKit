@@ -1,5 +1,11 @@
 # -*- coding: utf-8 -*-
-"""Link-Layer Header Type Values"""
+"""Link-Layer Header Type Values
+===================================
+
+This module contains the vendor crawler for **Link-Layer Header Type Values**,
+which is automatically generating :class:`pcapkit.const.reg.linktype.LinkType`.
+
+"""
 
 import collections
 import re
