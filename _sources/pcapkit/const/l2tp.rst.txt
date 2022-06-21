@@ -1,7 +1,7 @@
 :class:`~pcapkit.protocols.link.l2tp.L2TP` Constant Enumerations
 ================================================================
 
-.. module:: pcapkit.const.ipx
+.. module:: pcapkit.const.l2tp
 
 This module contains all constant enumerations of
 :class:`~pcapkit.protocols.link.l2tp.L2TP` implementations. Available
