@@ -30,72 +30,73 @@ crawlers include:
    :no-members:
 
 .. autoclass:: pcapkit.vendor.ipv6.extension_header.ExtensionHeader
-   :members:
-   :undoc-members:
-   :private-members:
+   :noindex:
+   :members: LINK
    :show-inheritance:
 
 .. automodule:: pcapkit.vendor.ipv6.option
    :no-members:
 
 .. autoclass:: pcapkit.vendor.ipv6.option.Option
-   :members:
-   :undoc-members:
-   :private-members:
+   :noindex:
+   :members: FLAG, LINK
    :show-inheritance:
 
 .. automodule:: pcapkit.vendor.ipv6.qs_function
    :no-members:
 
 .. autoclass:: pcapkit.vendor.ipv6.qs_function.QSFunction
-   :members:
-   :undoc-members:
-   :private-members:
+   :noindex:
+   :members: FLAG
    :show-inheritance:
+
+.. autodata:: pcapkit.vendor.ipv6.qs_function.DATA
+   :no-value:
 
 .. automodule:: pcapkit.vendor.ipv6.router_alert
    :no-members:
 
 .. autoclass:: pcapkit.vendor.ipv6.router_alert.RouterAlert
-   :members:
-   :undoc-members:
-   :private-members:
+   :noindex:
+   :members: FLAG, LINK
    :show-inheritance:
 
 .. automodule:: pcapkit.vendor.ipv6.routing
    :no-members:
 
 .. autoclass:: pcapkit.vendor.ipv6.routing.Routing
-   :members:
-   :undoc-members:
-   :private-members:
+   :noindex:
+   :members: FLAG, LINK
    :show-inheritance:
 
 .. automodule:: pcapkit.vendor.ipv6.seed_id
    :no-members:
 
 .. autoclass:: pcapkit.vendor.ipv6.seed_id.SeedID
-   :members:
-   :undoc-members:
-   :private-members:
+   :noindex:
+   :members: FLAG
    :show-inheritance:
+
+.. autodata:: pcapkit.vendor.ipv6.seed_id.DATA
+   :no-value:
 
 .. automodule:: pcapkit.vendor.ipv6.smf_dpd_mode
    :no-members:
 
 .. autoclass:: pcapkit.vendor.ipv6.smf_dpd_mode.SMFDPDMode
-   :members:
-   :undoc-members:
-   :private-members:
+   :noindex:
+   :members: FLAG
    :show-inheritance:
+
+.. autodata:: pcapkit.vendor.ipv6.smf_dpd_mode.DATA
+   :no-value:
 
 .. automodule:: pcapkit.vendor.ipv6.tagger_id
    :no-members:
 
 .. autoclass:: pcapkit.vendor.ipv6.tagger_id.TaggerID
-   :members:
-   :undoc-members:
-   :private-members:
+   :noindex:
+   :members: FLAG, LINK
    :show-inheritance:
 
 .. raw:: html

@@ -16,9 +16,8 @@ enumerations include:
    :no-members:
 
 .. autoclass:: pcapkit.vendor.mh.packet.Packet
-   :members:
-   :undoc-members:
-   :private-members:
+   :noindex:
+   :members: FLAG, LINK
    :show-inheritance:
 
 .. raw:: html

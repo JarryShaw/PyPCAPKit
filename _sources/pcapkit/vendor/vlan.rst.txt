@@ -1,7 +1,7 @@
 :class:`~pcapkit.protocols.link.vlan.VLAN` Vendor Crawlers
-================================================================
+==========================================================
 
-.. module:: pcapkit.const.vlan
+.. module:: pcapkit.vendor.vlan
 
 This module contains all vendor crawlers of
 :class:`~pcapkit.protocols.link.vlan.VLAN` implementations. Available
@@ -9,16 +9,15 @@ enumerations include:
 
 .. list-table::
 
-   * - :const:`VLAN_PriorityLevel <pcapkit.const.vlan.priority_level.PriorityLevel>`
+   * - :const:`VLAN_PriorityLevel <pcapkit.vendor.vlan.priority_level.PriorityLevel>`
      - Priority Levels [*]_
 
-.. automodule:: pcapkit.const.vlan.priority_level
+.. automodule:: pcapkit.vendor.vlan.priority_level
    :no-members:
 
-.. autoclass:: pcapkit.const.vlan.priority_level.PriorityLevel
-   :members:
-   :undoc-members:
-   :private-members:
+.. autoclass:: pcapkit.vendor.vlan.priority_level.PriorityLevel
+   :noindex:
+   :members: FLAG, LINK
    :show-inheritance:
 
 .. raw:: html

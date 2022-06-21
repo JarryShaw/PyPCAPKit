@@ -20,27 +20,30 @@ enumerations include:
    :no-members:
 
 .. autoclass:: pcapkit.vendor.tcp.checksum.Checksum
-   :members:
-   :undoc-members:
-   :private-members:
+   :noindex:
+   :members: FLAG
    :show-inheritance:
+
+.. autodata:: pcapkit.vendor.tcp.checksum.DATA
+   :no-value:
 
 .. automodule:: pcapkit.vendor.tcp.mp_tcp_option
    :no-members:
 
 .. autoclass:: pcapkit.vendor.tcp.mp_tcp_option.MPTCPOption
-   :members:
-   :undoc-members:
-   :private-members:
+   :noindex:
+   :members: FLAG
    :show-inheritance:
+
+.. autodata:: pcapkit.vendor.tcp.mp_tcp_option.DATA
+   :no-value:
 
 .. automodule:: pcapkit.vendor.tcp.option
    :no-members:
 
 .. autoclass:: pcapkit.vendor.tcp.option.Option
-   :members:
-   :undoc-members:
-   :private-members:
+   :noindex:
+   :members: FLAG, LINK
    :show-inheritance:
 
 .. raw:: html

@@ -40,21 +40,25 @@
 implementations. Available enumerations include:</p>
 <table class="docutils align-default">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="#pcapkit.vendor.reg.linktype.LinkType" title="pcapkit.vendor.reg.linktype.LinkType"><code class="xref py py-class docutils literal notranslate"><span class="pre">LINKTYPE</span></code></a></p></td>
+<tr class="row-odd"><td><p><code class="xref py py-class docutils literal notranslate"><span class="pre">LINKTYPE</span></code></p></td>
 <td><p>Link-Layer Header Type Values <a class="footnote-reference brackets" href="#id4" id="id1" role="doc-noteref"><span class="fn-bracket">[</span>*<span class="fn-bracket">]</span></a></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#pcapkit.vendor.reg.ethertype.EtherType" title="pcapkit.vendor.reg.ethertype.EtherType"><code class="xref py py-class docutils literal notranslate"><span class="pre">ETHERTYPE</span></code></a></p></td>
+<tr class="row-even"><td><p><code class="xref py py-class docutils literal notranslate"><span class="pre">ETHERTYPE</span></code></p></td>
 <td><p>Ethertype IEEE 802 Numbers <a class="footnote-reference brackets" href="#id5" id="id2" role="doc-noteref"><span class="fn-bracket">[</span>†<span class="fn-bracket">]</span></a></p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#pcapkit.vendor.reg.transtype.TransType" title="pcapkit.vendor.reg.transtype.TransType"><code class="xref py py-class docutils literal notranslate"><span class="pre">TRANSTYPE</span></code></a></p></td>
+<tr class="row-odd"><td><p><code class="xref py py-class docutils literal notranslate"><span class="pre">TRANSTYPE</span></code></p></td>
 <td><p>Transport Layer Protocol Numbers <a class="footnote-reference brackets" href="#id6" id="id3" role="doc-noteref"><span class="fn-bracket">[</span>‡<span class="fn-bracket">]</span></a></p></td>
 </tr>
 </tbody>
 </table>
-<span class="target" id="module-pcapkit.vendor.reg.linktype"></span><p>Link-Layer Header Type Values</p>
+<span class="target" id="module-pcapkit.vendor.reg.linktype"></span><section id="link-layer-header-type-values">
+<h2>Link-Layer Header Type Values<a class="headerlink" href="#link-layer-header-type-values" title="Permalink to this heading">¶</a></h2>
+<p>This module contains the vendor crawler for <strong>Link-Layer Header Type Values</strong>,
+which is automatically generating <a class="reference internal" href="../const/reg.html#pcapkit.const.reg.linktype.LinkType" title="pcapkit.const.reg.linktype.LinkType"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.const.reg.linktype.LinkType</span></code></a>.</p>
+</section>
 <dl class="py class">
-<dt class="sig sig-object py" id="pcapkit.vendor.reg.linktype.LinkType">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.vendor.reg.linktype.</span></span><span class="sig-name descname"><span class="pre">LinkType</span></span><a class="reference internal" href="../../_modules/pcapkit/vendor/reg/linktype.html#LinkType"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.vendor.reg.linktype.LinkType" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.vendor.reg.linktype.</span></span><span class="sig-name descname"><span class="pre">LinkType</span></span><a class="reference internal" href="../../_modules/pcapkit/vendor/reg/linktype.html#LinkType"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
 <dd><p>Bases: <a class="reference internal" href="default.html#pcapkit.vendor.default.Vendor" title="pcapkit.vendor.default.Vendor"><code class="xref py py-class docutils literal notranslate"><span class="pre">Vendor</span></code></a></p>
 <p>Link-Layer Header Type Values</p>
 <dl class="field-list simple">
@@ -63,71 +67,27 @@ implementations. Available enumerations include:</p>
 </dd>
 </dl>
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.vendor.reg.linktype.LinkType.FLAG">
-<span class="sig-name descname"><span class="pre">FLAG</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'isinstance(value,</span> <span class="pre">int)</span> <span class="pre">and</span> <span class="pre">0x00000000</span> <span class="pre">&lt;=</span> <span class="pre">value</span> <span class="pre">&lt;=</span> <span class="pre">0xFFFFFFFF'</span></em><a class="headerlink" href="#pcapkit.vendor.reg.linktype.LinkType.FLAG" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">FLAG</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'isinstance(value,</span> <span class="pre">int)</span> <span class="pre">and</span> <span class="pre">0x00000000</span> <span class="pre">&lt;=</span> <span class="pre">value</span> <span class="pre">&lt;=</span> <span class="pre">0xFFFFFFFF'</span></em></dt>
 <dd><p>Value limit checker.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.vendor.reg.linktype.LinkType.LINK">
-<span class="sig-name descname"><span class="pre">LINK</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'http://www.tcpdump.org/linktypes.html'</span></em><a class="headerlink" href="#pcapkit.vendor.reg.linktype.LinkType.LINK" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">LINK</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'http://www.tcpdump.org/linktypes.html'</span></em></dt>
 <dd><p>Link to registry.</p>
 </dd></dl>
 
-<dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.vendor.reg.linktype.LinkType.count">
-<span class="sig-name descname"><span class="pre">count</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/vendor/reg/linktype.html#LinkType.count"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.vendor.reg.linktype.LinkType.count" title="Permalink to this definition">¶</a></dt>
-<dd><p>Count field records.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/collections.html#collections.Counter" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Counter</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>]</p>
-</dd>
-<dt class="field-even">Parameters<span class="colon">:</span></dt>
-<dd class="field-even"><p><strong>data</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.10)"><em>list</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em>]</em>) – </p>
-</dd>
-</dl>
 </dd></dl>
 
-<dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.vendor.reg.linktype.LinkType.request">
-<span class="sig-name descname"><span class="pre">request</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/vendor/reg/linktype.html#LinkType.request"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.vendor.reg.linktype.LinkType.request" title="Permalink to this definition">¶</a></dt>
-<dd><p>Fetch registry table.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>text</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>) – Context from <a class="reference internal" href="#pcapkit.vendor.reg.linktype.LinkType.LINK" title="pcapkit.vendor.reg.linktype.LinkType.LINK"><code class="xref py py-attr docutils literal notranslate"><span class="pre">LINK</span></code></a>.</p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code></a>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Tag</span></code>]</p>
-</dd>
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Rows (<code class="docutils literal notranslate"><span class="pre">tr</span></code>) from registry table (<code class="docutils literal notranslate"><span class="pre">table</span></code>).</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.vendor.reg.linktype.LinkType.process">
-<span class="sig-name descname"><span class="pre">process</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/vendor/reg/linktype.html#LinkType.process"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.vendor.reg.linktype.LinkType.process" title="Permalink to this definition">¶</a></dt>
-<dd><p>Process registry data.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>data</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code></a>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Tag</span></code>]) – Registry data.</p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>], <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>]]</p>
-</dd>
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Enumeration fields and missing fields.</p>
-</dd>
-</dl>
-</dd></dl>
-
-</dd></dl>
-
-<span class="target" id="module-pcapkit.vendor.reg.ethertype"></span><p>Ethertype IEEE 802 Numbers</p>
+<span class="target" id="module-pcapkit.vendor.reg.ethertype"></span><section id="ethertype-ieee-802-numbers">
+<h2>Ethertype IEEE 802 Numbers<a class="headerlink" href="#ethertype-ieee-802-numbers" title="Permalink to this heading">¶</a></h2>
+<p>This module contains the vendor crawler for <strong>Ethertype IEEE 802 Numbers</strong>,
+which is automatically generating <a class="reference internal" href="../const/reg.html#pcapkit.const.reg.ethertype.EtherType" title="pcapkit.const.reg.ethertype.EtherType"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.const.reg.ethertype.EtherType</span></code></a>.</p>
+</section>
 <dl class="py class">
-<dt class="sig sig-object py" id="pcapkit.vendor.reg.ethertype.EtherType">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.vendor.reg.ethertype.</span></span><span class="sig-name descname"><span class="pre">EtherType</span></span><a class="reference internal" href="../../_modules/pcapkit/vendor/reg/ethertype.html#EtherType"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.vendor.reg.ethertype.EtherType" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.vendor.reg.ethertype.</span></span><span class="sig-name descname"><span class="pre">EtherType</span></span><a class="reference internal" href="../../_modules/pcapkit/vendor/reg/ethertype.html#EtherType"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
 <dd><p>Bases: <a class="reference internal" href="default.html#pcapkit.vendor.default.Vendor" title="pcapkit.vendor.default.Vendor"><code class="xref py py-class docutils literal notranslate"><span class="pre">Vendor</span></code></a></p>
 <p>Ethertype IEEE 802 Numbers</p>
 <dl class="field-list simple">
@@ -136,81 +96,27 @@ implementations. Available enumerations include:</p>
 </dd>
 </dl>
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.vendor.reg.ethertype.EtherType.FLAG">
-<span class="sig-name descname"><span class="pre">FLAG</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'isinstance(value,</span> <span class="pre">int)</span> <span class="pre">and</span> <span class="pre">0x0000</span> <span class="pre">&lt;=</span> <span class="pre">value</span> <span class="pre">&lt;=</span> <span class="pre">0xFFFF'</span></em><a class="headerlink" href="#pcapkit.vendor.reg.ethertype.EtherType.FLAG" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">FLAG</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'isinstance(value,</span> <span class="pre">int)</span> <span class="pre">and</span> <span class="pre">0x0000</span> <span class="pre">&lt;=</span> <span class="pre">value</span> <span class="pre">&lt;=</span> <span class="pre">0xFFFF'</span></em></dt>
 <dd><p>Value limit checker.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.vendor.reg.ethertype.EtherType.LINK">
-<span class="sig-name descname"><span class="pre">LINK</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'https://www.iana.org/assignments/ieee-802-numbers/ieee-802-numbers-1.csv'</span></em><a class="headerlink" href="#pcapkit.vendor.reg.ethertype.EtherType.LINK" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">LINK</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'https://www.iana.org/assignments/ieee-802-numbers/ieee-802-numbers-1.csv'</span></em></dt>
 <dd><p>Link to registry.</p>
 </dd></dl>
 
-<dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.vendor.reg.ethertype.EtherType.count">
-<span class="sig-name descname"><span class="pre">count</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/vendor/reg/ethertype.html#EtherType.count"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.vendor.reg.ethertype.EtherType.count" title="Permalink to this definition">¶</a></dt>
-<dd><p>Count field records.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>data</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>]) – CSV data.</p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/collections.html#collections.Counter" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Counter</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>]</p>
-</dd>
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Field recordings.</p>
-</dd>
-</dl>
 </dd></dl>
 
-<dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.vendor.reg.ethertype.EtherType.rename">
-<span class="sig-name descname"><span class="pre">rename</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">code</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">original</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/vendor/reg/ethertype.html#EtherType.rename"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.vendor.reg.ethertype.EtherType.rename" title="Permalink to this definition">¶</a></dt>
-<dd><p>Rename duplicated fields.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>) – Field name.</p></li>
-<li><p><strong>code</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>) – Field code.</p></li>
-<li><p><strong>original</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.10)"><em>Optional</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em>]</em>) – </p></li>
-</ul>
-</dd>
-<dt class="field-even">Keyword Arguments<span class="colon">:</span></dt>
-<dd class="field-even"><p><strong>original</strong> – Original field name (extracted from CSV records).</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></p>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>Revised field name.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.vendor.reg.ethertype.EtherType.process">
-<span class="sig-name descname"><span class="pre">process</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/vendor/reg/ethertype.html#EtherType.process"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.vendor.reg.ethertype.EtherType.process" title="Permalink to this definition">¶</a></dt>
-<dd><p>Process CSV data.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>data</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>]) – CSV data.</p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>], <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>]]</p>
-</dd>
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Enumeration fields and missing fields.</p>
-</dd>
-</dl>
-</dd></dl>
-
-</dd></dl>
-
-<span class="target" id="module-pcapkit.vendor.reg.transtype"></span><p>Transport Layer Protocol Numbers</p>
+<span class="target" id="module-pcapkit.vendor.reg.transtype"></span><section id="transport-layer-protocol-numbers">
+<h2>Transport Layer Protocol Numbers<a class="headerlink" href="#transport-layer-protocol-numbers" title="Permalink to this heading">¶</a></h2>
+<p>This module contains the vendor crawler for <strong>Transport Layer Protocol Numbers</strong>,
+which is automatically generating <a class="reference internal" href="../const/reg.html#pcapkit.const.reg.transtype.TransType" title="pcapkit.const.reg.transtype.TransType"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.const.reg.transtype.TransType</span></code></a>.</p>
+</section>
 <dl class="py class">
-<dt class="sig sig-object py" id="pcapkit.vendor.reg.transtype.TransType">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.vendor.reg.transtype.</span></span><span class="sig-name descname"><span class="pre">TransType</span></span><a class="reference internal" href="../../_modules/pcapkit/vendor/reg/transtype.html#TransType"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.vendor.reg.transtype.TransType" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.vendor.reg.transtype.</span></span><span class="sig-name descname"><span class="pre">TransType</span></span><a class="reference internal" href="../../_modules/pcapkit/vendor/reg/transtype.html#TransType"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
 <dd><p>Bases: <a class="reference internal" href="default.html#pcapkit.vendor.default.Vendor" title="pcapkit.vendor.default.Vendor"><code class="xref py py-class docutils literal notranslate"><span class="pre">Vendor</span></code></a></p>
 <p>Transport Layer Protocol Numbers</p>
 <dl class="field-list simple">
@@ -219,49 +125,15 @@ implementations. Available enumerations include:</p>
 </dd>
 </dl>
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.vendor.reg.transtype.TransType.FLAG">
-<span class="sig-name descname"><span class="pre">FLAG</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'isinstance(value,</span> <span class="pre">int)</span> <span class="pre">and</span> <span class="pre">0</span> <span class="pre">&lt;=</span> <span class="pre">value</span> <span class="pre">&lt;=</span> <span class="pre">255'</span></em><a class="headerlink" href="#pcapkit.vendor.reg.transtype.TransType.FLAG" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">FLAG</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'isinstance(value,</span> <span class="pre">int)</span> <span class="pre">and</span> <span class="pre">0</span> <span class="pre">&lt;=</span> <span class="pre">value</span> <span class="pre">&lt;=</span> <span class="pre">255'</span></em></dt>
 <dd><p>Value limit checker.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.vendor.reg.transtype.TransType.LINK">
-<span class="sig-name descname"><span class="pre">LINK</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'https://www.iana.org/assignments/protocol-numbers/protocol-numbers-1.csv'</span></em><a class="headerlink" href="#pcapkit.vendor.reg.transtype.TransType.LINK" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">LINK</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'https://www.iana.org/assignments/protocol-numbers/protocol-numbers-1.csv'</span></em></dt>
 <dd><p>Link to registry.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.vendor.reg.transtype.TransType.count">
-<span class="sig-name descname"><span class="pre">count</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/vendor/reg/transtype.html#TransType.count"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.vendor.reg.transtype.TransType.count" title="Permalink to this definition">¶</a></dt>
-<dd><p>Count field records.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>data</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>]) – CSV data.</p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/collections.html#collections.Counter" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Counter</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>]</p>
-</dd>
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Field recordings.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.vendor.reg.transtype.TransType.process">
-<span class="sig-name descname"><span class="pre">process</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/vendor/reg/transtype.html#TransType.process"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.vendor.reg.transtype.TransType.process" title="Permalink to this definition">¶</a></dt>
-<dd><p>Process CSV data.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>data</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>]) – CSV data.</p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>], <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>]]</p>
-</dd>
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Enumeration fields and missing fields.</p>
-</dd>
-</dl>
 </dd></dl>
 
 </dd></dl>

@@ -41,155 +41,83 @@
 enumerations include:</p>
 <table class="docutils align-default">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="#pcapkit.vendor.tcp.checksum.Checksum" title="pcapkit.vendor.tcp.checksum.Checksum"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP_Checksum</span></code></a></p></td>
+<tr class="row-odd"><td><p><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP_Checksum</span></code></p></td>
 <td><p>TCP Checksum <a class="footnote-reference brackets" href="#id3" id="id1" role="doc-noteref"><span class="fn-bracket">[</span>*<span class="fn-bracket">]</span></a></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#pcapkit.vendor.tcp.mp_tcp_option.MPTCPOption" title="pcapkit.vendor.tcp.mp_tcp_option.MPTCPOption"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP_MPTCPOption</span></code></a></p></td>
+<tr class="row-even"><td><p><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP_MPTCPOption</span></code></p></td>
 <td><p>Multipath TCP options <a class="footnote-reference brackets" href="#id4" id="id2" role="doc-noteref"><span class="fn-bracket">[</span>†<span class="fn-bracket">]</span></a></p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#pcapkit.vendor.tcp.option.Option" title="pcapkit.vendor.tcp.option.Option"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP_Option</span></code></a></p></td>
+<tr class="row-odd"><td><p><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP_Option</span></code></p></td>
 <td><p>TCP Option Kind Numbers</p></td>
 </tr>
 </tbody>
 </table>
-<span class="target" id="module-pcapkit.vendor.tcp.checksum"></span><p>TCP Checksum [<span class="target" id="index-0"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1146.html"><strong>RFC 1146</strong></a>]</p>
+<span class="target" id="module-pcapkit.vendor.tcp.checksum"></span><section id="tcp-checksum">
+<h2>TCP Checksum<a class="headerlink" href="#tcp-checksum" title="Permalink to this heading">¶</a></h2>
+<p>This module contains the vendor crawler for <strong>TCP Checksum</strong>,
+which is automatically generating <a class="reference internal" href="../const/tcp.html#pcapkit.const.tcp.checksum.Checksum" title="pcapkit.const.tcp.checksum.Checksum"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.const.tcp.checksum.Checksum</span></code></a>.</p>
+</section>
 <dl class="py class">
-<dt class="sig sig-object py" id="pcapkit.vendor.tcp.checksum.Checksum">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.vendor.tcp.checksum.</span></span><span class="sig-name descname"><span class="pre">Checksum</span></span><a class="reference internal" href="../../_modules/pcapkit/vendor/tcp/checksum.html#Checksum"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.vendor.tcp.checksum.Checksum" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.vendor.tcp.checksum.</span></span><span class="sig-name descname"><span class="pre">Checksum</span></span><a class="reference internal" href="../../_modules/pcapkit/vendor/tcp/checksum.html#Checksum"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
 <dd><p>Bases: <a class="reference internal" href="default.html#pcapkit.vendor.default.Vendor" title="pcapkit.vendor.default.Vendor"><code class="xref py py-class docutils literal notranslate"><span class="pre">Vendor</span></code></a></p>
-<p>TCP Checksum [<span class="target" id="index-1"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1146.html"><strong>RFC 1146</strong></a>]</p>
+<p>TCP Checksum [<span class="target" id="index-0"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1146.html"><strong>RFC 1146</strong></a>]</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference internal" href="default.html#pcapkit.vendor.default.Vendor" title="pcapkit.vendor.default.Vendor">Vendor</a></p>
 </dd>
 </dl>
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.vendor.tcp.checksum.Checksum.FLAG">
-<span class="sig-name descname"><span class="pre">FLAG</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'isinstance(value,</span> <span class="pre">int)</span> <span class="pre">and</span> <span class="pre">0</span> <span class="pre">&lt;=</span> <span class="pre">value</span> <span class="pre">&lt;=</span> <span class="pre">255'</span></em><a class="headerlink" href="#pcapkit.vendor.tcp.checksum.Checksum.FLAG" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">FLAG</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'isinstance(value,</span> <span class="pre">int)</span> <span class="pre">and</span> <span class="pre">0</span> <span class="pre">&lt;=</span> <span class="pre">value</span> <span class="pre">&lt;=</span> <span class="pre">255'</span></em></dt>
 <dd><p>Value limit checker.</p>
 </dd></dl>
 
-<dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.vendor.tcp.checksum.Checksum.request">
-<span class="sig-name descname"><span class="pre">request</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/vendor/tcp/checksum.html#Checksum.request"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.vendor.tcp.checksum.Checksum.request" title="Permalink to this definition">¶</a></dt>
-<dd><p>Fetch registry data.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>]</p>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>TCP checksum options, i.e. <code class="xref py py-data docutils literal notranslate"><span class="pre">DATA</span></code>.</p>
-</dd>
-</dl>
 </dd></dl>
 
-<dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.vendor.tcp.checksum.Checksum.count">
-<span class="sig-name descname"><span class="pre">count</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/vendor/tcp/checksum.html#Checksum.count"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.vendor.tcp.checksum.Checksum.count" title="Permalink to this definition">¶</a></dt>
-<dd><p>Count field records.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>data</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>]) – Registry data.</p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/collections.html#collections.Counter" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Counter</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>]</p>
-</dd>
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Field recordings.</p>
-</dd>
-</dl>
+<dl class="py data">
+<dt class="sig sig-object py" id="pcapkit.vendor.tcp.checksum.DATA">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.vendor.tcp.checksum.</span></span><span class="sig-name descname"><span class="pre">DATA</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pcapkit.vendor.tcp.checksum.DATA" title="Permalink to this definition">¶</a></dt>
+<dd><p>TCP checksum options.</p>
 </dd></dl>
 
-<dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.vendor.tcp.checksum.Checksum.process">
-<span class="sig-name descname"><span class="pre">process</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/vendor/tcp/checksum.html#Checksum.process"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.vendor.tcp.checksum.Checksum.process" title="Permalink to this definition">¶</a></dt>
-<dd><p>Process CSV data.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>data</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>]) – Registry data.</p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>], <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>]]</p>
-</dd>
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Enumeration fields and missing fields.</p>
-</dd>
-</dl>
-</dd></dl>
-
-</dd></dl>
-
-<span class="target" id="module-pcapkit.vendor.tcp.mp_tcp_option"></span><p>Multipath TCP options [<span class="target" id="index-2"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6824.html"><strong>RFC 6824</strong></a>]</p>
+<span class="target" id="module-pcapkit.vendor.tcp.mp_tcp_option"></span><section id="multipath-tcp-options">
+<h2>Multipath TCP options<a class="headerlink" href="#multipath-tcp-options" title="Permalink to this heading">¶</a></h2>
+<p>This module contains the vendor crawler for <strong>Multipath TCP options</strong>,
+which is automatically generating <a class="reference internal" href="../const/tcp.html#pcapkit.const.tcp.mp_tcp_option.MPTCPOption" title="pcapkit.const.tcp.mp_tcp_option.MPTCPOption"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.const.tcp.mp_tcp_option.MPTCPOption</span></code></a>.</p>
+</section>
 <dl class="py class">
-<dt class="sig sig-object py" id="pcapkit.vendor.tcp.mp_tcp_option.MPTCPOption">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.vendor.tcp.mp_tcp_option.</span></span><span class="sig-name descname"><span class="pre">MPTCPOption</span></span><a class="reference internal" href="../../_modules/pcapkit/vendor/tcp/mp_tcp_option.html#MPTCPOption"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.vendor.tcp.mp_tcp_option.MPTCPOption" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.vendor.tcp.mp_tcp_option.</span></span><span class="sig-name descname"><span class="pre">MPTCPOption</span></span><a class="reference internal" href="../../_modules/pcapkit/vendor/tcp/mp_tcp_option.html#MPTCPOption"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
 <dd><p>Bases: <a class="reference internal" href="default.html#pcapkit.vendor.default.Vendor" title="pcapkit.vendor.default.Vendor"><code class="xref py py-class docutils literal notranslate"><span class="pre">Vendor</span></code></a></p>
-<p>Multipath TCP options [<span class="target" id="index-3"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6824.html"><strong>RFC 6824</strong></a>]</p>
+<p>Multipath TCP options [<span class="target" id="index-1"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6824.html"><strong>RFC 6824</strong></a>]</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference internal" href="default.html#pcapkit.vendor.default.Vendor" title="pcapkit.vendor.default.Vendor">Vendor</a></p>
 </dd>
 </dl>
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.vendor.tcp.mp_tcp_option.MPTCPOption.FLAG">
-<span class="sig-name descname"><span class="pre">FLAG</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'isinstance(value,</span> <span class="pre">int)</span> <span class="pre">and</span> <span class="pre">0</span> <span class="pre">&lt;=</span> <span class="pre">value</span> <span class="pre">&lt;=</span> <span class="pre">255'</span></em><a class="headerlink" href="#pcapkit.vendor.tcp.mp_tcp_option.MPTCPOption.FLAG" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">FLAG</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'isinstance(value,</span> <span class="pre">int)</span> <span class="pre">and</span> <span class="pre">0</span> <span class="pre">&lt;=</span> <span class="pre">value</span> <span class="pre">&lt;=</span> <span class="pre">255'</span></em></dt>
 <dd><p>Value limit checker.</p>
 </dd></dl>
 
-<dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.vendor.tcp.mp_tcp_option.MPTCPOption.request">
-<span class="sig-name descname"><span class="pre">request</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/vendor/tcp/mp_tcp_option.html#MPTCPOption.request"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.vendor.tcp.mp_tcp_option.MPTCPOption.request" title="Permalink to this definition">¶</a></dt>
-<dd><p>Fetch registry data.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>]</p>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>Multipath TCP options, i.e. <code class="xref py py-data docutils literal notranslate"><span class="pre">DATA</span></code>.</p>
-</dd>
-</dl>
 </dd></dl>
 
-<dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.vendor.tcp.mp_tcp_option.MPTCPOption.count">
-<span class="sig-name descname"><span class="pre">count</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/vendor/tcp/mp_tcp_option.html#MPTCPOption.count"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.vendor.tcp.mp_tcp_option.MPTCPOption.count" title="Permalink to this definition">¶</a></dt>
-<dd><p>Count field records.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>data</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>]) – Registry data.</p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/collections.html#collections.Counter" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Counter</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>]</p>
-</dd>
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Field recordings.</p>
-</dd>
-</dl>
+<dl class="py data">
+<dt class="sig sig-object py" id="pcapkit.vendor.tcp.mp_tcp_option.DATA">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.vendor.tcp.mp_tcp_option.</span></span><span class="sig-name descname"><span class="pre">DATA</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pcapkit.vendor.tcp.mp_tcp_option.DATA" title="Permalink to this definition">¶</a></dt>
+<dd><p>Multipath TCP options.</p>
 </dd></dl>
 
-<dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.vendor.tcp.mp_tcp_option.MPTCPOption.process">
-<span class="sig-name descname"><span class="pre">process</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/vendor/tcp/mp_tcp_option.html#MPTCPOption.process"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.vendor.tcp.mp_tcp_option.MPTCPOption.process" title="Permalink to this definition">¶</a></dt>
-<dd><p>Process CSV data.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>data</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>]) – Registry data.</p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>], <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>]]</p>
-</dd>
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Enumeration fields and missing fields.</p>
-</dd>
-</dl>
-</dd></dl>
-
-</dd></dl>
-
-<span class="target" id="module-pcapkit.vendor.tcp.option"></span><p>TCP Option Kind Numbers</p>
+<span class="target" id="module-pcapkit.vendor.tcp.option"></span><section id="tcp-option-kind-numbers">
+<h2>TCP Option Kind Numbers<a class="headerlink" href="#tcp-option-kind-numbers" title="Permalink to this heading">¶</a></h2>
+<p>This module contains the vendor crawler for <strong>TCP Option Kind Numbers</strong>,
+which is automatically generating <a class="reference internal" href="../const/tcp.html#pcapkit.const.tcp.option.Option" title="pcapkit.const.tcp.option.Option"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.const.tcp.option.Option</span></code></a>.</p>
+</section>
 <dl class="py class">
-<dt class="sig sig-object py" id="pcapkit.vendor.tcp.option.Option">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.vendor.tcp.option.</span></span><span class="sig-name descname"><span class="pre">Option</span></span><a class="reference internal" href="../../_modules/pcapkit/vendor/tcp/option.html#Option"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.vendor.tcp.option.Option" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.vendor.tcp.option.</span></span><span class="sig-name descname"><span class="pre">Option</span></span><a class="reference internal" href="../../_modules/pcapkit/vendor/tcp/option.html#Option"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
 <dd><p>Bases: <a class="reference internal" href="default.html#pcapkit.vendor.default.Vendor" title="pcapkit.vendor.default.Vendor"><code class="xref py py-class docutils literal notranslate"><span class="pre">Vendor</span></code></a></p>
 <p>TCP Option Kind Numbers</p>
 <dl class="field-list simple">
@@ -198,49 +126,15 @@ enumerations include:</p>
 </dd>
 </dl>
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.vendor.tcp.option.Option.FLAG">
-<span class="sig-name descname"><span class="pre">FLAG</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'isinstance(value,</span> <span class="pre">int)</span> <span class="pre">and</span> <span class="pre">0</span> <span class="pre">&lt;=</span> <span class="pre">value</span> <span class="pre">&lt;=</span> <span class="pre">255'</span></em><a class="headerlink" href="#pcapkit.vendor.tcp.option.Option.FLAG" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">FLAG</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'isinstance(value,</span> <span class="pre">int)</span> <span class="pre">and</span> <span class="pre">0</span> <span class="pre">&lt;=</span> <span class="pre">value</span> <span class="pre">&lt;=</span> <span class="pre">255'</span></em></dt>
 <dd><p>Value limit checker.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.vendor.tcp.option.Option.LINK">
-<span class="sig-name descname"><span class="pre">LINK</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'https://www.iana.org/assignments/tcp-parameters/tcp-parameters-1.csv'</span></em><a class="headerlink" href="#pcapkit.vendor.tcp.option.Option.LINK" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">LINK</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'https://www.iana.org/assignments/tcp-parameters/tcp-parameters-1.csv'</span></em></dt>
 <dd><p>Link to registry.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.vendor.tcp.option.Option.count">
-<span class="sig-name descname"><span class="pre">count</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/vendor/tcp/option.html#Option.count"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.vendor.tcp.option.Option.count" title="Permalink to this definition">¶</a></dt>
-<dd><p>Count field records.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>data</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>]) – Registry data.</p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/collections.html#collections.Counter" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Counter</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>]</p>
-</dd>
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Field recordings.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.vendor.tcp.option.Option.process">
-<span class="sig-name descname"><span class="pre">process</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/vendor/tcp/option.html#Option.process"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.vendor.tcp.option.Option.process" title="Permalink to this definition">¶</a></dt>
-<dd><p>Process CSV data.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>data</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>]) – CSV data.</p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>], <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>]]</p>
-</dd>
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Enumeration fields and missing fields.</p>
-</dd>
-</dl>
 </dd></dl>
 
 </dd></dl>

@@ -31,6 +31,8 @@ enumerations include:
      - ToS (DS Field) Reliability
    * - :class:`IPv4_ToSThroughput <pcapkit.const.ipv4.tos_thr.TOSThroughput>`
      - ToS (DS Field) Throughput
+   * - :class:`IPv4_TSFlag <pcapkit.const.ipv4.ts_flag.TSFlag>`
+     - TS Flag
 
 .. automodule:: pcapkit.const.ipv4.classification_level
    :no-members:
@@ -136,6 +138,16 @@ enumerations include:
    :no-members:
 
 .. autoclass:: pcapkit.const.ipv4.tos_thr.ToSThroughput
+   :members:
+   :undoc-members:
+   :private-members:
+   :exclude-members: get, _missing_
+   :show-inheritance:
+
+.. automodule:: pcapkit.const.ipv4.ts_flag
+   :no-members:
+
+.. autoclass:: pcapkit.const.ipv4.ts_flag.TSFlag
    :members:
    :undoc-members:
    :private-members:

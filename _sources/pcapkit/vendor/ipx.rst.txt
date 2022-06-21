@@ -18,18 +18,16 @@ crawlers include:
    :no-members:
 
 .. autoclass:: pcapkit.vendor.ipx.packet.Packet
-   :members:
-   :undoc-members:
-   :private-members:
+   :noindex:
+   :members: FLAG, LINK
    :show-inheritance:
 
 .. automodule:: pcapkit.vendor.ipx.socket
    :no-members:
 
 .. autoclass:: pcapkit.vendor.ipx.socket.Socket
-   :members:
-   :undoc-members:
-   :private-members:
+   :noindex:
+   :members: FLAG, LINK
    :show-inheritance:
 
 .. raw:: html

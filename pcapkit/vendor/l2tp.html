@@ -34,22 +34,26 @@
 
           <div class="body" role="main">
             
-  <section id="module-pcapkit.vendor.ipx">
-<span id="l2tp-vendor-crawlers"></span><h1><a class="reference internal" href="../protocols/link/l2tp.html#pcapkit.protocols.link.l2tp.L2TP" title="pcapkit.protocols.link.l2tp.L2TP"><code class="xref py py-class docutils literal notranslate"><span class="pre">L2TP</span></code></a> Vendor Crawlers<a class="headerlink" href="#module-pcapkit.vendor.ipx" title="Permalink to this heading">¶</a></h1>
+  <section id="module-pcapkit.vendor.l2tp">
+<span id="l2tp-vendor-crawlers"></span><h1><a class="reference internal" href="../protocols/link/l2tp.html#pcapkit.protocols.link.l2tp.L2TP" title="pcapkit.protocols.link.l2tp.L2TP"><code class="xref py py-class docutils literal notranslate"><span class="pre">L2TP</span></code></a> Vendor Crawlers<a class="headerlink" href="#module-pcapkit.vendor.l2tp" title="Permalink to this heading">¶</a></h1>
 <p>This module contains all vendor crawlers of
 <a class="reference internal" href="../protocols/link/l2tp.html#pcapkit.protocols.link.l2tp.L2TP" title="pcapkit.protocols.link.l2tp.L2TP"><code class="xref py py-class docutils literal notranslate"><span class="pre">L2TP</span></code></a> implementations. Available
 enumerations include:</p>
 <table class="docutils align-default">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="#pcapkit.vendor.l2tp.type.Type" title="pcapkit.vendor.l2tp.type.Type"><code class="xref py py-class docutils literal notranslate"><span class="pre">L2TP_Type</span></code></a></p></td>
+<tr class="row-odd"><td><p><code class="xref py py-class docutils literal notranslate"><span class="pre">L2TP_Type</span></code></p></td>
 <td><p>L2TP Types</p></td>
 </tr>
 </tbody>
 </table>
-<span class="target" id="module-pcapkit.vendor.l2tp.type"></span><p>L2TP Type</p>
+<span class="target" id="module-pcapkit.vendor.l2tp.type"></span><section id="l2tp-type">
+<h2>L2TP Type<a class="headerlink" href="#l2tp-type" title="Permalink to this heading">¶</a></h2>
+<p>This module contains the vendor crawler for <strong>L2TP Type</strong>,
+which is automatically generating <a class="reference internal" href="../const/l2tp.html#pcapkit.const.l2tp.type.Type" title="pcapkit.const.l2tp.type.Type"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.const.l2tp.type.Type</span></code></a>.</p>
+</section>
 <dl class="py class">
-<dt class="sig sig-object py" id="pcapkit.vendor.l2tp.type.Type">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.vendor.l2tp.type.</span></span><span class="sig-name descname"><span class="pre">Type</span></span><a class="reference internal" href="../../_modules/pcapkit/vendor/l2tp/type.html#Type"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.vendor.l2tp.type.Type" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.vendor.l2tp.type.</span></span><span class="sig-name descname"><span class="pre">Type</span></span><a class="reference internal" href="../../_modules/pcapkit/vendor/l2tp/type.html#Type"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
 <dd><p>Bases: <a class="reference internal" href="default.html#pcapkit.vendor.default.Vendor" title="pcapkit.vendor.default.Vendor"><code class="xref py py-class docutils literal notranslate"><span class="pre">Vendor</span></code></a></p>
 <p>L2TP Type</p>
 <dl class="field-list simple">
@@ -58,59 +62,17 @@ enumerations include:</p>
 </dd>
 </dl>
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.vendor.l2tp.type.Type.FLAG">
-<span class="sig-name descname"><span class="pre">FLAG</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'isinstance(value,</span> <span class="pre">int)</span> <span class="pre">and</span> <span class="pre">0</span> <span class="pre">&lt;=</span> <span class="pre">value</span> <span class="pre">&lt;=</span> <span class="pre">1'</span></em><a class="headerlink" href="#pcapkit.vendor.l2tp.type.Type.FLAG" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">FLAG</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'isinstance(value,</span> <span class="pre">int)</span> <span class="pre">and</span> <span class="pre">0</span> <span class="pre">&lt;=</span> <span class="pre">value</span> <span class="pre">&lt;=</span> <span class="pre">1'</span></em></dt>
 <dd><p>Value limit checker.</p>
 </dd></dl>
 
-<dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.vendor.l2tp.type.Type.request">
-<span class="sig-name descname"><span class="pre">request</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/vendor/l2tp/type.html#Type.request"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.vendor.l2tp.type.Type.request" title="Permalink to this definition">¶</a></dt>
-<dd><p>Fetch registry data.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>]</p>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>TCP checksum options, i.e. <code class="xref py py-data docutils literal notranslate"><span class="pre">DATA</span></code>.</p>
-</dd>
-</dl>
 </dd></dl>
 
-<dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.vendor.l2tp.type.Type.count">
-<span class="sig-name descname"><span class="pre">count</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/vendor/l2tp/type.html#Type.count"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.vendor.l2tp.type.Type.count" title="Permalink to this definition">¶</a></dt>
-<dd><p>Count field records.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>data</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>]) – Registry data.</p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/collections.html#collections.Counter" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Counter</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>]</p>
-</dd>
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Field recordings.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.vendor.l2tp.type.Type.process">
-<span class="sig-name descname"><span class="pre">process</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/vendor/l2tp/type.html#Type.process"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.vendor.l2tp.type.Type.process" title="Permalink to this definition">¶</a></dt>
-<dd><p>Process CSV data.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>data</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>]) – Registry data.</p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>], <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>]]</p>
-</dd>
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Enumeration fields and missing fields.</p>
-</dd>
-</dl>
-</dd></dl>
-
+<dl class="py data">
+<dt class="sig sig-object py" id="pcapkit.vendor.l2tp.type.DATA">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.vendor.l2tp.type.</span></span><span class="sig-name descname"><span class="pre">DATA</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pcapkit.vendor.l2tp.type.DATA" title="Permalink to this definition">¶</a></dt>
+<dd><p>L2TP packet types.</p>
 </dd></dl>
 
 </section>

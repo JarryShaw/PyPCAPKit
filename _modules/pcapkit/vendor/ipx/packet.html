@@ -34,7 +34,13 @@
   <h1>Source code for pcapkit.vendor.ipx.packet</h1><div class="highlight"><pre>
 <span></span><span class="c1"># -*- coding: utf-8 -*-</span>
 <span class="c1"># pylint: disable=wrong-import-position</span>
-<span class="sd">&quot;&quot;&quot;IPX Packet Types&quot;&quot;&quot;</span>
+<span class="sd">&quot;&quot;&quot;IPX Packet Types</span>
+<span class="sd">======================</span>
+
+<span class="sd">This module contains the vendor crawler for **IPX Packet Types**,</span>
+<span class="sd">which is automatically generating :class:`pcapkit.const.ipx.packet.Packet`.</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
 
 <span class="c1">###############################################################################</span>
 <span class="c1"># NOTE: fix duplicated name of ``socket```</span>
@@ -71,7 +77,7 @@
     <span class="c1">#: Link to registry.</span>
     <span class="n">LINK</span> <span class="o">=</span> <span class="s1">&#39;https://en.wikipedia.org/wiki/Internetwork_Packet_Exchange#IPX_packet_structure&#39;</span>
 
-<div class="viewcode-block" id="Packet.count"><a class="viewcode-back" href="../../../../pcapkit/vendor/ipx.html#pcapkit.vendor.ipx.packet.Packet.count">[docs]</a>    <span class="k">def</span> <span class="nf">count</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">&#39;BeautifulSoup&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Counter[str]&#39;</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">count</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">&#39;BeautifulSoup&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Counter[str]&#39;</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Count field records.</span>
 
 <span class="sd">        Args:</span>
@@ -81,9 +87,9 @@
 <span class="sd">            Field recordings.</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="n">collections</span><span class="o">.</span><span class="n">Counter</span><span class="p">()</span></div>
+        <span class="k">return</span> <span class="n">collections</span><span class="o">.</span><span class="n">Counter</span><span class="p">()</span>
 
-<div class="viewcode-block" id="Packet.request"><a class="viewcode-back" href="../../../../pcapkit/vendor/ipx.html#pcapkit.vendor.ipx.packet.Packet.request">[docs]</a>    <span class="k">def</span> <span class="nf">request</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;BeautifulSoup&#39;</span><span class="p">:</span>  <span class="c1"># type: ignore[override] # pylint: disable=signature-differs</span>
+    <span class="k">def</span> <span class="nf">request</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;BeautifulSoup&#39;</span><span class="p">:</span>  <span class="c1"># type: ignore[override] # pylint: disable=signature-differs</span>
         <span class="sd">&quot;&quot;&quot;Fetch HTML source.</span>
 
 <span class="sd">        Args:</span>
@@ -93,9 +99,9 @@
 <span class="sd">            Parsed HTML source.</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="n">bs4</span><span class="o">.</span><span class="n">BeautifulSoup</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="s1">&#39;html5lib&#39;</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="n">bs4</span><span class="o">.</span><span class="n">BeautifulSoup</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="s1">&#39;html5lib&#39;</span><span class="p">)</span>
 
-<div class="viewcode-block" id="Packet.process"><a class="viewcode-back" href="../../../../pcapkit/vendor/ipx.html#pcapkit.vendor.ipx.packet.Packet.process">[docs]</a>    <span class="k">def</span> <span class="nf">process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">soup</span><span class="p">:</span> <span class="s1">&#39;BeautifulSoup&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;tuple[list[str], list[str]]&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=arguments-differ,arguments-renamed</span>
+    <span class="k">def</span> <span class="nf">process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">soup</span><span class="p">:</span> <span class="s1">&#39;BeautifulSoup&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;tuple[list[str], list[str]]&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=arguments-differ,arguments-renamed</span>
         <span class="sd">&quot;&quot;&quot;Process HTML source.</span>
 
 <span class="sd">        Args:</span>
@@ -143,7 +149,7 @@
 
             <span class="c1"># enum.append(f&#39;{pres.ljust(76)}{sufs}&#39;)</span>
             <span class="n">enum</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">sufs</span><span class="si">}</span><span class="se">\n</span><span class="s1">    </span><span class="si">{</span><span class="n">pres</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">enum</span><span class="p">,</span> <span class="n">miss</span></div></div>
+        <span class="k">return</span> <span class="n">enum</span><span class="p">,</span> <span class="n">miss</span></div>
 
 
 <span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>

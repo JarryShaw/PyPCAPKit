@@ -33,10 +33,17 @@
             
   <h1>Source code for pcapkit.vendor.ipv6.routing</h1><div class="highlight"><pre>
 <span></span><span class="c1"># -*- coding: utf-8 -*-</span>
-<span class="sd">&quot;&quot;&quot;IPv6 Routing Types&quot;&quot;&quot;</span>
+<span class="sd">&quot;&quot;&quot;IPv6 Routing Types</span>
+<span class="sd">========================</span>
+
+<span class="sd">This module contains the vendor crawler for **IPv6 Routing Types**,</span>
+<span class="sd">which is automatically generating :class:`pcapkit.const.ipv6.routing.Routing`.</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
 
 <span class="kn">import</span> <span class="nn">csv</span>
 <span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">import</span> <span class="nn">sys</span>
 
 <span class="kn">from</span> <span class="nn">pcapkit.vendor.default</span> <span class="kn">import</span> <span class="n">Vendor</span>
 
@@ -51,7 +58,7 @@
     <span class="c1">#: Link to registry.</span>
     <span class="n">LINK</span> <span class="o">=</span> <span class="s1">&#39;https://www.iana.org/assignments/ipv6-parameters/ipv6-parameters-3.csv&#39;</span>
 
-<div class="viewcode-block" id="Routing.process"><a class="viewcode-back" href="../../../../pcapkit/vendor/ipv6.html#pcapkit.vendor.ipv6.routing.Routing.process">[docs]</a>    <span class="k">def</span> <span class="nf">process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">&#39;list[str]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;tuple[list[str], list[str]]&#39;</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">&#39;list[str]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;tuple[list[str], list[str]]&#39;</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Process CSV data.</span>
 
 <span class="sd">        Args:</span>
@@ -106,7 +113,7 @@
                 <span class="n">miss</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;    #: </span><span class="si">{</span><span class="n">desc</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
                 <span class="n">miss</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;    extend_enum(cls, &#39;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">_%d&#39; % value, value)&quot;</span><span class="p">)</span>
                 <span class="n">miss</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;    return cls(value)&#39;</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">enum</span><span class="p">,</span> <span class="n">miss</span></div></div>
+        <span class="k">return</span> <span class="n">enum</span><span class="p">,</span> <span class="n">miss</span></div>
 
 
 <span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>

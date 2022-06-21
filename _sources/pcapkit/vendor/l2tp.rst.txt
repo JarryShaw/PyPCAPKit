@@ -1,7 +1,7 @@
 :class:`~pcapkit.protocols.link.l2tp.L2TP` Vendor Crawlers
 ==========================================================
 
-.. module:: pcapkit.vendor.ipx
+.. module:: pcapkit.vendor.l2tp
 
 This module contains all vendor crawlers of
 :class:`~pcapkit.protocols.link.l2tp.L2TP` implementations. Available
@@ -16,7 +16,9 @@ enumerations include:
    :no-members:
 
 .. autoclass:: pcapkit.vendor.l2tp.type.Type
-   :members:
-   :undoc-members:
-   :private-members:
+   :noindex:
+   :members: FLAG
    :show-inheritance:
+
+.. autodata:: pcapkit.vendor.l2tp.type.DATA
+   :no-value:

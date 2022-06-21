@@ -41,18 +41,22 @@
 enumerations include:</p>
 <table class="docutils align-default">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="#pcapkit.vendor.ospf.authentication.Authentication" title="pcapkit.vendor.ospf.authentication.Authentication"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF_Authentication</span></code></a></p></td>
+<tr class="row-odd"><td><p><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF_Authentication</span></code></p></td>
 <td><p>Authentication Codes <a class="footnote-reference brackets" href="#id3" id="id1" role="doc-noteref"><span class="fn-bracket">[</span>*<span class="fn-bracket">]</span></a></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#pcapkit.vendor.ospf.packet.Packet" title="pcapkit.vendor.ospf.packet.Packet"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF_Packet</span></code></a></p></td>
+<tr class="row-even"><td><p><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF_Packet</span></code></p></td>
 <td><p>OSPF Packet Types <a class="footnote-reference brackets" href="#id4" id="id2" role="doc-noteref"><span class="fn-bracket">[</span>†<span class="fn-bracket">]</span></a></p></td>
 </tr>
 </tbody>
 </table>
-<span class="target" id="module-pcapkit.vendor.ospf.authentication"></span><p>OSPF Authentication Types</p>
+<span class="target" id="module-pcapkit.vendor.ospf.authentication"></span><section id="authentication-types">
+<h2>Authentication Types<a class="headerlink" href="#authentication-types" title="Permalink to this heading">¶</a></h2>
+<p>This module contains the vendor crawler for <strong>Authentication Types</strong>,
+which is automatically generating <a class="reference internal" href="../const/ospf.html#pcapkit.const.ospf.authentication.Authentication" title="pcapkit.const.ospf.authentication.Authentication"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.const.ospf.authentication.Authentication</span></code></a>.</p>
+</section>
 <dl class="py class">
-<dt class="sig sig-object py" id="pcapkit.vendor.ospf.authentication.Authentication">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.vendor.ospf.authentication.</span></span><span class="sig-name descname"><span class="pre">Authentication</span></span><a class="reference internal" href="../../_modules/pcapkit/vendor/ospf/authentication.html#Authentication"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.vendor.ospf.authentication.Authentication" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.vendor.ospf.authentication.</span></span><span class="sig-name descname"><span class="pre">Authentication</span></span><a class="reference internal" href="../../_modules/pcapkit/vendor/ospf/authentication.html#Authentication"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
 <dd><p>Bases: <a class="reference internal" href="default.html#pcapkit.vendor.default.Vendor" title="pcapkit.vendor.default.Vendor"><code class="xref py py-class docutils literal notranslate"><span class="pre">Vendor</span></code></a></p>
 <p>Authentication Types</p>
 <dl class="field-list simple">
@@ -61,23 +65,27 @@ enumerations include:</p>
 </dd>
 </dl>
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.vendor.ospf.authentication.Authentication.FLAG">
-<span class="sig-name descname"><span class="pre">FLAG</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'isinstance(value,</span> <span class="pre">int)</span> <span class="pre">and</span> <span class="pre">0</span> <span class="pre">&lt;=</span> <span class="pre">value</span> <span class="pre">&lt;=</span> <span class="pre">65535'</span></em><a class="headerlink" href="#pcapkit.vendor.ospf.authentication.Authentication.FLAG" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">FLAG</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'isinstance(value,</span> <span class="pre">int)</span> <span class="pre">and</span> <span class="pre">0</span> <span class="pre">&lt;=</span> <span class="pre">value</span> <span class="pre">&lt;=</span> <span class="pre">65535'</span></em></dt>
 <dd><p>Value limit checker.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.vendor.ospf.authentication.Authentication.LINK">
-<span class="sig-name descname"><span class="pre">LINK</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'https://www.iana.org/assignments/ospf-authentication-codes/authentication-codes.csv'</span></em><a class="headerlink" href="#pcapkit.vendor.ospf.authentication.Authentication.LINK" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">LINK</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'https://www.iana.org/assignments/ospf-authentication-codes/authentication-codes.csv'</span></em></dt>
 <dd><p>Link to registry.</p>
 </dd></dl>
 
 </dd></dl>
 
-<span class="target" id="module-pcapkit.vendor.ospf.packet"></span><p>OSPF Packet Types</p>
+<span class="target" id="module-pcapkit.vendor.ospf.packet"></span><section id="ospf-packet-types">
+<h2>OSPF Packet Types<a class="headerlink" href="#ospf-packet-types" title="Permalink to this heading">¶</a></h2>
+<p>This module contains the vendor crawler for <strong>OSPF Packet Types</strong>,
+which is automatically generating <a class="reference internal" href="../const/ospf.html#pcapkit.const.ospf.packet.Packet" title="pcapkit.const.ospf.packet.Packet"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.const.ospf.packet.Packet</span></code></a>.</p>
+</section>
 <dl class="py class">
-<dt class="sig sig-object py" id="pcapkit.vendor.ospf.packet.Packet">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.vendor.ospf.packet.</span></span><span class="sig-name descname"><span class="pre">Packet</span></span><a class="reference internal" href="../../_modules/pcapkit/vendor/ospf/packet.html#Packet"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.vendor.ospf.packet.Packet" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.vendor.ospf.packet.</span></span><span class="sig-name descname"><span class="pre">Packet</span></span><a class="reference internal" href="../../_modules/pcapkit/vendor/ospf/packet.html#Packet"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
 <dd><p>Bases: <a class="reference internal" href="default.html#pcapkit.vendor.default.Vendor" title="pcapkit.vendor.default.Vendor"><code class="xref py py-class docutils literal notranslate"><span class="pre">Vendor</span></code></a></p>
 <p>OSPF Packet Types</p>
 <dl class="field-list simple">
@@ -86,14 +94,14 @@ enumerations include:</p>
 </dd>
 </dl>
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.vendor.ospf.packet.Packet.FLAG">
-<span class="sig-name descname"><span class="pre">FLAG</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'isinstance(value,</span> <span class="pre">int)</span> <span class="pre">and</span> <span class="pre">0</span> <span class="pre">&lt;=</span> <span class="pre">value</span> <span class="pre">&lt;=</span> <span class="pre">65535'</span></em><a class="headerlink" href="#pcapkit.vendor.ospf.packet.Packet.FLAG" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">FLAG</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'isinstance(value,</span> <span class="pre">int)</span> <span class="pre">and</span> <span class="pre">0</span> <span class="pre">&lt;=</span> <span class="pre">value</span> <span class="pre">&lt;=</span> <span class="pre">65535'</span></em></dt>
 <dd><p>Value limit checker.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.vendor.ospf.packet.Packet.LINK">
-<span class="sig-name descname"><span class="pre">LINK</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'https://www.iana.org/assignments/ospfv2-parameters/ospfv2-parameters-3.csv'</span></em><a class="headerlink" href="#pcapkit.vendor.ospf.packet.Packet.LINK" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">LINK</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'https://www.iana.org/assignments/ospfv2-parameters/ospfv2-parameters-3.csv'</span></em></dt>
 <dd><p>Link to registry.</p>
 </dd></dl>
 

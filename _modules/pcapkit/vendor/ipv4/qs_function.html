@@ -33,9 +33,16 @@
             
   <h1>Source code for pcapkit.vendor.ipv4.qs_function</h1><div class="highlight"><pre>
 <span></span><span class="c1"># -*- coding: utf-8 -*-</span>
-<span class="sd">&quot;&quot;&quot;IPv4 QS Functions&quot;&quot;&quot;</span>
+<span class="sd">&quot;&quot;&quot;QS Functions</span>
+<span class="sd">==================</span>
+
+<span class="sd">This module contains the vendor crawler for **QS Functions**,</span>
+<span class="sd">which is automatically generating :class:`pcapkit.const.ipv4.qs_function.QSFunction`.</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
 
 <span class="kn">import</span> <span class="nn">collections</span>
+<span class="kn">import</span> <span class="nn">sys</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
 
 <span class="kn">from</span> <span class="nn">pcapkit.vendor.default</span> <span class="kn">import</span> <span class="n">Vendor</span>
@@ -58,16 +65,16 @@
     <span class="c1">#: Value limit checker.</span>
     <span class="n">FLAG</span> <span class="o">=</span> <span class="s1">&#39;isinstance(value, int) and 0 &lt;= value &lt;= 8&#39;</span>
 
-<div class="viewcode-block" id="QSFunction.request"><a class="viewcode-back" href="../../../../pcapkit/vendor/ipv4.html#pcapkit.vendor.ipv4.qs_function.QSFunction.request">[docs]</a>    <span class="k">def</span> <span class="nf">request</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;dict[int, str]&#39;</span><span class="p">:</span>  <span class="c1"># type: ignore[override] # pylint: disable=arguments-differ</span>
+    <span class="k">def</span> <span class="nf">request</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;dict[int, str]&#39;</span><span class="p">:</span>  <span class="c1"># type: ignore[override] # pylint: disable=arguments-differ</span>
         <span class="sd">&quot;&quot;&quot;Fetch registry data.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            Registry data (:data:`~pcapkit.vendor.ipv4.qs_function.DATA`).</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="n">DATA</span></div>
+        <span class="k">return</span> <span class="n">DATA</span>
 
-<div class="viewcode-block" id="QSFunction.count"><a class="viewcode-back" href="../../../../pcapkit/vendor/ipv4.html#pcapkit.vendor.ipv4.qs_function.QSFunction.count">[docs]</a>    <span class="k">def</span> <span class="nf">count</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">&#39;dict[int, str]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Counter[str]&#39;</span><span class="p">:</span>  <span class="c1"># type: ignore[override]</span>
+    <span class="k">def</span> <span class="nf">count</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">&#39;dict[int, str]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Counter[str]&#39;</span><span class="p">:</span>  <span class="c1"># type: ignore[override]</span>
         <span class="sd">&quot;&quot;&quot;Count field records.</span>
 
 <span class="sd">        Args:</span>
@@ -77,9 +84,9 @@
 <span class="sd">            Field recordings.</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="n">collections</span><span class="o">.</span><span class="n">Counter</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">safe_name</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">values</span><span class="p">()))</span></div>
+        <span class="k">return</span> <span class="n">collections</span><span class="o">.</span><span class="n">Counter</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">safe_name</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">values</span><span class="p">()))</span>
 
-<div class="viewcode-block" id="QSFunction.process"><a class="viewcode-back" href="../../../../pcapkit/vendor/ipv4.html#pcapkit.vendor.ipv4.qs_function.QSFunction.process">[docs]</a>    <span class="k">def</span> <span class="nf">process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">&#39;dict[int, str]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;tuple[list[str], list[str]]&#39;</span><span class="p">:</span>  <span class="c1"># type: ignore[override]</span>
+    <span class="k">def</span> <span class="nf">process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">&#39;dict[int, str]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;tuple[list[str], list[str]]&#39;</span><span class="p">:</span>  <span class="c1"># type: ignore[override]</span>
         <span class="sd">&quot;&quot;&quot;Process registry data.</span>
 
 <span class="sd">        Args:</span>
@@ -97,7 +104,7 @@
         <span class="k">for</span> <span class="n">code</span><span class="p">,</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">DATA</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="n">renm</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">code</span><span class="p">)</span>  <span class="c1"># type: ignore[arg-type]</span>
             <span class="n">enum</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">renm</span><span class="si">}</span><span class="s2"> = </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">ljust</span><span class="p">(</span><span class="mi">76</span><span class="p">))</span>
-        <span class="k">return</span> <span class="n">enum</span><span class="p">,</span> <span class="n">miss</span></div></div>
+        <span class="k">return</span> <span class="n">enum</span><span class="p">,</span> <span class="n">miss</span></div>
 
 
 <span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
