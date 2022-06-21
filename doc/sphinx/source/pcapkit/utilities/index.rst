@@ -7,12 +7,12 @@ Utility Functions & Classes
 and classes which are fundations of :mod:`pcapkit`, including
 decorater function :func:`~pcapkit.utilities.decorators.seekset`
 and :func:`~pcapkit.utilities.decorators.beholder`, and
-several user-refined exceptions and validations.
+several user-refined exceptions and warnings.
 
 .. toctree::
    :maxdepth: 2
 
+   logging
    decorators
    exceptions
-   logging
    warnings
