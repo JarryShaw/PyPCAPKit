@@ -12,16 +12,7 @@ on `PCAP`_ parsing and analysis, which works as a stream PCAP file extractor.
 With support of `DictDumper`_, it shall support multiple
 output report formats.
 
-.. important::
-
    The whole project supports **Python 3.6** or later.
-
-.. toctree::
-   :maxdepth: 2
-
-   pcapkit/index
-   demo
-   pep
 
 -----
 About
@@ -29,8 +20,6 @@ About
 
 PyPCAPKit is an independent open source library, using only
 `DictDumper`_ as its formatted output dumper.
-
-.. note::
 
    There is a project called |jspcapy|_ works on ``pcapkit``, which is a
    command line tool for PCAP extraction.
