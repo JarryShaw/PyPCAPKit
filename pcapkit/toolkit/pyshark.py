@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
-"""PyShark tools
+""":mod:`PyShark <pyshark>` Tools
+====================================
 
 :mod:`pcapkit.toolkit.pyshark` contains all you need for
 :mod:`pcapkit` handy usage with `PyShark`_ engine. All
@@ -52,7 +53,7 @@ def tcp_traceflow(packet: 'Packet') -> 'TF_Packet | None':
     """Trace packet flow for TCP.
 
     Args:
-        packet (pyshark.packet.packet.Packet): Scapy packet.
+        packet: Scapy packet.
 
     Returns:
         Tuple[bool, Dict[str, Any]]: A tuple of data for TCP reassembly.
