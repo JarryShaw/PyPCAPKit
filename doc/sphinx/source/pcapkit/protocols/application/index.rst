@@ -8,7 +8,7 @@ Application Layer Protocols
 application layer, with detailed implementation and methods.
 
 .. toctree::
-   :maxdepth: 5
+   :maxdepth: 2
 
    application
    http
