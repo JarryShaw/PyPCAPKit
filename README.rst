@@ -38,10 +38,10 @@ PyPCAPKit is an independent open source library, using only
    .. |jspcapy| replace:: ``jspcapy``
    .. _jspcapy: https://github.com/JarryShaw/jspcapy
 
-   .. deprecated:: 0.8.0
+   .. note::
 
       The |jspcapy|_ project is deprecated and has been merged into the
-      PyPCAPKit project as its CLI support.
+      PyPCAPKit project as its CLI support since PyPCAPKit v0.8.0.
 
 Unlike popular PCAP file extractors, such as `Scapy`_, `DPKT`_, `PyShark`_,
 and etc, ``pcapkit`` uses **streaming** strategy to read input files. That
