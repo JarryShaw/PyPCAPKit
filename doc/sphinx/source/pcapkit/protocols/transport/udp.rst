@@ -1,6 +1,9 @@
 UDP - User Datagram Protocol
 ============================
 
+.. module:: pcapkit.protocols.transport.udp
+.. module:: pcapkit.protocols.data.transport.udp
+
 :mod:`pcapkit.protocols.transport.udp` contains
 :class:`~pcapkit.protocols.transport.udp.UDP` only,
 which implements extractor for User Datagram Protocol
@@ -19,45 +22,40 @@ Octets      Bits        Name                    Description
 
    <br />
 
-.. automodule:: pcapkit.protocols.transport.udp
-   :members:
-   :undoc-members:
-   :private-members:
+.. autoclass:: pcapkit.protocols.transport.udp.UDP
+   :no-members:
    :show-inheritance:
 
-Data Structure
---------------
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
 
-.. important::
+   .. automethod:: __index__
 
-   Following classes are only for *documentation* purpose.
-   They do **NOT** exist in the :mod:`pcapkit` module.
+   .. autoproperty:: name
+   .. autoproperty:: length
+   .. autoproperty:: src
+   .. autoproperty:: dst
 
-.. class:: DataType_UDP
+   .. automethod:: read
+   .. automethod:: make
 
-   :bases: TypedDict
+   .. autoattribute:: __proto__
+      :no-value:
 
-   Structure of UDP header [:rfc:`768`].
+Data Structures
+---------------
 
-   .. attribute:: srcport
-      :type: int
+.. autoclass:: pcapkit.protocols.data.transport.udp.UDP(srcport, dstport, len, checksum)
+   :no-members:
+   :show-inheritance:
 
-      Source port.
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. attribute:: dstport
-      :type: int
-
-      Destination port.
-
-   .. attribute:: len
-      :type: int
-
-      Length.
-
-   .. attribute:: checksum
-      :type: bytes
-
-      Checksum.
+   .. autoattribute:: srcport
+   .. autoattribute:: dstport
+   .. autoattribute:: len
+   .. autoattribute:: checksum
 
 .. raw:: html
 

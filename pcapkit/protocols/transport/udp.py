@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
-"""user datagram protocol
+"""UDP - User Datagram Protocol
+==================================
 
 :mod:`pcapkit.protocols.transport.udp` contains
 :class:`~pcapkit.protocols.transport.udp.UDP` only,
@@ -40,9 +41,9 @@ class UDP(Transport[DataType_UDP]):
     # Defaults.
     ##########################################################################
 
-    #: DefaultDict[int, Tuple[str, str]]: Protocol index mapping for decoding next layer,
-    #: c.f. :meth:`self._decode_next_layer <pcapkit.protocols.protocol.Protocol._decode_next_layer>`
-    #: & :meth:`self._import_next_layer <pcapkit.protocols.internet.link.Link._import_next_layer>`.
+    #: DefaultDict[int, tuple[str, str]]: Protocol index mapping for decoding next layer,
+    #: c.f. :meth:`self._decode_next_layer <pcapkit.protocols.transport.transport.Transport._decode_next_layer>`
+    #: & :meth:`self._import_next_layer <pcapkit.protocols.protocol.Protocol._import_next_layer>`.
     __proto__ = collections.defaultdict(
         lambda: ('pcapkit.protocols.misc.raw', 'Raw'),
         {
@@ -99,8 +100,6 @@ class UDP(Transport[DataType_UDP]):
 
         Args:
             length: Length of packet data.
-
-        Keyword Args:
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
@@ -127,7 +126,7 @@ class UDP(Transport[DataType_UDP]):
     def make(self, **kwargs: 'Any') -> 'NoReturn':
         """Make (construct) packet data.
 
-        Keyword Args:
+        Args:
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
