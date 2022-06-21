@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 # pylint: disable=unused-import,fixme
-"""application layer protocols
+"""Application Layer Protocols
+=================================
 
-`pcapkit.protocols.application` is collection of all
-protocols in application layer, with detailed
-implementation and methods.
+:mod:`pcapkit.protocols.application` is collection of all protocols in
+application layer, with detailed implementation and methods.
 
 """
 # TODO: Implements BGP, DHCP, DHCPv6, DNS, IMAP, LDAP, MQTT,
