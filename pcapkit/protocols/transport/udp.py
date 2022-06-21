@@ -35,7 +35,21 @@ __all__ = ['UDP']
 
 
 class UDP(Transport[DataType_UDP]):
-    """This class implements User Datagram Protocol."""
+    """This class implements User Datagram Protocol.
+
+    This class currently supports parsing of the following protocols, which are
+    registered in the :attr:`self.__proto__ <pcapkit.protocols.transport.udp.UDP.__proto__>`
+    attribute:
+
+    .. list-table::
+       :header-rows: 1
+
+       * - Port Number
+         - Protocol
+       * - 80
+         - :class:`pcapkit.protocols.application.http.HTTP`
+
+    """
 
     ##########################################################################
     # Defaults.

@@ -14,7 +14,7 @@ from dictdumper import Dumper
 from pcapkit.foundation.extraction import Extractor
 from pcapkit.foundation.traceflow import TraceFlow
 from pcapkit.protocols import __proto__ as protocol_registry
-from pcapkit.protocols.application.httpv2 import HTTPv2
+from pcapkit.protocols.application.httpv2 import HTTP as HTTPv2
 from pcapkit.protocols.internet.hopopt import HOPOPT
 from pcapkit.protocols.internet.internet import Internet
 from pcapkit.protocols.internet.ipv6_opts import IPv6_Opts
