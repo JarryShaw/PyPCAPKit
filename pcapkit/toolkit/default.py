@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
-"""default tools
+""":mod:`PyPCAPKit <pcapkit>` Tools
+======================================
 
 :mod:`pcapkit.toolkit.default` contains all you need for
 :mod:`pcapkit` handy usage. All functions returns with a
@@ -75,7 +76,7 @@ def ipv6_reassembly(frame: 'Frame') -> 'IP_Packet[IPv6Address] | None':
     """Make data for IPv6 reassembly.
 
     Args:
-        frame (pcapkit.protocols.misc.pcap.frame.Frame): PCAP frame.
+        frame: PCAP frame.
 
     Returns:
         Tuple[bool, Dict[str, Any]]: A tuple of data for IPv6 reassembly.
@@ -123,7 +124,7 @@ def tcp_reassembly(frame: 'Frame') -> 'TCP_Packet | None':
     """Make data for TCP reassembly.
 
     Args:
-        frame (pcapkit.protocols.misc.pcap.frame.Frame): PCAP frame.
+        frame: PCAP frame.
 
     Returns:
         Tuple[bool, Dict[str, Any]]: A tuple of data for TCP reassembly.
@@ -172,8 +173,6 @@ def tcp_traceflow(frame: 'Frame', *, data_link: 'LinkType') -> 'TF_Packet | None
 
     Args:
         frame: PCAP frame.
-
-    Keyword Args:
         data_link: Data link layer protocol (from global header).
 
     Returns:
