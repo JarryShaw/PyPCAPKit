@@ -33,7 +33,8 @@
             
   <h1>Source code for pcapkit.protocols.transport.udp</h1><div class="highlight"><pre>
 <span></span><span class="c1"># -*- coding: utf-8 -*-</span>
-<span class="sd">&quot;&quot;&quot;user datagram protocol</span>
+<span class="sd">&quot;&quot;&quot;UDP - User Datagram Protocol</span>
+<span class="sd">==================================</span>
 
 <span class="sd">:mod:`pcapkit.protocols.transport.udp` contains</span>
 <span class="sd">:class:`~pcapkit.protocols.transport.udp.UDP` only,</span>
@@ -74,9 +75,9 @@
     <span class="c1"># Defaults.</span>
     <span class="c1">##########################################################################</span>
 
-    <span class="c1">#: DefaultDict[int, Tuple[str, str]]: Protocol index mapping for decoding next layer,</span>
-    <span class="c1">#: c.f. :meth:`self._decode_next_layer &lt;pcapkit.protocols.protocol.Protocol._decode_next_layer&gt;`</span>
-    <span class="c1">#: &amp; :meth:`self._import_next_layer &lt;pcapkit.protocols.internet.link.Link._import_next_layer&gt;`.</span>
+    <span class="c1">#: DefaultDict[int, tuple[str, str]]: Protocol index mapping for decoding next layer,</span>
+    <span class="c1">#: c.f. :meth:`self._decode_next_layer &lt;pcapkit.protocols.transport.transport.Transport._decode_next_layer&gt;`</span>
+    <span class="c1">#: &amp; :meth:`self._import_next_layer &lt;pcapkit.protocols.protocol.Protocol._import_next_layer&gt;`.</span>
     <span class="n">__proto__</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">defaultdict</span><span class="p">(</span>
         <span class="k">lambda</span><span class="p">:</span> <span class="p">(</span><span class="s1">&#39;pcapkit.protocols.misc.raw&#39;</span><span class="p">,</span> <span class="s1">&#39;Raw&#39;</span><span class="p">),</span>
         <span class="p">{</span>
@@ -133,8 +134,6 @@
 
 <span class="sd">        Args:</span>
 <span class="sd">            length: Length of packet data.</span>
-
-<span class="sd">        Keyword Args:</span>
 <span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
 
 <span class="sd">        Returns:</span>
@@ -161,7 +160,7 @@
 <div class="viewcode-block" id="UDP.make"><a class="viewcode-back" href="../../../../pcapkit/protocols/transport/udp.html#pcapkit.protocols.transport.udp.UDP.make">[docs]</a>    <span class="k">def</span> <span class="nf">make</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;NoReturn&#39;</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Make (construct) packet data.</span>
 
-<span class="sd">        Keyword Args:</span>
+<span class="sd">        Args:</span>
 <span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
 
 <span class="sd">        Returns:</span>
@@ -174,9 +173,9 @@
     <span class="c1"># Data models.</span>
     <span class="c1">##########################################################################</span>
 
-<div class="viewcode-block" id="UDP.__length_hint__"><a class="viewcode-back" href="../../../../pcapkit/protocols/transport/udp.html#pcapkit.protocols.transport.udp.UDP.__length_hint__">[docs]</a>    <span class="k">def</span> <span class="fm">__length_hint__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Literal[8]&#39;</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__length_hint__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Literal[8]&#39;</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Return an estimated length for the object.&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="mi">8</span></div>
+        <span class="k">return</span> <span class="mi">8</span>
 
 <div class="viewcode-block" id="UDP.__index__"><a class="viewcode-back" href="../../../../pcapkit/protocols/transport/udp.html#pcapkit.protocols.transport.udp.UDP.__index__">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="fm">__index__</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;RegType_TransType&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=invalid-index-returned</span>

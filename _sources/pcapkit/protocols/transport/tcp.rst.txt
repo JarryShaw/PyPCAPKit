@@ -2,6 +2,7 @@ TCP - Transmission Control Protocol
 ===================================
 
 .. module:: pcapkit.protocols.transport.tcp
+.. module:: pcapkit.protocols.data.transport.tcp
 
 :mod:`pcapkit.protocols.transport.tcp` contains
 :class:`~pcapkit.protocols.transport.tcp.TCP` only,
@@ -38,1251 +39,475 @@ Octets      Bits        Name                    Description
    <br />
 
 .. autoclass:: pcapkit.protocols.transport.tcp.TCP
-   :members:
-   :undoc-members:
-   :private-members:
+   :no-members:
    :show-inheritance:
 
-   .. attribute:: _syn
-      :type: bool
-
-      SYN flag.
-
-   .. attribute:: _ack
-      :type: bool
-
-      ACK flag.
-
-.. data:: pcapkit.protocols.transport.tcp.TCP_OPT
-   :type: DataType_TCP_OPT
-
-   TCP option :obj:`dict` parsing mapping.
-
-   ===== ====== ======= ======= ============ =======================================================
-   kind  length  type   process  comment            name
-   ===== ====== ======= ======= ============ =======================================================
-     0                                       [:rfc:`793`] End of Option List
-     1                                       [:rfc:`793`] No-Operation
-     2      4   ``H``     1                  [:rfc:`793`] Maximum Segment Size
-     3      3   ``B``     1                  [:rfc:`7323`] Window Scale
-     4      2   ``?``           :data:`True` [:rfc:`2018`] SACK Permitted
-     5      ?   ``P``     0     ``2+8*N``    [:rfc:`2018`] SACK
-     6      6   ``P``     0                  [:rfc:`1072`][:rfc:`6247`] Echo
-     7      6   ``P``     0                  [:rfc:`1072`][:rfc:`6247`] Echo Reply
-     8     10   ``II``    2                  [:rfc:`7323`] Timestamps
-     9      2   ``?``           :data:`True` [:rfc:`1693`][:rfc:`6247`] POC Permitted
-    10      3   ``??P``   3                  [:rfc:`1693`][:rfc:`6247`] POC-Serv Profile
-    11      6   ``P``     0                  [:rfc:`1693`][:rfc:`6247`] Connection Count
-    12      6   ``P``     0                  [:rfc:`1693`][:rfc:`6247`] CC.NEW
-    13      6   ``P``     0                  [:rfc:`1693`][:rfc:`6247`] CC.ECHO
-    14      3   ``B``     4                  [:rfc:`1146`][:rfc:`6247`] Alt-Chksum Request
-    15      ?   ``P``     0                  [:rfc:`1146`][:rfc:`6247`] Alt-Chksum Data
-    19     18   ``P``     0                  [:rfc:`2385`] MD5 Signature Option
-    27      8   ``P``     5                  [:rfc:`4782`] Quick-Start Response
-    28      4   ``P``     6                  [:rfc:`5482`] User Timeout Option
-    29      ?   ``P``     7                  [:rfc:`5925`] TCP Authentication Option
-    30      ?   ``P``     8                  [:rfc:`6824`] Multipath TCP
-    34      ?   ``P``     0                  [:rfc:`7413`] Fast Open
-   ===== ====== ======= ======= ============ =======================================================
-
-   .. seealso::
-
-      :class:`pcapkit.protocols.transport.tcp.DataType_TCP_OPT`
-
-.. data:: pcapkit.protocols.transport.tcp.process_opt
-   :type: Dict[int, Callable[[pcapkit.protocols.transport.tcp.TCP, int, int], DataType_TCP_Opt]]
-
-   Process method for TCP options.
-
-   .. list-table::
-      :header-rows: 1
-
-      * - Code
-        - Method
-        - Description
-      * - 0
-        - :meth:`~pcapkit.protocols.transport.tcp.TCP._read_mode_donone`
-        - do nothing
-      * - 1
-        - :meth:`~pcapkit.protocols.transport.tcp.TCP._read_mode_unpack`
-        - unpack according to size
-      * - 2
-        - :meth:`~pcapkit.protocols.transport.tcp.TCP._read_mode_tsopt`
-        - timestamps
-      * - 3
-        - :meth:`~pcapkit.protocols.transport.tcp.TCP._read_mode_pocsp`
-        - POC service profile
-      * - 4
-        - :meth:`~pcapkit.protocols.transport.tcp.TCP._read_mode_acopt`
-        - alternate checksum request
-      * - 5
-        - :meth:`~pcapkit.protocols.transport.tcp.TCP._read_mode_qsopt`
-        - Quick-Start response
-      * - 6
-        - :meth:`~pcapkit.protocols.transport.tcp.TCP._read_mode_utopt`
-        - user timeout option
-      * - 7
-        - :meth:`~pcapkit.protocols.transport.tcp.TCP._read_mode_tcpao`
-        - TCP authentication option
-      * - 8
-        - :meth:`~pcapkit.protocols.transport.tcp.TCP._read_mode_mptcp`
-        - multipath TCP
-
-.. data:: pcapkit.protocols.transport.tcp.mptcp_opt
-   :type: Dict[int, Callable[[pcapkit.protocols.transport.tcp.TCP, str, int, int], DataType_TCP_MP_Opt]]
-
-   Process method for multipath TCP options [:rfc:`6824`].
-
-   .. list-table::
-      :header-rows: 1
-
-      * - Code
-        - Method
-        - Description
-      * - 0
-        - :meth:`~pcapkit.protocols.transport.tcp.TCP._read_mptcp_capable`
-        - ``MP_CAPABLE``
-      * - 1
-        - :meth:`~pcapkit.protocols.transport.tcp.TCP._read_mptcp_join`
-        - ``MP_JOIN``
-      * - 2
-        - :meth:`~pcapkit.protocols.transport.tcp.TCP._read_mptcp_dss`
-        - ``DSS``
-      * - 3
-        - :meth:`~pcapkit.protocols.transport.tcp.TCP._read_mptcp_add`
-        - ``ADD_ADDR``
-      * - 4
-        - :meth:`~pcapkit.protocols.transport.tcp.TCP._read_mptcp_remove`
-        - ``REMOVE_ADDR``
-      * - 5
-        - :meth:`~pcapkit.protocols.transport.tcp.TCP._read_mptcp_prio`
-        - ``MP_PRIO``
-      * - 6
-        - :meth:`~pcapkit.protocols.transport.tcp.TCP._read_mptcp_fail`
-        - ``MP_FAIL``
-      * - 7
-        - :meth:`~pcapkit.protocols.transport.tcp.TCP._read_mptcp_fastclose`
-        - ``MP_FASTCLOSE``
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
+   .. automethod:: __index__
+
+   .. autoproperty:: name
+   .. autoproperty:: length
+   .. autoproperty:: src
+   .. autoproperty:: dst
+
+   .. automethod:: read
+   .. automethod:: make
+   .. automethod:: register_option
+   .. automethod:: register_mp_option
+
+   .. automethod:: _read_tcp_options
+   .. automethod:: _read_mode_donone
+   .. automethod:: _read_mode_eool
+   .. automethod:: _read_mode_nop
+   .. automethod:: _read_mode_mss
+   .. automethod:: _read_mode_ws
+   .. automethod:: _read_mode_sackpmt
+   .. automethod:: _read_mode_sack
+   .. automethod:: _read_mode_echo
+   .. automethod:: _read_mode_echore
+   .. automethod:: _read_mode_ts
+   .. automethod:: _read_mode_poc
+   .. automethod:: _read_mode_pocsp
+   .. automethod:: _read_mode_cc
+   .. automethod:: _read_mode_ccnew
+   .. automethod:: _read_mode_ccecho
+   .. automethod:: _read_mode_chkreq
+   .. automethod:: _read_mode_chksum
+   .. automethod:: _read_mode_sig
+   .. automethod:: _read_mode_qs
+   .. automethod:: _read_mode_timeout
+   .. automethod:: _read_mode_ao
+   .. automethod:: _read_mode_mp
+   .. automethod:: _read_mode_fastopen
+
+   .. automethod:: _read_mptcp_unknown
+   .. automethod:: _read_mptcp_capable
+   .. automethod:: _read_mptcp_join
+   .. automethod:: _read_mptcp_dss
+   .. automethod:: _read_mptcp_addaddr
+   .. automethod:: _read_mptcp_remove
+   .. automethod:: _read_mptcp_prio
+   .. automethod:: _read_mptcp_fail
+   .. automethod:: _read_mptcp_fastclose
+
+   .. automethod:: _read_join_syn
+   .. automethod:: _read_join_synack
+   .. automethod:: _read_join_ack
+
+   .. autoattribute:: __proto__
+      :no-value:
+   .. autoattribute:: __option__
+      :no-value:
+   .. autoattribute:: __mp_option__
+      :no-value:
+
+Data Structures
+---------------
+
+.. autoclass:: pcapkit.protocols.data.transport.tcp.TCP(srcport, dstport, seq, ack, hdr_len, flags, window_size, checksum, urgent_pointer)
+   :no-members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
+   .. autoattribute:: srcport
+   .. autoattribute:: dstport
+   .. autoattribute:: seq
+   .. autoattribute:: ack
+   .. autoattribute:: hdr_len
+   .. autoattribute:: flags
+   .. autoattribute:: window_size
+   .. autoattribute:: checksum
+   .. autoattribute:: urgent_pointer
+
+   .. autoattribute:: options
+
+.. autoclass:: pcapkit.protocols.data.transport.tcp.Flags(ns, cwr, ece, urg, ack, psh, rst, syn, fin)
+   :no-members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
+   .. autoattribute:: ns
+   .. autoattribute:: cwr
+   .. autoattribute:: ece
+   .. autoattribute:: urg
+   .. autoattribute:: ack
+   .. autoattribute:: psh
+   .. autoattribute:: rst
+   .. autoattribute:: syn
+   .. autoattribute:: fin
+
+.. autoclass:: pcapkit.protocols.data.transport.tcp.Option(kind, length)
+   :no-members:
+   :show-inheritance:
 
-Data Structure
---------------
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
 
-.. important::
+   .. autoattribute:: kind
+   .. autoattribute:: length
 
-   Following classes are only for *documentation* purpose.
-   They do **NOT** exist in the :mod:`pcapkit` module.
+.. autoclass:: pcapkit.protocols.data.transport.tcp.UnassignedOption(kind, length, data)
+   :no-members:
+   :show-inheritance:
 
-.. class:: DataType_TCP
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
 
-   :bases: TypedDict
+   .. autoattribute:: data
 
-   Structure of TCP header [:rfc:`793`].
+.. autoclass:: pcapkit.protocols.data.transport.tcp.EndOfOptionList(kind, length)
+   :no-members:
+   :show-inheritance:
 
-   .. attribute:: srcport
-      :type: int
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
 
-      Source port.
+.. autoclass:: pcapkit.protocols.data.transport.tcp.NoOperation(kind, length)
+   :no-members:
+   :show-inheritance:
 
-   .. attribute:: dstport
-      :type: int
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
 
-      Description port.
+.. autoclass:: pcapkit.protocols.data.transport.tcp.MaximumSegmentSize(kind, length, mss)
+   :no-members:
+   :show-inheritance:
 
-   .. attribute:: seq
-      :type: int
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
 
-      Sequence number.
+   .. autoattribute:: mss
 
-   .. attribute:: ack
-      :type: int
+.. autoclass:: pcapkit.protocols.data.transport.tcp.WindowScale(kind, length, shift)
+   :no-members:
+   :show-inheritance:
 
-      Acknowledgement number.
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. attribute:: hdr_len
-      :type: int
+   .. autoattribute:: shift
 
-      Data offset.
+.. autoclass:: pcapkit.protocols.data.transport.tcp.SACKPermitted(kind, length)
+   :no-members:
+   :show-inheritance:
 
-   .. attribute:: flags
-      :type: DataType_TCP_Flags
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
 
-      Flags.
+.. autoclass:: pcapkit.protocols.data.transport.tcp.SACK(kind, length, sack)
+   :no-members:
+   :show-inheritance:
 
-   .. attribute:: window_size
-      :type: int
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
 
-      Size of receive window.
+   .. autoattribute:: sack
 
-   .. attribute:: checksum
-      :type: bytes
+.. autoclass:: pcapkit.protocols.data.transport.tcp.Echo(kind, length, data)
+   :no-members:
+   :show-inheritance:
 
-      Checksum.
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. attribute:: urgent_pointer
-      :type: int
+   .. autoattribute:: data
 
-      Urgent pointer.
+.. autoclass:: pcapkit.protocols.data.transport.tcp.EchoReply(kind, length, data)
+   :no-members:
+   :show-inheritance:
 
-   .. attribute:: opt
-      :type: Tuple[pcapkit.const.tcp.option.Option]
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
 
-      Array of TCP options.
+   .. autoattribute:: data
 
-   .. attribute:: packet
-      :type: bytes
+.. autoclass:: pcapkit.protocols.data.transport.tcp.Timestamp(kind, length, timestamp, echo)
+   :no-members:
+   :show-inheritance:
 
-      Raw packet data.
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
 
-.. class:: DataType_TCP_Flags
+   .. autoattribute:: timestamp
+   .. autoattribute:: echo
 
-   :bases: TypedDict
+.. autoclass:: pcapkit.protocols.data.transport.tcp.PartialOrderConnectionPermitted(kind, length)
+   :no-members:
+   :show-inheritance:
 
-   Flags.
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. attribute:: ns
-      :type: bool
+.. autoclass:: pcapkit.protocols.data.transport.tcp.PartialOrderConnectionProfile(kind, length, start, end)
+   :no-members:
+   :show-inheritance:
 
-      ECN concealment  protection.
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. attribute:: cwr
-      :type: bool
+   .. autoattribute:: start
+   .. autoattribute:: end
 
-      Congestion window reduced.
+.. autoclass:: pcapkit.protocols.data.transport.tcp.CC(kind, length, cc)
+   :no-members:
+   :show-inheritance:
 
-   .. attribute:: ece
-      :type: bool
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
 
-      ECN-Echo.
+   .. autoattribute:: cc
 
-   .. attribute:: urg
-      :type: bool
+.. autoclass:: pcapkit.protocols.data.transport.tcp.CCNew(kind, length, cc)
+   :no-members:
+   :show-inheritance:
 
-      Urgent.
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. attribute:: ack
-      :type: bool
+   .. autoattribute:: cc
 
-      Acknowledgement.
+.. autoclass:: pcapkit.protocols.data.transport.tcp.CCEcho(kind, length, cc)
+   :no-members:
+   :show-inheritance:
 
-   .. attribute:: psh
-      :type: bool
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
 
-      Push function.
+   .. autoattribute:: cc
 
-   .. attribute:: rst
-      :type: bool
+.. autoclass:: pcapkit.protocols.data.transport.tcp.AlternateChecksumRequest(kind, length, chksum)
+   :no-members:
+   :show-inheritance:
 
-      Reset connection.
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. attribute:: syn
-      :type: bool
+   .. autoattribute:: chksum
 
-      Synchronize sequence numbers.
+.. autoclass:: pcapkit.protocols.data.transport.tcp.AlternateChecksumData(kind, length, data)
+   :no-members:
+   :show-inheritance:
 
-   .. attribute:: fin
-      :type: bool
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
 
-      Last packet from sender.
+   .. autoattribute:: data
 
-.. class:: DataType_TCP_Opt
+.. autoclass:: pcapkit.protocols.data.transport.tcp.MD5Signature(kind, length, digest)
+   :no-members:
+   :show-inheritance:
 
-   :bases: TypedDict
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
 
-   Structure of TCP options.
+   .. autoattribute:: digest
 
-   .. attribute:: kind
-      :type: int
+.. autoclass:: pcapkit.protocols.data.transport.tcp.QuickStartResponse(kind, length, req_rate, ttl_diff, nounce)
+   :no-members:
+   :show-inheritance:
 
-      Option kind value.
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. attribute:: length
-      :type: int
+   .. autoattribute:: req_rate
+   .. autoattribute:: ttl_diff
+   .. autoattribute:: nounce
 
-      Length of option.
+.. autoclass:: pcapkit.protocols.data.transport.tcp.UserTimeout(kind, length, timeout)
+   :no-members:
+   :show-inheritance:
 
-.. class:: DataType_TCP_OPT
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
 
-   :bases: TypedDict
+   .. autoattribute:: timeout
 
-   TCP option :obj:`dict` parsing mapping.
+.. autoclass:: pcapkit.protocols.data.transport.tcp.Authentication(kind, length, key_id, next_key_id, mac)
+   :no-members:
+   :show-inheritance:
 
-   .. attribute:: flag
-      :type: bool
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
 
-      If the length of option is **GREATER THAN** ``1``.
+   .. autoattribute:: key_id
+   .. autoattribute:: next_key_id
+   .. autoattribute:: mac
 
-   .. attribute:: desc
-      :type: str
+.. autoclass:: pcapkit.protocols.data.transport.tcp.FastOpenCookie(kind, length, cookie)
+   :no-members:
+   :show-inheritance:
 
-      Description string, also attribute name.
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. attribute:: func
-      :type: Optional[Callable[[int], int]]
+   .. autoattribute:: cookie
 
-      Function, length of data bytes.
+.. autoclass:: pcapkit.protocols.data.transport.tcp.MPTCP(kind, length, subtype)
+   :no-members:
+   :show-inheritance:
 
-   .. attribute:: proc
-      :type: Optional[int]
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
 
-      Process method that data bytes need (when :attr:`flag` is :data:`True`).
+   .. autoattribute:: subtype
 
-      .. seealso::
+.. autoclass:: pcapkit.protocols.data.transport.tcp.MPTCPUnknown(kind, length, subtype, data)
+   :no-members:
+   :show-inheritance:
 
-         :data:`pcapkit.protocols.transport.tcp.process_opt`
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
 
-TCP Miscellaneous Options
-~~~~~~~~~~~~~~~~~~~~~~~~~
+   .. autoattribute:: data
 
-No Process Options
-++++++++++++++++++
+.. autoclass:: pcapkit.protocols.data.transport.tcp.MPTCPCapable(kind, length, subtype, version, flags, skey, rkey)
+   :no-members:
+   :show-inheritance:
 
-For TCP options require no process, its structure is described as below:
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
 
-======== ========= ==================== ==========================
-Octets      Bits        Name                    Description
-======== ========= ==================== ==========================
-  0           0    ``tcp.opt.kind``          Kind
-  1           8    ``tcp.opt.length``        Length
-  2          16    ``tcp.opt.data``          Kind-specific Data
-======== ========= ==================== ==========================
+   .. autoattribute:: version
+   .. autoattribute:: flags
+   .. autoattribute:: skey
+   .. autoattribute:: rkey
 
-.. raw:: html
+.. autoclass:: pcapkit.protocols.data.transport.tcp.MPTCPCapableFlag(req, ext, hsa)
+   :no-members:
+   :show-inheritance:
 
-   <br />
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
 
-.. class:: DataType_TCP_Opt_DONONE
+   .. autoattribute:: req
+   .. autoattribute:: ext
+   .. autoattribute:: hsa
 
-   :bases:  DataType_TCP_Opt
+.. autoclass:: pcapkit.protocols.data.transport.tcp.MPTCPJoin(kind, length, subtype)
+   :no-members:
+   :show-inheritance:
 
-   Structure of TCP options.
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. attribute:: data
-      :type: bytes
+.. autoclass:: pcapkit.protocols.data.transport.tcp.MPTCPJoinSYN(kind, length, subtype, connection, backup, addr_id, token, nounce)
+   :no-members:
+   :show-inheritance:
 
-      Kind-specific data.
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
 
-Unpack Process Options
-++++++++++++++++++++++
+   .. autoattribute:: connection
+   .. autoattribute:: backup
+   .. autoattribute:: addr_id
+   .. autoattribute:: token
+   .. autoattribute:: nounce
 
-For TCP options require unpack process, its structure is described as below:
+.. autoclass:: pcapkit.protocols.data.transport.tcp.MPTCPJoinSYNACK(kind, length, subtype, connection, backup, addr_id, hmac, nounce)
+   :no-members:
+   :show-inheritance:
 
-======== ========= ==================== ==========================
-Octets      Bits        Name                    Description
-======== ========= ==================== ==========================
-  0           0    ``tcp.opt.kind``          Kind
-  1           8    ``tcp.opt.length``        Length
-  2          16    ``tcp.opt.data``          Kind-specific Data
-======== ========= ==================== ==========================
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
 
-.. raw:: html
+   .. autoattribute:: connection
+   .. autoattribute:: backup
+   .. autoattribute:: addr_id
+   .. autoattribute:: hmac
+   .. autoattribute:: nounce
 
-   <br />
+.. autoclass:: pcapkit.protocols.data.transport.tcp.MPTCPJoinACK(kind, length, subtype, connection, hmac)
+   :no-members:
+   :show-inheritance:
 
-.. class:: DataType_TCP_Opt_UNPACK
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
 
-   :bases:  DataType_TCP_Opt
+   .. autoattribute:: connection
+   .. autoattribute:: hmac
 
-   Structure of TCP options.
+.. autoclass:: pcapkit.protocols.data.transport.tcp.MPTCPDSS(kind, length, subtype, flags, ack, dsn, ssn, dl_len, checksum)
+   :no-members:
+   :show-inheritance:
 
-   .. attribute:: data
-      :type: bytes
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
 
-      Kind-specific data.
+   .. autoattribute:: flags
+   .. autoattribute:: ack
+   .. autoattribute:: dsn
+   .. autoattribute:: ssn
+   .. autoattribute:: dl_len
+   .. autoattribute:: checksum
 
-Timestamps Option
-~~~~~~~~~~~~~~~~~
+.. autoclass:: pcapkit.protocols.data.transport.tcp.MPTCPDSSFlag(data_fin, dsn_oct, data_pre, ack_oct, ack_pre)
+   :no-members:
+   :show-inheritance:
 
-For TCP Timestamps (``TS``) option as described in :rfc:`7323`,
-its structure is described as below:
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
 
-======== ========= ==================== ==========================
-Octets      Bits        Name                    Description
-======== ========= ==================== ==========================
-  0           0    ``tcp.ts.kind``       Kind (``8``)
-  1           8    ``tcp.ts.length``     Length (``10``)
-  2          16    ``tcp.ts.val``        Timestamp Value
-  6          48    ``tcp.ts.ecr``        Timestamps Echo Reply
-======== ========= ==================== ==========================
+   .. autoattribute:: data_fin
+   .. autoattribute:: dsn_oct
+   .. autoattribute:: data_pre
+   .. autoattribute:: ack_oct
+   .. autoattribute:: ack_pre
 
-.. raw:: html
+.. autoclass:: pcapkit.protocols.data.transport.tcp.MPTCPAddAddress(kind, length, subtype, version, addr_id, addr, port)
+   :no-members:
+   :show-inheritance:
 
-   <br />
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
 
-.. class:: DataType_TCP_Opt_TS
+   .. autoattribute:: version
+   .. autoattribute:: addr_id
+   .. autoattribute:: addr
+   .. autoattribute:: port
 
-   :bases:  DataType_TCP_Opt
+.. autoclass:: pcapkit.protocols.data.transport.tcp.MPTCPRemoveAddress(kind, length, subtype, addr_id)
+   :no-members:
+   :show-inheritance:
 
-   Structure of TCP ``TSopt`` [:rfc:`7323`].
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. attribute:: val
-      :type: int
+   .. autoattribute:: addr_id
 
-      Timestamp value.
+.. autoclass:: pcapkit.protocols.data.transport.tcp.MPTCPPriority(kind, length, subtype, backup, addr_id)
+   :no-members:
+   :show-inheritance:
 
-   .. attribute:: ecr
-      :type: int
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
 
-      Timestamps echo reply.
+   .. autoattribute:: backup
+   .. autoattribute:: addr_id
 
-Partial Order Connection Service Profile Option
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.. autoclass:: pcapkit.protocols.data.transport.tcp.MPTCPFallback(kind, length, subtype, dsn)
+   :no-members:
+   :show-inheritance:
 
-For TCP Partial Order Connection Service Profile (``POC-SP``) option as described in :rfc:`1693` and :rfc:`6247`,
-its structure is described as below:
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
 
-======== ========= ==================== ==========================
-Octets      Bits        Name                    Description
-======== ========= ==================== ==========================
-  0           0    ``tcp.pocsp.kind``       Kind (``10``)
-  1           8    ``tcp.pocsp.length``     Length (``3``)
-  2          16    ``tcp.pocsp.start``      Start Flag
-  2          17    ``tcp.pocsp.end``        End Flag
-  2          18    ``tcp.pocsp.filler``     Filler
-======== ========= ==================== ==========================
+   .. autoattribute:: dsn
 
-.. raw:: html
+.. autoclass:: pcapkit.protocols.data.transport.tcp.MPTCPFastclose(kind, length, subtype, rkey)
+   :no-members:
+   :show-inheritance:
 
-   <br />
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
 
-.. class:: DataType_TCP_Opt_POCSP
+   .. autoattribute:: rkey
 
-   :bases:  DataType_TCP_Opt
-
-   Structure of TCP ``POC-SP`` Option [:rfc:`1693`][:rfc:`6247`].
-
-   .. attribute:: start
-      :type: bool
-
-      Start flag.
-
-   .. attribute:: end
-      :type: bool
-
-      End flag.
-
-   .. attribute:: filler
-      :type: bytes
-
-      Filler.
-
-Alternate Checksum Request Option
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-For TCP Alternate Checksum Request (``CHKSUM-REQ``) option as described in :rfc:`1146` and :rfc:`6247`,
-its structure is described as below:
-
-======== ========= ======================== ==========================
-Octets      Bits        Name                    Description
-======== ========= ======================== ==========================
-  0           0    ``tcp.chksumreq.kind``      Kind (``14``)
-  1           8    ``tcp.chksumreq.length``    Length (``3``)
-  2          16    ``tcp.chksumreq.ac``        Checksum Algorithm
-======== ========= ======================== ==========================
-
-.. raw:: html
-
-   <br />
-
-.. class:: DataType_TCP_Opt_ACOPT
-
-   :bases:  DataType_TCP_Opt
-
-   Structure of TCP ``CHKSUM-REQ`` [:rfc:`1146`][:rfc:`6247`].
-
-   .. attribute:: ac
-      :type: pcapkit.const.tcp.checksum.Checksum
-
-      Checksum algorithm.
-
-Quick-Start Response Option
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-For TCP Quick-Start Response (``QS``) option as described in :rfc:`4782`,
-its structure is described as below:
-
-======== ========= ======================== ===========================
-Octets      Bits        Name                    Description
-======== ========= ======================== ===========================
-  0           0    ``tcp.qs.kind``          Kind (``27``)
-  1           8    ``tcp.qs.length``        Length (``8``)
-  2          16                             Reserved (must be ``\x00``)
-  2          20    ``tcp.qs.req_rate``      Request Rate
-  3          24    ``tcp.qs.ttl_diff``      TTL Difference
-  4          32    ``tcp.qs.nounce``        QS Nounce
-  7          62                             Reserved (must be ``\x00``)
-======== ========= ======================== ===========================
-
-.. raw:: html
-
-   <br />
-
-.. class:: DataType_TCP_Opt_QSOPT
-
-   :bases:  DataType_TCP_Opt
-
-   Structure of TCP ``QSopt`` [:rfc:`4782`].
-
-   .. attribute:: req_rate
-      :type: int
-
-      Request rate.
-
-   .. attribute:: ttl_diff
-      :type: int
-
-      TTL difference.
-
-   .. attribute::  nounce
-      :type: int
-
-      QS nounce.
-
-User Timeout Option
-~~~~~~~~~~~~~~~~~~~
-
-For TCP User Timeout (``TIMEOUT``) option as described in :rfc:`5482`,
-its structure is described as below:
-
-======== ========= =========================== ===========================
-Octets      Bits        Name                    Description
-======== ========= =========================== ===========================
-  0           0    ``tcp.timeout.kind``        Kind (``28``)
-  1           8    ``tcp.timeout.length``      Length (``4``)
-  2          16    ``tcp.timeout.granularity`` Granularity
-  2          17    ``tcp.timeout.timeout``     User Timeout
-======== ========= =========================== ===========================
-
-.. raw:: html
-
-   <br />
-
-.. class:: DataType_TCP_Opt_UTOPT
-
-   :bases:  DataType_TCP_Opt
-
-   Structure of TCP ``TIMEOUT`` [:rfc:`5482`].
-
-   .. attribute:: granularity
-      :type: Literal['minutes', 'seconds']
-
-      Granularity.
-
-   .. attribute:: timeout
-      :type: datetime.timedelta
-
-      User timeout.
-
-Authentication Option
-~~~~~~~~~~~~~~~~~~~~~
-
-For Authentication (``AO``) option as described in :rfc:`5925`,
-its structure is described as below:
-
-======== ========= =========================== ===========================
-Octets      Bits        Name                    Description
-======== ========= =========================== ===========================
-  0           0    ``tcp.ao.kind``             Kind (``29``)
-  1           8    ``tcp.ao.length``           Length
-  2          16    ``tcp.ao.key_id``           KeyID
-  3          24    ``tcp.ao.r_next_key_id``    RNextKeyID
-  4          32    ``tcp.ao.mac``              Message Authentication Code
-======== ========= =========================== ===========================
-
-.. raw:: html
-
-   <br />
-
-.. class:: DataType_TCP_Opt_TCPAO
-
-   :bases:  DataType_TCP_Opt
-
-   Structure of TCP ``AOopt`` [:rfc:`5925`].
-
-   .. attribute:: key_id
-      :type: int
-
-      KeyID.
-
-   .. attribute:: r_next_key_id
-      :type: int
-
-      RNextKeyID.
-
-   .. attribute:: mac
-      :type: bytes
-
-      Message authentication code.
-
-Multipath TCP Options
-~~~~~~~~~~~~~~~~~~~~~
-
-For Multipath TCP (``MP-TCP``) options as described in :rfc:`6824`,
-its structure is described as below:
-
-======== ========= =========================== ===========================
-Octets      Bits        Name                    Description
-======== ========= =========================== ===========================
-  0           0    ``tcp.mp.kind``             Kind (``30``)
-  1           8    ``tcp.mp.length``           Length
-  2          16    ``tcp.mp.subtype``          Subtype
-  2          20    ``tcp.mp.data``             Subtype-specific Data
-======== ========= =========================== ===========================
-
-.. raw:: html
-
-   <br />
-
-.. class:: DataType_TCP_Opt_MPTCP
-
-   :bases:  DataType_TCP_Opt
-
-   Structure of ``MP-TCP`` [:rfc:`6824`].
-
-   .. attribute:: subtype
-      :type: pcapkit.const.tcp.mp_tcp_option.MPTCPOption
-
-      Subtype.
-
-   .. attribute:: data
-      :type: Optional[bytes]
-
-      Subtype-specific data.
-
-Multipath Capable Option
-++++++++++++++++++++++++
-
-For Multipath Capable (``MP_CAPABLE``) options as described in :rfc:`6824`,
-its structure is described as below:
-
-======== ========= ============================ =================================
-Octets      Bits        Name                    Description
-======== ========= ============================ =================================
-  0           0    ``tcp.mp.kind``              Kind (``30``)
-  1           8    ``tcp.mp.length``            Length (``12``/``20``)
-  2          16    ``tcp.mp.subtype``           Subtype (``0``)
-  2          20    ``tcp.mp.capable.version``   Version
-  3          24    ``tcp.mp.capable.flags.req`` Checksum Require Flag (``A``)
-  3          25    ``tcp.mp.capable.flags.ext`` Extensibility Flag (``B``)
-  3          26    ``tcp.mp.capable.flags.res`` Unassigned (``C`` - ``G``)
-  3          31    ``tcp.mp.capable.flags.hsa`` HMAC-SHA1 Flag (``H``)
-  4          32    ``tcp.mp.capable.skey``      Option Sender's Key
-  12         96    ``tcp.mp.capable.rkey``      Option Receiver's Key
-                                                (only if option length is ``20``)
-======== ========= ============================ =================================
-
-.. raw:: html
-
-   <br />
-
-.. class:: DataType_TCP_Opt_MP_CAPABLE
-
-   :bases: DataType_TCP_Opt_MPTCP
-
-   Structure of ``MP_CAPABLE`` [:rfc:`6824`].
-
-   .. attribute:: capable
-      :type: DataType_TCP_Opt_MP_CAPABLE_Data
-
-      Subtype-specific data.
-
-.. class:: DataType_TCP_Opt_MP_CAPABLE_Data
-
-   :bases: TypedDict
-
-   Structure of ``MP_CAPABLE`` [:rfc:`6824`].
-
-   .. attribute:: version
-      :type: int
-
-      Version.
-
-   .. attribute:: flags
-      :type: DataType_TCP_Opt_MP_CAPABLE_Flags
-
-      Flags.
-
-   .. attribute:: skey
-      :type: int
-
-      Option sender's key.
-
-   .. attribute:: rkey
-      :type: Optional[int]
-
-      Option receiver's key.
-
-.. class:: DataType_TCP_Opt_MP_CAPABLE_Flags
-
-   :bases: TypedDict
-
-   Flags.
-
-   .. attribute:: req
-      :type: bool
-
-      Checksum require flag.
-
-   .. attribute:: ext
-      :type: bool
-
-      Extensibility flag.
-
-   .. attribute:: res
-      :type: Tuple[bool, bool, bool, bool, bool]
-
-      Unassigned flags.
-
-   .. attribute:: hsa
-      :type: bool
-
-      HMAC-SHA1 flag.
-
-Join Connection Option
-++++++++++++++++++++++
-
-For Join Connection (``MP_JOIN``) options as described in :rfc:`6824`,
-its structure is described as below:
-
-======== ========= ============================ =================================
-Octets      Bits        Name                    Description
-======== ========= ============================ =================================
-  0           0    ``tcp.mp.kind``                 Kind (``30``)
-  1           8    ``tcp.mp.length``               Length
-  2          16    ``tcp.mp.subtype``              Subtype (``1``)
-  2          20    ``tcp.mp.data``                 Handshake-specific Data
-======== ========= ============================ =================================
-
-.. raw:: html
-
-   <br />
-
-.. class:: DataType_TCP_Opt_MP_JOIN
-
-   :bases: DataType_TCP_Opt_MPTCP
-
-   Structure of ``MP_JOIN`` [:rfc:`6824`].
-
-   .. attribute:: connection
-      :type: Optional[Literal['SYN/ACK', 'SYN', 'ACK']]
-
-      Join connection type.
-
-   .. attribute:: join
-      :type: DataType_TCP_Opt_MP_JOIN_Data
-
-      Subtype-specific data.
-
-.. class:: DataType_TCP_Opt_MP_JOIN_Data
-
-   :bases: TypedDict
-
-   Structure of ``MP_JOIN`` [:rfc:`6824`].
-
-   .. attribute:: data
-      :type: Optional[bytes]
-
-      Unknown type data.
-
-``MP_JOIN-SYN``
-:::::::::::::::
-
-For Join Connection (``MP_JOIN-SYN``) option for Initial SYN as described in :rfc:`6824`,
-its structure is described as below:
-
-======== ========= ============================ =================================
-Octets      Bits        Name                    Description
-======== ========= ============================ =================================
-  0           0    ``tcp.mp.kind``              Kind (``30``)
-  1           8    ``tcp.mp.length``            Length (``12``)
-  2          16    ``tcp.mp.subtype``           Subtype (``1`` | ``SYN``)
-  2          20                                 Reserved (must be ``\x00``)
-  2          23    ``tcp.mp.join.syn.backup``   Backup Path (``B``)
-  3          24    ``tcp.mp.join.syn.addr_id``  Address ID
-  4          32    ``tcp.mp.join.syn.token``    Receiver's Token
-  8          64    ``tcp.mp.join.syn.rand_num`` Sender's Random Number
-======== ========= ============================ =================================
-
-.. raw:: html
-
-   <br />
-
-.. class:: DataType_TCP_Opt_MP_JOIN_SYN
-
-   :bases: DataType_TCP_Opt_MP_JOIN_Data
-
-   Structure of ``MP_JOIN-SYN`` [:rfc:`6824`].
-
-   .. attribute:: syn
-      :type: DataType_TCP_Opt_MP_JOIN_SYN_Data
-
-      Subtype-specific data.
-
-.. class:: DataType_TCP_Opt_MP_JOIN_SYN_Data
-
-   :bases: TypedDict
-
-   Structure of ``MP_JOIN-SYN`` [:rfc:`6824`].
-
-   .. attribute:: backup
-      :type: bool
-
-      Backup path.
-
-   .. attribute:: addr_id
-      :type: int
-
-      Address ID.
-
-   .. attribute:: token
-      :type: int
-
-      Receiver's token.
-
-   .. attribute:: rand_num
-      :type: int
-
-      Sender's random number.
-
-``MP_JOIN-SYN/ACK``
-:::::::::::::::::::
-
-For Join Connection (``MP_JOIN-SYN/ACK``) option for Responding SYN/ACK as described in :rfc:`6824`,
-its structure is described as below:
-
-======== ========= =============================== =================================
-Octets      Bits        Name                       Description
-======== ========= =============================== =================================
-  0           0    ``tcp.mp.kind``                 Kind (``30``)
-  1           8    ``tcp.mp.length``               Length (``16``)
-  2          16    ``tcp.mp.subtype``              Subtype (``1`` | ``SYN/ACK``)
-  2          20                                    Reserved (must be ``\x00``)
-  2          23    ``tcp.mp.join.synack.backup``   Backup Path (``B``)
-  3          24    ``tcp.mp.join.synack.addr_id``  Address ID
-  4          32    ``tcp.mp.join.synack.hmac``     Sender's Truncated HMAC
-  12         96    ``tcp.mp.join.synack.rand_num`` Sender's Random Number
-======== ========= =============================== =================================
-
-.. raw:: html
-
-   <br />
-
-.. class:: DataType_TCP_Opt_MP_JOIN_SYNACK
-
-   :bases: DataType_TCP_Opt_MP_JOIN_Data
-
-   Structure of ``MP_JOIN-SYN/ACK`` [:rfc:`6824`].
-
-   .. attribute:: syn
-      :type: DataType_TCP_Opt_MP_JOIN_SYNACK_Data
-
-      Subtype-specific data.
-
-.. class:: DataType_TCP_Opt_MP_JOIN_SYNACK_Data
-
-   :bases: TypedDict
-
-   Structure of ``MP_JOIN-SYN/ACK`` [:rfc:`6824`].
-
-   .. attribute:: backup
-      :type: bool
-
-      Backup path.
-
-   .. attribute:: addr_id
-      :type: int
-
-      Address ID.
-
-   .. attribute:: hmac
-      :type: bytes
-
-      Sender's truncated HMAC.
-
-   .. attribute:: rand_num
-      :type: int
-
-      Sender's random number.
-
-``MP_JOIN-ACK``
-:::::::::::::::
-
-For Join Connection (``MP_JOIN-ACK``) option for Third ACK as described in :rfc:`6824`,
-its structure is described as below:
-
-======== ========= =============================== =================================
-Octets      Bits        Name                       Description
-======== ========= =============================== =================================
-  0           0    ``tcp.mp.kind``                 Kind (``30``)
-  1           8    ``tcp.mp.length``               Length (``16``)
-  2          16    ``tcp.mp.subtype``              Subtype (``1`` | ``ACK``)
-  2          20                                    Reserved (must be ``\x00``)
-  4          32    ``tcp.mp.join.ack.hmac``        Sender's HMAC
-======== ========= =============================== =================================
-
-.. raw:: html
-
-   <br />
-
-.. class:: DataType_TCP_Opt_MP_JOIN_ACK
-
-   :bases: DataType_TCP_Opt_MP_JOIN_Data
-
-   Structure of ``MP_JOIN-ACK`` [:rfc:`6824`].
-
-   .. attribute:: syn
-      :type: DataType_TCP_Opt_MP_JOIN_ACK_Data
-
-      Subtype-specific data.
-
-.. class:: DataType_TCP_Opt_MP_JOIN_ACK_Data
-
-   :bases: TypedDict
-
-   Structure of ``MP_JOIN-ACK`` [:rfc:`6824`].
-
-   .. attribute:: hmac
-      :type: bytes
-
-      Sender's HMAC.
-
-Data Sequence Signal Option
-+++++++++++++++++++++++++++
-
-For Data Sequence Signal (``DSS``) options as described in :rfc:`6824`,
-its structure is described as below:
-
-======= ========= ============================= =========================================================
-Octets      Bits        Name                    Description
-======= ========= ============================= =========================================================
-  0           0   ``tcp.mp.kind``                 Kind (``30``)
-  1           8   ``tcp.mp.length``               Length
-  2          16   ``tcp.mp.subtype``              Subtype (``2``)
-  2          20                                   Reserved (must be ``\x00``)
-  3          27   ``tcp.mp.dss.flags.fin``        DATA_FIN (``F``)
-  3          28   ``tcp.mp.dss.flags.dsn_len``    DSN Length (``m``)
-  3          29   ``tcp.mp.dss.flags.data_pre``   DSN, SSN, Data-Level Length, CHKSUM Present (``M``)
-  3          30   ``tcp.mp.dss.flags.ack_len``    ACK Length (``a``)
-  3          31   ``tcp.mp.dss.flags.ack_pre``    Data ACK Present (``A``)
-  4          32   ``tcp.mp.dss.ack``              Data ACK (``4`` / ``8`` octets)
-  8/12    64/96   ``tcp.mp.dss.dsn``              DSN (``4`` / ``8`` octets)
-  12/20  48/160   ``tcp.mp.dss.ssn``              Subflow Sequence Number
-  16/24 128/192   ``tcp.mp.dss.dl_len``           Data-Level Length
-  18/26 144/208   ``tcp.mp.dss.checksum``         Checksum
-======= ========= ============================= =========================================================
-
-.. raw:: html
-
-   <br />
-
-.. class:: DataType_TCP_Opt_DSS
-
-   :bases: DataType_TCP_Opt_MPTCP
-
-   Structure of ``DSS`` [:rfc:`6824`].
-
-   .. attribute:: dss
-      :type: DataType_TCP_Opt_DSS_Data
-
-      Subtype-specific data.
-
-.. class:: DataType_TCP_Opt_DSS_Data
-
-   :bases: TypedDict
-
-   Structure of ``DSS`` [:rfc:`6824`].
-
-   .. attribute:: flags
-      :type: DataType_TCP_Opt_DSS_Flags
-
-      Flags.
-
-   .. attribute:: ack
-      :type: Optional[int]
-
-      Data ACK.
-
-   .. attribute:: dsn
-      :type: Optional[int]
-
-      DSN.
-
-   .. attribute:: ssn
-      :type: Optional[int]
-
-      Subflow sequence number.
-
-   .. attribute:: dl_len
-      :type: int
-
-      Data-level length.
-
-   .. attribute:: checksum
-      :type: bytes
-
-      Checksum.
-
-.. class:: DataType_TCP_Opt_DSS_Flags
-
-   :bases: TypedDict
-
-   Flags.
-
-   .. attribute:: fin
-      :type: bool
-
-      ``DATA_FIN``.
-
-   .. attribute:: dsn_len
-      :type: int
-
-      DSN length.
-
-   .. attribute:: data_pre
-      :type: int
-
-      DSN, SSN, data-level length, checksum present.
-
-   .. attribute:: ack_len
-      :type: int
-
-      ACK length.
-
-   .. attribute:: ack_pre
-      :type: bool
-
-      ACK present.
-
-Add Address Option
-++++++++++++++++++
-
-For Add Address (``ADD_ADDR``) options as described in :rfc:`6824`,
-its structure is described as below:
-
-======= ========= ============================= =========================================================
-Octets      Bits        Name                    Description
-======= ========= ============================= =========================================================
-  0           0    ``tcp.mp.kind``                  Kind (``30``)
-  1           8    ``tcp.mp.length``                Length
-  2          16    ``tcp.mp.subtype``               Subtype (``3``)
-  2          20    ``tcp.mp.add_addr.ip_ver``       IP Version
-  3          24    ``tcp.mp.add_addr.addr_id``      Address ID
-  4          32    ``tcp.mp.add_addr.addr``         IP Address (``4`` / ``16``)
-  8/20   64/160    ``tcp.mp.add_addr.port``         Port (optional)
-======= ========= ============================= =========================================================
-
-.. raw:: html
-
-   <br />
-
-.. class:: DataType_TCP_Opt_ADD_ADDR
-
-   :bases: DataType_TCP_Opt_MPTCP
-
-   Structure of ``ADD_ADDR`` [:rfc:`6824`].
-
-   .. attribute:: add_addr
-      :type: DataType_TCP_Opt_ADD_ADDR_Data
-
-      Subtype-specific data.
-
-.. class:: DataType_TCP_Opt_ADD_ADDR_Data
-
-   :bases: TypedDict
-
-   Structure of ``ADD_ADDR`` [:rfc:`6824`].
-
-   .. attribute:: ip_ver
-      :type: Literal[4, 6]
-
-      IP version.
-
-   .. attribute:: addr_id
-      :type: int
-
-      Address ID.
-
-   .. attribute:: addr
-      :type: Union[ipaddress.IPv4Address, ipaddress.IPv6Address]
-
-      IP address.
-
-   .. attribute:: port
-      :type: Optional[int]
-
-      Port.
-
-Remove Address Option
-+++++++++++++++++++++
-
-For Remove Address (``REMOVE_ADDR``) options as described in :rfc:`6824`,
-its structure is described as below:
-
-======= ========= ============================== =========================================================
-Octets      Bits        Name                     Description
-======= ========= ============================== =========================================================
-  0           0   ``tcp.mp.kind``                    Kind (``30``)
-  1           8   ``tcp.mp.length``                  Length
-  2          16   ``tcp.mp.subtype``                 Subtype (``4``)
-  2          20                                      Reserved (must be ``\x00``)
-  3          24   ``tcp.mp.remove_addr.addr_id``     Address ID (optional list)
-======= ========= ============================== =========================================================
-
-.. raw:: html
-
-   <br />
-
-.. class:: DataType_TCP_Opt_REMOVE_ADDR
-
-   :bases: DataType_TCP_Opt_MPTCP
-
-   Structure of ``REMOVE_ADDR`` [:rfc:`6824`].
-
-   .. attribute:: remove_addr
-      :type: DataType_TCP_Opt_REMOVE_ADDR_Data
-
-      Subtype-specific data.
-
-.. class:: DataType_TCP_Opt_REMOVE_ADDR_Data
-
-   :bases: TypedDict
-
-   Structure of ``REMOVE_ADDR`` [:rfc:`6824`].
-
-   .. attribute:: addr_id
-      :type: Tuple[int]
-
-      Array of address IDs.
-
-Change Subflow Priority Option
-++++++++++++++++++++++++++++++
-
-For Change Subflow Priority (``MP_PRIO``) options as described in :rfc:`6824`,
-its structure is described as below:
-
-======= ========= ============================== =========================================================
-Octets      Bits        Name                     Description
-======= ========= ============================== =========================================================
-  0           0   ``tcp.mp.kind``                    Kind (``30``)
-  1           8   ``tcp.mp.length``                  Length
-  2          16   ``tcp.mp.subtype``                 Subtype (``4``)
-  2          23   ``tcp.mp.prio.backup``             Backup Path (``B``)
-  3          24   ``tcp.mp.prio.addr_id``            Address ID (optional)
-======= ========= ============================== =========================================================
-
-.. raw:: html
-
-   <br />
-
-.. class:: DataType_TCP_Opt_MP_PRIO
-
-   :bases: DataType_TCP_Opt_MPTCP
-
-   Structure of ``MP_PRIO`` [:rfc:`6824`].
-
-   .. attribute:: prio
-      :type: DataType_TCP_Opt_MP_PRIO_Data
-
-      Subtype-specific data.
-
-.. class:: DataType_TCP_Opt_MP_PRIO_Data
-
-   :bases: TypedDict
-
-   Structure of ``MP_PRIO`` [:rfc:`6824`].
-
-   .. attribute:: backup
-      :type: bool
-
-      Backup path.
-
-   .. attribute:: addr_id
-      :type: Optional[int]
-
-      Address ID.
-
-Fallback Option
-+++++++++++++++
-
-For Fallback (``MP_FAIL``) options as described in :rfc:`6824`,
-its structure is described as below:
-
-======= ========= ============================== =========================================================
-Octets      Bits        Name                     Description
-======= ========= ============================== =========================================================
-  0           0   ``tcp.mp.kind``                    Kind (``30``)
-  1           8   ``tcp.mp.length``                  Length
-  2          16   ``tcp.mp.subtype``                 Subtype (``4``)
-  2          23                                      Reserved (must be ``\x00``)
-  4          32   ``tcp.mp.fail.dsn``                Data Sequence Number
-======= ========= ============================== =========================================================
-
-.. raw:: html
-
-   <br />
-
-.. class:: DataType_TCP_Opt_MP_FAIL
-
-   :bases: DataType_TCP_Opt_MPTCP
-
-   Structure of ``MP_FAIL`` [:rfc:`6824`].
-
-   .. attribute:: fail
-      :type: DataType_TCP_Opt_MP_FAIL_Data
-
-      Subtype-specific data.
-
-.. class:: DataType_TCP_Opt_MP_FAIL_Data
-
-   :bases: TypedDict
-
-   Structure of ``MP_FAIL`` [:rfc:`6824`].
-
-   .. attribute:: dsn
-      :type: int
-
-      Data sequence number.
-
-Fast Close Option
-+++++++++++++++++
-
-For Fast Close (``MP_FASTCLOSE``) options as described in :rfc:`6824`,
-its structure is described as below:
-
-======= ========= ============================== =========================================================
-Octets      Bits        Name                     Description
-======= ========= ============================== =========================================================
-  0           0   ``tcp.mp.kind``                    Kind (``30``)
-  1           8   ``tcp.mp.length``                  Length
-  2          16   ``tcp.mp.subtype``                 Subtype (``4``)
-  2          23                                      Reserved (must be ``\x00``)
-  4          32   ``tcp.mp.fastclose.rkey``          Option Receiver's Key
-======= ========= ============================== =========================================================
-
-.. raw:: html
-
-   <br />
-
-.. class:: DataType_TCP_Opt_MP_FASTCLOSE
-
-   :bases: DataType_TCP_Opt_MPTCP
-
-   Structure of ``MP_FASTCLOSE`` [:rfc:`6824`].
-
-   .. attribute:: fastclose
-      :type: DataType_TCP_Opt_MP_FASTCLOSE_Data
-
-      Subtype-specific data.
-
-.. class:: DataType_TCP_Opt_MP_FASTCLOSE_Data
-
-   :bases: TypedDict
-
-   Structure of ``MP_FASTCLOSE`` [:rfc:`6824`].
-
-   .. attribute:: rkey
-      :type: int
-
-      Option receiver's key.
 
 .. raw:: html
 

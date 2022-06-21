@@ -33,7 +33,8 @@
             
   <h1>Source code for pcapkit.protocols.transport.tcp</h1><div class="highlight"><pre>
 <span></span><span class="c1"># -*- coding: utf-8 -*-</span>
-<span class="sd">&quot;&quot;&quot;transmission control protocol</span>
+<span class="sd">&quot;&quot;&quot;TCP - Transmission Control Protocol</span>
+<span class="sd">=========================================</span>
 
 <span class="sd">:mod:`pcapkit.protocols.transport.tcp` contains</span>
 <span class="sd">:class:`~pcapkit.protocols.transport.tcp.TCP` only,</span>
@@ -142,15 +143,111 @@
 
 
 <div class="viewcode-block" id="TCP"><a class="viewcode-back" href="../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP">[docs]</a><span class="k">class</span> <span class="nc">TCP</span><span class="p">(</span><span class="n">Transport</span><span class="p">[</span><span class="n">DataType_TCP</span><span class="p">]):</span>
-    <span class="sd">&quot;&quot;&quot;This class implements Transmission Control Protocol.&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;This class implements Transmission Control Protocol.</span>
+
+<span class="sd">    This class currently supports parsing of the following protocols, which are</span>
+<span class="sd">    registered in the :attr:`self.__proto__ &lt;pcapkit.protocols.transport.tcp.TCP.__proto__&gt;`</span>
+<span class="sd">    attribute:</span>
+
+<span class="sd">    .. list-table::</span>
+<span class="sd">       :header-rows: 1</span>
+
+<span class="sd">       * - Port Number</span>
+<span class="sd">         - Protocol</span>
+<span class="sd">       * - 21</span>
+<span class="sd">         - :class:`pcapkit.protocols.application.ftp.FTP`</span>
+<span class="sd">       * - 80</span>
+<span class="sd">         - :class:`pcapkit.protocols.application.http.HTTP`</span>
+
+<span class="sd">    This class currently supports parsing of the following TCP options,</span>
+<span class="sd">    which are directly mapped to the :class:`pcapkit.const.tcp.option.Option`</span>
+<span class="sd">    enumeration:</span>
+
+<span class="sd">    .. list-table::</span>
+<span class="sd">       :header-rows: 1</span>
+
+<span class="sd">       * - Option Code</span>
+<span class="sd">         - Option Parser</span>
+<span class="sd">       * - :attr:`~pcapkit.const.tcp.option.Option.End_of_Option_List`</span>
+<span class="sd">         - :meth:`~pcapkit.protocols.transport.tcp.TCP._read_mode_eool`</span>
+<span class="sd">       * - :attr:`~pcapkit.const.tcp.option.Option.No_Operation`</span>
+<span class="sd">         - :meth:`~pcapkit.protocols.transport.tcp.TCP._read_mode_nop`</span>
+<span class="sd">       * - :attr:`~pcapkit.const.tcp.option.Option.Maximum_Segment_Size`</span>
+<span class="sd">         - :meth:`~pcapkit.protocols.transport.tcp.TCP._read_mode_mss`</span>
+<span class="sd">       * - :attr:`~pcapkit.const.tcp.option.Option.Window_Scale`</span>
+<span class="sd">         - :meth:`~pcapkit.protocols.transport.tcp.TCP._read_mode_ws`</span>
+<span class="sd">       * - :attr:`~pcapkit.const.tcp.option.Option.SACK_Permitted`</span>
+<span class="sd">         - :meth:`~pcapkit.protocols.transport.tcp.TCP._read_mode_sackpmt`</span>
+<span class="sd">       * - :attr:`~pcapkit.const.tcp.option.Option.SACK`</span>
+<span class="sd">         - :meth:`~pcapkit.protocols.transport.tcp.TCP._read_mode_sack`</span>
+<span class="sd">       * - :attr:`~pcapkit.const.tcp.option.Option.Echo`</span>
+<span class="sd">         - :meth:`~pcapkit.protocols.transport.tcp.TCP._read_mode_echo`</span>
+<span class="sd">       * - :attr:`~pcapkit.const.tcp.option.Option.Echo_Reply`</span>
+<span class="sd">         - :meth:`~pcapkit.protocols.transport.tcp.TCP._read_mode_echore`</span>
+<span class="sd">       * - :attr:`~pcapkit.const.tcp.option.Option.Timestamps`</span>
+<span class="sd">         - :meth:`~pcapkit.protocols.transport.tcp.TCP._read_mode_ts`</span>
+<span class="sd">       * - :attr:`~pcapkit.const.tcp.option.Option.Partial_Order_Connection_Permitted`</span>
+<span class="sd">         - :meth:`~pcapkit.protocols.transport.tcp.TCP._read_mode_poc`</span>
+<span class="sd">       * - :attr:`~pcapkit.const.tcp.option.Option.Partial_Order_Service_Profile`</span>
+<span class="sd">         - :meth:`~pcapkit.protocols.transport.tcp.TCP._read_mode_pocsp`</span>
+<span class="sd">       * - :attr:`~pcapkit.const.tcp.option.Option.CC`</span>
+<span class="sd">         - :meth:`~pcapkit.protocols.transport.tcp.TCP._read_mode_cc`</span>
+<span class="sd">       * - :attr:`~pcapkit.const.tcp.option.Option.CC_NEW`</span>
+<span class="sd">         - :meth:`~pcapkit.protocols.transport.tcp.TCP._read_mode_ccnew`</span>
+<span class="sd">       * - :attr:`~pcapkit.const.tcp.option.Option.CC_ECHO`</span>
+<span class="sd">         - :meth:`~pcapkit.protocols.transport.tcp.TCP._read_mode_ccecho`</span>
+<span class="sd">       * - :attr:`~pcapkit.const.tcp.option.Option.TCP_Alternate_Checksum_Request`</span>
+<span class="sd">         - :meth:`~pcapkit.protocols.transport.tcp.TCP._read_mode_chkreq`</span>
+<span class="sd">       * - :attr:`~pcapkit.const.tcp.option.Option.TCP_Alternate_Checksum_Data`</span>
+<span class="sd">         - :meth:`~pcapkit.protocols.transport.tcp.TCP._read_mode_chksum`</span>
+<span class="sd">       * - :attr:`~pcapkit.const.tcp.option.Option.MD5_Signature_Option`</span>
+<span class="sd">         - :meth:`~pcapkit.protocols.transport.tcp.TCP._read_mode_sig`</span>
+<span class="sd">       * - :attr:`~pcapkit.const.tcp.option.Option.Quick_Start_Response`</span>
+<span class="sd">         - :meth:`~pcapkit.protocols.transport.tcp.TCP._read_mode_qs`</span>
+<span class="sd">       * - :attr:`~pcapkit.const.tcp.option.Option.User_Timeout_Option`</span>
+<span class="sd">         - :meth:`~pcapkit.protocols.transport.tcp.TCP._read_mode_timeout`</span>
+<span class="sd">       * - :attr:`~pcapkit.const.tcp.option.Option.TCP_Authentication_Option`</span>
+<span class="sd">         - :meth:`~pcapkit.protocols.transport.tcp.TCP._read_mode_ao`</span>
+<span class="sd">       * - :attr:`~pcapkit.const.tcp.option.Option.Multipath_TCP`</span>
+<span class="sd">         - :meth:`~pcapkit.protocols.transport.tcp.TCP._read_mode_mp`</span>
+<span class="sd">       * - :attr:`~pcapkit.const.tcp.option.Option.TCP_Fast_Open_Cookie`</span>
+<span class="sd">         - :meth:`~pcapkit.protocols.transport.tcp.TCP._read_mode_fastopen`</span>
+
+<span class="sd">    This class currently supports parsing of the following Multipath TCP options,</span>
+<span class="sd">    which are directly mapped to the :class:`pcapkit.const.tcp.mp_tcp_option.MPTCPOption`</span>
+<span class="sd">    enumeration:</span>
+
+<span class="sd">    .. list-table::</span>
+<span class="sd">       :header-rows: 1</span>
+
+<span class="sd">       * - Option Code</span>
+<span class="sd">         - Option Parser</span>
+<span class="sd">       * - :attr:`~pcapkit.const.tcp.mp_tcp_option.MPTCPOption.MP_CAPABLE`</span>
+<span class="sd">         - :meth:`~pcapkit.protocols.transport.tcp.TCP._read_mptcp_capable`</span>
+<span class="sd">       * - :attr:`~pcapkit.const.tcp.mp_tcp_option.MPTCPOption.MP_JOIN`</span>
+<span class="sd">         - :meth:`~pcapkit.protocols.transport.tcp.TCP._read_mptcp_join`</span>
+<span class="sd">       * - :attr:`~pcapkit.const.tcp.mp_tcp_option.MPTCPOption.DSS`</span>
+<span class="sd">         - :meth:`~pcapkit.protocols.transport.tcp.TCP._read_mptcp_dss`</span>
+<span class="sd">       * - :attr:`~pcapkit.const.tcp.mp_tcp_option.MPTCPOption.ADD_ADDR`</span>
+<span class="sd">         - :meth:`~pcapkit.protocols.transport.tcp.TCP._read_mptcp_addaddr`</span>
+<span class="sd">       * - :attr:`~pcapkit.const.tcp.mp_tcp_option.MPTCPOption.REMOVE_ADDR`</span>
+<span class="sd">         - :meth:`~pcapkit.protocols.transport.tcp.TCP._read_mptcp_remove`</span>
+<span class="sd">       * - :attr:`~pcapkit.const.tcp.mp_tcp_option.MPTCPOption.MP_PRIO`</span>
+<span class="sd">         - :meth:`~pcapkit.protocols.transport.tcp.TCP._read_mptcp_prio`</span>
+<span class="sd">       * - :attr:`~pcapkit.const.tcp.mp_tcp_option.MPTCPOption.MP_FAIL`</span>
+<span class="sd">         - :meth:`~pcapkit.protocols.transport.tcp.TCP._read_mptcp_fail`</span>
+<span class="sd">       * - :attr:`~pcapkit.const.tcp.mp_tcp_option.MPTCPOption.MP_FASTCLOSE`</span>
+<span class="sd">         - :meth:`~pcapkit.protocols.transport.tcp.TCP._read_mptcp_fastclose`</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="c1">##########################################################################</span>
     <span class="c1"># Defaults.</span>
     <span class="c1">##########################################################################</span>
 
-    <span class="c1">#: DefaultDict[int, Tuple[str, str]]: Protocol index mapping for decoding next layer,</span>
-    <span class="c1">#: c.f. :meth:`self._decode_next_layer &lt;pcapkit.protocols.protocol.Protocol._decode_next_layer&gt;`</span>
-    <span class="c1">#: &amp; :meth:`self._import_next_layer &lt;pcapkit.protocols.internet.link.Link._import_next_layer&gt;`.</span>
+    <span class="c1">#: DefaultDict[int, tuple[str, str]]: Protocol index mapping for decoding next layer,</span>
+    <span class="c1">#: c.f. :meth:`self._decode_next_layer &lt;pcapkit.protocols.transport.transport.Transport._decode_next_layer&gt;`</span>
+    <span class="c1">#: &amp; :meth:`self._import_next_layer &lt;pcapkit.protocols.protocol.Protocol._import_next_layer&gt;`.</span>
     <span class="n">__proto__</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">defaultdict</span><span class="p">(</span>
         <span class="k">lambda</span><span class="p">:</span> <span class="p">(</span><span class="s1">&#39;pcapkit.protocols.misc.raw&#39;</span><span class="p">,</span> <span class="s1">&#39;Raw&#39;</span><span class="p">),</span>
         <span class="p">{</span>
@@ -262,8 +359,6 @@
 
 <span class="sd">        Args:</span>
 <span class="sd">            length: Length of packet data.</span>
-
-<span class="sd">        Keyword Args:</span>
 <span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
 
 <span class="sd">        Returns:</span>
@@ -321,7 +416,7 @@
 <div class="viewcode-block" id="TCP.make"><a class="viewcode-back" href="../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP.make">[docs]</a>    <span class="k">def</span> <span class="nf">make</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;NoReturn&#39;</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Make (construct) packet data.</span>
 
-<span class="sd">        Keyword Args:</span>
+<span class="sd">        Args:</span>
 <span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
 
 <span class="sd">        Returns:</span>
@@ -356,9 +451,9 @@
     <span class="c1"># Data models.</span>
     <span class="c1">##########################################################################</span>
 
-<div class="viewcode-block" id="TCP.__length_hint__"><a class="viewcode-back" href="../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP.__length_hint__">[docs]</a>    <span class="k">def</span> <span class="fm">__length_hint__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Literal[20]&#39;</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__length_hint__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Literal[20]&#39;</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Return an estimated length for the object.&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="mi">20</span></div>
+        <span class="k">return</span> <span class="mi">20</span>
 
 <div class="viewcode-block" id="TCP.__index__"><a class="viewcode-back" href="../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP.__index__">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="fm">__index__</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;TransType&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=invalid-index-returned</span>
@@ -435,8 +530,6 @@
 
 <span class="sd">        Arguments:</span>
 <span class="sd">            kind: option kind value</span>
-
-<span class="sd">        Keyword Args:</span>
 <span class="sd">            options: extracted TCP options</span>
 
 <span class="sd">        Returns:</span>
@@ -467,8 +560,6 @@
 
 <span class="sd">        Arguments:</span>
 <span class="sd">            kind: option kind value</span>
-
-<span class="sd">        Keyword Args:</span>
 <span class="sd">            options: extracted TCP options</span>
 
 <span class="sd">        Returns:</span>
@@ -494,8 +585,6 @@
 
 <span class="sd">        Arguments:</span>
 <span class="sd">            kind: option kind value</span>
-
-<span class="sd">        Keyword Args:</span>
 <span class="sd">            options: extracted TCP options</span>
 
 <span class="sd">        Returns:</span>
@@ -521,8 +610,6 @@
 
 <span class="sd">        Arguments:</span>
 <span class="sd">            kind: option kind value</span>
-
-<span class="sd">        Keyword Args:</span>
 <span class="sd">            options: extracted TCP options</span>
 
 <span class="sd">        Returns:</span>
@@ -558,8 +645,6 @@
 
 <span class="sd">        Arguments:</span>
 <span class="sd">            kind: option kind value</span>
-
-<span class="sd">        Keyword Args:</span>
 <span class="sd">            options: extracted TCP options</span>
 
 <span class="sd">        Returns:</span>
@@ -594,8 +679,6 @@
 
 <span class="sd">        Arguments:</span>
 <span class="sd">            kind: option kind value</span>
-
-<span class="sd">        Keyword Args:</span>
 <span class="sd">            options: extracted TCP options</span>
 
 <span class="sd">        Returns:</span>
@@ -639,8 +722,6 @@
 
 <span class="sd">        Arguments:</span>
 <span class="sd">            kind: option kind value</span>
-
-<span class="sd">        Keyword Args:</span>
 <span class="sd">            options: extracted TCP options</span>
 
 <span class="sd">        Returns:</span>
@@ -676,8 +757,6 @@
 
 <span class="sd">        Arguments:</span>
 <span class="sd">            kind: option kind value</span>
-
-<span class="sd">        Keyword Args:</span>
 <span class="sd">            options: extracted TCP options</span>
 
 <span class="sd">        Returns:</span>
@@ -712,8 +791,6 @@
 
 <span class="sd">        Arguments:</span>
 <span class="sd">            kind: option kind value</span>
-
-<span class="sd">        Keyword Args:</span>
 <span class="sd">            options: extracted TCP options</span>
 
 <span class="sd">        Returns:</span>
@@ -749,8 +826,6 @@
 
 <span class="sd">        Arguments:</span>
 <span class="sd">            kind: option kind value</span>
-
-<span class="sd">        Keyword Args:</span>
 <span class="sd">            options: extracted TCP options</span>
 
 <span class="sd">        Returns:</span>
@@ -788,8 +863,6 @@
 
 <span class="sd">        Arguments:</span>
 <span class="sd">            kind: option kind value</span>
-
-<span class="sd">        Keyword Args:</span>
 <span class="sd">            options: extracted TCP options</span>
 
 <span class="sd">        Returns:</span>
@@ -823,8 +896,6 @@
 
 <span class="sd">        Arguments:</span>
 <span class="sd">            kind: option kind value</span>
-
-<span class="sd">        Keyword Args:</span>
 <span class="sd">            options: extracted TCP options</span>
 
 <span class="sd">        Returns:</span>
@@ -862,8 +933,6 @@
 
 <span class="sd">        Arguments:</span>
 <span class="sd">            kind: option kind value</span>
-
-<span class="sd">        Keyword Args:</span>
 <span class="sd">            options: extracted TCP options</span>
 
 <span class="sd">        Returns:</span>
@@ -899,8 +968,6 @@
 
 <span class="sd">        Arguments:</span>
 <span class="sd">            kind: option kind value</span>
-
-<span class="sd">        Keyword Args:</span>
 <span class="sd">            options: extracted TCP options</span>
 
 <span class="sd">        Returns:</span>
@@ -936,8 +1003,6 @@
 
 <span class="sd">        Arguments:</span>
 <span class="sd">            kind: option kind value</span>
-
-<span class="sd">        Keyword Args:</span>
 <span class="sd">            options: extracted TCP options</span>
 
 <span class="sd">        Returns:</span>
@@ -972,8 +1037,6 @@
 
 <span class="sd">        Arguments:</span>
 <span class="sd">            kind: option kind value</span>
-
-<span class="sd">        Keyword Args:</span>
 <span class="sd">            options: extracted TCP options</span>
 
 <span class="sd">        Returns:</span>
@@ -1009,8 +1072,6 @@
 
 <span class="sd">        Arguments:</span>
 <span class="sd">            kind: option kind value</span>
-
-<span class="sd">        Keyword Args:</span>
 <span class="sd">            options: extracted TCP options</span>
 
 <span class="sd">        Returns:</span>
@@ -1049,8 +1110,6 @@
 
 <span class="sd">        Arguments:</span>
 <span class="sd">            kind: option kind value</span>
-
-<span class="sd">        Keyword Args:</span>
 <span class="sd">            options: extracted TCP options</span>
 
 <span class="sd">        Returns:</span>
@@ -1090,8 +1149,6 @@
 
 <span class="sd">        Arguments:</span>
 <span class="sd">            kind: option kind value</span>
-
-<span class="sd">        Keyword Args:</span>
 <span class="sd">            options: extracted TCP options</span>
 
 <span class="sd">        Returns:</span>
@@ -1133,8 +1190,6 @@
 
 <span class="sd">        Arguments:</span>
 <span class="sd">            kind: option kind value</span>
-
-<span class="sd">        Keyword Args:</span>
 <span class="sd">            options: extracted TCP options</span>
 
 <span class="sd">        Returns:</span>
@@ -1181,8 +1236,6 @@
 
 <span class="sd">        Arguments:</span>
 <span class="sd">            kind: option kind value</span>
-
-<span class="sd">        Keyword Args:</span>
 <span class="sd">            options: extracted TCP options</span>
 
 <span class="sd">        Returns:</span>
@@ -1227,8 +1280,6 @@
 
 <span class="sd">        Arguments:</span>
 <span class="sd">            kind: option kind value</span>
-
-<span class="sd">        Keyword Args:</span>
 <span class="sd">            options: extracted TCP options</span>
 
 <span class="sd">        Returns:</span>
@@ -1264,8 +1315,6 @@
 <span class="sd">            kind: option kind value</span>
 <span class="sd">            dlen: length of remaining data</span>
 <span class="sd">            bits: 4-bit data</span>
-
-<span class="sd">        Keyword Args:</span>
 <span class="sd">            options: extracted TCP options</span>
 
 <span class="sd">        Returns:</span>
@@ -1306,8 +1355,6 @@
 <span class="sd">            kind: option kind value</span>
 <span class="sd">            dlen: length of remaining data</span>
 <span class="sd">            bits: 4-bit data</span>
-
-<span class="sd">        Keyword Args:</span>
 <span class="sd">            options: extracted TCP options</span>
 
 <span class="sd">        Returns:</span>
@@ -1349,8 +1396,6 @@
 <span class="sd">            kind: option kind value</span>
 <span class="sd">            dlen: length of remaining data</span>
 <span class="sd">            bits: 4-bit data</span>
-
-<span class="sd">        Keyword Args:</span>
 <span class="sd">            options: extracted TCP options</span>
 
 <span class="sd">        Returns:</span>
@@ -1390,8 +1435,6 @@
 <span class="sd">            kind: option kind value</span>
 <span class="sd">            dlen: length of remaining data</span>
 <span class="sd">            bits: 4-bit data</span>
-
-<span class="sd">        Keyword Args:</span>
 <span class="sd">            options: extracted TCP options</span>
 
 <span class="sd">        Returns:</span>
@@ -1445,8 +1488,6 @@
 <span class="sd">            kind: option kind value</span>
 <span class="sd">            dlen: length of remaining data</span>
 <span class="sd">            bits: 4-bit data</span>
-
-<span class="sd">        Keyword Args:</span>
 <span class="sd">            options: extracted TCP options</span>
 
 <span class="sd">        Returns:</span>
@@ -1500,8 +1541,6 @@
 <span class="sd">            kind: option kind value</span>
 <span class="sd">            dlen: length of remaining data</span>
 <span class="sd">            bits: 4-bit data</span>
-
-<span class="sd">        Keyword Args:</span>
 <span class="sd">            options: extracted TCP options</span>
 
 <span class="sd">        Returns:</span>
@@ -1555,8 +1594,6 @@
 <span class="sd">            kind: option kind value</span>
 <span class="sd">            dlen: length of remaining data</span>
 <span class="sd">            bits: 4-bit data</span>
-
-<span class="sd">        Keyword Args:</span>
 <span class="sd">            options: extracted TCP options</span>
 
 <span class="sd">        Returns:</span>
@@ -1616,8 +1653,6 @@
 <span class="sd">            kind: option kind value</span>
 <span class="sd">            dlen: length of remaining data</span>
 <span class="sd">            bits: 4-bit data</span>
-
-<span class="sd">        Keyword Args:</span>
 <span class="sd">            options: extracted TCP options</span>
 
 <span class="sd">        Returns:</span>
@@ -1671,8 +1706,6 @@
 <span class="sd">            kind: option kind value</span>
 <span class="sd">            dlen: length of remaining data</span>
 <span class="sd">            bits: 4-bit data</span>
-
-<span class="sd">        Keyword Args:</span>
 <span class="sd">            options: extracted TCP options</span>
 
 <span class="sd">        Returns:</span>
@@ -1716,8 +1749,6 @@
 <span class="sd">            kind: option kind value</span>
 <span class="sd">            dlen: length of remaining data</span>
 <span class="sd">            bits: 4-bit data</span>
-
-<span class="sd">        Keyword Args:</span>
 <span class="sd">            options: extracted TCP options</span>
 
 <span class="sd">        Returns:</span>
@@ -1763,8 +1794,6 @@
 <span class="sd">            kind: option kind value</span>
 <span class="sd">            dlen: length of remaining data</span>
 <span class="sd">            bits: 4-bit data</span>
-
-<span class="sd">        Keyword Args:</span>
 <span class="sd">            options: extracted TCP options</span>
 
 <span class="sd">        Returns:</span>
@@ -1811,8 +1840,6 @@
 <span class="sd">            kind: option kind value</span>
 <span class="sd">            dlen: length of remaining data</span>
 <span class="sd">            bits: 4-bit data</span>
-
-<span class="sd">        Keyword Args:</span>
 <span class="sd">            options: extracted TCP options</span>
 
 <span class="sd">        Returns:</span>
@@ -1854,8 +1881,6 @@
 
 <span class="sd">        Arguments:</span>
 <span class="sd">            kind: option kind value</span>
-
-<span class="sd">        Keyword Args:</span>
 <span class="sd">            options: extracted TCP options</span>
 
 <span class="sd">        Returns:</span>

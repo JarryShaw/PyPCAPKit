@@ -33,7 +33,8 @@
             
   <h1>Source code for pcapkit.protocols.internet.ipx</h1><div class="highlight"><pre>
 <span></span><span class="c1"># -*- coding: utf-8 -*-</span>
-<span class="sd">&quot;&quot;&quot;internetwork packet exchange</span>
+<span class="sd">&quot;&quot;&quot;IPX - Internetwork Packet Exchange</span>
+<span class="sd">========================================</span>
 
 <span class="sd">:mod:`pcapkit.protocols.internet.ipx` contains</span>
 <span class="sd">:class:`~pcapkit.protocols.internet.ipx.IPX` only,</span>
@@ -113,9 +114,7 @@
         <span class="sd">&quot;&quot;&quot;Read Internetwork Packet Exchange.</span>
 
 <span class="sd">         Args:</span>
-<span class="sd">            length (Optional[int]): Length of packet data.</span>
-
-<span class="sd">        Keyword Args:</span>
+<span class="sd">            length: Length of packet data.</span>
 <span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
 
 <span class="sd">        Returns:</span>
@@ -146,7 +145,7 @@
 <div class="viewcode-block" id="IPX.make"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/ipx.html#pcapkit.protocols.internet.ipx.IPX.make">[docs]</a>    <span class="k">def</span> <span class="nf">make</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;NoReturn&#39;</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Make (construct) packet data.</span>
 
-<span class="sd">        Keyword Args:</span>
+<span class="sd">        Args:</span>
 <span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
 
 <span class="sd">        Returns:</span>
@@ -159,9 +158,9 @@
     <span class="c1"># Data models.</span>
     <span class="c1">##########################################################################</span>
 
-<div class="viewcode-block" id="IPX.__length_hint__"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/ipx.html#pcapkit.protocols.internet.ipx.IPX.__length_hint__">[docs]</a>    <span class="k">def</span> <span class="fm">__length_hint__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Literal[30]&#39;</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__length_hint__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Literal[30]&#39;</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Return an estimated length for the object.&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="mi">30</span></div>
+        <span class="k">return</span> <span class="mi">30</span>
 
 <div class="viewcode-block" id="IPX.__index__"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/ipx.html#pcapkit.protocols.internet.ipx.IPX.__index__">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="fm">__index__</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;RegType_TransType&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=invalid-index-returned</span>

@@ -11,13 +11,24 @@ enumerations include:
 
    * - :class:`TCP_Checksum <pcapkit.const.tcp.checksum.Checksum>`
      - TCP Checksum [*]_
+   * - :class:`TCP_MPTCPOption <pcapkit.vendor.tcp.mp_tcp_option.MPTCPOption>`
+     - Multipath TCP options [*]_
    * - :class:`TCP_Option <pcapkit.vendor.tcp.option.Option>`
-     - TCP Option Kind Numbers [*]_
+     - TCP Option Kind Numbers
 
 .. automodule:: pcapkit.const.tcp.checksum
    :no-members:
 
 .. autoclass:: pcapkit.const.tcp.checksum.Checksum
+   :members:
+   :undoc-members:
+   :private-members:
+   :show-inheritance:
+
+.. automodule:: pcapkit.const.tcp.mp_tcp_option
+   :no-members:
+
+.. autoclass:: pcapkit.const.tcp.mp_tcp_option.MPTCPOption
    :members:
    :undoc-members:
    :private-members:
