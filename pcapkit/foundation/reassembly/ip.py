@@ -162,7 +162,7 @@ class IP_Reassembly(Reassembly[Packet[AT], Datagram[AT], tuple[AT, AT, 'int', 'T
         # initialise buffer with BUFID
         if BUFID not in self._buffer:
             self._buffer[BUFID] = Buffer(
-                TDL=0,                              # Total Data Length
+                TDL=-1,                              # Total Data Length
                 RCVBT=bytearray(8191),              # Fragment Received Bit Table
                 index=[],                           # index record
                 header=b'' if FO else info.header,  # header buffer
@@ -190,6 +190,7 @@ class IP_Reassembly(Reassembly[Packet[AT], Datagram[AT], tuple[AT, AT, 'int', 'T
         TDL = 0
         if not MF:
             TDL = TL - IHL + FO
+            self._buffer[BUFID].__update__(TDL=TDL)
 
         # when datagram is reassembled in whole
         start = 0
