@@ -137,7 +137,7 @@ class IPv6(IP[DataType_IPv6]):
         _srca = self._read_ip_addr()
         _dsta = self._read_ip_addr()
 
-        ipv6 = DataType_IPv6.from_dict({  # type: ignore[assignment]
+        ipv6 = DataType_IPv6.from_dict({
             'version': _htet[0],
             'class': _htet[1],
             'label': _htet[2],

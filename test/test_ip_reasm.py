@@ -44,6 +44,8 @@ with open('../sample/out', 'a') as file:  # pylint: disable=unspecified-encoding
         file.write('\n')
 
         print(repr(datagram.packet))
+        print(repr(datagram.packet), file=file)
+
         file.write(str(datagram.packet))
         print()
 
