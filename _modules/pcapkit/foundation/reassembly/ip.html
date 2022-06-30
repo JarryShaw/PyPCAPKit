@@ -196,7 +196,7 @@
         <span class="c1"># initialise buffer with BUFID</span>
         <span class="k">if</span> <span class="n">BUFID</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="p">[</span><span class="n">BUFID</span><span class="p">]</span> <span class="o">=</span> <span class="n">Buffer</span><span class="p">(</span>
-                <span class="n">TDL</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>                              <span class="c1"># Total Data Length</span>
+                <span class="n">TDL</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span>                              <span class="c1"># Total Data Length</span>
                 <span class="n">RCVBT</span><span class="o">=</span><span class="nb">bytearray</span><span class="p">(</span><span class="mi">8191</span><span class="p">),</span>              <span class="c1"># Fragment Received Bit Table</span>
                 <span class="n">index</span><span class="o">=</span><span class="p">[],</span>                           <span class="c1"># index record</span>
                 <span class="n">header</span><span class="o">=</span><span class="sa">b</span><span class="s1">&#39;&#39;</span> <span class="k">if</span> <span class="n">FO</span> <span class="k">else</span> <span class="n">info</span><span class="o">.</span><span class="n">header</span><span class="p">,</span>  <span class="c1"># header buffer</span>
@@ -224,6 +224,7 @@
         <span class="n">TDL</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">MF</span><span class="p">:</span>
             <span class="n">TDL</span> <span class="o">=</span> <span class="n">TL</span> <span class="o">-</span> <span class="n">IHL</span> <span class="o">+</span> <span class="n">FO</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="p">[</span><span class="n">BUFID</span><span class="p">]</span><span class="o">.</span><span class="n">__update__</span><span class="p">(</span><span class="n">TDL</span><span class="o">=</span><span class="n">TDL</span><span class="p">)</span>
 
         <span class="c1"># when datagram is reassembled in whole</span>
         <span class="n">start</span> <span class="o">=</span> <span class="mi">0</span>
