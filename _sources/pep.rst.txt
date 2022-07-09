@@ -95,7 +95,7 @@ and the PoC of ``_read_fields`` would be something like
    def _read_fields(self, *fields: 'Field') -> 'tuple[Any, ...]':
        # built template
        fmt = ''.join(field.template for field in fields)
-       len = sum([field.length for field in fields)
+       len = sum([field.length for field in fields])
 
        # read from buffer & do unpack
        buf = self._file.read(fmt)
