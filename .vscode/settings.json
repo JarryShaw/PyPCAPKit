@@ -342,5 +342,6 @@
         "wght",
         "Xcode"
     ],
-    "esbonio.sphinx.confDir": "${workspaceFolder}/doc/sphinx/source"
+    "esbonio.sphinx.confDir": "${workspaceFolder}/doc/sphinx/source",
+    "C_Cpp.errorSquiggles": "Enabled"
 }

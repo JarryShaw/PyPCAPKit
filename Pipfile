@@ -44,6 +44,7 @@ types-docutils = "*"
 types-emoji = "*"
 types-requests = "*"
 types-urllib3 = "*"
+pybind11 = {extras = ["global"],version = "*"}
 
 [requires]
 python_version = "3"
