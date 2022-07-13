@@ -11,6 +11,6 @@ scapy = pcapkit.extract(fin='../sample/in.pcap',
 dpkt = pcapkit.extract(fin='../sample/in.pcap',
                        fout='../sample/engines/dpkt.txt', format='tree', engine='dpkt')
 
-pipeline = pcapkit.extract(fin='../sample/in.pcap',
-                           nofile=True, engine='pipeline')
-server = pcapkit.extract(fin='../sample/in.pcap', nofile=True, engine='server')
+# pipeline = pcapkit.extract(fin='../sample/in.pcap',
+#                            nofile=True, engine='pipeline')
+# server = pcapkit.extract(fin='../sample/in.pcap', nofile=True, engine='server')

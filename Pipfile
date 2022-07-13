@@ -45,6 +45,7 @@ types-emoji = "*"
 types-requests = "*"
 types-urllib3 = "*"
 pybind11 = {extras = ["global"],version = "*"}
+snakeviz = "*"
 
 [requires]
 python_version = "3"

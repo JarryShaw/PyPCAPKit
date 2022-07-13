@@ -1,21 +1,16 @@
 # -*- coding: utf-8 -*-
 
 import cProfile
-import pstats
 
 import pcapkit
 
 
-def test():
-    return pcapkit.extract(fin='../sample/in.pcap',
-                           store=False, nofile=True, engine=engine)
+def test() -> 'None':
+    pcapkit.extract(fin='../sample/http.pcap', store=False, nofile=True, engine='default')
 
 
-for engine in ['default', 'dpkt', 'scapy', 'pyshark', 'pipline', 'server']:
-    profiler = cProfile.Profile()
-    profiler.runcall(test)
-
-    stats = pstats.Stats(profiler)
-    stats.strip_dirs()
-    stats.sort_stats('cumulative')
-    stats.print_stats()
+if __name__ == '__main__':
+    cProfile.run(
+        'test()',
+        'temp/parse_pcap.pstats',
+    )

@@ -10,10 +10,12 @@ version  = $(shell cat setup.py | grep "^__version__" | sed "s/__version__ = '\(
 # commit message
 message  ?= ""
 
-profile:
-	pipenv run python -m cProfile -o /tmp/parse_pcap.pstats $@
-	gprof2dot -f pstats /tmp/parse_pcap.pstats | dot -Tpng -o /tmp/parse_pcap.png
-	open /tmp/parse_pcap.png
+# profile:
+# 	mkdir -p test/temp
+# 	cd test && pipenv run python -m cProfile -o temp/parse_pcap.pstats test_engine.py
+# 	gprof2dot -f pstats test/temp/parse_pcap.pstats | dot -Tpng -o test/temp/parse_pcap.png
+# 	open test/temp/parse_pcap.png
+# 	snakeviz test/temp/parse_pcap.pstats
 
 clean: clean-pyc clean-misc clean-pypi
 const: update-const
@@ -224,3 +226,6 @@ mypy:
 
 bandit:
 	pipenv run bandit pcapkit
+
+profile:
+	$(MAKE) -C test profile
