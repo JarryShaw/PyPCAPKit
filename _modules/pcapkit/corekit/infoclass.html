@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pcapkit.corekit.infoclass &#8212; PyPCAPKit 0.16.1 documentation</title>
+    <title>pcapkit.corekit.infoclass &#8212; PyPCAPKit 0.16.2 documentation</title>
     <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/alabaster.css" />
     <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
@@ -74,14 +74,15 @@
 
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="c1">#: Mapping of name conflicts with builtin methods (original names to</span>
-    <span class="c1">#: transformed names).</span>
-    <span class="n">__map__</span><span class="p">:</span> <span class="s1">&#39;dict[str, str]&#39;</span>
-    <span class="c1">#: Mapping of name conflicts with builtin methods (transformed names to</span>
-    <span class="c1">#: original names).</span>
-    <span class="n">__map_reverse__</span><span class="p">:</span> <span class="s1">&#39;dict[str, str]&#39;</span>
-    <span class="c1">#： List of builtin methods.</span>
-    <span class="n">__builtin__</span><span class="p">:</span> <span class="s1">&#39;set[str]&#39;</span>
+    <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+        <span class="c1">#: Mapping of name conflicts with builtin methods (original names to</span>
+        <span class="c1">#: transformed names).</span>
+        <span class="n">__map__</span><span class="p">:</span> <span class="s1">&#39;dict[str, str]&#39;</span>
+        <span class="c1">#: Mapping of name conflicts with builtin methods (transformed names to</span>
+        <span class="c1">#: original names).</span>
+        <span class="n">__map_reverse__</span><span class="p">:</span> <span class="s1">&#39;dict[str, str]&#39;</span>
+        <span class="c1">#： List of builtin methods.</span>
+        <span class="n">__builtin__</span><span class="p">:</span> <span class="s1">&#39;set[str]&#39;</span>
 
 <div class="viewcode-block" id="Info.__new__"><a class="viewcode-back" href="../../../pcapkit/corekit/infoclass.html#pcapkit.corekit.infoclass.Info.__new__">[docs]</a>    <span class="k">def</span> <span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="s1">&#39;VT&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;VT&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Info&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
         <span class="sd">&quot;&quot;&quot;Create a new instance.</span>
@@ -98,7 +99,7 @@
         <span class="bp">cls</span><span class="o">.</span><span class="n">__map__</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="bp">cls</span><span class="o">.</span><span class="n">__map_reverse__</span> <span class="o">=</span> <span class="p">{}</span>
 
-        <span class="n">temp</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: list[str]</span>
+        <span class="n">temp</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;__map__&#39;</span><span class="p">,</span> <span class="s1">&#39;__map_reverse__&#39;</span><span class="p">,</span> <span class="s1">&#39;__builtin__&#39;</span><span class="p">]</span>
         <span class="k">for</span> <span class="n">obj</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="n">mro</span><span class="p">():</span>
             <span class="n">temp</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="nb">dir</span><span class="p">(</span><span class="n">obj</span><span class="p">))</span>
         <span class="bp">cls</span><span class="o">.</span><span class="n">__builtin__</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">temp</span><span class="p">)</span>
