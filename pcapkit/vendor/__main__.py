@@ -20,11 +20,10 @@ if TYPE_CHECKING:
     from argparse import ArgumentParser
     from typing import Type
 
-    import sys
-from pcapkit.vendor.default import Vendor
+    from pcapkit.vendor.default import Vendor
 
 #: version string
-__version__ = '0.16.1'
+__version__ = '0.16.2'
 
 
 def get_parser() -> 'ArgumentParser':
