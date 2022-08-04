@@ -118,10 +118,6 @@ Engine        Performance (seconds per packet)
 ``pyshark``   0.039607704480489093
 ============= =================================
 
-.. raw:: html
-
-   <br />
-
 ------------
 Installation
 ------------
