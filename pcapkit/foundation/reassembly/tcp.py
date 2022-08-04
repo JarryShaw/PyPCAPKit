@@ -190,6 +190,10 @@ class TCP_Reassembly(Reassembly[Packet, Datagram, BufferID, Buffer]):
             info: :term:`info <tcp.packet>` dict of packets to be reassembled
 
         """
+        # clear cache
+        self._newflg = False
+        self.__cached__.clear()
+
         BUFID = info.bufid  # Buffer Identifier
         DSN = info.dsn      # Data Sequence Number
         ACK = info.ack      # Acknowledgement Number

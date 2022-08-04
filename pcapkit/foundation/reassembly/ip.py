@@ -145,6 +145,10 @@ class IP_Reassembly(Reassembly[Packet[AT], Datagram[AT], tuple[AT, AT, 'int', 'T
             info: info dict of packets to be reassembled
 
         """
+        # clear cache
+        self._newflg = False
+        self.__cached__.clear()
+
         BUFID = info.bufid  # Buffer Identifier
         FO = info.fo        # Fragment Offset
         IHL = info.ihl      # Internet Header Length

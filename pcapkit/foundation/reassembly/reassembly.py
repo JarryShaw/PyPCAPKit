@@ -38,6 +38,8 @@ class Reassembly(Generic[PT, DT, IT, BT], metaclass=abc.ABCMeta):
             implemented) when submit
 
     """
+    _strflg: 'bool'
+    _newflg: 'bool'
 
     # Internal data storage for cached properties.
     __cached__: 'dict[str, Any]'
@@ -56,6 +58,10 @@ class Reassembly(Generic[PT, DT, IT, BT], metaclass=abc.ABCMeta):
     @property
     def count(self) -> 'int':
         """Total number of reassembled packets."""
+        if self._newflg:
+            self.__cached__.clear()
+            self._newflg = False
+
         if (cached := self.__cached__.get('count')) is not None:
             return cached
 
@@ -90,6 +96,7 @@ class Reassembly(Generic[PT, DT, IT, BT], metaclass=abc.ABCMeta):
 
         """
         # clear cache
+        self._newflg = False
         self.__cached__['count'] = None
         self.__cached__['fetch'] = None
 
@@ -122,6 +129,10 @@ class Reassembly(Generic[PT, DT, IT, BT], metaclass=abc.ABCMeta):
         will be returned.
 
         """
+        if self._newflg:
+            self.__cached__.clear()
+            self._newflg = False
+
         if (cached := self.__cached__.get('fetch')) is not None:
             return cached
 
@@ -187,6 +198,9 @@ class Reassembly(Generic[PT, DT, IT, BT], metaclass=abc.ABCMeta):
         """
         #: bool: Strict mode flag.
         self._strflg = strict
+        #: bool: New datagram flag.
+        self._newflg = False
+
         #: dict[IT, BT]: Dict buffer field.
         self._buffer = {}  # type: dict[IT, BT]
         #: list[DT]: List reassembled datagram.
@@ -200,4 +214,5 @@ class Reassembly(Generic[PT, DT, IT, BT], metaclass=abc.ABCMeta):
                 (detailed format described in corresponding protocol)
 
         """
+        self._newflg = True
         self.reassembly(packet)
