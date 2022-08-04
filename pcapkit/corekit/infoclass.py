@@ -40,14 +40,15 @@ class Info(collections.abc.Mapping[str, VT], Generic[VT]):
 
     """
 
-    #: Mapping of name conflicts with builtin methods (original names to
-    #: transformed names).
-    __map__: 'dict[str, str]'
-    #: Mapping of name conflicts with builtin methods (transformed names to
-    #: original names).
-    __map_reverse__: 'dict[str, str]'
-    #： List of builtin methods.
-    __builtin__: 'set[str]'
+    if TYPE_CHECKING:
+        #: Mapping of name conflicts with builtin methods (original names to
+        #: transformed names).
+        __map__: 'dict[str, str]'
+        #: Mapping of name conflicts with builtin methods (transformed names to
+        #: original names).
+        __map_reverse__: 'dict[str, str]'
+        #： List of builtin methods.
+        __builtin__: 'set[str]'
 
     def __new__(cls, *args: 'VT', **kwargs: 'VT') -> 'Info':  # pylint: disable=unused-argument
         """Create a new instance.
@@ -64,7 +65,7 @@ class Info(collections.abc.Mapping[str, VT], Generic[VT]):
         cls.__map__ = {}
         cls.__map_reverse__ = {}
 
-        temp = []  # type: list[str]
+        temp = ['__map__', '__map_reverse__', '__builtin__']
         for obj in cls.mro():
             temp.extend(dir(obj))
         cls.__builtin__ = set(temp)
