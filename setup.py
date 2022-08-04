@@ -4,7 +4,7 @@ import subprocess  # nosec
 import sys
 
 # version string
-__version__ = '0.16.2'
+__version__ = '0.16.3'
 
 # README
 with open('README.rst', encoding='utf-8') as file:

@@ -36,7 +36,7 @@ copyright = f'2017-{datetime.date.today().year}, Jarry Shaw'  # pylint: disable=
 author = 'Jarry Shaw'
 
 # The full version, including alpha/beta/rc tags
-release = '0.16.2'
+release = '0.16.3'
 
 
 # -- General configuration ---------------------------------------------------

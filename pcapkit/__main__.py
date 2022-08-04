@@ -34,7 +34,7 @@ if TYPE_CHECKING:
     from argparse import ArgumentParser
 
 #: version number
-__version__ = '0.16.2'
+__version__ = '0.16.3'
 
 
 def get_parser() -> 'ArgumentParser':
