@@ -1,8 +1,8 @@
 # sphinx
-Sphinx==5.1.0
+Sphinx==5.1.1
 
 # sphinx-autodoc-typehints
-sphinx-autodoc-typehints==1.18.3
+sphinx-autodoc-typehints==1.19.2
 
 # typing-extensions
 typing_extensions==4.3.0
