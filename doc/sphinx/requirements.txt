@@ -2,7 +2,7 @@
 Sphinx==5.2.3
 
 # sphinx-autodoc-typehints
-sphinx-autodoc-typehints==1.19.2
+sphinx-autodoc-typehints==1.19.4
 
 # typing-extensions
 typing_extensions==4.3.0
