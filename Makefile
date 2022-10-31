@@ -25,21 +25,41 @@ pipenv: update-pipenv
 # update: update-const update-date
 update: update-const
 
-dist:
-	mkdir -p dist sdist eggs wheels
-	find dist -iname '*.egg' -exec mv {} eggs \;
-	find dist -iname '*.whl' -exec mv {} wheels \;
-	find dist -iname '*.tar.gz' -exec mv {} sdist \;
-	rm -rf build dist *.egg-info
-	pipenv run python setup.py sdist
-	pypy3.7 setup.py bdist_egg bdist_wheel --python-tag='pp37'
-	python3.7 setup.py bdist_egg bdist_wheel --python-tag='cp37'
-	python3.8 setup.py bdist_egg bdist_wheel --python-tag='cp38'
-	python3.9 setup.py bdist_egg bdist_wheel --python-tag='cp39'
-	python3.10 setup.py bdist_egg bdist_wheel --python-tag='cp310'
-	twine check dist/* || true
-	twine upload dist/* -r pypi --skip-existing
-	twine upload dist/* -r pypitest --skip-existing
+dist-update:
+	~/.pyenv/versions/pypy3.7-*/bin/python3.7 -m pip install -U pip setuptools wheel
+	~/.pyenv/versions/pypy3.8-*/bin/python3.8 -m pip install -U pip setuptools wheel
+	~/.pyenv/versions/pypy3.9-*/bin/python3.9 -m pip install -U pip setuptools wheel
+	~/.pyenv/versions/3.7.*/bin/python3.7 -m pip install -U pip setuptools wheel
+	~/.pyenv/versions/3.8.*/bin/python3.8 -m pip install -U pip setuptools wheel
+	python3.9 -m pip install -U pip setuptools wheel
+	python3.10 -m pip install -U pip setuptools wheel
+	python3.11 -m pip install -U pip setuptools wheel
+
+dist-build:
+	rm -rf build_tmp
+	mkdir build_tmp
+	cp -r pcapkit LICENSE MANIFEST.in pyproject.toml README.rst setup.cfg setup.py build_tmp
+	cd build_tmp && mkdir -p dist sdist eggs wheels
+	cd build_tmp && python3.11 setup.py bdist_egg bdist_wheel --python-tag='cp311'
+	cd build_tmp && python3.10 setup.py bdist_egg bdist_wheel --python-tag='cp310'
+	cd build_tmp && python3.9 setup.py bdist_egg bdist_wheel --python-tag='cp39'
+	cd build_tmp && ~/.pyenv/versions/pypy3.9-*/bin/python3.9 setup.py bdist_egg bdist_wheel --python-tag='pp39'
+	cd build_tmp && pipenv run walrus --no-archive pcapkit
+	cd build_tmp && ~/.pyenv/versions/3.8.*/bin/python3.8 setup.py bdist_egg bdist_wheel --python-tag='cp38'
+	cd build_tmp && ~/.pyenv/versions/pypy3.8-*/bin/python3.8 setup.py bdist_egg bdist_wheel --python-tag='pp38'
+	cd build_tmp && ~/.pyenv/versions/3.7.*/bin/python3.7 setup.py bdist_egg bdist_wheel --python-tag='cp37'
+	cd build_tmp && ~/.pyenv/versions/pypy3.7-*/bin/python3.7 setup.py bdist_egg bdist_wheel --python-tag='pp37'
+	cd build_tmp && python3.11 setup.py sdist
+
+dist-upload:
+	twine check build_tmp/dist/*
+	twine upload build_tmp/dist/* -r pypi --skip-existing
+	# twine upload build_tmp/dist/* -r pypitest --skip-existing
+	find build_tmp/dist -name "*.egg" -exec mv {} eggs \;
+	find build_tmp/dist -name "*.whl" -exec mv {} wheels \;
+	find build_tmp/dist -name "*.tar.gz" -exec mv {} sdist \;
+
+dist: dist-update dist-build dist-upload
 
 docs:
 	PCAPKIT_SPHINX=1 pipenv run $(MAKE) -C doc/sphinx html
@@ -139,7 +159,7 @@ dist-pypi-old: dist-f2format
 
 # upload PyPI distribution
 .ONESHELL:
-dist-upload:
+dist-upload-old:
 	set -ex
 	cd $(DIR)
 	twine check dist/*

@@ -165,17 +165,43 @@ attrs = dict(
     },
     setup_requires=[
         # version compatibility
-        #'bpc-f2format; python_version < "3.6"',
         'f2format; python_version < "3.6"',
-        #'bpc-walrus; python_version < "3.8"',
-        'python-walrus==0.1.5rc1; python_version < "3.8"',
+        'bpc-walrus; python_version < "3.8"',
         'pathlib2>=2.3.2; python_version == "3.4"',
     ]
 )
 
+
+def refactor() -> 'None':
+    """Refactor code."""
+    if version_info < (3, 6):
+        try:
+            subprocess.check_call(  # nosec
+                [sys.executable, '-m', 'f2format', '--no-archive', 'pcapkit']
+            )
+        except subprocess.CalledProcessError as error:
+            print('Failed to perform assignment expression backport compiling.'
+                  'Please consider manually install `bpc-f2format` and try again.', file=sys.stderr)
+            sys.exit(error.returncode)
+
+    if version_info < (3, 8):
+        try:
+            subprocess.check_call(  # nosec
+                [sys.executable, '-m', 'walrus', '--no-archive', 'pcapkit']
+            )
+        except subprocess.CalledProcessError as error:
+            print('Failed to perform assignment expression backport compiling.'
+                  'Please consider manually install `bpc-walrus` and try again.', file=sys.stderr)
+            sys.exit(error.returncode)
+
+
 try:
     from setuptools import setup
-    from setuptools.command.build_py import build_py
+    from setuptools.command.bdist_egg import bdist_egg as _bdist_egg
+    from setuptools.command.build_py import build_py as _build_py
+    from setuptools.command.develop import develop as _develop
+    from setuptools.command.install import install as _install
+    from setuptools.command.sdist import sdist as _sdist
 
     version_info = sys.version_info[:2]
 
@@ -191,38 +217,99 @@ try:
         python_requires='>=3.6',
         zip_safe=True,  # type: ignore
     ))
+
+
+    class bdist_egg(_bdist_egg):
+        """Add on-distribution backport code conversion."""
+
+        def run(self) -> 'None':
+            """Run command."""
+            refactor()
+            _bdist_egg.run(self)
+
+
+    class develop(_develop):
+        """Add on-develop backport code conversion."""
+
+        def run(self) -> 'None':
+            """Run command."""
+            refactor()
+            _develop.run(self)
+
+
+    cmdclass = {
+        'bdist_egg': bdist_egg,
+        'develop': develop,
+    }
+
 except ImportError:
     from distutils.core import setup  # pylint: disable=deprecated-module
-    from distutils.command.build_py import build_py  # pylint: disable=deprecated-module
+    from distutils.command.bdist import bdist as _bdist  # pylint: disable=deprecated-module
+    from distutils.command.build_py import build_py as _build_py  # pylint: disable=deprecated-module
+    from distutils.command.install import install as _install  # pylint: disable=deprecated-module
+    from distutils.command.sdist import sdist as _sdist  # pylint: disable=deprecated-module
 
 
-class build(build_py):
+    class bdist(_bdist):
+        """Add on-distribution backport code conversion."""
+
+        def run(self) -> 'None':
+            """Run command."""
+            refactor()
+            _bdist.run(self)
+
+
+    cmdclass = {
+        'bdist': bdist,
+    }
+
+
+try:
+    from wheel.bdist_wheel import bdist_wheel as _bdist_wheel
+
+
+    class bdist_wheel(_bdist_wheel):
+        """Add on-wheel backport code conversion."""
+
+        def run(self) -> 'None':
+            """Run command."""
+            refactor()
+            _bdist_wheel.run(self)
+
+
+    cmdclass['bdist_wheel'] = bdist_wheel
+except ImportError:
+    pass
+
+
+class build_py(_build_py):
     """Add on-build backport code conversion."""
 
     def run(self) -> 'None':
-        if version_info < (3, 6):
-            try:
-                subprocess.check_call(  # nosec
-                    [sys.executable, '-m', 'f2format', '--no-archive', 'pcapkit']
-                )
-            except subprocess.CalledProcessError as error:
-                print('Failed to perform assignment expression backport compiling.'
-                      'Please consider manually install `bpc-f2format` and try again.', file=sys.stderr)
-                sys.exit(error.returncode)
+        refactor()
+        _build_py.run(self)
 
-        if version_info < (3, 8):
-            try:
-                subprocess.check_call(  # nosec
-                    [sys.executable, '-m', 'walrus', '--no-archive', 'pcapkit']
-                )
-            except subprocess.CalledProcessError as error:
-                print('Failed to perform assignment expression backport compiling.'
-                      'Please consider manually install `bpc-walrus` and try again.', file=sys.stderr)
-                sys.exit(error.returncode)
-        build_py.run(self)
+
+class install(_install):
+    """Add on-install backport code conversion."""
+
+    def run(self) -> 'None':
+        refactor()
+        _install.run(self)
+
+
+class sdist(_sdist):
+    """Add on-distribution backport code conversion."""
+
+    def run(self) -> 'None':
+        refactor()
+        _sdist.run(self)
 
 
 # set-up script for pip distribution
 setup(cmdclass={
-    'build_py': build,
+    'build_py': build_py,
+    'install': install,
+    'sdist': sdist,
+    **cmdclass,
 }, **attrs)

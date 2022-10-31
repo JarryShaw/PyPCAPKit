@@ -216,6 +216,7 @@
         "pycapfile",
         "pyenv",
         "pypcap",
+        "pyproject",
         "qsfn",
         "qsnn",
         "qsopt",

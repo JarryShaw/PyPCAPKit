@@ -31,6 +31,8 @@ temp
 _build
 Pipfile.lock
 
+build_tmp
+
 # Created by https://www.gitignore.io/api/macos,python,visualstudiocode
 
 ### macOS ###
