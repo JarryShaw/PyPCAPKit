@@ -12,17 +12,18 @@ import collections.abc
 import itertools
 from typing import TYPE_CHECKING, Generic, TypeVar
 
+from pcapkit.utilities.compat import Mapping
 from pcapkit.utilities.exceptions import UnsupportedCall
 
 if TYPE_CHECKING:
-    from typing import Any, Iterable, Iterator, Mapping, NoReturn, Optional
+    from typing import Any, Iterable, Iterator, NoReturn, Optional
 
 __all__ = ['Info']
 
 VT = TypeVar('VT')
 
 
-class Info(collections.abc.Mapping[str, VT], Generic[VT]):
+class Info(Mapping[str, VT], Generic[VT]):
     """Turn dictionaries into :obj:`object` like instances.
 
     * :class:`Info` objects inherit from :obj:`dict` type

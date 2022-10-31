@@ -19,6 +19,7 @@ import sys
 from typing import TYPE_CHECKING, Generic, TypeVar, overload
 
 from pcapkit.corekit.infoclass import Info
+from pcapkit.utilities.compat import Tuple
 from pcapkit.utilities.exceptions import FileExists, stacklevel
 from pcapkit.utilities.logging import logger
 from pcapkit.utilities.warnings import FileWarning, FormatWarning, warn
@@ -41,7 +42,7 @@ IPAddress = TypeVar('IPAddress', 'IPv4Address', 'IPv6Address')
 # Data Models
 ###############################################################################
 
-BufferID = tuple[IPAddress, int, IPAddress, int]
+BufferID = Tuple[IPAddress, int, IPAddress, int]
 
 
 class Packet(Info, Generic[IPAddress]):

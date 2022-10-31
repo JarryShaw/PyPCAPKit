@@ -13,6 +13,7 @@ from typing import TYPE_CHECKING, Generic, TypeVar
 from pcapkit.corekit.infoclass import Info
 from pcapkit.foundation.reassembly.reassembly import Reassembly
 from pcapkit.protocols.transport.tcp import TCP
+from pcapkit.utilities.compat import Tuple
 
 if TYPE_CHECKING:
     from ipaddress import IPv4Address, IPv6Address
@@ -30,7 +31,7 @@ IPAddress = TypeVar('IPAddress', 'IPv4Address', 'IPv6Address')
 # Data Models
 ###############################################################################
 
-BufferID = tuple[IPAddress, int, IPAddress, int]
+BufferID = Tuple[IPAddress, int, IPAddress, int]
 
 
 class Packet(Info):

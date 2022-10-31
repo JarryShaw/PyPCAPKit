@@ -16,6 +16,7 @@ from typing import TYPE_CHECKING, Generic, TypeVar
 
 from pcapkit.corekit.infoclass import Info
 from pcapkit.foundation.reassembly.reassembly import Reassembly
+from pcapkit.utilities.compat import Tuple
 
 if TYPE_CHECKING:
     from ipaddress import IPv4Address, IPv6Address
@@ -124,7 +125,7 @@ class Buffer(Info, Generic[AT]):
 ###############################################################################
 
 
-class IP_Reassembly(Reassembly[Packet[AT], Datagram[AT], tuple[AT, AT, 'int', 'TransType'], Buffer[AT]], Generic[AT]):  # pylint: disable=abstract-method
+class IP_Reassembly(Reassembly[Packet[AT], Datagram[AT], Tuple[AT, AT, 'int', 'TransType'], Buffer[AT]], Generic[AT]):  # pylint: disable=abstract-method
     """Reassembly for IP payload.
 
     Important:

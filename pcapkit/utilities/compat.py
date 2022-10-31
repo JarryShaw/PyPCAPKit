@@ -14,6 +14,7 @@ __all__ = [
 
     # classes
     'Collection', 'cached_property',
+    'Mapping', 'Tuple',
 
     # modules
     'pathlib',
@@ -116,3 +117,10 @@ else:
                             )
                             raise TypeError(msg) from None
             return val
+
+if version < (3, 9):
+    from typing import Mapping, Tuple
+else:
+    from collections.abc import Mapping
+
+    Tuple = tuple  # type: ignore[assignment]
