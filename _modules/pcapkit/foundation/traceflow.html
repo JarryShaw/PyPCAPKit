@@ -54,6 +54,7 @@
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">Generic</span><span class="p">,</span> <span class="n">TypeVar</span><span class="p">,</span> <span class="n">overload</span>
 
 <span class="kn">from</span> <span class="nn">pcapkit.corekit.infoclass</span> <span class="kn">import</span> <span class="n">Info</span>
+<span class="kn">from</span> <span class="nn">pcapkit.utilities.compat</span> <span class="kn">import</span> <span class="n">Tuple</span>
 <span class="kn">from</span> <span class="nn">pcapkit.utilities.exceptions</span> <span class="kn">import</span> <span class="n">FileExists</span><span class="p">,</span> <span class="n">stacklevel</span>
 <span class="kn">from</span> <span class="nn">pcapkit.utilities.logging</span> <span class="kn">import</span> <span class="n">logger</span>
 <span class="kn">from</span> <span class="nn">pcapkit.utilities.warnings</span> <span class="kn">import</span> <span class="n">FileWarning</span><span class="p">,</span> <span class="n">FormatWarning</span><span class="p">,</span> <span class="n">warn</span>
@@ -76,7 +77,7 @@
 <span class="c1"># Data Models</span>
 <span class="c1">###############################################################################</span>
 
-<span class="n">BufferID</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">IPAddress</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="n">IPAddress</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span>
+<span class="n">BufferID</span> <span class="o">=</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">IPAddress</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="n">IPAddress</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span>
 
 
 <div class="viewcode-block" id="Packet"><a class="viewcode-back" href="../../../pcapkit/foundation/traceflow.html#pcapkit.foundation.traceflow.Packet">[docs]</a><span class="k">class</span> <span class="nc">Packet</span><span class="p">(</span><span class="n">Info</span><span class="p">,</span> <span class="n">Generic</span><span class="p">[</span><span class="n">IPAddress</span><span class="p">]):</span>

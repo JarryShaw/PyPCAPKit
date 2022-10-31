@@ -51,6 +51,7 @@
 
 <span class="kn">from</span> <span class="nn">pcapkit.corekit.infoclass</span> <span class="kn">import</span> <span class="n">Info</span>
 <span class="kn">from</span> <span class="nn">pcapkit.foundation.reassembly.reassembly</span> <span class="kn">import</span> <span class="n">Reassembly</span>
+<span class="kn">from</span> <span class="nn">pcapkit.utilities.compat</span> <span class="kn">import</span> <span class="n">Tuple</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
     <span class="kn">from</span> <span class="nn">ipaddress</span> <span class="kn">import</span> <span class="n">IPv4Address</span><span class="p">,</span> <span class="n">IPv6Address</span>
@@ -159,7 +160,7 @@
 <span class="c1">###############################################################################</span>
 
 
-<div class="viewcode-block" id="IP_Reassembly"><a class="viewcode-back" href="../../../../pcapkit/foundation/reassembly/ip/ip.html#pcapkit.foundation.reassembly.ip.IP_Reassembly">[docs]</a><span class="k">class</span> <span class="nc">IP_Reassembly</span><span class="p">(</span><span class="n">Reassembly</span><span class="p">[</span><span class="n">Packet</span><span class="p">[</span><span class="n">AT</span><span class="p">],</span> <span class="n">Datagram</span><span class="p">[</span><span class="n">AT</span><span class="p">],</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">AT</span><span class="p">,</span> <span class="n">AT</span><span class="p">,</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="s1">&#39;TransType&#39;</span><span class="p">],</span> <span class="n">Buffer</span><span class="p">[</span><span class="n">AT</span><span class="p">]],</span> <span class="n">Generic</span><span class="p">[</span><span class="n">AT</span><span class="p">]):</span>  <span class="c1"># pylint: disable=abstract-method</span>
+<div class="viewcode-block" id="IP_Reassembly"><a class="viewcode-back" href="../../../../pcapkit/foundation/reassembly/ip/ip.html#pcapkit.foundation.reassembly.ip.IP_Reassembly">[docs]</a><span class="k">class</span> <span class="nc">IP_Reassembly</span><span class="p">(</span><span class="n">Reassembly</span><span class="p">[</span><span class="n">Packet</span><span class="p">[</span><span class="n">AT</span><span class="p">],</span> <span class="n">Datagram</span><span class="p">[</span><span class="n">AT</span><span class="p">],</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">AT</span><span class="p">,</span> <span class="n">AT</span><span class="p">,</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="s1">&#39;TransType&#39;</span><span class="p">],</span> <span class="n">Buffer</span><span class="p">[</span><span class="n">AT</span><span class="p">]],</span> <span class="n">Generic</span><span class="p">[</span><span class="n">AT</span><span class="p">]):</span>  <span class="c1"># pylint: disable=abstract-method</span>
     <span class="sd">&quot;&quot;&quot;Reassembly for IP payload.</span>
 
 <span class="sd">    Important:</span>

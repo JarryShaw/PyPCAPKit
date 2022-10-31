@@ -48,6 +48,7 @@
 <span class="kn">from</span> <span class="nn">pcapkit.corekit.infoclass</span> <span class="kn">import</span> <span class="n">Info</span>
 <span class="kn">from</span> <span class="nn">pcapkit.foundation.reassembly.reassembly</span> <span class="kn">import</span> <span class="n">Reassembly</span>
 <span class="kn">from</span> <span class="nn">pcapkit.protocols.transport.tcp</span> <span class="kn">import</span> <span class="n">TCP</span>
+<span class="kn">from</span> <span class="nn">pcapkit.utilities.compat</span> <span class="kn">import</span> <span class="n">Tuple</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
     <span class="kn">from</span> <span class="nn">ipaddress</span> <span class="kn">import</span> <span class="n">IPv4Address</span><span class="p">,</span> <span class="n">IPv6Address</span>
@@ -65,7 +66,7 @@
 <span class="c1"># Data Models</span>
 <span class="c1">###############################################################################</span>
 
-<span class="n">BufferID</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">IPAddress</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="n">IPAddress</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span>
+<span class="n">BufferID</span> <span class="o">=</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">IPAddress</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="n">IPAddress</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span>
 
 
 <div class="viewcode-block" id="Packet"><a class="viewcode-back" href="../../../../pcapkit/foundation/reassembly/tcp/tcp.html#pcapkit.foundation.reassembly.tcp.Packet">[docs]</a><span class="k">class</span> <span class="nc">Packet</span><span class="p">(</span><span class="n">Info</span><span class="p">):</span>
