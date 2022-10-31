@@ -14,6 +14,7 @@
     <script src="../../_static/underscore.js"></script>
     <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/sphinx_highlight.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
     <link rel="next" title="Logging System" href="logging.html" />
@@ -43,10 +44,79 @@ and <a class="reference internal" href="decorators.html#pcapkit.utilities.decora
 several user-refined exceptions and warnings.</p>
 <div class="toctree-wrapper compound">
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="logging.html">Logging System</a></li>
-<li class="toctree-l1"><a class="reference internal" href="decorators.html">Decorator Functions</a></li>
-<li class="toctree-l1"><a class="reference internal" href="exceptions.html">User Defined Exceptions</a></li>
-<li class="toctree-l1"><a class="reference internal" href="warnings.html">User Defined Warnings</a></li>
+<li class="toctree-l1"><a class="reference internal" href="logging.html">Logging System</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="logging.html#pcapkit.utilities.logging.logger"><code class="docutils literal notranslate"><span class="pre">logger</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="logging.html#pcapkit.utilities.logging.DEVMODE"><code class="docutils literal notranslate"><span class="pre">DEVMODE</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="decorators.html">Decorator Functions</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="decorators.html#pcapkit.utilities.decorators.seekset"><code class="docutils literal notranslate"><span class="pre">seekset()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="decorators.html#pcapkit.utilities.decorators.beholder"><code class="docutils literal notranslate"><span class="pre">beholder()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="exceptions.html">User Defined Exceptions</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="exceptions.html#pcapkit.utilities.exceptions.BaseError"><code class="docutils literal notranslate"><span class="pre">BaseError</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="exceptions.html#pcapkit.utilities.exceptions.DigitError"><code class="docutils literal notranslate"><span class="pre">DigitError</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="exceptions.html#pcapkit.utilities.exceptions.IntError"><code class="docutils literal notranslate"><span class="pre">IntError</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="exceptions.html#pcapkit.utilities.exceptions.RealError"><code class="docutils literal notranslate"><span class="pre">RealError</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="exceptions.html#pcapkit.utilities.exceptions.ComplexError"><code class="docutils literal notranslate"><span class="pre">ComplexError</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="exceptions.html#pcapkit.utilities.exceptions.BoolError"><code class="docutils literal notranslate"><span class="pre">BoolError</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="exceptions.html#pcapkit.utilities.exceptions.BytesError"><code class="docutils literal notranslate"><span class="pre">BytesError</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="exceptions.html#pcapkit.utilities.exceptions.StringError"><code class="docutils literal notranslate"><span class="pre">StringError</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="exceptions.html#pcapkit.utilities.exceptions.BytearrayError"><code class="docutils literal notranslate"><span class="pre">BytearrayError</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="exceptions.html#pcapkit.utilities.exceptions.DictError"><code class="docutils literal notranslate"><span class="pre">DictError</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="exceptions.html#pcapkit.utilities.exceptions.ListError"><code class="docutils literal notranslate"><span class="pre">ListError</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="exceptions.html#pcapkit.utilities.exceptions.TupleError"><code class="docutils literal notranslate"><span class="pre">TupleError</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="exceptions.html#pcapkit.utilities.exceptions.IterableError"><code class="docutils literal notranslate"><span class="pre">IterableError</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="exceptions.html#pcapkit.utilities.exceptions.IOObjError"><code class="docutils literal notranslate"><span class="pre">IOObjError</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="exceptions.html#pcapkit.utilities.exceptions.ProtocolUnbound"><code class="docutils literal notranslate"><span class="pre">ProtocolUnbound</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="exceptions.html#pcapkit.utilities.exceptions.CallableError"><code class="docutils literal notranslate"><span class="pre">CallableError</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="exceptions.html#pcapkit.utilities.exceptions.InfoError"><code class="docutils literal notranslate"><span class="pre">InfoError</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="exceptions.html#pcapkit.utilities.exceptions.IPError"><code class="docutils literal notranslate"><span class="pre">IPError</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="exceptions.html#pcapkit.utilities.exceptions.EnumError"><code class="docutils literal notranslate"><span class="pre">EnumError</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="exceptions.html#pcapkit.utilities.exceptions.ComparisonError"><code class="docutils literal notranslate"><span class="pre">ComparisonError</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="exceptions.html#pcapkit.utilities.exceptions.RegistryError"><code class="docutils literal notranslate"><span class="pre">RegistryError</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="exceptions.html#pcapkit.utilities.exceptions.FormatError"><code class="docutils literal notranslate"><span class="pre">FormatError</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="exceptions.html#pcapkit.utilities.exceptions.UnsupportedCall"><code class="docutils literal notranslate"><span class="pre">UnsupportedCall</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="exceptions.html#pcapkit.utilities.exceptions.FileError"><code class="docutils literal notranslate"><span class="pre">FileError</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="exceptions.html#pcapkit.utilities.exceptions.FileExists"><code class="docutils literal notranslate"><span class="pre">FileExists</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="exceptions.html#pcapkit.utilities.exceptions.FileNotFound"><code class="docutils literal notranslate"><span class="pre">FileNotFound</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="exceptions.html#pcapkit.utilities.exceptions.ProtocolNotFound"><code class="docutils literal notranslate"><span class="pre">ProtocolNotFound</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="exceptions.html#pcapkit.utilities.exceptions.VersionError"><code class="docutils literal notranslate"><span class="pre">VersionError</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="exceptions.html#pcapkit.utilities.exceptions.IndexNotFound"><code class="docutils literal notranslate"><span class="pre">IndexNotFound</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="exceptions.html#pcapkit.utilities.exceptions.ProtocolError"><code class="docutils literal notranslate"><span class="pre">ProtocolError</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="exceptions.html#pcapkit.utilities.exceptions.EndianError"><code class="docutils literal notranslate"><span class="pre">EndianError</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="exceptions.html#pcapkit.utilities.exceptions.KeyExists"><code class="docutils literal notranslate"><span class="pre">KeyExists</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="exceptions.html#pcapkit.utilities.exceptions.ProtocolNotImplemented"><code class="docutils literal notranslate"><span class="pre">ProtocolNotImplemented</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="exceptions.html#pcapkit.utilities.exceptions.VendorNotImplemented"><code class="docutils literal notranslate"><span class="pre">VendorNotImplemented</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="exceptions.html#pcapkit.utilities.exceptions.StructError"><code class="docutils literal notranslate"><span class="pre">StructError</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="exceptions.html#pcapkit.utilities.exceptions.MissingKeyError"><code class="docutils literal notranslate"><span class="pre">MissingKeyError</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="exceptions.html#pcapkit.utilities.exceptions.FragmentError"><code class="docutils literal notranslate"><span class="pre">FragmentError</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="exceptions.html#pcapkit.utilities.exceptions.PacketError"><code class="docutils literal notranslate"><span class="pre">PacketError</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="exceptions.html#pcapkit.utilities.exceptions.ModuleNotFound"><code class="docutils literal notranslate"><span class="pre">ModuleNotFound</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="exceptions.html#pcapkit.utilities.exceptions.stacklevel"><code class="docutils literal notranslate"><span class="pre">stacklevel()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="warnings.html">User Defined Warnings</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="warnings.html#pcapkit.utilities.warnings.warn"><code class="docutils literal notranslate"><span class="pre">warn()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="warnings.html#pcapkit.utilities.warnings.BaseWarning"><code class="docutils literal notranslate"><span class="pre">BaseWarning</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="warnings.html#pcapkit.utilities.warnings.FormatWarning"><code class="docutils literal notranslate"><span class="pre">FormatWarning</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="warnings.html#pcapkit.utilities.warnings.EngineWarning"><code class="docutils literal notranslate"><span class="pre">EngineWarning</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="warnings.html#pcapkit.utilities.warnings.InvalidVendorWarning"><code class="docutils literal notranslate"><span class="pre">InvalidVendorWarning</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="warnings.html#pcapkit.utilities.warnings.FileWarning"><code class="docutils literal notranslate"><span class="pre">FileWarning</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="warnings.html#pcapkit.utilities.warnings.LayerWarning"><code class="docutils literal notranslate"><span class="pre">LayerWarning</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="warnings.html#pcapkit.utilities.warnings.ProtocolWarning"><code class="docutils literal notranslate"><span class="pre">ProtocolWarning</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="warnings.html#pcapkit.utilities.warnings.AttributeWarning"><code class="docutils literal notranslate"><span class="pre">AttributeWarning</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="warnings.html#pcapkit.utilities.warnings.DevModeWarning"><code class="docutils literal notranslate"><span class="pre">DevModeWarning</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="warnings.html#pcapkit.utilities.warnings.VendorRequestWarning"><code class="docutils literal notranslate"><span class="pre">VendorRequestWarning</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="warnings.html#pcapkit.utilities.warnings.VendorRuntimeWarning"><code class="docutils literal notranslate"><span class="pre">VendorRuntimeWarning</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="warnings.html#pcapkit.utilities.warnings.DPKTWarning"><code class="docutils literal notranslate"><span class="pre">DPKTWarning</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="warnings.html#pcapkit.utilities.warnings.ScapyWarning"><code class="docutils literal notranslate"><span class="pre">ScapyWarning</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="warnings.html#pcapkit.utilities.warnings.PySharkWarning"><code class="docutils literal notranslate"><span class="pre">PySharkWarning</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="warnings.html#pcapkit.utilities.warnings.EmojiWarning"><code class="docutils literal notranslate"><span class="pre">EmojiWarning</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="warnings.html#pcapkit.utilities.warnings.VendorWarning"><code class="docutils literal notranslate"><span class="pre">VendorWarning</span></code></a></li>
+</ul>
+</li>
 </ul>
 </div>
 <section id="module-pcapkit.utilities.compat">
@@ -55,16 +125,16 @@ several user-refined exceptions and warnings.</p>
 following objects and functions:</p>
 <table class="docutils align-default">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ModuleNotFoundError" title="(in Python v3.10)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ModuleNotFoundError</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ModuleNotFoundError" title="(in Python v3.11)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ModuleNotFoundError</span></code></a></p></td>
 <td><p>Python 3.6+</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Collection" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">collections.abc.Collection</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Collection" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">collections.abc.Collection</span></code></a></p></td>
 <td><p>Python 3.6+</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#module-pathlib" title="(in Python v3.10)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pathlib</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#module-pathlib" title="(in Python v3.11)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pathlib</span></code></a></p></td>
 <td><p>Python 3.5+</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference external" href="https://docs.python.org/3/library/functools.html#functools.cached_property" title="(in Python v3.10)"><code class="xref py py-func docutils literal notranslate"><span class="pre">functools.cached_property()</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference external" href="https://docs.python.org/3/library/functools.html#functools.cached_property" title="(in Python v3.11)"><code class="xref py py-func docutils literal notranslate"><span class="pre">functools.cached_property()</span></code></a></p></td>
 <td><p>Python 3.8+</p></td>
 </tr>
 </tbody>

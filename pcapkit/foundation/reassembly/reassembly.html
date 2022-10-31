@@ -14,6 +14,7 @@
     <script src="../../../_static/underscore.js"></script>
     <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/sphinx_highlight.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" />
     <link rel="next" title="IP Datagram Reassembly" href="ip/index.html" />
@@ -44,12 +45,12 @@ implements datagram reassembly of IP and TCP packets.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.foundation.reassembly.reassembly.Reassembly">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.foundation.reassembly.reassembly.</span></span><span class="sig-name descname"><span class="pre">Reassembly</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">strict</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/foundation/reassembly/reassembly.html#Reassembly"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.reassembly.reassembly.Reassembly" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Generic" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Generic</span></code></a>[<code class="xref py py-obj docutils literal notranslate"><span class="pre">PT</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">DT</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">IT</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">BT</span></code>]</p>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Generic" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Generic</span></code></a>[<code class="xref py py-obj docutils literal notranslate"><span class="pre">PT</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">DT</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">IT</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">BT</span></code>]</p>
 <p>Base class for reassembly procedure.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>strict</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a>) – if return all datagrams (including those not
+<li><p><strong>strict</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a>) – if return all datagrams (including those not
 implemented) when submit</p></li>
 <li><p><strong>*args</strong> (<em>Any</em>) – Arbitrary positional arguments.</p></li>
 <li><p><strong>**kwargs</strong> (<em>Any</em>) – Arbitrary keyword arguments.</p></li>
@@ -65,7 +66,7 @@ implemented) when submit</p></li>
 <dd><p>Initialise packet reassembly.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>strict</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a>) – if return all datagrams (including those not
+<dd class="field-odd"><p><strong>strict</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a>) – if return all datagrams (including those not
 implemented) when submit</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
@@ -80,55 +81,55 @@ implemented) when submit</p>
 <dd><p>Call packet reassembly.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>packet</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.TypeVar" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">TypeVar</span></code></a>(<code class="docutils literal notranslate"><span class="pre">PT</span></code>, bound= Info)) – packet dict to be reassembled
+<dd class="field-odd"><p><strong>packet</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.TypeVar" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">TypeVar</span></code></a>(<code class="docutils literal notranslate"><span class="pre">PT</span></code>, bound= Info)) – packet dict to be reassembled
 (detailed format described in corresponding protocol)</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></p>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="pcapkit.foundation.reassembly.reassembly.Reassembly.name">
-<em class="property"><span class="pre">abstract</span><span class="w"> </span><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></em><a class="headerlink" href="#pcapkit.foundation.reassembly.reassembly.Reassembly.name" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">abstract</span><span class="w"> </span><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a></em><a class="headerlink" href="#pcapkit.foundation.reassembly.reassembly.Reassembly.name" title="Permalink to this definition">¶</a></dt>
 <dd><p>Protocol name of current reassembly object.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="pcapkit.foundation.reassembly.reassembly.Reassembly.count">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">count</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></em><a class="headerlink" href="#pcapkit.foundation.reassembly.reassembly.Reassembly.count" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">count</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a></em><a class="headerlink" href="#pcapkit.foundation.reassembly.reassembly.Reassembly.count" title="Permalink to this definition">¶</a></dt>
 <dd><p>Total number of reassembled packets.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="pcapkit.foundation.reassembly.reassembly.Reassembly.datagram">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">datagram</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.10)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><span class="pre">DT</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pcapkit.foundation.reassembly.reassembly.Reassembly.datagram" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">datagram</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.11)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><span class="pre">DT</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pcapkit.foundation.reassembly.reassembly.Reassembly.datagram" title="Permalink to this definition">¶</a></dt>
 <dd><p>Reassembled datagram.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.TypeVar" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">TypeVar</span></code></a>(<code class="docutils literal notranslate"><span class="pre">DT</span></code>, bound= Info), <a class="reference external" href="https://docs.python.org/3/library/constants.html#Ellipsis" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">...</span></code></a>]</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.TypeVar" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">TypeVar</span></code></a>(<code class="docutils literal notranslate"><span class="pre">DT</span></code>, bound= Info), <a class="reference external" href="https://docs.python.org/3/library/constants.html#Ellipsis" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">...</span></code></a>]</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="pcapkit.foundation.reassembly.reassembly.Reassembly.protocol">
-<em class="property"><span class="pre">abstract</span><span class="w"> </span><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">protocol</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.10)"><span class="pre">Type</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="../../protocols/protocol.html#pcapkit.protocols.protocol.Protocol" title="pcapkit.protocols.protocol.Protocol"><span class="pre">Protocol</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pcapkit.foundation.reassembly.reassembly.Reassembly.protocol" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">abstract</span><span class="w"> </span><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">protocol</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.11)"><span class="pre">Type</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="../../protocols/protocol.html#pcapkit.protocols.protocol.Protocol" title="pcapkit.protocols.protocol.Protocol"><span class="pre">Protocol</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pcapkit.foundation.reassembly.reassembly.Reassembly.protocol" title="Permalink to this definition">¶</a></dt>
 <dd><p>Protocol of current reassembly object.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Type</span></code></a>[<a class="reference internal" href="../../protocols/protocol.html#pcapkit.protocols.protocol.Protocol" title="pcapkit.protocols.protocol.Protocol"><code class="xref py py-class docutils literal notranslate"><span class="pre">Protocol</span></code></a>]</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Type</span></code></a>[<a class="reference internal" href="../../protocols/protocol.html#pcapkit.protocols.protocol.Protocol" title="pcapkit.protocols.protocol.Protocol"><code class="xref py py-class docutils literal notranslate"><span class="pre">Protocol</span></code></a>]</p>
 </dd>
 </dl>
 </dd></dl>
@@ -139,10 +140,10 @@ implemented) when submit</p>
 <dd><p>Reassembly procedure.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>info</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.TypeVar" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">TypeVar</span></code></a>(<code class="docutils literal notranslate"><span class="pre">PT</span></code>, bound= Info)) – info dict of packets to be reassembled</p>
+<dd class="field-odd"><p><strong>info</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.TypeVar" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">TypeVar</span></code></a>(<code class="docutils literal notranslate"><span class="pre">PT</span></code>, bound= Info)) – info dict of packets to be reassembled</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></p>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -154,12 +155,12 @@ implemented) when submit</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>buf</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.TypeVar" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">TypeVar</span></code></a>(<code class="docutils literal notranslate"><span class="pre">BT</span></code>, bound= Info)) – buffer dict of reassembled packets</p></li>
-<li><p><strong>**kwargs</strong> – arbitrary keyword arguments</p></li>
+<li><p><strong>buf</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.TypeVar" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">TypeVar</span></code></a>(<code class="docutils literal notranslate"><span class="pre">BT</span></code>, bound= Info)) – buffer dict of reassembled packets</p></li>
+<li><p><strong>**kwargs</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>) – arbitrary keyword arguments</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.TypeVar" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">TypeVar</span></code></a>(<code class="docutils literal notranslate"><span class="pre">DT</span></code>, bound= Info)]</p>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.TypeVar" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">TypeVar</span></code></a>(<code class="docutils literal notranslate"><span class="pre">DT</span></code>, bound= Info)]</p>
 </dd>
 </dl>
 </dd></dl>
@@ -170,7 +171,7 @@ implemented) when submit</p>
 <dd><p>Fetch datagram.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.TypeVar" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">TypeVar</span></code></a>(<code class="docutils literal notranslate"><span class="pre">DT</span></code>, bound= Info), <a class="reference external" href="https://docs.python.org/3/library/constants.html#Ellipsis" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">...</span></code></a>]</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.TypeVar" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">TypeVar</span></code></a>(<code class="docutils literal notranslate"><span class="pre">DT</span></code>, bound= Info), <a class="reference external" href="https://docs.python.org/3/library/constants.html#Ellipsis" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">...</span></code></a>]</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>Tuple of reassembled datagrams.</p>
@@ -192,14 +193,14 @@ will be returned.</p>
 <dd><p>Return datagram index.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>pkt_num</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>) – index of packet</p>
+<dd class="field-odd"><p><strong>pkt_num</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>) – index of packet</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>]</p>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>]</p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Reassembled datagram index which was from No. <code class="docutils literal notranslate"><span class="pre">pkt_num</span></code> packet;
-if not found, returns <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a>.</p>
+if not found, returns <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a>.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -210,32 +211,32 @@ if not found, returns <a class="reference external" href="https://docs.python.or
 <dd><p>Run automatically.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>packets</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.TypeVar" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">TypeVar</span></code></a>(<code class="docutils literal notranslate"><span class="pre">PT</span></code>, bound= Info)]) – list of packet dicts to be reassembled</p>
+<dd class="field-odd"><p><strong>packets</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.TypeVar" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">TypeVar</span></code></a>(<code class="docutils literal notranslate"><span class="pre">PT</span></code>, bound= Info)]) – list of packet dicts to be reassembled</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></p>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.foundation.reassembly.reassembly.Reassembly._buffer">
-<span class="sig-name descname"><span class="pre">_buffer</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><span class="pre">IT</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">BT</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pcapkit.foundation.reassembly.reassembly.Reassembly._buffer" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">_buffer</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><span class="pre">IT</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">BT</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pcapkit.foundation.reassembly.reassembly.Reassembly._buffer" title="Permalink to this definition">¶</a></dt>
 <dd><p>Dict buffer field.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)">dict</a>[IT, BT]</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)">dict</a>[IT, BT]</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.foundation.reassembly.reassembly.Reassembly._dtgram">
-<span class="sig-name descname"><span class="pre">_dtgram</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.10)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><span class="pre">DT</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pcapkit.foundation.reassembly.reassembly.Reassembly._dtgram" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">_dtgram</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.11)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><span class="pre">DT</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pcapkit.foundation.reassembly.reassembly.Reassembly._dtgram" title="Permalink to this definition">¶</a></dt>
 <dd><p>List reassembled datagram.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.10)">list</a>[DT]</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.11)">list</a>[DT]</p>
 </dd>
 </dl>
 </dd></dl>

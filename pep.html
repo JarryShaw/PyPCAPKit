@@ -14,6 +14,7 @@
     <script src="_static/underscore.js"></script>
     <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="_static/doctools.js"></script>
+    <script src="_static/sphinx_highlight.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="prev" title="How to …" href="demo.html" />
@@ -91,7 +92,7 @@ performance difference is acceptable.</p>
 <p>However, there might still be a way to further accelerate the protocol
 implementation – merge and concatenation <code class="docutils literal notranslate"><span class="pre">_read_xxxxxx</span></code> methods within one
 single <code class="xref py py-meth docutils literal notranslate"><span class="pre">file.read()</span></code>, such that we shall decrease the overall number of IO
-calls and reduce the duplicated <a class="reference external" href="https://docs.python.org/3/library/struct.html#struct.unpack" title="(in Python v3.10)"><code class="xref py py-func docutils literal notranslate"><span class="pre">struct.unpack()</span></code></a> calls, etc. I am not yet
+calls and reduce the duplicated <a class="reference external" href="https://docs.python.org/3/library/struct.html#struct.unpack" title="(in Python v3.11)"><code class="xref py py-func docutils literal notranslate"><span class="pre">struct.unpack()</span></code></a> calls, etc. I am not yet
 confident about the performance improvement, but this is the most efficient way
 to accelerate PyPCAPKit at the moment, inspired from the implementation of
 Scapy and DPKT themselves.</p>

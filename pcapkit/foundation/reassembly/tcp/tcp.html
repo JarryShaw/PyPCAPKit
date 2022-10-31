@@ -14,6 +14,7 @@
     <script src="../../../../_static/underscore.js"></script>
     <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="../../../../_static/doctools.js"></script>
+    <script src="../../../../_static/sphinx_highlight.js"></script>
     <link rel="index" title="Index" href="../../../../genindex.html" />
     <link rel="search" title="Search" href="../../../../search.html" />
     <link rel="next" title="Registry Management" href="../../registry.html" />
@@ -42,7 +43,7 @@ which reconstructs fragmented TCP packets back to origin.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.foundation.reassembly.tcp.TCP_Reassembly">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.foundation.reassembly.tcp.</span></span><span class="sig-name descname"><span class="pre">TCP_Reassembly</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">strict</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/pcapkit/foundation/reassembly/tcp.html#TCP_Reassembly"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.reassembly.tcp.TCP_Reassembly" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="../reassembly.html#pcapkit.foundation.reassembly.reassembly.Reassembly" title="pcapkit.foundation.reassembly.reassembly.Reassembly"><code class="xref py py-class docutils literal notranslate"><span class="pre">Reassembly</span></code></a>[<a class="reference internal" href="#pcapkit.foundation.reassembly.tcp.Packet" title="pcapkit.foundation.reassembly.tcp.Packet"><code class="xref py py-class docutils literal notranslate"><span class="pre">Packet</span></code></a>, <a class="reference internal" href="#pcapkit.foundation.reassembly.tcp.Datagram" title="pcapkit.foundation.reassembly.tcp.Datagram"><code class="xref py py-class docutils literal notranslate"><span class="pre">Datagram</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code></a>[<code class="xref py py-obj docutils literal notranslate"><span class="pre">IPAddress</span></code>, <a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">IPAddress</span></code>, <a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>], <a class="reference internal" href="#pcapkit.foundation.reassembly.tcp.Buffer" title="pcapkit.foundation.reassembly.tcp.Buffer"><code class="xref py py-class docutils literal notranslate"><span class="pre">Buffer</span></code></a>]</p>
+<dd><p>Bases: <a class="reference internal" href="../reassembly.html#pcapkit.foundation.reassembly.reassembly.Reassembly" title="pcapkit.foundation.reassembly.reassembly.Reassembly"><code class="xref py py-class docutils literal notranslate"><span class="pre">Reassembly</span></code></a>[<a class="reference internal" href="#pcapkit.foundation.reassembly.tcp.Packet" title="pcapkit.foundation.reassembly.tcp.Packet"><code class="xref py py-class docutils literal notranslate"><span class="pre">Packet</span></code></a>, <a class="reference internal" href="#pcapkit.foundation.reassembly.tcp.Datagram" title="pcapkit.foundation.reassembly.tcp.Datagram"><code class="xref py py-class docutils literal notranslate"><span class="pre">Datagram</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code></a>[<code class="xref py py-obj docutils literal notranslate"><span class="pre">IPAddress</span></code>, <a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">IPAddress</span></code>, <a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>], <a class="reference internal" href="#pcapkit.foundation.reassembly.tcp.Buffer" title="pcapkit.foundation.reassembly.tcp.Buffer"><code class="xref py py-class docutils literal notranslate"><span class="pre">Buffer</span></code></a>]</p>
 <p>Reassembly for TCP payload.</p>
 <div class="admonition-example admonition">
 <p class="admonition-title">Example</p>
@@ -73,18 +74,18 @@ which reconstructs fragmented TCP packets back to origin.</p>
 <dd><p>Protocol of current packet.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Literal" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Literal</span></code></a>[‘Transmission Control Protocol’]</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Literal" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Literal</span></code></a>[‘Transmission Control Protocol’]</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="pcapkit.foundation.reassembly.tcp.TCP_Reassembly.protocol">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">protocol</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.10)"><span class="pre">Type</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="../../../protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP" title="pcapkit.protocols.transport.tcp.TCP"><span class="pre">TCP</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pcapkit.foundation.reassembly.tcp.TCP_Reassembly.protocol" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">protocol</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.11)"><span class="pre">Type</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="../../../protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP" title="pcapkit.protocols.transport.tcp.TCP"><span class="pre">TCP</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pcapkit.foundation.reassembly.tcp.TCP_Reassembly.protocol" title="Permalink to this definition">¶</a></dt>
 <dd><p>Protocol of current reassembly object.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Type</span></code></a>[<a class="reference internal" href="../../../protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP" title="pcapkit.protocols.transport.tcp.TCP"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code></a>]</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Type</span></code></a>[<a class="reference internal" href="../../../protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP" title="pcapkit.protocols.transport.tcp.TCP"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code></a>]</p>
 </dd>
 </dl>
 </dd></dl>
@@ -98,7 +99,7 @@ which reconstructs fragmented TCP packets back to origin.</p>
 <dd class="field-odd"><p><strong>info</strong> (<a class="reference internal" href="#pcapkit.foundation.reassembly.tcp.Packet" title="pcapkit.foundation.reassembly.tcp.Packet"><code class="xref py py-class docutils literal notranslate"><span class="pre">Packet</span></code></a>) – <a class="reference internal" href="#term-tcp.packet"><span class="xref std std-term">info</span></a> dict of packets to be reassembled</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></p>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -111,11 +112,11 @@ which reconstructs fragmented TCP packets back to origin.</p>
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>buf</strong> (<a class="reference internal" href="#pcapkit.foundation.reassembly.tcp.Buffer" title="pcapkit.foundation.reassembly.tcp.Buffer"><code class="xref py py-class docutils literal notranslate"><span class="pre">Buffer</span></code></a>) – <a class="reference internal" href="#term-tcp.buffer"><span class="xref std std-term">buffer</span></a> dict of reassembled packets</p></li>
-<li><p><strong>bufid</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.TypeVar" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">TypeVar</span></code></a>(<code class="docutils literal notranslate"><span class="pre">IPAddress</span></code>, IPv4Address, IPv6Address), <a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.TypeVar" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">TypeVar</span></code></a>(<code class="docutils literal notranslate"><span class="pre">IPAddress</span></code>, IPv4Address, IPv6Address), <a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>]) – buffer identifier</p></li>
+<li><p><strong>bufid</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.TypeVar" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">TypeVar</span></code></a>(<code class="docutils literal notranslate"><span class="pre">IPAddress</span></code>, IPv4Address, IPv6Address), <a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.TypeVar" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">TypeVar</span></code></a>(<code class="docutils literal notranslate"><span class="pre">IPAddress</span></code>, IPv4Address, IPv6Address), <a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>]) – buffer identifier</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code></a>[<a class="reference internal" href="#pcapkit.foundation.reassembly.tcp.Datagram" title="pcapkit.foundation.reassembly.tcp.Datagram"><code class="xref py py-class docutils literal notranslate"><span class="pre">Datagram</span></code></a>]</p>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code></a>[<a class="reference internal" href="#pcapkit.foundation.reassembly.tcp.Datagram" title="pcapkit.foundation.reassembly.tcp.Datagram"><code class="xref py py-class docutils literal notranslate"><span class="pre">Datagram</span></code></a>]</p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Reassembled <a class="reference internal" href="#term-tcp.datagram"><span class="xref std std-term">packets</span></a>.</p>
@@ -245,74 +246,74 @@ is as following:</p>
 </dl>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.foundation.reassembly.tcp.Packet.bufid">
-<span class="sig-name descname"><span class="pre">bufid</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.10)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><span class="pre">IPAddress</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">IPAddress</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pcapkit.foundation.reassembly.tcp.Packet.bufid" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">bufid</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.11)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><span class="pre">IPAddress</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">IPAddress</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pcapkit.foundation.reassembly.tcp.Packet.bufid" title="Permalink to this definition">¶</a></dt>
 <dd><p>Buffer ID.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.foundation.reassembly.tcp.Packet.dsn">
-<span class="sig-name descname"><span class="pre">dsn</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></em><a class="headerlink" href="#pcapkit.foundation.reassembly.tcp.Packet.dsn" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">dsn</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a></em><a class="headerlink" href="#pcapkit.foundation.reassembly.tcp.Packet.dsn" title="Permalink to this definition">¶</a></dt>
 <dd><p>Data sequence number.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.foundation.reassembly.tcp.Packet.ack">
-<span class="sig-name descname"><span class="pre">ack</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></em><a class="headerlink" href="#pcapkit.foundation.reassembly.tcp.Packet.ack" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">ack</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a></em><a class="headerlink" href="#pcapkit.foundation.reassembly.tcp.Packet.ack" title="Permalink to this definition">¶</a></dt>
 <dd><p>Acknowledgment number.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.foundation.reassembly.tcp.Packet.num">
-<span class="sig-name descname"><span class="pre">num</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></em><a class="headerlink" href="#pcapkit.foundation.reassembly.tcp.Packet.num" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">num</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a></em><a class="headerlink" href="#pcapkit.foundation.reassembly.tcp.Packet.num" title="Permalink to this definition">¶</a></dt>
 <dd><p>Original packet range number.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.foundation.reassembly.tcp.Packet.syn">
-<span class="sig-name descname"><span class="pre">syn</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><span class="pre">bool</span></a></em><a class="headerlink" href="#pcapkit.foundation.reassembly.tcp.Packet.syn" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">syn</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><span class="pre">bool</span></a></em><a class="headerlink" href="#pcapkit.foundation.reassembly.tcp.Packet.syn" title="Permalink to this definition">¶</a></dt>
 <dd><p>Synchronise flag.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.foundation.reassembly.tcp.Packet.fin">
-<span class="sig-name descname"><span class="pre">fin</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><span class="pre">bool</span></a></em><a class="headerlink" href="#pcapkit.foundation.reassembly.tcp.Packet.fin" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">fin</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><span class="pre">bool</span></a></em><a class="headerlink" href="#pcapkit.foundation.reassembly.tcp.Packet.fin" title="Permalink to this definition">¶</a></dt>
 <dd><p>Finish flag.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.foundation.reassembly.tcp.Packet.rst">
-<span class="sig-name descname"><span class="pre">rst</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><span class="pre">bool</span></a></em><a class="headerlink" href="#pcapkit.foundation.reassembly.tcp.Packet.rst" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">rst</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><span class="pre">bool</span></a></em><a class="headerlink" href="#pcapkit.foundation.reassembly.tcp.Packet.rst" title="Permalink to this definition">¶</a></dt>
 <dd><p>Reset connection flag.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.foundation.reassembly.tcp.Packet.len">
-<span class="sig-name descname"><span class="pre">len</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></em><a class="headerlink" href="#pcapkit.foundation.reassembly.tcp.Packet.len" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">len</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a></em><a class="headerlink" href="#pcapkit.foundation.reassembly.tcp.Packet.len" title="Permalink to this definition">¶</a></dt>
 <dd><p>Payload length, header excluded.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.foundation.reassembly.tcp.Packet.first">
-<span class="sig-name descname"><span class="pre">first</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></em><a class="headerlink" href="#pcapkit.foundation.reassembly.tcp.Packet.first" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">first</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a></em><a class="headerlink" href="#pcapkit.foundation.reassembly.tcp.Packet.first" title="Permalink to this definition">¶</a></dt>
 <dd><p>This sequence number.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.foundation.reassembly.tcp.Packet.last">
-<span class="sig-name descname"><span class="pre">last</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></em><a class="headerlink" href="#pcapkit.foundation.reassembly.tcp.Packet.last" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">last</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a></em><a class="headerlink" href="#pcapkit.foundation.reassembly.tcp.Packet.last" title="Permalink to this definition">¶</a></dt>
 <dd><p>Next (wanted) sequence number.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.foundation.reassembly.tcp.Packet.header">
-<span class="sig-name descname"><span class="pre">header</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.10)"><span class="pre">bytes</span></a></em><a class="headerlink" href="#pcapkit.foundation.reassembly.tcp.Packet.header" title="Permalink to this definition">¶</a></dt>
-<dd><p>Raw <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bytes</span></code></a> type header.</p>
+<span class="sig-name descname"><span class="pre">header</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.11)"><span class="pre">bytes</span></a></em><a class="headerlink" href="#pcapkit.foundation.reassembly.tcp.Packet.header" title="Permalink to this definition">¶</a></dt>
+<dd><p>Raw <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bytes</span></code></a> type header.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.foundation.reassembly.tcp.Packet.payload">
-<span class="sig-name descname"><span class="pre">payload</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytearray" title="(in Python v3.10)"><span class="pre">bytearray</span></a></em><a class="headerlink" href="#pcapkit.foundation.reassembly.tcp.Packet.payload" title="Permalink to this definition">¶</a></dt>
-<dd><p>Raw <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytearray" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bytearray</span></code></a> type payload.</p>
+<span class="sig-name descname"><span class="pre">payload</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytearray" title="(in Python v3.11)"><span class="pre">bytearray</span></a></em><a class="headerlink" href="#pcapkit.foundation.reassembly.tcp.Packet.payload" title="Permalink to this definition">¶</a></dt>
+<dd><p>Raw <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytearray" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bytearray</span></code></a> type payload.</p>
 </dd></dl>
 
 </dd></dl>
@@ -320,7 +321,7 @@ is as following:</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.foundation.reassembly.tcp.DatagramID">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.foundation.reassembly.tcp.</span></span><span class="sig-name descname"><span class="pre">DatagramID</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dict_</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/pcapkit/foundation/reassembly/tcp.html#DatagramID"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.reassembly.tcp.DatagramID" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="../../../corekit/infoclass.html#pcapkit.corekit.infoclass.Info" title="pcapkit.corekit.infoclass.Info"><code class="xref py py-class docutils literal notranslate"><span class="pre">Info</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Generic" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Generic</span></code></a>[<code class="xref py py-obj docutils literal notranslate"><span class="pre">IPAddress</span></code>]</p>
+<dd><p>Bases: <a class="reference internal" href="../../../corekit/infoclass.html#pcapkit.corekit.infoclass.Info" title="pcapkit.corekit.infoclass.Info"><code class="xref py py-class docutils literal notranslate"><span class="pre">Info</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Generic" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Generic</span></code></a>[<code class="xref py py-obj docutils literal notranslate"><span class="pre">IPAddress</span></code>]</p>
 <p>Data model for <a class="reference internal" href="#term-tcp.datagram"><span class="xref std std-term">tcp.datagram</span></a> original packet identifier.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -335,19 +336,19 @@ is as following:</p>
 </dl>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.foundation.reassembly.tcp.DatagramID.src">
-<span class="sig-name descname"><span class="pre">src</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.10)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><span class="pre">IPAddress</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pcapkit.foundation.reassembly.tcp.DatagramID.src" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">src</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.11)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><span class="pre">IPAddress</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pcapkit.foundation.reassembly.tcp.DatagramID.src" title="Permalink to this definition">¶</a></dt>
 <dd><p>Source address.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.foundation.reassembly.tcp.DatagramID.dst">
-<span class="sig-name descname"><span class="pre">dst</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.10)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><span class="pre">IPAddress</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pcapkit.foundation.reassembly.tcp.DatagramID.dst" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">dst</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.11)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><span class="pre">IPAddress</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pcapkit.foundation.reassembly.tcp.DatagramID.dst" title="Permalink to this definition">¶</a></dt>
 <dd><p>Destination address.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.foundation.reassembly.tcp.DatagramID.ack">
-<span class="sig-name descname"><span class="pre">ack</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></em><a class="headerlink" href="#pcapkit.foundation.reassembly.tcp.DatagramID.ack" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">ack</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a></em><a class="headerlink" href="#pcapkit.foundation.reassembly.tcp.DatagramID.ack" title="Permalink to this definition">¶</a></dt>
 <dd><p>Original packet ACK number.</p>
 </dd></dl>
 
@@ -356,7 +357,7 @@ is as following:</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.foundation.reassembly.tcp.Datagram">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.foundation.reassembly.tcp.</span></span><span class="sig-name descname"><span class="pre">Datagram</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dict_</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/pcapkit/foundation/reassembly/tcp.html#Datagram"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.reassembly.tcp.Datagram" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="../../../corekit/infoclass.html#pcapkit.corekit.infoclass.Info" title="pcapkit.corekit.infoclass.Info"><code class="xref py py-class docutils literal notranslate"><span class="pre">Info</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Generic" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Generic</span></code></a>[<code class="xref py py-obj docutils literal notranslate"><span class="pre">IPAddress</span></code>]</p>
+<dd><p>Bases: <a class="reference internal" href="../../../corekit/infoclass.html#pcapkit.corekit.infoclass.Info" title="pcapkit.corekit.infoclass.Info"><code class="xref py py-class docutils literal notranslate"><span class="pre">Info</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Generic" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Generic</span></code></a>[<code class="xref py py-obj docutils literal notranslate"><span class="pre">IPAddress</span></code>]</p>
 <p>Data model for <a class="reference internal" href="#term-tcp.datagram"><span class="xref std std-term">tcp.datagram</span></a>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -371,7 +372,7 @@ is as following:</p>
 </dl>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.foundation.reassembly.tcp.Datagram.completed">
-<span class="sig-name descname"><span class="pre">completed</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><span class="pre">bool</span></a></em><a class="headerlink" href="#pcapkit.foundation.reassembly.tcp.Datagram.completed" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">completed</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><span class="pre">bool</span></a></em><a class="headerlink" href="#pcapkit.foundation.reassembly.tcp.Datagram.completed" title="Permalink to this definition">¶</a></dt>
 <dd><p>Completed flag.</p>
 </dd></dl>
 
@@ -383,25 +384,25 @@ is as following:</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.foundation.reassembly.tcp.Datagram.index">
-<span class="sig-name descname"><span class="pre">index</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.10)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pcapkit.foundation.reassembly.tcp.Datagram.index" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">index</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.11)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pcapkit.foundation.reassembly.tcp.Datagram.index" title="Permalink to this definition">¶</a></dt>
 <dd><p>Packet numbers.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.foundation.reassembly.tcp.Datagram.header">
-<span class="sig-name descname"><span class="pre">header</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.10)"><span class="pre">bytes</span></a></em><a class="headerlink" href="#pcapkit.foundation.reassembly.tcp.Datagram.header" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">header</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.11)"><span class="pre">bytes</span></a></em><a class="headerlink" href="#pcapkit.foundation.reassembly.tcp.Datagram.header" title="Permalink to this definition">¶</a></dt>
 <dd><p>Initial TCP header.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.foundation.reassembly.tcp.Datagram.payload">
-<span class="sig-name descname"><span class="pre">payload</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.10)"><span class="pre">bytes</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.10)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.10)"><span class="pre">bytes</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pcapkit.foundation.reassembly.tcp.Datagram.payload" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">payload</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.11)"><span class="pre">bytes</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.11)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.11)"><span class="pre">bytes</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pcapkit.foundation.reassembly.tcp.Datagram.payload" title="Permalink to this definition">¶</a></dt>
 <dd><p>Reassembled payload (application layer data).</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.foundation.reassembly.tcp.Datagram.packet">
-<span class="sig-name descname"><span class="pre">packet</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.10)"><span class="pre">Optional</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="../../../protocols/protocol.html#pcapkit.protocols.protocol.Protocol" title="pcapkit.protocols.protocol.Protocol"><span class="pre">Protocol</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pcapkit.foundation.reassembly.tcp.Datagram.packet" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">packet</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><span class="pre">Optional</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="../../../protocols/protocol.html#pcapkit.protocols.protocol.Protocol" title="pcapkit.protocols.protocol.Protocol"><span class="pre">Protocol</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pcapkit.foundation.reassembly.tcp.Datagram.packet" title="Permalink to this definition">¶</a></dt>
 <dd><p>Parsed reassembled payload.</p>
 </dd></dl>
 
@@ -425,13 +426,13 @@ is as following:</p>
 </dl>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.foundation.reassembly.tcp.HoleDiscriptor.first">
-<span class="sig-name descname"><span class="pre">first</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></em><a class="headerlink" href="#pcapkit.foundation.reassembly.tcp.HoleDiscriptor.first" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">first</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a></em><a class="headerlink" href="#pcapkit.foundation.reassembly.tcp.HoleDiscriptor.first" title="Permalink to this definition">¶</a></dt>
 <dd><p>Start of hole.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.foundation.reassembly.tcp.HoleDiscriptor.last">
-<span class="sig-name descname"><span class="pre">last</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></em><a class="headerlink" href="#pcapkit.foundation.reassembly.tcp.HoleDiscriptor.last" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">last</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a></em><a class="headerlink" href="#pcapkit.foundation.reassembly.tcp.HoleDiscriptor.last" title="Permalink to this definition">¶</a></dt>
 <dd><p>Stop of hole.</p>
 </dd></dl>
 
@@ -455,25 +456,25 @@ is as following:</p>
 </dl>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.foundation.reassembly.tcp.Fragment.ind">
-<span class="sig-name descname"><span class="pre">ind</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.10)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pcapkit.foundation.reassembly.tcp.Fragment.ind" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">ind</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.11)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pcapkit.foundation.reassembly.tcp.Fragment.ind" title="Permalink to this definition">¶</a></dt>
 <dd><p>List of reassembled packets.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.foundation.reassembly.tcp.Fragment.isn">
-<span class="sig-name descname"><span class="pre">isn</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></em><a class="headerlink" href="#pcapkit.foundation.reassembly.tcp.Fragment.isn" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">isn</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a></em><a class="headerlink" href="#pcapkit.foundation.reassembly.tcp.Fragment.isn" title="Permalink to this definition">¶</a></dt>
 <dd><p>ISN of payload buffer.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.foundation.reassembly.tcp.Fragment.len">
-<span class="sig-name descname"><span class="pre">len</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></em><a class="headerlink" href="#pcapkit.foundation.reassembly.tcp.Fragment.len" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">len</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a></em><a class="headerlink" href="#pcapkit.foundation.reassembly.tcp.Fragment.len" title="Permalink to this definition">¶</a></dt>
 <dd><p>Length of payload buffer.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.foundation.reassembly.tcp.Fragment.raw">
-<span class="sig-name descname"><span class="pre">raw</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytearray" title="(in Python v3.10)"><span class="pre">bytearray</span></a></em><a class="headerlink" href="#pcapkit.foundation.reassembly.tcp.Fragment.raw" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">raw</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytearray" title="(in Python v3.11)"><span class="pre">bytearray</span></a></em><a class="headerlink" href="#pcapkit.foundation.reassembly.tcp.Fragment.raw" title="Permalink to this definition">¶</a></dt>
 <dd><p>Reassembled payload holes set to b’x00’.</p>
 </dd></dl>
 
@@ -497,19 +498,19 @@ is as following:</p>
 </dl>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.foundation.reassembly.tcp.Buffer.hdl">
-<span class="sig-name descname"><span class="pre">hdl</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.10)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#pcapkit.foundation.reassembly.tcp.HoleDiscriptor" title="pcapkit.foundation.reassembly.tcp.HoleDiscriptor"><span class="pre">pcapkit.foundation.reassembly.tcp.HoleDiscriptor</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pcapkit.foundation.reassembly.tcp.Buffer.hdl" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">hdl</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.11)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#pcapkit.foundation.reassembly.tcp.HoleDiscriptor" title="pcapkit.foundation.reassembly.tcp.HoleDiscriptor"><span class="pre">pcapkit.foundation.reassembly.tcp.HoleDiscriptor</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pcapkit.foundation.reassembly.tcp.Buffer.hdl" title="Permalink to this definition">¶</a></dt>
 <dd><p>Hole descriptor list.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.foundation.reassembly.tcp.Buffer.hdr">
-<span class="sig-name descname"><span class="pre">hdr</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.10)"><span class="pre">bytes</span></a></em><a class="headerlink" href="#pcapkit.foundation.reassembly.tcp.Buffer.hdr" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">hdr</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.11)"><span class="pre">bytes</span></a></em><a class="headerlink" href="#pcapkit.foundation.reassembly.tcp.Buffer.hdr" title="Permalink to this definition">¶</a></dt>
 <dd><p>Initial TCP header.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.foundation.reassembly.tcp.Buffer.ack">
-<span class="sig-name descname"><span class="pre">ack</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="#pcapkit.foundation.reassembly.tcp.Fragment" title="pcapkit.foundation.reassembly.tcp.Fragment"><span class="pre">pcapkit.foundation.reassembly.tcp.Fragment</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pcapkit.foundation.reassembly.tcp.Buffer.ack" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">ack</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="#pcapkit.foundation.reassembly.tcp.Fragment" title="pcapkit.foundation.reassembly.tcp.Fragment"><span class="pre">pcapkit.foundation.reassembly.tcp.Fragment</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pcapkit.foundation.reassembly.tcp.Buffer.ack" title="Permalink to this definition">¶</a></dt>
 <dd><p>ACK list.</p>
 </dd></dl>
 

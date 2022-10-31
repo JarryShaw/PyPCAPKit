@@ -14,6 +14,7 @@
     <script src="../../_static/underscore.js"></script>
     <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/sphinx_highlight.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
     <link rel="next" title="Info Class" href="infoclass.html" />
@@ -37,18 +38,33 @@
   <section id="module-pcapkit.corekit">
 <span id="core-utilities"></span><h1>Core Utilities<a class="headerlink" href="#module-pcapkit.corekit" title="Permalink to this heading">¶</a></h1>
 <p><a class="reference internal" href="#module-pcapkit.corekit" title="pcapkit.corekit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit</span></code></a> is the collection of core utilities
-for <a class="reference internal" href="../index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> implementation, including <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dict</span></code></a> like
+for <a class="reference internal" href="../index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> implementation, including <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dict</span></code></a> like
 class <a class="reference internal" href="infoclass.html#pcapkit.corekit.infoclass.Info" title="pcapkit.corekit.infoclass.Info"><code class="xref py py-class docutils literal notranslate"><span class="pre">Info</span></code></a>,
-<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">tuple</span></code></a> like class <a class="reference internal" href="version.html#pcapkit.corekit.version.VersionInfo" title="pcapkit.corekit.version.VersionInfo"><code class="xref py py-class docutils literal notranslate"><span class="pre">VersionInfo</span></code></a>,
+<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">tuple</span></code></a> like class <a class="reference internal" href="version.html#pcapkit.corekit.version.VersionInfo" title="pcapkit.corekit.version.VersionInfo"><code class="xref py py-class docutils literal notranslate"><span class="pre">VersionInfo</span></code></a>,
 protocol collection class <a class="reference internal" href="protochain.html#pcapkit.corekit.protochain.ProtoChain" title="pcapkit.corekit.protochain.ProtoChain"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProtoChain</span></code></a>,
 and <a class="reference internal" href="multidict.html#pcapkit.corekit.multidict.MultiDict" title="pcapkit.corekit.multidict.MultiDict"><code class="xref py py-class docutils literal notranslate"><span class="pre">MultiDict</span></code></a> family inspired from
-<code class="xref py py-mod docutils literal notranslate"><span class="pre">Werkzeug</span></code> for multientry <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dict</span></code></a> data mapping.</p>
+<code class="xref py py-mod docutils literal notranslate"><span class="pre">Werkzeug</span></code> for multientry <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dict</span></code></a> data mapping.</p>
 <div class="toctree-wrapper compound">
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="infoclass.html">Info Class</a></li>
-<li class="toctree-l1"><a class="reference internal" href="multidict.html">Multi-Mapping Dictionary</a></li>
-<li class="toctree-l1"><a class="reference internal" href="protochain.html">Protocol Chain</a></li>
-<li class="toctree-l1"><a class="reference internal" href="version.html">Version Info</a></li>
+<li class="toctree-l1"><a class="reference internal" href="infoclass.html">Info Class</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="infoclass.html#pcapkit.corekit.infoclass.Info"><code class="docutils literal notranslate"><span class="pre">Info</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="multidict.html">Multi-Mapping Dictionary</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="multidict.html#pcapkit.corekit.multidict.MultiDict"><code class="docutils literal notranslate"><span class="pre">MultiDict</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="multidict.html#pcapkit.corekit.multidict.OrderedMultiDict"><code class="docutils literal notranslate"><span class="pre">OrderedMultiDict</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="protochain.html">Protocol Chain</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="protochain.html#pcapkit.corekit.protochain.ProtoChain"><code class="docutils literal notranslate"><span class="pre">ProtoChain</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="version.html">Version Info</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="version.html#pcapkit.corekit.version.VersionInfo"><code class="docutils literal notranslate"><span class="pre">VersionInfo</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="version.html#pcapkit.corekit.version.major"><code class="docutils literal notranslate"><span class="pre">major</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="version.html#pcapkit.corekit.version.minor"><code class="docutils literal notranslate"><span class="pre">minor</span></code></a></li>
+</ul>
+</li>
 </ul>
 </div>
 </section>
