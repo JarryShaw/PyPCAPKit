@@ -3,16 +3,6 @@ name = "pypi"
 url = "https://pypi.org/simple"
 verify_ssl = true
 
-[[source]]
-name = "tuna"
-url = "https://pypi.tuna.tsinghua.edu.cn/simple"
-verify_ssl = true
-
-[[source]]
-name = "sjtu"
-url = "https://mirrors.sjtug.sjtu.edu.cn/pypi/web/simple"
-verify_ssl = true
-
 [packages]
 aenum = "*"
 chardet = "*"

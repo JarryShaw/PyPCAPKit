@@ -29,6 +29,7 @@ deprecated/
 temp
 
 _build
+Pipfile.lock
 
 # Created by https://www.gitignore.io/api/macos,python,visualstudiocode
 
