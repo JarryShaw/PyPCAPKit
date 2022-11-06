@@ -24,7 +24,7 @@ jobs:
           export PCAPKIT_SPHINX=1
 
           brew install python@3.11 libmagic
-          brew link --force --overwrite python@3.10
+          brew link --overwrite python@3.11 || true
 
           python3.11 -m pip install -U pip setuptools wheel
           python3.11 -m pip install -r doc/sphinx/requirements.txt
