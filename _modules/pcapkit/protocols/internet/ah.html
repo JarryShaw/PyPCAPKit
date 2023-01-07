@@ -76,7 +76,7 @@
 
 
 <div class="viewcode-block" id="AH"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/ah.html#pcapkit.protocols.internet.ah.AH">[docs]</a><span class="k">class</span> <span class="nc">AH</span><span class="p">(</span><span class="n">IPsec</span><span class="p">[</span><span class="n">DataType_AH</span><span class="p">]):</span>
-    <span class="sd">&quot;&quot;&quot;This class implements Authentication Header.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;This class implements Authentication Header.&quot;&quot;&quot;</span>
 
     <span class="c1">##########################################################################</span>
     <span class="c1"># Properties.</span>
@@ -84,17 +84,17 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Literal[&quot;Authentication Header&quot;]&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Name of corresponding protocol.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Name of corresponding protocol.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="s1">&#39;Authentication Header&#39;</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">length</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;int&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Header length of current protocol.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Header length of current protocol.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_info</span><span class="o">.</span><span class="n">length</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">payload</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Protocol | NoReturn&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Payload of current instance.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Payload of current instance.</span>
 
 <span class="sd">        Raises:</span>
 <span class="sd">            UnsupportedCall: if the protocol is used as an IPv6 extension header</span>
@@ -106,7 +106,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">protocol</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Optional[str] | NoReturn&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Name of next layer protocol (if any).</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Name of next layer protocol (if any).</span>
 
 <span class="sd">        Raises:</span>
 <span class="sd">            UnsupportedCall: if the protocol is used as an IPv6 extension header</span>
@@ -118,7 +118,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">protochain</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;ProtoChain | NoReturn&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Protocol chain of current instance.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Protocol chain of current instance.</span>
 
 <span class="sd">        Raises:</span>
 <span class="sd">            UnsupportedCall: if the protocol is used as an IPv6 extension header</span>
@@ -134,7 +134,7 @@
 
 <div class="viewcode-block" id="AH.read"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/ah.html#pcapkit.protocols.internet.ah.AH.read">[docs]</a>    <span class="k">def</span> <span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">version</span><span class="p">:</span> <span class="s1">&#39;Literal[4, 6]&#39;</span> <span class="o">=</span> <span class="mi">4</span><span class="p">,</span>  <span class="c1"># pylint: disable=arguments-differ</span>
              <span class="n">extension</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_AH&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
-        <span class="sd">&quot;&quot;&quot;Read Authentication Header.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read Authentication Header.</span>
 
 <span class="sd">        Structure of AH header [:rfc:`4302`]:</span>
 
@@ -203,7 +203,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_decode_next_layer</span><span class="p">(</span><span class="n">ah</span><span class="p">,</span> <span class="n">_next</span><span class="p">,</span> <span class="n">length</span> <span class="o">-</span> <span class="n">ah</span><span class="o">.</span><span class="n">length</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="AH.make"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/ah.html#pcapkit.protocols.internet.ah.AH.make">[docs]</a>    <span class="k">def</span> <span class="nf">make</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;NoReturn&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Make (construct) packet data.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Make (construct) packet data.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
@@ -216,7 +216,7 @@
 
 <div class="viewcode-block" id="AH.id"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/ah.html#pcapkit.protocols.internet.ah.AH.id">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">id</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;tuple[Literal[&quot;AH&quot;]]&#39;</span><span class="p">:</span>  <span class="c1"># type: ignore[override]</span>
-        <span class="sd">&quot;&quot;&quot;Index ID of the protocol.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Index ID of the protocol.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            Index ID of the protocol.</span>
@@ -238,7 +238,7 @@
 <div class="viewcode-block" id="AH.__post_init__"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/ah.html#pcapkit.protocols.internet.ah.AH.__post_init__">[docs]</a>    <span class="k">def</span> <span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file</span><span class="p">:</span> <span class="s1">&#39;Optional[BinaryIO]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>  <span class="c1"># pylint: disable=arguments-differ</span>
                       <span class="n">version</span><span class="p">:</span> <span class="s1">&#39;Literal[4, 6]&#39;</span> <span class="o">=</span> <span class="mi">4</span><span class="p">,</span> <span class="n">extension</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
                       <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Post initialisation hook.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Post initialisation hook.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            file: Source packet stream.</span>
@@ -258,12 +258,12 @@
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__post_init__</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="n">version</span><span class="p">,</span> <span class="n">extension</span><span class="o">=</span><span class="n">extension</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>  <span class="c1"># type: ignore[arg-type]</span></div>
 
     <span class="k">def</span> <span class="fm">__length_hint__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Literal[20]&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Return an estimated length for the object.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return an estimated length for the object.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="mi">20</span>
 
 <div class="viewcode-block" id="AH.__index__"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/ah.html#pcapkit.protocols.internet.ah.AH.__index__">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="fm">__index__</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;RegType_TransType&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=invalid-index-returned</span>
-        <span class="sd">&quot;&quot;&quot;Numeral registry index of the protocol.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Numeral registry index of the protocol.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            Numeral registry index of the protocol in `IANA`_.</span>
@@ -335,7 +335,7 @@
       <div class="clearer"></div>
     </div>
     <div class="footer">
-      &copy;2017-2022, Jarry Shaw.
+      &copy;2017-2023, Jarry Shaw.
       
     </div>
 

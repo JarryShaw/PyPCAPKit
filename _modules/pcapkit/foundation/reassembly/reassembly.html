@@ -66,7 +66,7 @@
 
 
 <div class="viewcode-block" id="Reassembly"><a class="viewcode-back" href="../../../../pcapkit/foundation/reassembly/reassembly.html#pcapkit.foundation.reassembly.reassembly.Reassembly">[docs]</a><span class="k">class</span> <span class="nc">Reassembly</span><span class="p">(</span><span class="n">Generic</span><span class="p">[</span><span class="n">PT</span><span class="p">,</span> <span class="n">DT</span><span class="p">,</span> <span class="n">IT</span><span class="p">,</span> <span class="n">BT</span><span class="p">],</span> <span class="n">metaclass</span><span class="o">=</span><span class="n">abc</span><span class="o">.</span><span class="n">ABCMeta</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Base class for reassembly procedure.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Base class for reassembly procedure.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        strict: if return all datagrams (including those not</span>
@@ -87,12 +87,12 @@
     <span class="nd">@property</span>
     <span class="nd">@abc</span><span class="o">.</span><span class="n">abstractmethod</span>
     <span class="k">def</span> <span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;str&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Protocol name of current reassembly object.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Protocol name of current reassembly object.&quot;&quot;&quot;</span>
 
     <span class="c1"># total number of reassembled packets</span>
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">count</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;int&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Total number of reassembled packets.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Total number of reassembled packets.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_newflg</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">__cached__</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_newflg</span> <span class="o">=</span> <span class="kc">False</span>
@@ -107,7 +107,7 @@
     <span class="c1"># reassembled datagram</span>
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">datagram</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;tuple[DT, ...]&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Reassembled datagram.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Reassembled datagram.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">fetch</span><span class="p">()</span>
         <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_dtgram</span><span class="p">)</span>
@@ -115,7 +115,7 @@
     <span class="nd">@property</span>
     <span class="nd">@abc</span><span class="o">.</span><span class="n">abstractmethod</span>
     <span class="k">def</span> <span class="nf">protocol</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Type[Protocol]&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Protocol of current reassembly object.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Protocol of current reassembly object.&quot;&quot;&quot;</span>
 
     <span class="c1">##########################################################################</span>
     <span class="c1"># Methods.</span>
@@ -124,7 +124,7 @@
     <span class="c1"># reassembly procedure</span>
 <div class="viewcode-block" id="Reassembly.reassembly"><a class="viewcode-back" href="../../../../pcapkit/foundation/reassembly/reassembly.html#pcapkit.foundation.reassembly.reassembly.Reassembly.reassembly">[docs]</a>    <span class="nd">@abc</span><span class="o">.</span><span class="n">abstractmethod</span>
     <span class="k">def</span> <span class="nf">reassembly</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">info</span><span class="p">:</span> <span class="s1">&#39;PT&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Reassembly procedure.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Reassembly procedure.</span>
 
 <span class="sd">        Arguments:</span>
 <span class="sd">            info: info dict of packets to be reassembled</span>
@@ -138,7 +138,7 @@
     <span class="c1"># submit reassembled payload</span>
 <div class="viewcode-block" id="Reassembly.submit"><a class="viewcode-back" href="../../../../pcapkit/foundation/reassembly/reassembly.html#pcapkit.foundation.reassembly.reassembly.Reassembly.submit">[docs]</a>    <span class="nd">@abc</span><span class="o">.</span><span class="n">abstractmethod</span>
     <span class="k">def</span> <span class="nf">submit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">buf</span><span class="p">:</span> <span class="s1">&#39;BT&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;list[DT]&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Submit reassembled payload.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Submit reassembled payload.</span>
 
 <span class="sd">        Arguments:</span>
 <span class="sd">            buf: buffer dict of reassembled packets</span>
@@ -148,7 +148,7 @@
 
     <span class="c1"># fetch datagram</span>
 <div class="viewcode-block" id="Reassembly.fetch"><a class="viewcode-back" href="../../../../pcapkit/foundation/reassembly/reassembly.html#pcapkit.foundation.reassembly.reassembly.Reassembly.fetch">[docs]</a>    <span class="k">def</span> <span class="nf">fetch</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;tuple[DT, ...]&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Fetch datagram.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Fetch datagram.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            Tuple of reassembled datagrams.</span>
@@ -184,7 +184,7 @@
 
     <span class="c1"># return datagram index</span>
 <div class="viewcode-block" id="Reassembly.index"><a class="viewcode-back" href="../../../../pcapkit/foundation/reassembly/reassembly.html#pcapkit.foundation.reassembly.reassembly.Reassembly.index">[docs]</a>    <span class="k">def</span> <span class="nf">index</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pkt_num</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Optional[int]&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Return datagram index.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return datagram index.</span>
 
 <span class="sd">        Arguments:</span>
 <span class="sd">            pkt_num: index of packet</span>
@@ -201,7 +201,7 @@
 
     <span class="c1"># run automatically</span>
 <div class="viewcode-block" id="Reassembly.run"><a class="viewcode-back" href="../../../../pcapkit/foundation/reassembly/reassembly.html#pcapkit.foundation.reassembly.reassembly.Reassembly.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">packets</span><span class="p">:</span> <span class="s1">&#39;list[PT]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Run automatically.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Run automatically.</span>
 
 <span class="sd">        Arguments:</span>
 <span class="sd">            packets: list of packet dicts to be reassembled</span>
@@ -224,7 +224,7 @@
         <span class="k">return</span> <span class="bp">self</span>
 
 <div class="viewcode-block" id="Reassembly.__init__"><a class="viewcode-back" href="../../../../pcapkit/foundation/reassembly/reassembly.html#pcapkit.foundation.reassembly.reassembly.Reassembly.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">strict</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Initialise packet reassembly.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialise packet reassembly.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            strict: if return all datagrams (including those not</span>
@@ -242,7 +242,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_dtgram</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: list[DT]</span></div>
 
 <div class="viewcode-block" id="Reassembly.__call__"><a class="viewcode-back" href="../../../../pcapkit/foundation/reassembly/reassembly.html#pcapkit.foundation.reassembly.reassembly.Reassembly.__call__">[docs]</a>    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">&#39;PT&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Call packet reassembly.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Call packet reassembly.</span>
 
 <span class="sd">        Arguments:</span>
 <span class="sd">            packet: packet dict to be reassembled</span>
@@ -314,7 +314,7 @@
       <div class="clearer"></div>
     </div>
     <div class="footer">
-      &copy;2017-2022, Jarry Shaw.
+      &copy;2017-2023, Jarry Shaw.
       
     </div>
 

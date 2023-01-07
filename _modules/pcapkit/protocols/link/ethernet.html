@@ -78,7 +78,7 @@
 
 
 <div class="viewcode-block" id="Ethernet"><a class="viewcode-back" href="../../../../pcapkit/protocols/link/ethernet.html#pcapkit.protocols.link.ethernet.Ethernet">[docs]</a><span class="k">class</span> <span class="nc">Ethernet</span><span class="p">(</span><span class="n">Link</span><span class="p">[</span><span class="n">DataType_Ethernet</span><span class="p">]):</span>
-    <span class="sd">&quot;&quot;&quot;This class implements Ethernet Protocol.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;This class implements Ethernet Protocol.&quot;&quot;&quot;</span>
 
     <span class="c1">##########################################################################</span>
     <span class="c1"># Properties.</span>
@@ -86,29 +86,29 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Literal[&quot;Ethernet Protocol&quot;]&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Name of current protocol.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Name of current protocol.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="s1">&#39;Ethernet Protocol&#39;</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">length</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Literal[14]&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Header length of current protocol.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Header length of current protocol.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="mi">14</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">protocol</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;RegType_EtherType&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Name of next layer protocol.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Name of next layer protocol.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_info</span><span class="o">.</span><span class="n">type</span>
 
     <span class="c1"># source mac address</span>
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">src</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;str&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Source mac address.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Source mac address.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_info</span><span class="o">.</span><span class="n">src</span>
 
     <span class="c1"># destination mac address</span>
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">dst</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;str&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Destination mac address.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Destination mac address.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_info</span><span class="o">.</span><span class="n">dst</span>
 
     <span class="c1">##########################################################################</span>
@@ -116,7 +116,7 @@
     <span class="c1">##########################################################################</span>
 
 <div class="viewcode-block" id="Ethernet.read"><a class="viewcode-back" href="../../../../pcapkit/protocols/link/ethernet.html#pcapkit.protocols.link.ethernet.Ethernet.read">[docs]</a>    <span class="k">def</span> <span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_Ethernet&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
-        <span class="sd">&quot;&quot;&quot;Read Ethernet Protocol.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read Ethernet Protocol.</span>
 
 <span class="sd">        Structure of Ethernet header [:rfc:`7042`]:</span>
 
@@ -157,7 +157,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_decode_next_layer</span><span class="p">(</span><span class="n">ethernet</span><span class="p">,</span> <span class="n">_type</span><span class="p">,</span> <span class="n">length</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">length</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="Ethernet.make"><a class="viewcode-back" href="../../../../pcapkit/protocols/link/ethernet.html#pcapkit.protocols.link.ethernet.Ethernet.make">[docs]</a>    <span class="k">def</span> <span class="nf">make</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;NoReturn&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Make (construct) packet data.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Make (construct) packet data.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
@@ -173,12 +173,12 @@
     <span class="c1">##########################################################################</span>
 
     <span class="k">def</span> <span class="fm">__length_hint__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Literal[14]&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Return an estimated length for the object.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return an estimated length for the object.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="mi">14</span>
 
 <div class="viewcode-block" id="Ethernet.__index__"><a class="viewcode-back" href="../../../../pcapkit/protocols/link/ethernet.html#pcapkit.protocols.link.ethernet.Ethernet.__index__">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="fm">__index__</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;RegType_LinkType&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=invalid-index-returned</span>
-        <span class="sd">&quot;&quot;&quot;Numeral registry index of the protocol.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Numeral registry index of the protocol.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            Numeral registry index of the protocol in `tcpdump`_ link-layer</span>
@@ -194,7 +194,7 @@
     <span class="c1">##########################################################################</span>
 
     <span class="k">def</span> <span class="nf">_read_mac_addr</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;str&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Read MAC address.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read MAC address.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            Colon (``:``) seperated *hex* encoded MAC address.</span>
@@ -269,7 +269,7 @@
       <div class="clearer"></div>
     </div>
     <div class="footer">
-      &copy;2017-2022, Jarry Shaw.
+      &copy;2017-2023, Jarry Shaw.
       
     </div>
 

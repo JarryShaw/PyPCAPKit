@@ -76,7 +76,7 @@
 
 
 <div class="viewcode-block" id="IPX"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/ipx.html#pcapkit.protocols.internet.ipx.IPX">[docs]</a><span class="k">class</span> <span class="nc">IPX</span><span class="p">(</span><span class="n">Internet</span><span class="p">[</span><span class="n">DataType_IPX</span><span class="p">]):</span>
-    <span class="sd">&quot;&quot;&quot;This class implements Internetwork Packet Exchange.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;This class implements Internetwork Packet Exchange.&quot;&quot;&quot;</span>
 
     <span class="c1">##########################################################################</span>
     <span class="c1"># Properties.</span>
@@ -84,27 +84,27 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Literal[&quot;Internetwork Packet Exchange&quot;]&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Name of corresponding protocol.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Name of corresponding protocol.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="s1">&#39;Internetwork Packet Exchange&#39;</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">length</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Literal[30]&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Header length of corresponding protocol.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Header length of corresponding protocol.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="mi">30</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">protocol</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;RegType_TransType&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Name of next layer protocol.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Name of next layer protocol.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_info</span><span class="o">.</span><span class="n">type</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">src</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;str&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Source IPX address.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Source IPX address.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_info</span><span class="o">.</span><span class="n">src</span><span class="o">.</span><span class="n">addr</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">dst</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;str&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Destination IPX address.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Destination IPX address.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_info</span><span class="o">.</span><span class="n">dst</span><span class="o">.</span><span class="n">addr</span>
 
     <span class="c1">##########################################################################</span>
@@ -112,7 +112,7 @@
     <span class="c1">##########################################################################</span>
 
 <div class="viewcode-block" id="IPX.read"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/ipx.html#pcapkit.protocols.internet.ipx.IPX.read">[docs]</a>    <span class="k">def</span> <span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_IPX&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Read Internetwork Packet Exchange.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read Internetwork Packet Exchange.</span>
 
 <span class="sd">         Args:</span>
 <span class="sd">            length: Length of packet data.</span>
@@ -144,7 +144,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_decode_next_layer</span><span class="p">(</span><span class="n">ipx</span><span class="p">,</span> <span class="n">ipx</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="n">ipx</span><span class="o">.</span><span class="n">len</span> <span class="o">-</span> <span class="mi">30</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="IPX.make"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/ipx.html#pcapkit.protocols.internet.ipx.IPX.make">[docs]</a>    <span class="k">def</span> <span class="nf">make</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;NoReturn&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Make (construct) packet data.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Make (construct) packet data.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
@@ -160,12 +160,12 @@
     <span class="c1">##########################################################################</span>
 
     <span class="k">def</span> <span class="fm">__length_hint__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Literal[30]&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Return an estimated length for the object.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return an estimated length for the object.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="mi">30</span>
 
 <div class="viewcode-block" id="IPX.__index__"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/ipx.html#pcapkit.protocols.internet.ipx.IPX.__index__">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="fm">__index__</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;RegType_TransType&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=invalid-index-returned</span>
-        <span class="sd">&quot;&quot;&quot;Numeral registry index of the protocol.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Numeral registry index of the protocol.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            Numeral registry index of the protocol in `IANA`_.</span>
@@ -180,7 +180,7 @@
     <span class="c1">##########################################################################</span>
 
 <div class="viewcode-block" id="IPX._read_ipx_address"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/ipx.html#pcapkit.protocols.internet.ipx.IPX._read_ipx_address">[docs]</a>    <span class="k">def</span> <span class="nf">_read_ipx_address</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_Address&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Read IPX address field.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read IPX address field.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            Parsed IPX address field.</span>
@@ -273,7 +273,7 @@
       <div class="clearer"></div>
     </div>
     <div class="footer">
-      &copy;2017-2022, Jarry Shaw.
+      &copy;2017-2023, Jarry Shaw.
       
     </div>
 

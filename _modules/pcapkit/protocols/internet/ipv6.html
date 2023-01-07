@@ -81,7 +81,7 @@
 
 
 <div class="viewcode-block" id="IPv6"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/ipv6.html#pcapkit.protocols.internet.ipv6.IPv6">[docs]</a><span class="k">class</span> <span class="nc">IPv6</span><span class="p">(</span><span class="n">IP</span><span class="p">[</span><span class="n">DataType_IPv6</span><span class="p">]):</span>
-    <span class="sd">&quot;&quot;&quot;This class implements Internet Protocol version 6.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;This class implements Internet Protocol version 6.&quot;&quot;&quot;</span>
 
     <span class="c1">##########################################################################</span>
     <span class="c1"># Properties.</span>
@@ -89,34 +89,34 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Literal[&quot;Internet Protocol version 6&quot;]&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Name of corresponding protocol.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Name of corresponding protocol.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="s1">&#39;Internet Protocol version 6&#39;</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">length</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Literal[40]&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Header length of corresponding protocol.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Header length of corresponding protocol.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="mi">40</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">protocol</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;RegType_TransType&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Name of next layer protocol.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Name of next layer protocol.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_info</span><span class="o">.</span><span class="n">protocol</span>
 
     <span class="c1"># source IP address</span>
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">src</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;IPv6Address&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Source IP address.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Source IP address.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_info</span><span class="o">.</span><span class="n">src</span>
 
     <span class="c1"># destination IP address</span>
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">dst</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;IPv6Address&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Destination IP address.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Destination IP address.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_info</span><span class="o">.</span><span class="n">dst</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">extension_headers</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;OrderedMultiDict[RegType_ExtensionHeader, Protocol]&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;IPv6 extension header records.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;IPv6 extension header records.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_exthdr</span>
 
     <span class="c1">##########################################################################</span>
@@ -124,7 +124,7 @@
     <span class="c1">##########################################################################</span>
 
 <div class="viewcode-block" id="IPv6.read"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/ipv6.html#pcapkit.protocols.internet.ipv6.IPv6.read">[docs]</a>    <span class="k">def</span> <span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_IPv6&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
-        <span class="sd">&quot;&quot;&quot;Read Internet Protocol version 6 (IPv6).</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read Internet Protocol version 6 (IPv6).</span>
 
 <span class="sd">        Structure of IPv6 header [:rfc:`2460`]:</span>
 
@@ -186,7 +186,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_decode_next_layer</span><span class="p">(</span><span class="n">ipv6</span><span class="p">,</span> <span class="n">_next</span><span class="p">,</span> <span class="n">ipv6</span><span class="o">.</span><span class="n">payload</span><span class="p">)</span>  <span class="c1"># pylint: disable=no-member</span></div>
 
 <div class="viewcode-block" id="IPv6.make"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/ipv6.html#pcapkit.protocols.internet.ipv6.IPv6.make">[docs]</a>    <span class="k">def</span> <span class="nf">make</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;NoReturn&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Make (construct) packet data.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Make (construct) packet data.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
@@ -199,7 +199,7 @@
 
 <div class="viewcode-block" id="IPv6.id"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/ipv6.html#pcapkit.protocols.internet.ipv6.IPv6.id">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">id</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;tuple[Literal[&quot;IPv6&quot;]]&#39;</span><span class="p">:</span>  <span class="c1"># type: ignore[override]</span>
-        <span class="sd">&quot;&quot;&quot;Index ID of the protocol.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Index ID of the protocol.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            Index ID of the protocol.</span>
@@ -212,12 +212,12 @@
     <span class="c1">##########################################################################</span>
 
     <span class="k">def</span> <span class="fm">__length_hint__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Literal[40]&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Return an estimated length for the object.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return an estimated length for the object.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="mi">40</span>
 
 <div class="viewcode-block" id="IPv6.__index__"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/ipv6.html#pcapkit.protocols.internet.ipv6.IPv6.__index__">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="fm">__index__</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;RegType_TransType&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=invalid-index-returned</span>
-        <span class="sd">&quot;&quot;&quot;Numeral registry index of the protocol.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Numeral registry index of the protocol.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            Numeral registry index of the protocol in `IANA`_.</span>
@@ -232,7 +232,7 @@
     <span class="c1">##########################################################################</span>
 
 <div class="viewcode-block" id="IPv6._read_ip_hextet"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/ipv6.html#pcapkit.protocols.internet.ipv6.IPv6._read_ip_hextet">[docs]</a>    <span class="k">def</span> <span class="nf">_read_ip_hextet</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;tuple[int, int, int]&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Read first four hextets of IPv6.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read first four hextets of IPv6.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            Parsed hextets data, including version number, traffic class and</span>
@@ -247,7 +247,7 @@
         <span class="k">return</span> <span class="p">(</span><span class="n">_vers</span><span class="p">,</span> <span class="n">_tcls</span><span class="p">,</span> <span class="n">_flow</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="IPv6._read_ip_addr"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/ipv6.html#pcapkit.protocols.internet.ipv6.IPv6._read_ip_addr">[docs]</a>    <span class="k">def</span> <span class="nf">_read_ip_addr</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;IPv6Address&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Read IP address.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read IP address.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            Parsed IP address.</span>
@@ -257,7 +257,7 @@
 
 <div class="viewcode-block" id="IPv6._decode_next_layer"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/ipv6.html#pcapkit.protocols.internet.ipv6.IPv6._decode_next_layer">[docs]</a>    <span class="k">def</span> <span class="nf">_decode_next_layer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ipv6</span><span class="p">:</span> <span class="s1">&#39;DataType_IPv6&#39;</span><span class="p">,</span> <span class="n">proto</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># type: ignore[override] # pylint: disable=arguments-differ,arguments-renamed</span>
                            <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_IPv6&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=arguments-differ</span>
-        <span class="sd">&quot;&quot;&quot;Decode next layer extractor.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Decode next layer extractor.</span>
 
 <span class="sd">        Arguments:</span>
 <span class="sd">            ipv6: info buffer</span>
@@ -388,7 +388,7 @@
       <div class="clearer"></div>
     </div>
     <div class="footer">
-      &copy;2017-2022, Jarry Shaw.
+      &copy;2017-2023, Jarry Shaw.
       
     </div>
 

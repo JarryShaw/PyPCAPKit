@@ -87,7 +87,7 @@
 
 
 <div class="viewcode-block" id="OSPF"><a class="viewcode-back" href="../../../../pcapkit/protocols/link/ospf.html#pcapkit.protocols.link.ospf.OSPF">[docs]</a><span class="k">class</span> <span class="nc">OSPF</span><span class="p">(</span><span class="n">Link</span><span class="p">[</span><span class="n">DataType_OSPF</span><span class="p">]):</span>
-    <span class="sd">&quot;&quot;&quot;This class implements Open Shortest Path First.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;This class implements Open Shortest Path First.&quot;&quot;&quot;</span>
 
     <span class="c1">##########################################################################</span>
     <span class="c1"># Properties.</span>
@@ -95,22 +95,22 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;str&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Name of current protocol.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Name of current protocol.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;Open Shortest Path First version </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_info</span><span class="o">.</span><span class="n">version</span><span class="si">}</span><span class="s1">&#39;</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">alias</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;str&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Acronym of current protocol.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Acronym of current protocol.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;OSPFv</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_info</span><span class="o">.</span><span class="n">version</span><span class="si">}</span><span class="s1">&#39;</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">length</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Literal[24]&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Header length of current protocol.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Header length of current protocol.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="mi">24</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;RegType_Packet&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;OSPF packet type.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;OSPF packet type.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_info</span><span class="o">.</span><span class="n">type</span>
 
     <span class="c1">##########################################################################</span>
@@ -118,7 +118,7 @@
     <span class="c1">##########################################################################</span>
 
 <div class="viewcode-block" id="OSPF.read"><a class="viewcode-back" href="../../../../pcapkit/protocols/link/ospf.html#pcapkit.protocols.link.ospf.OSPF.read">[docs]</a>    <span class="k">def</span> <span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_OSPF&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Read Open Shortest Path First.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read Open Shortest Path First.</span>
 
 <span class="sd">        Structure of OSPF header [:rfc:`2328`]:</span>
 
@@ -180,7 +180,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_decode_next_layer</span><span class="p">(</span><span class="n">ospf</span><span class="p">,</span> <span class="n">length</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">length</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="OSPF.make"><a class="viewcode-back" href="../../../../pcapkit/protocols/link/ospf.html#pcapkit.protocols.link.ospf.OSPF.make">[docs]</a>    <span class="k">def</span> <span class="nf">make</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;NoReturn&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Make (construct) packet data.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Make (construct) packet data.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
@@ -196,12 +196,12 @@
     <span class="c1">##########################################################################</span>
 
     <span class="k">def</span> <span class="fm">__length_hint__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Literal[24]&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Return an estimated length for the object.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return an estimated length for the object.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="mi">24</span>
 
 <div class="viewcode-block" id="OSPF.__index__"><a class="viewcode-back" href="../../../../pcapkit/protocols/link/ospf.html#pcapkit.protocols.link.ospf.OSPF.__index__">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="fm">__index__</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;NoReturn&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=invalid-index-returned</span>
-        <span class="sd">&quot;&quot;&quot;Numeral registry index of the protocol.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Numeral registry index of the protocol.</span>
 
 <span class="sd">        Raises:</span>
 <span class="sd">            UnsupportedCall: This protocol has no registry entry.</span>
@@ -214,7 +214,7 @@
     <span class="c1">##########################################################################</span>
 
     <span class="k">def</span> <span class="nf">_read_id_numbers</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;IPv4Address&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Read router and area IDs.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read router and area IDs.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            Parsed IDs as an IPv4 address.</span>
@@ -225,7 +225,7 @@
         <span class="k">return</span> <span class="n">ipaddress</span><span class="o">.</span><span class="n">ip_address</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_read_fileng</span><span class="p">(</span><span class="mi">4</span><span class="p">))</span>  <span class="c1"># type: ignore[return-value]</span>
 
 <div class="viewcode-block" id="OSPF._read_encrypt_auth"><a class="viewcode-back" href="../../../../pcapkit/protocols/link/ospf.html#pcapkit.protocols.link.ospf.OSPF._read_encrypt_auth">[docs]</a>    <span class="k">def</span> <span class="nf">_read_encrypt_auth</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_CrytographicAuthentication&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Read Authentication field when Cryptographic Authentication is employed,</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read Authentication field when Cryptographic Authentication is employed,</span>
 <span class="sd">        i.e. :attr:`~OSPF.autype` is ``2``.</span>
 
 <span class="sd">        Structure of Cryptographic Authentication [:rfc:`2328`]:</span>
@@ -321,7 +321,7 @@
       <div class="clearer"></div>
     </div>
     <div class="footer">
-      &copy;2017-2022, Jarry Shaw.
+      &copy;2017-2023, Jarry Shaw.
       
     </div>
 

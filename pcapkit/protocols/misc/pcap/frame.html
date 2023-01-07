@@ -41,12 +41,12 @@
 <a class="reference internal" href="#pcapkit.protocols.misc.pcap.frame.Frame" title="pcapkit.protocols.misc.pcap.frame.Frame"><code class="xref py py-class docutils literal notranslate"><span class="pre">Frame</span></code></a> only,
 which implements extractor for frame headers <a class="footnote-reference brackets" href="#id2" id="id1" role="doc-noteref"><span class="fn-bracket">[</span>*<span class="fn-bracket">]</span></a> of PCAP,
 whose structure is described as below:</p>
-<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">typedef</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="nc">pcaprec_hdr_s</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">    </span><span class="n">guint32</span><span class="w"> </span><span class="n">ts_sec</span><span class="p">;</span><span class="w">     </span><span class="cm">/* timestamp seconds */</span><span class="w"></span>
-<span class="w">    </span><span class="n">guint32</span><span class="w"> </span><span class="n">ts_usec</span><span class="p">;</span><span class="w">    </span><span class="cm">/* timestamp microseconds */</span><span class="w"></span>
-<span class="w">    </span><span class="n">guint32</span><span class="w"> </span><span class="n">incl_len</span><span class="p">;</span><span class="w">   </span><span class="cm">/* number of octets of packet saved in file */</span><span class="w"></span>
-<span class="w">    </span><span class="n">guint32</span><span class="w"> </span><span class="n">orig_len</span><span class="p">;</span><span class="w">   </span><span class="cm">/* actual length of packet */</span><span class="w"></span>
-<span class="p">}</span><span class="w"> </span><span class="n">pcaprec_hdr_t</span><span class="p">;</span><span class="w"></span>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">typedef</span><span class="w"> </span><span class="k">struct</span><span class="w"> </span><span class="nc">pcaprec_hdr_s</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">guint32</span><span class="w"> </span><span class="n">ts_sec</span><span class="p">;</span><span class="w">     </span><span class="cm">/* timestamp seconds */</span>
+<span class="w">    </span><span class="n">guint32</span><span class="w"> </span><span class="n">ts_usec</span><span class="p">;</span><span class="w">    </span><span class="cm">/* timestamp microseconds */</span>
+<span class="w">    </span><span class="n">guint32</span><span class="w"> </span><span class="n">incl_len</span><span class="p">;</span><span class="w">   </span><span class="cm">/* number of octets of packet saved in file */</span>
+<span class="w">    </span><span class="n">guint32</span><span class="w"> </span><span class="n">orig_len</span><span class="p">;</span><span class="w">   </span><span class="cm">/* actual length of packet */</span>
+<span class="p">}</span><span class="w"> </span><span class="n">pcaprec_hdr_t</span><span class="p">;</span>
 </pre></div>
 </div>
 <br /><dl class="py class">
@@ -494,7 +494,7 @@ The values should be a tuple representing the module name and class name.</p>
       <div class="clearer"></div>
     </div>
     <div class="footer">
-      &copy;2017-2022, Jarry Shaw.
+      &copy;2017-2023, Jarry Shaw.
       
       |
       <a href="../../../../_sources/pcapkit/protocols/misc/pcap/frame.rst.txt"

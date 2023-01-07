@@ -70,7 +70,7 @@
 
 
 <div class="viewcode-block" id="UDP"><a class="viewcode-back" href="../../../../pcapkit/protocols/transport/udp.html#pcapkit.protocols.transport.udp.UDP">[docs]</a><span class="k">class</span> <span class="nc">UDP</span><span class="p">(</span><span class="n">Transport</span><span class="p">[</span><span class="n">DataType_UDP</span><span class="p">]):</span>
-    <span class="sd">&quot;&quot;&quot;This class implements User Datagram Protocol.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;This class implements User Datagram Protocol.</span>
 
 <span class="sd">    This class currently supports parsing of the following protocols, which are</span>
 <span class="sd">    registered in the :attr:`self.__proto__ &lt;pcapkit.protocols.transport.udp.UDP.__proto__&gt;`</span>
@@ -106,22 +106,22 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Literal[&quot;User Datagram Protocol&quot;]&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Name of current protocol.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Name of current protocol.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="s1">&#39;User Datagram Protocol&#39;</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">length</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Literal[8]&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Header length of current protocol.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Header length of current protocol.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="mi">8</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">src</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;int&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Source port.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Source port.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_info</span><span class="o">.</span><span class="n">srcport</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">dst</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;int&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Destination port.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Destination port.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_info</span><span class="o">.</span><span class="n">dstport</span>
 
     <span class="c1">##########################################################################</span>
@@ -129,7 +129,7 @@
     <span class="c1">##########################################################################</span>
 
 <div class="viewcode-block" id="UDP.read"><a class="viewcode-back" href="../../../../pcapkit/protocols/transport/udp.html#pcapkit.protocols.transport.udp.UDP.read">[docs]</a>    <span class="k">def</span> <span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_UDP&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
-        <span class="sd">&quot;&quot;&quot;Read User Datagram Protocol (UDP).</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read User Datagram Protocol (UDP).</span>
 
 <span class="sd">        Structure of UDP header [:rfc:`768`]:</span>
 
@@ -173,7 +173,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_decode_next_layer</span><span class="p">(</span><span class="n">udp</span><span class="p">,</span> <span class="p">(</span><span class="n">udp</span><span class="o">.</span><span class="n">srcport</span><span class="p">,</span> <span class="n">udp</span><span class="o">.</span><span class="n">dstport</span><span class="p">),</span> <span class="n">udp</span><span class="o">.</span><span class="n">len</span> <span class="o">-</span> <span class="mi">8</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="UDP.make"><a class="viewcode-back" href="../../../../pcapkit/protocols/transport/udp.html#pcapkit.protocols.transport.udp.UDP.make">[docs]</a>    <span class="k">def</span> <span class="nf">make</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;NoReturn&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Make (construct) packet data.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Make (construct) packet data.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
@@ -189,12 +189,12 @@
     <span class="c1">##########################################################################</span>
 
     <span class="k">def</span> <span class="fm">__length_hint__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Literal[8]&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Return an estimated length for the object.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return an estimated length for the object.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="mi">8</span>
 
 <div class="viewcode-block" id="UDP.__index__"><a class="viewcode-back" href="../../../../pcapkit/protocols/transport/udp.html#pcapkit.protocols.transport.udp.UDP.__index__">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="fm">__index__</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;RegType_TransType&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=invalid-index-returned</span>
-        <span class="sd">&quot;&quot;&quot;Numeral registry index of the protocol.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Numeral registry index of the protocol.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            Numeral registry index of the protocol in `IANA`_.</span>
@@ -266,7 +266,7 @@
       <div class="clearer"></div>
     </div>
     <div class="footer">
-      &copy;2017-2022, Jarry Shaw.
+      &copy;2017-2023, Jarry Shaw.
       
     </div>
 

@@ -126,7 +126,7 @@
 
 
 <div class="viewcode-block" id="register_protocol"><a class="viewcode-back" href="../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.register_protocol">[docs]</a><span class="k">def</span> <span class="nf">register_protocol</span><span class="p">(</span><span class="n">protocol</span><span class="p">:</span> <span class="s1">&#39;Type[Protocol]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;registered protocol class.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;registered protocol class.</span>
 
 <span class="sd">    The protocol class must be a subclass of</span>
 <span class="sd">    :class:`~pcapkit.protocols.protocol.Protocol`, and will be registered to</span>
@@ -149,7 +149,7 @@
 
 
 <div class="viewcode-block" id="register_extractor"><a class="viewcode-back" href="../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.register_extractor">[docs]</a><span class="k">def</span> <span class="nf">register_extractor</span><span class="p">(</span><span class="nb">format</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">,</span> <span class="n">class_</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">,</span> <span class="n">ext</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=redefined-builtin</span>
-    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;registered a new dumper class.</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;registered a new dumper class.</span>
 
 <span class="sd">    Notes:</span>
 <span class="sd">        The full qualified class name of the new dumper class</span>
@@ -179,7 +179,7 @@
 
 
 <div class="viewcode-block" id="register_traceflow"><a class="viewcode-back" href="../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.register_traceflow">[docs]</a><span class="k">def</span> <span class="nf">register_traceflow</span><span class="p">(</span><span class="nb">format</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">,</span> <span class="n">class_</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">,</span> <span class="n">ext</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=redefined-builtin</span>
-    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;registered a new dumper class.</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;registered a new dumper class.</span>
 
 <span class="sd">    Notes:</span>
 <span class="sd">        The full qualified class name of the new dumper class</span>
@@ -209,7 +209,7 @@
 
 
 <div class="viewcode-block" id="register_http"><a class="viewcode-back" href="../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.register_http">[docs]</a><span class="k">def</span> <span class="nf">register_http</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">&#39;HTTP_Frame&#39;</span><span class="p">,</span> <span class="n">meth</span><span class="p">:</span> <span class="s1">&#39;str | HTTP_FrameParser&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;registered a frame parser.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;registered a frame parser.</span>
 
 <span class="sd">    The function will register the given frame parser to the</span>
 <span class="sd">    :data:`pcapkit.protocols.application.httpv2.HTTPv2.__frame__` registry.</span>
@@ -233,7 +233,7 @@
 
 
 <div class="viewcode-block" id="register_hopopt"><a class="viewcode-back" href="../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.register_hopopt">[docs]</a><span class="k">def</span> <span class="nf">register_hopopt</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">&#39;IPv6_Option&#39;</span><span class="p">,</span> <span class="n">meth</span><span class="p">:</span> <span class="s1">&#39;str | HOPOPT_OptionParser&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Register an option parser.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Register an option parser.</span>
 
 <span class="sd">    The function will register the given option parser to the</span>
 <span class="sd">    :data:`pcapkit.protocols.internet.hopopt.HOPOPT.__option__` registry.</span>
@@ -257,7 +257,7 @@
 
 
 <div class="viewcode-block" id="register_transtype"><a class="viewcode-back" href="../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.register_transtype">[docs]</a><span class="k">def</span> <span class="nf">register_transtype</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">&#39;TransType&#39;</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">class_</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
-    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Register a new protocol class.</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Register a new protocol class.</span>
 
 <span class="sd">    Notes:</span>
 <span class="sd">        The full qualified class name of the new protocol class</span>
@@ -289,7 +289,7 @@
 
 
 <div class="viewcode-block" id="register_ipv6_opts"><a class="viewcode-back" href="../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.register_ipv6_opts">[docs]</a><span class="k">def</span> <span class="nf">register_ipv6_opts</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">&#39;IPv6_Option&#39;</span><span class="p">,</span> <span class="n">meth</span><span class="p">:</span> <span class="s1">&#39;str | IPv6_Opts_OptionParser&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Register an option parser.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Register an option parser.</span>
 
 <span class="sd">    The function will register the given option parser to the</span>
 <span class="sd">    :data:`pcapkit.protocols.internet.ipv6_opts.IPv6_Opts.__option__` registry.</span>
@@ -313,7 +313,7 @@
 
 
 <div class="viewcode-block" id="register_ipv6_route"><a class="viewcode-back" href="../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.register_ipv6_route">[docs]</a><span class="k">def</span> <span class="nf">register_ipv6_route</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">&#39;IPv6_Routing&#39;</span><span class="p">,</span> <span class="n">meth</span><span class="p">:</span> <span class="s1">&#39;str | IPv6_Route_TypeParser&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
-    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Register an routing data parser.</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Register an routing data parser.</span>
 
 <span class="sd">    The function will register the given routing data parser to the</span>
 <span class="sd">    :data:`pcapkit.protocols.internet.ipv6_route.IPv6_Route.__routing__` registry.</span>
@@ -337,7 +337,7 @@
 
 
 <div class="viewcode-block" id="register_ethertype"><a class="viewcode-back" href="../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.register_ethertype">[docs]</a><span class="k">def</span> <span class="nf">register_ethertype</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">&#39;EtherType&#39;</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">class_</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
-    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Register a new protocol class.</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Register a new protocol class.</span>
 
 <span class="sd">    Notes:</span>
 <span class="sd">        The full qualified class name of the new protocol class</span>
@@ -369,7 +369,7 @@
 
 
 <div class="viewcode-block" id="register_pcap"><a class="viewcode-back" href="../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.register_pcap">[docs]</a><span class="k">def</span> <span class="nf">register_pcap</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">&#39;LinkType&#39;</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">class_</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
-    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Register a new protocol class.</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Register a new protocol class.</span>
 
 <span class="sd">    Notes:</span>
 <span class="sd">        The full qualified class name of the new protocol class</span>
@@ -401,7 +401,7 @@
 
 
 <div class="viewcode-block" id="register_tcp"><a class="viewcode-back" href="../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.register_tcp">[docs]</a><span class="k">def</span> <span class="nf">register_tcp</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">&#39;TCP_Option&#39;</span><span class="p">,</span> <span class="n">meth</span><span class="p">:</span> <span class="s1">&#39;str | TCP_OptionParser&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Register an option parser.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Register an option parser.</span>
 
 <span class="sd">    The function will register the given option parser to the</span>
 <span class="sd">    :data:`pcapkit.protocols.transport.tcp.TCP.__option__` registry.</span>
@@ -425,7 +425,7 @@
 
 
 <div class="viewcode-block" id="register_mptcp"><a class="viewcode-back" href="../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.register_mptcp">[docs]</a><span class="k">def</span> <span class="nf">register_mptcp</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">&#39;TCP_MPTCPOption&#39;</span><span class="p">,</span> <span class="n">meth</span><span class="p">:</span> <span class="s1">&#39;str | TCP_MPOptionParser&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Register an MPTCP option parser.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Register an MPTCP option parser.</span>
 
 <span class="sd">    The function will register the given option parser to the</span>
 <span class="sd">    :data:`pcapkit.protocols.transport.tcp.TCP.__mp_option__` registry.</span>
@@ -449,7 +449,7 @@
 
 
 <div class="viewcode-block" id="register_tcp_port"><a class="viewcode-back" href="../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.register_tcp_port">[docs]</a><span class="k">def</span> <span class="nf">register_tcp_port</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">class_</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
-    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Register a new protocol class.</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Register a new protocol class.</span>
 
 <span class="sd">    Notes:</span>
 <span class="sd">        The full qualified class name of the new protocol class</span>
@@ -481,7 +481,7 @@
 
 
 <div class="viewcode-block" id="register_udp_port"><a class="viewcode-back" href="../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.register_udp_port">[docs]</a><span class="k">def</span> <span class="nf">register_udp_port</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">class_</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
-    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Register a new protocol class.</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Register a new protocol class.</span>
 
 <span class="sd">    Notes:</span>
 <span class="sd">        The full qualified class name of the new protocol class</span>
@@ -513,7 +513,7 @@
 
 
 <div class="viewcode-block" id="register_output"><a class="viewcode-back" href="../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.register_output">[docs]</a><span class="k">def</span> <span class="nf">register_output</span><span class="p">(</span><span class="nb">format</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">,</span> <span class="n">class_</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">,</span> <span class="n">ext</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=redefined-builtin</span>
-    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;registered a new dumper class.</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;registered a new dumper class.</span>
 
 <span class="sd">    Notes:</span>
 <span class="sd">        The full qualified class name of the new dumper class</span>
@@ -544,7 +544,7 @@
 
 
 <div class="viewcode-block" id="register_linktype"><a class="viewcode-back" href="../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.register_linktype">[docs]</a><span class="k">def</span> <span class="nf">register_linktype</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">&#39;LinkType&#39;</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">class_</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
-    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Register a new protocol class.</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Register a new protocol class.</span>
 
 <span class="sd">    Notes:</span>
 <span class="sd">        The full qualified class name of the new protocol class</span>
@@ -574,7 +574,7 @@
 
 
 <div class="viewcode-block" id="register_port"><a class="viewcode-back" href="../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.register_port">[docs]</a><span class="k">def</span> <span class="nf">register_port</span><span class="p">(</span><span class="n">proto</span><span class="p">:</span> <span class="s1">&#39;Literal[&quot;tcp&quot;, &quot;udp&quot;]&#39;</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">class_</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
-    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Register a new protocol class.</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Register a new protocol class.</span>
 
 <span class="sd">    Notes:</span>
 <span class="sd">        The full qualified class name of the new protocol class</span>
@@ -674,7 +674,7 @@
       <div class="clearer"></div>
     </div>
     <div class="footer">
-      &copy;2017-2022, Jarry Shaw.
+      &copy;2017-2023, Jarry Shaw.
       
     </div>
 

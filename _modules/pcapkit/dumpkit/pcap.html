@@ -65,7 +65,7 @@
 
 
 <div class="viewcode-block" id="PCAPIO"><a class="viewcode-back" href="../../../pcapkit/dumpkit/pcap.html#pcapkit.dumpkit.pcap.PCAPIO">[docs]</a><span class="k">class</span> <span class="nc">PCAPIO</span><span class="p">(</span><span class="n">dictdumper</span><span class="o">.</span><span class="n">Dumper</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;PCAP file dumper.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;PCAP file dumper.&quot;&quot;&quot;</span>
 
     <span class="c1">##########################################################################</span>
     <span class="c1"># Properties.</span>
@@ -73,7 +73,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">kind</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Literal[&quot;pcap&quot;]&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;File format of current dumper.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;File format of current dumper.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="s1">&#39;pcap&#39;</span>
 
     <span class="c1">##########################################################################</span>
@@ -83,7 +83,7 @@
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fname</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">protocol</span><span class="p">:</span> <span class="s1">&#39;RegType_LinkType | StdlibIntEnum | AenumIntEnum | str | int&#39;</span><span class="p">,</span>
                  <span class="n">byteorder</span><span class="p">:</span> <span class="s1">&#39;Literal[&quot;big&quot;, &quot;little&quot;]&#39;</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">byteorder</span><span class="p">,</span>
                  <span class="n">nanosecond</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=arguments-differ</span>
-        <span class="sd">&quot;&quot;&quot;Initialise dumper.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialise dumper.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            fname: output file name</span>
@@ -103,7 +103,7 @@
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="n">protocol</span><span class="o">=</span><span class="n">protocol</span><span class="p">,</span> <span class="n">byteorder</span><span class="o">=</span><span class="n">byteorder</span><span class="p">,</span> <span class="n">nanosecond</span><span class="o">=</span><span class="n">nanosecond</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="s1">&#39;Frame&#39;</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="s1">&#39;Optional[str]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;PCAPIO&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Dump a new frame.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Dump a new frame.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            value: content to be dumped</span>
@@ -124,7 +124,7 @@
     <span class="k">def</span> <span class="nf">_dump_header</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">protocol</span><span class="p">:</span> <span class="s1">&#39;RegType_LinkType | StdlibIntEnum | AenumIntEnum | str | int&#39;</span><span class="p">,</span>  <span class="c1"># pylint: disable=arguments-differ</span>
                      <span class="n">byteorder</span><span class="p">:</span> <span class="s1">&#39;Literal[&quot;big&quot;, &quot;little&quot;]&#39;</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">byteorder</span><span class="p">,</span> <span class="n">nanosecond</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
                      <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
-        <span class="sd">&quot;&quot;&quot;Initially dump file heads and tails.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initially dump file heads and tails.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            protocol: data link type</span>
@@ -142,7 +142,7 @@
             <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_append_value</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="s1">&#39;Frame&#39;</span><span class="p">,</span> <span class="n">file</span><span class="p">:</span> <span class="s1">&#39;BinaryIO&#39;</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
-        <span class="sd">&quot;&quot;&quot;Call this function to write contents.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Call this function to write contents.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            value: content to be dumped</span>
@@ -222,7 +222,7 @@
       <div class="clearer"></div>
     </div>
     <div class="footer">
-      &copy;2017-2022, Jarry Shaw.
+      &copy;2017-2023, Jarry Shaw.
       
     </div>
 

@@ -59,7 +59,7 @@
 
 
 <div class="viewcode-block" id="NotImplementedIO"><a class="viewcode-back" href="../../../pcapkit/dumpkit/null.html#pcapkit.dumpkit.null.NotImplementedIO">[docs]</a><span class="k">class</span> <span class="nc">NotImplementedIO</span><span class="p">(</span><span class="n">dictdumper</span><span class="o">.</span><span class="n">Dumper</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Unspecified output format.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Unspecified output format.&quot;&quot;&quot;</span>
 
     <span class="c1">##########################################################################</span>
     <span class="c1"># Properties.</span>
@@ -67,7 +67,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">kind</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Literal[&quot;null&quot;]&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;File format of current dumper.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;File format of current dumper.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="s1">&#39;null&#39;</span>
 
     <span class="c1">##########################################################################</span>
@@ -75,7 +75,7 @@
     <span class="c1">##########################################################################</span>
 
     <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="s1">&#39;dict[str, Any]&#39;</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="s1">&#39;Optional[str]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;NotImplementedIO&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
-        <span class="sd">&quot;&quot;&quot;Dump a new frame.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Dump a new frame.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            value: content to be dumped</span>
@@ -92,7 +92,7 @@
     <span class="c1">##########################################################################</span>
 
     <span class="k">def</span> <span class="nf">_dump_header</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
-        <span class="sd">&quot;&quot;&quot;Initially dump file heads and tails.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initially dump file heads and tails.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            **kwargs: arbitrary keyword arguments</span>
@@ -100,7 +100,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="nf">_append_value</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="s1">&#39;dict[str, Any]&#39;</span><span class="p">,</span> <span class="n">file</span><span class="p">:</span> <span class="s1">&#39;BinaryIO&#39;</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
-        <span class="sd">&quot;&quot;&quot;Call this function to write contents.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Call this function to write contents.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            value: content to be dumped</span>
@@ -171,7 +171,7 @@
       <div class="clearer"></div>
     </div>
     <div class="footer">
-      &copy;2017-2022, Jarry Shaw.
+      &copy;2017-2023, Jarry Shaw.
       
     </div>
 

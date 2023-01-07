@@ -81,7 +81,7 @@
 
 
 <div class="viewcode-block" id="Packet"><a class="viewcode-back" href="../../../pcapkit/foundation/traceflow.html#pcapkit.foundation.traceflow.Packet">[docs]</a><span class="k">class</span> <span class="nc">Packet</span><span class="p">(</span><span class="n">Info</span><span class="p">,</span> <span class="n">Generic</span><span class="p">[</span><span class="n">IPAddress</span><span class="p">]):</span>
-    <span class="sd">&quot;&quot;&quot;Data structure for **TCP flow tracing**.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Data structure for **TCP flow tracing**.</span>
 
 <span class="sd">    See Also:</span>
 <span class="sd">        * :meth:`pcapkit.foundation.traceflow.TraceFlow.dump`</span>
@@ -115,7 +115,7 @@
 
 
 <div class="viewcode-block" id="Buffer"><a class="viewcode-back" href="../../../pcapkit/foundation/traceflow.html#pcapkit.foundation.traceflow.Buffer">[docs]</a><span class="k">class</span> <span class="nc">Buffer</span><span class="p">(</span><span class="n">Info</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Data structure for **TCP flow tracing**.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Data structure for **TCP flow tracing**.</span>
 
 <span class="sd">    See Also:</span>
 <span class="sd">        * :attr:`pcapkit.foundation.traceflow.TraceFlow.index`</span>
@@ -135,7 +135,7 @@
 
 
 <div class="viewcode-block" id="Index"><a class="viewcode-back" href="../../../pcapkit/foundation/traceflow.html#pcapkit.foundation.traceflow.Index">[docs]</a><span class="k">class</span> <span class="nc">Index</span><span class="p">(</span><span class="n">Info</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Data structure for **TCP flow tracing**.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Data structure for **TCP flow tracing**.</span>
 
 <span class="sd">    See Also:</span>
 <span class="sd">        * element from :attr:`pcapkit.foundation.traceflow.TraceFlow.index`</span>
@@ -161,7 +161,7 @@
 
 
 <div class="viewcode-block" id="TraceFlow"><a class="viewcode-back" href="../../../pcapkit/foundation/traceflow.html#pcapkit.foundation.traceflow.TraceFlow">[docs]</a><span class="k">class</span> <span class="nc">TraceFlow</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Trace TCP flows.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Trace TCP flows.&quot;&quot;&quot;</span>
 
     <span class="c1"># Internal data storage for cached properties.</span>
     <span class="n">__cached__</span><span class="p">:</span> <span class="s1">&#39;dict[str, Any]&#39;</span>
@@ -193,7 +193,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">index</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;tuple[Index, ...]&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Index table for traced flow.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Index table for traced flow.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">submit</span><span class="p">()</span>
         <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_stream</span><span class="p">)</span>
@@ -204,7 +204,7 @@
 
 <div class="viewcode-block" id="TraceFlow.register"><a class="viewcode-back" href="../../../pcapkit/foundation/traceflow.html#pcapkit.foundation.traceflow.TraceFlow.register">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">register</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="nb">format</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">,</span> <span class="n">class_</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">,</span> <span class="n">ext</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=redefined-builtin</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Register a new dumper class.</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Register a new dumper class.</span>
 
 <span class="sd">        Notes:</span>
 <span class="sd">            The full qualified class name of the new dumper class</span>
@@ -221,7 +221,7 @@
 
 <div class="viewcode-block" id="TraceFlow.make_fout"><a class="viewcode-back" href="../../../pcapkit/foundation/traceflow.html#pcapkit.foundation.traceflow.TraceFlow.make_fout">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">make_fout</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">fout</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span> <span class="o">=</span> <span class="s1">&#39;./tmp&#39;</span><span class="p">,</span> <span class="n">fmt</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span> <span class="o">=</span> <span class="s1">&#39;pcap&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;tuple[Type[Dumper], str | None]&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Make root path for output.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Make root path for output.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            fout: root path for output</span>
@@ -253,10 +253,10 @@
                 <span class="k">raise</span> <span class="n">FileExists</span><span class="p">(</span><span class="o">*</span><span class="n">error</span><span class="o">.</span><span class="n">args</span><span class="p">)</span><span class="o">.</span><span class="n">with_traceback</span><span class="p">(</span><span class="n">error</span><span class="o">.</span><span class="n">__traceback__</span><span class="p">)</span>
 
         <span class="k">class</span> <span class="nc">DictDumper</span><span class="p">(</span><span class="n">output</span><span class="p">):</span>  <span class="c1"># type: ignore[valid-type,misc]</span>
-            <span class="sd">&quot;&quot;&quot;Customised :class:`~dictdumper.dumper.Dumper` object.&quot;&quot;&quot;</span>
+<span class="w">            </span><span class="sd">&quot;&quot;&quot;Customised :class:`~dictdumper.dumper.Dumper` object.&quot;&quot;&quot;</span>
 
             <span class="k">def</span> <span class="nf">object_hook</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">o</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Any&#39;</span><span class="p">:</span>
-                <span class="sd">&quot;&quot;&quot;Convert content for function call.</span>
+<span class="w">                </span><span class="sd">&quot;&quot;&quot;Convert content for function call.</span>
 
 <span class="sd">                Args:</span>
 <span class="sd">                    o: object to convert</span>
@@ -288,7 +288,7 @@
                 <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">object_hook</span><span class="p">(</span><span class="n">o</span><span class="p">)</span>  <span class="c1"># type: ignore[unreachable]</span>
 
             <span class="k">def</span> <span class="nf">default</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">o</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Literal[&quot;fallback&quot;]&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
-                <span class="sd">&quot;&quot;&quot;Check content type for function call.&quot;&quot;&quot;</span>
+<span class="w">                </span><span class="sd">&quot;&quot;&quot;Check content type for function call.&quot;&quot;&quot;</span>
                 <span class="k">return</span> <span class="s1">&#39;fallback&#39;</span>
 
             <span class="k">def</span> <span class="nf">_append_fallback</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">,</span> <span class="n">file</span><span class="p">:</span> <span class="s1">&#39;TextIO&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
@@ -306,7 +306,7 @@
         <span class="k">return</span> <span class="n">DictDumper</span><span class="p">,</span> <span class="n">ext</span></div>
 
 <div class="viewcode-block" id="TraceFlow.dump"><a class="viewcode-back" href="../../../pcapkit/foundation/traceflow.html#pcapkit.foundation.traceflow.TraceFlow.dump">[docs]</a>    <span class="k">def</span> <span class="nf">dump</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">&#39;Packet&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Dump frame to output files.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Dump frame to output files.</span>
 
 <span class="sd">        Arguments:</span>
 <span class="sd">            packet (Dict[str, Any]): a flow packet (:term:`trace.packet`)</span>
@@ -324,7 +324,7 @@
     <span class="k">def</span> <span class="nf">trace</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">&#39;Packet&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">output</span><span class="p">:</span> <span class="s1">&#39;Literal[False]&#39;</span> <span class="o">=</span> <span class="o">...</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;str&#39;</span><span class="p">:</span> <span class="o">...</span>
 
 <div class="viewcode-block" id="TraceFlow.trace"><a class="viewcode-back" href="../../../pcapkit/foundation/traceflow.html#pcapkit.foundation.traceflow.TraceFlow.trace">[docs]</a>    <span class="k">def</span> <span class="nf">trace</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">&#39;Packet&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">output</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Dumper | str&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Trace packets.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Trace packets.</span>
 
 <span class="sd">        Arguments:</span>
 <span class="sd">            packet: a flow packet (:term:`trace.packet`)</span>
@@ -363,7 +363,7 @@
         <span class="k">if</span> <span class="n">BUFID</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="p">:</span>
             <span class="n">label</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">packet</span><span class="o">.</span><span class="n">src</span><span class="si">}</span><span class="s1">_</span><span class="si">{</span><span class="n">packet</span><span class="o">.</span><span class="n">srcport</span><span class="si">}</span><span class="s1">-</span><span class="si">{</span><span class="n">packet</span><span class="o">.</span><span class="n">dst</span><span class="si">}</span><span class="s1">_</span><span class="si">{</span><span class="n">packet</span><span class="o">.</span><span class="n">dstport</span><span class="si">}</span><span class="s1">-</span><span class="si">{</span><span class="n">packet</span><span class="o">.</span><span class="n">timestamp</span><span class="si">}</span><span class="s1">&#39;</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="p">[</span><span class="n">BUFID</span><span class="p">]</span> <span class="o">=</span> <span class="n">Buffer</span><span class="p">(</span>
-                <span class="n">fpout</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_foutio</span><span class="p">(</span><span class="n">fname</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_fproot</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">label</span><span class="si">}{</span><span class="bp">self</span><span class="o">.</span><span class="n">_fdpext</span> <span class="ow">or</span> <span class="s2">&quot;&quot;</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">protocol</span><span class="o">=</span><span class="n">packet</span><span class="o">.</span><span class="n">protocol</span><span class="p">,</span>
+                <span class="n">fpout</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_foutio</span><span class="p">(</span><span class="n">fname</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_fproot</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">label</span><span class="si">}{</span><span class="bp">self</span><span class="o">.</span><span class="n">_fdpext</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="s2">&quot;&quot;</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">protocol</span><span class="o">=</span><span class="n">packet</span><span class="o">.</span><span class="n">protocol</span><span class="p">,</span>
                                    <span class="n">byteorder</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_endian</span><span class="p">,</span> <span class="n">nanosecond</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_nnsecd</span><span class="p">),</span>
                 <span class="n">index</span><span class="o">=</span><span class="p">[],</span>
                 <span class="n">label</span><span class="o">=</span><span class="n">label</span><span class="p">,</span>
@@ -388,7 +388,7 @@
         <span class="k">return</span> <span class="n">fpout</span> <span class="k">if</span> <span class="n">output</span> <span class="k">else</span> <span class="n">label</span></div>
 
 <div class="viewcode-block" id="TraceFlow.submit"><a class="viewcode-back" href="../../../pcapkit/foundation/traceflow.html#pcapkit.foundation.traceflow.TraceFlow.submit">[docs]</a>    <span class="k">def</span> <span class="nf">submit</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;tuple[Index, ...]&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Submit traced TCP flows.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Submit traced TCP flows.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            Traced TCP flow (:term:`trace.index`).</span>
@@ -424,7 +424,7 @@
 <div class="viewcode-block" id="TraceFlow.__init__"><a class="viewcode-back" href="../../../pcapkit/foundation/traceflow.html#pcapkit.foundation.traceflow.TraceFlow.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fout</span><span class="p">:</span> <span class="s1">&#39;Optional[str]&#39;</span><span class="p">,</span> <span class="nb">format</span><span class="p">:</span> <span class="s1">&#39;Optional[str]&#39;</span><span class="p">,</span>  <span class="c1"># pylint: disable=redefined-builtin</span>
                  <span class="n">byteorder</span><span class="p">:</span> <span class="s1">&#39;Literal[&quot;little&quot;, &quot;big&quot;]&#39;</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">byteorder</span><span class="p">,</span>
                  <span class="n">nanosecond</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Initialise instance.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialise instance.</span>
 
 <span class="sd">        Arguments:</span>
 <span class="sd">            fout: output path</span>
@@ -459,7 +459,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_fdpext</span> <span class="o">=</span> <span class="n">ext</span></div>
 
 <div class="viewcode-block" id="TraceFlow.__call__"><a class="viewcode-back" href="../../../pcapkit/foundation/traceflow.html#pcapkit.foundation.traceflow.TraceFlow.__call__">[docs]</a>    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">&#39;Packet&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Dump frame to output files.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Dump frame to output files.</span>
 
 <span class="sd">        Arguments:</span>
 <span class="sd">            packet: a flow packet (:term:`trace.packet`)</span>
@@ -530,7 +530,7 @@
       <div class="clearer"></div>
     </div>
     <div class="footer">
-      &copy;2017-2022, Jarry Shaw.
+      &copy;2017-2023, Jarry Shaw.
       
     </div>
 

@@ -57,7 +57,7 @@
 
 
 <div class="viewcode-block" id="ProtoChain"><a class="viewcode-back" href="../../../pcapkit/corekit/protochain.html#pcapkit.corekit.protochain.ProtoChain">[docs]</a><span class="k">class</span> <span class="nc">ProtoChain</span><span class="p">(</span><span class="n">collections</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Sequence</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Protocols chain.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Protocols chain.&quot;&quot;&quot;</span>
 
     <span class="c1">#: Internal data storage for protocol chain.</span>
     <span class="n">__data__</span><span class="p">:</span> <span class="s1">&#39;tuple[tuple[str, Type[Protocol]], ...]&#39;</span>
@@ -68,17 +68,17 @@
 
     <span class="nd">@cached_property</span>
     <span class="k">def</span> <span class="nf">protocols</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;tuple[Type[Protocol], ...]&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;List of protocols in the chain.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;List of protocols in the chain.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">data</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__data__</span><span class="p">)</span>
 
     <span class="nd">@cached_property</span>
     <span class="k">def</span> <span class="nf">aliases</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;tuple[str, ...]&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Protocol names.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Protocol names.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">data</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__data__</span><span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">chain</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;str&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Protocol chain string.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Protocol chain string.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="fm">__str__</span><span class="p">()</span>
 
     <span class="c1">##########################################################################</span>
@@ -87,7 +87,7 @@
 
 <div class="viewcode-block" id="ProtoChain.from_list"><a class="viewcode-back" href="../../../pcapkit/corekit/protochain.html#pcapkit.corekit.protochain.ProtoChain.from_list">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">from_list</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">&#39;list[Protocol | Type[Protocol]]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;ProtoChain&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Create a protocol chain from a list.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Create a protocol chain from a list.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            data: Protocol chain list.</span>
@@ -109,7 +109,7 @@
 
 <div class="viewcode-block" id="ProtoChain.index"><a class="viewcode-back" href="../../../pcapkit/corekit/protochain.html#pcapkit.corekit.protochain.ProtoChain.index">[docs]</a>    <span class="k">def</span> <span class="nf">index</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="s1">&#39;str | Protocol | Type[Protocol]&#39;</span><span class="p">,</span>
               <span class="n">start</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">stop</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;int&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;First index of ``value``.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;First index of ``value``.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            value: Value to search.</span>
@@ -141,7 +141,7 @@
         <span class="k">raise</span> <span class="n">IndexNotFound</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">value</span><span class="si">!r}</span><span class="s1"> is not in </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">!r}</span><span class="s1">&#39;</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="ProtoChain.count"><a class="viewcode-back" href="../../../pcapkit/corekit/protochain.html#pcapkit.corekit.protochain.ProtoChain.count">[docs]</a>    <span class="k">def</span> <span class="nf">count</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="s1">&#39;str | Protocol | Type[Protocol]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Number of occurrences of ``value``.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Number of occurrences of ``value``.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            value: Value to search.</span>
@@ -166,7 +166,7 @@
 
 <div class="viewcode-block" id="ProtoChain.__init__"><a class="viewcode-back" href="../../../pcapkit/corekit/protochain.html#pcapkit.corekit.protochain.ProtoChain.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">proto</span><span class="p">:</span> <span class="s1">&#39;Protocol | Type[Protocol]&#39;</span><span class="p">,</span> <span class="n">alias</span><span class="p">:</span> <span class="s1">&#39;Optional[str]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
                  <span class="n">basis</span><span class="p">:</span> <span class="s1">&#39;Optional[ProtoChain]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Initialisation.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialisation.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            proto: New protocol class on the top stack.</span>
@@ -189,17 +189,17 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">__data__</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">temp_data</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="ProtoChain.__repr__"><a class="viewcode-back" href="../../../pcapkit/corekit/protochain.html#pcapkit.corekit.protochain.ProtoChain.__repr__">[docs]</a>    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;str&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Returns representation of protocol chain data.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns representation of protocol chain data.</span>
 
 <span class="sd">        Example:</span>
 <span class="sd">            &gt;&gt;&gt; protochain</span>
 <span class="sd">            ProtoChain(Ethernet, IPv6, Raw)</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;ProtoChain(</span><span class="si">{</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">p</span><span class="p">:</span> <span class="n">p</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__data__</span><span class="p">))</span><span class="si">}</span><span class="s2">)&quot;</span></div>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;ProtoChain(</span><span class="si">{</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="k">lambda</span><span class="w"> </span><span class="n">p</span><span class="p">:</span><span class="w"> </span><span class="n">p</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span><span class="w"> </span><span class="bp">self</span><span class="o">.</span><span class="n">__data__</span><span class="p">))</span><span class="si">}</span><span class="s2">)&quot;</span></div>
 
 <div class="viewcode-block" id="ProtoChain.__str__"><a class="viewcode-back" href="../../../pcapkit/corekit/protochain.html#pcapkit.corekit.protochain.ProtoChain.__str__">[docs]</a>    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;str&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Returns formatted hex representation of source data stream.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns formatted hex representation of source data stream.</span>
 
 <span class="sd">        Example:</span>
 <span class="sd">            &gt;&gt;&gt; protochain</span>
@@ -211,7 +211,7 @@
         <span class="k">return</span> <span class="s1">&#39;:&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">p</span><span class="p">:</span> <span class="n">p</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">__data__</span><span class="p">))</span></div>
 
     <span class="k">def</span> <span class="fm">__contains__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="s1">&#39;str | Protocol | Type[Protocol]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;bool&#39;</span><span class="p">:</span>  <span class="c1"># type: ignore[override]</span>
-        <span class="sd">&quot;&quot;&quot;Returns if ``name`` is in the chain.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns if ``name`` is in the chain.&quot;&quot;&quot;</span>
         <span class="kn">from</span> <span class="nn">pcapkit.protocols.protocol</span> <span class="kn">import</span> <span class="n">Protocol</span>  <span class="c1"># pylint: disable=import-outside-toplevel</span>
         <span class="n">comp</span> <span class="o">=</span> <span class="n">Protocol</span><span class="o">.</span><span class="n">expand_comp</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
 
@@ -228,7 +228,7 @@
     <span class="k">def</span> <span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="s1">&#39;slice&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;tuple[str, ...]&#39;</span><span class="p">:</span> <span class="o">...</span>
 
     <span class="k">def</span> <span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="s1">&#39;int | slice&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;str | tuple[str, ...]&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Subscription (``getitem``) support.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Subscription (``getitem``) support.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            index: Indexing key.</span>
@@ -242,7 +242,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__data__</span><span class="p">[</span><span class="n">index</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
 
     <span class="k">def</span> <span class="fm">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Iterator[tuple[str, Type[Protocol]]]&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Iterator support.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Iterator support.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            Iterator of protocol alias and class.</span>
@@ -251,7 +251,7 @@
         <span class="k">return</span> <span class="nb">iter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__data__</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;int&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Length support.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Length support.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            Length of protocol chain.</span>
@@ -260,7 +260,7 @@
         <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__data__</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="fm">__add__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="s1">&#39;ProtoChain&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;ProtoChain&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Merge protocol chain by appending protocols from ``other``.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Merge protocol chain by appending protocols from ``other``.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            other: Protocol chain to be merged.</span>
@@ -335,7 +335,7 @@
       <div class="clearer"></div>
     </div>
     <div class="footer">
-      &copy;2017-2022, Jarry Shaw.
+      &copy;2017-2023, Jarry Shaw.
       
     </div>
 

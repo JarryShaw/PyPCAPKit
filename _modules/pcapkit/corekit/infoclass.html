@@ -59,7 +59,7 @@
 
 
 <div class="viewcode-block" id="Info"><a class="viewcode-back" href="../../../pcapkit/corekit/infoclass.html#pcapkit.corekit.infoclass.Info">[docs]</a><span class="k">class</span> <span class="nc">Info</span><span class="p">(</span><span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">VT</span><span class="p">],</span> <span class="n">Generic</span><span class="p">[</span><span class="n">VT</span><span class="p">]):</span>
-    <span class="sd">&quot;&quot;&quot;Turn dictionaries into :obj:`object` like instances.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Turn dictionaries into :obj:`object` like instances.</span>
 
 <span class="sd">    * :class:`Info` objects inherit from :obj:`dict` type</span>
 <span class="sd">    * :class:`Info` objects are *iterable*, and support all functions as</span>
@@ -87,7 +87,7 @@
         <span class="n">__builtin__</span><span class="p">:</span> <span class="s1">&#39;set[str]&#39;</span>
 
 <div class="viewcode-block" id="Info.__new__"><a class="viewcode-back" href="../../../pcapkit/corekit/infoclass.html#pcapkit.corekit.infoclass.Info.__new__">[docs]</a>    <span class="k">def</span> <span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="s1">&#39;VT&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;VT&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Info&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
-        <span class="sd">&quot;&quot;&quot;Create a new instance.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Create a new instance.</span>
 
 <span class="sd">        The class will try to automatically generate ``__init__`` method with</span>
 <span class="sd">        the same signature as specified in class variables&#39; type annotations,</span>
@@ -241,7 +241,7 @@
 <div class="viewcode-block" id="Info.from_dict"><a class="viewcode-back" href="../../../pcapkit/corekit/infoclass.html#pcapkit.corekit.infoclass.Info.from_dict">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">from_dict</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">dict_</span><span class="p">:</span> <span class="s1">&#39;Optional[Mapping[str, VT] | Iterable[tuple[str, VT]]]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                   <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;VT&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Info[VT]&#39;</span><span class="p">:</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Create a new instance.</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Create a new instance.</span>
 
 <span class="sd">        * If ``dict_`` is present and has a ``.keys()`` method, then does:</span>
 <span class="sd">          ``for k in dict_: self[k] = dict_[k]``.</span>
@@ -260,7 +260,7 @@
         <span class="k">return</span> <span class="bp">self</span></div>
 
 <div class="viewcode-block" id="Info.to_dict"><a class="viewcode-back" href="../../../pcapkit/corekit/infoclass.html#pcapkit.corekit.infoclass.Info.to_dict">[docs]</a>    <span class="k">def</span> <span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;dict[str, VT]&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Convert :class:`Info` into :obj:`dict`.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Convert :class:`Info` into :obj:`dict`.</span>
 
 <span class="sd">        Important:</span>
 <span class="sd">            We only convert nested :class:`Info` objects into :obj:`dict` if</span>
@@ -351,7 +351,7 @@
       <div class="clearer"></div>
     </div>
     <div class="footer">
-      &copy;2017-2022, Jarry Shaw.
+      &copy;2017-2023, Jarry Shaw.
       
     </div>
 

@@ -101,7 +101,7 @@
             <span class="n">ip</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">ipv4</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">ipv6</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">tcp</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">strict</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>                     <span class="c1"># reassembly settings # pylint: disable=line-too-long</span>
             <span class="n">trace</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">trace_fout</span><span class="p">:</span> <span class="s1">&#39;Optional[str]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">trace_format</span><span class="p">:</span> <span class="s1">&#39;Optional[Formats]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>                            <span class="c1"># trace settings # pylint: disable=line-too-long,redefined-outer-name</span>
             <span class="n">trace_byteorder</span><span class="p">:</span> <span class="s1">&#39;Literal[&quot;big&quot;, &quot;little&quot;]&#39;</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">byteorder</span><span class="p">,</span> <span class="n">trace_nanosecond</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Extractor&#39;</span><span class="p">:</span>                  <span class="c1"># trace settings # pylint: disable=line-too-long</span>
-    <span class="sd">&quot;&quot;&quot;Extract a PCAP file.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Extract a PCAP file.</span>
 
 <span class="sd">    Arguments:</span>
 <span class="sd">        fin: file name to be read; if file not exist, raise :exc:`FileNotFound`</span>
@@ -151,7 +151,7 @@
 
 
 <div class="viewcode-block" id="reassemble"><a class="viewcode-back" href="../../../pcapkit/interface/core.html#pcapkit.interface.core.reassemble">[docs]</a><span class="k">def</span> <span class="nf">reassemble</span><span class="p">(</span><span class="n">protocol</span><span class="p">:</span> <span class="s1">&#39;str | Type[Protocol]&#39;</span><span class="p">,</span> <span class="n">strict</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Reassembly&#39;</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Reassemble fragmented datagrams.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Reassemble fragmented datagrams.</span>
 
 <span class="sd">    Arguments:</span>
 <span class="sd">        protocol: protocol to be reassembled</span>
@@ -179,7 +179,7 @@
 <div class="viewcode-block" id="trace"><a class="viewcode-back" href="../../../pcapkit/interface/core.html#pcapkit.interface.core.trace">[docs]</a><span class="k">def</span> <span class="nf">trace</span><span class="p">(</span><span class="n">fout</span><span class="p">:</span> <span class="s1">&#39;Optional[str]&#39;</span><span class="p">,</span> <span class="nb">format</span><span class="p">:</span> <span class="s1">&#39;Optional[str]&#39;</span><span class="p">,</span>  <span class="c1"># pylint: disable=redefined-builtin</span>
           <span class="n">byteorder</span><span class="p">:</span> <span class="s1">&#39;Literal[&quot;little&quot;, &quot;big&quot;]&#39;</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">byteorder</span><span class="p">,</span>
           <span class="n">nanosecond</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;TraceFlow&#39;</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Trace TCP flows.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Trace TCP flows.</span>
 
 <span class="sd">    Arguments:</span>
 <span class="sd">        fout: output path</span>
@@ -255,7 +255,7 @@
       <div class="clearer"></div>
     </div>
     <div class="footer">
-      &copy;2017-2022, Jarry Shaw.
+      &copy;2017-2023, Jarry Shaw.
       
     </div>
 

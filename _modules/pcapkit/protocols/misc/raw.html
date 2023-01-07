@@ -61,7 +61,7 @@
 
 
 <div class="viewcode-block" id="Raw"><a class="viewcode-back" href="../../../../pcapkit/protocols/misc/raw.html#pcapkit.protocols.misc.raw.Raw">[docs]</a><span class="k">class</span> <span class="nc">Raw</span><span class="p">(</span><span class="n">Protocol</span><span class="p">[</span><span class="n">DataType_Raw</span><span class="p">]):</span>
-    <span class="sd">&quot;&quot;&quot;This class implements universal unknown protocol.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;This class implements universal unknown protocol.&quot;&quot;&quot;</span>
 
     <span class="c1">##########################################################################</span>
     <span class="c1"># Properties.</span>
@@ -70,19 +70,19 @@
     <span class="c1"># name of current protocol</span>
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Literal[&quot;Unknown&quot;]&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Name of current protocol.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Name of current protocol.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="s1">&#39;Unknown&#39;</span>
 
     <span class="c1"># header length of current protocol</span>
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">length</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Literal[0]&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Header length of current protocol.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Header length of current protocol.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="mi">0</span>
 
     <span class="c1"># name of next layer protocol</span>
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">protocol</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;NoReturn&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Name of next layer protocol.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Name of next layer protocol.</span>
 
 <span class="sd">        Raises:</span>
 <span class="sd">            UnsupportedCall: This protocol doesn&#39;t support :attr:`protocol`.</span>
@@ -96,7 +96,7 @@
 
 <div class="viewcode-block" id="Raw.read"><a class="viewcode-back" href="../../../../pcapkit/protocols/misc/raw.html#pcapkit.protocols.misc.raw.Raw.read">[docs]</a>    <span class="k">def</span> <span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">error</span><span class="p">:</span> <span class="s1">&#39;Optional[Exception]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># pylint: disable=arguments-differ</span>
              <span class="n">alias</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_Raw&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
-        <span class="sd">&quot;&quot;&quot;Read raw packet data.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read raw packet data.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            length: Length of packet data.</span>
@@ -117,7 +117,7 @@
         <span class="k">return</span> <span class="n">raw</span></div>
 
 <div class="viewcode-block" id="Raw.make"><a class="viewcode-back" href="../../../../pcapkit/protocols/misc/raw.html#pcapkit.protocols.misc.raw.Raw.make">[docs]</a>    <span class="k">def</span> <span class="nf">make</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;bytes&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Make raw packet data.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Make raw packet data.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            packet (bytes): Raw packet data.</span>
@@ -141,7 +141,7 @@
 
 <div class="viewcode-block" id="Raw.__post_init__"><a class="viewcode-back" href="../../../../pcapkit/protocols/misc/raw.html#pcapkit.protocols.misc.raw.Raw.__post_init__">[docs]</a>    <span class="k">def</span> <span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file</span><span class="p">:</span> <span class="s1">&#39;Optional[BinaryIO]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                       <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Post initialisation hook.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Post initialisation hook.</span>
 
 <span class="sd">        Would :mod:`pcapkit` encounter malformed packets, the original parsing</span>
 <span class="sd">        error instance will be provided as in ``error``.</span>
@@ -181,7 +181,7 @@
 
 <div class="viewcode-block" id="Raw.__index__"><a class="viewcode-back" href="../../../../pcapkit/protocols/misc/raw.html#pcapkit.protocols.misc.raw.Raw.__index__">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="fm">__index__</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;NoReturn&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Numeral registry index of the protocol.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Numeral registry index of the protocol.</span>
 
 <span class="sd">        Raises:</span>
 <span class="sd">            UnsupportedCall: This protocol has no registry entry.</span>
@@ -251,7 +251,7 @@
       <div class="clearer"></div>
     </div>
     <div class="footer">
-      &copy;2017-2022, Jarry Shaw.
+      &copy;2017-2023, Jarry Shaw.
       
     </div>
 

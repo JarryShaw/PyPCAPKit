@@ -102,7 +102,7 @@
 
 
 <div class="viewcode-block" id="HTTP"><a class="viewcode-back" href="../../../../pcapkit/protocols/application/httpv2.html#pcapkit.protocols.application.httpv2.HTTP">[docs]</a><span class="k">class</span> <span class="nc">HTTP</span><span class="p">(</span><span class="n">HTTPBase</span><span class="p">[</span><span class="n">DataType_HTTP</span><span class="p">]):</span>
-    <span class="sd">&quot;&quot;&quot;This class implements Hypertext Transfer Protocol (HTTP/2).</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;This class implements Hypertext Transfer Protocol (HTTP/2).</span>
 
 <span class="sd">    This class currently supports parsing of the following HTTP/2 frames,</span>
 <span class="sd">    which are directly mapped to the :class:`pcapkit.const.http.frame.Frame`</span>
@@ -166,17 +166,17 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">alias</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Literal[&quot;HTTP/2&quot;]&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Acronym of current protocol.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Acronym of current protocol.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="s1">&#39;HTTP/2&#39;</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">length</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Literal[9]&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Header length of current protocol.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Header length of current protocol.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="mi">9</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">version</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Literal[&quot;2&quot;]&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Version of current protocol.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Version of current protocol.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="s1">&#39;2&#39;</span>
 
     <span class="c1">##########################################################################</span>
@@ -184,7 +184,7 @@
     <span class="c1">##########################################################################</span>
 
 <div class="viewcode-block" id="HTTP.read"><a class="viewcode-back" href="../../../../pcapkit/protocols/application/httpv2.html#pcapkit.protocols.application.httpv2.HTTP.read">[docs]</a>    <span class="k">def</span> <span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_HTTP&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Read Hypertext Transfer Protocol (HTTP/2).</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read Hypertext Transfer Protocol (HTTP/2).</span>
 
 <span class="sd">        Structure of HTTP/2 packet [:rfc:`7540`]:</span>
 
@@ -245,7 +245,7 @@
         <span class="k">return</span> <span class="n">http</span></div>
 
 <div class="viewcode-block" id="HTTP.make"><a class="viewcode-back" href="../../../../pcapkit/protocols/application/httpv2.html#pcapkit.protocols.application.httpv2.HTTP.make">[docs]</a>    <span class="k">def</span> <span class="nf">make</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;NoReturn&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Make (construct) packet data.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Make (construct) packet data.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
@@ -258,7 +258,7 @@
 
 <div class="viewcode-block" id="HTTP.id"><a class="viewcode-back" href="../../../../pcapkit/protocols/application/httpv2.html#pcapkit.protocols.application.httpv2.HTTP.id">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">id</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;tuple[Literal[&quot;HTTP&quot;]]&#39;</span><span class="p">:</span>  <span class="c1"># type: ignore[override]</span>
-        <span class="sd">&quot;&quot;&quot;Index ID of the protocol.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Index ID of the protocol.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            Index ID of the protocol.</span>
@@ -268,7 +268,7 @@
 
 <div class="viewcode-block" id="HTTP.register_frame"><a class="viewcode-back" href="../../../../pcapkit/protocols/application/httpv2.html#pcapkit.protocols.application.httpv2.HTTP.register_frame">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">register_frame</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">&#39;RegType_Frame&#39;</span><span class="p">,</span> <span class="n">meth</span><span class="p">:</span> <span class="s1">&#39;str | FrameParser&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Register a frame parser.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Register a frame parser.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            code: HTTP frame type code.</span>
@@ -282,7 +282,7 @@
     <span class="c1">##########################################################################</span>
 
     <span class="k">def</span> <span class="fm">__length_hint__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Literal[9]&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Total length of corresponding protocol.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Total length of corresponding protocol.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="mi">9</span>
 
     <span class="c1">##########################################################################</span>
@@ -291,7 +291,7 @@
 
 <div class="viewcode-block" id="HTTP._read_http_none"><a class="viewcode-back" href="../../../../pcapkit/protocols/application/httpv2.html#pcapkit.protocols.application.httpv2.HTTP._read_http_none">[docs]</a>    <span class="k">def</span> <span class="nf">_read_http_none</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frame</span><span class="p">:</span> <span class="s1">&#39;RegType_Frame&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span>
                         <span class="n">flags</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">,</span> <span class="n">sid</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_UnassignedFrame&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Read HTTP packet with unassigned type.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read HTTP packet with unassigned type.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            frame: Frame type.</span>
@@ -320,7 +320,7 @@
         <span class="k">return</span> <span class="n">data</span></div>
 
 <div class="viewcode-block" id="HTTP._read_http_data"><a class="viewcode-back" href="../../../../pcapkit/protocols/application/httpv2.html#pcapkit.protocols.application.httpv2.HTTP._read_http_data">[docs]</a>    <span class="k">def</span> <span class="nf">_read_http_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frame</span><span class="p">:</span> <span class="s1">&#39;RegType_Frame&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">flags</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">,</span> <span class="n">sid</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_DataFrame&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Read HTTP/2 ``DATA`` frames.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read HTTP/2 ``DATA`` frames.</span>
 
 <span class="sd">        Structure of HTTP/2 ``DATA`` frame [:rfc:`7540`]:</span>
 
@@ -389,7 +389,7 @@
 
 <div class="viewcode-block" id="HTTP._read_http_headers"><a class="viewcode-back" href="../../../../pcapkit/protocols/application/httpv2.html#pcapkit.protocols.application.httpv2.HTTP._read_http_headers">[docs]</a>    <span class="k">def</span> <span class="nf">_read_http_headers</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frame</span><span class="p">:</span> <span class="s1">&#39;RegType_Frame&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span>
                            <span class="n">flags</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">,</span> <span class="n">sid</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_HeadersFrame&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Read HTTP/2 ``HEADERS`` frames.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read HTTP/2 ``HEADERS`` frames.</span>
 
 <span class="sd">        Structure of HTTP/2 ``HEADERS`` frame [:rfc:`7540`]:</span>
 
@@ -472,7 +472,7 @@
 
 <div class="viewcode-block" id="HTTP._read_http_priority"><a class="viewcode-back" href="../../../../pcapkit/protocols/application/httpv2.html#pcapkit.protocols.application.httpv2.HTTP._read_http_priority">[docs]</a>    <span class="k">def</span> <span class="nf">_read_http_priority</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frame</span><span class="p">:</span> <span class="s1">&#39;RegType_Frame&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span>
                             <span class="n">flags</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">,</span> <span class="n">sid</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_PriorityFrame&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
-        <span class="sd">&quot;&quot;&quot;Read HTTP/2 ``PRIORITY`` frames.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read HTTP/2 ``PRIORITY`` frames.</span>
 
 <span class="sd">        Structure of HTTP/2 ``PRIORITY`` frame [:rfc:`7540`]:</span>
 
@@ -523,7 +523,7 @@
 
 <div class="viewcode-block" id="HTTP._read_http_rst_stream"><a class="viewcode-back" href="../../../../pcapkit/protocols/application/httpv2.html#pcapkit.protocols.application.httpv2.HTTP._read_http_rst_stream">[docs]</a>    <span class="k">def</span> <span class="nf">_read_http_rst_stream</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frame</span><span class="p">:</span> <span class="s1">&#39;RegType_Frame&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span>
                               <span class="n">flags</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">,</span> <span class="n">sid</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_RstStreamFrame&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
-        <span class="sd">&quot;&quot;&quot;Read HTTP/2 ``RST_STREAM`` frames.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read HTTP/2 ``RST_STREAM`` frames.</span>
 
 <span class="sd">        Structure of HTTP/2 ``RST_STREAM`` frame [:rfc:`7540`]:</span>
 
@@ -569,7 +569,7 @@
 
 <div class="viewcode-block" id="HTTP._read_http_settings"><a class="viewcode-back" href="../../../../pcapkit/protocols/application/httpv2.html#pcapkit.protocols.application.httpv2.HTTP._read_http_settings">[docs]</a>    <span class="k">def</span> <span class="nf">_read_http_settings</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frame</span><span class="p">:</span> <span class="s1">&#39;RegType_Frame&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span>
                             <span class="n">flags</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">,</span> <span class="n">sid</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_SettingsFrame&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Read HTTP/2 ``SETTINGS`` frames.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read HTTP/2 ``SETTINGS`` frames.</span>
 
 <span class="sd">        Structure of HTTP/2 ``SETTINGS`` frame [:rfc:`7540`]:</span>
 
@@ -631,7 +631,7 @@
 
 <div class="viewcode-block" id="HTTP._read_http_push_promise"><a class="viewcode-back" href="../../../../pcapkit/protocols/application/httpv2.html#pcapkit.protocols.application.httpv2.HTTP._read_http_push_promise">[docs]</a>    <span class="k">def</span> <span class="nf">_read_http_push_promise</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frame</span><span class="p">:</span> <span class="s1">&#39;RegType_Frame&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span>
                                 <span class="n">flags</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">,</span> <span class="n">sid</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_PushPromiseFrame&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Read HTTP/2 ``PUSH_PROMISE`` frames.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read HTTP/2 ``PUSH_PROMISE`` frames.</span>
 
 <span class="sd">        Structure of HTTP/2 ``PUSH_PROMISE`` frame [:rfc:`7540`]:</span>
 
@@ -702,7 +702,7 @@
 
 <div class="viewcode-block" id="HTTP._read_http_ping"><a class="viewcode-back" href="../../../../pcapkit/protocols/application/httpv2.html#pcapkit.protocols.application.httpv2.HTTP._read_http_ping">[docs]</a>    <span class="k">def</span> <span class="nf">_read_http_ping</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frame</span><span class="p">:</span> <span class="s1">&#39;RegType_Frame&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span>
                         <span class="n">flags</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">,</span> <span class="n">sid</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_PingFrame&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Read HTTP/2 ``PING`` frames.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read HTTP/2 ``PING`` frames.</span>
 
 <span class="sd">        Structure of HTTP/2 ``PING`` frame [:rfc:`7540`]:</span>
 
@@ -754,7 +754,7 @@
 
 <div class="viewcode-block" id="HTTP._read_http_goaway"><a class="viewcode-back" href="../../../../pcapkit/protocols/application/httpv2.html#pcapkit.protocols.application.httpv2.HTTP._read_http_goaway">[docs]</a>    <span class="k">def</span> <span class="nf">_read_http_goaway</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frame</span><span class="p">:</span> <span class="s1">&#39;RegType_Frame&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span>
                           <span class="n">flags</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">,</span> <span class="n">sid</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_GoawayFrame&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
-        <span class="sd">&quot;&quot;&quot;Read HTTP/2 ``GOAWAY`` frames.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read HTTP/2 ``GOAWAY`` frames.</span>
 
 <span class="sd">        Structure of HTTP/2 ``GOAWAY`` frame [:rfc:`7540`]:</span>
 
@@ -809,7 +809,7 @@
 
 <div class="viewcode-block" id="HTTP._read_http_window_update"><a class="viewcode-back" href="../../../../pcapkit/protocols/application/httpv2.html#pcapkit.protocols.application.httpv2.HTTP._read_http_window_update">[docs]</a>    <span class="k">def</span> <span class="nf">_read_http_window_update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frame</span><span class="p">:</span> <span class="s1">&#39;RegType_Frame&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span>
                                  <span class="n">flags</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">,</span> <span class="n">sid</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_WindowUpdateFrame&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
-        <span class="sd">&quot;&quot;&quot;Read HTTP/2 ``WINDOW_UPDATE`` frames.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read HTTP/2 ``WINDOW_UPDATE`` frames.</span>
 
 <span class="sd">        Structure of HTTP/2 ``WINDOW_UPDATE`` frame [:rfc:`7540`]:</span>
 
@@ -855,7 +855,7 @@
 
 <div class="viewcode-block" id="HTTP._read_http_continuation"><a class="viewcode-back" href="../../../../pcapkit/protocols/application/httpv2.html#pcapkit.protocols.application.httpv2.HTTP._read_http_continuation">[docs]</a>    <span class="k">def</span> <span class="nf">_read_http_continuation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frame</span><span class="p">:</span> <span class="s1">&#39;RegType_Frame&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span>
                                 <span class="n">flags</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">,</span> <span class="n">sid</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_ContinuationFrame&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Read HTTP/2 ``CONTINUATION`` frames.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read HTTP/2 ``CONTINUATION`` frames.</span>
 
 <span class="sd">        Structure of HTTP/2 ``CONTINUATION`` frame [:rfc:`7540`]:</span>
 
@@ -962,7 +962,7 @@
       <div class="clearer"></div>
     </div>
     <div class="footer">
-      &copy;2017-2022, Jarry Shaw.
+      &copy;2017-2023, Jarry Shaw.
       
     </div>
 

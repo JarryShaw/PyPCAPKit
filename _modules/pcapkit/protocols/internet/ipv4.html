@@ -126,7 +126,7 @@
 
 
 <div class="viewcode-block" id="IPv4"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/ipv4.html#pcapkit.protocols.internet.ipv4.IPv4">[docs]</a><span class="k">class</span> <span class="nc">IPv4</span><span class="p">(</span><span class="n">IP</span><span class="p">[</span><span class="n">DataType_IPv4</span><span class="p">]):</span>
-    <span class="sd">&quot;&quot;&quot;This class implements Internet Protocol version 4.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;This class implements Internet Protocol version 4.</span>
 
 <span class="sd">    This class currently supports parsing of the following IPv4 options,</span>
 <span class="sd">    which are directly mapped to the :class:`pcapkit.const.ipv4.option_number.OptionNumber`</span>
@@ -174,29 +174,29 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Literal[&quot;Internet Protocol version 4&quot;]&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Name of corresponding protocol.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Name of corresponding protocol.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="s1">&#39;Internet Protocol version 4&#39;</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">length</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;int&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Header length of corresponding protocol.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Header length of corresponding protocol.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_info</span><span class="o">.</span><span class="n">hdr_len</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">protocol</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;RegType_TransType&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Name of next layer protocol.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Name of next layer protocol.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_info</span><span class="o">.</span><span class="n">protocol</span>
 
     <span class="c1"># source IP address</span>
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">src</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;IPv4Address&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Source IP address.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Source IP address.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_info</span><span class="o">.</span><span class="n">src</span>
 
     <span class="c1"># destination IP address</span>
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">dst</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;IPv4Address&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Destination IP address.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Destination IP address.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_info</span><span class="o">.</span><span class="n">dst</span>
 
     <span class="c1">##########################################################################</span>
@@ -204,7 +204,7 @@
     <span class="c1">##########################################################################</span>
 
 <div class="viewcode-block" id="IPv4.read"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/ipv4.html#pcapkit.protocols.internet.ipv4.IPv4.read">[docs]</a>    <span class="k">def</span> <span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_IPv4&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
-        <span class="sd">&quot;&quot;&quot;Read Internet Protocol version 4 (IPv4).</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read Internet Protocol version 4 (IPv4).</span>
 
 <span class="sd">        Structure of IPv4 header [:rfc:`791`]:</span>
 
@@ -285,7 +285,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_decode_next_layer</span><span class="p">(</span><span class="n">ipv4</span><span class="p">,</span> <span class="n">_prot</span><span class="p">,</span> <span class="n">ipv4</span><span class="o">.</span><span class="n">len</span> <span class="o">-</span> <span class="n">ipv4</span><span class="o">.</span><span class="n">hdr_len</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="IPv4.make"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/ipv4.html#pcapkit.protocols.internet.ipv4.IPv4.make">[docs]</a>    <span class="k">def</span> <span class="nf">make</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;NoReturn&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Make (construct) packet data.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Make (construct) packet data.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
@@ -298,7 +298,7 @@
 
 <div class="viewcode-block" id="IPv4.id"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/ipv4.html#pcapkit.protocols.internet.ipv4.IPv4.id">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">id</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;tuple[Literal[&quot;IPv4&quot;]]&#39;</span><span class="p">:</span>  <span class="c1"># type: ignore[override]</span>
-        <span class="sd">&quot;&quot;&quot;Index ID of the protocol.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Index ID of the protocol.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            Index ID of the protocol.</span>
@@ -311,12 +311,12 @@
     <span class="c1">##########################################################################</span>
 
     <span class="k">def</span> <span class="fm">__length_hint__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Literal[20]&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Return an estimated length for the object.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return an estimated length for the object.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="mi">20</span>
 
 <div class="viewcode-block" id="IPv4.__index__"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/ipv4.html#pcapkit.protocols.internet.ipv4.IPv4.__index__">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="fm">__index__</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;RegType_TransType&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=invalid-index-returned</span>
-        <span class="sd">&quot;&quot;&quot;Numeral registry index of the protocol.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Numeral registry index of the protocol.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            Numeral registry index of the protocol in `IANA`_.</span>
@@ -331,7 +331,7 @@
     <span class="c1">##########################################################################</span>
 
 <div class="viewcode-block" id="IPv4._read_ipv4_addr"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/ipv4.html#pcapkit.protocols.internet.ipv4.IPv4._read_ipv4_addr">[docs]</a>    <span class="k">def</span> <span class="nf">_read_ipv4_addr</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;IPv4Address&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Read IP address.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read IP address.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            Parsed IP address.</span>
@@ -343,7 +343,7 @@
         <span class="k">return</span> <span class="n">ipaddress</span><span class="o">.</span><span class="n">ip_address</span><span class="p">(</span><span class="n">_byte</span><span class="p">)</span>  <span class="c1"># type: ignore[return-value]</span></div>
 
 <div class="viewcode-block" id="IPv4._read_ipv4_opt_type"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/ipv4.html#pcapkit.protocols.internet.ipv4.IPv4._read_ipv4_opt_type">[docs]</a>    <span class="k">def</span> <span class="nf">_read_ipv4_opt_type</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_OptionType&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Read option type field.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read option type field.</span>
 
 <span class="sd">        Arguments:</span>
 <span class="sd">            code: option kind value</span>
@@ -366,7 +366,7 @@
         <span class="p">})</span></div>
 
 <div class="viewcode-block" id="IPv4._read_ipv4_options"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/ipv4.html#pcapkit.protocols.internet.ipv4.IPv4._read_ipv4_options">[docs]</a>    <span class="k">def</span> <span class="nf">_read_ipv4_options</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Option&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Read IPv4 option list.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read IPv4 option list.</span>
 
 <span class="sd">        Arguments:</span>
 <span class="sd">            length: length of options</span>
@@ -410,7 +410,7 @@
         <span class="k">return</span> <span class="n">options</span></div>
 
 <div class="viewcode-block" id="IPv4._read_opt_unassigned"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/ipv4.html#pcapkit.protocols.internet.ipv4.IPv4._read_opt_unassigned">[docs]</a>    <span class="k">def</span> <span class="nf">_read_opt_unassigned</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;RegType_OptionNumber&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_UnassignedOption&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
-        <span class="sd">&quot;&quot;&quot;Read IPv4 unassigned options.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read IPv4 unassigned options.</span>
 
 <span class="sd">        Structure of IPv4 unassigned options [:rfc:`791`]:</span>
 
@@ -447,7 +447,7 @@
         <span class="k">return</span> <span class="n">data</span></div>
 
 <div class="viewcode-block" id="IPv4._read_opt_eool"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/ipv4.html#pcapkit.protocols.internet.ipv4.IPv4._read_opt_eool">[docs]</a>    <span class="k">def</span> <span class="nf">_read_opt_eool</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;RegType_OptionNumber&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_EOOLOption&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
-        <span class="sd">&quot;&quot;&quot;Read IPv4 End of Option List (``EOOL``) option.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read IPv4 End of Option List (``EOOL``) option.</span>
 
 <span class="sd">        Structure of IPv4 End of Option List (``EOOL``) option [:rfc:`719`]:</span>
 
@@ -475,7 +475,7 @@
         <span class="k">return</span> <span class="n">data</span></div>
 
 <div class="viewcode-block" id="IPv4._read_opt_nop"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/ipv4.html#pcapkit.protocols.internet.ipv4.IPv4._read_opt_nop">[docs]</a>    <span class="k">def</span> <span class="nf">_read_opt_nop</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;RegType_OptionNumber&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_NOPOption&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
-        <span class="sd">&quot;&quot;&quot;Read IPv4 No Operation (``NOP``) option.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read IPv4 No Operation (``NOP``) option.</span>
 
 <span class="sd">        Structure of IPv4 No Operation (``NOP``) option [:rfc:`719`]:</span>
 
@@ -503,7 +503,7 @@
         <span class="k">return</span> <span class="n">data</span></div>
 
 <div class="viewcode-block" id="IPv4._read_opt_sec"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/ipv4.html#pcapkit.protocols.internet.ipv4.IPv4._read_opt_sec">[docs]</a>    <span class="k">def</span> <span class="nf">_read_opt_sec</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;RegType_OptionNumber&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_SECOption&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
-        <span class="sd">&quot;&quot;&quot;Read IPv4 Security (``SEC``) option.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read IPv4 Security (``SEC``) option.</span>
 
 <span class="sd">        Structure of IPv4 Security (``SEC``) option [:rfc:`1108`]:</span>
 
@@ -559,7 +559,7 @@
         <span class="k">return</span> <span class="n">data</span></div>
 
 <div class="viewcode-block" id="IPv4._read_opt_lsr"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/ipv4.html#pcapkit.protocols.internet.ipv4.IPv4._read_opt_lsr">[docs]</a>    <span class="k">def</span> <span class="nf">_read_opt_lsr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;RegType_OptionNumber&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_LSROption&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
-        <span class="sd">&quot;&quot;&quot;Read IPv4 Loose Source Route (``LSR``) option.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read IPv4 Loose Source Route (``LSR``) option.</span>
 
 <span class="sd">        Structure of IPv4 Loose Source Route (``LSR``) option [:rfc:`791`]:</span>
 
@@ -606,7 +606,7 @@
         <span class="k">return</span> <span class="n">data</span></div>
 
 <div class="viewcode-block" id="IPv4._read_opt_ts"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/ipv4.html#pcapkit.protocols.internet.ipv4.IPv4._read_opt_ts">[docs]</a>    <span class="k">def</span> <span class="nf">_read_opt_ts</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;RegType_OptionNumber&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_TSOption&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
-        <span class="sd">&quot;&quot;&quot;Read IPv4 Time Stamp (``TS``) option.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read IPv4 Time Stamp (``TS``) option.</span>
 
 <span class="sd">        Structure of IPv4 Time Stamp (``TS``) option [:rfc:`791`]:</span>
 
@@ -688,7 +688,7 @@
         <span class="k">return</span> <span class="n">data</span></div>
 
 <div class="viewcode-block" id="IPv4._read_opt_esec"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/ipv4.html#pcapkit.protocols.internet.ipv4.IPv4._read_opt_esec">[docs]</a>    <span class="k">def</span> <span class="nf">_read_opt_esec</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;RegType_OptionNumber&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_ESECOption&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
-        <span class="sd">&quot;&quot;&quot;Read IPv4 Extended Security (``ESEC``) option.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read IPv4 Extended Security (``ESEC``) option.</span>
 
 <span class="sd">        Structure of IPv4 Extended Security (``ESEC``) option [:rfc:`1108`]:</span>
 
@@ -743,7 +743,7 @@
         <span class="k">return</span> <span class="n">data</span></div>
 
 <div class="viewcode-block" id="IPv4._read_opt_rr"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/ipv4.html#pcapkit.protocols.internet.ipv4.IPv4._read_opt_rr">[docs]</a>    <span class="k">def</span> <span class="nf">_read_opt_rr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;RegType_OptionNumber&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_RROption&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
-        <span class="sd">&quot;&quot;&quot;Read IPv4 Record Route (``RR``) option.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read IPv4 Record Route (``RR``) option.</span>
 
 <span class="sd">        Structure of IPv4 Record Route (``RR``) option [:rfc:`791`]:</span>
 
@@ -791,7 +791,7 @@
         <span class="k">return</span> <span class="n">data</span></div>
 
 <div class="viewcode-block" id="IPv4._read_opt_sid"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/ipv4.html#pcapkit.protocols.internet.ipv4.IPv4._read_opt_sid">[docs]</a>    <span class="k">def</span> <span class="nf">_read_opt_sid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;RegType_OptionNumber&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_SIDOption&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
-        <span class="sd">&quot;&quot;&quot;Read IPv4 Stream ID (``SID``) option.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read IPv4 Stream ID (``SID``) option.</span>
 
 <span class="sd">        Structure of IPv4 Stream ID (``SID``) option [:rfc:`791`][:rfc:`6814`]:</span>
 
@@ -827,7 +827,7 @@
         <span class="k">return</span> <span class="n">data</span></div>
 
 <div class="viewcode-block" id="IPv4._read_opt_ssr"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/ipv4.html#pcapkit.protocols.internet.ipv4.IPv4._read_opt_ssr">[docs]</a>    <span class="k">def</span> <span class="nf">_read_opt_ssr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;RegType_OptionNumber&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_SSROption&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
-        <span class="sd">&quot;&quot;&quot;Read IPv4 Strict Source Route (``SSR``) option.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read IPv4 Strict Source Route (``SSR``) option.</span>
 
 <span class="sd">        Structure of IPv4 Strict Source Route (``SSR``) option [:rfc:`791`]:</span>
 
@@ -875,7 +875,7 @@
         <span class="k">return</span> <span class="n">data</span></div>
 
 <div class="viewcode-block" id="IPv4._read_opt_mtup"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/ipv4.html#pcapkit.protocols.internet.ipv4.IPv4._read_opt_mtup">[docs]</a>    <span class="k">def</span> <span class="nf">_read_opt_mtup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;RegType_OptionNumber&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_MTUPOption&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
-        <span class="sd">&quot;&quot;&quot;Read IPv4 MTU Probe (``MTUP``) option.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read IPv4 MTU Probe (``MTUP``) option.</span>
 
 <span class="sd">        Structure of IPv4 MTU Probe (``MTUP``) option [:rfc:`1063`][:rfc:`1191`]:</span>
 
@@ -910,7 +910,7 @@
         <span class="k">return</span> <span class="n">data</span></div>
 
 <div class="viewcode-block" id="IPv4._read_opt_mtur"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/ipv4.html#pcapkit.protocols.internet.ipv4.IPv4._read_opt_mtur">[docs]</a>    <span class="k">def</span> <span class="nf">_read_opt_mtur</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;RegType_OptionNumber&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_MTUROption&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
-        <span class="sd">&quot;&quot;&quot;Read IPv4 MTU Reply (``MTUR``) option.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read IPv4 MTU Reply (``MTUR``) option.</span>
 
 <span class="sd">        Structure of IPv4 MTU Reply (``MTUR``) option [:rfc:`1063`][:rfc:`1191`]:</span>
 
@@ -945,7 +945,7 @@
         <span class="k">return</span> <span class="n">data</span></div>
 
 <div class="viewcode-block" id="IPv4._read_opt_tr"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/ipv4.html#pcapkit.protocols.internet.ipv4.IPv4._read_opt_tr">[docs]</a>    <span class="k">def</span> <span class="nf">_read_opt_tr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;RegType_OptionNumber&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_TROption&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
-        <span class="sd">&quot;&quot;&quot;Read IPv4 Traceroute (``TR``) option.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read IPv4 Traceroute (``TR``) option.</span>
 
 <span class="sd">        Structure of IPv4 Traceroute (``TR``) option [:rfc:`1393`][:rfc:`6814`]:</span>
 
@@ -993,7 +993,7 @@
         <span class="k">return</span> <span class="n">data</span></div>
 
 <div class="viewcode-block" id="IPv4._read_opt_rtralt"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/ipv4.html#pcapkit.protocols.internet.ipv4.IPv4._read_opt_rtralt">[docs]</a>    <span class="k">def</span> <span class="nf">_read_opt_rtralt</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;RegType_OptionNumber&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_RTRALTOption&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
-        <span class="sd">&quot;&quot;&quot;Read IPv4 Router Alert (``RTRALT``) option.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read IPv4 Router Alert (``RTRALT``) option.</span>
 
 <span class="sd">        Structure of IPv4 Router Alert (``RTRALT``) option [:rfc:`2113`]:</span>
 
@@ -1030,7 +1030,7 @@
         <span class="k">return</span> <span class="n">data</span></div>
 
 <div class="viewcode-block" id="IPv4._read_opt_qs"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/ipv4.html#pcapkit.protocols.internet.ipv4.IPv4._read_opt_qs">[docs]</a>    <span class="k">def</span> <span class="nf">_read_opt_qs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;RegType_OptionNumber&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_QSOption&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
-        <span class="sd">&quot;&quot;&quot;Read IPv4 Quick Start (``QS``) option.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read IPv4 Quick Start (``QS``) option.</span>
 
 <span class="sd">        Structure of IPv4 Quick Start (``QS``) option [:rfc:`4782`]:</span>
 
@@ -1160,7 +1160,7 @@
       <div class="clearer"></div>
     </div>
     <div class="footer">
-      &copy;2017-2022, Jarry Shaw.
+      &copy;2017-2023, Jarry Shaw.
       
     </div>
 

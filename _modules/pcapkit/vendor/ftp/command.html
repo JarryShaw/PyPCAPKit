@@ -70,7 +70,7 @@
 
 <span class="c1">#: Command entry template.</span>
 <span class="n">make</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">cmmd</span><span class="p">,</span> <span class="n">feat</span><span class="p">,</span> <span class="n">desc</span><span class="p">,</span> <span class="n">kind</span><span class="p">,</span> <span class="n">conf</span><span class="p">,</span> <span class="n">rfcs</span><span class="p">,</span> <span class="n">cmmt</span><span class="p">:</span> <span class="sa">f</span><span class="s1">&#39;&#39;&#39;</span><span class="se">\</span>
-<span class="s1">    # </span><span class="si">{</span><span class="n">cmmt</span><span class="si">}</span><span class="s1"></span>
+<span class="s1">    # </span><span class="si">{</span><span class="n">cmmt</span><span class="si">}</span>
 <span class="s1">    </span><span class="si">{</span><span class="n">cmmd</span><span class="si">}</span><span class="s1">=CommandType(</span>
 <span class="s1">        name=</span><span class="si">{</span><span class="n">cmmd</span><span class="si">!r}</span><span class="s1">,</span>
 <span class="s1">        feat=</span><span class="si">{</span><span class="n">feat</span><span class="si">!r}</span><span class="s1">,</span>
@@ -85,8 +85,8 @@
 <span class="n">LINE</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">NAME</span><span class="p">,</span> <span class="n">DOCS</span><span class="p">,</span> <span class="n">INFO</span><span class="p">,</span> <span class="n">MISS</span><span class="p">,</span> <span class="n">MODL</span><span class="p">:</span> <span class="sa">f</span><span class="s1">&#39;&#39;&#39;</span><span class="se">\</span>
 <span class="s1"># -*- coding: utf-8 -*-</span>
 <span class="s1"># pylint: disable=line-too-long,consider-using-f-string</span>
-<span class="s1">&quot;&quot;&quot;</span><span class="si">{</span><span class="p">(</span><span class="n">name</span> <span class="o">:=</span> <span class="n">DOCS</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39; [&#39;</span><span class="p">,</span> <span class="n">maxsplit</span><span class="o">=</span><span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span><span class="si">}</span><span class="s1"></span>
-<span class="si">{</span><span class="s1">&#39;=&#39;</span> <span class="o">*</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">name</span><span class="p">)</span> <span class="o">+</span> <span class="mi">6</span><span class="p">)</span><span class="si">}</span><span class="s1"></span>
+<span class="s1">&quot;&quot;&quot;</span><span class="si">{</span><span class="p">(</span><span class="n">name</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="n">DOCS</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39; [&#39;</span><span class="p">,</span><span class="w"> </span><span class="n">maxsplit</span><span class="o">=</span><span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span><span class="si">}</span>
+<span class="si">{</span><span class="s1">&#39;=&#39;</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">name</span><span class="p">)</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">6</span><span class="p">)</span><span class="si">}</span>
 
 <span class="s1">This module contains the constant enumeration for **</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1">**,</span>
 <span class="s1">which is automatically generated from :class:`</span><span class="si">{</span><span class="n">MODL</span><span class="si">}</span><span class="s1">.</span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">`.</span>
@@ -142,24 +142,24 @@
 <span class="s1">        try:</span>
 <span class="s1">            return super().__getitem__(key)</span>
 <span class="s1">        except KeyError:</span>
-<span class="s1">            return </span><span class="si">{</span><span class="n">MISS</span><span class="si">}</span><span class="s1"></span>
+<span class="s1">            return </span><span class="si">{</span><span class="n">MISS</span><span class="si">}</span>
 
 
-<span class="s1">#: </span><span class="si">{</span><span class="n">DOCS</span><span class="si">}</span><span class="s1"></span>
+<span class="s1">#: </span><span class="si">{</span><span class="n">DOCS</span><span class="si">}</span>
 <span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1"> = defaultInfo(</span>
-<span class="s1">    </span><span class="si">{</span><span class="n">INFO</span><span class="si">}</span><span class="s1"></span>
+<span class="s1">    </span><span class="si">{</span><span class="n">INFO</span><span class="si">}</span>
 <span class="s1">)</span>
 <span class="s1">&#39;&#39;&#39;</span>  <span class="c1"># type: Callable[[str, str, str, str, str], str]</span>
 
 
 <div class="viewcode-block" id="Command"><a class="viewcode-back" href="../../../../pcapkit/vendor/ftp.html#pcapkit.vendor.ftp.command.Command">[docs]</a><span class="k">class</span> <span class="nc">Command</span><span class="p">(</span><span class="n">Vendor</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;FTP Command&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;FTP Command&quot;&quot;&quot;</span>
 
     <span class="c1">#: Link to registry.</span>
     <span class="n">LINK</span> <span class="o">=</span> <span class="s1">&#39;https://www.iana.org/assignments/ftp-commands-extensions/ftp-commands-extensions-2.csv&#39;</span>
 
     <span class="k">def</span> <span class="nf">process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">&#39;list[str]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;tuple[dict[str, str], str]&#39;</span><span class="p">:</span>  <span class="c1"># type: ignore[override]</span>
-        <span class="sd">&quot;&quot;&quot;Process CSV data.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Process CSV data.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            data: CSV data.</span>
@@ -204,7 +204,7 @@
         <span class="k">return</span> <span class="n">info</span><span class="p">,</span> <span class="n">MISS</span>
 
     <span class="k">def</span> <span class="nf">context</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">&#39;list[str]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;str&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Generate constant context.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Generate constant context.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            data: CSV data.</span>
@@ -283,7 +283,7 @@
       <div class="clearer"></div>
     </div>
     <div class="footer">
-      &copy;2017-2022, Jarry Shaw.
+      &copy;2017-2023, Jarry Shaw.
       
     </div>
 

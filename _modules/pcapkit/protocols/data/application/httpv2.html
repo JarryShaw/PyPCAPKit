@@ -65,11 +65,11 @@
 
 
 <div class="viewcode-block" id="Flags"><a class="viewcode-back" href="../../../../../pcapkit/protocols/application/httpv2.html#pcapkit.protocols.data.application.httpv2.Flags">[docs]</a><span class="k">class</span> <span class="nc">Flags</span><span class="p">(</span><span class="n">Info</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Data model for HTTP/2 flags.&quot;&quot;&quot;</span></div>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for HTTP/2 flags.&quot;&quot;&quot;</span></div>
 
 
 <div class="viewcode-block" id="HTTP"><a class="viewcode-back" href="../../../../../pcapkit/protocols/application/httpv2.html#pcapkit.protocols.data.application.httpv2.HTTP">[docs]</a><span class="k">class</span> <span class="nc">HTTP</span><span class="p">(</span><span class="n">DataType_HTTP</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Data model for HTTP/2 protocol.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for HTTP/2 protocol.&quot;&quot;&quot;</span>
 
     <span class="c1">#: Length.</span>
     <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span>
@@ -82,7 +82,7 @@
 
 
 <div class="viewcode-block" id="UnassignedFrame"><a class="viewcode-back" href="../../../../../pcapkit/protocols/application/httpv2.html#pcapkit.protocols.data.application.httpv2.UnassignedFrame">[docs]</a><span class="k">class</span> <span class="nc">UnassignedFrame</span><span class="p">(</span><span class="n">HTTP</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Data model for HTTP/2 unassigned frame.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for HTTP/2 unassigned frame.&quot;&quot;&quot;</span>
 
     <span class="c1">#: Flags.</span>
     <span class="n">flags</span><span class="p">:</span> <span class="s1">&#39;Literal[None]&#39;</span>
@@ -94,7 +94,7 @@
 
 
 <div class="viewcode-block" id="DataFrameFlags"><a class="viewcode-back" href="../../../../../pcapkit/protocols/application/httpv2.html#pcapkit.protocols.data.application.httpv2.DataFrameFlags">[docs]</a><span class="k">class</span> <span class="nc">DataFrameFlags</span><span class="p">(</span><span class="n">Flags</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Data model for HTTP/2 ``DATA`` frame flags.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for HTTP/2 ``DATA`` frame flags.&quot;&quot;&quot;</span>
 
     <span class="c1">#: ``END_STREAM`` flag.</span>
     <span class="n">END_STREAM</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span>  <span class="c1"># bit 0</span>
@@ -106,7 +106,7 @@
 
 
 <div class="viewcode-block" id="DataFrame"><a class="viewcode-back" href="../../../../../pcapkit/protocols/application/httpv2.html#pcapkit.protocols.data.application.httpv2.DataFrame">[docs]</a><span class="k">class</span> <span class="nc">DataFrame</span><span class="p">(</span><span class="n">HTTP</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Data model for HTTP/2 ``DATA`` frame.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for HTTP/2 ``DATA`` frame.&quot;&quot;&quot;</span>
 
     <span class="c1">#: Flags.</span>
     <span class="n">flags</span><span class="p">:</span> <span class="s1">&#39;DataFrameFlags&#39;</span>
@@ -120,7 +120,7 @@
 
 
 <div class="viewcode-block" id="HeadersFrameFlags"><a class="viewcode-back" href="../../../../../pcapkit/protocols/application/httpv2.html#pcapkit.protocols.data.application.httpv2.HeadersFrameFlags">[docs]</a><span class="k">class</span> <span class="nc">HeadersFrameFlags</span><span class="p">(</span><span class="n">Flags</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Data model for HTTP/2 ``HEADERS`` frame flags.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for HTTP/2 ``HEADERS`` frame flags.&quot;&quot;&quot;</span>
 
     <span class="c1">#: ``END_STREAM`` flag.</span>
     <span class="n">END_STREAM</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span>   <span class="c1"># bit 0</span>
@@ -136,7 +136,7 @@
 
 
 <div class="viewcode-block" id="HeadersFrame"><a class="viewcode-back" href="../../../../../pcapkit/protocols/application/httpv2.html#pcapkit.protocols.data.application.httpv2.HeadersFrame">[docs]</a><span class="k">class</span> <span class="nc">HeadersFrame</span><span class="p">(</span><span class="n">HTTP</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Data model for HTTP/2 ``HEADERS`` frame.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for HTTP/2 ``HEADERS`` frame.&quot;&quot;&quot;</span>
 
     <span class="c1">#: Flags.</span>
     <span class="n">flags</span><span class="p">:</span> <span class="s1">&#39;HeadersFrameFlags&#39;</span>
@@ -156,7 +156,7 @@
 
 
 <div class="viewcode-block" id="PriorityFrame"><a class="viewcode-back" href="../../../../../pcapkit/protocols/application/httpv2.html#pcapkit.protocols.data.application.httpv2.PriorityFrame">[docs]</a><span class="k">class</span> <span class="nc">PriorityFrame</span><span class="p">(</span><span class="n">HTTP</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Data model for HTTP/2 ``PRIORITY`` frame.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for HTTP/2 ``PRIORITY`` frame.&quot;&quot;&quot;</span>
 
     <span class="c1">#: Flags.</span>
     <span class="n">flags</span><span class="p">:</span> <span class="s1">&#39;Literal[None]&#39;</span>
@@ -172,7 +172,7 @@
 
 
 <div class="viewcode-block" id="RstStreamFrame"><a class="viewcode-back" href="../../../../../pcapkit/protocols/application/httpv2.html#pcapkit.protocols.data.application.httpv2.RstStreamFrame">[docs]</a><span class="k">class</span> <span class="nc">RstStreamFrame</span><span class="p">(</span><span class="n">HTTP</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Data model for HTTP/2 ``RST_STREAM`` frame.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for HTTP/2 ``RST_STREAM`` frame.&quot;&quot;&quot;</span>
 
     <span class="c1">#: Flags.</span>
     <span class="n">flags</span><span class="p">:</span> <span class="s1">&#39;Literal[None]&#39;</span>
@@ -184,7 +184,7 @@
 
 
 <div class="viewcode-block" id="SettingsFrameFlags"><a class="viewcode-back" href="../../../../../pcapkit/protocols/application/httpv2.html#pcapkit.protocols.data.application.httpv2.SettingsFrameFlags">[docs]</a><span class="k">class</span> <span class="nc">SettingsFrameFlags</span><span class="p">(</span><span class="n">Flags</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Data model for HTTP/2 ``SETTINGS`` frame flags.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for HTTP/2 ``SETTINGS`` frame flags.&quot;&quot;&quot;</span>
 
     <span class="c1">#: ``ACK`` flag.</span>
     <span class="n">ACK</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span>  <span class="c1"># bit 0</span>
@@ -194,7 +194,7 @@
 
 
 <div class="viewcode-block" id="SettingsFrame"><a class="viewcode-back" href="../../../../../pcapkit/protocols/application/httpv2.html#pcapkit.protocols.data.application.httpv2.SettingsFrame">[docs]</a><span class="k">class</span> <span class="nc">SettingsFrame</span><span class="p">(</span><span class="n">HTTP</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Data model for HTTP/2 ``SETTINGS`` frame.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for HTTP/2 ``SETTINGS`` frame.&quot;&quot;&quot;</span>
 
     <span class="c1">#: Flags.</span>
     <span class="n">flags</span><span class="p">:</span> <span class="s1">&#39;SettingsFrameFlags&#39;</span>
@@ -206,7 +206,7 @@
 
 
 <div class="viewcode-block" id="PushPromiseFrameFlags"><a class="viewcode-back" href="../../../../../pcapkit/protocols/application/httpv2.html#pcapkit.protocols.data.application.httpv2.PushPromiseFrameFlags">[docs]</a><span class="k">class</span> <span class="nc">PushPromiseFrameFlags</span><span class="p">(</span><span class="n">Flags</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Data model for HTTP/2 ``PUSH_PROMISE`` frame flags.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for HTTP/2 ``PUSH_PROMISE`` frame flags.&quot;&quot;&quot;</span>
 
     <span class="c1">#: ``END_HEADERS`` flag.</span>
     <span class="n">END_HEADERS</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span>  <span class="c1"># bit 2</span>
@@ -218,7 +218,7 @@
 
 
 <div class="viewcode-block" id="PushPromiseFrame"><a class="viewcode-back" href="../../../../../pcapkit/protocols/application/httpv2.html#pcapkit.protocols.data.application.httpv2.PushPromiseFrame">[docs]</a><span class="k">class</span> <span class="nc">PushPromiseFrame</span><span class="p">(</span><span class="n">HTTP</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Data model for HTTP/2 ``PUSH_PROMISE`` frame.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for HTTP/2 ``PUSH_PROMISE`` frame.&quot;&quot;&quot;</span>
 
     <span class="c1">#: Flags.</span>
     <span class="n">flags</span><span class="p">:</span> <span class="s1">&#39;PushPromiseFrameFlags&#39;</span>
@@ -234,7 +234,7 @@
 
 
 <div class="viewcode-block" id="PingFrameFlags"><a class="viewcode-back" href="../../../../../pcapkit/protocols/application/httpv2.html#pcapkit.protocols.data.application.httpv2.PingFrameFlags">[docs]</a><span class="k">class</span> <span class="nc">PingFrameFlags</span><span class="p">(</span><span class="n">Flags</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Data model for HTTP/2 ``PING`` frame flags.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for HTTP/2 ``PING`` frame flags.&quot;&quot;&quot;</span>
 
     <span class="c1">#: ``ACK`` flag.</span>
     <span class="n">ACK</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span>  <span class="c1"># bit 0</span>
@@ -244,7 +244,7 @@
 
 
 <div class="viewcode-block" id="PingFrame"><a class="viewcode-back" href="../../../../../pcapkit/protocols/application/httpv2.html#pcapkit.protocols.data.application.httpv2.PingFrame">[docs]</a><span class="k">class</span> <span class="nc">PingFrame</span><span class="p">(</span><span class="n">HTTP</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Data model for HTTP/2 ``PING`` frame.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for HTTP/2 ``PING`` frame.&quot;&quot;&quot;</span>
 
     <span class="c1">#: Flags.</span>
     <span class="n">flags</span><span class="p">:</span> <span class="s1">&#39;PingFrameFlags&#39;</span>
@@ -256,7 +256,7 @@
 
 
 <div class="viewcode-block" id="GoawayFrame"><a class="viewcode-back" href="../../../../../pcapkit/protocols/application/httpv2.html#pcapkit.protocols.data.application.httpv2.GoawayFrame">[docs]</a><span class="k">class</span> <span class="nc">GoawayFrame</span><span class="p">(</span><span class="n">HTTP</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Data model for HTTP/2 ``GOAWAY`` frame.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for HTTP/2 ``GOAWAY`` frame.&quot;&quot;&quot;</span>
 
     <span class="c1">#: Flags.</span>
     <span class="n">flags</span><span class="p">:</span> <span class="s1">&#39;Literal[None]&#39;</span>
@@ -272,7 +272,7 @@
 
 
 <div class="viewcode-block" id="WindowUpdateFrame"><a class="viewcode-back" href="../../../../../pcapkit/protocols/application/httpv2.html#pcapkit.protocols.data.application.httpv2.WindowUpdateFrame">[docs]</a><span class="k">class</span> <span class="nc">WindowUpdateFrame</span><span class="p">(</span><span class="n">HTTP</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Data moddel for HTTP/2 ``WINDOW_UPDATE`` frame.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Data moddel for HTTP/2 ``WINDOW_UPDATE`` frame.&quot;&quot;&quot;</span>
 
     <span class="c1">#: Flags.</span>
     <span class="n">flags</span><span class="p">:</span> <span class="s1">&#39;Literal[None]&#39;</span>
@@ -284,7 +284,7 @@
 
 
 <div class="viewcode-block" id="ContinuationFrameFlags"><a class="viewcode-back" href="../../../../../pcapkit/protocols/application/httpv2.html#pcapkit.protocols.data.application.httpv2.ContinuationFrameFlags">[docs]</a><span class="k">class</span> <span class="nc">ContinuationFrameFlags</span><span class="p">(</span><span class="n">Flags</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Data model for HTTP/2 ``CONTINUATION`` frame flags.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for HTTP/2 ``CONTINUATION`` frame flags.&quot;&quot;&quot;</span>
 
     <span class="c1">#: ``END_HEADERS`` flag.</span>
     <span class="n">END_HEADERS</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span>  <span class="c1"># bit 2</span>
@@ -294,7 +294,7 @@
 
 
 <div class="viewcode-block" id="ContinuationFrame"><a class="viewcode-back" href="../../../../../pcapkit/protocols/application/httpv2.html#pcapkit.protocols.data.application.httpv2.ContinuationFrame">[docs]</a><span class="k">class</span> <span class="nc">ContinuationFrame</span><span class="p">(</span><span class="n">HTTP</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Data model for HTTP/2 ``CONTINUATION`` frame.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for HTTP/2 ``CONTINUATION`` frame.&quot;&quot;&quot;</span>
 
     <span class="c1">#: Flags.</span>
     <span class="n">flags</span><span class="p">:</span> <span class="s1">&#39;ContinuationFrameFlags&#39;</span>
@@ -366,7 +366,7 @@
       <div class="clearer"></div>
     </div>
     <div class="footer">
-      &copy;2017-2022, Jarry Shaw.
+      &copy;2017-2023, Jarry Shaw.
       
     </div>
 

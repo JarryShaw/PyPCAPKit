@@ -114,7 +114,7 @@
 
 
 <div class="viewcode-block" id="IPv6_Opts"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/ipv6_opts.html#pcapkit.protocols.internet.ipv6_opts.IPv6_Opts">[docs]</a><span class="k">class</span> <span class="nc">IPv6_Opts</span><span class="p">(</span><span class="n">Internet</span><span class="p">[</span><span class="n">DataType_IPv6_Opts</span><span class="p">]):</span>
-    <span class="sd">&quot;&quot;&quot;This class implements Destination Options for IPv6.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;This class implements Destination Options for IPv6.</span>
 
 <span class="sd">    This class currently supports parsing of the following IPv6 Hop-by-Hop</span>
 <span class="sd">    options, which are registered in the</span>
@@ -195,22 +195,22 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Literal[&quot;Destination Options for IPv6&quot;]&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Name of current protocol.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Name of current protocol.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="s1">&#39;Destination Options for IPv6&#39;</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">alias</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Literal[&quot;IPv6-Opts&quot;]&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Acronym of corresponding protocol.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Acronym of corresponding protocol.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="s1">&#39;IPv6-Opts&#39;</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">length</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;int&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Header length of current protocol.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Header length of current protocol.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_info</span><span class="o">.</span><span class="n">length</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">payload</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Protocol | NoReturn&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Payload of current instance.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Payload of current instance.</span>
 
 <span class="sd">        Raises:</span>
 <span class="sd">            UnsupportedCall: if the protocol is used as an IPv6 extension header</span>
@@ -223,7 +223,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">protocol</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Optional[str] | NoReturn&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Name of next layer protocol (if any).</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Name of next layer protocol (if any).</span>
 
 <span class="sd">        Raises:</span>
 <span class="sd">            UnsupportedCall: if the protocol is used as an IPv6 extension header</span>
@@ -235,7 +235,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">protochain</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;ProtoChain | NoReturn&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Protocol chain of current instance.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Protocol chain of current instance.</span>
 
 <span class="sd">        Raises:</span>
 <span class="sd">            UnsupportedCall: if the protocol is used as an IPv6 extension header</span>
@@ -251,7 +251,7 @@
 
 <div class="viewcode-block" id="IPv6_Opts.read"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/ipv6_opts.html#pcapkit.protocols.internet.ipv6_opts.IPv6_Opts.read">[docs]</a>    <span class="k">def</span> <span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">extension</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>  <span class="c1"># pylint: disable=arguments-differ</span>
              <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_IPv6_Opts&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
-        <span class="sd">&quot;&quot;&quot;Read Destination Options for IPv6.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read Destination Options for IPv6.</span>
 
 <span class="sd">        Structure of IPv6-Opts header [:rfc:`8200`]:</span>
 
@@ -294,7 +294,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_decode_next_layer</span><span class="p">(</span><span class="n">ipv6_opts</span><span class="p">,</span> <span class="n">_next</span><span class="p">,</span> <span class="n">length</span> <span class="o">-</span> <span class="n">ipv6_opts</span><span class="o">.</span><span class="n">length</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="IPv6_Opts.make"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/ipv6_opts.html#pcapkit.protocols.internet.ipv6_opts.IPv6_Opts.make">[docs]</a>    <span class="k">def</span> <span class="nf">make</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;NoReturn&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Make (construct) packet data.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Make (construct) packet data.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
@@ -307,7 +307,7 @@
 
 <div class="viewcode-block" id="IPv6_Opts.register_option"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/ipv6_opts.html#pcapkit.protocols.internet.ipv6_opts.IPv6_Opts.register_option">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">register_option</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">&#39;RegType_Option&#39;</span><span class="p">,</span> <span class="n">meth</span><span class="p">:</span> <span class="s1">&#39;str | OptionParser&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Register an option parser.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Register an option parser.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            code: IPv6-Opts option code.</span>
@@ -329,7 +329,7 @@
 
 <div class="viewcode-block" id="IPv6_Opts.__post_init__"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/ipv6_opts.html#pcapkit.protocols.internet.ipv6_opts.IPv6_Opts.__post_init__">[docs]</a>    <span class="k">def</span> <span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file</span><span class="p">:</span> <span class="s1">&#39;Optional[BinaryIO]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>  <span class="c1"># pylint: disable=arguments-differ</span>
                       <span class="n">extension</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Post initialisation hook.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Post initialisation hook.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            file: Source packet stream.</span>
@@ -348,12 +348,12 @@
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__post_init__</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="n">extension</span><span class="o">=</span><span class="n">extension</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>  <span class="c1"># type: ignore[arg-type]</span></div>
 
     <span class="k">def</span> <span class="fm">__length_hint__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Literal[2]&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Return an estimated length for the object.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return an estimated length for the object.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="mi">2</span>
 
 <div class="viewcode-block" id="IPv6_Opts.__index__"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/ipv6_opts.html#pcapkit.protocols.internet.ipv6_opts.IPv6_Opts.__index__">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="fm">__index__</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;RegType_TransType&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=invalid-index-returned</span>
-        <span class="sd">&quot;&quot;&quot;Numeral registry index of the protocol.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Numeral registry index of the protocol.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            Numeral registry index of the protocol in `IANA`_.</span>
@@ -368,7 +368,7 @@
     <span class="c1">##########################################################################</span>
 
 <div class="viewcode-block" id="IPv6_Opts._read_opt_type"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/ipv6_opts.html#pcapkit.protocols.internet.ipv6_opts.IPv6_Opts._read_opt_type">[docs]</a>    <span class="k">def</span> <span class="nf">_read_opt_type</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;tuple[int, bool]&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Read option type field.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read option type field.</span>
 
 <span class="sd">        Arguments:</span>
 <span class="sd">            kind (int): option kind value</span>
@@ -382,7 +382,7 @@
         <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">bin_</span><span class="p">[:</span><span class="mi">2</span><span class="p">],</span> <span class="n">base</span><span class="o">=</span><span class="mi">2</span><span class="p">),</span> <span class="nb">bool</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">bin_</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">base</span><span class="o">=</span><span class="mi">2</span><span class="p">))</span></div>
 
 <div class="viewcode-block" id="IPv6_Opts._read_ipv6_opts"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/ipv6_opts.html#pcapkit.protocols.internet.ipv6_opts.IPv6_Opts._read_ipv6_opts">[docs]</a>    <span class="k">def</span> <span class="nf">_read_ipv6_opts</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Option&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Read IPv6-Opts options.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read IPv6-Opts options.</span>
 
 <span class="sd">        Positional arguments:</span>
 <span class="sd">            length: length of options</span>
@@ -431,7 +431,7 @@
 
 <div class="viewcode-block" id="IPv6_Opts._read_opt_none"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/ipv6_opts.html#pcapkit.protocols.internet.ipv6_opts.IPv6_Opts._read_opt_none">[docs]</a>    <span class="k">def</span> <span class="nf">_read_opt_none</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">&#39;RegType_Option&#39;</span><span class="p">,</span> <span class="n">acts</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">cflg</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
                        <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_UnassignedOption&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
-        <span class="sd">&quot;&quot;&quot;Read IPv6-Opts unassigned options.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read IPv6-Opts unassigned options.</span>
 
 <span class="sd">        Structure of IPv6-Opts unassigned options [:rfc:`8200`]:</span>
 
@@ -466,7 +466,7 @@
 
 <div class="viewcode-block" id="IPv6_Opts._read_opt_pad"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/ipv6_opts.html#pcapkit.protocols.internet.ipv6_opts.IPv6_Opts._read_opt_pad">[docs]</a>    <span class="k">def</span> <span class="nf">_read_opt_pad</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">&#39;RegType_Option&#39;</span><span class="p">,</span> <span class="n">acts</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">cflg</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
                       <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_PadOption&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
-        <span class="sd">&quot;&quot;&quot;Read IPv6-Opts padding options.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read IPv6-Opts padding options.</span>
 
 <span class="sd">        Structure of IPv6-Opts padding options [:rfc:`8200`]:</span>
 
@@ -518,7 +518,7 @@
 
 <div class="viewcode-block" id="IPv6_Opts._read_opt_tun"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/ipv6_opts.html#pcapkit.protocols.internet.ipv6_opts.IPv6_Opts._read_opt_tun">[docs]</a>    <span class="k">def</span> <span class="nf">_read_opt_tun</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">&#39;RegType_Option&#39;</span><span class="p">,</span> <span class="n">acts</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">cflg</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
                       <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_TunnelEncapsulationLimitOption&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
-        <span class="sd">&quot;&quot;&quot;Read IPv6-Opts Tunnel Encapsulation Limit option.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read IPv6-Opts Tunnel Encapsulation Limit option.</span>
 
 <span class="sd">        Structure of IPv6-Opts Tunnel Encapsulation Limit option [:rfc:`2473`]:</span>
 
@@ -560,7 +560,7 @@
 
 <div class="viewcode-block" id="IPv6_Opts._read_opt_ra"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/ipv6_opts.html#pcapkit.protocols.internet.ipv6_opts.IPv6_Opts._read_opt_ra">[docs]</a>    <span class="k">def</span> <span class="nf">_read_opt_ra</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">&#39;RegType_Option&#39;</span><span class="p">,</span> <span class="n">acts</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">cflg</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
                      <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_RouterAlertOption&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
-        <span class="sd">&quot;&quot;&quot;Read IPv6-Opts Router Alert option.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read IPv6-Opts Router Alert option.</span>
 
 <span class="sd">        Structure of IPv6-Opts Router Alert option [:rfc:`2711`]:</span>
 
@@ -601,7 +601,7 @@
 
 <div class="viewcode-block" id="IPv6_Opts._read_opt_calipso"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/ipv6_opts.html#pcapkit.protocols.internet.ipv6_opts.IPv6_Opts._read_opt_calipso">[docs]</a>    <span class="k">def</span> <span class="nf">_read_opt_calipso</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">&#39;RegType_Option&#39;</span><span class="p">,</span> <span class="n">acts</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">cflg</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
                           <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_CALIPSOOption&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
-        <span class="sd">&quot;&quot;&quot;Read IPv6-Opts Common Architecture Label IPv6 Security Option (CALIPSO) option.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read IPv6-Opts Common Architecture Label IPv6 Security Option (CALIPSO) option.</span>
 
 <span class="sd">        Structure of IPv6-Opts CALIPSO option [:rfc:`5570`]:</span>
 
@@ -668,7 +668,7 @@
 
 <div class="viewcode-block" id="IPv6_Opts._read_opt_smf_dpd"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/ipv6_opts.html#pcapkit.protocols.internet.ipv6_opts.IPv6_Opts._read_opt_smf_dpd">[docs]</a>    <span class="k">def</span> <span class="nf">_read_opt_smf_dpd</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">&#39;RegType_Option&#39;</span><span class="p">,</span> <span class="n">acts</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">cflg</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
                           <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_SMFIdentificationBasedDPDOption | DataType_SMFHashBasedDPDOption&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument,line-too-long</span>
-        <span class="sd">&quot;&quot;&quot;Read IPv6-Opts Simplified Multicast Forwarding Duplicate Packet Detection (``SMF_DPD``) option.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read IPv6-Opts Simplified Multicast Forwarding Duplicate Packet Detection (``SMF_DPD``) option.</span>
 
 <span class="sd">        Structure of IPv6-Opts ``SMF_DPD`` option [:rfc:`6621`]:</span>
 
@@ -805,7 +805,7 @@
 
 <div class="viewcode-block" id="IPv6_Opts._read_opt_pdm"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/ipv6_opts.html#pcapkit.protocols.internet.ipv6_opts.IPv6_Opts._read_opt_pdm">[docs]</a>    <span class="k">def</span> <span class="nf">_read_opt_pdm</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">&#39;RegType_Option&#39;</span><span class="p">,</span> <span class="n">acts</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">cflg</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
                       <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_PDMOption&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
-        <span class="sd">&quot;&quot;&quot;Read IPv6-Opts Performance and Diagnostic Metrics (PDM) option.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read IPv6-Opts Performance and Diagnostic Metrics (PDM) option.</span>
 
 <span class="sd">        Structure of IPv6-Opts PDM option [:rfc:`8250`]:</span>
 
@@ -861,7 +861,7 @@
 
 <div class="viewcode-block" id="IPv6_Opts._read_opt_qs"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/ipv6_opts.html#pcapkit.protocols.internet.ipv6_opts.IPv6_Opts._read_opt_qs">[docs]</a>    <span class="k">def</span> <span class="nf">_read_opt_qs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">&#39;RegType_Option&#39;</span><span class="p">,</span> <span class="n">acts</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">cflg</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
                      <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_QuickStartOption&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument  # pylint: disable=unused-argument</span>
-        <span class="sd">&quot;&quot;&quot;Read IPv6-Opts Quick Start option.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read IPv6-Opts Quick Start option.</span>
 
 <span class="sd">        Structure of IPv6-Opts Quick-Start option [:rfc:`4782`]:</span>
 
@@ -934,7 +934,7 @@
 
 <div class="viewcode-block" id="IPv6_Opts._read_opt_rpl"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/ipv6_opts.html#pcapkit.protocols.internet.ipv6_opts.IPv6_Opts._read_opt_rpl">[docs]</a>    <span class="k">def</span> <span class="nf">_read_opt_rpl</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">&#39;RegType_Option&#39;</span><span class="p">,</span> <span class="n">acts</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">cflg</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
                       <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_RPLOption&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
-        <span class="sd">&quot;&quot;&quot;Read IPv6-Opts Routing Protocol for Low-Power and Lossy Networks (RPL) option.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read IPv6-Opts Routing Protocol for Low-Power and Lossy Networks (RPL) option.</span>
 
 <span class="sd">        Structure of IPv6-Opts RPL option [:rfc:`6553`]:</span>
 
@@ -988,7 +988,7 @@
 
 <div class="viewcode-block" id="IPv6_Opts._read_opt_mpl"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/ipv6_opts.html#pcapkit.protocols.internet.ipv6_opts.IPv6_Opts._read_opt_mpl">[docs]</a>    <span class="k">def</span> <span class="nf">_read_opt_mpl</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">&#39;RegType_Option&#39;</span><span class="p">,</span> <span class="n">acts</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">cflg</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
                       <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_MPLOption&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
-        <span class="sd">&quot;&quot;&quot;Read IPv6-Opts Multicast Protocol for Low-Power and Lossy Networks (MPL) option.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read IPv6-Opts Multicast Protocol for Low-Power and Lossy Networks (MPL) option.</span>
 
 <span class="sd">        Structure of IPv6-Opts MPL option [:rfc:`7731`]:</span>
 
@@ -1067,7 +1067,7 @@
 
 <div class="viewcode-block" id="IPv6_Opts._read_opt_ilnp"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/ipv6_opts.html#pcapkit.protocols.internet.ipv6_opts.IPv6_Opts._read_opt_ilnp">[docs]</a>    <span class="k">def</span> <span class="nf">_read_opt_ilnp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">&#39;RegType_Option&#39;</span><span class="p">,</span> <span class="n">acts</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">cflg</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
                        <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_ILNPOption&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
-        <span class="sd">&quot;&quot;&quot;Read IPv6-Opts Identifier-Locator Network Protocol (ILNP) Nonce option.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read IPv6-Opts Identifier-Locator Network Protocol (ILNP) Nonce option.</span>
 
 <span class="sd">        Structure of IPv6-Opts ILNP Nonce option [:rfc:`6744`]:</span>
 
@@ -1106,7 +1106,7 @@
 
 <div class="viewcode-block" id="IPv6_Opts._read_opt_lio"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/ipv6_opts.html#pcapkit.protocols.internet.ipv6_opts.IPv6_Opts._read_opt_lio">[docs]</a>    <span class="k">def</span> <span class="nf">_read_opt_lio</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">&#39;RegType_Option&#39;</span><span class="p">,</span> <span class="n">acts</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">cflg</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
                       <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_LineIdentificationOption&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
-        <span class="sd">&quot;&quot;&quot;Read IPv6-Opts Line-Identification option.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read IPv6-Opts Line-Identification option.</span>
 
 <span class="sd">        Structure of IPv6-Opts Line-Identification option [:rfc:`6788`]:</span>
 
@@ -1151,7 +1151,7 @@
 
 <div class="viewcode-block" id="IPv6_Opts._read_opt_jumbo"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/ipv6_opts.html#pcapkit.protocols.internet.ipv6_opts.IPv6_Opts._read_opt_jumbo">[docs]</a>    <span class="k">def</span> <span class="nf">_read_opt_jumbo</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">&#39;RegType_Option&#39;</span><span class="p">,</span> <span class="n">acts</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">cflg</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
                         <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_JumboPayloadOption&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
-        <span class="sd">&quot;&quot;&quot;Read IPv6-Opts Jumbo Payload option.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read IPv6-Opts Jumbo Payload option.</span>
 
 <span class="sd">        Structure of IPv6-Opts Jumbo Payload option [:rfc:`2675`]:</span>
 
@@ -1193,7 +1193,7 @@
 
 <div class="viewcode-block" id="IPv6_Opts._read_opt_home"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/ipv6_opts.html#pcapkit.protocols.internet.ipv6_opts.IPv6_Opts._read_opt_home">[docs]</a>    <span class="k">def</span> <span class="nf">_read_opt_home</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">&#39;RegType_Option&#39;</span><span class="p">,</span> <span class="n">acts</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">cflg</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
                        <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_HomeAddressOption&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
-        <span class="sd">&quot;&quot;&quot;Read IPv6-Opts Home Address option.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read IPv6-Opts Home Address option.</span>
 
 <span class="sd">        Structure of IPv6-Opts Home Address option [:rfc:`6275`]:</span>
 
@@ -1243,7 +1243,7 @@
 
 <div class="viewcode-block" id="IPv6_Opts._read_opt_ip_dff"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/ipv6_opts.html#pcapkit.protocols.internet.ipv6_opts.IPv6_Opts._read_opt_ip_dff">[docs]</a>    <span class="k">def</span> <span class="nf">_read_opt_ip_dff</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">&#39;RegType_Option&#39;</span><span class="p">,</span> <span class="n">acts</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">cflg</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
                          <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_IPDFFOption&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
-        <span class="sd">&quot;&quot;&quot;Read IPv6-Opts Depth-First Forwarding (``IP_DFF``) option.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read IPv6-Opts Depth-First Forwarding (``IP_DFF``) option.</span>
 
 <span class="sd">        Structure of IPv6-Opts ``IP_DFF`` option [:rfc:`6971`]:</span>
 
@@ -1353,7 +1353,7 @@
       <div class="clearer"></div>
     </div>
     <div class="footer">
-      &copy;2017-2022, Jarry Shaw.
+      &copy;2017-2023, Jarry Shaw.
       
     </div>
 

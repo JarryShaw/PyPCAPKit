@@ -95,7 +95,7 @@
 
 
 <div class="viewcode-block" id="ARP"><a class="viewcode-back" href="../../../../pcapkit/protocols/link/arp.html#pcapkit.protocols.link.arp.ARP">[docs]</a><span class="k">class</span> <span class="nc">ARP</span><span class="p">(</span><span class="n">Link</span><span class="p">[</span><span class="n">DataType_ARP</span><span class="p">]):</span>
-    <span class="sd">&quot;&quot;&quot;This class implements all protocols in ARP family.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;This class implements all protocols in ARP family.</span>
 
 <span class="sd">    - Address Resolution Protocol (:class:`~pcapkit.protocols.link.arp.ARP`) [:rfc:`826`]</span>
 <span class="sd">    - Reverse Address Resolution Protocol (:class:`~pcapkit.protocols.link.rarp.RARP`) [:rfc:`903`]</span>
@@ -114,32 +114,32 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Literal[&quot;Dynamic Reverse Address Resolution Protocol&quot;, &quot;Inverse Address Resolution Protocol&quot;, &quot;Reverse Address Resolution Protocol&quot;, &quot;Address Resolution Protocol&quot;]&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=line-too-long</span>
-        <span class="sd">&quot;&quot;&quot;Name of current protocol.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Name of current protocol.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_name</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">alias</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Literal[&quot;ARP&quot;, &quot;InARP&quot;, &quot;RARP&quot;, &quot;DRARP&quot;]&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Acronym of corresponding protocol.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Acronym of corresponding protocol.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_acnm</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">length</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;int&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Header length of current protocol.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Header length of current protocol.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_info</span><span class="o">.</span><span class="n">len</span>
 
     <span class="nd">@cached_property</span>
     <span class="k">def</span> <span class="nf">src</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_Address&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Sender hardware &amp; protocol address.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Sender hardware &amp; protocol address.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">DataType_Address</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_info</span><span class="o">.</span><span class="n">sha</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_info</span><span class="o">.</span><span class="n">spa</span><span class="p">)</span>
 
     <span class="nd">@cached_property</span>
     <span class="k">def</span> <span class="nf">dst</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_Address&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Target hardware &amp; protocol address.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Target hardware &amp; protocol address.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">DataType_Address</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_info</span><span class="o">.</span><span class="n">tha</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_info</span><span class="o">.</span><span class="n">tpa</span><span class="p">)</span>
 
     <span class="nd">@cached_property</span>
     <span class="k">def</span> <span class="nf">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_Type&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Hardware &amp; protocol type.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Hardware &amp; protocol type.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">DataType_Type</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_info</span><span class="o">.</span><span class="n">htype</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_info</span><span class="o">.</span><span class="n">ptype</span><span class="p">)</span>
 
     <span class="c1">##########################################################################</span>
@@ -148,11 +148,11 @@
 
 <div class="viewcode-block" id="ARP.id"><a class="viewcode-back" href="../../../../pcapkit/protocols/link/arp.html#pcapkit.protocols.link.arp.ARP.id">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">id</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;tuple[Literal[&quot;ARP&quot;], Literal[&quot;InARP&quot;]]&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Index ID of the protocol.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Index ID of the protocol.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="p">(</span><span class="s1">&#39;ARP&#39;</span><span class="p">,</span> <span class="s1">&#39;InARP&#39;</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="ARP.read"><a class="viewcode-back" href="../../../../pcapkit/protocols/link/arp.html#pcapkit.protocols.link.arp.ARP.read">[docs]</a>    <span class="k">def</span> <span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_ARP&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Read Address Resolution Protocol.</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Read Address Resolution Protocol.</span>
 
 <span class="sd">        Data structure of ARP Request header [:rfc:`826`]:</span>
 
@@ -226,7 +226,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_decode_next_layer</span><span class="p">(</span><span class="n">arp</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">length</span> <span class="o">-</span> <span class="n">arp</span><span class="o">.</span><span class="n">len</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="ARP.make"><a class="viewcode-back" href="../../../../pcapkit/protocols/link/arp.html#pcapkit.protocols.link.arp.ARP.make">[docs]</a>    <span class="k">def</span> <span class="nf">make</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;NoReturn&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Make (construct) packet data.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Make (construct) packet data.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
@@ -242,12 +242,12 @@
     <span class="c1">##########################################################################</span>
 
     <span class="k">def</span> <span class="fm">__length_hint__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Literal[28]&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Return an estimated length for the object.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return an estimated length for the object.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="mi">28</span>
 
 <div class="viewcode-block" id="ARP.__index__"><a class="viewcode-back" href="../../../../pcapkit/protocols/link/arp.html#pcapkit.protocols.link.arp.ARP.__index__">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="fm">__index__</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;RegType_EtherType&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=invalid-index-returned</span>
-        <span class="sd">&quot;&quot;&quot;Numeral registry index of the protocol.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Numeral registry index of the protocol.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            Numeral registry index of the protocol in `IANA`_.</span>
@@ -262,7 +262,7 @@
     <span class="c1">##########################################################################</span>
 
     <span class="k">def</span> <span class="nf">_read_addr_resolve</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">htype</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;str&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Resolve headware address according to protocol.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Resolve headware address according to protocol.</span>
 
 <span class="sd">        Arguments:</span>
 <span class="sd">            length: Hardware address length.</span>
@@ -284,7 +284,7 @@
         <span class="k">return</span> <span class="n">_addr</span>
 
     <span class="k">def</span> <span class="nf">_read_proto_resolve</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">ptype</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;str | IPv4Address | IPv6Address&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Resolve protocol address according to protocol.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Resolve protocol address according to protocol.</span>
 
 <span class="sd">        Arguments:</span>
 <span class="sd">            length: Protocol address length.</span>
@@ -366,7 +366,7 @@
       <div class="clearer"></div>
     </div>
     <div class="footer">
-      &copy;2017-2022, Jarry Shaw.
+      &copy;2017-2023, Jarry Shaw.
       
     </div>
 

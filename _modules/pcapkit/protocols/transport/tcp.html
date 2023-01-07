@@ -144,7 +144,7 @@
 
 
 <div class="viewcode-block" id="TCP"><a class="viewcode-back" href="../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP">[docs]</a><span class="k">class</span> <span class="nc">TCP</span><span class="p">(</span><span class="n">Transport</span><span class="p">[</span><span class="n">DataType_TCP</span><span class="p">]):</span>
-    <span class="sd">&quot;&quot;&quot;This class implements Transmission Control Protocol.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;This class implements Transmission Control Protocol.</span>
 
 <span class="sd">    This class currently supports parsing of the following protocols, which are</span>
 <span class="sd">    registered in the :attr:`self.__proto__ &lt;pcapkit.protocols.transport.tcp.TCP.__proto__&gt;`</span>
@@ -311,22 +311,22 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Literal[&quot;Transmission Control Protocol&quot;]&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Name of current protocol.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Name of current protocol.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="s1">&#39;Transmission Control Protocol&#39;</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">length</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;int&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Header length of current protocol.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Header length of current protocol.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_info</span><span class="o">.</span><span class="n">hdr_len</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">src</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;int&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Source port.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Source port.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_info</span><span class="o">.</span><span class="n">srcport</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">dst</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;int&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Destination port.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Destination port.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_info</span><span class="o">.</span><span class="n">dstport</span>
 
     <span class="c1">##########################################################################</span>
@@ -334,7 +334,7 @@
     <span class="c1">##########################################################################</span>
 
 <div class="viewcode-block" id="TCP.read"><a class="viewcode-back" href="../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP.read">[docs]</a>    <span class="k">def</span> <span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_TCP&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
-        <span class="sd">&quot;&quot;&quot;Read Transmission Control Protocol (TCP).</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read Transmission Control Protocol (TCP).</span>
 
 <span class="sd">        Structure of TCP header [:rfc:`793`]::</span>
 
@@ -415,7 +415,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_decode_next_layer</span><span class="p">(</span><span class="n">tcp</span><span class="p">,</span> <span class="p">(</span><span class="n">tcp</span><span class="o">.</span><span class="n">srcport</span><span class="p">,</span> <span class="n">tcp</span><span class="o">.</span><span class="n">dstport</span><span class="p">),</span> <span class="n">length</span> <span class="o">-</span> <span class="n">tcp</span><span class="o">.</span><span class="n">hdr_len</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="TCP.make"><a class="viewcode-back" href="../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP.make">[docs]</a>    <span class="k">def</span> <span class="nf">make</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;NoReturn&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Make (construct) packet data.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Make (construct) packet data.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
@@ -428,7 +428,7 @@
 
 <div class="viewcode-block" id="TCP.register_option"><a class="viewcode-back" href="../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP.register_option">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">register_option</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">&#39;RegType_Option&#39;</span><span class="p">,</span> <span class="n">meth</span><span class="p">:</span> <span class="s1">&#39;str | OptionParser&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Register an option parser.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Register an option parser.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            code: TCP option code.</span>
@@ -439,7 +439,7 @@
 
 <div class="viewcode-block" id="TCP.register_mp_option"><a class="viewcode-back" href="../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP.register_mp_option">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">register_mp_option</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">&#39;RegType_MPTCPOption&#39;</span><span class="p">,</span> <span class="n">meth</span><span class="p">:</span> <span class="s1">&#39;str | MPOptionParser&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Register an MPTCP option parser.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Register an MPTCP option parser.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            code: MPTCP option code.</span>
@@ -453,12 +453,12 @@
     <span class="c1">##########################################################################</span>
 
     <span class="k">def</span> <span class="fm">__length_hint__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Literal[20]&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Return an estimated length for the object.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return an estimated length for the object.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="mi">20</span>
 
 <div class="viewcode-block" id="TCP.__index__"><a class="viewcode-back" href="../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP.__index__">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="fm">__index__</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;TransType&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=invalid-index-returned</span>
-        <span class="sd">&quot;&quot;&quot;Numeral registry index of the protocol.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Numeral registry index of the protocol.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            Numeral registry index of the protocol in `IANA`_.</span>
@@ -473,7 +473,7 @@
     <span class="c1">##########################################################################</span>
 
 <div class="viewcode-block" id="TCP._read_tcp_options"><a class="viewcode-back" href="../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP._read_tcp_options">[docs]</a>    <span class="k">def</span> <span class="nf">_read_tcp_options</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">size</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Option&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Read TCP option list.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read TCP option list.</span>
 
 <span class="sd">        Arguments:</span>
 <span class="sd">            size: length of option list</span>
@@ -527,7 +527,7 @@
         <span class="k">return</span> <span class="n">options</span></div>
 
 <div class="viewcode-block" id="TCP._read_mode_donone"><a class="viewcode-back" href="../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP._read_mode_donone">[docs]</a>    <span class="k">def</span> <span class="nf">_read_mode_donone</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;RegType_Option&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_UnassignedOption&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
-        <span class="sd">&quot;&quot;&quot;Read options request no process.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read options request no process.</span>
 
 <span class="sd">        Arguments:</span>
 <span class="sd">            kind: option kind value</span>
@@ -548,7 +548,7 @@
         <span class="k">return</span> <span class="n">option</span></div>
 
 <div class="viewcode-block" id="TCP._read_mode_eool"><a class="viewcode-back" href="../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP._read_mode_eool">[docs]</a>    <span class="k">def</span> <span class="nf">_read_mode_eool</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;RegType_Option&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_EndOfOptionList&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
-        <span class="sd">&quot;&quot;&quot;Read TCP End of Option List option.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read TCP End of Option List option.</span>
 
 <span class="sd">        Structure of TCP end of option list option [:rfc:`793`]:</span>
 
@@ -573,7 +573,7 @@
         <span class="p">)</span></div>
 
 <div class="viewcode-block" id="TCP._read_mode_nop"><a class="viewcode-back" href="../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP._read_mode_nop">[docs]</a>    <span class="k">def</span> <span class="nf">_read_mode_nop</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;RegType_Option&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_NoOperation&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
-        <span class="sd">&quot;&quot;&quot;Read TCP No Operation option.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read TCP No Operation option.</span>
 
 <span class="sd">        Structure of TCP maximum segment size option [:rfc:`793`]:</span>
 
@@ -598,7 +598,7 @@
         <span class="p">)</span></div>
 
 <div class="viewcode-block" id="TCP._read_mode_mss"><a class="viewcode-back" href="../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP._read_mode_mss">[docs]</a>    <span class="k">def</span> <span class="nf">_read_mode_mss</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;RegType_Option&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_MaximumSegmentSize&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
-        <span class="sd">&quot;&quot;&quot;Read TCP max segment size option.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read TCP max segment size option.</span>
 
 <span class="sd">        Structure of TCP maximum segment size option [:rfc:`793`]:</span>
 
@@ -633,7 +633,7 @@
         <span class="k">return</span> <span class="n">data</span></div>
 
 <div class="viewcode-block" id="TCP._read_mode_ws"><a class="viewcode-back" href="../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP._read_mode_ws">[docs]</a>    <span class="k">def</span> <span class="nf">_read_mode_ws</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;RegType_Option&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_WindowScale&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
-        <span class="sd">&quot;&quot;&quot;Read TCP windows scale option.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read TCP windows scale option.</span>
 
 <span class="sd">        Structure of TCP window scale option [:rfc:`7323`]:</span>
 
@@ -668,7 +668,7 @@
         <span class="k">return</span> <span class="n">data</span></div>
 
 <div class="viewcode-block" id="TCP._read_mode_sackpmt"><a class="viewcode-back" href="../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP._read_mode_sackpmt">[docs]</a>    <span class="k">def</span> <span class="nf">_read_mode_sackpmt</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;RegType_Option&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_SACKPermitted&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
-        <span class="sd">&quot;&quot;&quot;Read TCP SACK permitted option.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read TCP SACK permitted option.</span>
 
 <span class="sd">        Structure of TCP SACK permitted option [:rfc:`2018`]:</span>
 
@@ -699,7 +699,7 @@
         <span class="p">)</span></div>
 
 <div class="viewcode-block" id="TCP._read_mode_sack"><a class="viewcode-back" href="../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP._read_mode_sack">[docs]</a>    <span class="k">def</span> <span class="nf">_read_mode_sack</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;RegType_Option&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_SACK&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
-        <span class="sd">&quot;&quot;&quot;Read TCP SACK option.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read TCP SACK option.</span>
 
 <span class="sd">        Structure of TCP SACK option [:rfc:`2018`]:</span>
 
@@ -746,7 +746,7 @@
         <span class="k">return</span> <span class="n">data</span></div>
 
 <div class="viewcode-block" id="TCP._read_mode_echo"><a class="viewcode-back" href="../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP._read_mode_echo">[docs]</a>    <span class="k">def</span> <span class="nf">_read_mode_echo</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;RegType_Option&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_Echo&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
-        <span class="sd">&quot;&quot;&quot;Read TCP echo option.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read TCP echo option.</span>
 
 <span class="sd">        Structure of TCP echo option [:rfc:`1072`]:</span>
 
@@ -780,7 +780,7 @@
         <span class="k">return</span> <span class="n">data</span></div>
 
 <div class="viewcode-block" id="TCP._read_mode_echore"><a class="viewcode-back" href="../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP._read_mode_echore">[docs]</a>    <span class="k">def</span> <span class="nf">_read_mode_echore</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;RegType_Option&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_EchoReply&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
-        <span class="sd">&quot;&quot;&quot;Read TCP echo reply option.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read TCP echo reply option.</span>
 
 <span class="sd">        Structure of TCP echo reply option [:rfc:`1072`]:</span>
 
@@ -814,7 +814,7 @@
         <span class="k">return</span> <span class="n">data</span></div>
 
 <div class="viewcode-block" id="TCP._read_mode_ts"><a class="viewcode-back" href="../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP._read_mode_ts">[docs]</a>    <span class="k">def</span> <span class="nf">_read_mode_ts</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;RegType_Option&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_Timestamp&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
-        <span class="sd">&quot;&quot;&quot;Read TCP timestamps option.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read TCP timestamps option.</span>
 
 <span class="sd">        Structure of TCP timestamp option [:rfc:`7323`]:</span>
 
@@ -852,7 +852,7 @@
 
 <div class="viewcode-block" id="TCP._read_mode_poc"><a class="viewcode-back" href="../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP._read_mode_poc">[docs]</a>    <span class="k">def</span> <span class="nf">_read_mode_poc</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;RegType_Option&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
                        <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_PartialOrderConnectionPermitted&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
-        <span class="sd">&quot;&quot;&quot;Read TCP partial order connection service profile option.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read TCP partial order connection service profile option.</span>
 
 <span class="sd">        Structure of TCP ``POC-Permitted`` option [:rfc:`1693`][:rfc:`6247`]:</span>
 
@@ -884,7 +884,7 @@
 
 <div class="viewcode-block" id="TCP._read_mode_pocsp"><a class="viewcode-back" href="../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP._read_mode_pocsp">[docs]</a>    <span class="k">def</span> <span class="nf">_read_mode_pocsp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;RegType_Option&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
                          <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_PartialOrderConnectionProfile&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
-        <span class="sd">&quot;&quot;&quot;Read TCP partial order connection service profile option.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read TCP partial order connection service profile option.</span>
 
 <span class="sd">        Structure of TCP ``POC-SP`` option [:rfc:`1693`][:rfc:`6247`]:</span>
 
@@ -921,7 +921,7 @@
         <span class="k">return</span> <span class="n">data</span></div>
 
 <div class="viewcode-block" id="TCP._read_mode_cc"><a class="viewcode-back" href="../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP._read_mode_cc">[docs]</a>    <span class="k">def</span> <span class="nf">_read_mode_cc</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;RegType_Option&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_CC&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
-        <span class="sd">&quot;&quot;&quot;Read TCP connection count option.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read TCP connection count option.</span>
 
 <span class="sd">        Structure of TCP ``CC`` option [:rfc:`1644`]:</span>
 
@@ -956,7 +956,7 @@
         <span class="k">return</span> <span class="n">data</span></div>
 
 <div class="viewcode-block" id="TCP._read_mode_ccnew"><a class="viewcode-back" href="../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP._read_mode_ccnew">[docs]</a>    <span class="k">def</span> <span class="nf">_read_mode_ccnew</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;RegType_Option&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_CCNew&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
-        <span class="sd">&quot;&quot;&quot;Read TCP connection count (new) option.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read TCP connection count (new) option.</span>
 
 <span class="sd">        Structure of TCP ``CC.NEW`` option [:rfc:`1644`]:</span>
 
@@ -991,7 +991,7 @@
         <span class="k">return</span> <span class="n">data</span></div>
 
 <div class="viewcode-block" id="TCP._read_mode_ccecho"><a class="viewcode-back" href="../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP._read_mode_ccecho">[docs]</a>    <span class="k">def</span> <span class="nf">_read_mode_ccecho</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;RegType_Option&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_CCEcho&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
-        <span class="sd">&quot;&quot;&quot;Read TCP connection count (echo) option.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read TCP connection count (echo) option.</span>
 
 <span class="sd">        Structure of TCP ``CC.ECHO`` option [:rfc:`1644`]:</span>
 
@@ -1026,7 +1026,7 @@
         <span class="k">return</span> <span class="n">data</span></div>
 
 <div class="viewcode-block" id="TCP._read_mode_chkreq"><a class="viewcode-back" href="../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP._read_mode_chkreq">[docs]</a>    <span class="k">def</span> <span class="nf">_read_mode_chkreq</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;RegType_Option&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_AlternateChecksumRequest&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
-        <span class="sd">&quot;&quot;&quot;Read Alternate Checksum Request option.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read Alternate Checksum Request option.</span>
 
 <span class="sd">        Structure of TCP ``CHKSUM-REQ`` [:rfc:`1146`][:rfc:`6247`]:</span>
 
@@ -1061,7 +1061,7 @@
         <span class="k">return</span> <span class="n">data</span></div>
 
 <div class="viewcode-block" id="TCP._read_mode_chksum"><a class="viewcode-back" href="../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP._read_mode_chksum">[docs]</a>    <span class="k">def</span> <span class="nf">_read_mode_chksum</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;RegType_Option&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_AlternateChecksumData&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
-        <span class="sd">&quot;&quot;&quot;Read Alternate Checksum Data option.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read Alternate Checksum Data option.</span>
 
 <span class="sd">        Structure of TCP ``CHKSUM`` [:rfc:`1146`][:rfc:`6247`]:</span>
 
@@ -1091,7 +1091,7 @@
         <span class="k">return</span> <span class="n">data</span></div>
 
 <div class="viewcode-block" id="TCP._read_mode_sig"><a class="viewcode-back" href="../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP._read_mode_sig">[docs]</a>    <span class="k">def</span> <span class="nf">_read_mode_sig</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;RegType_Option&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_MD5Signature&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
-        <span class="sd">&quot;&quot;&quot;Read MD5 Signature option.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read MD5 Signature option.</span>
 
 <span class="sd">        Structure of TCP ``SIG`` option [:rfc:`2385`]:</span>
 
@@ -1133,7 +1133,7 @@
         <span class="k">return</span> <span class="n">data</span></div>
 
 <div class="viewcode-block" id="TCP._read_mode_qs"><a class="viewcode-back" href="../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP._read_mode_qs">[docs]</a>    <span class="k">def</span> <span class="nf">_read_mode_qs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;RegType_Option&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_QuickStartResponse&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
-        <span class="sd">&quot;&quot;&quot;Read Quick-Start Response option.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read Quick-Start Response option.</span>
 
 <span class="sd">        Structure of TCP ``QSopt`` [:rfc:`4782`]:</span>
 
@@ -1177,7 +1177,7 @@
         <span class="k">return</span> <span class="n">data</span></div>
 
 <div class="viewcode-block" id="TCP._read_mode_timeout"><a class="viewcode-back" href="../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP._read_mode_timeout">[docs]</a>    <span class="k">def</span> <span class="nf">_read_mode_timeout</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;RegType_Option&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_UserTimeout&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
-        <span class="sd">&quot;&quot;&quot;Read User Timeout option.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read User Timeout option.</span>
 
 <span class="sd">        Structure of TCP ``TIMEOUT`` [:rfc:`5482`]:</span>
 
@@ -1219,7 +1219,7 @@
         <span class="k">return</span> <span class="n">data</span></div>
 
 <div class="viewcode-block" id="TCP._read_mode_ao"><a class="viewcode-back" href="../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP._read_mode_ao">[docs]</a>    <span class="k">def</span> <span class="nf">_read_mode_ao</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;RegType_Option&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_Authentication&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
-        <span class="sd">&quot;&quot;&quot;Read Authentication option.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read Authentication option.</span>
 
 <span class="sd">        Structure of TCP ``AOopt`` [:rfc:`5925`]:</span>
 
@@ -1264,7 +1264,7 @@
         <span class="k">return</span> <span class="n">data</span></div>
 
 <div class="viewcode-block" id="TCP._read_mode_mp"><a class="viewcode-back" href="../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP._read_mode_mp">[docs]</a>    <span class="k">def</span> <span class="nf">_read_mode_mp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;RegType_Option&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_MPTCP&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
-        <span class="sd">&quot;&quot;&quot;Read Multipath TCP option.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read Multipath TCP option.</span>
 
 <span class="sd">        Structure of ``MP-TCP`` [:rfc:`6824`]:</span>
 
@@ -1310,7 +1310,7 @@
 
 <div class="viewcode-block" id="TCP._read_mptcp_unknown"><a class="viewcode-back" href="../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP._read_mptcp_unknown">[docs]</a>    <span class="k">def</span> <span class="nf">_read_mptcp_unknown</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;RegType_MPTCPOption&#39;</span><span class="p">,</span> <span class="n">dlen</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
                             <span class="n">bits</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_MPTCPUnknown&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
-        <span class="sd">&quot;&quot;&quot;Read unknown MPTCP subtype.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read unknown MPTCP subtype.</span>
 
 <span class="sd">        Arguments:</span>
 <span class="sd">            kind: option kind value</span>
@@ -1332,7 +1332,7 @@
 
 <div class="viewcode-block" id="TCP._read_mptcp_capable"><a class="viewcode-back" href="../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP._read_mptcp_capable">[docs]</a>    <span class="k">def</span> <span class="nf">_read_mptcp_capable</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;RegType_MPTCPOption&#39;</span><span class="p">,</span> <span class="n">dlen</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
                             <span class="n">bits</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_MPTCPCapable&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
-        <span class="sd">&quot;&quot;&quot;Read Multipath Capable option.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read Multipath Capable option.</span>
 
 <span class="sd">        Structure of ``MP_CAPABLE`` [:rfc:`6824`]:</span>
 
@@ -1391,7 +1391,7 @@
 
 <div class="viewcode-block" id="TCP._read_mptcp_join"><a class="viewcode-back" href="../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP._read_mptcp_join">[docs]</a>    <span class="k">def</span> <span class="nf">_read_mptcp_join</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;RegType_MPTCPOption&#39;</span><span class="p">,</span> <span class="n">dlen</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
                          <span class="n">bits</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_MPTCPJoin&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Read Join Connection option.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read Join Connection option.</span>
 
 <span class="sd">        Arguments:</span>
 <span class="sd">            kind: option kind value</span>
@@ -1416,7 +1416,7 @@
 
 <div class="viewcode-block" id="TCP._read_join_syn"><a class="viewcode-back" href="../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP._read_join_syn">[docs]</a>    <span class="k">def</span> <span class="nf">_read_join_syn</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;RegType_MPTCPOption&#39;</span><span class="p">,</span> <span class="n">dlen</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
                        <span class="n">bits</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_MPTCPJoinSYN&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
-        <span class="sd">&quot;&quot;&quot;Read Join Connection option for Initial SYN.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read Join Connection option for Initial SYN.</span>
 
 <span class="sd">        Structure of ``MP_JOIN-SYN`` [:rfc:`6824`]:</span>
 
@@ -1467,7 +1467,7 @@
 
 <div class="viewcode-block" id="TCP._read_join_synack"><a class="viewcode-back" href="../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP._read_join_synack">[docs]</a>    <span class="k">def</span> <span class="nf">_read_join_synack</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;RegType_MPTCPOption&#39;</span><span class="p">,</span> <span class="n">dlen</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
                           <span class="n">bits</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_MPTCPJoinSYNACK&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
-        <span class="sd">&quot;&quot;&quot;Read Join Connection option for Responding SYN/ACK.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read Join Connection option for Responding SYN/ACK.</span>
 
 <span class="sd">        Structure of ``MP_JOIN-SYN/ACK`` [:rfc:`6824`]:</span>
 
@@ -1520,7 +1520,7 @@
 
 <div class="viewcode-block" id="TCP._read_join_ack"><a class="viewcode-back" href="../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP._read_join_ack">[docs]</a>    <span class="k">def</span> <span class="nf">_read_join_ack</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;RegType_MPTCPOption&#39;</span><span class="p">,</span> <span class="n">dlen</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
                        <span class="n">bits</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_MPTCPJoinACK&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
-        <span class="sd">&quot;&quot;&quot;Read Join Connection option for Third ACK.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read Join Connection option for Third ACK.</span>
 
 <span class="sd">        Structure of ``MP_JOIN-ACK`` [:rfc:`6824`]:</span>
 
@@ -1567,7 +1567,7 @@
 
 <div class="viewcode-block" id="TCP._read_mptcp_dss"><a class="viewcode-back" href="../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP._read_mptcp_dss">[docs]</a>    <span class="k">def</span> <span class="nf">_read_mptcp_dss</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;RegType_MPTCPOption&#39;</span><span class="p">,</span> <span class="n">dlen</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
                         <span class="n">bits</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_MPTCPDSS&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
-        <span class="sd">&quot;&quot;&quot;Read Data Sequence Signal (Data ACK and Data Sequence Mapping) option.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read Data Sequence Signal (Data ACK and Data Sequence Mapping) option.</span>
 
 <span class="sd">        Structure of ``DSS`` [:rfc:`6824`]:</span>
 
@@ -1634,7 +1634,7 @@
 
 <div class="viewcode-block" id="TCP._read_mptcp_addaddr"><a class="viewcode-back" href="../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP._read_mptcp_addaddr">[docs]</a>    <span class="k">def</span> <span class="nf">_read_mptcp_addaddr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;RegType_MPTCPOption&#39;</span><span class="p">,</span> <span class="n">dlen</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
                             <span class="n">bits</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_MPTCPAddAddress&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
-        <span class="sd">&quot;&quot;&quot;Read Add Address option.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read Add Address option.</span>
 
 <span class="sd">        Structure of ``ADD_ADDR`` [:rfc:`6824`]:</span>
 
@@ -1690,7 +1690,7 @@
 
 <div class="viewcode-block" id="TCP._read_mptcp_remove"><a class="viewcode-back" href="../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP._read_mptcp_remove">[docs]</a>    <span class="k">def</span> <span class="nf">_read_mptcp_remove</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;RegType_MPTCPOption&#39;</span><span class="p">,</span> <span class="n">dlen</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
                            <span class="n">bits</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_MPTCPRemoveAddress&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
-        <span class="sd">&quot;&quot;&quot;Read Remove Address option.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read Remove Address option.</span>
 
 <span class="sd">        Structure of ``REMOVE_ADDR`` [:rfc:`6824`]:</span>
 
@@ -1734,7 +1734,7 @@
 
 <div class="viewcode-block" id="TCP._read_mptcp_prio"><a class="viewcode-back" href="../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP._read_mptcp_prio">[docs]</a>    <span class="k">def</span> <span class="nf">_read_mptcp_prio</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;RegType_MPTCPOption&#39;</span><span class="p">,</span> <span class="n">dlen</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
                          <span class="n">bits</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_MPTCPPriority&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
-        <span class="sd">&quot;&quot;&quot;Read Change Subflow Priority option.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read Change Subflow Priority option.</span>
 
 <span class="sd">        Structure of ``MP_PRIO`` [RFC 6824]:</span>
 
@@ -1775,7 +1775,7 @@
 
 <div class="viewcode-block" id="TCP._read_mptcp_fail"><a class="viewcode-back" href="../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP._read_mptcp_fail">[docs]</a>    <span class="k">def</span> <span class="nf">_read_mptcp_fail</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;RegType_MPTCPOption&#39;</span><span class="p">,</span> <span class="n">dlen</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
                          <span class="n">bits</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_MPTCPFallback&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
-        <span class="sd">&quot;&quot;&quot;Read Fallback option.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read Fallback option.</span>
 
 <span class="sd">        Structure of ``MP_FAIL`` [:rfc:`6824`]:</span>
 
@@ -1821,7 +1821,7 @@
 
 <div class="viewcode-block" id="TCP._read_mptcp_fastclose"><a class="viewcode-back" href="../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP._read_mptcp_fastclose">[docs]</a>    <span class="k">def</span> <span class="nf">_read_mptcp_fastclose</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;RegType_MPTCPOption&#39;</span><span class="p">,</span> <span class="n">dlen</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
                               <span class="n">bits</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_MPTCPFastclose&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
-        <span class="sd">&quot;&quot;&quot;Read Fast Close option.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read Fast Close option.</span>
 
 <span class="sd">        Structure of ``MP_FASTCLOSE`` [RFC 6824]:</span>
 
@@ -1866,7 +1866,7 @@
         <span class="k">return</span> <span class="n">data</span></div>
 
 <div class="viewcode-block" id="TCP._read_mode_fastopen"><a class="viewcode-back" href="../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP._read_mode_fastopen">[docs]</a>    <span class="k">def</span> <span class="nf">_read_mode_fastopen</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;RegType_Option&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_FastOpenCookie&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
-        <span class="sd">&quot;&quot;&quot;Read Fast Open option.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read Fast Open option.</span>
 
 <span class="sd">        Structure of TCP ``FASTOPEN`` [:rfc:`7413`]:</span>
 
@@ -1966,7 +1966,7 @@
       <div class="clearer"></div>
     </div>
     <div class="footer">
-      &copy;2017-2022, Jarry Shaw.
+      &copy;2017-2023, Jarry Shaw.
       
     </div>
 

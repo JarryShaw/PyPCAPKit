@@ -84,7 +84,7 @@
 
 
 <div class="viewcode-block" id="stacklevel"><a class="viewcode-back" href="../../../pcapkit/utilities/exceptions.html#pcapkit.utilities.exceptions.stacklevel">[docs]</a><span class="k">def</span> <span class="nf">stacklevel</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="s1">&#39;int&#39;</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Fetch current stack level.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Fetch current stack level.</span>
 
 <span class="sd">    The function will walk through the straceback stack (:func:`traceback.extract_stack`),</span>
 <span class="sd">    and fetch the stack level where the path contains ``/pcapkit/``. So that it won&#39;t</span>
@@ -110,7 +110,7 @@
 
 
 <div class="viewcode-block" id="BaseError"><a class="viewcode-back" href="../../../pcapkit/utilities/exceptions.html#pcapkit.utilities.exceptions.BaseError">[docs]</a><span class="k">class</span> <span class="nc">BaseError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Base error class of all kinds.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Base error class of all kinds.</span>
 
 <span class="sd">    Important:</span>
 
@@ -149,83 +149,83 @@
 
 
 <div class="viewcode-block" id="DigitError"><a class="viewcode-back" href="../../../pcapkit/utilities/exceptions.html#pcapkit.utilities.exceptions.DigitError">[docs]</a><span class="k">class</span> <span class="nc">DigitError</span><span class="p">(</span><span class="n">BaseError</span><span class="p">,</span> <span class="ne">TypeError</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;The argument(s) must be (a) number(s).&quot;&quot;&quot;</span></div>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;The argument(s) must be (a) number(s).&quot;&quot;&quot;</span></div>
 
 
 <div class="viewcode-block" id="IntError"><a class="viewcode-back" href="../../../pcapkit/utilities/exceptions.html#pcapkit.utilities.exceptions.IntError">[docs]</a><span class="k">class</span> <span class="nc">IntError</span><span class="p">(</span><span class="n">BaseError</span><span class="p">,</span> <span class="ne">TypeError</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;The argument(s) must be integral.&quot;&quot;&quot;</span></div>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;The argument(s) must be integral.&quot;&quot;&quot;</span></div>
 
 
 <div class="viewcode-block" id="RealError"><a class="viewcode-back" href="../../../pcapkit/utilities/exceptions.html#pcapkit.utilities.exceptions.RealError">[docs]</a><span class="k">class</span> <span class="nc">RealError</span><span class="p">(</span><span class="n">BaseError</span><span class="p">,</span> <span class="ne">TypeError</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;The function is not defined for real number.&quot;&quot;&quot;</span></div>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;The function is not defined for real number.&quot;&quot;&quot;</span></div>
 
 
 <div class="viewcode-block" id="ComplexError"><a class="viewcode-back" href="../../../pcapkit/utilities/exceptions.html#pcapkit.utilities.exceptions.ComplexError">[docs]</a><span class="k">class</span> <span class="nc">ComplexError</span><span class="p">(</span><span class="n">BaseError</span><span class="p">,</span> <span class="ne">TypeError</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;The function is not defined for complex instance.&quot;&quot;&quot;</span></div>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;The function is not defined for complex instance.&quot;&quot;&quot;</span></div>
 
 
 <div class="viewcode-block" id="BytesError"><a class="viewcode-back" href="../../../pcapkit/utilities/exceptions.html#pcapkit.utilities.exceptions.BytesError">[docs]</a><span class="k">class</span> <span class="nc">BytesError</span><span class="p">(</span><span class="n">BaseError</span><span class="p">,</span> <span class="ne">TypeError</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;The argument(s) must be :obj:`bytes` type.&quot;&quot;&quot;</span></div>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;The argument(s) must be :obj:`bytes` type.&quot;&quot;&quot;</span></div>
 
 
 <div class="viewcode-block" id="BytearrayError"><a class="viewcode-back" href="../../../pcapkit/utilities/exceptions.html#pcapkit.utilities.exceptions.BytearrayError">[docs]</a><span class="k">class</span> <span class="nc">BytearrayError</span><span class="p">(</span><span class="n">BaseError</span><span class="p">,</span> <span class="ne">TypeError</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;The argument(s) must be :obj:`bytearray` type.&quot;&quot;&quot;</span></div>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;The argument(s) must be :obj:`bytearray` type.&quot;&quot;&quot;</span></div>
 
 
 <div class="viewcode-block" id="BoolError"><a class="viewcode-back" href="../../../pcapkit/utilities/exceptions.html#pcapkit.utilities.exceptions.BoolError">[docs]</a><span class="k">class</span> <span class="nc">BoolError</span><span class="p">(</span><span class="n">BaseError</span><span class="p">,</span> <span class="ne">TypeError</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;The argument(s) must be :obj:`bool` type.&quot;&quot;&quot;</span></div>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;The argument(s) must be :obj:`bool` type.&quot;&quot;&quot;</span></div>
 
 
 <div class="viewcode-block" id="StringError"><a class="viewcode-back" href="../../../pcapkit/utilities/exceptions.html#pcapkit.utilities.exceptions.StringError">[docs]</a><span class="k">class</span> <span class="nc">StringError</span><span class="p">(</span><span class="n">BaseError</span><span class="p">,</span> <span class="ne">TypeError</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;The argument(s) must be :obj:`str` type.&quot;&quot;&quot;</span></div>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;The argument(s) must be :obj:`str` type.&quot;&quot;&quot;</span></div>
 
 
 <div class="viewcode-block" id="DictError"><a class="viewcode-back" href="../../../pcapkit/utilities/exceptions.html#pcapkit.utilities.exceptions.DictError">[docs]</a><span class="k">class</span> <span class="nc">DictError</span><span class="p">(</span><span class="n">BaseError</span><span class="p">,</span> <span class="ne">TypeError</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;The argument(s) must be :obj:`dict` type.&quot;&quot;&quot;</span></div>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;The argument(s) must be :obj:`dict` type.&quot;&quot;&quot;</span></div>
 
 
 <div class="viewcode-block" id="ListError"><a class="viewcode-back" href="../../../pcapkit/utilities/exceptions.html#pcapkit.utilities.exceptions.ListError">[docs]</a><span class="k">class</span> <span class="nc">ListError</span><span class="p">(</span><span class="n">BaseError</span><span class="p">,</span> <span class="ne">TypeError</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;The argument(s) must be :obj:`list` type.&quot;&quot;&quot;</span></div>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;The argument(s) must be :obj:`list` type.&quot;&quot;&quot;</span></div>
 
 
 <div class="viewcode-block" id="TupleError"><a class="viewcode-back" href="../../../pcapkit/utilities/exceptions.html#pcapkit.utilities.exceptions.TupleError">[docs]</a><span class="k">class</span> <span class="nc">TupleError</span><span class="p">(</span><span class="n">BaseError</span><span class="p">,</span> <span class="ne">TypeError</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;The argument(s) must be :obj:`tuple` type.&quot;&quot;&quot;</span></div>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;The argument(s) must be :obj:`tuple` type.&quot;&quot;&quot;</span></div>
 
 
 <div class="viewcode-block" id="IterableError"><a class="viewcode-back" href="../../../pcapkit/utilities/exceptions.html#pcapkit.utilities.exceptions.IterableError">[docs]</a><span class="k">class</span> <span class="nc">IterableError</span><span class="p">(</span><span class="n">BaseError</span><span class="p">,</span> <span class="ne">TypeError</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;The argument(s) must be *iterable*.&quot;&quot;&quot;</span></div>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;The argument(s) must be *iterable*.&quot;&quot;&quot;</span></div>
 
 
 <div class="viewcode-block" id="CallableError"><a class="viewcode-back" href="../../../pcapkit/utilities/exceptions.html#pcapkit.utilities.exceptions.CallableError">[docs]</a><span class="k">class</span> <span class="nc">CallableError</span><span class="p">(</span><span class="n">BaseError</span><span class="p">,</span> <span class="ne">TypeError</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;The argument(s) must be *callable*.&quot;&quot;&quot;</span></div>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;The argument(s) must be *callable*.&quot;&quot;&quot;</span></div>
 
 
 <div class="viewcode-block" id="ProtocolUnbound"><a class="viewcode-back" href="../../../pcapkit/utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolUnbound">[docs]</a><span class="k">class</span> <span class="nc">ProtocolUnbound</span><span class="p">(</span><span class="n">BaseError</span><span class="p">,</span> <span class="ne">TypeError</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Protocol slice unbound.&quot;&quot;&quot;</span></div>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Protocol slice unbound.&quot;&quot;&quot;</span></div>
 
 
 <div class="viewcode-block" id="IOObjError"><a class="viewcode-back" href="../../../pcapkit/utilities/exceptions.html#pcapkit.utilities.exceptions.IOObjError">[docs]</a><span class="k">class</span> <span class="nc">IOObjError</span><span class="p">(</span><span class="n">BaseError</span><span class="p">,</span> <span class="ne">TypeError</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;The argument(s) must be *file-like object*.&quot;&quot;&quot;</span></div>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;The argument(s) must be *file-like object*.&quot;&quot;&quot;</span></div>
 
 
 <div class="viewcode-block" id="InfoError"><a class="viewcode-back" href="../../../pcapkit/utilities/exceptions.html#pcapkit.utilities.exceptions.InfoError">[docs]</a><span class="k">class</span> <span class="nc">InfoError</span><span class="p">(</span><span class="n">BaseError</span><span class="p">,</span> <span class="ne">TypeError</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;The argument(s) must be :class:`~pcapkit.corekit.infoclass.Info` instance.&quot;&quot;&quot;</span></div>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;The argument(s) must be :class:`~pcapkit.corekit.infoclass.Info` instance.&quot;&quot;&quot;</span></div>
 
 
 <div class="viewcode-block" id="IPError"><a class="viewcode-back" href="../../../pcapkit/utilities/exceptions.html#pcapkit.utilities.exceptions.IPError">[docs]</a><span class="k">class</span> <span class="nc">IPError</span><span class="p">(</span><span class="n">BaseError</span><span class="p">,</span> <span class="ne">TypeError</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;The argument(s) must be *IP address*.&quot;&quot;&quot;</span></div>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;The argument(s) must be *IP address*.&quot;&quot;&quot;</span></div>
 
 
 <div class="viewcode-block" id="EnumError"><a class="viewcode-back" href="../../../pcapkit/utilities/exceptions.html#pcapkit.utilities.exceptions.EnumError">[docs]</a><span class="k">class</span> <span class="nc">EnumError</span><span class="p">(</span><span class="n">BaseError</span><span class="p">,</span> <span class="ne">TypeError</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;The argument(s) must be *enumeration protocol* type.&quot;&quot;&quot;</span></div>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;The argument(s) must be *enumeration protocol* type.&quot;&quot;&quot;</span></div>
 
 
 <div class="viewcode-block" id="ComparisonError"><a class="viewcode-back" href="../../../pcapkit/utilities/exceptions.html#pcapkit.utilities.exceptions.ComparisonError">[docs]</a><span class="k">class</span> <span class="nc">ComparisonError</span><span class="p">(</span><span class="n">BaseError</span><span class="p">,</span> <span class="ne">TypeError</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Rich comparison not supported between instances.&quot;&quot;&quot;</span></div>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Rich comparison not supported between instances.&quot;&quot;&quot;</span></div>
 
 
 <div class="viewcode-block" id="RegistryError"><a class="viewcode-back" href="../../../pcapkit/utilities/exceptions.html#pcapkit.utilities.exceptions.RegistryError">[docs]</a><span class="k">class</span> <span class="nc">RegistryError</span><span class="p">(</span><span class="n">BaseError</span><span class="p">,</span> <span class="ne">TypeError</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;The argument(s) must be *registry* type.&quot;&quot;&quot;</span></div>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;The argument(s) must be *registry* type.&quot;&quot;&quot;</span></div>
 
 
 <span class="c1">##############################################################################</span>
@@ -234,11 +234,11 @@
 
 
 <div class="viewcode-block" id="FormatError"><a class="viewcode-back" href="../../../pcapkit/utilities/exceptions.html#pcapkit.utilities.exceptions.FormatError">[docs]</a><span class="k">class</span> <span class="nc">FormatError</span><span class="p">(</span><span class="n">BaseError</span><span class="p">,</span> <span class="ne">AttributeError</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Unknown format(s).&quot;&quot;&quot;</span></div>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Unknown format(s).&quot;&quot;&quot;</span></div>
 
 
 <div class="viewcode-block" id="UnsupportedCall"><a class="viewcode-back" href="../../../pcapkit/utilities/exceptions.html#pcapkit.utilities.exceptions.UnsupportedCall">[docs]</a><span class="k">class</span> <span class="nc">UnsupportedCall</span><span class="p">(</span><span class="n">BaseError</span><span class="p">,</span> <span class="ne">AttributeError</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Unsupported function or property call.&quot;&quot;&quot;</span></div>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Unsupported function or property call.&quot;&quot;&quot;</span></div>
 
 
 <span class="c1">##############################################################################</span>
@@ -247,7 +247,7 @@
 
 
 <div class="viewcode-block" id="FileError"><a class="viewcode-back" href="../../../pcapkit/utilities/exceptions.html#pcapkit.utilities.exceptions.FileError">[docs]</a><span class="k">class</span> <span class="nc">FileError</span><span class="p">(</span><span class="n">BaseError</span><span class="p">,</span> <span class="ne">IOError</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;[Errno 5] Wrong file format.&quot;&quot;&quot;</span></div>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;[Errno 5] Wrong file format.&quot;&quot;&quot;</span></div>
     <span class="c1"># args: errno, strerror, filename, winerror, filename2</span>
 
 
@@ -257,7 +257,7 @@
 
 
 <div class="viewcode-block" id="FileExists"><a class="viewcode-back" href="../../../pcapkit/utilities/exceptions.html#pcapkit.utilities.exceptions.FileExists">[docs]</a><span class="k">class</span> <span class="nc">FileExists</span><span class="p">(</span><span class="n">BaseError</span><span class="p">,</span> <span class="ne">FileExistsError</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;[Errno 17] File already exists.&quot;&quot;&quot;</span></div>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;[Errno 17] File already exists.&quot;&quot;&quot;</span></div>
     <span class="c1"># args: errno, strerror, filename, winerror, filename2</span>
 
 
@@ -267,7 +267,7 @@
 
 
 <div class="viewcode-block" id="FileNotFound"><a class="viewcode-back" href="../../../pcapkit/utilities/exceptions.html#pcapkit.utilities.exceptions.FileNotFound">[docs]</a><span class="k">class</span> <span class="nc">FileNotFound</span><span class="p">(</span><span class="n">BaseError</span><span class="p">,</span> <span class="ne">FileNotFoundError</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;[Errno 2] File not found.&quot;&quot;&quot;</span></div>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;[Errno 2] File not found.&quot;&quot;&quot;</span></div>
     <span class="c1"># args: errno, strerror, filename, winerror, filename2</span>
 
 
@@ -277,7 +277,7 @@
 
 
 <div class="viewcode-block" id="ProtocolNotFound"><a class="viewcode-back" href="../../../pcapkit/utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolNotFound">[docs]</a><span class="k">class</span> <span class="nc">ProtocolNotFound</span><span class="p">(</span><span class="n">BaseError</span><span class="p">,</span> <span class="ne">IndexError</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Protocol not found in ProtoChain.&quot;&quot;&quot;</span></div>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Protocol not found in ProtoChain.&quot;&quot;&quot;</span></div>
 
 
 <span class="c1">##############################################################################</span>
@@ -286,23 +286,23 @@
 
 
 <div class="viewcode-block" id="VersionError"><a class="viewcode-back" href="../../../pcapkit/utilities/exceptions.html#pcapkit.utilities.exceptions.VersionError">[docs]</a><span class="k">class</span> <span class="nc">VersionError</span><span class="p">(</span><span class="n">BaseError</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Unknown IP version.&quot;&quot;&quot;</span></div>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Unknown IP version.&quot;&quot;&quot;</span></div>
 
 
 <div class="viewcode-block" id="IndexNotFound"><a class="viewcode-back" href="../../../pcapkit/utilities/exceptions.html#pcapkit.utilities.exceptions.IndexNotFound">[docs]</a><span class="k">class</span> <span class="nc">IndexNotFound</span><span class="p">(</span><span class="n">BaseError</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Protocol not in ProtoChain.&quot;&quot;&quot;</span></div>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Protocol not in ProtoChain.&quot;&quot;&quot;</span></div>
 
 
 <div class="viewcode-block" id="ProtocolError"><a class="viewcode-back" href="../../../pcapkit/utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError">[docs]</a><span class="k">class</span> <span class="nc">ProtocolError</span><span class="p">(</span><span class="n">BaseError</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Invalid protocol format.&quot;&quot;&quot;</span></div>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Invalid protocol format.&quot;&quot;&quot;</span></div>
 
 
 <div class="viewcode-block" id="EndianError"><a class="viewcode-back" href="../../../pcapkit/utilities/exceptions.html#pcapkit.utilities.exceptions.EndianError">[docs]</a><span class="k">class</span> <span class="nc">EndianError</span><span class="p">(</span><span class="n">BaseError</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Invalid endian (byte order).&quot;&quot;&quot;</span></div>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Invalid endian (byte order).&quot;&quot;&quot;</span></div>
 
 
 <div class="viewcode-block" id="KeyExists"><a class="viewcode-back" href="../../../pcapkit/utilities/exceptions.html#pcapkit.utilities.exceptions.KeyExists">[docs]</a><span class="k">class</span> <span class="nc">KeyExists</span><span class="p">(</span><span class="n">BaseError</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Key already exists.&quot;&quot;&quot;</span></div>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Key already exists.&quot;&quot;&quot;</span></div>
 
 
 <span class="c1">##############################################################################</span>
@@ -311,11 +311,11 @@
 
 
 <div class="viewcode-block" id="ProtocolNotImplemented"><a class="viewcode-back" href="../../../pcapkit/utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolNotImplemented">[docs]</a><span class="k">class</span> <span class="nc">ProtocolNotImplemented</span><span class="p">(</span><span class="n">BaseError</span><span class="p">,</span> <span class="ne">NotImplementedError</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Protocol not implemented.&quot;&quot;&quot;</span></div>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Protocol not implemented.&quot;&quot;&quot;</span></div>
 
 
 <div class="viewcode-block" id="VendorNotImplemented"><a class="viewcode-back" href="../../../pcapkit/utilities/exceptions.html#pcapkit.utilities.exceptions.VendorNotImplemented">[docs]</a><span class="k">class</span> <span class="nc">VendorNotImplemented</span><span class="p">(</span><span class="n">BaseError</span><span class="p">,</span> <span class="ne">NotImplementedError</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Vendor not implemented.&quot;&quot;&quot;</span></div>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Vendor not implemented.&quot;&quot;&quot;</span></div>
 
 
 <span class="c1">##############################################################################</span>
@@ -324,7 +324,7 @@
 
 
 <div class="viewcode-block" id="StructError"><a class="viewcode-back" href="../../../pcapkit/utilities/exceptions.html#pcapkit.utilities.exceptions.StructError">[docs]</a><span class="k">class</span> <span class="nc">StructError</span><span class="p">(</span><span class="n">BaseError</span><span class="p">,</span> <span class="n">struct</span><span class="o">.</span><span class="n">error</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Unpack failed.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Unpack failed.&quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">,</span> <span class="n">eof</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">eof</span> <span class="o">=</span> <span class="n">eof</span>
@@ -337,15 +337,15 @@
 
 
 <div class="viewcode-block" id="MissingKeyError"><a class="viewcode-back" href="../../../pcapkit/utilities/exceptions.html#pcapkit.utilities.exceptions.MissingKeyError">[docs]</a><span class="k">class</span> <span class="nc">MissingKeyError</span><span class="p">(</span><span class="n">BaseError</span><span class="p">,</span> <span class="ne">KeyError</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Key not found.&quot;&quot;&quot;</span></div>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Key not found.&quot;&quot;&quot;</span></div>
 
 
 <div class="viewcode-block" id="FragmentError"><a class="viewcode-back" href="../../../pcapkit/utilities/exceptions.html#pcapkit.utilities.exceptions.FragmentError">[docs]</a><span class="k">class</span> <span class="nc">FragmentError</span><span class="p">(</span><span class="n">BaseError</span><span class="p">,</span> <span class="ne">KeyError</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Invalid fragment dict.&quot;&quot;&quot;</span></div>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Invalid fragment dict.&quot;&quot;&quot;</span></div>
 
 
 <div class="viewcode-block" id="PacketError"><a class="viewcode-back" href="../../../pcapkit/utilities/exceptions.html#pcapkit.utilities.exceptions.PacketError">[docs]</a><span class="k">class</span> <span class="nc">PacketError</span><span class="p">(</span><span class="n">BaseError</span><span class="p">,</span> <span class="ne">KeyError</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Invalid packet dict.&quot;&quot;&quot;</span></div>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Invalid packet dict.&quot;&quot;&quot;</span></div>
 
 
 <span class="c1">##############################################################################</span>
@@ -354,7 +354,7 @@
 
 
 <div class="viewcode-block" id="ModuleNotFound"><a class="viewcode-back" href="../../../pcapkit/utilities/exceptions.html#pcapkit.utilities.exceptions.ModuleNotFound">[docs]</a><span class="k">class</span> <span class="nc">ModuleNotFound</span><span class="p">(</span><span class="n">BaseError</span><span class="p">,</span> <span class="ne">ModuleNotFoundError</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Module not found.&quot;&quot;&quot;</span></div>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Module not found.&quot;&quot;&quot;</span></div>
     <span class="c1"># kwargs: name, path</span>
 </pre></div>
 
@@ -419,7 +419,7 @@
       <div class="clearer"></div>
     </div>
     <div class="footer">
-      &copy;2017-2022, Jarry Shaw.
+      &copy;2017-2023, Jarry Shaw.
       
     </div>
 

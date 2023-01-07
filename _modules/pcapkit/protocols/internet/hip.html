@@ -183,7 +183,7 @@
 
 
 <div class="viewcode-block" id="HIP"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.internet.hip.HIP">[docs]</a><span class="k">class</span> <span class="nc">HIP</span><span class="p">(</span><span class="n">Internet</span><span class="p">[</span><span class="n">DataType_HIP</span><span class="p">]):</span>
-    <span class="sd">&quot;&quot;&quot;This class implements Host Identity Protocol.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;This class implements Host Identity Protocol.</span>
 
 <span class="sd">    This class currently supports parsing of the following HIP parameters,</span>
 <span class="sd">    which are directly mapped to the :class:`pcapkit.const.hip.parameter.Parameter`</span>
@@ -299,22 +299,22 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Literal[&quot;Host Identity Protocol&quot;]&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Name of current protocol.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Name of current protocol.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="s1">&#39;Host Identity Protocol&#39;</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">alias</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;str&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Acronym of corresponding protocol.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Acronym of corresponding protocol.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;HIPv</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_info</span><span class="o">.</span><span class="n">version</span><span class="si">}</span><span class="s1">&#39;</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">length</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;int&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Header length of current protocol.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Header length of current protocol.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_info</span><span class="o">.</span><span class="n">length</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">payload</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Protocol | NoReturn&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Payload of current instance.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Payload of current instance.</span>
 
 <span class="sd">        Raises:</span>
 <span class="sd">            UnsupportedCall: if the protocol is used as an IPv6 extension header</span>
@@ -327,7 +327,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">protocol</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Optional[str] | NoReturn&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Name of next layer protocol (if any).</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Name of next layer protocol (if any).</span>
 
 <span class="sd">        Raises:</span>
 <span class="sd">            UnsupportedCall: if the protocol is used as an IPv6 extension header</span>
@@ -339,7 +339,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">protochain</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;ProtoChain | NoReturn&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Protocol chain of current instance.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Protocol chain of current instance.</span>
 
 <span class="sd">        Raises:</span>
 <span class="sd">            UnsupportedCall: if the protocol is used as an IPv6 extension header</span>
@@ -354,7 +354,7 @@
     <span class="c1">##########################################################################</span>
 
 <div class="viewcode-block" id="HIP.read"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.internet.hip.HIP.read">[docs]</a>    <span class="k">def</span> <span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">extension</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_HIP&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=arguments-differ,unused-argument</span>
-        <span class="sd">&quot;&quot;&quot;Read Host Identity Protocol.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read Host Identity Protocol.</span>
 
 <span class="sd">        Structure of HIP header [:rfc:`5201`][:rfc:`7401`]:</span>
 
@@ -435,7 +435,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_decode_next_layer</span><span class="p">(</span><span class="n">hip</span><span class="p">,</span> <span class="n">_next</span><span class="p">,</span> <span class="n">length</span> <span class="o">-</span> <span class="n">hip</span><span class="o">.</span><span class="n">length</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="HIP.make"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.internet.hip.HIP.make">[docs]</a>    <span class="k">def</span> <span class="nf">make</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;NoReturn&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Make (construct) packet data.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Make (construct) packet data.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
@@ -459,7 +459,7 @@
 
 <div class="viewcode-block" id="HIP.__post_init__"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.internet.hip.HIP.__post_init__">[docs]</a>    <span class="k">def</span> <span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file</span><span class="p">:</span> <span class="s1">&#39;Optional[BinaryIO]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>  <span class="c1"># pylint: disable=arguments-differ</span>
                       <span class="n">extension</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Post initialisation hook.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Post initialisation hook.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            file: Source packet stream.</span>
@@ -478,12 +478,12 @@
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__post_init__</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="n">extension</span><span class="o">=</span><span class="n">extension</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>  <span class="c1"># type: ignore[arg-type]</span></div>
 
     <span class="k">def</span> <span class="fm">__length_hint__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Literal[40]&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Return an estimated length for the object.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return an estimated length for the object.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="mi">40</span>
 
 <div class="viewcode-block" id="HIP.__index__"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.internet.hip.HIP.__index__">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="fm">__index__</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;RegType_TransType&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=invalid-index-returned</span>
-        <span class="sd">&quot;&quot;&quot;Numeral registry index of the protocol.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Numeral registry index of the protocol.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            Numeral registry index of the protocol in `IANA`_.</span>
@@ -498,7 +498,7 @@
     <span class="c1">##########################################################################</span>
 
 <div class="viewcode-block" id="HIP._read_hip_param"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.internet.hip.HIP._read_hip_param">[docs]</a>    <span class="k">def</span> <span class="nf">_read_hip_param</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">version</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Parameter&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=line-too-long</span>
-        <span class="sd">&quot;&quot;&quot;Read HIP parameters.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read HIP parameters.</span>
 
 <span class="sd">        Arguments:</span>
 <span class="sd">            length: length of parameters</span>
@@ -548,7 +548,7 @@
 <div class="viewcode-block" id="HIP._read_param_unassigned"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.internet.hip.HIP._read_param_unassigned">[docs]</a>    <span class="k">def</span> <span class="nf">_read_param_unassigned</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">cbit</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span><span class="p">,</span> <span class="n">clen</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>  <span class="c1"># pylint: disable=unused-argument</span>
                                <span class="n">desc</span><span class="p">:</span> <span class="s1">&#39;RegType_Parameter&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">version</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span>  <span class="c1"># pylint: disable=unused-argument</span>
                                <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Parameter&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_UnassignedParameter&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
-        <span class="sd">&quot;&quot;&quot;Read HIP unassigned parameters.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read HIP unassigned parameters.</span>
 
 <span class="sd">        Structure of HIP unassigned parameters [:rfc:`5201`][:rfc:`7401`]:</span>
 
@@ -594,7 +594,7 @@
 <div class="viewcode-block" id="HIP._read_param_esp_info"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.internet.hip.HIP._read_param_esp_info">[docs]</a>    <span class="k">def</span> <span class="nf">_read_param_esp_info</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">cbit</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span><span class="p">,</span> <span class="n">clen</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
                              <span class="n">desc</span><span class="p">:</span> <span class="s1">&#39;RegType_Parameter&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">version</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span>  <span class="c1"># pylint: disable=unused-argument</span>
                              <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Parameter&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_ESPInfoParameter&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
-        <span class="sd">&quot;&quot;&quot;Read HIP ``ESP_INFO`` parameter.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read HIP ``ESP_INFO`` parameter.</span>
 
 <span class="sd">        Structure of HIP ``ESP_INFO`` parameter [:rfc:`7402`]:</span>
 
@@ -650,7 +650,7 @@
 <div class="viewcode-block" id="HIP._read_param_r1_counter"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.internet.hip.HIP._read_param_r1_counter">[docs]</a>    <span class="k">def</span> <span class="nf">_read_param_r1_counter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">cbit</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span><span class="p">,</span> <span class="n">clen</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
                                <span class="n">desc</span><span class="p">:</span> <span class="s1">&#39;RegType_Parameter&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">version</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span>  <span class="c1"># pylint: disable=unused-argument</span>
                                <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Parameter&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_R1CounterParameter&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
-        <span class="sd">&quot;&quot;&quot;Read HIP ``R1_COUNTER`` parameter.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read HIP ``R1_COUNTER`` parameter.</span>
 
 <span class="sd">        Structure of HIP ``R1_COUNTER`` parameter [:rfc:`5201`][:rfc:`7401`]:</span>
 
@@ -703,7 +703,7 @@
 <div class="viewcode-block" id="HIP._read_param_locator_set"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.internet.hip.HIP._read_param_locator_set">[docs]</a>    <span class="k">def</span> <span class="nf">_read_param_locator_set</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">cbit</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span><span class="p">,</span> <span class="n">clen</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
                                 <span class="n">desc</span><span class="p">:</span> <span class="s1">&#39;RegType_Parameter&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">version</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span>  <span class="c1"># pylint: disable=unused-argument</span>
                                 <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Parameter&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_LocatorSetParameter&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
-        <span class="sd">&quot;&quot;&quot;Read HIP ``LOCATOR_SET`` parameter.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read HIP ``LOCATOR_SET`` parameter.</span>
 
 <span class="sd">        Structure of HIP ``LOCATOR_SET`` parameter [:rfc:`8046`]:</span>
 
@@ -753,7 +753,7 @@
 
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">def</span> <span class="nf">_read_locator</span><span class="p">(</span><span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">size</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_LocatorData | IPv4Address&#39;</span><span class="p">:</span>
-            <span class="sd">&quot;&quot;&quot;Parse locator data.</span>
+<span class="w">            </span><span class="sd">&quot;&quot;&quot;Parse locator data.</span>
 
 <span class="sd">            Args:</span>
 <span class="sd">                kind: locator type</span>
@@ -812,7 +812,7 @@
 <div class="viewcode-block" id="HIP._read_param_puzzle"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.internet.hip.HIP._read_param_puzzle">[docs]</a>    <span class="k">def</span> <span class="nf">_read_param_puzzle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">cbit</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span><span class="p">,</span> <span class="n">clen</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
                            <span class="n">desc</span><span class="p">:</span> <span class="s1">&#39;RegType_Parameter&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">version</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span>
                            <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Parameter&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_PuzzleParameter&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
-        <span class="sd">&quot;&quot;&quot;Read HIP ``PUZZLE`` parameter.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read HIP ``PUZZLE`` parameter.</span>
 
 <span class="sd">        Structure of HIP ``PUZZLE`` parameter [:rfc:`5201`][:rfc:`7401`]:</span>
 
@@ -872,7 +872,7 @@
 <div class="viewcode-block" id="HIP._read_param_solution"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.internet.hip.HIP._read_param_solution">[docs]</a>    <span class="k">def</span> <span class="nf">_read_param_solution</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">cbit</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span><span class="p">,</span> <span class="n">clen</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
                              <span class="n">desc</span><span class="p">:</span> <span class="s1">&#39;RegType_Parameter&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">version</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span>
                              <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Parameter&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_SolutionParameter&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
-        <span class="sd">&quot;&quot;&quot;Read HIP ``SOLUTION`` parameter.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read HIP ``SOLUTION`` parameter.</span>
 
 <span class="sd">        Structure of HIP ``SOLUTION`` parameter [:rfc:`5201`][:rfc:`7401`]:</span>
 
@@ -941,7 +941,7 @@
 <div class="viewcode-block" id="HIP._read_param_seq"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.internet.hip.HIP._read_param_seq">[docs]</a>    <span class="k">def</span> <span class="nf">_read_param_seq</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">cbit</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span><span class="p">,</span> <span class="n">clen</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
                         <span class="n">desc</span><span class="p">:</span> <span class="s1">&#39;RegType_Parameter&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">version</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span>  <span class="c1"># pylint: disable=unused-argument</span>
                         <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Parameter&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_SEQParameter&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
-        <span class="sd">&quot;&quot;&quot;Read HIP ``SEQ`` parameter.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read HIP ``SEQ`` parameter.</span>
 
 <span class="sd">        Structure of HIP ``SEQ`` parameter [:rfc:`7401`]:</span>
 
@@ -988,7 +988,7 @@
 <div class="viewcode-block" id="HIP._read_param_ack"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.internet.hip.HIP._read_param_ack">[docs]</a>    <span class="k">def</span> <span class="nf">_read_param_ack</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">cbit</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span><span class="p">,</span> <span class="n">clen</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
                         <span class="n">desc</span><span class="p">:</span> <span class="s1">&#39;RegType_Parameter&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">version</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span>  <span class="c1"># pylint: disable=unused-argument</span>
                         <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Parameter&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_ACKParameter&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
-        <span class="sd">&quot;&quot;&quot;Read HIP ``ACK`` parameter.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read HIP ``ACK`` parameter.</span>
 
 <span class="sd">        Structure of HIP ``ACK`` parameter [:rfc:`7401`]:</span>
 
@@ -1039,7 +1039,7 @@
 <div class="viewcode-block" id="HIP._read_param_dh_group_list"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.internet.hip.HIP._read_param_dh_group_list">[docs]</a>    <span class="k">def</span> <span class="nf">_read_param_dh_group_list</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">cbit</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span><span class="p">,</span> <span class="n">clen</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>  <span class="c1"># pylint: disable=unused-argument</span>
                                   <span class="n">desc</span><span class="p">:</span> <span class="s1">&#39;RegType_Parameter&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">version</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span>  <span class="c1"># pylint: disable=unused-argument</span>
                                   <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Parameter&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_DHGroupListParameter&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
-        <span class="sd">&quot;&quot;&quot;Read HIP ``DH_GROUP_LIST`` parameter.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read HIP ``DH_GROUP_LIST`` parameter.</span>
 
 <span class="sd">        Structure of HIP ``DH_GROUP_LIST`` parameter [:rfc:`7401`]:</span>
 
@@ -1088,7 +1088,7 @@
 <div class="viewcode-block" id="HIP._read_param_diffie_hellman"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.internet.hip.HIP._read_param_diffie_hellman">[docs]</a>    <span class="k">def</span> <span class="nf">_read_param_diffie_hellman</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">cbit</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span><span class="p">,</span> <span class="n">clen</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>  <span class="c1"># pylint: disable=unused-argument</span>
                                    <span class="n">desc</span><span class="p">:</span> <span class="s1">&#39;RegType_Parameter&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">version</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span>  <span class="c1"># pylint: disable=unused-argument</span>
                                    <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Parameter&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_DeffieHellmanParameter&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
-        <span class="sd">&quot;&quot;&quot;Read HIP ``DIFFIE_HELLMAN`` parameter.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read HIP ``DIFFIE_HELLMAN`` parameter.</span>
 
 <span class="sd">        Structure of HIP ``DIFFIE_HELLMAN`` parameter [:rfc:`7401`]:</span>
 
@@ -1141,7 +1141,7 @@
 <div class="viewcode-block" id="HIP._read_param_hip_transform"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.internet.hip.HIP._read_param_hip_transform">[docs]</a>    <span class="k">def</span> <span class="nf">_read_param_hip_transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">cbit</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span><span class="p">,</span> <span class="n">clen</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
                                   <span class="n">desc</span><span class="p">:</span> <span class="s1">&#39;RegType_Parameter&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">version</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span>
                                   <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Parameter&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_HIPTransformParameter&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
-        <span class="sd">&quot;&quot;&quot;Read HIP ``HIP_TRANSFORM`` parameter.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read HIP ``HIP_TRANSFORM`` parameter.</span>
 
 <span class="sd">        Structure of HIP ``HIP_TRANSFORM`` parameter [:rfc:`5201`]:</span>
 
@@ -1198,7 +1198,7 @@
 <div class="viewcode-block" id="HIP._read_param_hip_cipher"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.internet.hip.HIP._read_param_hip_cipher">[docs]</a>    <span class="k">def</span> <span class="nf">_read_param_hip_cipher</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">cbit</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span><span class="p">,</span> <span class="n">clen</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>  <span class="c1"># pylint: disable=unused-argument</span>
                                <span class="n">desc</span><span class="p">:</span> <span class="s1">&#39;RegType_Parameter&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">version</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span>
                                <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Parameter&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_HIPCipherParameter&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
-        <span class="sd">&quot;&quot;&quot;Read HIP ``HIP_CIPHER`` parameter.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read HIP ``HIP_CIPHER`` parameter.</span>
 
 <span class="sd">        Structure of HIP ``HIP_CIPHER`` parameter [:rfc:`7401`]:</span>
 
@@ -1258,7 +1258,7 @@
 <div class="viewcode-block" id="HIP._read_param_nat_traversal_mode"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.internet.hip.HIP._read_param_nat_traversal_mode">[docs]</a>    <span class="k">def</span> <span class="nf">_read_param_nat_traversal_mode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">cbit</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span><span class="p">,</span> <span class="n">clen</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>  <span class="c1"># pylint: disable=unused-argument</span>
                                        <span class="n">desc</span><span class="p">:</span> <span class="s1">&#39;RegType_Parameter&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">version</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span>  <span class="c1"># pylint: disable=unused-argument</span>
                                        <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Parameter&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_NATTraversalModeParameter&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument,line-too-long</span>
-        <span class="sd">&quot;&quot;&quot;Read HIP ``NAT_TRAVERSAL_MODE`` parameter.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read HIP ``NAT_TRAVERSAL_MODE`` parameter.</span>
 
 <span class="sd">        Structure of HIP ``NAT_TRAVERSAL_MODE`` parameter [:rfc:`5770`]:</span>
 
@@ -1316,7 +1316,7 @@
 <div class="viewcode-block" id="HIP._read_param_transaction_pacing"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.internet.hip.HIP._read_param_transaction_pacing">[docs]</a>    <span class="k">def</span> <span class="nf">_read_param_transaction_pacing</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">cbit</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span><span class="p">,</span> <span class="n">clen</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
                                        <span class="n">desc</span><span class="p">:</span> <span class="s1">&#39;RegType_Parameter&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">version</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span>  <span class="c1"># pylint: disable=unused-argument</span>
                                        <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Parameter&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_TransactionPacingParameter&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument,line-too-long</span>
-        <span class="sd">&quot;&quot;&quot;Read HIP ``TRANSACTION_PACING`` parameter.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read HIP ``TRANSACTION_PACING`` parameter.</span>
 
 <span class="sd">        Structure of HIP ``TRANSACTION_PACING`` parameter [:rfc:`5770`]:</span>
 
@@ -1363,7 +1363,7 @@
 <div class="viewcode-block" id="HIP._read_param_encrypted"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.internet.hip.HIP._read_param_encrypted">[docs]</a>    <span class="k">def</span> <span class="nf">_read_param_encrypted</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">cbit</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span><span class="p">,</span> <span class="n">clen</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>  <span class="c1"># pylint: disable=unused-argument</span>
                               <span class="n">desc</span><span class="p">:</span> <span class="s1">&#39;RegType_Parameter&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">version</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span>  <span class="c1"># pylint: disable=unused-argument</span>
                               <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Parameter&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_EncryptedParameter&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
-        <span class="sd">&quot;&quot;&quot;Read HIP ``ENCRYPTED`` parameter.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read HIP ``ENCRYPTED`` parameter.</span>
 
 <span class="sd">        Structure of HIP ``ENCRYPTED`` parameter [:rfc:`7401`]:</span>
 
@@ -1418,7 +1418,7 @@
 <div class="viewcode-block" id="HIP._read_param_host_id"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.internet.hip.HIP._read_param_host_id">[docs]</a>    <span class="k">def</span> <span class="nf">_read_param_host_id</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">cbit</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span><span class="p">,</span> <span class="n">clen</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>  <span class="c1"># pylint: disable=unused-argument</span>
                             <span class="n">desc</span><span class="p">:</span> <span class="s1">&#39;RegType_Parameter&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">version</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span>  <span class="c1"># pylint: disable=unused-argument</span>
                             <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Parameter&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_HostIDParameter&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
-        <span class="sd">&quot;&quot;&quot;Read HIP ``HOST_ID`` parameter.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read HIP ``HOST_ID`` parameter.</span>
 
 <span class="sd">        Structure of HIP ``HOST_ID`` parameter [:rfc:`7401`]:</span>
 
@@ -1452,7 +1452,7 @@
 
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">def</span> <span class="nf">_read_host_identity</span><span class="p">(</span><span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;tuple[RegType_HIAlgorithm, DataType_HostIdentity | bytes]&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=line-too-long</span>
-            <span class="sd">&quot;&quot;&quot;Read host identity.</span>
+<span class="w">            </span><span class="sd">&quot;&quot;&quot;Read host identity.</span>
 
 <span class="sd">            Args:</span>
 <span class="sd">                length: length of host identity</span>
@@ -1481,7 +1481,7 @@
             <span class="k">return</span> <span class="n">algorithm</span><span class="p">,</span> <span class="n">host_id</span>
 
         <span class="k">def</span> <span class="nf">_read_domain_identifier</span><span class="p">(</span><span class="n">di_data</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;tuple[RegType_DITypes, int, bytes]&#39;</span><span class="p">:</span>
-            <span class="sd">&quot;&quot;&quot;Read domain identifier.</span>
+<span class="w">            </span><span class="sd">&quot;&quot;&quot;Read domain identifier.</span>
 
 <span class="sd">            Args:</span>
 <span class="sd">                di_data: bit string of DI information byte</span>
@@ -1522,7 +1522,7 @@
 <div class="viewcode-block" id="HIP._read_param_hit_suite_list"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.internet.hip.HIP._read_param_hit_suite_list">[docs]</a>    <span class="k">def</span> <span class="nf">_read_param_hit_suite_list</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">cbit</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span><span class="p">,</span> <span class="n">clen</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>  <span class="c1"># pylint: disable=unused-argument</span>
                                    <span class="n">desc</span><span class="p">:</span> <span class="s1">&#39;RegType_Parameter&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">version</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span>  <span class="c1"># pylint: disable=unused-argument</span>
                                    <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Parameter&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_HITSuiteParameter&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
-        <span class="sd">&quot;&quot;&quot;Read HIP ``HIT_SUITE_LIST`` parameter.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read HIP ``HIT_SUITE_LIST`` parameter.</span>
 
 <span class="sd">        Structure of HIP ``HIT_SUITE_LIST`` parameter [:rfc:`7401`]:</span>
 
@@ -1571,7 +1571,7 @@
 <div class="viewcode-block" id="HIP._read_param_cert"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.internet.hip.HIP._read_param_cert">[docs]</a>    <span class="k">def</span> <span class="nf">_read_param_cert</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">cbit</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span><span class="p">,</span> <span class="n">clen</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>  <span class="c1"># pylint: disable=unused-argument</span>
                          <span class="n">desc</span><span class="p">:</span> <span class="s1">&#39;RegType_Parameter&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">version</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span>  <span class="c1"># pylint: disable=unused-argument</span>
                          <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Parameter&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_CertParameter&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
-        <span class="sd">&quot;&quot;&quot;Read HIP ``CERT`` parameter.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read HIP ``CERT`` parameter.</span>
 
 <span class="sd">        Structure of HIP ``CERT`` parameter [:rfc:`7401`]:</span>
 
@@ -1628,7 +1628,7 @@
 <div class="viewcode-block" id="HIP._read_param_notification"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.internet.hip.HIP._read_param_notification">[docs]</a>    <span class="k">def</span> <span class="nf">_read_param_notification</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">cbit</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span><span class="p">,</span> <span class="n">clen</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>  <span class="c1"># pylint: disable=unused-argument</span>
                                  <span class="n">desc</span><span class="p">:</span> <span class="s1">&#39;RegType_Parameter&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">version</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span>  <span class="c1"># pylint: disable=unused-argument</span>
                                  <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Parameter&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_NotificationParameter&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
-        <span class="sd">&quot;&quot;&quot;Read HIP ``NOTIFICATION`` parameter.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read HIP ``NOTIFICATION`` parameter.</span>
 
 <span class="sd">        Structure of HIP ``NOTIFICATION`` parameter [:rfc:`7401`]:</span>
 
@@ -1683,7 +1683,7 @@
 <div class="viewcode-block" id="HIP._read_param_echo_request_signed"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.internet.hip.HIP._read_param_echo_request_signed">[docs]</a>    <span class="k">def</span> <span class="nf">_read_param_echo_request_signed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">cbit</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span><span class="p">,</span> <span class="n">clen</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>  <span class="c1"># pylint: disable=unused-argument</span>
                                         <span class="n">desc</span><span class="p">:</span> <span class="s1">&#39;RegType_Parameter&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">version</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span>  <span class="c1"># pylint: disable=unused-argument</span>
                                         <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Parameter&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_EchoRequestSignedParameter&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
-        <span class="sd">&quot;&quot;&quot;Read HIP ``ECHO_REQUEST_SIGNED`` parameter.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read HIP ``ECHO_REQUEST_SIGNED`` parameter.</span>
 
 <span class="sd">        Structure of HIP ``ECHO_REQUEST_SIGNED`` parameter [:rfc:`7401`]:</span>
 
@@ -1728,7 +1728,7 @@
 <div class="viewcode-block" id="HIP._read_param_reg_info"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.internet.hip.HIP._read_param_reg_info">[docs]</a>    <span class="k">def</span> <span class="nf">_read_param_reg_info</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">cbit</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span><span class="p">,</span> <span class="n">clen</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>  <span class="c1"># pylint: disable=unused-argument</span>
                              <span class="n">desc</span><span class="p">:</span> <span class="s1">&#39;RegType_Parameter&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">version</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span>  <span class="c1"># pylint: disable=unused-argument</span>
                              <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Parameter&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_RegInfoParameter&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
-        <span class="sd">&quot;&quot;&quot;Read HIP ``REG_INFO`` parameter.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read HIP ``REG_INFO`` parameter.</span>
 
 <span class="sd">        Structure of HIP ``REG_INFO`` parameter [:rfc:`8003`]:</span>
 
@@ -1791,7 +1791,7 @@
 <div class="viewcode-block" id="HIP._read_param_reg_request"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.internet.hip.HIP._read_param_reg_request">[docs]</a>    <span class="k">def</span> <span class="nf">_read_param_reg_request</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">cbit</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span><span class="p">,</span> <span class="n">clen</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>  <span class="c1"># pylint: disable=unused-argument</span>
                                 <span class="n">desc</span><span class="p">:</span> <span class="s1">&#39;RegType_Parameter&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">version</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span>  <span class="c1"># pylint: disable=unused-argument</span>
                                 <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Parameter&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_RegRequestParameter&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
-        <span class="sd">&quot;&quot;&quot;Read HIP ``REG_REQUEST`` parameter.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read HIP ``REG_REQUEST`` parameter.</span>
 
 <span class="sd">        Structure of HIP ``REG_REQUEST`` parameter [:rfc:`8003`]:</span>
 
@@ -1854,7 +1854,7 @@
 <div class="viewcode-block" id="HIP._read_param_reg_response"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.internet.hip.HIP._read_param_reg_response">[docs]</a>    <span class="k">def</span> <span class="nf">_read_param_reg_response</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">cbit</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span><span class="p">,</span> <span class="n">clen</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>  <span class="c1"># pylint: disable=unused-argument</span>
                                  <span class="n">desc</span><span class="p">:</span> <span class="s1">&#39;RegType_Parameter&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">version</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span>  <span class="c1"># pylint: disable=unused-argument</span>
                                  <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Parameter&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_RegResponseParameter&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
-        <span class="sd">&quot;&quot;&quot;Read HIP ``REG_RESPONSE`` parameter.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read HIP ``REG_RESPONSE`` parameter.</span>
 
 <span class="sd">        Structure of HIP ``REG_RESPONSE`` parameter [:rfc:`8003`]:</span>
 
@@ -1917,7 +1917,7 @@
 <div class="viewcode-block" id="HIP._read_param_reg_failed"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.internet.hip.HIP._read_param_reg_failed">[docs]</a>    <span class="k">def</span> <span class="nf">_read_param_reg_failed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">cbit</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span><span class="p">,</span> <span class="n">clen</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>  <span class="c1"># pylint: disable=unused-argument</span>
                                <span class="n">desc</span><span class="p">:</span> <span class="s1">&#39;RegType_Parameter&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">version</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span>  <span class="c1"># pylint: disable=unused-argument</span>
                                <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Parameter&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_RegFailedParameter&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
-        <span class="sd">&quot;&quot;&quot;Read HIP ``REG_FAILED`` parameter.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read HIP ``REG_FAILED`` parameter.</span>
 
 <span class="sd">        Structure of HIP ``REG_FAILED`` parameter [:rfc:`8003`]:</span>
 
@@ -1980,7 +1980,7 @@
 <div class="viewcode-block" id="HIP._read_param_reg_from"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.internet.hip.HIP._read_param_reg_from">[docs]</a>    <span class="k">def</span> <span class="nf">_read_param_reg_from</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">cbit</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span><span class="p">,</span> <span class="n">clen</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>  <span class="c1"># pylint: disable=unused-argument</span>
                              <span class="n">desc</span><span class="p">:</span> <span class="s1">&#39;RegType_Parameter&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">version</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span>  <span class="c1"># pylint: disable=unused-argument</span>
                              <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Parameter&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_RegFromParameter&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
-        <span class="sd">&quot;&quot;&quot;Read HIP ``REG_FROM`` parameter.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read HIP ``REG_FROM`` parameter.</span>
 
 <span class="sd">        Structure of HIP ``REG_FROM`` parameter [:rfc:`5770`]:</span>
 
@@ -2037,7 +2037,7 @@
 <div class="viewcode-block" id="HIP._read_param_echo_response_signed"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.internet.hip.HIP._read_param_echo_response_signed">[docs]</a>    <span class="k">def</span> <span class="nf">_read_param_echo_response_signed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">cbit</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span><span class="p">,</span> <span class="n">clen</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>  <span class="c1"># pylint: disable=unused-argument</span>
                                          <span class="n">desc</span><span class="p">:</span> <span class="s1">&#39;RegType_Parameter&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">version</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span>  <span class="c1"># pylint: disable=unused-argument</span>
                                          <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Parameter&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_EchoResponseSignedParameter&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
-        <span class="sd">&quot;&quot;&quot;Read HIP ``ECHO_RESPONSE_SIGNED`` parameter.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read HIP ``ECHO_RESPONSE_SIGNED`` parameter.</span>
 
 <span class="sd">        Structure of HIP ``ECHO_RESPONSE_SIGNED`` parameter [:rfc:`7401`]:</span>
 
@@ -2082,7 +2082,7 @@
 <div class="viewcode-block" id="HIP._read_param_transport_format_list"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.internet.hip.HIP._read_param_transport_format_list">[docs]</a>    <span class="k">def</span> <span class="nf">_read_param_transport_format_list</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">cbit</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span><span class="p">,</span> <span class="n">clen</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>  <span class="c1"># pylint: disable=unused-argument</span>
                                           <span class="n">desc</span><span class="p">:</span> <span class="s1">&#39;RegType_Parameter&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">version</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span>  <span class="c1"># pylint: disable=unused-argument</span>
                                           <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Parameter&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_TransportFormatListParameter&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
-        <span class="sd">&quot;&quot;&quot;Read HIP ``TRANSPORT_FORMAT_LIST`` parameter.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read HIP ``TRANSPORT_FORMAT_LIST`` parameter.</span>
 
 <span class="sd">        Structure of HIP ``TRANSPORT_FORMAT_LIST`` parameter [:rfc:`7401`]:</span>
 
@@ -2137,7 +2137,7 @@
 <div class="viewcode-block" id="HIP._read_param_esp_transform"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.internet.hip.HIP._read_param_esp_transform">[docs]</a>    <span class="k">def</span> <span class="nf">_read_param_esp_transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">cbit</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span><span class="p">,</span> <span class="n">clen</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>  <span class="c1"># pylint: disable=unused-argument</span>
                                   <span class="n">desc</span><span class="p">:</span> <span class="s1">&#39;RegType_Parameter&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">version</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span>  <span class="c1"># pylint: disable=unused-argument</span>
                                   <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Parameter&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_ESPTransformParameter&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
-        <span class="sd">&quot;&quot;&quot;Read HIP ``ESP_TRANSFORM`` parameter.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read HIP ``ESP_TRANSFORM`` parameter.</span>
 
 <span class="sd">        Structure of HIP ``ESP_TRANSFORM`` parameter [:rfc:`7402`]:</span>
 
@@ -2196,7 +2196,7 @@
 <div class="viewcode-block" id="HIP._read_param_seq_data"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.internet.hip.HIP._read_param_seq_data">[docs]</a>    <span class="k">def</span> <span class="nf">_read_param_seq_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">cbit</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span><span class="p">,</span> <span class="n">clen</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>  <span class="c1"># pylint: disable=unused-argument</span>
                              <span class="n">desc</span><span class="p">:</span> <span class="s1">&#39;RegType_Parameter&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">version</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span>  <span class="c1"># pylint: disable=unused-argument</span>
                              <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Parameter&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_SeqDataParameter&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
-        <span class="sd">&quot;&quot;&quot;Read HIP ``SEQ_DATA`` parameter.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read HIP ``SEQ_DATA`` parameter.</span>
 
 <span class="sd">        Structure of HIP ``SEQ_DATA`` parameter [:rfc:`6078`]:</span>
 
@@ -2243,7 +2243,7 @@
 <div class="viewcode-block" id="HIP._read_param_ack_data"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.internet.hip.HIP._read_param_ack_data">[docs]</a>    <span class="k">def</span> <span class="nf">_read_param_ack_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">cbit</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span><span class="p">,</span> <span class="n">clen</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>  <span class="c1"># pylint: disable=unused-argument</span>
                              <span class="n">desc</span><span class="p">:</span> <span class="s1">&#39;RegType_Parameter&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">version</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span>  <span class="c1"># pylint: disable=unused-argument</span>
                              <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Parameter&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_AckDataParameter&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
-        <span class="sd">&quot;&quot;&quot;Read HIP ``ACK_DATA`` parameter.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read HIP ``ACK_DATA`` parameter.</span>
 
 <span class="sd">        Structure of HIP ``ACK_DATA`` parameter [:rfc:`6078`]:</span>
 
@@ -2293,7 +2293,7 @@
 <div class="viewcode-block" id="HIP._read_param_payload_mic"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.internet.hip.HIP._read_param_payload_mic">[docs]</a>    <span class="k">def</span> <span class="nf">_read_param_payload_mic</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">cbit</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span><span class="p">,</span> <span class="n">clen</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>  <span class="c1"># pylint: disable=unused-argument</span>
                                 <span class="n">desc</span><span class="p">:</span> <span class="s1">&#39;RegType_Parameter&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">version</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span>  <span class="c1"># pylint: disable=unused-argument</span>
                                 <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Parameter&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_PayloadMICParameter&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
-        <span class="sd">&quot;&quot;&quot;Read HIP ``PAYLOAD_MIC`` parameter.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read HIP ``PAYLOAD_MIC`` parameter.</span>
 
 <span class="sd">        Structure of HIP ``PAYLOAD_MIC`` parameter [:rfc:`6078`]:</span>
 
@@ -2350,7 +2350,7 @@
 <div class="viewcode-block" id="HIP._read_param_transaction_id"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.internet.hip.HIP._read_param_transaction_id">[docs]</a>    <span class="k">def</span> <span class="nf">_read_param_transaction_id</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">cbit</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span><span class="p">,</span> <span class="n">clen</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>  <span class="c1"># pylint: disable=unused-argument</span>
                                    <span class="n">desc</span><span class="p">:</span> <span class="s1">&#39;RegType_Parameter&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">version</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span>  <span class="c1"># pylint: disable=unused-argument</span>
                                    <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Parameter&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_TransactionIDParameter&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
-        <span class="sd">&quot;&quot;&quot;Read HIP ``TRANSACTION_ID`` parameter.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read HIP ``TRANSACTION_ID`` parameter.</span>
 
 <span class="sd">        Structure of HIP ``TRANSACTION_ID`` parameter [:rfc:`6078`]:</span>
 
@@ -2397,7 +2397,7 @@
 <div class="viewcode-block" id="HIP._read_param_overlay_id"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.internet.hip.HIP._read_param_overlay_id">[docs]</a>    <span class="k">def</span> <span class="nf">_read_param_overlay_id</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">cbit</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span><span class="p">,</span> <span class="n">clen</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>  <span class="c1"># pylint: disable=unused-argument</span>
                                <span class="n">desc</span><span class="p">:</span> <span class="s1">&#39;RegType_Parameter&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">version</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span>  <span class="c1"># pylint: disable=unused-argument</span>
                                <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Parameter&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_OverlayIDParameter&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
-        <span class="sd">&quot;&quot;&quot;Read HIP ``OVERLAY_ID`` parameter.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read HIP ``OVERLAY_ID`` parameter.</span>
 
 <span class="sd">        Structure of HIP ``OVERLAY_ID`` parameter [:rfc:`6079`]:</span>
 
@@ -2444,7 +2444,7 @@
 <div class="viewcode-block" id="HIP._read_param_route_dst"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.internet.hip.HIP._read_param_route_dst">[docs]</a>    <span class="k">def</span> <span class="nf">_read_param_route_dst</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">cbit</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span><span class="p">,</span> <span class="n">clen</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>  <span class="c1"># pylint: disable=unused-argument</span>
                               <span class="n">desc</span><span class="p">:</span> <span class="s1">&#39;RegType_Parameter&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">version</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span>  <span class="c1"># pylint: disable=unused-argument</span>
                               <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Parameter&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_RouteDstParameter&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
-        <span class="sd">&quot;&quot;&quot;Read HIP ``ROUTE_DST`` parameter.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read HIP ``ROUTE_DST`` parameter.</span>
 
 <span class="sd">        Structure of HIP ``ROUTE_DST`` parameter [:rfc:`6028`]:</span>
 
@@ -2513,7 +2513,7 @@
 <div class="viewcode-block" id="HIP._read_param_hip_transport_mode"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.internet.hip.HIP._read_param_hip_transport_mode">[docs]</a>    <span class="k">def</span> <span class="nf">_read_param_hip_transport_mode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">cbit</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span><span class="p">,</span> <span class="n">clen</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>  <span class="c1"># pylint: disable=unused-argument</span>
                                        <span class="n">desc</span><span class="p">:</span> <span class="s1">&#39;RegType_Parameter&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">version</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span>  <span class="c1"># pylint: disable=unused-argument</span>
                                        <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Parameter&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_HIPTransportModeParameter&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
-        <span class="sd">&quot;&quot;&quot;Read HIP ``HIP_TRANSPORT_MODE`` parameter.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read HIP ``HIP_TRANSPORT_MODE`` parameter.</span>
 
 <span class="sd">        Structure of HIP ``HIP_TRANSPORT_MODE`` parameter [:rfc:`6261`]:</span>
 
@@ -2574,7 +2574,7 @@
 <div class="viewcode-block" id="HIP._read_param_hip_mac"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.internet.hip.HIP._read_param_hip_mac">[docs]</a>    <span class="k">def</span> <span class="nf">_read_param_hip_mac</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">cbit</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span><span class="p">,</span> <span class="n">clen</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>  <span class="c1"># pylint: disable=unused-argument</span>
                             <span class="n">desc</span><span class="p">:</span> <span class="s1">&#39;RegType_Parameter&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">version</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span>  <span class="c1"># pylint: disable=unused-argument</span>
                             <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Parameter&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_HIPMACParameter&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
-        <span class="sd">&quot;&quot;&quot;Read HIP ``HIP_MAC`` parameter.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read HIP ``HIP_MAC`` parameter.</span>
 
 <span class="sd">        Structure of HIP ``HIP_MAC`` parameter [:rfc:`7401`]:</span>
 
@@ -2623,7 +2623,7 @@
 <div class="viewcode-block" id="HIP._read_param_hip_mac_2"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.internet.hip.HIP._read_param_hip_mac_2">[docs]</a>    <span class="k">def</span> <span class="nf">_read_param_hip_mac_2</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">cbit</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span><span class="p">,</span> <span class="n">clen</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>  <span class="c1"># pylint: disable=unused-argument</span>
                               <span class="n">desc</span><span class="p">:</span> <span class="s1">&#39;RegType_Parameter&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">version</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span>  <span class="c1"># pylint: disable=unused-argument</span>
                               <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Parameter&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_HIPMAC2Parameter&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
-        <span class="sd">&quot;&quot;&quot;Read HIP ``HIP_MAC_2`` parameter.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read HIP ``HIP_MAC_2`` parameter.</span>
 
 <span class="sd">        Structure of HIP ``HIP_MAC_2`` parameter [:rfc:`7401`]:</span>
 
@@ -2672,7 +2672,7 @@
 <div class="viewcode-block" id="HIP._read_param_hip_signature_2"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.internet.hip.HIP._read_param_hip_signature_2">[docs]</a>    <span class="k">def</span> <span class="nf">_read_param_hip_signature_2</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">cbit</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span><span class="p">,</span> <span class="n">clen</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>  <span class="c1"># pylint: disable=unused-argument</span>
                                     <span class="n">desc</span><span class="p">:</span> <span class="s1">&#39;RegType_Parameter&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">version</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span>  <span class="c1"># pylint: disable=unused-argument</span>
                                     <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Parameter&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_HIPSignature2Parameter&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
-        <span class="sd">&quot;&quot;&quot;Read HIP ``HIP_SIGNATURE_2`` parameter.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read HIP ``HIP_SIGNATURE_2`` parameter.</span>
 
 <span class="sd">        Structure of HIP ``HIP_SIGNATURE_2`` parameter [:rfc:`7401`]:</span>
 
@@ -2721,7 +2721,7 @@
 <div class="viewcode-block" id="HIP._read_param_hip_signature"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.internet.hip.HIP._read_param_hip_signature">[docs]</a>    <span class="k">def</span> <span class="nf">_read_param_hip_signature</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">cbit</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span><span class="p">,</span> <span class="n">clen</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>  <span class="c1"># pylint: disable=unused-argument</span>
                                   <span class="n">desc</span><span class="p">:</span> <span class="s1">&#39;RegType_Parameter&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">version</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span>  <span class="c1"># pylint: disable=unused-argument</span>
                                   <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Parameter&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_HIPSignatureParameter&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
-        <span class="sd">&quot;&quot;&quot;Read HIP ``HIP_SIGNATURE`` parameter.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read HIP ``HIP_SIGNATURE`` parameter.</span>
 
 <span class="sd">        Structure of HIP ``HIP_SIGNATURE`` parameter [:rfc:`7401`]:</span>
 
@@ -2770,7 +2770,7 @@
 <div class="viewcode-block" id="HIP._read_param_echo_request_unsigned"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.internet.hip.HIP._read_param_echo_request_unsigned">[docs]</a>    <span class="k">def</span> <span class="nf">_read_param_echo_request_unsigned</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">cbit</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span><span class="p">,</span> <span class="n">clen</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>  <span class="c1"># pylint: disable=unused-argument</span>
                                           <span class="n">desc</span><span class="p">:</span> <span class="s1">&#39;RegType_Parameter&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">version</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span>  <span class="c1"># pylint: disable=unused-argument</span>
                                           <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Parameter&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_EchoRequestUnsignedParameter&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
-        <span class="sd">&quot;&quot;&quot;Read HIP ``ECHO_REQUEST_UNSIGNED`` parameter.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read HIP ``ECHO_REQUEST_UNSIGNED`` parameter.</span>
 
 <span class="sd">        Structure of HIP ``ECHO_REQUEST_UNSIGNED`` parameter [:rfc:`7401`]:</span>
 
@@ -2815,7 +2815,7 @@
 <div class="viewcode-block" id="HIP._read_param_echo_response_unsigned"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.internet.hip.HIP._read_param_echo_response_unsigned">[docs]</a>    <span class="k">def</span> <span class="nf">_read_param_echo_response_unsigned</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">cbit</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span><span class="p">,</span> <span class="n">clen</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>  <span class="c1"># pylint: disable=unused-argument</span>
                                            <span class="n">desc</span><span class="p">:</span> <span class="s1">&#39;RegType_Parameter&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">version</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span>  <span class="c1"># pylint: disable=unused-argument</span>
                                            <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Parameter&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_EchoResponseUnsignedParameter&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
-        <span class="sd">&quot;&quot;&quot;Read HIP ``ECHO_RESPONSE_UNSIGNED`` parameter.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read HIP ``ECHO_RESPONSE_UNSIGNED`` parameter.</span>
 
 <span class="sd">        Structure of HIP ``ECHO_RESPONSE_UNSIGNED`` parameter [:rfc:`7401`]:</span>
 
@@ -2860,7 +2860,7 @@
 <div class="viewcode-block" id="HIP._read_param_relay_from"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.internet.hip.HIP._read_param_relay_from">[docs]</a>    <span class="k">def</span> <span class="nf">_read_param_relay_from</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">cbit</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span><span class="p">,</span> <span class="n">clen</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>  <span class="c1"># pylint: disable=unused-argument</span>
                                <span class="n">desc</span><span class="p">:</span> <span class="s1">&#39;RegType_Parameter&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">version</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span>  <span class="c1"># pylint: disable=unused-argument</span>
                                <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Parameter&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_RelayFromParameter&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
-        <span class="sd">&quot;&quot;&quot;Read HIP ``RELAY_FROM`` parameter.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read HIP ``RELAY_FROM`` parameter.</span>
 
 <span class="sd">        Structure of HIP ``RELAY_FROM`` parameter [:rfc:`5770`]:</span>
 
@@ -2917,7 +2917,7 @@
 <div class="viewcode-block" id="HIP._read_param_relay_to"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.internet.hip.HIP._read_param_relay_to">[docs]</a>    <span class="k">def</span> <span class="nf">_read_param_relay_to</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">cbit</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span><span class="p">,</span> <span class="n">clen</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>  <span class="c1"># pylint: disable=unused-argument</span>
                              <span class="n">desc</span><span class="p">:</span> <span class="s1">&#39;RegType_Parameter&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">version</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span>  <span class="c1"># pylint: disable=unused-argument</span>
                              <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Parameter&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_RelayToParameter&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
-        <span class="sd">&quot;&quot;&quot;Read HIP ``RELAY_TO`` parameter.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read HIP ``RELAY_TO`` parameter.</span>
 
 <span class="sd">        Structure of HIP ``RELAY_TO`` parameter [:rfc:`5770`]:</span>
 
@@ -2974,7 +2974,7 @@
 <div class="viewcode-block" id="HIP._read_param_overlay_ttl"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.internet.hip.HIP._read_param_overlay_ttl">[docs]</a>    <span class="k">def</span> <span class="nf">_read_param_overlay_ttl</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">cbit</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span><span class="p">,</span> <span class="n">clen</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>  <span class="c1"># pylint: disable=unused-argument</span>
                                 <span class="n">desc</span><span class="p">:</span> <span class="s1">&#39;RegType_Parameter&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">version</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span>  <span class="c1"># pylint: disable=unused-argument</span>
                                 <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Parameter&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_OverlayTTLParameter&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
-        <span class="sd">&quot;&quot;&quot;Read HIP ``OVERLAY_TTL`` parameter.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read HIP ``OVERLAY_TTL`` parameter.</span>
 
 <span class="sd">        Structure of HIP ``OVERLAY_TTL`` parameter [:rfc:`6078`]:</span>
 
@@ -3021,7 +3021,7 @@
 <div class="viewcode-block" id="HIP._read_param_route_via"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.internet.hip.HIP._read_param_route_via">[docs]</a>    <span class="k">def</span> <span class="nf">_read_param_route_via</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">cbit</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span><span class="p">,</span> <span class="n">clen</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>  <span class="c1"># pylint: disable=unused-argument</span>
                               <span class="n">desc</span><span class="p">:</span> <span class="s1">&#39;RegType_Parameter&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">version</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span>  <span class="c1"># pylint: disable=unused-argument</span>
                               <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Parameter&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_RouteViaParameter&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
-        <span class="sd">&quot;&quot;&quot;Read HIP ``ROUTE_VIA`` parameter.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read HIP ``ROUTE_VIA`` parameter.</span>
 
 <span class="sd">        Structure of HIP ``ROUTE_VIA`` parameter [:rfc:`6028`]:</span>
 
@@ -3090,7 +3090,7 @@
 <div class="viewcode-block" id="HIP._read_param_from"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.internet.hip.HIP._read_param_from">[docs]</a>    <span class="k">def</span> <span class="nf">_read_param_from</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">cbit</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span><span class="p">,</span> <span class="n">clen</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>  <span class="c1"># pylint: disable=unused-argument</span>
                          <span class="n">desc</span><span class="p">:</span> <span class="s1">&#39;RegType_Parameter&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">version</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span>  <span class="c1"># pylint: disable=unused-argument</span>
                          <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Parameter&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_FromParameter&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
-        <span class="sd">&quot;&quot;&quot;Read HIP ``FROM`` parameter.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read HIP ``FROM`` parameter.</span>
 
 <span class="sd">        Structure of HIP ``FROM`` parameter [:rfc:`8004`]:</span>
 
@@ -3140,7 +3140,7 @@
 <div class="viewcode-block" id="HIP._read_param_rvs_hmac"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.internet.hip.HIP._read_param_rvs_hmac">[docs]</a>    <span class="k">def</span> <span class="nf">_read_param_rvs_hmac</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">cbit</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span><span class="p">,</span> <span class="n">clen</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>  <span class="c1"># pylint: disable=unused-argument</span>
                              <span class="n">desc</span><span class="p">:</span> <span class="s1">&#39;RegType_Parameter&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">version</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span>  <span class="c1"># pylint: disable=unused-argument</span>
                              <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Parameter&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_RVSHMACParameter&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
-        <span class="sd">&quot;&quot;&quot;Read HIP ``RVS_HMAC`` parameter.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read HIP ``RVS_HMAC`` parameter.</span>
 
 <span class="sd">        Structure of HIP ``RVS_HMAC`` parameter [:rfc:`8004`]:</span>
 
@@ -3187,7 +3187,7 @@
 <div class="viewcode-block" id="HIP._read_param_via_rvs"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.internet.hip.HIP._read_param_via_rvs">[docs]</a>    <span class="k">def</span> <span class="nf">_read_param_via_rvs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">cbit</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span><span class="p">,</span> <span class="n">clen</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>  <span class="c1"># pylint: disable=unused-argument</span>
                             <span class="n">desc</span><span class="p">:</span> <span class="s1">&#39;RegType_Parameter&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">version</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span>  <span class="c1"># pylint: disable=unused-argument</span>
                             <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Parameter&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_ViaRVSParameter&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
-        <span class="sd">&quot;&quot;&quot;Read HIP ``VIA_RVS`` parameter.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read HIP ``VIA_RVS`` parameter.</span>
 
 <span class="sd">        Structure of HIP ``VIA_RVS`` parameter [:rfc:`6028`]:</span>
 
@@ -3247,7 +3247,7 @@
 <div class="viewcode-block" id="HIP._read_param_relay_hmac"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.internet.hip.HIP._read_param_relay_hmac">[docs]</a>    <span class="k">def</span> <span class="nf">_read_param_relay_hmac</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">cbit</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span><span class="p">,</span> <span class="n">clen</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>  <span class="c1"># pylint: disable=unused-argument</span>
                                <span class="n">desc</span><span class="p">:</span> <span class="s1">&#39;RegType_Parameter&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">version</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span>  <span class="c1"># pylint: disable=unused-argument</span>
                                <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Parameter&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_RelayHMACParameter&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
-        <span class="sd">&quot;&quot;&quot;Read HIP ``RELAY_HMAC`` parameter.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read HIP ``RELAY_HMAC`` parameter.</span>
 
 <span class="sd">        Structure of HIP ``RELAY_HMAC`` parameter [:rfc:`5770`]:</span>
 
@@ -3353,7 +3353,7 @@
       <div class="clearer"></div>
     </div>
     <div class="footer">
-      &copy;2017-2022, Jarry Shaw.
+      &copy;2017-2023, Jarry Shaw.
       
     </div>
 

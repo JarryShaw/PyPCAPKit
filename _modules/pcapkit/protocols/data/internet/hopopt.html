@@ -69,7 +69,7 @@
 
 
 <div class="viewcode-block" id="Option"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hopopt.html#pcapkit.protocols.data.internet.hopopt.Option">[docs]</a><span class="k">class</span> <span class="nc">Option</span><span class="p">(</span><span class="n">Info</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Data model for HOPOPT option data.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for HOPOPT option data.&quot;&quot;&quot;</span>
 
     <span class="c1">#: Option type.</span>
     <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;RegType_Option&#39;</span>
@@ -82,7 +82,7 @@
 
 
 <div class="viewcode-block" id="HOPOPT"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hopopt.html#pcapkit.protocols.data.internet.hopopt.HOPOPT">[docs]</a><span class="k">class</span> <span class="nc">HOPOPT</span><span class="p">(</span><span class="n">Info</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Data model for HOPOPT protocol.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for HOPOPT protocol.&quot;&quot;&quot;</span>
 
     <span class="c1">#: Next header.</span>
     <span class="nb">next</span><span class="p">:</span> <span class="s1">&#39;TransType&#39;</span>
@@ -96,7 +96,7 @@
 
 
 <div class="viewcode-block" id="UnassignedOption"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hopopt.html#pcapkit.protocols.data.internet.hopopt.UnassignedOption">[docs]</a><span class="k">class</span> <span class="nc">UnassignedOption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Data model for HOPOPT unassigned option.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for HOPOPT unassigned option.&quot;&quot;&quot;</span>
 
     <span class="c1">#: Option data.</span>
     <span class="n">data</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span>
@@ -106,14 +106,14 @@
 
 
 <div class="viewcode-block" id="PadOption"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hopopt.html#pcapkit.protocols.data.internet.hopopt.PadOption">[docs]</a><span class="k">class</span> <span class="nc">PadOption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Data model for HOPOPT padding options.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for HOPOPT padding options.&quot;&quot;&quot;</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
         <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;RegType_Option&#39;</span><span class="p">,</span> <span class="n">action</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">change</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=super-init-not-called,unused-argument,redefined-builtin,multiple-statements,line-too-long</span></div>
 
 
 <div class="viewcode-block" id="TunnelEncapsulationLimitOption"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hopopt.html#pcapkit.protocols.data.internet.hopopt.TunnelEncapsulationLimitOption">[docs]</a><span class="k">class</span> <span class="nc">TunnelEncapsulationLimitOption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Data model for HOPOPT tunnel encapsulation limit option.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for HOPOPT tunnel encapsulation limit option.&quot;&quot;&quot;</span>
 
     <span class="c1">#: Tunnel encapsulation limit.</span>
     <span class="n">limit</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span>
@@ -123,7 +123,7 @@
 
 
 <div class="viewcode-block" id="RouterAlertOption"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hopopt.html#pcapkit.protocols.data.internet.hopopt.RouterAlertOption">[docs]</a><span class="k">class</span> <span class="nc">RouterAlertOption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Data model for HOPOPT router alter option.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for HOPOPT router alter option.&quot;&quot;&quot;</span>
 
     <span class="c1">#: Router alter value.</span>
     <span class="n">value</span><span class="p">:</span> <span class="s1">&#39;RouterAlert&#39;</span>
@@ -133,7 +133,7 @@
 
 
 <div class="viewcode-block" id="CALIPSOOption"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hopopt.html#pcapkit.protocols.data.internet.hopopt.CALIPSOOption">[docs]</a><span class="k">class</span> <span class="nc">CALIPSOOption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Data model for HOPOPT Common Architecture Label IPv6 Security Option (CALIPSO) option.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for HOPOPT Common Architecture Label IPv6 Security Option (CALIPSO) option.&quot;&quot;&quot;</span>
 
     <span class="c1">#: CALIPSO domain of interpretation.</span>
     <span class="n">domain</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span>
@@ -152,7 +152,7 @@
 
 
 <div class="viewcode-block" id="SMFDPDOption"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hopopt.html#pcapkit.protocols.data.internet.hopopt.SMFDPDOption">[docs]</a><span class="k">class</span> <span class="nc">SMFDPDOption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Data model for HOPOPT Simplified Multicast Forwarding Duplicate Packet Detection (``SMF_DPD``) option.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for HOPOPT Simplified Multicast Forwarding Duplicate Packet Detection (``SMF_DPD``) option.&quot;&quot;&quot;</span>
 
     <span class="c1">#: DPD type.</span>
     <span class="n">dpd_type</span><span class="p">:</span> <span class="s1">&#39;SMFDPDMode&#39;</span>
@@ -161,7 +161,7 @@
 
 
 <div class="viewcode-block" id="SMFIdentificationBasedDPDOption"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hopopt.html#pcapkit.protocols.data.internet.hopopt.SMFIdentificationBasedDPDOption">[docs]</a><span class="k">class</span> <span class="nc">SMFIdentificationBasedDPDOption</span><span class="p">(</span><span class="n">SMFDPDOption</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Data model for HOPOPT **I-DPD** (Identification-Based DPD) option.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for HOPOPT **I-DPD** (Identification-Based DPD) option.&quot;&quot;&quot;</span>
 
     <span class="c1">#: TaggerID length.</span>
     <span class="n">tid_len</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span>
@@ -175,7 +175,7 @@
 
 
 <div class="viewcode-block" id="SMFHashBasedDPDOption"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hopopt.html#pcapkit.protocols.data.internet.hopopt.SMFHashBasedDPDOption">[docs]</a><span class="k">class</span> <span class="nc">SMFHashBasedDPDOption</span><span class="p">(</span><span class="n">SMFDPDOption</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Data model for HOPOPT **H-DPD** (Hash-Based DPD) option.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for HOPOPT **H-DPD** (Hash-Based DPD) option.&quot;&quot;&quot;</span>
 
     <span class="c1">#: Hash assist value.</span>
     <span class="n">hav</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span>
@@ -185,7 +185,7 @@
 
 
 <div class="viewcode-block" id="PDMOption"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hopopt.html#pcapkit.protocols.data.internet.hopopt.PDMOption">[docs]</a><span class="k">class</span> <span class="nc">PDMOption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Data model for HOPOPT Performance Diagnostic Metrics (PDM) option.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for HOPOPT Performance Diagnostic Metrics (PDM) option.&quot;&quot;&quot;</span>
 
     <span class="c1">#: Scale delta time last received.</span>
     <span class="n">scaledtlr</span><span class="p">:</span> <span class="s1">&#39;timedelta&#39;</span>
@@ -205,7 +205,7 @@
 
 
 <div class="viewcode-block" id="QuickStartOption"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hopopt.html#pcapkit.protocols.data.internet.hopopt.QuickStartOption">[docs]</a><span class="k">class</span> <span class="nc">QuickStartOption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Data model for HOPOPT Quick Start option.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for HOPOPT Quick Start option.&quot;&quot;&quot;</span>
 
     <span class="c1">#: QS function.</span>
     <span class="n">func</span><span class="p">:</span> <span class="s1">&#39;QSFunction&#39;</span>
@@ -221,7 +221,7 @@
 
 
 <div class="viewcode-block" id="RPLFlags"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hopopt.html#pcapkit.protocols.data.internet.hopopt.RPLFlags">[docs]</a><span class="k">class</span> <span class="nc">RPLFlags</span><span class="p">(</span><span class="n">Info</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Data model for HOPOPT RPL option flags fields.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for HOPOPT RPL option flags fields.&quot;&quot;&quot;</span>
 
     <span class="c1">#: Down flag.</span>
     <span class="n">down</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span>
@@ -235,7 +235,7 @@
 
 
 <div class="viewcode-block" id="RPLOption"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hopopt.html#pcapkit.protocols.data.internet.hopopt.RPLOption">[docs]</a><span class="k">class</span> <span class="nc">RPLOption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Data model for HOPOPT Routing Protocol for Low-Power and Lossy Networks (RPL) option.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for HOPOPT Routing Protocol for Low-Power and Lossy Networks (RPL) option.&quot;&quot;&quot;</span>
 
     <span class="c1">#: Flags.</span>
     <span class="n">flags</span><span class="p">:</span> <span class="s1">&#39;RPLFlags&#39;</span>
@@ -249,7 +249,7 @@
 
 
 <div class="viewcode-block" id="MPLFlags"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hopopt.html#pcapkit.protocols.data.internet.hopopt.MPLFlags">[docs]</a><span class="k">class</span> <span class="nc">MPLFlags</span><span class="p">(</span><span class="n">Info</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Data model for HOPOPT MPL option flags fields.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for HOPOPT MPL option flags fields.&quot;&quot;&quot;</span>
 
     <span class="c1">#: Max flag.</span>
     <span class="nb">max</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span>
@@ -261,7 +261,7 @@
 
 
 <div class="viewcode-block" id="MPLOption"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hopopt.html#pcapkit.protocols.data.internet.hopopt.MPLOption">[docs]</a><span class="k">class</span> <span class="nc">MPLOption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Data model for HOPOPT Multicast Protocol for Low-Power and Lossy Networks (MPL) option.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for HOPOPT Multicast Protocol for Low-Power and Lossy Networks (MPL) option.&quot;&quot;&quot;</span>
 
     <span class="c1">#: Seed length.</span>
     <span class="n">seed_type</span><span class="p">:</span> <span class="s1">&#39;SeedID&#39;</span>
@@ -277,7 +277,7 @@
 
 
 <div class="viewcode-block" id="ILNPOption"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hopopt.html#pcapkit.protocols.data.internet.hopopt.ILNPOption">[docs]</a><span class="k">class</span> <span class="nc">ILNPOption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Data model for HOPOPT Identifier-Locator Network Protocol (ILNP) Nonce option.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for HOPOPT Identifier-Locator Network Protocol (ILNP) Nonce option.&quot;&quot;&quot;</span>
 
     <span class="c1">#: Nonce value.</span>
     <span class="n">nounce</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span>
@@ -287,7 +287,7 @@
 
 
 <div class="viewcode-block" id="LineIdentificationOption"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hopopt.html#pcapkit.protocols.data.internet.hopopt.LineIdentificationOption">[docs]</a><span class="k">class</span> <span class="nc">LineIdentificationOption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Data model for HOPOPT Line-Identification option.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for HOPOPT Line-Identification option.&quot;&quot;&quot;</span>
 
     <span class="c1">#: Line ID length.</span>
     <span class="n">line_id_len</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span>
@@ -299,7 +299,7 @@
 
 
 <div class="viewcode-block" id="JumboPayloadOption"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hopopt.html#pcapkit.protocols.data.internet.hopopt.JumboPayloadOption">[docs]</a><span class="k">class</span> <span class="nc">JumboPayloadOption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Data model for Jumbo Payload option.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for Jumbo Payload option.&quot;&quot;&quot;</span>
 
     <span class="c1">#: Jumbo payload length.</span>
     <span class="n">payload_len</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span>
@@ -309,7 +309,7 @@
 
 
 <div class="viewcode-block" id="HomeAddressOption"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hopopt.html#pcapkit.protocols.data.internet.hopopt.HomeAddressOption">[docs]</a><span class="k">class</span> <span class="nc">HomeAddressOption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Data model for HOPOPT Home Address option.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for HOPOPT Home Address option.&quot;&quot;&quot;</span>
 
     <span class="c1">#: Home address.</span>
     <span class="n">address</span><span class="p">:</span> <span class="s1">&#39;IPv6Address&#39;</span>
@@ -319,7 +319,7 @@
 
 
 <div class="viewcode-block" id="DFFFlags"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hopopt.html#pcapkit.protocols.data.internet.hopopt.DFFFlags">[docs]</a><span class="k">class</span> <span class="nc">DFFFlags</span><span class="p">(</span><span class="n">Info</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Data model for HOPOPT ``IP_DFF`` option flags.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for HOPOPT ``IP_DFF`` option flags.&quot;&quot;&quot;</span>
 
     <span class="c1">#: Duplicate flag.</span>
     <span class="n">dup</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span>
@@ -331,7 +331,7 @@
 
 
 <div class="viewcode-block" id="IPDFFOption"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hopopt.html#pcapkit.protocols.data.internet.hopopt.IPDFFOption">[docs]</a><span class="k">class</span> <span class="nc">IPDFFOption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Data model for HOPOPT Depth-First Forwarding (``IP_DFF``) option.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for HOPOPT Depth-First Forwarding (``IP_DFF``) option.&quot;&quot;&quot;</span>
 
     <span class="c1">#: Version.</span>
     <span class="n">version</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span>
@@ -405,7 +405,7 @@
       <div class="clearer"></div>
     </div>
     <div class="footer">
-      &copy;2017-2022, Jarry Shaw.
+      &copy;2017-2023, Jarry Shaw.
       
     </div>
 

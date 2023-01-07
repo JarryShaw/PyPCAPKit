@@ -94,7 +94,7 @@
 
 
 <div class="viewcode-block" id="ReassemblyData"><a class="viewcode-back" href="../../../pcapkit/foundation/extraction.html#pcapkit.foundation.extraction.ReassemblyData">[docs]</a><span class="k">class</span> <span class="nc">ReassemblyData</span><span class="p">(</span><span class="n">Info</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Data storage for reassembly.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Data storage for reassembly.&quot;&quot;&quot;</span>
 
     <span class="c1">#: IPv4 reassembled data.</span>
     <span class="n">ipv4</span><span class="p">:</span> <span class="s1">&#39;Optional[tuple[IP_Datagram, ...]]&#39;</span>
@@ -108,7 +108,7 @@
 
 
 <div class="viewcode-block" id="Extractor"><a class="viewcode-back" href="../../../pcapkit/foundation/extraction.html#pcapkit.foundation.extraction.Extractor">[docs]</a><span class="k">class</span> <span class="nc">Extractor</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Extractor for PCAP files.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Extractor for PCAP files.</span>
 
 <span class="sd">    Notes:</span>
 <span class="sd">        For supported engines, please refer to</span>
@@ -211,7 +211,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">info</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;VersionInfo&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Version of input PCAP file.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Version of input PCAP file.</span>
 
 <span class="sd">        Raises:</span>
 <span class="sd">            UnsupportedCall: If :attr:`self._exeng &lt;pcapkit.foundation.extraction.Extractor._exeng&gt;`</span>
@@ -224,12 +224,12 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">length</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;int&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Frame number (of current extracted frame or all).&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Frame number (of current extracted frame or all).&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_frnum</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">format</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Formats&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Format of output file.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Format of output file.</span>
 
 <span class="sd">        Raises:</span>
 <span class="sd">            UnsupportedCall: If :attr:`self._flag_q &lt;pcapkit.foundation.extraction.Extractor._flag_q&gt;`</span>
@@ -242,12 +242,12 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">input</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;str&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Name of input PCAP file.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Name of input PCAP file.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ifnm</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">output</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;str&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Name of output file.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Name of output file.</span>
 
 <span class="sd">        Raises:</span>
 <span class="sd">            UnsupportedCall: If :attr:`self._flag_q &lt;pcapkit.foundation.extraction.Extractor._flag_q&gt;`</span>
@@ -260,12 +260,12 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">header</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Header&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Global header.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Global header.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gbhdr</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">frame</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;tuple[Frame, ...]&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Extracted frames.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Extracted frames.</span>
 
 <span class="sd">        Raises:</span>
 <span class="sd">            UnsupportedCall: If :attr:`self._flag_d &lt;pcapkit.foundation.extraction.Extractor._flag_d&gt;`</span>
@@ -278,7 +278,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">reassembly</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;ReassemblyData&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Frame record for reassembly.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Frame record for reassembly.</span>
 
 <span class="sd">        * ``ipv4`` -- tuple of TCP payload fragment (:term:`ipv4.datagram`)</span>
 <span class="sd">        * ``ipv6`` -- tuple of TCP payload fragment (:term:`ipv6.datagram`)</span>
@@ -294,7 +294,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">trace</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;tuple[Index, ...]&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Index table for traced flow.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Index table for traced flow.</span>
 
 <span class="sd">        Raises:</span>
 <span class="sd">            UnsupportedCall: If :attr:`self._flag_t &lt;pcapkit.foundation.extraction.Extractor._flag_t&gt;`</span>
@@ -307,7 +307,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">engine</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Engines&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;PCAP extraction engine.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;PCAP extraction engine.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_exeng</span>
 
     <span class="c1">##########################################################################</span>
@@ -316,7 +316,7 @@
 
 <div class="viewcode-block" id="Extractor.register"><a class="viewcode-back" href="../../../pcapkit/foundation/extraction.html#pcapkit.foundation.extraction.Extractor.register">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">register</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="nb">format</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">,</span> <span class="n">class_</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">,</span> <span class="n">ext</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=redefined-builtin</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Register a new dumper class.</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Register a new dumper class.</span>
 
 <span class="sd">        Notes:</span>
 <span class="sd">            The full qualified class name of the new dumper class</span>
@@ -332,7 +332,7 @@
         <span class="bp">cls</span><span class="o">.</span><span class="n">__output__</span><span class="p">[</span><span class="nb">format</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="n">class_</span><span class="p">,</span> <span class="n">ext</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="Extractor.run"><a class="viewcode-back" href="../../../pcapkit/foundation/extraction.html#pcapkit.foundation.extraction.Extractor.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=inconsistent-return-statements</span>
-        <span class="sd">&quot;&quot;&quot;Start extraction.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Start extraction.</span>
 
 <span class="sd">        We uses :meth:`~pcapkit.foundation.extraction.Extractor.import_test` to check if</span>
 <span class="sd">        a certain engine is available or not. For supported engines, each engine has</span>
@@ -374,7 +374,7 @@
 
     <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">import_test</span><span class="p">(</span><span class="n">engine</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="s1">&#39;Optional[str]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Optional[ModuleType]&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Test import for extractcion engine.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Test import for extractcion engine.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            engine: Extraction engine module name.</span>
@@ -391,7 +391,7 @@
             <span class="n">module</span> <span class="o">=</span> <span class="n">importlib</span><span class="o">.</span><span class="n">import_module</span><span class="p">(</span><span class="n">engine</span><span class="p">)</span>
         <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
             <span class="n">module</span> <span class="o">=</span> <span class="kc">None</span>
-            <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;extraction engine &#39;</span><span class="si">{</span><span class="n">name</span> <span class="ow">or</span> <span class="n">engine</span><span class="si">}</span><span class="s2">&#39; not available; &quot;</span>
+            <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;extraction engine &#39;</span><span class="si">{</span><span class="n">name</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="n">engine</span><span class="si">}</span><span class="s2">&#39; not available; &quot;</span>
                  <span class="s1">&#39;using default engine instead&#39;</span><span class="p">,</span> <span class="n">EngineWarning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="n">stacklevel</span><span class="p">())</span>
         <span class="k">return</span> <span class="n">module</span>
 
@@ -399,7 +399,7 @@
     <span class="k">def</span> <span class="nf">make_name</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">fin</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span> <span class="o">=</span> <span class="s1">&#39;in.pcap&#39;</span><span class="p">,</span> <span class="n">fout</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span> <span class="o">=</span> <span class="s1">&#39;out&#39;</span><span class="p">,</span> <span class="n">fmt</span><span class="p">:</span> <span class="s1">&#39;Formats&#39;</span> <span class="o">=</span> <span class="s1">&#39;tree&#39;</span><span class="p">,</span>
                   <span class="n">extension</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">files</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
                   <span class="n">nofile</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;tuple[str, Optional[str], Formats, Optional[str], bool]&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Generate input and output filenames.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Generate input and output filenames.</span>
 
 <span class="sd">        The method will perform following processing:</span>
 
@@ -470,7 +470,7 @@
         <span class="k">return</span> <span class="n">ifnm</span><span class="p">,</span> <span class="n">ofnm</span><span class="p">,</span> <span class="n">fmt</span><span class="p">,</span> <span class="n">ext</span><span class="p">,</span> <span class="n">files</span></div>
 
 <div class="viewcode-block" id="Extractor.record_header"><a class="viewcode-back" href="../../../pcapkit/foundation/extraction.html#pcapkit.foundation.extraction.Extractor.record_header">[docs]</a>    <span class="k">def</span> <span class="nf">record_header</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Read global header.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read global header.</span>
 
 <span class="sd">        The method will parse the PCAP global header and save the parsed result</span>
 <span class="sd">        as :attr:`self._gbhdr &lt;Extractor._gbhdr&gt;`. Information such as PCAP version,</span>
@@ -506,7 +506,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_type</span> <span class="o">=</span> <span class="n">ofile</span><span class="o">.</span><span class="n">kind</span></div>
 
 <div class="viewcode-block" id="Extractor.record_frames"><a class="viewcode-back" href="../../../pcapkit/foundation/extraction.html#pcapkit.foundation.extraction.Extractor.record_frames">[docs]</a>    <span class="k">def</span> <span class="nf">record_frames</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Read packet frames.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read packet frames.</span>
 
 <span class="sd">        The method calls :meth:`_read_frame` to parse each frame from the input</span>
 <span class="sd">        PCAP file; and calls :meth:`_cleanup` upon complision.</span>
@@ -537,7 +537,7 @@
                  <span class="n">ip</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">ipv4</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">ipv6</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">tcp</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">strict</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>    <span class="c1"># reassembly settings # pylint: disable=line-too-long</span>
                  <span class="n">trace</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">trace_fout</span><span class="p">:</span> <span class="s1">&#39;Optional[str]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">trace_format</span><span class="p">:</span> <span class="s1">&#39;Optional[Formats]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>           <span class="c1"># trace settings # pylint: disable=line-too-long</span>
                  <span class="n">trace_byteorder</span><span class="p">:</span> <span class="s1">&#39;Literal[&quot;big&quot;, &quot;little&quot;]&#39;</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">byteorder</span><span class="p">,</span> <span class="n">trace_nanosecond</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>      <span class="c1"># trace settings # pylint: disable=line-too-long</span>
-        <span class="sd">&quot;&quot;&quot;Initialise PCAP Reader.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialise PCAP Reader.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            fin: file name to be read; if file not exist, raise :exc:`FileNotFound`</span>
@@ -653,10 +653,10 @@
             <span class="n">output</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">importlib</span><span class="o">.</span><span class="n">import_module</span><span class="p">(</span><span class="n">module</span><span class="p">),</span> <span class="n">class_</span><span class="p">)</span>  <span class="c1"># type: Type[Dumper]</span>
 
             <span class="k">class</span> <span class="nc">DictDumper</span><span class="p">(</span><span class="n">output</span><span class="p">):</span>  <span class="c1"># type: ignore[valid-type,misc]</span>
-                <span class="sd">&quot;&quot;&quot;Customised :class:`~dictdumper.dumper.Dumper` object.&quot;&quot;&quot;</span>
+<span class="w">                </span><span class="sd">&quot;&quot;&quot;Customised :class:`~dictdumper.dumper.Dumper` object.&quot;&quot;&quot;</span>
 
                 <span class="k">def</span> <span class="nf">object_hook</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">o</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Any&#39;</span><span class="p">:</span>
-                    <span class="sd">&quot;&quot;&quot;Convert content for function call.</span>
+<span class="w">                    </span><span class="sd">&quot;&quot;&quot;Convert content for function call.</span>
 
 <span class="sd">                    Args:</span>
 <span class="sd">                        o: object to convert</span>
@@ -688,7 +688,7 @@
                     <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">object_hook</span><span class="p">(</span><span class="n">o</span><span class="p">)</span>  <span class="c1"># type: ignore[unreachable]</span>
 
                 <span class="k">def</span> <span class="nf">default</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">o</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Literal[&quot;fallback&quot;]&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
-                    <span class="sd">&quot;&quot;&quot;Check content type for function call.&quot;&quot;&quot;</span>
+<span class="w">                    </span><span class="sd">&quot;&quot;&quot;Check content type for function call.&quot;&quot;&quot;</span>
                     <span class="k">return</span> <span class="s1">&#39;fallback&#39;</span>
 
                 <span class="k">def</span> <span class="nf">_append_fallback</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">,</span> <span class="n">file</span><span class="p">:</span> <span class="s1">&#39;TextIO&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
@@ -708,7 +708,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>    <span class="c1"># start extraction</span></div>
 
 <div class="viewcode-block" id="Extractor.__iter__"><a class="viewcode-back" href="../../../pcapkit/foundation/extraction.html#pcapkit.foundation.extraction.Extractor.__iter__">[docs]</a>    <span class="k">def</span> <span class="fm">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Extractor&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Iterate and parse PCAP frame.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Iterate and parse PCAP frame.</span>
 
 <span class="sd">        Raises:</span>
 <span class="sd">            IterableError: If :attr:`self._flag_a &lt;pcapkit.foundation.extraction.Extractor._flag_a&gt;`</span>
@@ -720,7 +720,7 @@
         <span class="k">raise</span> <span class="n">IterableError</span><span class="p">(</span><span class="s2">&quot;&#39;Extractor(auto=True)&#39; object is not iterable&quot;</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="Extractor.__next__"><a class="viewcode-back" href="../../../pcapkit/foundation/extraction.html#pcapkit.foundation.extraction.Extractor.__next__">[docs]</a>    <span class="k">def</span> <span class="fm">__next__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Frame | ScapyPacket | DPKTPacket&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Iterate and parse next PCAP frame.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Iterate and parse next PCAP frame.</span>
 
 <span class="sd">        It will call :meth:`_read_frame` to parse next PCAP frame internally,</span>
 <span class="sd">        until the EOF reached; then it calls :meth:`_cleanup` for the aftermath.</span>
@@ -733,7 +733,7 @@
             <span class="k">raise</span> <span class="ne">StopIteration</span>  <span class="c1"># pylint: disable=raise-missing-from</span></div>
 
 <div class="viewcode-block" id="Extractor.__call__"><a class="viewcode-back" href="../../../pcapkit/foundation/extraction.html#pcapkit.foundation.extraction.Extractor.__call__">[docs]</a>    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Frame | ScapyPacket | DPKTPacket&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Works as a simple wrapper for the iteration protocol.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Works as a simple wrapper for the iteration protocol.</span>
 
 <span class="sd">        Raises:</span>
 <span class="sd">            IterableError: If :attr:`self._flag_a &lt;pcapkit.foundation.extraction.Extractor._flag_a&gt;`</span>
@@ -749,12 +749,12 @@
         <span class="k">raise</span> <span class="n">CallableError</span><span class="p">(</span><span class="s2">&quot;&#39;Extractor(auto=True)&#39; object is not callable&quot;</span><span class="p">)</span></div>
 
     <span class="k">def</span> <span class="fm">__enter__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Extractor&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Uses :class:`Extractor` as a context manager.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Uses :class:`Extractor` as a context manager.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span>
 
     <span class="k">def</span> <span class="fm">__exit__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">exc_type</span><span class="p">:</span> <span class="s1">&#39;Type[BaseException] | None&#39;</span><span class="p">,</span> <span class="n">exc_value</span><span class="p">:</span> <span class="s1">&#39;BaseException | None&#39;</span><span class="p">,</span>
                  <span class="n">traceback</span><span class="p">:</span> <span class="s1">&#39;TracebackType | None&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
-        <span class="sd">&quot;&quot;&quot;Close the input file when exits.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Close the input file when exits.&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_ifile</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
 
     <span class="c1">##########################################################################</span>
@@ -762,7 +762,7 @@
     <span class="c1">##########################################################################</span>
 
 <div class="viewcode-block" id="Extractor._cleanup"><a class="viewcode-back" href="../../../pcapkit/foundation/extraction.html#pcapkit.foundation.extraction.Extractor._cleanup">[docs]</a>    <span class="k">def</span> <span class="nf">_cleanup</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Cleanup after extraction &amp; analysis.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Cleanup after extraction &amp; analysis.</span>
 
 <span class="sd">        The method clears the :attr:`self._expkg &lt;Extractor._expkg&gt;` and</span>
 <span class="sd">        :attr:`self._extmp &lt;Extractor._extmp&gt;` attributes, sets</span>
@@ -777,7 +777,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_ifile</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div>
 
 <div class="viewcode-block" id="Extractor._read_frame"><a class="viewcode-back" href="../../../pcapkit/foundation/extraction.html#pcapkit.foundation.extraction.Extractor._read_frame">[docs]</a>    <span class="k">def</span> <span class="nf">_read_frame</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Frame | ScapyPacket | DPKTPacket&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Headquarters for frame reader.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Headquarters for frame reader.</span>
 
 <span class="sd">        This method is a dispatcher for parsing frames.</span>
 
@@ -799,7 +799,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_default_read_frame</span><span class="p">()</span></div>
 
 <div class="viewcode-block" id="Extractor._default_read_frame"><a class="viewcode-back" href="../../../pcapkit/foundation/extraction.html#pcapkit.foundation.extraction.Extractor._default_read_frame">[docs]</a>    <span class="k">def</span> <span class="nf">_default_read_frame</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Frame&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Read frames with default engine.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read frames with default engine.</span>
 
 <span class="sd">        This method performs following operations:</span>
 
@@ -862,7 +862,7 @@
         <span class="k">return</span> <span class="n">frame</span></div>
 
 <div class="viewcode-block" id="Extractor._run_scapy"><a class="viewcode-back" href="../../../pcapkit/foundation/extraction.html#pcapkit.foundation.extraction.Extractor._run_scapy">[docs]</a>    <span class="k">def</span> <span class="nf">_run_scapy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">scapy_all</span><span class="p">:</span> <span class="s1">&#39;ModuleType&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Call :func:`scapy.all.sniff` to extract PCAP files.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Call :func:`scapy.all.sniff` to extract PCAP files.</span>
 
 <span class="sd">        This method assigns :attr:`self._expkg &lt;Extractor._expkg&gt;` as :mod:`scapy.all`</span>
 <span class="sd">        and :attr:`self._extmp &lt;Extractor._extmp&gt;` as an iterator from</span>
@@ -901,7 +901,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">record_frames</span><span class="p">()</span></div>
 
 <div class="viewcode-block" id="Extractor._scapy_read_frame"><a class="viewcode-back" href="../../../pcapkit/foundation/extraction.html#pcapkit.foundation.extraction.Extractor._scapy_read_frame">[docs]</a>    <span class="k">def</span> <span class="nf">_scapy_read_frame</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;ScapyPacket&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Read frames with Scapy engine.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read frames with Scapy engine.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            Parsed frame instance.</span>
@@ -960,7 +960,7 @@
         <span class="k">return</span> <span class="n">packet</span></div>
 
 <div class="viewcode-block" id="Extractor._run_dpkt"><a class="viewcode-back" href="../../../pcapkit/foundation/extraction.html#pcapkit.foundation.extraction.Extractor._run_dpkt">[docs]</a>    <span class="k">def</span> <span class="nf">_run_dpkt</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dpkt</span><span class="p">:</span> <span class="s1">&#39;ModuleType&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Call :class:`dpkt.pcap.Reader` to extract PCAP files.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Call :class:`dpkt.pcap.Reader` to extract PCAP files.</span>
 
 <span class="sd">        This method assigns :attr:`self._expkg &lt;Extractor._expkg&gt;` as :mod:`dpkt` and</span>
 <span class="sd">        :attr:`self._extmp &lt;Extractor._extmp&gt;` as an iterator from :class:`dpkt.pcap.Reader`.</span>
@@ -1004,7 +1004,7 @@
                  <span class="n">DPKTWarning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="n">stacklevel</span><span class="p">())</span>
 
             <span class="k">class</span> <span class="nc">RawPacket</span><span class="p">(</span><span class="n">dpkt</span><span class="o">.</span><span class="n">dpkt</span><span class="o">.</span><span class="n">Packet</span><span class="p">):</span>  <span class="c1"># type: ignore[name-defined]</span>
-                <span class="sd">&quot;&quot;&quot;Raw packet.&quot;&quot;&quot;</span>
+<span class="w">                </span><span class="sd">&quot;&quot;&quot;Raw packet.&quot;&quot;&quot;</span>
 
                 <span class="k">def</span> <span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;int&#39;</span><span class="p">:</span>
                     <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
@@ -1025,7 +1025,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">record_frames</span><span class="p">()</span></div>
 
 <div class="viewcode-block" id="Extractor._dpkt_read_frame"><a class="viewcode-back" href="../../../pcapkit/foundation/extraction.html#pcapkit.foundation.extraction.Extractor._dpkt_read_frame">[docs]</a>    <span class="k">def</span> <span class="nf">_dpkt_read_frame</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DPKTPacket&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Read frames with DPKT engine.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read frames with DPKT engine.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            dpkt.dpkt.Packet: Parsed frame instance.</span>
@@ -1085,7 +1085,7 @@
         <span class="k">return</span> <span class="n">packet</span></div>
 
 <div class="viewcode-block" id="Extractor._run_pyshark"><a class="viewcode-back" href="../../../pcapkit/foundation/extraction.html#pcapkit.foundation.extraction.Extractor._run_pyshark">[docs]</a>    <span class="k">def</span> <span class="nf">_run_pyshark</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pyshark</span><span class="p">:</span> <span class="s1">&#39;ModuleType&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Call :class:`pyshark.FileCapture` to extract PCAP files.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Call :class:`pyshark.FileCapture` to extract PCAP files.</span>
 
 <span class="sd">        This method assigns :attr:`self._expkg &lt;Extractor._expkg&gt;` as :mod:`pyshark` and</span>
 <span class="sd">        :attr:`self._extmp &lt;Extractor._extmp&gt;` as an iterator from :class:`pyshark.FileCapture`.</span>
@@ -1129,7 +1129,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">record_frames</span><span class="p">()</span></div>
 
 <div class="viewcode-block" id="Extractor._pyshark_read_frame"><a class="viewcode-back" href="../../../pcapkit/foundation/extraction.html#pcapkit.foundation.extraction.Extractor._pyshark_read_frame">[docs]</a>    <span class="k">def</span> <span class="nf">_pyshark_read_frame</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;PySharkPacket&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Read frames with PyShark engine.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read frames with PyShark engine.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            Parsed frame instance.</span>
@@ -1233,7 +1233,7 @@
       <div class="clearer"></div>
     </div>
     <div class="footer">
-      &copy;2017-2022, Jarry Shaw.
+      &copy;2017-2023, Jarry Shaw.
       
     </div>
 

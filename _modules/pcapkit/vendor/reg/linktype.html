@@ -60,7 +60,7 @@
 
 
 <div class="viewcode-block" id="LinkType"><a class="viewcode-back" href="../../../../pcapkit/vendor/reg.html#pcapkit.vendor.reg.linktype.LinkType">[docs]</a><span class="k">class</span> <span class="nc">LinkType</span><span class="p">(</span><span class="n">Vendor</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Link-Layer Header Type Values&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Link-Layer Header Type Values&quot;&quot;&quot;</span>
 
     <span class="c1">#: Value limit checker.</span>
     <span class="n">FLAG</span> <span class="o">=</span> <span class="s1">&#39;isinstance(value, int) and 0x00000000 &lt;= value &lt;= 0xFFFFFFFF&#39;</span>
@@ -68,11 +68,11 @@
     <span class="n">LINK</span> <span class="o">=</span> <span class="s1">&#39;http://www.tcpdump.org/linktypes.html&#39;</span>
 
     <span class="k">def</span> <span class="nf">count</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">&#39;list[str]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Counter[str]&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Count field records.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Count field records.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">collections</span><span class="o">.</span><span class="n">Counter</span><span class="p">()</span>
 
     <span class="k">def</span> <span class="nf">request</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;list[Tag]&#39;</span><span class="p">:</span>  <span class="c1"># type: ignore[override] # pylint: disable=signature-differs</span>
-        <span class="sd">&quot;&quot;&quot;Fetch registry table.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Fetch registry table.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            text: Context from :attr:`~LinkType.LINK`.</span>
@@ -86,7 +86,7 @@
         <span class="k">return</span> <span class="n">table</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s1">&#39;tr&#39;</span><span class="p">)[</span><span class="mi">1</span><span class="p">:]</span>
 
     <span class="k">def</span> <span class="nf">process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">&#39;list[Tag]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;tuple[list[str], list[str]]&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Process registry data.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Process registry data.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            data: Registry data.</span>
@@ -199,7 +199,7 @@
       <div class="clearer"></div>
     </div>
     <div class="footer">
-      &copy;2017-2022, Jarry Shaw.
+      &copy;2017-2023, Jarry Shaw.
       
     </div>
 

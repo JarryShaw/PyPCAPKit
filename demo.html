@@ -96,41 +96,41 @@ its main interface. Several scenarios are shown as below.</p>
 <ol class="arabic">
 <li><p>export to a macOS Property List
 (<a class="reference external" href="https://developer.apple.com/xcode">Xcode</a> has special support for this format)</p>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>$ pcapkit-cli <span class="k">in</span> --format plist --verbose
-🚨Loading file <span class="s1">&#39;in.pcap&#39;</span>
-Frame   <span class="m">1</span>: Ethernet:IPv6:IPv6_ICMP
-Frame   <span class="m">2</span>: Ethernet:IPv6:IPv6_ICMP
-Frame   <span class="m">3</span>: Ethernet:IPv4:TCP
-Frame   <span class="m">4</span>: Ethernet:IPv4:TCP
-Frame   <span class="m">5</span>: Ethernet:IPv4:TCP
-Frame   <span class="m">6</span>: Ethernet:IPv4:UDP:Raw
-🍺Report file stored <span class="k">in</span> <span class="s1">&#39;out.plist&#39;</span>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>pcapkit-cli<span class="w"> </span><span class="k">in</span><span class="w"> </span>--format<span class="w"> </span>plist<span class="w"> </span>--verbose
+🚨Loading<span class="w"> </span>file<span class="w"> </span><span class="s1">&#39;in.pcap&#39;</span>
+Frame<span class="w">   </span><span class="m">1</span>:<span class="w"> </span>Ethernet:IPv6:IPv6_ICMP
+Frame<span class="w">   </span><span class="m">2</span>:<span class="w"> </span>Ethernet:IPv6:IPv6_ICMP
+Frame<span class="w">   </span><span class="m">3</span>:<span class="w"> </span>Ethernet:IPv4:TCP
+Frame<span class="w">   </span><span class="m">4</span>:<span class="w"> </span>Ethernet:IPv4:TCP
+Frame<span class="w">   </span><span class="m">5</span>:<span class="w"> </span>Ethernet:IPv4:TCP
+Frame<span class="w">   </span><span class="m">6</span>:<span class="w"> </span>Ethernet:IPv4:UDP:Raw
+🍺Report<span class="w"> </span>file<span class="w"> </span>stored<span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="s1">&#39;out.plist&#39;</span>
 </pre></div>
 </div>
 </li>
 <li><p>export to a JSON file (with no format specified)</p>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>$ pcapkit-cli <span class="k">in</span> --output out.json --verbose
-🚨Loading file <span class="s1">&#39;in.pcap&#39;</span>
-Frame   <span class="m">1</span>: Ethernet:IPv6:IPv6_ICMP
-Frame   <span class="m">2</span>: Ethernet:IPv6:IPv6_ICMP
-Frame   <span class="m">3</span>: Ethernet:IPv4:TCP
-Frame   <span class="m">4</span>: Ethernet:IPv4:TCP
-Frame   <span class="m">5</span>: Ethernet:IPv4:TCP
-Frame   <span class="m">6</span>: Ethernet:IPv4:UDP:Raw
-🍺Report file stored <span class="k">in</span> <span class="s1">&#39;out.json&#39;</span>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>pcapkit-cli<span class="w"> </span><span class="k">in</span><span class="w"> </span>--output<span class="w"> </span>out.json<span class="w"> </span>--verbose
+🚨Loading<span class="w"> </span>file<span class="w"> </span><span class="s1">&#39;in.pcap&#39;</span>
+Frame<span class="w">   </span><span class="m">1</span>:<span class="w"> </span>Ethernet:IPv6:IPv6_ICMP
+Frame<span class="w">   </span><span class="m">2</span>:<span class="w"> </span>Ethernet:IPv6:IPv6_ICMP
+Frame<span class="w">   </span><span class="m">3</span>:<span class="w"> </span>Ethernet:IPv4:TCP
+Frame<span class="w">   </span><span class="m">4</span>:<span class="w"> </span>Ethernet:IPv4:TCP
+Frame<span class="w">   </span><span class="m">5</span>:<span class="w"> </span>Ethernet:IPv4:TCP
+Frame<span class="w">   </span><span class="m">6</span>:<span class="w"> </span>Ethernet:IPv4:UDP:Raw
+🍺Report<span class="w"> </span>file<span class="w"> </span>stored<span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="s1">&#39;out.json&#39;</span>
 </pre></div>
 </div>
 </li>
 <li><p>export to a text tree view file (without extension autocorrect)</p>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>$ pcapkit-cli <span class="k">in</span> --output out.txt --format tree --verbose
-🚨Loading file <span class="s1">&#39;in.pcap&#39;</span>
-Frame   <span class="m">1</span>: Ethernet:IPv6:IPv6_ICMP
-Frame   <span class="m">2</span>: Ethernet:IPv6:IPv6_ICMP
-Frame   <span class="m">3</span>: Ethernet:IPv4:TCP
-Frame   <span class="m">4</span>: Ethernet:IPv4:TCP
-Frame   <span class="m">5</span>: Ethernet:IPv4:TCP
-Frame   <span class="m">6</span>: Ethernet:IPv4:UDP:Raw
-🍺Report file stored <span class="k">in</span> <span class="s1">&#39;out.txt&#39;</span>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>pcapkit-cli<span class="w"> </span><span class="k">in</span><span class="w"> </span>--output<span class="w"> </span>out.txt<span class="w"> </span>--format<span class="w"> </span>tree<span class="w"> </span>--verbose
+🚨Loading<span class="w"> </span>file<span class="w"> </span><span class="s1">&#39;in.pcap&#39;</span>
+Frame<span class="w">   </span><span class="m">1</span>:<span class="w"> </span>Ethernet:IPv6:IPv6_ICMP
+Frame<span class="w">   </span><span class="m">2</span>:<span class="w"> </span>Ethernet:IPv6:IPv6_ICMP
+Frame<span class="w">   </span><span class="m">3</span>:<span class="w"> </span>Ethernet:IPv4:TCP
+Frame<span class="w">   </span><span class="m">4</span>:<span class="w"> </span>Ethernet:IPv4:TCP
+Frame<span class="w">   </span><span class="m">5</span>:<span class="w"> </span>Ethernet:IPv4:TCP
+Frame<span class="w">   </span><span class="m">6</span>:<span class="w"> </span>Ethernet:IPv4:UDP:Raw
+🍺Report<span class="w"> </span>file<span class="w"> </span>stored<span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="s1">&#39;out.txt&#39;</span>
 </pre></div>
 </div>
 </li>
@@ -204,7 +204,7 @@ Frame   <span class="m">6</span>: Ethernet:IPv4:UDP:Raw
       <div class="clearer"></div>
     </div>
     <div class="footer">
-      &copy;2017-2022, Jarry Shaw.
+      &copy;2017-2023, Jarry Shaw.
       
       |
       <a href="_sources/demo.rst.txt"

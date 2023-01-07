@@ -71,7 +71,7 @@
 
 
 <div class="viewcode-block" id="Socket"><a class="viewcode-back" href="../../../../pcapkit/vendor/ipx.html#pcapkit.vendor.ipx.socket.Socket">[docs]</a><span class="k">class</span> <span class="nc">Socket</span><span class="p">(</span><span class="n">Vendor</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Socket Types&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Socket Types&quot;&quot;&quot;</span>
 
     <span class="c1">#: Value limit checker.</span>
     <span class="n">FLAG</span> <span class="o">=</span> <span class="s1">&#39;isinstance(value, int) and 0x0000 &lt;= value &lt;= 0xFFFF&#39;</span>
@@ -79,7 +79,7 @@
     <span class="n">LINK</span> <span class="o">=</span> <span class="s1">&#39;https://en.wikipedia.org/wiki/Internetwork_Packet_Exchange#Socket_number&#39;</span>
 
     <span class="k">def</span> <span class="nf">count</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">&#39;BeautifulSoup&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Counter[str]&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Count field records.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Count field records.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            data: Registry data.</span>
@@ -91,7 +91,7 @@
         <span class="k">return</span> <span class="n">collections</span><span class="o">.</span><span class="n">Counter</span><span class="p">()</span>
 
     <span class="k">def</span> <span class="nf">request</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;BeautifulSoup&#39;</span><span class="p">:</span>  <span class="c1"># type: ignore[override] # pylint: disable=signature-differs</span>
-        <span class="sd">&quot;&quot;&quot;Fetch HTML source.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Fetch HTML source.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            text: Context from :attr:`~Vendor.LINK`.</span>
@@ -103,7 +103,7 @@
         <span class="k">return</span> <span class="n">bs4</span><span class="o">.</span><span class="n">BeautifulSoup</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="s1">&#39;html5lib&#39;</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">soup</span><span class="p">:</span> <span class="s1">&#39;BeautifulSoup&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;tuple[list[str], list[str]]&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=arguments-differ,arguments-renamed</span>
-        <span class="sd">&quot;&quot;&quot;Process HTML source.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Process HTML source.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            data: Parsed HTML source.</span>
@@ -220,7 +220,7 @@
       <div class="clearer"></div>
     </div>
     <div class="footer">
-      &copy;2017-2022, Jarry Shaw.
+      &copy;2017-2023, Jarry Shaw.
       
     </div>
 

@@ -72,7 +72,7 @@
 
 
 <div class="viewcode-block" id="Packet"><a class="viewcode-back" href="../../../../pcapkit/foundation/reassembly/ip/ip.html#pcapkit.foundation.reassembly.ip.Packet">[docs]</a><span class="k">class</span> <span class="nc">Packet</span><span class="p">(</span><span class="n">Info</span><span class="p">,</span> <span class="n">Generic</span><span class="p">[</span><span class="n">AT</span><span class="p">]):</span>
-    <span class="sd">&quot;&quot;&quot;Data model for :term:`ipv4.packet` / :term:`ipv6.packet`.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for :term:`ipv4.packet` / :term:`ipv6.packet`.&quot;&quot;&quot;</span>
 
     <span class="c1">#: Buffer ID.</span>
     <span class="n">bufid</span><span class="p">:</span> <span class="s1">&#39;tuple[AT, AT, int, TransType]&#39;</span>
@@ -96,7 +96,7 @@
 
 
 <div class="viewcode-block" id="DatagramID"><a class="viewcode-back" href="../../../../pcapkit/foundation/reassembly/ip/ip.html#pcapkit.foundation.reassembly.ip.DatagramID">[docs]</a><span class="k">class</span> <span class="nc">DatagramID</span><span class="p">(</span><span class="n">Info</span><span class="p">,</span> <span class="n">Generic</span><span class="p">[</span><span class="n">AT</span><span class="p">]):</span>
-    <span class="sd">&quot;&quot;&quot;Data model for :term:`ipv4.datagram` / :term:`ipv6.datagram` original packet identifier.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for :term:`ipv4.datagram` / :term:`ipv6.datagram` original packet identifier.&quot;&quot;&quot;</span>
 
     <span class="c1">#: Source address.</span>
     <span class="n">src</span><span class="p">:</span> <span class="s1">&#39;AT&#39;</span>
@@ -112,7 +112,7 @@
 
 
 <div class="viewcode-block" id="Datagram"><a class="viewcode-back" href="../../../../pcapkit/foundation/reassembly/ip/ip.html#pcapkit.foundation.reassembly.ip.Datagram">[docs]</a><span class="k">class</span> <span class="nc">Datagram</span><span class="p">(</span><span class="n">Info</span><span class="p">,</span> <span class="n">Generic</span><span class="p">[</span><span class="n">AT</span><span class="p">]):</span>
-    <span class="sd">&quot;&quot;&quot;Data model for :term:`ipv4.datagram` / :term:`ipv6.datagram`.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for :term:`ipv4.datagram` / :term:`ipv6.datagram`.&quot;&quot;&quot;</span>
 
     <span class="c1">#: Completed flag.</span>
     <span class="n">completed</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span>
@@ -138,7 +138,7 @@
 
 
 <div class="viewcode-block" id="Buffer"><a class="viewcode-back" href="../../../../pcapkit/foundation/reassembly/ip/ip.html#pcapkit.foundation.reassembly.ip.Buffer">[docs]</a><span class="k">class</span> <span class="nc">Buffer</span><span class="p">(</span><span class="n">Info</span><span class="p">,</span> <span class="n">Generic</span><span class="p">[</span><span class="n">AT</span><span class="p">]):</span>
-    <span class="sd">&quot;&quot;&quot;Data model for :term:`ipv4.buffer` / :term:`ipv6.buffer`.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for :term:`ipv4.buffer` / :term:`ipv6.buffer`.&quot;&quot;&quot;</span>
 
     <span class="c1">#: Total data length.</span>
     <span class="n">TDL</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span>
@@ -161,7 +161,7 @@
 
 
 <div class="viewcode-block" id="IP_Reassembly"><a class="viewcode-back" href="../../../../pcapkit/foundation/reassembly/ip/ip.html#pcapkit.foundation.reassembly.ip.IP_Reassembly">[docs]</a><span class="k">class</span> <span class="nc">IP_Reassembly</span><span class="p">(</span><span class="n">Reassembly</span><span class="p">[</span><span class="n">Packet</span><span class="p">[</span><span class="n">AT</span><span class="p">],</span> <span class="n">Datagram</span><span class="p">[</span><span class="n">AT</span><span class="p">],</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">AT</span><span class="p">,</span> <span class="n">AT</span><span class="p">,</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="s1">&#39;TransType&#39;</span><span class="p">],</span> <span class="n">Buffer</span><span class="p">[</span><span class="n">AT</span><span class="p">]],</span> <span class="n">Generic</span><span class="p">[</span><span class="n">AT</span><span class="p">]):</span>  <span class="c1"># pylint: disable=abstract-method</span>
-    <span class="sd">&quot;&quot;&quot;Reassembly for IP payload.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Reassembly for IP payload.</span>
 
 <span class="sd">    Important:</span>
 <span class="sd">        This class is not intended to be instantiated directly,</span>
@@ -175,7 +175,7 @@
     <span class="c1">##########################################################################</span>
 
 <div class="viewcode-block" id="IP_Reassembly.reassembly"><a class="viewcode-back" href="../../../../pcapkit/foundation/reassembly/ip/ip.html#pcapkit.foundation.reassembly.ip.IP_Reassembly.reassembly">[docs]</a>    <span class="k">def</span> <span class="nf">reassembly</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">info</span><span class="p">:</span> <span class="s1">&#39;Packet[AT]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Reassembly procedure.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Reassembly procedure.</span>
 
 <span class="sd">        Arguments:</span>
 <span class="sd">            info: info dict of packets to be reassembled</span>
@@ -242,7 +242,7 @@
 
 <div class="viewcode-block" id="IP_Reassembly.submit"><a class="viewcode-back" href="../../../../pcapkit/foundation/reassembly/ip/ip.html#pcapkit.foundation.reassembly.ip.IP_Reassembly.submit">[docs]</a>    <span class="k">def</span> <span class="nf">submit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">buf</span><span class="p">:</span> <span class="s1">&#39;Buffer[AT]&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">bufid</span><span class="p">:</span> <span class="s1">&#39;tuple[AT, AT, int, TransType]&#39;</span><span class="p">,</span>  <span class="c1"># type: ignore[override] # pylint: disable=arguments-differ</span>
                <span class="n">checked</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;list[Datagram[AT]]&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Submit reassembled payload.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Submit reassembled payload.</span>
 
 <span class="sd">        Arguments:</span>
 <span class="sd">            buf: buffer dict of reassembled packets</span>
@@ -371,7 +371,7 @@
       <div class="clearer"></div>
     </div>
     <div class="footer">
-      &copy;2017-2022, Jarry Shaw.
+      &copy;2017-2023, Jarry Shaw.
       
     </div>
 

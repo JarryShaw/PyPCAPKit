@@ -95,7 +95,7 @@
 
 
 <div class="viewcode-block" id="HTTP"><a class="viewcode-back" href="../../../../pcapkit/protocols/application/httpv1.html#pcapkit.protocols.application.httpv1.HTTP">[docs]</a><span class="k">class</span> <span class="nc">HTTP</span><span class="p">(</span><span class="n">HTTPBase</span><span class="p">[</span><span class="n">DataType_HTTP</span><span class="p">]):</span>
-    <span class="sd">&quot;&quot;&quot;This class implements Hypertext Transfer Protocol (HTTP/1.*).&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;This class implements Hypertext Transfer Protocol (HTTP/1.*).&quot;&quot;&quot;</span>
 
     <span class="c1">##########################################################################</span>
     <span class="c1"># Defaults.</span>
@@ -110,12 +110,12 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">alias</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Literal[&quot;HTTP/0.9&quot;, &quot;HTTP/1.0&quot;, &quot;HTTP/1.1&quot;]&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Acronym of current protocol.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Acronym of current protocol.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;HTTP/</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">version</span><span class="si">}</span><span class="s1">&#39;</span>  <span class="c1"># type: ignore[return-value]</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">version</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Literal[&quot;0.9&quot;, &quot;1.0&quot;, &quot;1.1&quot;]&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Version of current protocol.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Version of current protocol.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_info</span><span class="o">.</span><span class="n">receipt</span><span class="o">.</span><span class="n">version</span>  <span class="c1"># type: ignore[attr-defined]</span>
 
     <span class="c1">##########################################################################</span>
@@ -123,7 +123,7 @@
     <span class="c1">##########################################################################</span>
 
 <div class="viewcode-block" id="HTTP.read"><a class="viewcode-back" href="../../../../pcapkit/protocols/application/httpv1.html#pcapkit.protocols.application.httpv1.HTTP.read">[docs]</a>    <span class="k">def</span> <span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_HTTP&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
-        <span class="sd">&quot;&quot;&quot;Read Hypertext Transfer Protocol (HTTP/1.*).</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read Hypertext Transfer Protocol (HTTP/1.*).</span>
 
 <span class="sd">        Structure of HTTP/1.* packet [:rfc:`7230`]:</span>
 
@@ -167,7 +167,7 @@
         <span class="k">return</span> <span class="n">http</span></div>
 
 <div class="viewcode-block" id="HTTP.make"><a class="viewcode-back" href="../../../../pcapkit/protocols/application/httpv1.html#pcapkit.protocols.application.httpv1.HTTP.make">[docs]</a>    <span class="k">def</span> <span class="nf">make</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;NoReturn&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Make (construct) packet data.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Make (construct) packet data.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
@@ -180,7 +180,7 @@
 
 <div class="viewcode-block" id="HTTP.id"><a class="viewcode-back" href="../../../../pcapkit/protocols/application/httpv1.html#pcapkit.protocols.application.httpv1.HTTP.id">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">id</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;tuple[Literal[&quot;HTTP&quot;]]&#39;</span><span class="p">:</span>  <span class="c1"># type: ignore[override]</span>
-        <span class="sd">&quot;&quot;&quot;Index ID of the protocol.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Index ID of the protocol.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            Index ID of the protocol.</span>
@@ -193,7 +193,7 @@
     <span class="c1">##########################################################################</span>
 
 <div class="viewcode-block" id="HTTP._read_http_header"><a class="viewcode-back" href="../../../../pcapkit/protocols/application/httpv1.html#pcapkit.protocols.application.httpv1.HTTP._read_http_header">[docs]</a>    <span class="k">def</span> <span class="nf">_read_http_header</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">header</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;tuple[DataType_Header, OrderedMultiDict[str, str]]&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Read HTTP/1.* header.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read HTTP/1.* header.</span>
 
 <span class="sd">        Structure of HTTP/1.* header [:rfc:`7230`]:</span>
 
@@ -252,7 +252,7 @@
         <span class="k">return</span> <span class="n">header_line</span><span class="p">,</span> <span class="n">header_fields</span></div>
 
 <div class="viewcode-block" id="HTTP._read_http_body"><a class="viewcode-back" href="../../../../pcapkit/protocols/application/httpv1.html#pcapkit.protocols.application.httpv1.HTTP._read_http_body">[docs]</a>    <span class="k">def</span> <span class="nf">_read_http_body</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">body</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;bytes&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Read HTTP/1.* body.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read HTTP/1.* body.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            body: HTTP body data.</span>
@@ -325,7 +325,7 @@
       <div class="clearer"></div>
     </div>
     <div class="footer">
-      &copy;2017-2022, Jarry Shaw.
+      &copy;2017-2023, Jarry Shaw.
       
     </div>
 

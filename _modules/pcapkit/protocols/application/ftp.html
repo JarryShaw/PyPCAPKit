@@ -64,7 +64,7 @@
 
 
 <div class="viewcode-block" id="FTP"><a class="viewcode-back" href="../../../../pcapkit/protocols/application/ftp.html#pcapkit.protocols.application.ftp.FTP">[docs]</a><span class="k">class</span> <span class="nc">FTP</span><span class="p">(</span><span class="n">Application</span><span class="p">[</span><span class="n">DataType_FTP</span><span class="p">]):</span>
-    <span class="sd">&quot;&quot;&quot;This class implements File Transfer Protocol.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;This class implements File Transfer Protocol.&quot;&quot;&quot;</span>
 
     <span class="c1">##########################################################################</span>
     <span class="c1"># Properties.</span>
@@ -72,12 +72,12 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Literal[&quot;File Transfer Protocol&quot;]&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Name of current protocol.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Name of current protocol.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="s1">&#39;File Transfer Protocol&#39;</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">length</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;NoReturn&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Header length of current protocol.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Header length of current protocol.</span>
 
 <span class="sd">        Raises:</span>
 <span class="sd">            UnsupportedCall: This protocol doesn&#39;t support :attr:`length`.</span>
@@ -90,7 +90,7 @@
     <span class="c1">##########################################################################</span>
 
 <div class="viewcode-block" id="FTP.read"><a class="viewcode-back" href="../../../../pcapkit/protocols/application/ftp.html#pcapkit.protocols.application.ftp.FTP.read">[docs]</a>    <span class="k">def</span> <span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_FTP&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
-        <span class="sd">&quot;&quot;&quot;Read File Transfer Protocol (FTP).</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read File Transfer Protocol (FTP).</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            length: Length of packet data.</span>
@@ -149,7 +149,7 @@
         <span class="k">return</span> <span class="n">ftp</span></div>
 
 <div class="viewcode-block" id="FTP.make"><a class="viewcode-back" href="../../../../pcapkit/protocols/application/ftp.html#pcapkit.protocols.application.ftp.FTP.make">[docs]</a>    <span class="k">def</span> <span class="nf">make</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;NoReturn&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Make (construct) packet data.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Make (construct) packet data.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            Arbitrary keyword arguments.</span>
@@ -222,7 +222,7 @@
       <div class="clearer"></div>
     </div>
     <div class="footer">
-      &copy;2017-2022, Jarry Shaw.
+      &copy;2017-2023, Jarry Shaw.
       
     </div>
 

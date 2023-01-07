@@ -56,7 +56,7 @@
 
 
 <div class="viewcode-block" id="Link"><a class="viewcode-back" href="../../../../pcapkit/protocols/link/link.html#pcapkit.protocols.link.link.Link">[docs]</a><span class="k">class</span> <span class="nc">Link</span><span class="p">(</span><span class="n">Protocol</span><span class="p">[</span><span class="n">PT</span><span class="p">],</span> <span class="n">Generic</span><span class="p">[</span><span class="n">PT</span><span class="p">]):</span>  <span class="c1"># pylint: disable=abstract-method</span>
-    <span class="sd">&quot;&quot;&quot;Abstract base class for link layer protocol family.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Abstract base class for link layer protocol family.</span>
 
 <span class="sd">    This class currently supports parsing of the following protocols, which are</span>
 <span class="sd">    registered in the :attr:`self.__proto__ &lt;pcapkit.protocols.link.link.Link.__proto__&gt;`</span>
@@ -113,7 +113,7 @@
     <span class="c1"># protocol layer</span>
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">layer</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Literal[&quot;Link&quot;]&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Protocol layer.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Protocol layer.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__layer__</span>
 
     <span class="c1">##########################################################################</span>
@@ -122,7 +122,7 @@
 
 <div class="viewcode-block" id="Link.register"><a class="viewcode-back" href="../../../../pcapkit/protocols/link/link.html#pcapkit.protocols.link.link.Link.register">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">register</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">&#39;RegType_EtherType&#39;</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">class_</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
-        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Register a new protocol class.</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Register a new protocol class.</span>
 
 <span class="sd">        Notes:</span>
 <span class="sd">            The full qualified class name of the new protocol class</span>
@@ -141,7 +141,7 @@
     <span class="c1">##########################################################################</span>
 
 <div class="viewcode-block" id="Link._read_protos"><a class="viewcode-back" href="../../../../pcapkit/protocols/link/link.html#pcapkit.protocols.link.link.Link._read_protos">[docs]</a>    <span class="k">def</span> <span class="nf">_read_protos</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">size</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;RegType_EtherType&#39;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Read next layer protocol type.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read next layer protocol type.</span>
 
 <span class="sd">        Arguments:</span>
 <span class="sd">            size: buffer size</span>
@@ -216,7 +216,7 @@
       <div class="clearer"></div>
     </div>
     <div class="footer">
-      &copy;2017-2022, Jarry Shaw.
+      &copy;2017-2023, Jarry Shaw.
       
     </div>
 
