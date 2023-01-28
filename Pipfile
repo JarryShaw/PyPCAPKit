@@ -36,6 +36,7 @@ types-requests = "*"
 types-urllib3 = "*"
 pybind11 = {extras = ["global"],version = "*"}
 snakeviz = "*"
+tuna = "*"
 
 [requires]
 python_version = "3"

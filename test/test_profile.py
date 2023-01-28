@@ -6,7 +6,8 @@ import pcapkit
 
 
 def test() -> 'None':
-    pcapkit.extract(fin='../sample/http.pcap', store=False, nofile=True, engine='default')
+    pcapkit.extract(fin='../sample/http.pcap', store=True,
+                    nofile=True, engine='default', verbose=True)
 
 
 if __name__ == '__main__':
