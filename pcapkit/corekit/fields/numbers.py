@@ -4,7 +4,7 @@
 import enum
 from typing import TYPE_CHECKING, cast
 
-from pcapkit.protocols.fields.field import Field
+from pcapkit.corekit.fields.field import Field
 
 __all__ = [
     'NumberField',

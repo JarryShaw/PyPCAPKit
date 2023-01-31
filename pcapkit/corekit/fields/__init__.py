@@ -8,10 +8,10 @@ descriptive of the structure of protocol headers.
 
 """
 
-from pcapkit.protocols.fields.field import Field
+from pcapkit.corekit.fields.field import Field
 
-from pcapkit.protocols.fields.numbers import NumberField, EnumField
-from pcapkit.protocols.fields.strings import BytesField, StringField, BitField
+from pcapkit.corekit.fields.numbers import NumberField, EnumField
+from pcapkit.corekit.fields.strings import BytesField, StringField, BitField
 
 __all__ = [
     'NumberField',

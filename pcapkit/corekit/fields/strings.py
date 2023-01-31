@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING
 import chardet
 
 from pcapkit.corekit.infoclass import Info
-from pcapkit.protocols.fields.field import Field
+from pcapkit.corekit.fields.field import Field
 
 __all__ = [
     'BytesField',
