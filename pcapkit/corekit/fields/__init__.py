@@ -10,11 +10,17 @@ descriptive of the structure of protocol headers.
 
 from pcapkit.corekit.fields.field import Field
 
-from pcapkit.corekit.fields.numbers import NumberField, EnumField
+from pcapkit.corekit.fields.numbers import (ByteField, EnumField, IntField, LongField, NumberField,
+                                            ShortField, UByteField, UIntField, ULongField,
+                                            UShortField)
 from pcapkit.corekit.fields.strings import BytesField, StringField, BitField
 
 __all__ = [
     'NumberField',
+    'IntField', 'UIntField',
+    'ShortField', 'UShortField',
+    'LongField', 'ULongField',
+    'ByteField', 'UByteField',
     'EnumField',
 
     'BytesField',

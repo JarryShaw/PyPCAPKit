@@ -40,6 +40,7 @@ attrs = dict(
         'pcapkit.const.tcp',
         'pcapkit.const.vlan',
         'pcapkit.corekit',
+        'pcapkit.corekit.fields',
         'pcapkit.dumpkit',
         'pcapkit.foundation',
         'pcapkit.foundation.reassembly',

@@ -40,7 +40,7 @@ __all__ = [
     'FileNotFound',                                                 # FileNotFoundError
     'ProtocolNotFound',                                             # IndexError
     'VersionError', 'IndexNotFound', 'ProtocolError',               # ValueError
-    'EndianError', 'KeyExists',                                     # ValueError
+    'EndianError', 'KeyExists', 'NoDefaultValue',                   # ValueError
     'ProtocolNotImplemented', 'VendorNotImplemented',               # NotImplementedError
     'StructError',                                                  # struct.error
     'MissingKeyError', 'FragmentError', 'PacketError',              # KeyError
@@ -268,6 +268,10 @@ class EndianError(BaseError, ValueError):
 
 class KeyExists(BaseError, ValueError):
     """Key already exists."""
+
+
+class NoDefaultValue(BaseError, ValueError):
+    """No default value."""
 
 
 ##############################################################################

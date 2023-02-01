@@ -6,8 +6,8 @@ from typing import TYPE_CHECKING
 
 import chardet
 
-from pcapkit.corekit.infoclass import Info
 from pcapkit.corekit.fields.field import Field
+from pcapkit.corekit.infoclass import Info
 
 __all__ = [
     'BytesField',
@@ -26,18 +26,23 @@ if TYPE_CHECKING:
 
 
 class BytesField(Field):
-    """Bytes value for protocol fields."""
+    """Bytes value for protocol fields.
+
+    Args:
+        name: field name.
+        length: field size (in bytes).
+        default: field default value, if any.
+
+    """
 
     @property
     def length(self) -> 'int':
         """Field size."""
         return self._length
 
-    def __init__(self, condition: 'Optional[Callable[[Info], bool]]' = None,
-                 length: 'int' = 1) -> 'None':
-        super().__init__(condition)
+    def __init__(self, name: 'str', length: 'int', default: 'Any' = None) -> 'None':
+        super().__init__(name, length, default)
 
-        self._length = length
         self._template = f'{length}s'
 
 
@@ -45,10 +50,9 @@ class StringField(BytesField):
     r"""String value for protocol fields.
 
     Args:
-        condition: field condition function (this function should return a bool
-            value and accept the current packet :class:`pcapkit.corekit.infoclass.Info`
-            as its only argument).
+        name: field name.
         length: field size (in bytes).
+        default: field default value, if any.
         encoding: The encoding with which to decode the :obj:`bytes`.
             If not provided, :mod:`pcapkit` will first try detecting its encoding
             using |chardet|_. The fallback encoding would is **UTF-8**.
@@ -66,11 +70,11 @@ class StringField(BytesField):
 
     """
 
-    def __init__(self, condition: 'Optional[Callable[..., bool]]' = None,
-                 length: 'int' = 1, encoding: 'Optional[str]' = None,
+    def __init__(self, name: 'str', length: 'int',
+                 default: 'Any' = None, encoding: 'Optional[str]' = None,
                  errors: 'Literal["strict", "ignore", "replace"]' = 'strict',
                  unquote: 'bool' = False) -> 'None':
-        super().__init__(condition)
+        super().__init__(name, length, default)
 
         self._encoding = encoding
         self._errors = errors
@@ -118,9 +122,9 @@ class BitField(BytesField):
     """Bit value for protocol fields.
 
     Args:
-        condition: field condition function (this function should return a bool
-            value and accept the current packet :class:`pcapkit.corekit.infoclass.Info`
-            as its only argument).
+        name: field name.
+        length: field size (in bytes).
+        default: field default value, if any.
         length: field size (in bytes).
         namespace: field namespace (a dict mapping field name to a tuple of start index,
             end index, converter function, which takes the flag value :obj:`int` as
@@ -129,9 +133,9 @@ class BitField(BytesField):
 
     """
 
-    def __init__(self, condition: 'Optional[Callable[..., bool]]' = None, length: 'int' = 1,
+    def __init__(self, name: 'str', length: 'int', default: 'Any' = None,
                  namespace: 'Optional[dict[str, NamespaceEntry]]' = None) -> 'None':  # pylint: disable=line-too-long
-        super().__init__(condition)
+        super().__init__(name, length, default)
 
         self._namespace = namespace or {}
 
@@ -145,14 +149,14 @@ class BitField(BytesField):
             Processed field value.
 
         """
-        buffer = ['0' for _ in range(self.length * 8)]
+        buffer = bytearray(self.length * 8)
         for name, (start, end, _, reverser) in self._namespace.items():
             end = end or start
             if reverser is None:
-                buffer[start:end] = list(f'{value[name]:0{end - start}b}')
+                buffer[start:end] = f'{value[name]:0{end - start}b}'.encode()
             else:
-                buffer[start:end] = list(f'{reverser(value[name]):0{end - start}b}')
-        return int(''.join(buffer), 2).to_bytes(self.length, 'big')
+                buffer[start:end] = f'{reverser(value[name]):0{end - start}b}'.encode()
+        return int(b''.join(map(lambda x: b'1' if x else b'0', buffer)), 2).to_bytes(self.length, 'big')
 
     def post_process(self, value: 'bytes') -> 'Info':
         """Process field value after parsing (unpacked).
