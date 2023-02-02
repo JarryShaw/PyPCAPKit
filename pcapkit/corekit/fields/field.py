@@ -16,7 +16,39 @@ _P = TypeVar('_P', 'int', 'bytes')
 _T = TypeVar('_T')
 
 
-class Field(abc.ABC, Generic[_P, _T]):
+class _Field(Generic[_P, _T], metaclass=abc.ABCMeta):
+    """Internal base class for protocol fields."""
+
+    @property
+    @abc.abstractmethod
+    def name(self) -> 'str':
+        """Field name."""
+
+    @property
+    @abc.abstractmethod
+    def default(self) -> '_T':
+        """Field default value."""
+
+    @property
+    @abc.abstractmethod
+    def template(self) -> 'str':
+        """Field template."""
+
+    @property
+    @abc.abstractmethod
+    def length(self) -> 'int':
+        """Field size."""
+
+    @abc.abstractmethod
+    def pack(self, value: '_T') -> 'bytes':
+        """Pack field value into :obj:`bytes`."""
+
+    @abc.abstractmethod
+    def unpack(self, buffer: 'bytes') -> '_T':
+        """Unpack field value from :obj:`bytes`."""
+
+
+class Field(_Field[_P, _T], Generic[_P, _T]):
     """Base class for protocol fields.
 
     Args:
