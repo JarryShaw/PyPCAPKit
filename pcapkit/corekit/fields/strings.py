@@ -2,15 +2,14 @@
 """text field class"""
 
 import urllib.parse as urllib_parse
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, Dict, Generic, TypeVar
 
 import chardet
 
 from pcapkit.corekit.fields.field import Field
-from pcapkit.corekit.infoclass import Info
 
 __all__ = [
-    'BytesField',
+    '_TextField',
     'StringField',
     'BitField',
 ]
@@ -24,34 +23,55 @@ if TYPE_CHECKING:
     ReverserFunc = Callable[[Any], int]
     NamespaceEntry = tuple[int, Optional[int], Optional[ConverterFunc], Optional[ReverserFunc]]
 
+_T = TypeVar('_T', 'str', 'bytes', 'dict[str, Any]')
 
-class BytesField(Field):
-    """Bytes value for protocol fields.
+
+class _TextField(Field[_T], Generic[_T]):
+    """Internal text value for protocol fields.
 
     Args:
         name: field name.
-        length: field size (in bytes).
+        length: field size (in bytes); if a callable is given, it should return
+            an integer value and accept the current packet as its only argument.
         default: field default value, if any.
 
     """
 
-    @property
-    def length(self) -> 'int':
-        """Field size."""
-        return self._length
+    def __init__(self, name: 'str', length: 'int | Callable[[dict[str, Any]], int]',
+                 default: 'Optional[_T]' = None) -> 'None':
+        super().__init__(name, length, default)  # type: ignore[arg-type]
 
-    def __init__(self, name: 'str', length: 'int', default: 'Any' = None) -> 'None':
-        super().__init__(name, length, default)
+        self._template = f'{self._length}s'
 
-        self._template = f'{length}s'
+    def __call__(self, packet: 'dict[str, Any]') -> 'None':
+        """Update field attributes."""
+        old_length = self._length
+        super().__call__(packet)
+
+        if old_length == self._length:
+            return
+        self._template = f'{self._length}s'
 
 
-class StringField(BytesField):
+class BytesField(_TextField[bytes]):
+    """Bytes value for protocol fields.
+
+    Args:
+        name: field name.
+        length: field size (in bytes); if a callable is given, it should return
+            an integer value and accept the current packet as its only argument.
+        default: field default value, if any.
+
+    """
+
+
+class StringField(_TextField[str]):
     r"""String value for protocol fields.
 
     Args:
         name: field name.
-        length: field size (in bytes).
+        length: field size (in bytes); if a callable is given, it should return
+            an integer value and accept the current packet as its only argument.
         default: field default value, if any.
         encoding: The encoding with which to decode the :obj:`bytes`.
             If not provided, :mod:`pcapkit` will first try detecting its encoding
@@ -70,8 +90,8 @@ class StringField(BytesField):
 
     """
 
-    def __init__(self, name: 'str', length: 'int',
-                 default: 'Any' = None, encoding: 'Optional[str]' = None,
+    def __init__(self, name: 'str', length: 'int | Callable[[dict[str, Any]], int]',
+                 default: 'Optional[str]' = None, encoding: 'Optional[str]' = None,
                  errors: 'Literal["strict", "ignore", "replace"]' = 'strict',
                  unquote: 'bool' = False) -> 'None':
         super().__init__(name, length, default)
@@ -80,11 +100,12 @@ class StringField(BytesField):
         self._errors = errors
         self._unquote = unquote
 
-    def pre_process(self, value: 'str') -> 'bytes':
+    def pre_process(self, value: 'str', packet: 'dict[str, Any]') -> 'bytes':  # pylint: disable=unused-argument
         """Process field value before construction (packing).
 
         Arguments:
             value: field value
+            packet: packet data
 
         Returns:
             Processed field value.
@@ -94,11 +115,12 @@ class StringField(BytesField):
             value = urllib_parse.quote(value, encoding=self._encoding or 'utf-8', errors=self._errors)
         return value.encode(self._encoding or 'utf-8', self._errors)
 
-    def post_process(self, value: 'bytes') -> 'bytes | str':
+    def post_process(self, value: 'bytes', packet: 'dict[str, Any]') -> 'str':  # pylint: disable=unused-argument
         """Process field value after parsing (unpacked).
 
         Arguments:
             value: field value
+            packet: packet data
 
         Returns:
             Processed field value.
@@ -118,14 +140,14 @@ class StringField(BytesField):
         return ret
 
 
-class BitField(BytesField):
+class BitField(_TextField[Dict[str, Any]]):
     """Bit value for protocol fields.
 
     Args:
         name: field name.
-        length: field size (in bytes).
+        length: field size (in bytes); if a callable is given, it should return
+            an integer value and accept the current packet as its only argument.
         default: field default value, if any.
-        length: field size (in bytes).
         namespace: field namespace (a dict mapping field name to a tuple of start index,
             end index, converter function, which takes the flag value :obj:`int` as
             its only argument, and reverser function, which takes the converted flag value
@@ -133,17 +155,19 @@ class BitField(BytesField):
 
     """
 
-    def __init__(self, name: 'str', length: 'int', default: 'Any' = None,
-                 namespace: 'Optional[dict[str, NamespaceEntry]]' = None) -> 'None':  # pylint: disable=line-too-long
+    def __init__(self, name: 'str', length: 'int | Callable[[dict[str, Any]], int]',
+                 default: 'Optional[dict[str, Any]]' = None,
+                 namespace: 'Optional[dict[str, NamespaceEntry]]' = None) -> 'None':
         super().__init__(name, length, default)
 
         self._namespace = namespace or {}
 
-    def pre_process(self, value: 'dict[str, Any]') -> 'bytes':
+    def pre_process(self, value: 'dict[str, Any]', packet: 'dict[str, Any]') -> 'bytes':  # pylint: disable=unused-argument
         """Process field value before construction (packing).
 
         Arguments:
             value: field value
+            packet: packet data
 
         Returns:
             Processed field value.
@@ -158,11 +182,12 @@ class BitField(BytesField):
                 buffer[start:end] = f'{reverser(value[name]):0{end - start}b}'.encode()
         return int(b''.join(map(lambda x: b'1' if x else b'0', buffer)), 2).to_bytes(self.length, 'big')
 
-    def post_process(self, value: 'bytes') -> 'Info':
+    def post_process(self, value: 'bytes', packet: 'dict[str, Any]') -> 'dict[str, Any]':  # pylint: disable=unused-argument
         """Process field value after parsing (unpacked).
 
         Arguments:
             value: field value
+            packet: packet data
 
         Returns:
             Processed field value.
@@ -175,4 +200,4 @@ class BitField(BytesField):
                 buffer[name] = int(binary[start:end], 2)
             else:
                 buffer[name] = converter(int(binary[start:end], 2))
-        return Info.from_dict(buffer)
+        return buffer

@@ -10,14 +10,16 @@ from pcapkit.utilities.exceptions import NoDefaultValue
 __all__ = ['Field']
 
 if TYPE_CHECKING:
-    from typing import Optional
+    from typing import Any, Callable, Optional
 
-_P = TypeVar('_P', 'int', 'bytes')
 _T = TypeVar('_T')
 
 
-class _Field(Generic[_P, _T], metaclass=abc.ABCMeta):
+class _Field(Generic[_T], metaclass=abc.ABCMeta):
     """Internal base class for protocol fields."""
+
+    if TYPE_CHECKING:
+        _default: Optional[_T]
 
     @property
     @abc.abstractmethod
@@ -25,9 +27,14 @@ class _Field(Generic[_P, _T], metaclass=abc.ABCMeta):
         """Field name."""
 
     @property
-    @abc.abstractmethod
-    def default(self) -> '_T':
+    def default(self) -> 'Optional[_T]':
         """Field default value."""
+        return None
+
+    @default.setter
+    def default(self, value: '_T') -> 'None':
+        """Set field default value."""
+        self._default = value
 
     @property
     @abc.abstractmethod
@@ -35,25 +42,85 @@ class _Field(Generic[_P, _T], metaclass=abc.ABCMeta):
         """Field template."""
 
     @property
-    @abc.abstractmethod
     def length(self) -> 'int':
         """Field size."""
+        return struct.calcsize(self.template)
 
-    @abc.abstractmethod
-    def pack(self, value: '_T') -> 'bytes':
-        """Pack field value into :obj:`bytes`."""
+    def __call__(self, packet: 'dict[str, Any]') -> 'None':
+        """Update field attributes.
 
-    @abc.abstractmethod
-    def unpack(self, buffer: 'bytes') -> '_T':
-        """Unpack field value from :obj:`bytes`."""
+        Arguments:
+            packet: packet data.
+
+        """
+
+    def pre_process(self, value: '_T', packet: 'dict[str, Any]') -> 'Any':  # pylint: disable=unused-argument
+        """Process field value before construction (packing).
+
+        Arguments:
+            value: field value.
+            packet: packet data.
+
+        Returns:
+            Processed field value.
+
+        """
+        return cast('Any', value)
+
+    def pack(self, value: 'Optional[_T]', packet: 'dict[str, Any]') -> 'bytes':
+        """Pack field value into :obj:`bytes`.
+
+        Args:
+            value: field value.
+            packet: packet data.
+
+        Returns:
+            Packed field value.
+
+        """
+        if value is None:
+            if self._default is None:
+                raise NoDefaultValue(f'Field {self.name} has no default value.')
+            value = self._default
+
+        pre_processed = self.pre_process(value, packet)
+        return struct.pack(self.template, pre_processed)
+
+    def post_process(self, value: 'Any', packet: 'dict[str, Any]') -> '_T':  # pylint: disable=unused-argument
+        """Process field value after parsing (unpacking).
+
+        Args:
+            value: field value.
+            packet: packet data.
+
+        Returns:
+            Processed field value.
+
+        """
+        return cast('_T', value)
+
+    def unpack(self, buffer: 'bytes', packet: 'dict[str, Any]') -> '_T':
+        """Unpack field value from :obj:`bytes`.
+
+        Args:
+            buffer: field buffer.
+            packet: packet data.
+
+        Returns:
+            Unpacked field value.
+
+        """
+        value = struct.unpack(self.template, buffer[:self.length])[0]
+        return self.post_process(value, packet)
 
 
-class Field(_Field[_P, _T], Generic[_P, _T]):
+class Field(_Field[_T], Generic[_T]):
     """Base class for protocol fields.
 
     Args:
         name: field name.
-        length: field size (in bytes).
+        length: field size (in bytes); if a callable is given, it should return
+            an integer value and accept the current packet as its only argument.
         default: field default value, if any.
 
     """
@@ -67,13 +134,6 @@ class Field(_Field[_P, _T], Generic[_P, _T]):
         return self._name
 
     @property
-    def default(self) -> '_T':
-        """Field default value."""
-        if self._default is None:
-            raise NoDefaultValue(f'Field {self._name} has no default value.')
-        return self._default
-
-    @property
     def template(self) -> 'str':
         """Field template."""
         return self._template
@@ -83,57 +143,18 @@ class Field(_Field[_P, _T], Generic[_P, _T]):
         """Field size."""
         return struct.calcsize(self.template)
 
-    def __init__(self, name: 'str', length: 'int', default: 'Optional[_T]' = None) -> 'None':
+    def __init__(self, name: 'str', length: 'int | Callable[[dict[str, Any]], int]',
+                 default: 'Optional[_T]' = None) -> 'None':
         self._name = name
-        self._length = length
         self._default = default
 
-    def pre_process(self, value: '_T') -> '_P':
-        """Process field value before construction (packing).
+        self._length_callback = None
+        if not isinstance(length, int):
+            self._length_callback, length = length, 1
+        self._length = length
 
-        Arguments:
-            value: field value
-
-        Returns:
-            Processed field value.
-
-        """
-        return cast('_P', value)
-
-    def pack(self, value: '_T') -> 'bytes':
-        """Pack field value into :obj:`bytes`.
-
-        Arguments:
-            value: field value
-
-        Returns:
-            Packed field value.
-
-        """
-        temp = self.pre_process(value)
-        return struct.pack(self.template, temp)
-
-    def post_process(self, value: '_P') -> '_T':
-        """Process field value after parsing (unpacked).
-
-        Arguments:
-            value: field value
-
-        Returns:
-            Processed field value.
-
-        """
-        return cast('_T', value)
-
-    def unpack(self, buffer: 'bytes') -> '_T':
-        """Unpack field value from :obj:`bytes`.
-
-        Arguments:
-            buffer: buffer to unpack
-
-        Returns:
-            Unpacked field value.
-
-        """
-        temp = struct.unpack(self.template, buffer)[0]
-        return self.post_process(temp)
+    def __call__(self, packet: 'dict[str, Any]') -> 'None':
+        """Update field attributes."""
+        if self._length_callback is None:
+            return
+        self._length = self._length_callback(packet)

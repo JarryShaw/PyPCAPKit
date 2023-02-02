@@ -2,7 +2,7 @@
 """numerical field class"""
 
 import enum
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING, Generic, TypeVar, cast
 
 from pcapkit.corekit.fields.field import Field
 from pcapkit.utilities.exceptions import IntError
@@ -18,20 +18,22 @@ __all__ = [
 
 if TYPE_CHECKING:
     from enum import IntEnum as StdlibEnum
-    from typing import Any, Optional, Type
+    from typing import Any, Callable, Optional, Type
 
     from aenum import IntEnum as AenumEnum
     from typing_extensions import Literal
 
+_T = TypeVar('_T', bound='int')
 
-class NumberField(Field):
+
+class NumberField(Field[int], Generic[_T]):
     """Numerical value for protocol fields.
 
     Args:
         name: field name.
-        length: field size (in bytes).
+        length: field size (in bytes); if a callable is given, it should return
+            an integer value and accept the current packet as its only argument.
         default: field default value, if any.
-        size: field size (in bytes).
         signed: whether the field is signed.
         byteorder: field byte order.
 
@@ -41,8 +43,9 @@ class NumberField(Field):
     __template__ = None  # type: Optional[str]
     __signed__ = None  # type: Optional[bool]
 
-    def __init__(self, name: 'str', length: 'Optional[int]' = None, default: 'Any' = None,
-                 signed: 'bool' = False, byteorder: 'Literal["little", "big"]' = 'big') -> 'None':
+    def __init__(self, name: 'str', length: 'Optional[int | Callable[[dict[str, Any]], int]]' = None,
+                 default: 'Optional[int]' = None, signed: 'bool' = False,
+                 byteorder: 'Literal["little", "big"]' = 'big') -> 'None':
         if length is None:
             if self.__length__ is None:
                 raise IntError(f'Field {name} has no length.')
@@ -57,7 +60,19 @@ class NumberField(Field):
         if self.__template__ is not None:
             struct_fmt = self.__template__
         else:
-            struct_fmt = self.build_template(length, signed)
+            struct_fmt = self.build_template(self._length, signed)
+        self._template = f'{endian}{struct_fmt}'
+
+    def __call__(self, packet: 'dict[str, Any]') -> 'None':
+        """Update field attributes."""
+        old_length = self._length
+        super().__call__(packet)
+
+        if old_length == self._length:
+            return
+
+        endian = '>' if self._byteorder == 'big' else '<'
+        struct_fmt = self.build_template(self._length, self._signed)
         self._template = f'{endian}{struct_fmt}'
 
     def build_template(self, length: 'int', signed: 'bool') -> 'str':
@@ -83,11 +98,12 @@ class NumberField(Field):
             self._need_process = True
         return struct_fmt
 
-    def pre_process(self, value: 'int') -> 'int | bytes':
+    def pre_process(self, value: 'int', packet: 'dict[str, Any]') -> 'int | bytes':  # pylint: disable=unused-argument
         """Process field value before construction (packing).
 
         Arguments:
-            value: field value
+            value: field value.
+            packet: packet data.
 
         Returns:
             Processed field value.
@@ -99,11 +115,12 @@ class NumberField(Field):
             self._length, self._byteorder, signed=self._signed
         )
 
-    def post_process(self, value: 'int | bytes') -> 'int':
+    def post_process(self, value: 'int | bytes', packet: 'dict[str, Any]') -> 'int':  # pylint: disable=unused-argument
         """Process field value after parsing (unpacked).
 
-        Arguments:
-            value: field value
+        Args:
+            value: field value.
+            packet: packet data.
 
         Returns:
             Processed field value.
@@ -252,12 +269,13 @@ class UByteField(NumberField):
     __signed__ = False
 
 
-class EnumField(NumberField):
+class EnumField(NumberField[StdlibEnum | AenumEnum]):
     """Enumerated value for protocol fields.
 
     Args:
         name: field name.
-        length: field size (in bytes).
+        length: field size (in bytes); if a callable is given, it should return
+            an integer value and accept the current packet as its only argument.
         default: field default value, if any.
         signed: whether the field is signed.
         byteorder: field byte order.
@@ -265,36 +283,26 @@ class EnumField(NumberField):
 
     """
 
-    def __init__(self, name: 'str', length: 'int', default: 'Any' = None,
-                 signed: 'bool' = False, byteorder: 'Literal["little", "big"]' = 'big',
+    def __init__(self, name: 'str', length: 'Optional[int | Callable[[dict[str, Any]], int]]' = None,
+                 default: 'Optional[StdlibEnum | AenumEnum]' = None, signed: 'bool' = False,
+                 byteorder: 'Literal["little", "big"]' = 'big',
                  namespace: 'Optional[Type[StdlibEnum] | Type[AenumEnum]]' = None) -> 'None':
         super().__init__(name, length, default, signed, byteorder)
 
         self._namespace = namespace
 
-    def pre_process(self, value: 'StdlibEnum | AenumEnum') -> 'int | bytes':
-        """Process field value before construction (packing).
-
-        Arguments:
-            value: field value
-
-        Returns:
-            Processed field value.
-
-        """
-        return super().pre_process(value.value)
-
-    def post_process(self, value: 'int | bytes') -> 'StdlibEnum | AenumEnum':
+    def post_process(self, value: 'int | bytes', packet: 'dict[str, Any]') -> 'StdlibEnum | AenumEnum':
         """Process field value after parsing (unpacked).
 
-        Arguments:
-            value: field value
+        Args:
+            value: field value.
+            packet: packet data.
 
         Returns:
             Processed field value.
 
         """
-        value = super().post_process(value)
+        value = super().post_process(value, packet)
         if self._namespace is None:
             unknown = enum.IntEnum('<unknown>', {
                 '<unassigned>': value,
