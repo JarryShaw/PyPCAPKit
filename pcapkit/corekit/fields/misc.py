@@ -216,12 +216,17 @@ class PayloadField(_Field[_TP]):
             return value
         return value.data
 
-    def unpack(self, buffer: 'bytes | BinaryIO', packet: 'dict[str, Any]') -> '_TP':
+    def unpack(self, buffer: 'bytes | BinaryIO',
+               packet: 'dict[str, Any]', *,
+               length: 'Optional[int]' = None) -> '_TP':
         """Unpack field value from :obj:`bytes`.
 
         Args:
             buffer: field buffer.
             packet: packet data.
+
+        Keyword Arguments:
+            length: field length.
 
         Returns:
             Unpacked field value.
@@ -231,4 +236,4 @@ class PayloadField(_Field[_TP]):
             file = io.BytesIO(buffer)  # type: BinaryIO
         else:
             file = buffer
-        return self._protocol(file)  # type: ignore[abstract]
+        return self._protocol(file, length)  # type: ignore[abstract]
