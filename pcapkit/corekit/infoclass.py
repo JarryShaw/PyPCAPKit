@@ -48,7 +48,7 @@ class Info(Mapping[str, VT], Generic[VT]):
         #: Mapping of name conflicts with builtin methods (transformed names to
         #: original names).
         __map_reverse__: 'dict[str, str]'
-        #： List of builtin methods.
+        #: List of builtin methods.
         __builtin__: 'set[str]'
 
     def __new__(cls, *args: 'VT', **kwargs: 'VT') -> 'Info':  # pylint: disable=unused-argument
@@ -193,8 +193,8 @@ class Info(Mapping[str, VT], Generic[VT]):
         for key in self.__dict__:
             yield self.__map_reverse__.get(key, key)
 
-    def __getitem__(self, key: 'str') -> 'VT':
-        key = self.__map__.get(key, key)
+    def __getitem__(self, name: 'str') -> 'VT':
+        key = self.__map__.get(name, name)
         return self.__dict__[key]
 
     def __setattr__(self, name: 'str', value: 'VT') -> 'NoReturn':
