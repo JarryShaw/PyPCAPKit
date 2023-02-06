@@ -52,9 +52,15 @@ __all__ = [
     'Info',                                                 # Info Class
     'ProtoChain',                                           # ProtoChain
     'VersionInfo',                                          # Version
+    'NumberField', 'IntField', 'UIntField', 'ShortField',   # numeric protocol fields
+    'UShortField', 'LongField', 'ULongField', 'ByteField',
+    'UByteField', 'EnumField',
+    'BytesField', 'StringField', 'BitField',                # text protocol fields
+    'ConditionalField', 'PayloadField',                     # misc protocol fields
+    'Schema',                                               # protocol schema
 
     # pcapkit.dumpkit
-    'PCAPIO',                                                 # PCAP Dumper
+    'PCAPIO',                                               # PCAP Dumper
     'NotImplementedIO',                                     # Simulated I/O
 
     # pcapkit.foundation
