@@ -30,34 +30,32 @@ class _TextField(Field[_T], Generic[_T]):
     """Internal text value for protocol fields.
 
     Args:
-        name: field name.
         length: field size (in bytes); if a callable is given, it should return
             an integer value and accept the current packet as its only argument.
         default: field default value, if any.
 
     """
 
-    def __init__(self, name: 'str', length: 'int | Callable[[dict[str, Any]], int]',
+    def __init__(self, length: 'int | Callable[[dict[str, Any]], int]',
                  default: 'Optional[_T]' = None) -> 'None':
-        super().__init__(name, length, default)  # type: ignore[arg-type]
+        super().__init__(length, default)  # type: ignore[arg-type]
 
         self._template = f'{self._length}s'
 
-    def __call__(self, packet: 'dict[str, Any]') -> 'None':
+    def __call__(self, packet: 'dict[str, Any]') -> '_TextField':
         """Update field attributes."""
         old_length = self._length
         super().__call__(packet)
 
-        if old_length == self._length:
-            return
-        self._template = f'{self._length}s'
+        if old_length != self._length:
+            self._template = f'{self._length}s'
+        return self
 
 
 class BytesField(_TextField[bytes]):
     """Bytes value for protocol fields.
 
     Args:
-        name: field name.
         length: field size (in bytes); if a callable is given, it should return
             an integer value and accept the current packet as its only argument.
         default: field default value, if any.
@@ -69,7 +67,6 @@ class StringField(_TextField[str]):
     r"""String value for protocol fields.
 
     Args:
-        name: field name.
         length: field size (in bytes); if a callable is given, it should return
             an integer value and accept the current packet as its only argument.
         default: field default value, if any.
@@ -90,11 +87,11 @@ class StringField(_TextField[str]):
 
     """
 
-    def __init__(self, name: 'str', length: 'int | Callable[[dict[str, Any]], int]',
+    def __init__(self, length: 'int | Callable[[dict[str, Any]], int]',
                  default: 'Optional[str]' = None, encoding: 'Optional[str]' = None,
                  errors: 'Literal["strict", "ignore", "replace"]' = 'strict',
                  unquote: 'bool' = False) -> 'None':
-        super().__init__(name, length, default)
+        super().__init__(length, default)
 
         self._encoding = encoding
         self._errors = errors
@@ -144,7 +141,6 @@ class BitField(_TextField[Dict[str, Any]]):
     """Bit value for protocol fields.
 
     Args:
-        name: field name.
         length: field size (in bytes); if a callable is given, it should return
             an integer value and accept the current packet as its only argument.
         default: field default value, if any.
@@ -155,10 +151,10 @@ class BitField(_TextField[Dict[str, Any]]):
 
     """
 
-    def __init__(self, name: 'str', length: 'int | Callable[[dict[str, Any]], int]',
+    def __init__(self, length: 'int | Callable[[dict[str, Any]], int]',
                  default: 'Optional[dict[str, Any]]' = None,
                  namespace: 'Optional[dict[str, NamespaceEntry]]' = None) -> 'None':
-        super().__init__(name, length, default)
+        super().__init__(length, default)
 
         self._namespace = namespace or {}
 

@@ -19,12 +19,18 @@ class _Field(Generic[_T], metaclass=abc.ABCMeta):
     """Internal base class for protocol fields."""
 
     if TYPE_CHECKING:
-        _default: Optional[_T]
+        _name: 'str'
+        _default: 'Optional[_T]'
 
     @property
-    @abc.abstractmethod
     def name(self) -> 'str':
         """Field name."""
+        return self._name
+
+    @name.setter
+    def name(self, value: 'str') -> 'None':
+        """Set field name."""
+        self._name = value
 
     @property
     def default(self) -> 'Optional[_T]':
@@ -46,13 +52,17 @@ class _Field(Generic[_T], metaclass=abc.ABCMeta):
         """Field size."""
         return struct.calcsize(self.template)
 
-    def __call__(self, packet: 'dict[str, Any]') -> 'None':
+    def __call__(self, packet: 'dict[str, Any]') -> '_Field':
         """Update field attributes.
 
         Arguments:
             packet: packet data.
 
         """
+        return self
+
+    def __repr__(self) -> 'str':
+        return f'<{self.__class__.__name__} {self.name}>'
 
     def pre_process(self, value: '_T', packet: 'dict[str, Any]') -> 'Any':  # pylint: disable=unused-argument
         """Process field value before construction (packing).
@@ -118,7 +128,6 @@ class Field(_Field[_T], Generic[_T]):
     """Base class for protocol fields.
 
     Args:
-        name: field name.
         length: field size (in bytes); if a callable is given, it should return
             an integer value and accept the current packet as its only argument.
         default: field default value, if any.
@@ -127,11 +136,6 @@ class Field(_Field[_T], Generic[_T]):
 
     if TYPE_CHECKING:
         _template: 'str'
-
-    @property
-    def name(self) -> 'str':
-        """Field name."""
-        return self._name
 
     @property
     def template(self) -> 'str':
@@ -143,9 +147,9 @@ class Field(_Field[_T], Generic[_T]):
         """Field size."""
         return struct.calcsize(self.template)
 
-    def __init__(self, name: 'str', length: 'int | Callable[[dict[str, Any]], int]',
+    def __init__(self, length: 'int | Callable[[dict[str, Any]], int]',
                  default: 'Optional[_T]' = None) -> 'None':
-        self._name = name
+        self._name = '<unknown>'
         self._default = default
 
         self._length_callback = None
@@ -153,8 +157,8 @@ class Field(_Field[_T], Generic[_T]):
             self._length_callback, length = length, 1
         self._length = length
 
-    def __call__(self, packet: 'dict[str, Any]') -> 'None':
+    def __call__(self, packet: 'dict[str, Any]') -> 'Field':
         """Update field attributes."""
-        if self._length_callback is None:
-            return
-        self._length = self._length_callback(packet)
+        if self._length_callback is not None:
+            self._length = self._length_callback(packet)
+        return self

@@ -30,7 +30,6 @@ class NumberField(Field[int], Generic[_T]):
     """Numerical value for protocol fields.
 
     Args:
-        name: field name.
         length: field size (in bytes); if a callable is given, it should return
             an integer value and accept the current packet as its only argument.
         default: field default value, if any.
@@ -43,14 +42,14 @@ class NumberField(Field[int], Generic[_T]):
     __template__ = None  # type: Optional[str]
     __signed__ = None  # type: Optional[bool]
 
-    def __init__(self, name: 'str', length: 'Optional[int | Callable[[dict[str, Any]], int]]' = None,
+    def __init__(self, length: 'Optional[int | Callable[[dict[str, Any]], int]]' = None,
                  default: 'Optional[int]' = None, signed: 'bool' = False,
                  byteorder: 'Literal["little", "big"]' = 'big') -> 'None':
         if length is None:
             if self.__length__ is None:
-                raise IntError(f'Field {name} has no length.')
+                raise IntError(f'Field has no length.')
             length = self.__length__
-        super().__init__(name, length, default)
+        super().__init__(length, default)
 
         self._signed = signed if self.__signed__ is None else self.__signed__
         self._byteorder = byteorder
@@ -63,17 +62,16 @@ class NumberField(Field[int], Generic[_T]):
             struct_fmt = self.build_template(self._length, signed)
         self._template = f'{endian}{struct_fmt}'
 
-    def __call__(self, packet: 'dict[str, Any]') -> 'None':
+    def __call__(self, packet: 'dict[str, Any]') -> 'NumberField':
         """Update field attributes."""
         old_length = self._length
         super().__call__(packet)
 
-        if old_length == self._length:
-            return
-
-        endian = '>' if self._byteorder == 'big' else '<'
-        struct_fmt = self.build_template(self._length, self._signed)
-        self._template = f'{endian}{struct_fmt}'
+        if old_length != self._length:
+            endian = '>' if self._byteorder == 'big' else '<'
+            struct_fmt = self.build_template(self._length, self._signed)
+            self._template = f'{endian}{struct_fmt}'
+        return self
 
     def build_template(self, length: 'int', signed: 'bool') -> 'str':
         """Build template for field.
@@ -137,7 +135,6 @@ class IntField(NumberField):
     """Integer value for protocol fields.
 
     Args:
-        name: field name.
         length: field size (in bytes).
         default: field default value, if any.
         signed: whether the field is signed.
@@ -154,7 +151,6 @@ class UIntField(NumberField):
     """Unsigned integer value for protocol fields.
 
     Args:
-        name: field name.
         length: field size (in bytes).
         default: field default value, if any.
         signed: whether the field is signed.
@@ -171,7 +167,6 @@ class ShortField(NumberField):
     """Short integer value for protocol fields.
 
     Args:
-        name: field name.
         length: field size (in bytes).
         default: field default value, if any.
         signed: whether the field is signed.
@@ -188,7 +183,6 @@ class UShortField(NumberField):
     """Unsigned short integer value for protocol fields.
 
     Args:
-        name: field name.
         length: field size (in bytes).
         default: field default value, if any.
         signed: whether the field is signed.
@@ -205,7 +199,6 @@ class LongField(NumberField):
     """Long integer value for protocol fields.
 
     Args:
-        name: field name.
         length: field size (in bytes).
         default: field default value, if any.
         signed: whether the field is signed.
@@ -222,7 +215,6 @@ class ULongField(NumberField):
     """Unsigned long integer value for protocol fields.
 
     Args:
-        name: field name.
         length: field size (in bytes).
         default: field default value, if any.
         signed: whether the field is signed.
@@ -239,7 +231,6 @@ class ByteField(NumberField):
     """Byte value for protocol fields.
 
     Args:
-        name: field name.
         length: field size (in bytes).
         default: field default value, if any.
         signed: whether the field is signed.
@@ -256,7 +247,6 @@ class UByteField(NumberField):
     """Unsigned byte value for protocol fields.
 
     Args:
-        name: field name.
         length: field size (in bytes).
         default: field default value, if any.
         signed: whether the field is signed.
@@ -273,7 +263,6 @@ class EnumField(NumberField[StdlibEnum | AenumEnum]):
     """Enumerated value for protocol fields.
 
     Args:
-        name: field name.
         length: field size (in bytes); if a callable is given, it should return
             an integer value and accept the current packet as its only argument.
         default: field default value, if any.
@@ -283,11 +272,11 @@ class EnumField(NumberField[StdlibEnum | AenumEnum]):
 
     """
 
-    def __init__(self, name: 'str', length: 'Optional[int | Callable[[dict[str, Any]], int]]' = None,
+    def __init__(self, length: 'Optional[int | Callable[[dict[str, Any]], int]]' = None,
                  default: 'Optional[StdlibEnum | AenumEnum]' = None, signed: 'bool' = False,
                  byteorder: 'Literal["little", "big"]' = 'big',
                  namespace: 'Optional[Type[StdlibEnum] | Type[AenumEnum]]' = None) -> 'None':
-        super().__init__(name, length, default, signed, byteorder)
+        super().__init__(length, default, signed, byteorder)
 
         self._namespace = namespace
 

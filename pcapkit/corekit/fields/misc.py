@@ -12,7 +12,7 @@ from pcapkit.utilities.exceptions import NoDefaultValue, UnsupportedCall
 __all__ = ['ConditionalField', 'PayloadField']
 
 if TYPE_CHECKING:
-    from typing import Any, BinaryIO, Callable, Optional, Type, NoReturn
+    from typing import Any, BinaryIO, Callable, NoReturn, Optional, Type
 
     from pcapkit.corekit.fields.field import Field
     from pcapkit.protocols.protocol import Protocol
@@ -36,6 +36,11 @@ class ConditionalField(_Field[_TC]):
     def name(self) -> 'str':
         """Field name."""
         return self._field.name
+
+    @name.setter
+    def name(self, value: 'str') -> 'None':
+        """Set field name."""
+        self._field.name = value
 
     @property
     def default(self) -> 'Optional[_TC]':
@@ -67,16 +72,16 @@ class ConditionalField(_Field[_TC]):
         self._field = field  # type: Field[_TC]
         self._condition = condition
 
-    def __call__(self, packet: 'dict[str, Any]') -> 'None':
+    def __call__(self, packet: 'dict[str, Any]') -> 'ConditionalField':
         """Update field attributes.
 
         Arguments:
             packet: packet data.
 
         """
-        if not self._condition(packet):
-            return
-        self._field(packet)
+        if self._condition(packet):
+            self._field(packet)
+        return self
 
     def pre_process(self, value: '_TC', packet: 'dict[str, Any]') -> 'Any':  # pylint: disable=unused-argument
         """Process field value before construction (packing).
@@ -151,16 +156,10 @@ class PayloadField(_Field[_TP]):
     """Payload value for protocol fields.
 
     Args:
-        name: field name.
         default: field default value.
         protocol: payload protocol.
 
     """
-
-    @property
-    def name(self) -> 'str':
-        """Field name."""
-        return self._name
 
     @property
     def template(self) -> 'NoReturn':
@@ -187,10 +186,11 @@ class PayloadField(_Field[_TP]):
         """
         self._protocol = protocol
 
-    def __init__(self, name: 'str' = 'payload', default: 'Optional[_TP]' = None,
-                 protocol: 'Type[_TP]' = Raw) -> 'None':  # type: ignore[assignment]
+    def __init__(self, name: 'str' = 'payload', default: 'Optional[_TP]' = None, protocol: 'Type[_TP]' = Raw,  # type: ignore[assignment]
+                 length_hint: 'Callable[[dict[str, Any]], Optional[int]]' = lambda x: None) -> 'None':
         self._name = name
         self._protocol = protocol
+        self._length_hint = length_hint
 
         if default is None:
             default = cast('_TP', NoPayload())
@@ -233,7 +233,33 @@ class PayloadField(_Field[_TP]):
 
         """
         if isinstance(buffer, bytes):
+            if length is None:
+                length = self.test_length(packet, len(buffer))
+
             file = io.BytesIO(buffer)  # type: BinaryIO
         else:
+            if length is None:
+                current = buffer.tell()
+                default_length = buffer.seek(0, io.SEEK_END) - current
+                buffer.seek(current)
+
+                length = self.test_length(packet, default_length)
             file = buffer
+
         return self._protocol(file, length)  # type: ignore[abstract]
+
+    def test_length(self, packet: 'dict[str, Any]', default: 'int') -> 'int':
+        """Get field length hint.
+
+        Arguments:
+            packet: packet data.
+            default: default field length.
+
+        Returns:
+            Field length hint.
+
+        """
+        value = self._length_hint(packet)
+        if value is None:
+            return default
+        return value
