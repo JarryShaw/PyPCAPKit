@@ -74,4 +74,4 @@ class QSFunction(Vendor):
 
 
 if __name__ == '__main__':
-    sys.exit(QSFunction())
+    sys.exit(QSFunction())  # type: ignore[arg-type]

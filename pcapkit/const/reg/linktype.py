@@ -21,22 +21,31 @@ class LinkType(IntEnum):
     #: of either 24, 28, or 30 for IPv6 packets, a value of 7 for OSI packets, or a
     #: value of 23 for IPX packets. All of the IPv6 values correspond to IPv6
     #: packets; code reading files should check for all of them. Note that ``host
-    #: byte order'' is the byte order of the machine on that the packets are
-    #: captured; if a live capture is being done, ``host byte order'' is the byte
-    #: order of the machine capturing the packets, but if a ``savefile'' is being
+    #: byte order`` is the byte order of the machine on that the packets are
+    #: captured; if a live capture is being done, ``host byte order`` is the byte
+    #: order of the machine capturing the packets, but if a ``savefile`` is being
     #: read, the byte order is not necessarily that of the machine reading the
     #: capture file.
     NULL = 0
 
     #: [``DLT_EN10MB``] IEEE 802.3 Ethernet (10Mb, 100Mb, 1000Mb, and up); the 10MB
-    #: in the DLT_ name is historical.
+    #: in the DLT\_ name is historical.
     ETHERNET = 1
+
+    #: [``DLT_EN3MB``] Experimental Ethernet (3Mb).
+    EXP_ETHERNET = 2
 
     #: [``DLT_AX25``] AX.25 packet, with nothing preceding it.
     AX25 = 3
 
-    #: [``DLT_IEEE802``] IEEE 802.5 Token Ring; the IEEE802, without _5, in the
-    #: DLT_ name is historical.
+    #: [``DLT_PRONET``] Proteon ProNET Token Ring.
+    PRONET = 4
+
+    #: [``DLT_CHAOS``] Chaos.
+    CHAOS = 5
+
+    #: [``DLT_IEEE802``] IEEE 802.5 Token Ring; the IEEE802, without \_5, in the
+    #: DLT\_ name is historical.
     IEEE802_5 = 6
 
     #: [``DLT_ARCNET``] ARCNET Data Packets, as described by the ARCNET Trade
@@ -47,7 +56,7 @@ class LinkType(IntEnum):
     #: 1201; for RFC 1051 frames, ATA 878.2 is not used.
     ARCNET_BSD = 7
 
-    #: [``DLT_SLIP``] SLIP, encapsulated with a LINKTYPE_SLIP header.
+    #: [``DLT_SLIP``] SLIP, encapsulated with a LINKTYPE\_SLIP header.
     SLIP = 8
 
     #: [``DLT_PPP``] PPP, as per RFC 1661 and RFC 1662; if the first 2 bytes are
@@ -60,6 +69,9 @@ class LinkType(IntEnum):
     #: [``DLT_FDDI``] FDDI, as specified by ANSI INCITS 239-1994.
     FDDI = 10
 
+    #: [``DLT_REDBACK_SMARTEDGE``] Redback SmartEdge 400/800.
+    REDBACK_SMARTEDGE = 32
+
     #: [``DLT_PPP_SERIAL``] PPP in HDLC-like framing, as per RFC 1662, or Cisco PPP
     #: with HDLC framing, as per section 4.3.1 of RFC 1547; the first byte will be
     #: 0xFF for PPP in HDLC-like framing, and will be 0x0F or 0x8F for Cisco PPP
@@ -70,6 +82,9 @@ class LinkType(IntEnum):
     #: [``DLT_PPP_ETHER``] PPPoE; the packet begins with a PPPoE header, as per RFC
     #: 2516.
     PPP_ETHER = 51
+
+    #: [``DLT_SYMANTEC_FIREWALL``] Symantec Enterprise (ex-Axent Raptor) firewall.
+    SYMANTEC_FIREWALL = 99
 
     #: [``DLT_ATM_RFC1483``] RFC 1483 LLC/SNAP-encapsulated ATM; the packet begins
     #: with an ISO 8802-2 (formerly known as IEEE 802.2) LLC header.
@@ -87,6 +102,9 @@ class LinkType(IntEnum):
     #: [``DLT_IEEE802_11``] IEEE 802.11 wireless LAN.
     IEEE802_11 = 105
 
+    #: [``DLT_ATM_CLIP``] Linux Classical IP over ATM.
+    ATM_CLIP = 106
+
     #: [``DLT_FRELAY``] Frame Relay LAPF frames, beginning with a ITU-T
     #: Recommendation Q.922 LAPF header starting with the address field, and
     #: without an FCS at the end of the frame.
@@ -99,6 +117,12 @@ class LinkType(IntEnum):
     #: correspond to IPv6 packets; code reading files should check for all of them.
     LOOP = 108
 
+    #: [``DLT_ENC``] Encapsulated packets for IPsec.
+    ENC = 109
+
+    #: [``DLT_HDLC``] Cisco HDLC.
+    NETBSD_HDLC = 112
+
     #: [``DLT_LINUX_SLL``] Linux "cooked" capture encapsulation.
     LINUX_SLL = 113
 
@@ -107,6 +131,12 @@ class LinkType(IntEnum):
     #: AppleTalk, Second Edition.
     LTALK = 114
 
+    #: [``DLT_ECONET``] Acorn Econet.
+    ECONET = 115
+
+    #: [``DLT_IPFILTER``] OpenBSD ipfilter.
+    IPFILTER = 116
+
     #: [``DLT_PFLOG``] OpenBSD pflog; the link-layer header contains a struct
     #: pfloghdr structure, as defined by the host on that the file was saved. (This
     #: differs from operating system to operating system and release to release;
@@ -114,21 +144,42 @@ class LinkType(IntEnum):
     #: is.)
     PFLOG = 117
 
+    #: [``DLT_CISCO_IOS``] Cisco internal use.
+    CISCO_IOS = 118
+
     #: [``DLT_PRISM_HEADER``] Prism monitor mode information followed by an 802.11
     #: header.
     IEEE802_11_PRISM = 119
 
+    #: [``DLT_AIRONET_HEADER``] Reserved for Aironet 802.11 cards, with an Aironet
+    #: link-layer header.
+    AIRONET_HEADER = 120
+
     #: [``DLT_IP_OVER_FC``] RFC 2625 IP-over-Fibre Channel, with the link-layer
-    #: header being the Network_Header as described in that RFC.
+    #: header being the Network\_Header as described in that RFC.
     IP_OVER_FC = 122
 
     #: [``DLT_SUNATM``] ATM traffic, encapsulated as per the scheme used by SunATM
     #: devices.
     SUNATM = 123
 
+    #: [``DLT_RIO``] RapidIO.
+    RIO = 124
+
+    #: [``DLT_PCI_EXP``] PCI Express.
+    PCI_EXP = 125
+
+    #: [``DLT_AURORA``] Xilinx Aurora.
+    AURORA = 126
+
     #: [``DLT_IEEE802_11_RADIO``] Radiotap link-layer information followed by an
     #: 802.11 header.
     IEEE802_11_RADIOTAP = 127
+
+    #: [``DLT_TZSP``] Tazmen Sniffer Protocol (TZSP) is a generic encapsulation for
+    #: any other link type, which includes a means to include meta-information with
+    #: the packet, e.g. signal strength and channel for 802.11 packets.
+    TZSP = 128
 
     #: [``DLT_ARCNET_LINUX``] ARCNET Data Packets, as described by the ARCNET Trade
     #: Association standard ATA 878.1-1999, but without the Starting Delimiter,
@@ -140,6 +191,30 @@ class LinkType(IntEnum):
     #: supplied. See also RFC 1051 and RFC 1201; for RFC 1051 frames, ATA 878.2 is
     #: not used.
     ARCNET_LINUX = 129
+
+    #: [``DLT_JUNIPER_MLPPP``] Juniper Networks private data link type.
+    JUNIPER_MLPPP = 130
+
+    #: [``DLT_JUNIPER_MLFR``] Juniper Networks private data link type.
+    JUNIPER_MLFR = 131
+
+    #: [``DLT_JUNIPER_ES``] Juniper Networks private data link type.
+    JUNIPER_ES = 132
+
+    #: [``DLT_JUNIPER_GGSN``] Juniper Networks private data link type.
+    JUNIPER_GGSN = 133
+
+    #: [``DLT_JUNIPER_MFR``] Juniper Networks private data link type.
+    JUNIPER_MFR = 134
+
+    #: [``DLT_JUNIPER_ATM2``] Juniper Networks private data link type.
+    JUNIPER_ATM2 = 135
+
+    #: [``DLT_JUNIPER_SERVICES``] Juniper Networks private data link type.
+    JUNIPER_SERVICES = 136
+
+    #: [``DLT_JUNIPER_ATM1``] Juniper Networks private data link type.
+    JUNIPER_ATM1 = 137
 
     #: [``DLT_APPLE_IP_OVER_IEEE1394``] Apple IP-over-IEEE 1394 cooked header.
     APPLE_IP_OVER_IEEE1394 = 138
@@ -168,11 +243,17 @@ class LinkType(IntEnum):
     #: MAC frames.
     DOCSIS = 143
 
-    #: [``DLT_LINUX_IRDA``] Linux-IrDA packets, with a LINKTYPE_LINUX_IRDA header,
-    #: with the payload for IrDA frames beginning with by the IrLAP header as
-    #: defined by IrDA Data Specifications, including the IrDA Link Access Protocol
-    #: specification.
+    #: [``DLT_LINUX_IRDA``] Linux-IrDA packets, with a LINKTYPE\_LINUX\_IRDA
+    #: header, with the payload for IrDA frames beginning with by the IrLAP header
+    #: as defined by IrDA Data Specifications, including the IrDA Link Access
+    #: Protocol specification.
     LINUX_IRDA = 144
+
+    #: [``DLT_IBM_SP``] IBM SP switch.
+    IBM_SP = 145
+
+    #: [``DLT_IBM_SN``] IBM Next Federation switch.
+    IBM_SN = 146
 
     #: [``DLT_USER0``] Reserved for private use; see above.
     USER0 = 147
@@ -226,16 +307,25 @@ class LinkType(IntEnum):
     #: 802.11 header.
     IEEE802_11_AVS = 163
 
+    #: [``DLT_JUNIPER_MONITOR``] Juniper Networks private data link type.
+    JUNIPER_MONITOR = 164
+
     #: [``DLT_BACNET_MS_TP``] BACnet MS/TP frames, as specified by section 9.3
     #: MS/TP Frame Format of ANSI/ASHRAE Standard 135, BACnet® - A Data
     #: Communication Protocol for Building Automation and Control Networks,
     #: including the preamble and, if present, the Data CRC.
     BACNET_MS_TP = 165
 
-    #: [``DLT_PPP_PPPD``] PPP in HDLC-like encapsulation, like LINKTYPE_PPP_HDLC,
+    #: [``DLT_PPP_PPPD``] PPP in HDLC-like encapsulation, like LINKTYPE\_PPP\_HDLC,
     #: but with the 0xff address byte replaced by a direction indication—0x00 for
     #: incoming and 0x01 for outgoing.
     PPP_PPPD = 166
+
+    #: [``DLT_JUNIPER_PPPOE``] Juniper Networks private data link type.
+    JUNIPER_PPPOE = 167
+
+    #: [``DLT_JUNIPER_PPPOE_ATM``] Juniper Networks private data link type.
+    JUNIPER_PPPOE_ATM = 168
 
     #: [``DLT_GPRS_LLC``] General Packet Radio Service Logical Link Control, as
     #: defined by 3GPP TS 04.64.
@@ -249,15 +339,59 @@ class LinkType(IntEnum):
     #: ITU-T Recommendation G.7041/Y.1303.
     GPF_F = 171
 
+    #: [``DLT_GCOM_T1E1``] Gcom's T1/E1 line monitoring equipment.
+    GCOM_T1E1 = 172
+
+    #: [``DLT_GCOM_SERIAL``] Gcom's T1/E1 line monitoring equipment.
+    GCOM_SERIAL = 173
+
+    #: [``DLT_JUNIPER_PIC_PEER``] Juniper Networks private data link type.
+    JUNIPER_PIC_PEER = 174
+
+    #: [``DLT_ERF_ETH``] An ERF header followed by Ethernet.
+    ERF_ETH = 175
+
+    #: [``DLT_ERF_POS``] An ERF header followed by Packet-over-SONET.
+    ERF_POS = 176
+
     #: [``DLT_LINUX_LAPD``] Link Access Procedures on the D Channel (LAPD) frames,
     #: as specified by ITU-T Recommendation Q.920 and ITU-T Recommendation Q.921,
-    #: captured via vISDN, with a LINKTYPE_LINUX_LAPD header, followed by the Q.921
-    #: frame, starting with the address field.
+    #: captured via vISDN, with a LINKTYPE\_LINUX\_LAPD header, followed by the
+    #: Q.921 frame, starting with the address field.
     LINUX_LAPD = 177
+
+    #: [``DLT_JUNIPER_ETHER``] Juniper Networks private data link type. Ethernet
+    #: frames prepended with meta-information.
+    JUNIPER_ETHER = 178
+
+    #: [``DLT_JUNIPER_PPP``] Juniper Networks private data link type. PPP frames
+    #: prepended with meta-information.
+    JUNIPER_PPP = 179
+
+    #: [``DLT_JUNIPER_FRELAY``] Juniper Networks private data link type. Frame
+    #: Relay frames prepended with meta-information.
+    JUNIPER_FRELAY = 180
+
+    #: [``DLT_JUNIPER_CHDLC``] Juniper Networks private data link type. C-HDLC
+    #: frames prepended with meta-information.
+    JUNIPER_CHDLC = 181
 
     #: [``DLT_MFR``] FRF.16.1 Multi-Link Frame Relay frames, beginning with an
     #: FRF.12 Interface fragmentation format fragmentation header.
     MFR = 182
+
+    #: [``DLT_JUNIPER_VP``] Juniper Networks private data link type.
+    JUNIPER_VP = 183
+
+    #: [``DLT_A429``] ARINC 429 frames. Every frame contains a 32-bit A429 label.
+    A429 = 184
+
+    #: [``DLT_A653_ICM``] ARINC 653 interpartition communication messages. Please
+    #: refer to the A653-1 standard for more information.
+    A653_ICM = 185
+
+    #: [``DLT_USB_FREEBSD``] USB with FreeBSD header.
+    USB_FREEBSD = 186
 
     #: [``DLT_BLUETOOTH_HCI_H4``] Bluetooth HCI UART transport layer; the frame
     #: contains an HCI packet indicator byte, as specified by the UART Transport
@@ -267,8 +401,11 @@ class LinkType(IntEnum):
     #: Bluetooth Core Specification.
     BLUETOOTH_HCI_H4 = 187
 
+    #: [``DLT_IEEE802_16_MAC_CPS``] IEEE 802.16 MAC Common Part Sublayer.
+    IEEE802_16_MAC_CPS = 188
+
     #: [``DLT_USB_LINUX``] USB packets, beginning with a Linux USB header, as
-    #: specified by the struct usbmon_packet in the Documentation/usb/usbmon.txt
+    #: specified by the struct usbmon\_packet in the Documentation/usb/usbmon.txt
     #: file in the Linux source tree. Only the first 48 bytes of that header are
     #: present. All fields in the header are in host byte order. When performing a
     #: live capture, the host byte order is the byte order of the machine on that
@@ -278,10 +415,24 @@ class LinkType(IntEnum):
     #: the pcapng file, as specified by the Section Header Block.
     USB_LINUX = 189
 
+    #: [``DLT_CAN20B``] Controller Area Network (CAN) v. 2.0B.
+    CAN20B = 190
+
+    #: [``DLT_IEEE802_15_4_LINUX``] IEEE 802.15.4, with address fields padded, as
+    #: is done by Linux drivers.
+    IEEE802_15_4_LINUX = 191
+
     #: [``DLT_PPI``] Per-Packet Information information, as specified by the Per-
     #: Packet Information Header Specification, followed by a packet with the
-    #: LINKTYPE_ value specified by the pph_dlt field of that header.
+    #: LINKTYPE\_ value specified by the pph\_dlt field of that header.
     PPI = 192
+
+    #: [``DLT_IEEE802_16_MAC_CPS_RADIO``] IEEE 802.16 MAC Common Part Sublayer plus
+    #: radiotap header.
+    IEEE802_16_MAC_CPS_RADIO = 193
+
+    #: [``DLT_JUNIPER_ISM``] Juniper Networks private data link type.
+    JUNIPER_ISM = 194
 
     #: [``DLT_IEEE802_15_4_WITHFCS``] IEEE 802.15.4 Low-Rate Wireless Networks,
     #: with each packet having the FCS at the end of the frame.
@@ -293,6 +444,17 @@ class LinkType(IntEnum):
     #: [``DLT_ERF``] Various link-layer types, with a pseudo-header, for Endace DAG
     #: cards; encapsulates Endace ERF records.
     ERF = 197
+
+    #: [``DLT_RAIF1``] Special header prepended to Ethernet packets when capturing
+    #: from a u10 Networks board.
+    RAIF1 = 198
+
+    #: [``DLT_IPMB_KONTRON``] IPMB packet for IPMI, beginning with a 2-byte header,
+    #: followed by the I2C slave address, followed by the netFn and LUN, etc…
+    IPMB_KONTRON = 199
+
+    #: [``DLT_JUNIPER_ST``] Juniper Networks private data link type.
+    JUNIPER_ST = 200
 
     #: [``DLT_BLUETOOTH_HCI_H4_WITH_PHDR``] Bluetooth HCI UART transport layer; the
     #: frame contains a 4-byte direction field, in network byte order (big-endian),
@@ -349,9 +511,21 @@ class LinkType(IntEnum):
     #: pseudo-header.
     FLEXRAY = 210
 
+    #: [``DLT_MOST``] Media Oriented Systems Transport (MOST) bus for multimedia
+    #: transport.
+    MOST = 211
+
     #: [``DLT_LIN``] Local Interconnect Network (LIN) automotive bus, preceded by a
     #: pseudo-header.
     LIN = 212
+
+    #: [``DLT_X2E_SERIAL``] X2E-private data link type used for serial line
+    #: capture.
+    X2E_SERIAL = 213
+
+    #: [``DLT_X2E_XORAYA``] X2E-private data link type used for the Xoraya data
+    #: logger family.
+    X2E_XORAYA = 214
 
     #: [``DLT_IEEE802_15_4_NONASK_PHY``] IEEE 802.15.4 Low-Rate Wireless Networks,
     #: with each packet having the FCS at the end of the frame, and with the PHY-
@@ -360,28 +534,51 @@ class LinkType(IntEnum):
     #: bit) preceding the MAC-layer data (starting with the frame control field).
     IEEE802_15_4_NONASK_PHY = 215
 
+    #: [``DLT_LINUX_EVDEV``] Linux evdev events from /dev/input/eventN devices.
+    LINUX_EVDEV = 216
+
+    #: [``DLT_GSMTAP_UM``] GSM Um interface, preceded by a "gsmtap" header.
+    GSMTAP_UM = 217
+
+    #: [``DLT_GSMTAP_ABIS``] GSM Abis interface, preceded by a "gsmtap" header.
+    GSMTAP_ABIS = 218
+
+    #: [``DLT_MPLS``] MPLS, with an MPLS label as the link-layer header.
+    MPLS = 219
+
     #: [``DLT_USB_LINUX_MMAPPED``] USB packets, beginning with a Linux USB header,
-    #: as specified by the struct usbmon_packet in the Documentation/usb/usbmon.txt
-    #: file in the Linux source tree. All 64 bytes of the header are present. All
-    #: fields in the header are in host byte order. When performing a live capture,
-    #: the host byte order is the byte order of the machine on that the packets are
-    #: captured. When reading a pcap file, the byte order is the byte order for the
-    #: file, as specified by the file's magic number; when reading a pcapng file,
-    #: the byte order is the byte order for the section of the pcapng file, as
-    #: specified by the Section Header Block. For isochronous transfers, the ndesc
-    #: field specifies the number of isochronous descriptors that follow.
+    #: as specified by the struct usbmon\_packet in the
+    #: Documentation/usb/usbmon.txt file in the Linux source tree. All 64 bytes of
+    #: the header are present. All fields in the header are in host byte order.
+    #: When performing a live capture, the host byte order is the byte order of the
+    #: machine on that the packets are captured. When reading a pcap file, the byte
+    #: order is the byte order for the file, as specified by the file's magic
+    #: number; when reading a pcapng file, the byte order is the byte order for the
+    #: section of the pcapng file, as specified by the Section Header Block. For
+    #: isochronous transfers, the ndesc field specifies the number of isochronous
+    #: descriptors that follow.
     USB_LINUX_MMAPPED = 220
 
-    #: [``DLT_FC_2``] Fibre Channel FC-2 frames, beginning with a Frame_Header.
+    #: [``DLT_DECT``] DECT packets, with a pseudo-header.
+    DECT = 221
+
+    #: [``DLT_AOS``] AOS Space Data Link Protocol.
+    AOS = 222
+
+    #: [``DLT_WIHART``] WirelessHART (Highway Addressable Remote Transducer) from
+    #: the HART Communication Foundation (IEC/PAS 62591).
+    WIHART = 223
+
+    #: [``DLT_FC_2``] Fibre Channel FC-2 frames, beginning with a Frame\_Header.
     FC_2 = 224
 
     #: [``DLT_FC_2_WITH_FRAME_DELIMS``] Fibre Channel FC-2 frames, beginning an
-    #: encoding of the SOF, followed by a Frame_Header, and ending with an encoding
-    #: of the SOF. The encodings represent the frame delimiters as 4-byte sequences
-    #: representing the corresponding ordered sets, with K28.5 represented as 0xBC,
-    #: and the D symbols as the corresponding byte values; for example, SOFi2,
-    #: which is K28.5 - D21.5 - D1.2 - D21.2, is represented as 0xBC 0xB5 0x55
-    #: 0x55.
+    #: encoding of the SOF, followed by a Frame\_Header, and ending with an
+    #: encoding of the SOF. The encodings represent the frame delimiters as 4-byte
+    #: sequences representing the corresponding ordered sets, with K28.5
+    #: represented as 0xBC, and the D symbols as the corresponding byte values; for
+    #: example, SOFi2, which is K28.5 - D21.5 - D1.2 - D21.2, is represented as
+    #: 0xBC 0xB5 0x55 0x55.
     FC_2_WITH_FRAME_DELIMS = 225
 
     #: [``DLT_IPNET``] Solaris ipnet pseudo-header, followed by an IPv4 or IPv6
@@ -407,6 +604,15 @@ class LinkType(IntEnum):
     #: before the message sequence.
     DBUS = 231
 
+    #: [``DLT_JUNIPER_VS``] Juniper Networks private data link type.
+    JUNIPER_VS = 232
+
+    #: [``DLT_JUNIPER_SRX_E2E``] Juniper Networks private data link type.
+    JUNIPER_SRX_E2E = 233
+
+    #: [``DLT_JUNIPER_FIBRECHANNEL``] Juniper Networks private data link type.
+    JUNIPER_FIBRECHANNEL = 234
+
     #: [``DLT_DVB_CI``] DVB-CI (DVB Common Interface for communication between a PC
     #: Card module and a DVB receiver), with the message format specified by the
     #: PCAP format for DVB-CI specification.
@@ -416,11 +622,14 @@ class LinkType(IntEnum):
     #: to, but not the same as, 27.010).
     MUX27010 = 236
 
-    #: [``DLT_STANAG_5066_D_PDU``] D_PDUs as described by NATO standard STANAG
+    #: [``DLT_STANAG_5066_D_PDU``] D\_PDUs as described by NATO standard STANAG
     #: 5066, starting with the synchronization sequence, and including both header
     #: and data CRCs. The current version of STANAG 5066 is backwards-compatible
     #: with the 1.0.2 version, although newer versions are classified.
     STANAG_5066_D_PDU = 237
+
+    #: [``DLT_JUNIPER_ATM_CEMIC``] Juniper Networks private data link type.
+    JUNIPER_ATM_CEMIC = 238
 
     #: [``DLT_NFLOG``] Linux netlink NETLINK NFLOG socket log messages.
     NFLOG = 239
@@ -452,8 +661,11 @@ class LinkType(IntEnum):
     NG40 = 244
 
     #: [``DLT_NFC_LLCP``] Pseudo-header for NFC LLCP packet captures, followed by
-    #: frame data for the LLCP Protocol as specified by NFCForum-TS-LLCP_1.1.
+    #: frame data for the LLCP Protocol as specified by NFCForum-TS-LLCP\_1.1.
     NFC_LLCP = 245
+
+    #: [````] Packet filter state syncing.
+    PFSYNC = 246
 
     #: [``DLT_INFINIBAND``] Raw InfiniBand frames, starting with the Local Routing
     #: Header, as specified in Chapter 5 "Data packet format" of InfiniBand™
@@ -477,6 +689,11 @@ class LinkType(IntEnum):
     #: of the Bluetooth Specification Version 4.0 (see PDF page 2200), but without
     #: the Preamble.
     BLUETOOTH_LE_LL = 251
+
+    #: [``DLT_WIRESHARK_UPPER_PDU``] Upper-protocol layer PDU saves from Wireshark;
+    #: the actual contents are determined by two tags, one or more of which is
+    #: stored with each packet.
+    WIRESHARK_UPPER_PDU = 252
 
     #: [``DLT_NETLINK``] Linux Netlink capture encapsulation.
     NETLINK = 253
@@ -538,12 +755,19 @@ class LinkType(IntEnum):
     #: header.
     USB_DARWIN = 266
 
+    #: [``DLT_OPENFLOW``] OpenFlow messages with an additional 12-octet header, as
+    #: used in OpenBSD switch interface monitoring.
+    OPENFLOW = 267
+
     #: [``DLT_SDLC``] SDLC packets, as specified by Chapter 1, "DLC Links", section
     #: "Synchronous Data Link Control (SDLC)" of Systems Network Architecture
     #: Formats, GA27-3136-20, without the flag fields, zero-bit insertion, or Frame
     #: Check Sequence field, containing SNA path information units (PIUs) as the
     #: payload.
     SDLC = 268
+
+    #: [``DLT_TI_LLN_SNIFFER``] TI LLN sniffer frames.
+    TI_LLN_SNIFFER = 269
 
     #: [``DLT_LORATAP``] LoRaTap pseudo-header, followed by the payload, which is
     #: typically the PHYPayload from the LoRaWan specification.
@@ -571,6 +795,9 @@ class LinkType(IntEnum):
 
     #: [``DLT_LINUX_SLL2``] Linux "cooked" capture encapsulation v2.
     LINUX_SLL2 = 276
+
+    #: [``DLT_SERCOS_MONITOR``] Sercos Monitor.
+    SERCOS_MONITOR = 277
 
     #: [``DLT_OPENVIZSLA``] Openvizsla FPGA-based USB sniffer.
     OPENVIZSLA = 278
@@ -605,7 +832,7 @@ class LinkType(IntEnum):
 
     #: [``DLT_ELEE``] Payload of lawful intercept packets using the ELEE protocol.
     #: The packet begins with the ELEE header; it does not include any transport-
-    #: layer or lower-layer headers for protcols used to transport ELEE packets.
+    #: layer or lower-layer headers for protocols used to transport ELEE packets.
     ELEE = 286
 
     #: [``DLT_Z_WAVE_SERIAL``] Serial frames transmitted between a host and a
@@ -615,7 +842,8 @@ class LinkType(IntEnum):
 
     #: [``DLT_USB_2_0``] USB 2.0, 1.1, or 1.0 packet, beginning with a PID, as
     #: described by Chapter 8 "Protocol Layer" of the the Universal Serial Bus
-    #: Specification Revision 2.0.
+    #: Specification Revision 2.0. Deprecated in favor of speed specific USB 2.0,
+    #: 1.1, or 1.0 linktypes.
     USB_2_0 = 288
 
     #: [``DLT_ATSC_ALP``] ATSC Link-Layer Protocol frames, as described in section
@@ -627,9 +855,32 @@ class LinkType(IntEnum):
     #: header.
     ETW = 290
 
+    #: [``DLT_NETANALYZER_NG``] Hilscher Gesellschaft fuer Systemautomation mbH
+    #: netANALYZER NG hardware and software (specification).
+    NETANALYZER_NG = 291
+
     #: [``DLT_ZBOSS_NCP``] Serial NCP (Network Co-Processor) protocol for Zigbee
     #: stack ZBOSS by DSR. ZBOSS NCP protocol, beginning with a header.
     ZBOSS_NCP = 292
+
+    #: [``DLT_USB_2_0_LOW_SPEED``] Low-Speed USB 2.0, 1.1, or 1.0 packet, beginning
+    #: with a PID, as described by Chapter 8 "Protocol Layer" of the the Universal
+    #: Serial Bus Specification Revision 2.0.
+    USB_2_0_LOW_SPEED = 293
+
+    #: [``DLT_USB_2_0_FULL_SPEED``] Full-Speed USB 2.0, 1.1, or 1.0 packet,
+    #: beginning with a PID, as described by Chapter 8 "Protocol Layer" of the the
+    #: Universal Serial Bus Specification Revision 2.0.
+    USB_2_0_FULL_SPEED = 294
+
+    #: [``DLT_USB_2_0_HIGH_SPEED``] High-Speed USB 2.0 packet, beginning with a
+    #: PID, as described by Chapter 8 "Protocol Layer" of the the Universal Serial
+    #: Bus Specification Revision 2.0.
+    USB_2_0_HIGH_SPEED = 295
+
+    #: [``DLT_AUERSWALD_LOG``] Auerswald Logger Protocol, as described in this
+    #: document.
+    AUERSWALD_LOG = 296
 
     @staticmethod
     def get(key: 'int | str', default: 'int' = -1) -> 'LinkType':

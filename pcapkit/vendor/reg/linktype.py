@@ -66,10 +66,13 @@ class LinkType(Vendor):
             'return cls(value)'
         ]
         for content in data:
-            name = content.select('td.symbol')[0].text.strip()[9:]
+            name = content.select('td.symbol')[0].text.strip()[9:].strip()
             temp = content.select('td.number')[0].text.strip()
             desc = content.select('td.symbol')[1].text.strip()
-            cmmt = re.sub(r'\s+', ' ', content.select('td')[3].text.strip())
+            cmmt = re.sub(r'\s+', ' ', content.select('td')[3].text.strip()).replace("''", '``').replace('_', '\_')
+
+            if not name:
+                name = desc[4:]
 
             try:
                 code, _ = temp, int(temp)
@@ -100,4 +103,4 @@ class LinkType(Vendor):
 
 
 if __name__ == '__main__':
-    sys.exit(LinkType())
+    sys.exit(LinkType())  # type: ignore[arg-type]

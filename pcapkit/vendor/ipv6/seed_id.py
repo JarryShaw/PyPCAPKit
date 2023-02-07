@@ -77,4 +77,4 @@ class SeedID(Vendor):
 
 
 if __name__ == '__main__':
-    sys.exit(SeedID())
+    sys.exit(SeedID())  # type: ignore[arg-type]

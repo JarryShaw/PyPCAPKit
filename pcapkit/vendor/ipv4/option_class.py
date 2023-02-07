@@ -76,4 +76,4 @@ class OptionClass(Vendor):
 
 
 if __name__ == '__main__':
-    sys.exit(OptionClass())
+    sys.exit(OptionClass())  # type: ignore[arg-type]

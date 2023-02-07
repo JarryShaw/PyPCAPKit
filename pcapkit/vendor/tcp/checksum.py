@@ -76,4 +76,4 @@ class Checksum(Vendor):
 
 
 if __name__ == '__main__':
-    sys.exit(Checksum())
+    sys.exit(Checksum())  # type: ignore[arg-type]

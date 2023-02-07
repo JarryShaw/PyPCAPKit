@@ -184,4 +184,4 @@ class Command(Vendor):
 
 
 if __name__ == '__main__':
-    sys.exit(Command())
+    sys.exit(Command())  # type: ignore[arg-type]

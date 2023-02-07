@@ -24,4 +24,4 @@ class Authentication(Vendor):
 
 
 if __name__ == '__main__':
-    sys.exit(Authentication())
+    sys.exit(Authentication())  # type: ignore[arg-type]

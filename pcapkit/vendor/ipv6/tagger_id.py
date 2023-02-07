@@ -77,4 +77,4 @@ class TaggerID(Vendor):
 
 
 if __name__ == '__main__':
-    sys.exit(TaggerID())
+    sys.exit(TaggerID())  # type: ignore[arg-type]

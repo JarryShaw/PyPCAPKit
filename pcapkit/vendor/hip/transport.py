@@ -24,4 +24,4 @@ class Transport(Vendor):
 
 
 if __name__ == '__main__':
-    sys.exit(Transport())
+    sys.exit(Transport())  # type: ignore[arg-type]

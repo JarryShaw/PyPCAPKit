@@ -80,4 +80,4 @@ class ToSPrecedence(Vendor):
 
 
 if __name__ == '__main__':
-    sys.exit(ToSPrecedence())
+    sys.exit(ToSPrecedence())  # type: ignore[arg-type]

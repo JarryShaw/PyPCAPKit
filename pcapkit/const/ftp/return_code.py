@@ -99,13 +99,17 @@ class ReturnCode(IntEnum):
     #: User logged out; service terminated.
     CODE_231 = 231
 
-    #: Logout command noted, will complete when transfer done.
+    #: Logout command noted, will complete when transfer done. Alternatively: User
+    #: logged in, authorized by security data exchange.
     CODE_232 = 232
 
     #: Specifies that the server accepts the authentication mechanism specified by
-    #: the client, and the exchange of security data is complete. A higher level
-    #: nonstandard code created by Microsoft.
+    #: the client, and no security data needs to be exchanged.
     CODE_234 = 234
+
+    #: Specifies that the server accepts the security data given by the client, and
+    #: no further security data needs to be exchanged.
+    CODE_235 = 235
 
     #: Requested file action okay, completed.
     CODE_250 = 250
@@ -118,6 +122,14 @@ class ReturnCode(IntEnum):
 
     #: Need account for login.
     CODE_332 = 332
+
+    #: Specifies that the server accepts the authentication mechanism specified by
+    #: the client, but some security data needs to be exchanged.
+    CODE_334 = 334
+
+    #: Specifies that the server accepts the security data given by the client, but
+    #: further security data needs to be exchanged.
+    CODE_335 = 335
 
     #: Requested file action pending further information
     CODE_350 = 350
@@ -166,7 +178,7 @@ class ReturnCode(IntEnum):
     #: Need account for storing files.
     CODE_532 = 532
 
-    #: Could Not Connect to Server - Policy Requires SSL
+    #: Request denied for policy reasons.
     CODE_534 = 534
 
     #: Requested action not taken. File unavailable (e.g., file not found, no

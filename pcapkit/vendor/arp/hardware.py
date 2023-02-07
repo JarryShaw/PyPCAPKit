@@ -24,4 +24,4 @@ class Hardware(Vendor):
 
 
 if __name__ == '__main__':
-    sys.exit(Hardware())
+    sys.exit(Hardware())  # type: ignore[arg-type]

@@ -24,4 +24,4 @@ class Certificate(Vendor):
 
 
 if __name__ == '__main__':
-    sys.exit(Certificate())
+    sys.exit(Certificate())  # type: ignore[arg-type]

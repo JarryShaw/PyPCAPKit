@@ -91,4 +91,4 @@ class ToSECN(Vendor):
 
 
 if __name__ == '__main__':
-    sys.exit(ToSECN())
+    sys.exit(ToSECN())  # type: ignore[arg-type]

@@ -87,4 +87,4 @@ class ClassificationLevel(Vendor):
 
 
 if __name__ == '__main__':
-    sys.exit(ClassificationLevel())
+    sys.exit(ClassificationLevel())  # type: ignore[arg-type]

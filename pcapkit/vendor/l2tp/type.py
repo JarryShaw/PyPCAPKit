@@ -74,4 +74,4 @@ class Type(Vendor):
 
 
 if __name__ == '__main__':
-    sys.exit(Type())
+    sys.exit(Type())  # type: ignore[arg-type]

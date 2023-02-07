@@ -74,4 +74,4 @@ class SMFDPDMode(Vendor):
 
 
 if __name__ == '__main__':
-    sys.exit(SMFDPDMode())
+    sys.exit(SMFDPDMode())  # type: ignore[arg-type]

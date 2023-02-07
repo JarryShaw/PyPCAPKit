@@ -24,4 +24,4 @@ class DITypes(Vendor):
 
 
 if __name__ == '__main__':
-    sys.exit(DITypes())
+    sys.exit(DITypes())  # type: ignore[arg-type]

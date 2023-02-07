@@ -24,4 +24,4 @@ class Registration(Vendor):
 
 
 if __name__ == '__main__':
-    sys.exit(Registration())
+    sys.exit(Registration())  # type: ignore[arg-type]

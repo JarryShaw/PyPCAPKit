@@ -52,7 +52,11 @@ class Frame(Vendor):
             for rfc in filter(None, re.split(r'\[|\]', rfcs)):
                 if 'RFC' in rfc and re.match(r'\d+', rfc[3:]):
                     #temp.append(f'[{rfc[:3]} {rfc[3:]}]')
-                    temp.append(f'[:rfc:`{rfc[3:]}`]')
+                    temp_split = rfc[3:].split(', ', maxsplit=1)
+                    if len(temp_split) > 1:
+                        temp.append(f'[:rfc:`{temp_split[0]}#{temp_split[1].lower()}`]'.replace(' ', '-'))
+                    else:
+                        temp.append(f'[:rfc:`{temp_split[0]}`]')
                 else:
                     temp.append(f'[{rfc}]'.replace('_', ' '))
             desc = self.wrap_comment(re.sub(r'\r*\n', ' ', '``%s`` %s' % (  # pylint: disable=consider-using-f-string
@@ -83,4 +87,4 @@ class Frame(Vendor):
 
 
 if __name__ == '__main__':
-    sys.exit(Frame())
+    sys.exit(Frame())  # type: ignore[arg-type]

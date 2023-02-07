@@ -34,7 +34,7 @@ class TransType(IntEnum):
     #: Stream [:rfc:`1190`][:rfc:`1819`]
     ST = 5
 
-    #: Transmission Control [RFC-ietf-tcpm-rfc793bis-28]
+    #: Transmission Control [:rfc:`9293`]
     TCP = 6
 
     #: CBT [Tony Ballardie]
@@ -62,7 +62,7 @@ class TransType(IntEnum):
     #: ARGUS (deprecated)) [Robert W Scheifler]
     ARGUS = 13
 
-    #: EMCON [<mystery contact>]
+    #: EMCON [Bich Nguyen]
     EMCON = 14
 
     #: Cross Net Debugger [Haverty, J., "XNET Formats for Internet Protocol Version
@@ -117,7 +117,7 @@ class TransType(IntEnum):
     #: Internet Reliable Transaction [:rfc:`938`][Trudy Miller]
     IRTP = 28
 
-    #: ISO Transport Protocol Class 4 [:rfc:`905`][<mystery contact>]
+    #: ISO Transport Protocol Class 4 [:rfc:`905`][Robert Cole]
     ISO_TP4 = 29
 
     #: Bulk Data Transfer Protocol [:rfc:`969`][David Clark]
@@ -474,6 +474,9 @@ class TransType(IntEnum):
     #: Ethernet [:rfc:`8986`]
     Ethernet = 143
 
+    #: AGGFRAG encapsulation payload for ESP [:rfc:`9347`]
+    AGGFRAG = 144
+
     #: Use for experimentation and testing [:rfc:`3692`]
     Use_for_experimentation_and_testing_253 = 253
 
@@ -508,7 +511,7 @@ class TransType(IntEnum):
         """
         if not (isinstance(value, int) and 0 <= value <= 255):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))
-        if 144 <= value <= 252:
+        if 145 <= value <= 252:
             #: Unassigned [Internet Assigned Numbers Authority]
             extend_enum(cls, 'Unassigned_%d' % value, value)
             return cls(value)

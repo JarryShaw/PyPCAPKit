@@ -121,4 +121,4 @@ class Socket(Vendor):
 
 
 if __name__ == '__main__':
-    sys.exit(Socket())
+    sys.exit(Socket())  # type: ignore[arg-type]

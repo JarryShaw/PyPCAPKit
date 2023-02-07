@@ -84,4 +84,4 @@ class Parameter(Vendor):
 
 
 if __name__ == '__main__':
-    sys.exit(Parameter())
+    sys.exit(Parameter())  # type: ignore[arg-type]

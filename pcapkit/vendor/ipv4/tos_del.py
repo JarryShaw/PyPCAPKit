@@ -74,4 +74,4 @@ class ToSDelay(Vendor):
 
 
 if __name__ == '__main__':
-    sys.exit(ToSDelay())
+    sys.exit(ToSDelay())  # type: ignore[arg-type]

@@ -83,4 +83,4 @@ class Routing(Vendor):
 
 
 if __name__ == '__main__':
-    sys.exit(Routing())
+    sys.exit(Routing())  # type: ignore[arg-type]

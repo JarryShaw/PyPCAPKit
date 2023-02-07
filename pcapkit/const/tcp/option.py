@@ -16,13 +16,13 @@ __all__ = ['Option']
 class Option(IntEnum):
     """[Option] TCP Option Kind Numbers"""
 
-    #: End of Option List [RFC-ietf-tcpm-rfc793bis-28]
+    #: End of Option List [:rfc:`9293`]
     End_of_Option_List = 0
 
-    #: No-Operation [RFC-ietf-tcpm-rfc793bis-28]
+    #: No-Operation [:rfc:`9293`]
     No_Operation = 1
 
-    #: Maximum Segment Size [RFC-ietf-tcpm-rfc793bis-28]
+    #: Maximum Segment Size [:rfc:`9293`]
     Maximum_Segment_Size = 2
 
     #: Window Scale [:rfc:`7323`]
@@ -137,6 +137,17 @@ class Option(IntEnum):
     #: Reserved (known unauthorized use without proper IANA assignment) [**]
     Reserved_78 = 78
 
+    #: Accurate ECN Order 0 (AccECN0) (TEMPORARY - registered 2022-08-03, expires
+    #: 2023-08-03) [draft-ietf-tcpm-accurate-ecn-20]
+    Accurate_ECN_Order_0 = 172
+
+    #: Reserved
+    Reserved_173 = 173
+
+    #: Accurate ECN Order 1 (AccECN1) (TEMPORARY - registered 2022-08-03, expires
+    #: 2023-08-03) [draft-ietf-tcpm-accurate-ecn-20]
+    Accurate_ECN_Order_1 = 174
+
     #: RFC3692-style Experiment 1 (also improperly used for shipping
     #: products) [*] [:rfc:`4727`]
     RFC3692_style_Experiment_1 = 253
@@ -178,7 +189,11 @@ class Option(IntEnum):
             #: Reserved
             extend_enum(cls, 'Reserved_%d' % value, value)
             return cls(value)
-        if 79 <= value <= 252:
+        if 79 <= value <= 171:
+            #: Reserved
+            extend_enum(cls, 'Reserved_%d' % value, value)
+            return cls(value)
+        if 175 <= value <= 252:
             #: Reserved
             extend_enum(cls, 'Reserved_%d' % value, value)
             return cls(value)

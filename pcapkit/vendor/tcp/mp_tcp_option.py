@@ -80,4 +80,4 @@ class MPTCPOption(Vendor):
 
 
 if __name__ == '__main__':
-    sys.exit(MPTCPOption())
+    sys.exit(MPTCPOption())  # type: ignore[arg-type]

@@ -46,6 +46,9 @@ class HIAlgorithm(IntEnum):
     #: ECDSA_LOW [:rfc:`7401`]
     ECDSA_LOW = 9
 
+    #: EdDSA [:rfc:`8032`]
+    EdDSA = 13
+
     @staticmethod
     def get(key: 'int | str', default: 'int' = -1) -> 'HIAlgorithm':
         """Backport support for original codes.
@@ -71,7 +74,11 @@ class HIAlgorithm(IntEnum):
         """
         if not (isinstance(value, int) and 0 <= value <= 65535):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))
-        if 10 <= value <= 65535:
+        if 10 <= value <= 12:
+            #: Unassigned
+            extend_enum(cls, 'Unassigned_%d' % value, value)
+            return cls(value)
+        if 14 <= value <= 65535:
             #: Unassigned
             extend_enum(cls, 'Unassigned_%d' % value, value)
             return cls(value)

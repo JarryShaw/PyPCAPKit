@@ -24,4 +24,4 @@ class ECDSACurve(Vendor):
 
 
 if __name__ == '__main__':
-    sys.exit(ECDSACurve())
+    sys.exit(ECDSACurve())  # type: ignore[arg-type]

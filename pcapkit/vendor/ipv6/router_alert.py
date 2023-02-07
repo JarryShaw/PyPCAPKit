@@ -89,4 +89,4 @@ class RouterAlert(Vendor):
 
 
 if __name__ == '__main__':
-    sys.exit(RouterAlert())
+    sys.exit(RouterAlert())  # type: ignore[arg-type]

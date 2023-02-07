@@ -24,4 +24,4 @@ class RegistrationFailure(Vendor):
 
 
 if __name__ == '__main__':
-    sys.exit(RegistrationFailure())
+    sys.exit(RegistrationFailure())  # type: ignore[arg-type]

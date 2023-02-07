@@ -28,6 +28,12 @@ class HITSuite(IntEnum):
     #: ECDSA_LOW/SHA-1 [:rfc:`7401`]
     ECDSA_LOW_SHA_1 = 3
 
+    #: Unassigned
+    Unassigned_4 = 4
+
+    #: EdDSA/cSHAKE128 [RFC-ietf-drip-rid-37]
+    EdDSA_cSHAKE128 = 5
+
     @staticmethod
     def get(key: 'int | str', default: 'int' = -1) -> 'HITSuite':
         """Backport support for original codes.
@@ -53,7 +59,7 @@ class HITSuite(IntEnum):
         """
         if not (isinstance(value, int) and 0 <= value <= 15):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))
-        if 4 <= value <= 15:
+        if 6 <= value <= 15:
             #: Unassigned
             extend_enum(cls, 'Unassigned_%d' % value, value)
             return cls(value)

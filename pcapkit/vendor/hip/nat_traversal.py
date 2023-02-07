@@ -24,4 +24,4 @@ class NATTraversal(Vendor):
 
 
 if __name__ == '__main__':
-    sys.exit(NATTraversal())
+    sys.exit(NATTraversal())  # type: ignore[arg-type]

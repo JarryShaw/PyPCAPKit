@@ -74,4 +74,4 @@ class ToSReliability(Vendor):
 
 
 if __name__ == '__main__':
-    sys.exit(ToSReliability())
+    sys.exit(ToSReliability())  # type: ignore[arg-type]

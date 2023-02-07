@@ -182,4 +182,4 @@ class ReturnCode(Vendor):
 
 
 if __name__ == '__main__':
-    sys.exit(ReturnCode())
+    sys.exit(ReturnCode())  # type: ignore[arg-type]

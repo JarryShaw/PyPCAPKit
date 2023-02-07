@@ -93,4 +93,4 @@ class PriorityLevel(Vendor):
 
 
 if __name__ == '__main__':
-    sys.exit(PriorityLevel())
+    sys.exit(PriorityLevel())  # type: ignore[arg-type]

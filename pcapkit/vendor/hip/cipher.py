@@ -24,4 +24,4 @@ class Cipher(Vendor):
 
 
 if __name__ == '__main__':
-    sys.exit(Cipher())
+    sys.exit(Cipher())  # type: ignore[arg-type]

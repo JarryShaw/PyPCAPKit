@@ -107,4 +107,4 @@ class TransType(Vendor):
 
 
 if __name__ == '__main__':
-    sys.exit(TransType())
+    sys.exit(TransType())  # type: ignore[arg-type]

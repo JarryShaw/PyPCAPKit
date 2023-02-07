@@ -75,4 +75,4 @@ class TSFlag(Vendor):
 
 
 if __name__ == '__main__':
-    sys.exit(TSFlag())
+    sys.exit(TSFlag())  # type: ignore[arg-type]

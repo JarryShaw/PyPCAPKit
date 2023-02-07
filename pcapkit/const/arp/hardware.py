@@ -132,6 +132,9 @@ class Hardware(IntEnum):
     #: HFI [Tseng-Hui Lin]
     HFI = 37
 
+    #: Unified Bus (UB) [Luoqing Zhou]
+    Unified_Bus = 38
+
     #: HW_EXP2 [:rfc:`5494`]
     HW_EXP2 = 256
 
@@ -166,7 +169,7 @@ class Hardware(IntEnum):
         """
         if not (isinstance(value, int) and 0 <= value <= 65535):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))
-        if 38 <= value <= 255:
+        if 39 <= value <= 255:
             #: Unassigned
             extend_enum(cls, 'Unassigned_%d' % value, value)
             return cls(value)

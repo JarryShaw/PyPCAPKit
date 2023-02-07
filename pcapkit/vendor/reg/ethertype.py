@@ -117,4 +117,4 @@ class EtherType(Vendor):
 
 
 if __name__ == '__main__':
-    sys.exit(EtherType())
+    sys.exit(EtherType())  # type: ignore[arg-type]

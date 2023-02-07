@@ -24,4 +24,4 @@ class HIAlgorithm(Vendor):
 
 
 if __name__ == '__main__':
-    sys.exit(HIAlgorithm())
+    sys.exit(HIAlgorithm())  # type: ignore[arg-type]

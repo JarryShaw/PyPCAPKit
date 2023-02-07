@@ -73,4 +73,4 @@ class ToSThroughput(Vendor):
 
 
 if __name__ == '__main__':
-    sys.exit(ToSThroughput())
+    sys.exit(ToSThroughput())  # type: ignore[arg-type]

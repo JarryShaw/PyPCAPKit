@@ -24,4 +24,4 @@ class ESPTransformSuite(Vendor):
 
 
 if __name__ == '__main__':
-    sys.exit(ESPTransformSuite())
+    sys.exit(ESPTransformSuite())  # type: ignore[arg-type]

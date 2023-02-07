@@ -24,4 +24,4 @@ class HITSuite(Vendor):
 
 
 if __name__ == '__main__':
-    sys.exit(HITSuite())
+    sys.exit(HITSuite())  # type: ignore[arg-type]

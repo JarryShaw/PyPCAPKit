@@ -80,4 +80,4 @@ class ProtectionAuthority(Vendor):
 
 
 if __name__ == '__main__':
-    sys.exit(ProtectionAuthority())
+    sys.exit(ProtectionAuthority())  # type: ignore[arg-type]

@@ -24,4 +24,4 @@ class ECDSALowCurve(Vendor):
 
 
 if __name__ == '__main__':
-    sys.exit(ECDSALowCurve())
+    sys.exit(ECDSALowCurve())  # type: ignore[arg-type]

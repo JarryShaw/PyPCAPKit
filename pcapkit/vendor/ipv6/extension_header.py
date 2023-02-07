@@ -158,4 +158,4 @@ class ExtensionHeader(Vendor):
 
 
 if __name__ == '__main__':
-    sys.exit(ExtensionHeader())
+    sys.exit(ExtensionHeader())  # type: ignore[arg-type]

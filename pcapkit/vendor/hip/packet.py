@@ -84,4 +84,4 @@ class Packet(Vendor):
 
 
 if __name__ == '__main__':
-    sys.exit(Packet())
+    sys.exit(Packet())  # type: ignore[arg-type]

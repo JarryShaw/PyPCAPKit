@@ -24,4 +24,4 @@ class Operation(Vendor):
 
 
 if __name__ == '__main__':
-    sys.exit(Operation())
+    sys.exit(Operation())  # type: ignore[arg-type]

@@ -24,4 +24,4 @@ class Suite(Vendor):
 
 
 if __name__ == '__main__':
-    sys.exit(Suite())
+    sys.exit(Suite())  # type: ignore[arg-type]

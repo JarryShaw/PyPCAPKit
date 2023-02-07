@@ -24,4 +24,4 @@ class NotifyMessage(Vendor):
 
 
 if __name__ == '__main__':
-    sys.exit(NotifyMessage())
+    sys.exit(NotifyMessage())  # type: ignore[arg-type]

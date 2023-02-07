@@ -83,4 +83,4 @@ class Group(Vendor):
 
 
 if __name__ == '__main__':
-    sys.exit(Group())
+    sys.exit(Group())  # type: ignore[arg-type]
