@@ -4,6 +4,8 @@
 import enum
 from typing import TYPE_CHECKING, Generic, TypeVar, cast
 
+import aenum
+
 from pcapkit.corekit.fields.field import Field, NoValue
 from pcapkit.utilities.exceptions import IntError
 
@@ -261,7 +263,7 @@ class UByteField(NumberField):
     __signed__ = False
 
 
-class EnumField(NumberField[StdlibEnum | AenumEnum]):
+class EnumField(NumberField[enum.IntEnum | aenum.IntEnum]):
     """Enumerated value for protocol fields.
 
     Args:

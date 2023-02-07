@@ -5,8 +5,6 @@ import io
 from typing import TYPE_CHECKING, TypeVar, cast
 
 from pcapkit.corekit.fields.field import NoValue, _Field
-from pcapkit.protocols.misc.null import NoPayload
-from pcapkit.protocols.misc.raw import Raw
 from pcapkit.utilities.exceptions import NoDefaultValue
 
 __all__ = ['ConditionalField', 'PayloadField']
@@ -201,13 +199,19 @@ class PayloadField(_Field[_TP]):
         """
         self._protocol = protocol
 
-    def __init__(self, name: 'str' = 'payload', default: '_TP | NoValueType' = NoValue, protocol: 'Type[_TP]' = Raw,  # type: ignore[assignment]
+    def __init__(self, name: 'str' = 'payload', default: '_TP | NoValueType' = NoValue,
+                 protocol: 'Optional[Type[_TP]]' = None,
                  length_hint: 'Callable[[dict[str, Any]], Optional[int]]' = lambda x: None) -> 'None':
         self._name = name
-        self._protocol = protocol
         self._length_hint = length_hint
 
+        if protocol is None:
+            from pcapkit.protocols.misc.raw import Raw  # pylint: disable=import-outside-top-level
+            protocol = cast('Type[_TP]', Raw)
+        self._protocol = protocol
+
         if default is NoValue:
+            from pcapkit.protocols.misc.null import NoPayload  # pylint: disable=import-outside-top-level
             default = cast('_TP', NoPayload())
         self._default = default
 
@@ -242,8 +246,6 @@ class PayloadField(_Field[_TP]):
         Args:
             buffer: field buffer.
             packet: packet data.
-
-        Keyword Arguments:
             length: field length.
 
         Returns:
