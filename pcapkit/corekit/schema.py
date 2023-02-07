@@ -255,6 +255,7 @@ class Schema(Mapping[str, VT], Generic[VT]):
         """
         self = cls.__new__(cls)
         self.__update__(dict_, **kwargs)
+        self.__post_init__()
         return self
 
     def to_dict(self) -> 'dict[str, VT]':
