@@ -35,6 +35,8 @@ class Schema(Mapping[str, VT], Generic[VT]):
         __fields__: 'list[_Field]'
         #: Mapping of field names to packed values.
         __buffer__: 'dict[str, bytes]'
+        #: Flag for whether the schema is recently updated.
+        __updated__: 'bool'
 
     def __new__(cls, *args: 'VT', **kwargs: 'VT') -> 'Schema':  # pylint: disable=unused-argument
         """Create a new instance.
@@ -118,7 +120,12 @@ class Schema(Mapping[str, VT], Generic[VT]):
         cls.__init__.__qualname__ = f'{cls.__name__}.__init__'
 
         self = super().__new__(cls)
+
+        #: NOTE: We only create the attributes for the instance itself,
+        #: to avoid creating shared attributes for the class.
         self.__buffer__ = {}
+        self.__updated__ = False
+
         return self
 
     def __update__(self, dict_: 'Optional[Mapping[str, VT] | Iterable[tuple[str, VT]]]' = None,
@@ -158,6 +165,8 @@ class Schema(Mapping[str, VT], Generic[VT]):
             #     key = re.sub(r'\W', '_', key)
             self.__dict__[key] = value
 
+        self.__updated__ = True
+
     __init__ = __update__
 
     def __str__(self) -> 'str':
@@ -179,6 +188,11 @@ class Schema(Mapping[str, VT], Generic[VT]):
         args = ', '.join(temp)
         return f'{type(self).__name__}({args})'
 
+    def __bytes__(self) -> 'bytes':
+        if self.__updated__:
+            self.pack()
+        return b''.join(self.__buffer__[field.name] for field in self.__fields__)
+
     def __len__(self) -> 'int':
         return len(self.__dict__)
 
@@ -193,10 +207,12 @@ class Schema(Mapping[str, VT], Generic[VT]):
     def __setattr__(self, name: 'str', value: 'VT') -> 'None':
         key = self.__map__.get(name, name)
         self.__dict__[key] = value
+        self.__updated__ = True
 
     def __delattr__(self, name: 'str') -> 'None':
         key = self.__map__.get(name, name)
         del self.__dict__[key]
+        self.__updated__ = True
 
     @classmethod
     def from_dict(cls, dict_: 'Optional[Mapping[str, VT] | Iterable[tuple[str, VT]]]' = None,
@@ -239,13 +255,12 @@ class Schema(Mapping[str, VT], Generic[VT]):
                 dict_[out_key] = value
         return dict_
 
+    def to_bytes(self) -> 'bytes':
+        """Convert :class:`Schema` into :obj:`bytes`."""
+        return self.__bytes__()
+
     def pack(self) -> 'None':
-        """Pack :class:`Schema` into :obj:`bytes`.
-
-        Returns:
-            :obj:`bytes`: Packed data.
-
-        """
+        """Pack :class:`Schema` into :obj:`bytes`."""
         buffer = self.__buffer__
         packet = self.__dict__
 
@@ -275,6 +290,8 @@ class Schema(Mapping[str, VT], Generic[VT]):
             value = getattr(self, field.name)
             temp = field(packet).pack(value, self.__dict__)
             buffer[field.name] = temp
+
+        self.__updated__ = True
 
     def unpack(self, data: 'bytes | IO[bytes]') -> 'None':
         """Unpack :obj:`bytes` into :class:`Schema`.
@@ -311,3 +328,5 @@ class Schema(Mapping[str, VT], Generic[VT]):
             value = field(packet).unpack(byte, packet)
             setattr(self, field.name, value)
             length -= field.length
+
+        self.__updated__ = True
