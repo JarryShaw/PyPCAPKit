@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING, Any, Dict, Generic, TypeVar
 
 import chardet
 
-from pcapkit.corekit.fields.field import Field
+from pcapkit.corekit.fields.field import Field, NoValue
 
 __all__ = [
     '_TextField',
@@ -18,6 +18,8 @@ if TYPE_CHECKING:
     from typing import Any, Callable, Optional
 
     from typing_extensions import Literal
+
+    from pcapkit.corekit.fields.field import NoValueType
 
     ConverterFunc = Callable[[int], Any]
     ReverserFunc = Callable[[Any], int]
@@ -37,7 +39,7 @@ class _TextField(Field[_T], Generic[_T]):
     """
 
     def __init__(self, length: 'int | Callable[[dict[str, Any]], int]',
-                 default: 'Optional[_T]' = None) -> 'None':
+                 default: '_T | NoValueType' = NoValue) -> 'None':
         super().__init__(length, default)  # type: ignore[arg-type]
 
         self._template = f'{self._length}s'
@@ -88,7 +90,7 @@ class StringField(_TextField[str]):
     """
 
     def __init__(self, length: 'int | Callable[[dict[str, Any]], int]',
-                 default: 'Optional[str]' = None, encoding: 'Optional[str]' = None,
+                 default: 'str | NoValueType' = NoValue, encoding: 'Optional[str]' = None,
                  errors: 'Literal["strict", "ignore", "replace"]' = 'strict',
                  unquote: 'bool' = False) -> 'None':
         super().__init__(length, default)
@@ -152,7 +154,7 @@ class BitField(_TextField[Dict[str, Any]]):
     """
 
     def __init__(self, length: 'int | Callable[[dict[str, Any]], int]',
-                 default: 'Optional[dict[str, Any]]' = None,
+                 default: 'dict[str, Any] | NoValueType' = NoValue,
                  namespace: 'Optional[dict[str, NamespaceEntry]]' = None) -> 'None':
         super().__init__(length, default)
 

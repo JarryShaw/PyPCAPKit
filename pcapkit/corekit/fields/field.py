@@ -5,6 +5,8 @@ import abc
 import struct
 from typing import TYPE_CHECKING, Generic, TypeVar, cast
 
+from typing_extensions import final
+
 from pcapkit.utilities.exceptions import NoDefaultValue
 
 __all__ = ['Field']
@@ -15,12 +17,21 @@ if TYPE_CHECKING:
 _T = TypeVar('_T')
 
 
+@final
+class NoValueType:
+    """Default value for fields."""
+
+
+#: Default value for :attr:`_Field.default`.
+NoValue = NoValueType()
+
+
 class _Field(Generic[_T], metaclass=abc.ABCMeta):
     """Internal base class for protocol fields."""
 
     if TYPE_CHECKING:
         _name: 'str'
-        _default: 'Optional[_T]'
+        _default: '_T | NoValueType'
 
     @property
     def name(self) -> 'str':
@@ -33,14 +44,19 @@ class _Field(Generic[_T], metaclass=abc.ABCMeta):
         self._name = value
 
     @property
-    def default(self) -> 'Optional[_T]':
+    def default(self) -> '_T | NoValueType':
         """Field default value."""
-        return None
+        return self._default
 
     @default.setter
-    def default(self, value: '_T') -> 'None':
+    def default(self, value: '_T | NoValueType') -> 'None':
         """Set field default value."""
         self._default = value
+
+    @default.deleter
+    def default(self) -> 'None':
+        """Delete field default value."""
+        self._default = NoValue
 
     @property
     @abc.abstractmethod
@@ -51,6 +67,11 @@ class _Field(Generic[_T], metaclass=abc.ABCMeta):
     def length(self) -> 'int':
         """Field size."""
         return struct.calcsize(self.template)
+
+    @property
+    def optional(self) -> 'bool':
+        """Field is optional."""
+        return False
 
     def __call__(self, packet: 'dict[str, Any]') -> '_Field':
         """Update field attributes.
@@ -89,9 +110,9 @@ class _Field(Generic[_T], metaclass=abc.ABCMeta):
 
         """
         if value is None:
-            if self._default is None:
+            if self._default is NoValue:
                 raise NoDefaultValue(f'Field {self.name} has no default value.')
-            value = self._default
+            value = cast('_T', self._default)
 
         pre_processed = self.pre_process(value, packet)
         return struct.pack(self.template, pre_processed)
@@ -148,7 +169,7 @@ class Field(_Field[_T], Generic[_T]):
         return struct.calcsize(self.template)
 
     def __init__(self, length: 'int | Callable[[dict[str, Any]], int]',
-                 default: 'Optional[_T]' = None) -> 'None':
+                 default: '_T | NoValueType' = NoValue) -> 'None':
         self._name = '<unknown>'
         self._default = default
 

@@ -14,7 +14,7 @@ from pcapkit.corekit.fields.misc import ConditionalField, PayloadField
 from pcapkit.corekit.fields.numbers import (ByteField, EnumField, IntField, LongField, NumberField,
                                             ShortField, UByteField, UIntField, ULongField,
                                             UShortField)
-from pcapkit.corekit.fields.strings import BytesField, StringField, BitField
+from pcapkit.corekit.fields.strings import BitField, BytesField, StringField
 
 __all__ = [
     'NumberField',

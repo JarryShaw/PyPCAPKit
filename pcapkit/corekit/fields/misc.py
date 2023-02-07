@@ -4,17 +4,17 @@
 import io
 from typing import TYPE_CHECKING, TypeVar, cast
 
-from pcapkit.corekit.fields.field import _Field
+from pcapkit.corekit.fields.field import NoValue, _Field
 from pcapkit.protocols.misc.null import NoPayload
 from pcapkit.protocols.misc.raw import Raw
-from pcapkit.utilities.exceptions import NoDefaultValue, UnsupportedCall
+from pcapkit.utilities.exceptions import NoDefaultValue
 
 __all__ = ['ConditionalField', 'PayloadField']
 
 if TYPE_CHECKING:
-    from typing import Any, BinaryIO, Callable, NoReturn, Optional, Type
+    from typing import Any, BinaryIO, Callable, Optional, Type
 
-    from pcapkit.corekit.fields.field import Field
+    from pcapkit.corekit.fields.field import Field, NoValueType
     from pcapkit.protocols.protocol import Protocol
 
 _TC = TypeVar('_TC', bound='Field')
@@ -43,14 +43,19 @@ class ConditionalField(_Field[_TC]):
         self._field.name = value
 
     @property
-    def default(self) -> 'Optional[_TC]':
+    def default(self) -> '_TC | NoValueType':
         """Field default value."""
         return self._field.default
 
     @default.setter
-    def default(self, value: '_TC') -> 'None':
+    def default(self, value: '_TC | NoValueType') -> 'None':
         """Set field default value."""
         self._field.default = value
+
+    @default.deleter
+    def default(self) -> 'None':
+        """Delete field default value."""
+        self._field.default = NoValue
 
     @property
     def template(self) -> 'str':
@@ -61,6 +66,11 @@ class ConditionalField(_Field[_TC]):
     def length(self) -> 'int':
         """Field size."""
         return self._field.length
+
+    @property
+    def optional(self) -> 'bool':
+        """Field is optional."""
+        return True
 
     @property
     def field(self) -> 'Field[_TC]':
@@ -162,14 +172,19 @@ class PayloadField(_Field[_TP]):
     """
 
     @property
-    def template(self) -> 'NoReturn':
+    def template(self) -> 'str':
         """Field template."""
-        raise UnsupportedCall(f"{self.__class__.__name__} object has no attribute 'template'.")
+        return self._template
 
     @property
-    def length(self) -> 'NoReturn':
+    def length(self) -> 'int':
         """Field size."""
-        raise UnsupportedCall(f"{self.__class__.__name__} object has no attribute 'length'.")
+        return self._length
+
+    @property
+    def optional(self) -> 'bool':
+        """Field is optional."""
+        return True
 
     @property
     def protocol(self) -> 'Type[_TP]':
@@ -186,15 +201,18 @@ class PayloadField(_Field[_TP]):
         """
         self._protocol = protocol
 
-    def __init__(self, name: 'str' = 'payload', default: 'Optional[_TP]' = None, protocol: 'Type[_TP]' = Raw,  # type: ignore[assignment]
+    def __init__(self, name: 'str' = 'payload', default: '_TP | NoValueType' = NoValue, protocol: 'Type[_TP]' = Raw,  # type: ignore[assignment]
                  length_hint: 'Callable[[dict[str, Any]], Optional[int]]' = lambda x: None) -> 'None':
         self._name = name
         self._protocol = protocol
         self._length_hint = length_hint
 
-        if default is None:
+        if default is NoValue:
             default = cast('_TP', NoPayload())
         self._default = default
+
+        self._length = 0
+        self._template = '0s'
 
     def pack(self, value: 'Optional[_TP | bytes]', packet: 'dict[str, Any]') -> 'bytes':
         """Pack field value into :obj:`bytes`.
@@ -208,9 +226,9 @@ class PayloadField(_Field[_TP]):
 
         """
         if value is None:
-            if self._default is None:
+            if self._default is NoValue:
                 raise NoDefaultValue(f'Field {self.name} has no default value.')
-            value = self._default
+            value = cast('_TP', self._default)
 
         if isinstance(value, bytes):
             return value
@@ -261,5 +279,9 @@ class PayloadField(_Field[_TP]):
         """
         value = self._length_hint(packet)
         if value is None:
-            return default
+            value = default
+
+        self._length = value
+        self._template = f'{value}s'
+
         return value

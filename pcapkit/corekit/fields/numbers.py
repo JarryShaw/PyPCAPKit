@@ -4,7 +4,7 @@
 import enum
 from typing import TYPE_CHECKING, Generic, TypeVar, cast
 
-from pcapkit.corekit.fields.field import Field
+from pcapkit.corekit.fields.field import Field, NoValue
 from pcapkit.utilities.exceptions import IntError
 
 __all__ = [
@@ -22,6 +22,8 @@ if TYPE_CHECKING:
 
     from aenum import IntEnum as AenumEnum
     from typing_extensions import Literal
+
+    from pcapkit.corekit.fields.field import NoValueType
 
 _T = TypeVar('_T', bound='int')
 
@@ -43,7 +45,7 @@ class NumberField(Field[int], Generic[_T]):
     __signed__ = None  # type: Optional[bool]
 
     def __init__(self, length: 'Optional[int | Callable[[dict[str, Any]], int]]' = None,
-                 default: 'Optional[int]' = None, signed: 'bool' = False,
+                 default: 'int | NoValueType' = NoValue, signed: 'bool' = False,
                  byteorder: 'Literal["little", "big"]' = 'big') -> 'None':
         if length is None:
             if self.__length__ is None:
@@ -273,7 +275,7 @@ class EnumField(NumberField[StdlibEnum | AenumEnum]):
     """
 
     def __init__(self, length: 'Optional[int | Callable[[dict[str, Any]], int]]' = None,
-                 default: 'Optional[StdlibEnum | AenumEnum]' = None, signed: 'bool' = False,
+                 default: 'StdlibEnum | AenumEnum | NoValueType' = NoValue, signed: 'bool' = False,
                  byteorder: 'Literal["little", "big"]' = 'big',
                  namespace: 'Optional[Type[StdlibEnum] | Type[AenumEnum]]' = None) -> 'None':
         super().__init__(length, default, signed, byteorder)
