@@ -10,9 +10,6 @@
     <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/alabaster.css" />
     <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
-    <script src="../../../_static/jquery.js"></script>
-    <script src="../../../_static/underscore.js"></script>
-    <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="../../../_static/doctools.js"></script>
     <script src="../../../_static/sphinx_highlight.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
@@ -59,9 +56,7 @@ extractor for unknown protocol, and constructs a
 </dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.protocols.misc.raw.Raw.__post_init__">
-<span class="sig-name descname"><span class="pre">__post_init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">BinaryIO</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><span class="pre">None</span></a></span></span><a class="reference internal" href="../../../_modules/pcapkit/protocols/misc/raw.html#Raw.__post_init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.misc.raw.Raw.__post_init__" title="Permalink to this definition">¶</a></dt>
-<dt class="sig sig-object py">
-<span class="sig-name descname"><span class="pre">__post_init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><span class="pre">None</span></a></span></span></dt>
+<span class="sig-name descname"><span class="pre">__post_init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/misc/raw.html#Raw.__post_init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.misc.raw.Raw.__post_init__" title="Permalink to this definition">¶</a></dt>
 <dd><p>Post initialisation hook.</p>
 <p>Would <a class="reference internal" href="../../index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> encounter malformed packets, the original parsing
 error instance will be provided as in <code class="docutils literal notranslate"><span class="pre">error</span></code>.</p>
@@ -75,16 +70,14 @@ error instance will be provided as in <code class="docutils literal notranslate"
 <li><p><strong>**kwargs</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>) – Arbitrary keyword arguments.</p></li>
 </ul>
 </dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></p>
+</dd>
 </dl>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
 <p>For construction argument, please refer to <a class="reference internal" href="#pcapkit.protocols.misc.raw.Raw.make" title="pcapkit.protocols.misc.raw.Raw.make"><code class="xref py py-meth docutils literal notranslate"><span class="pre">make()</span></code></a>.</p>
 </div>
-<dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></p>
-</dd>
-</dl>
 </dd></dl>
 
 <dl class="py method">
@@ -105,22 +98,12 @@ error instance will be provided as in <code class="docutils literal notranslate"
 <dt class="sig sig-object py" id="pcapkit.protocols.misc.raw.Raw.name">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Literal" title="(in Python v3.11)"><span class="pre">Literal</span></a><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'Unknown'</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pcapkit.protocols.misc.raw.Raw.name" title="Permalink to this definition">¶</a></dt>
 <dd><p>Name of current protocol.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Literal" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Literal</span></code></a>[‘Unknown’]</p>
-</dd>
-</dl>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="pcapkit.protocols.misc.raw.Raw.length">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">length</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Literal" title="(in Python v3.11)"><span class="pre">Literal</span></a><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">0</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pcapkit.protocols.misc.raw.Raw.length" title="Permalink to this definition">¶</a></dt>
 <dd><p>Header length of current protocol.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Literal" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Literal</span></code></a>[0]</p>
-</dd>
-</dl>
 </dd></dl>
 
 <dl class="py property">
@@ -130,9 +113,6 @@ error instance will be provided as in <code class="docutils literal notranslate"
 <dl class="field-list simple">
 <dt class="field-odd">Raises<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.UnsupportedCall" title="pcapkit.utilities.exceptions.UnsupportedCall"><strong>UnsupportedCall</strong></a> – This protocol doesn’t support <a class="reference internal" href="#pcapkit.protocols.misc.raw.Raw.protocol" title="pcapkit.protocols.misc.raw.Raw.protocol"><code class="xref py py-attr docutils literal notranslate"><span class="pre">protocol</span></code></a>.</p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.NoReturn" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">NoReturn</span></code></a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -201,19 +181,19 @@ error instance will be provided as in <code class="docutils literal notranslate"
 </dl>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.misc.raw.Raw.protocol">
-<span class="sig-name descname"><span class="pre">protocol</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pcapkit.protocols.data.misc.raw.Raw.protocol" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">protocol</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional[int]</span></em><a class="headerlink" href="#pcapkit.protocols.data.misc.raw.Raw.protocol" title="Permalink to this definition">¶</a></dt>
 <dd><p>Original enumeration of this protocol.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.misc.raw.Raw.packet">
-<span class="sig-name descname"><span class="pre">packet</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.11)"><span class="pre">bytes</span></a></em><a class="headerlink" href="#pcapkit.protocols.data.misc.raw.Raw.packet" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">packet</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bytes</span></em><a class="headerlink" href="#pcapkit.protocols.data.misc.raw.Raw.packet" title="Permalink to this definition">¶</a></dt>
 <dd><p>packet data</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.misc.raw.Raw.error">
-<span class="sig-name descname"><span class="pre">error</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#Exception" title="(in Python v3.11)"><span class="pre">Exception</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pcapkit.protocols.data.misc.raw.Raw.error" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">error</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional[Exception]</span></em><a class="headerlink" href="#pcapkit.protocols.data.misc.raw.Raw.error" title="Permalink to this definition">¶</a></dt>
 <dd><p>error instance when parsing packet data</p>
 </dd></dl>
 

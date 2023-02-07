@@ -10,9 +10,6 @@
     <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css" />
     <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
-    <script src="../../_static/jquery.js"></script>
-    <script src="../../_static/underscore.js"></script>
-    <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="../../_static/doctools.js"></script>
     <script src="../../_static/sphinx_highlight.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
@@ -42,13 +39,13 @@ implementations. Available enumerations include:</p>
 <table class="docutils align-default">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="#pcapkit.const.reg.linktype.LinkType" title="pcapkit.const.reg.linktype.LinkType"><code class="xref py py-class docutils literal notranslate"><span class="pre">LINKTYPE</span></code></a></p></td>
-<td><p>Link-Layer Header Type Values <a class="footnote-reference brackets" href="#id10" id="id1" role="doc-noteref"><span class="fn-bracket">[</span>*<span class="fn-bracket">]</span></a></p></td>
+<td><p>Link-Layer Header Type Values <a class="footnote-reference brackets" href="#id8" id="id1" role="doc-noteref"><span class="fn-bracket">[</span>*<span class="fn-bracket">]</span></a></p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#pcapkit.const.reg.ethertype.EtherType" title="pcapkit.const.reg.ethertype.EtherType"><code class="xref py py-class docutils literal notranslate"><span class="pre">ETHERTYPE</span></code></a></p></td>
-<td><p>Ethertype IEEE 802 Numbers <a class="footnote-reference brackets" href="#id11" id="id2" role="doc-noteref"><span class="fn-bracket">[</span>†<span class="fn-bracket">]</span></a></p></td>
+<td><p>Ethertype IEEE 802 Numbers <a class="footnote-reference brackets" href="#id9" id="id2" role="doc-noteref"><span class="fn-bracket">[</span>†<span class="fn-bracket">]</span></a></p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#pcapkit.const.reg.transtype.TransType" title="pcapkit.const.reg.transtype.TransType"><code class="xref py py-class docutils literal notranslate"><span class="pre">TRANSTYPE</span></code></a></p></td>
-<td><p>Transport Layer Protocol Numbers <a class="footnote-reference brackets" href="#id12" id="id3" role="doc-noteref"><span class="fn-bracket">[</span>‡<span class="fn-bracket">]</span></a></p></td>
+<td><p>Transport Layer Protocol Numbers <a class="footnote-reference brackets" href="#id10" id="id3" role="doc-noteref"><span class="fn-bracket">[</span>‡<span class="fn-bracket">]</span></a></p></td>
 </tr>
 </tbody>
 </table>
@@ -69,10 +66,10 @@ which is automatically generated from <code class="xref py py-class docutils lit
 field, in host byte order, containing a value of 2 for IPv4 packets, a value
 of either 24, 28, or 30 for IPv6 packets, a value of 7 for OSI packets, or a
 value of 23 for IPX packets. All of the IPv6 values correspond to IPv6
-packets; code reading files should check for all of them. Note that <a href="#id4"><span class="problematic" id="id5">``</span></a>host
-byte order’’ is the byte order of the machine on that the packets are
-captured; if a live capture is being done, <a href="#id6"><span class="problematic" id="id7">``</span></a>host byte order’’ is the byte
-order of the machine capturing the packets, but if a <a href="#id8"><span class="problematic" id="id9">``</span></a>savefile’’ is being
+packets; code reading files should check for all of them. Note that <code class="docutils literal notranslate"><span class="pre">host</span>
+<span class="pre">byte</span> <span class="pre">order</span></code> is the byte order of the machine on that the packets are
+captured; if a live capture is being done, <code class="docutils literal notranslate"><span class="pre">host</span> <span class="pre">byte</span> <span class="pre">order</span></code> is the byte
+order of the machine capturing the packets, but if a <code class="docutils literal notranslate"><span class="pre">savefile</span></code> is being
 read, the byte order is not necessarily that of the machine reading the
 capture file.</p>
 </dd></dl>
@@ -81,7 +78,13 @@ capture file.</p>
 <dt class="sig sig-object py" id="pcapkit.const.reg.linktype.LinkType.ETHERNET">
 <span class="sig-name descname"><span class="pre">ETHERNET</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1</span></em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.ETHERNET" title="Permalink to this definition">¶</a></dt>
 <dd><p>[<code class="docutils literal notranslate"><span class="pre">DLT_EN10MB</span></code>] IEEE 802.3 Ethernet (10Mb, 100Mb, 1000Mb, and up); the 10MB
-in the <a href="#id13"><span class="problematic" id="id14">DLT_</span></a> name is historical.</p>
+in the DLT_ name is historical.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.reg.linktype.LinkType.EXP_ETHERNET">
+<span class="sig-name descname"><span class="pre">EXP_ETHERNET</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">2</span></em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.EXP_ETHERNET" title="Permalink to this definition">¶</a></dt>
+<dd><p>[<code class="docutils literal notranslate"><span class="pre">DLT_EN3MB</span></code>] Experimental Ethernet (3Mb).</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -91,10 +94,22 @@ in the <a href="#id13"><span class="problematic" id="id14">DLT_</span></a> name 
 </dd></dl>
 
 <dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.reg.linktype.LinkType.PRONET">
+<span class="sig-name descname"><span class="pre">PRONET</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">4</span></em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.PRONET" title="Permalink to this definition">¶</a></dt>
+<dd><p>[<code class="docutils literal notranslate"><span class="pre">DLT_PRONET</span></code>] Proteon ProNET Token Ring.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.reg.linktype.LinkType.CHAOS">
+<span class="sig-name descname"><span class="pre">CHAOS</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">5</span></em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.CHAOS" title="Permalink to this definition">¶</a></dt>
+<dd><p>[<code class="docutils literal notranslate"><span class="pre">DLT_CHAOS</span></code>] Chaos.</p>
+</dd></dl>
+
+<dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.reg.linktype.LinkType.IEEE802_5">
 <span class="sig-name descname"><span class="pre">IEEE802_5</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">6</span></em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.IEEE802_5" title="Permalink to this definition">¶</a></dt>
 <dd><p>[<code class="docutils literal notranslate"><span class="pre">DLT_IEEE802</span></code>] IEEE 802.5 Token Ring; the IEEE802, without _5, in the
-<a href="#id15"><span class="problematic" id="id16">DLT_</span></a> name is historical.</p>
+DLT_ name is historical.</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -131,6 +146,12 @@ stuffed.</p>
 </dd></dl>
 
 <dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.reg.linktype.LinkType.REDBACK_SMARTEDGE">
+<span class="sig-name descname"><span class="pre">REDBACK_SMARTEDGE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">32</span></em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.REDBACK_SMARTEDGE" title="Permalink to this definition">¶</a></dt>
+<dd><p>[<code class="docutils literal notranslate"><span class="pre">DLT_REDBACK_SMARTEDGE</span></code>] Redback SmartEdge 400/800.</p>
+</dd></dl>
+
+<dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.reg.linktype.LinkType.PPP_HDLC">
 <span class="sig-name descname"><span class="pre">PPP_HDLC</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">50</span></em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.PPP_HDLC" title="Permalink to this definition">¶</a></dt>
 <dd><p>[<code class="docutils literal notranslate"><span class="pre">DLT_PPP_SERIAL</span></code>] PPP in HDLC-like framing, as per RFC 1662, or Cisco PPP
@@ -145,6 +166,12 @@ stuffed.</p>
 <span class="sig-name descname"><span class="pre">PPP_ETHER</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">51</span></em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.PPP_ETHER" title="Permalink to this definition">¶</a></dt>
 <dd><p>[<code class="docutils literal notranslate"><span class="pre">DLT_PPP_ETHER</span></code>] PPPoE; the packet begins with a PPPoE header, as per RFC
 2516.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.reg.linktype.LinkType.SYMANTEC_FIREWALL">
+<span class="sig-name descname"><span class="pre">SYMANTEC_FIREWALL</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">99</span></em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.SYMANTEC_FIREWALL" title="Permalink to this definition">¶</a></dt>
+<dd><p>[<code class="docutils literal notranslate"><span class="pre">DLT_SYMANTEC_FIREWALL</span></code>] Symantec Enterprise (ex-Axent Raptor) firewall.</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -176,6 +203,12 @@ header.</p>
 </dd></dl>
 
 <dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.reg.linktype.LinkType.ATM_CLIP">
+<span class="sig-name descname"><span class="pre">ATM_CLIP</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">106</span></em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.ATM_CLIP" title="Permalink to this definition">¶</a></dt>
+<dd><p>[<code class="docutils literal notranslate"><span class="pre">DLT_ATM_CLIP</span></code>] Linux Classical IP over ATM.</p>
+</dd></dl>
+
+<dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.reg.linktype.LinkType.FRELAY">
 <span class="sig-name descname"><span class="pre">FRELAY</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">107</span></em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.FRELAY" title="Permalink to this definition">¶</a></dt>
 <dd><p>[<code class="docutils literal notranslate"><span class="pre">DLT_FRELAY</span></code>] Frame Relay LAPF frames, beginning with a ITU-T
@@ -194,6 +227,18 @@ correspond to IPv6 packets; code reading files should check for all of them.</p>
 </dd></dl>
 
 <dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.reg.linktype.LinkType.ENC">
+<span class="sig-name descname"><span class="pre">ENC</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">109</span></em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.ENC" title="Permalink to this definition">¶</a></dt>
+<dd><p>[<code class="docutils literal notranslate"><span class="pre">DLT_ENC</span></code>] Encapsulated packets for IPsec.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.reg.linktype.LinkType.NETBSD_HDLC">
+<span class="sig-name descname"><span class="pre">NETBSD_HDLC</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">112</span></em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.NETBSD_HDLC" title="Permalink to this definition">¶</a></dt>
+<dd><p>[<code class="docutils literal notranslate"><span class="pre">DLT_HDLC</span></code>] Cisco HDLC.</p>
+</dd></dl>
+
+<dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.reg.linktype.LinkType.LINUX_SLL">
 <span class="sig-name descname"><span class="pre">LINUX_SLL</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">113</span></em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.LINUX_SLL" title="Permalink to this definition">¶</a></dt>
 <dd><p>[<code class="docutils literal notranslate"><span class="pre">DLT_LINUX_SLL</span></code>] Linux “cooked” capture encapsulation.</p>
@@ -208,6 +253,18 @@ AppleTalk, Second Edition.</p>
 </dd></dl>
 
 <dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.reg.linktype.LinkType.ECONET">
+<span class="sig-name descname"><span class="pre">ECONET</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">115</span></em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.ECONET" title="Permalink to this definition">¶</a></dt>
+<dd><p>[<code class="docutils literal notranslate"><span class="pre">DLT_ECONET</span></code>] Acorn Econet.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.reg.linktype.LinkType.IPFILTER">
+<span class="sig-name descname"><span class="pre">IPFILTER</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">116</span></em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.IPFILTER" title="Permalink to this definition">¶</a></dt>
+<dd><p>[<code class="docutils literal notranslate"><span class="pre">DLT_IPFILTER</span></code>] OpenBSD ipfilter.</p>
+</dd></dl>
+
+<dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.reg.linktype.LinkType.PFLOG">
 <span class="sig-name descname"><span class="pre">PFLOG</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">117</span></em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.PFLOG" title="Permalink to this definition">¶</a></dt>
 <dd><p>[<code class="docutils literal notranslate"><span class="pre">DLT_PFLOG</span></code>] OpenBSD pflog; the link-layer header contains a struct
@@ -218,10 +275,23 @@ is.)</p>
 </dd></dl>
 
 <dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.reg.linktype.LinkType.CISCO_IOS">
+<span class="sig-name descname"><span class="pre">CISCO_IOS</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">118</span></em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.CISCO_IOS" title="Permalink to this definition">¶</a></dt>
+<dd><p>[<code class="docutils literal notranslate"><span class="pre">DLT_CISCO_IOS</span></code>] Cisco internal use.</p>
+</dd></dl>
+
+<dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.reg.linktype.LinkType.IEEE802_11_PRISM">
 <span class="sig-name descname"><span class="pre">IEEE802_11_PRISM</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">119</span></em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.IEEE802_11_PRISM" title="Permalink to this definition">¶</a></dt>
 <dd><p>[<code class="docutils literal notranslate"><span class="pre">DLT_PRISM_HEADER</span></code>] Prism monitor mode information followed by an 802.11
 header.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.reg.linktype.LinkType.AIRONET_HEADER">
+<span class="sig-name descname"><span class="pre">AIRONET_HEADER</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">120</span></em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.AIRONET_HEADER" title="Permalink to this definition">¶</a></dt>
+<dd><p>[<code class="docutils literal notranslate"><span class="pre">DLT_AIRONET_HEADER</span></code>] Reserved for Aironet 802.11 cards, with an Aironet
+link-layer header.</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -239,10 +309,36 @@ devices.</p>
 </dd></dl>
 
 <dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.reg.linktype.LinkType.RIO">
+<span class="sig-name descname"><span class="pre">RIO</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">124</span></em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.RIO" title="Permalink to this definition">¶</a></dt>
+<dd><p>[<code class="docutils literal notranslate"><span class="pre">DLT_RIO</span></code>] RapidIO.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.reg.linktype.LinkType.PCI_EXP">
+<span class="sig-name descname"><span class="pre">PCI_EXP</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">125</span></em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.PCI_EXP" title="Permalink to this definition">¶</a></dt>
+<dd><p>[<code class="docutils literal notranslate"><span class="pre">DLT_PCI_EXP</span></code>] PCI Express.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.reg.linktype.LinkType.AURORA">
+<span class="sig-name descname"><span class="pre">AURORA</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">126</span></em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.AURORA" title="Permalink to this definition">¶</a></dt>
+<dd><p>[<code class="docutils literal notranslate"><span class="pre">DLT_AURORA</span></code>] Xilinx Aurora.</p>
+</dd></dl>
+
+<dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.reg.linktype.LinkType.IEEE802_11_RADIOTAP">
 <span class="sig-name descname"><span class="pre">IEEE802_11_RADIOTAP</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">127</span></em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.IEEE802_11_RADIOTAP" title="Permalink to this definition">¶</a></dt>
 <dd><p>[<code class="docutils literal notranslate"><span class="pre">DLT_IEEE802_11_RADIO</span></code>] Radiotap link-layer information followed by an
 802.11 header.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.reg.linktype.LinkType.TZSP">
+<span class="sig-name descname"><span class="pre">TZSP</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">128</span></em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.TZSP" title="Permalink to this definition">¶</a></dt>
+<dd><p>[<code class="docutils literal notranslate"><span class="pre">DLT_TZSP</span></code>] Tazmen Sniffer Protocol (TZSP) is a generic encapsulation for
+any other link type, which includes a means to include meta-information with
+the packet, e.g. signal strength and channel for 802.11 packets.</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -257,6 +353,54 @@ Association draft standard ATA 878.2 is also used; however, no exception
 frames are supplied, and reassembled frames, rather than fragments, are
 supplied. See also RFC 1051 and RFC 1201; for RFC 1051 frames, ATA 878.2 is
 not used.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.reg.linktype.LinkType.JUNIPER_MLPPP">
+<span class="sig-name descname"><span class="pre">JUNIPER_MLPPP</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">130</span></em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.JUNIPER_MLPPP" title="Permalink to this definition">¶</a></dt>
+<dd><p>[<code class="docutils literal notranslate"><span class="pre">DLT_JUNIPER_MLPPP</span></code>] Juniper Networks private data link type.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.reg.linktype.LinkType.JUNIPER_MLFR">
+<span class="sig-name descname"><span class="pre">JUNIPER_MLFR</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">131</span></em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.JUNIPER_MLFR" title="Permalink to this definition">¶</a></dt>
+<dd><p>[<code class="docutils literal notranslate"><span class="pre">DLT_JUNIPER_MLFR</span></code>] Juniper Networks private data link type.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.reg.linktype.LinkType.JUNIPER_ES">
+<span class="sig-name descname"><span class="pre">JUNIPER_ES</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">132</span></em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.JUNIPER_ES" title="Permalink to this definition">¶</a></dt>
+<dd><p>[<code class="docutils literal notranslate"><span class="pre">DLT_JUNIPER_ES</span></code>] Juniper Networks private data link type.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.reg.linktype.LinkType.JUNIPER_GGSN">
+<span class="sig-name descname"><span class="pre">JUNIPER_GGSN</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">133</span></em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.JUNIPER_GGSN" title="Permalink to this definition">¶</a></dt>
+<dd><p>[<code class="docutils literal notranslate"><span class="pre">DLT_JUNIPER_GGSN</span></code>] Juniper Networks private data link type.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.reg.linktype.LinkType.JUNIPER_MFR">
+<span class="sig-name descname"><span class="pre">JUNIPER_MFR</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">134</span></em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.JUNIPER_MFR" title="Permalink to this definition">¶</a></dt>
+<dd><p>[<code class="docutils literal notranslate"><span class="pre">DLT_JUNIPER_MFR</span></code>] Juniper Networks private data link type.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.reg.linktype.LinkType.JUNIPER_ATM2">
+<span class="sig-name descname"><span class="pre">JUNIPER_ATM2</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">135</span></em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.JUNIPER_ATM2" title="Permalink to this definition">¶</a></dt>
+<dd><p>[<code class="docutils literal notranslate"><span class="pre">DLT_JUNIPER_ATM2</span></code>] Juniper Networks private data link type.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.reg.linktype.LinkType.JUNIPER_SERVICES">
+<span class="sig-name descname"><span class="pre">JUNIPER_SERVICES</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">136</span></em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.JUNIPER_SERVICES" title="Permalink to this definition">¶</a></dt>
+<dd><p>[<code class="docutils literal notranslate"><span class="pre">DLT_JUNIPER_SERVICES</span></code>] Juniper Networks private data link type.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.reg.linktype.LinkType.JUNIPER_ATM1">
+<span class="sig-name descname"><span class="pre">JUNIPER_ATM1</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">137</span></em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.JUNIPER_ATM1" title="Permalink to this definition">¶</a></dt>
+<dd><p>[<code class="docutils literal notranslate"><span class="pre">DLT_JUNIPER_ATM1</span></code>] Juniper Networks private data link type.</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -307,10 +451,22 @@ MAC frames.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.reg.linktype.LinkType.LINUX_IRDA">
 <span class="sig-name descname"><span class="pre">LINUX_IRDA</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">144</span></em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.LINUX_IRDA" title="Permalink to this definition">¶</a></dt>
-<dd><p>[<code class="docutils literal notranslate"><span class="pre">DLT_LINUX_IRDA</span></code>] Linux-IrDA packets, with a LINKTYPE_LINUX_IRDA header,
-with the payload for IrDA frames beginning with by the IrLAP header as
-defined by IrDA Data Specifications, including the IrDA Link Access Protocol
-specification.</p>
+<dd><p>[<code class="docutils literal notranslate"><span class="pre">DLT_LINUX_IRDA</span></code>] Linux-IrDA packets, with a LINKTYPE_LINUX_IRDA
+header, with the payload for IrDA frames beginning with by the IrLAP header
+as defined by IrDA Data Specifications, including the IrDA Link Access
+Protocol specification.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.reg.linktype.LinkType.IBM_SP">
+<span class="sig-name descname"><span class="pre">IBM_SP</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">145</span></em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.IBM_SP" title="Permalink to this definition">¶</a></dt>
+<dd><p>[<code class="docutils literal notranslate"><span class="pre">DLT_IBM_SP</span></code>] IBM SP switch.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.reg.linktype.LinkType.IBM_SN">
+<span class="sig-name descname"><span class="pre">IBM_SN</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">146</span></em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.IBM_SN" title="Permalink to this definition">¶</a></dt>
+<dd><p>[<code class="docutils literal notranslate"><span class="pre">DLT_IBM_SN</span></code>] IBM Next Federation switch.</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -417,6 +573,12 @@ specification.</p>
 </dd></dl>
 
 <dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.reg.linktype.LinkType.JUNIPER_MONITOR">
+<span class="sig-name descname"><span class="pre">JUNIPER_MONITOR</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">164</span></em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.JUNIPER_MONITOR" title="Permalink to this definition">¶</a></dt>
+<dd><p>[<code class="docutils literal notranslate"><span class="pre">DLT_JUNIPER_MONITOR</span></code>] Juniper Networks private data link type.</p>
+</dd></dl>
+
+<dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.reg.linktype.LinkType.BACNET_MS_TP">
 <span class="sig-name descname"><span class="pre">BACNET_MS_TP</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">165</span></em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.BACNET_MS_TP" title="Permalink to this definition">¶</a></dt>
 <dd><p>[<code class="docutils literal notranslate"><span class="pre">DLT_BACNET_MS_TP</span></code>] BACnet MS/TP frames, as specified by section 9.3
@@ -431,6 +593,18 @@ including the preamble and, if present, the Data CRC.</p>
 <dd><p>[<code class="docutils literal notranslate"><span class="pre">DLT_PPP_PPPD</span></code>] PPP in HDLC-like encapsulation, like LINKTYPE_PPP_HDLC,
 but with the 0xff address byte replaced by a direction indication—0x00 for
 incoming and 0x01 for outgoing.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.reg.linktype.LinkType.JUNIPER_PPPOE">
+<span class="sig-name descname"><span class="pre">JUNIPER_PPPOE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">167</span></em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.JUNIPER_PPPOE" title="Permalink to this definition">¶</a></dt>
+<dd><p>[<code class="docutils literal notranslate"><span class="pre">DLT_JUNIPER_PPPOE</span></code>] Juniper Networks private data link type.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.reg.linktype.LinkType.JUNIPER_PPPOE_ATM">
+<span class="sig-name descname"><span class="pre">JUNIPER_PPPOE_ATM</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">168</span></em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.JUNIPER_PPPOE_ATM" title="Permalink to this definition">¶</a></dt>
+<dd><p>[<code class="docutils literal notranslate"><span class="pre">DLT_JUNIPER_PPPOE_ATM</span></code>] Juniper Networks private data link type.</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -455,12 +629,70 @@ ITU-T Recommendation G.7041/Y.1303.</p>
 </dd></dl>
 
 <dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.reg.linktype.LinkType.GCOM_T1E1">
+<span class="sig-name descname"><span class="pre">GCOM_T1E1</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">172</span></em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.GCOM_T1E1" title="Permalink to this definition">¶</a></dt>
+<dd><p>[<code class="docutils literal notranslate"><span class="pre">DLT_GCOM_T1E1</span></code>] Gcom’s T1/E1 line monitoring equipment.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.reg.linktype.LinkType.GCOM_SERIAL">
+<span class="sig-name descname"><span class="pre">GCOM_SERIAL</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">173</span></em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.GCOM_SERIAL" title="Permalink to this definition">¶</a></dt>
+<dd><p>[<code class="docutils literal notranslate"><span class="pre">DLT_GCOM_SERIAL</span></code>] Gcom’s T1/E1 line monitoring equipment.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.reg.linktype.LinkType.JUNIPER_PIC_PEER">
+<span class="sig-name descname"><span class="pre">JUNIPER_PIC_PEER</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">174</span></em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.JUNIPER_PIC_PEER" title="Permalink to this definition">¶</a></dt>
+<dd><p>[<code class="docutils literal notranslate"><span class="pre">DLT_JUNIPER_PIC_PEER</span></code>] Juniper Networks private data link type.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.reg.linktype.LinkType.ERF_ETH">
+<span class="sig-name descname"><span class="pre">ERF_ETH</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">175</span></em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.ERF_ETH" title="Permalink to this definition">¶</a></dt>
+<dd><p>[<code class="docutils literal notranslate"><span class="pre">DLT_ERF_ETH</span></code>] An ERF header followed by Ethernet.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.reg.linktype.LinkType.ERF_POS">
+<span class="sig-name descname"><span class="pre">ERF_POS</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">176</span></em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.ERF_POS" title="Permalink to this definition">¶</a></dt>
+<dd><p>[<code class="docutils literal notranslate"><span class="pre">DLT_ERF_POS</span></code>] An ERF header followed by Packet-over-SONET.</p>
+</dd></dl>
+
+<dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.reg.linktype.LinkType.LINUX_LAPD">
 <span class="sig-name descname"><span class="pre">LINUX_LAPD</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">177</span></em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.LINUX_LAPD" title="Permalink to this definition">¶</a></dt>
 <dd><p>[<code class="docutils literal notranslate"><span class="pre">DLT_LINUX_LAPD</span></code>] Link Access Procedures on the D Channel (LAPD) frames,
 as specified by ITU-T Recommendation Q.920 and ITU-T Recommendation Q.921,
-captured via vISDN, with a LINKTYPE_LINUX_LAPD header, followed by the Q.921
-frame, starting with the address field.</p>
+captured via vISDN, with a LINKTYPE_LINUX_LAPD header, followed by the
+Q.921 frame, starting with the address field.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.reg.linktype.LinkType.JUNIPER_ETHER">
+<span class="sig-name descname"><span class="pre">JUNIPER_ETHER</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">178</span></em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.JUNIPER_ETHER" title="Permalink to this definition">¶</a></dt>
+<dd><p>[<code class="docutils literal notranslate"><span class="pre">DLT_JUNIPER_ETHER</span></code>] Juniper Networks private data link type. Ethernet
+frames prepended with meta-information.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.reg.linktype.LinkType.JUNIPER_PPP">
+<span class="sig-name descname"><span class="pre">JUNIPER_PPP</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">179</span></em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.JUNIPER_PPP" title="Permalink to this definition">¶</a></dt>
+<dd><p>[<code class="docutils literal notranslate"><span class="pre">DLT_JUNIPER_PPP</span></code>] Juniper Networks private data link type. PPP frames
+prepended with meta-information.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.reg.linktype.LinkType.JUNIPER_FRELAY">
+<span class="sig-name descname"><span class="pre">JUNIPER_FRELAY</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">180</span></em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.JUNIPER_FRELAY" title="Permalink to this definition">¶</a></dt>
+<dd><p>[<code class="docutils literal notranslate"><span class="pre">DLT_JUNIPER_FRELAY</span></code>] Juniper Networks private data link type. Frame
+Relay frames prepended with meta-information.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.reg.linktype.LinkType.JUNIPER_CHDLC">
+<span class="sig-name descname"><span class="pre">JUNIPER_CHDLC</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">181</span></em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.JUNIPER_CHDLC" title="Permalink to this definition">¶</a></dt>
+<dd><p>[<code class="docutils literal notranslate"><span class="pre">DLT_JUNIPER_CHDLC</span></code>] Juniper Networks private data link type. C-HDLC
+frames prepended with meta-information.</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -468,6 +700,31 @@ frame, starting with the address field.</p>
 <span class="sig-name descname"><span class="pre">MFR</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">182</span></em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.MFR" title="Permalink to this definition">¶</a></dt>
 <dd><p>[<code class="docutils literal notranslate"><span class="pre">DLT_MFR</span></code>] FRF.16.1 Multi-Link Frame Relay frames, beginning with an
 FRF.12 Interface fragmentation format fragmentation header.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.reg.linktype.LinkType.JUNIPER_VP">
+<span class="sig-name descname"><span class="pre">JUNIPER_VP</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">183</span></em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.JUNIPER_VP" title="Permalink to this definition">¶</a></dt>
+<dd><p>[<code class="docutils literal notranslate"><span class="pre">DLT_JUNIPER_VP</span></code>] Juniper Networks private data link type.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.reg.linktype.LinkType.A429">
+<span class="sig-name descname"><span class="pre">A429</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">184</span></em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.A429" title="Permalink to this definition">¶</a></dt>
+<dd><p>[<code class="docutils literal notranslate"><span class="pre">DLT_A429</span></code>] ARINC 429 frames. Every frame contains a 32-bit A429 label.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.reg.linktype.LinkType.A653_ICM">
+<span class="sig-name descname"><span class="pre">A653_ICM</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">185</span></em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.A653_ICM" title="Permalink to this definition">¶</a></dt>
+<dd><p>[<code class="docutils literal notranslate"><span class="pre">DLT_A653_ICM</span></code>] ARINC 653 interpartition communication messages. Please
+refer to the A653-1 standard for more information.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.reg.linktype.LinkType.USB_FREEBSD">
+<span class="sig-name descname"><span class="pre">USB_FREEBSD</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">186</span></em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.USB_FREEBSD" title="Permalink to this definition">¶</a></dt>
+<dd><p>[<code class="docutils literal notranslate"><span class="pre">DLT_USB_FREEBSD</span></code>] USB with FreeBSD header.</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -479,6 +736,12 @@ Layer portion of the most recent Bluetooth Core specification, followed by
 an HCI packet of the specified packet type, as specified by the Host
 Controller Interface Functional Specification portion of the most recent
 Bluetooth Core Specification.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.reg.linktype.LinkType.IEEE802_16_MAC_CPS">
+<span class="sig-name descname"><span class="pre">IEEE802_16_MAC_CPS</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">188</span></em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.IEEE802_16_MAC_CPS" title="Permalink to this definition">¶</a></dt>
+<dd><p>[<code class="docutils literal notranslate"><span class="pre">DLT_IEEE802_16_MAC_CPS</span></code>] IEEE 802.16 MAC Common Part Sublayer.</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -496,11 +759,37 @@ the pcapng file, as specified by the Section Header Block.</p>
 </dd></dl>
 
 <dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.reg.linktype.LinkType.CAN20B">
+<span class="sig-name descname"><span class="pre">CAN20B</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">190</span></em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.CAN20B" title="Permalink to this definition">¶</a></dt>
+<dd><p>[<code class="docutils literal notranslate"><span class="pre">DLT_CAN20B</span></code>] Controller Area Network (CAN) v. 2.0B.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.reg.linktype.LinkType.IEEE802_15_4_LINUX">
+<span class="sig-name descname"><span class="pre">IEEE802_15_4_LINUX</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">191</span></em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.IEEE802_15_4_LINUX" title="Permalink to this definition">¶</a></dt>
+<dd><p>[<code class="docutils literal notranslate"><span class="pre">DLT_IEEE802_15_4_LINUX</span></code>] IEEE 802.15.4, with address fields padded, as
+is done by Linux drivers.</p>
+</dd></dl>
+
+<dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.reg.linktype.LinkType.PPI">
 <span class="sig-name descname"><span class="pre">PPI</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">192</span></em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.PPI" title="Permalink to this definition">¶</a></dt>
 <dd><p>[<code class="docutils literal notranslate"><span class="pre">DLT_PPI</span></code>] Per-Packet Information information, as specified by the Per-
 Packet Information Header Specification, followed by a packet with the
-<a href="#id17"><span class="problematic" id="id18">LINKTYPE_</span></a> value specified by the pph_dlt field of that header.</p>
+LINKTYPE_ value specified by the pph_dlt field of that header.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.reg.linktype.LinkType.IEEE802_16_MAC_CPS_RADIO">
+<span class="sig-name descname"><span class="pre">IEEE802_16_MAC_CPS_RADIO</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">193</span></em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.IEEE802_16_MAC_CPS_RADIO" title="Permalink to this definition">¶</a></dt>
+<dd><p>[<code class="docutils literal notranslate"><span class="pre">DLT_IEEE802_16_MAC_CPS_RADIO</span></code>] IEEE 802.16 MAC Common Part Sublayer plus
+radiotap header.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.reg.linktype.LinkType.JUNIPER_ISM">
+<span class="sig-name descname"><span class="pre">JUNIPER_ISM</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">194</span></em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.JUNIPER_ISM" title="Permalink to this definition">¶</a></dt>
+<dd><p>[<code class="docutils literal notranslate"><span class="pre">DLT_JUNIPER_ISM</span></code>] Juniper Networks private data link type.</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -521,6 +810,26 @@ with each packet having the FCS at the end of the frame.</p>
 <span class="sig-name descname"><span class="pre">ERF</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">197</span></em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.ERF" title="Permalink to this definition">¶</a></dt>
 <dd><p>[<code class="docutils literal notranslate"><span class="pre">DLT_ERF</span></code>] Various link-layer types, with a pseudo-header, for Endace DAG
 cards; encapsulates Endace ERF records.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.reg.linktype.LinkType.RAIF1">
+<span class="sig-name descname"><span class="pre">RAIF1</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">198</span></em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.RAIF1" title="Permalink to this definition">¶</a></dt>
+<dd><p>[<code class="docutils literal notranslate"><span class="pre">DLT_RAIF1</span></code>] Special header prepended to Ethernet packets when capturing
+from a u10 Networks board.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.reg.linktype.LinkType.IPMB_KONTRON">
+<span class="sig-name descname"><span class="pre">IPMB_KONTRON</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">199</span></em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.IPMB_KONTRON" title="Permalink to this definition">¶</a></dt>
+<dd><p>[<code class="docutils literal notranslate"><span class="pre">DLT_IPMB_KONTRON</span></code>] IPMB packet for IPMI, beginning with a 2-byte header,
+followed by the I2C slave address, followed by the netFn and LUN, etc…</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.reg.linktype.LinkType.JUNIPER_ST">
+<span class="sig-name descname"><span class="pre">JUNIPER_ST</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">200</span></em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.JUNIPER_ST" title="Permalink to this definition">¶</a></dt>
+<dd><p>[<code class="docutils literal notranslate"><span class="pre">DLT_JUNIPER_ST</span></code>] Juniper Networks private data link type.</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -606,10 +915,31 @@ pseudo-header.</p>
 </dd></dl>
 
 <dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.reg.linktype.LinkType.MOST">
+<span class="sig-name descname"><span class="pre">MOST</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">211</span></em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.MOST" title="Permalink to this definition">¶</a></dt>
+<dd><p>[<code class="docutils literal notranslate"><span class="pre">DLT_MOST</span></code>] Media Oriented Systems Transport (MOST) bus for multimedia
+transport.</p>
+</dd></dl>
+
+<dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.reg.linktype.LinkType.LIN">
 <span class="sig-name descname"><span class="pre">LIN</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">212</span></em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.LIN" title="Permalink to this definition">¶</a></dt>
 <dd><p>[<code class="docutils literal notranslate"><span class="pre">DLT_LIN</span></code>] Local Interconnect Network (LIN) automotive bus, preceded by a
 pseudo-header.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.reg.linktype.LinkType.X2E_SERIAL">
+<span class="sig-name descname"><span class="pre">X2E_SERIAL</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">213</span></em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.X2E_SERIAL" title="Permalink to this definition">¶</a></dt>
+<dd><p>[<code class="docutils literal notranslate"><span class="pre">DLT_X2E_SERIAL</span></code>] X2E-private data link type used for serial line
+capture.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.reg.linktype.LinkType.X2E_XORAYA">
+<span class="sig-name descname"><span class="pre">X2E_XORAYA</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">214</span></em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.X2E_XORAYA" title="Permalink to this definition">¶</a></dt>
+<dd><p>[<code class="docutils literal notranslate"><span class="pre">DLT_X2E_XORAYA</span></code>] X2E-private data link type used for the Xoraya data
+logger family.</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -623,18 +953,62 @@ bit) preceding the MAC-layer data (starting with the frame control field).</p>
 </dd></dl>
 
 <dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.reg.linktype.LinkType.LINUX_EVDEV">
+<span class="sig-name descname"><span class="pre">LINUX_EVDEV</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">216</span></em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.LINUX_EVDEV" title="Permalink to this definition">¶</a></dt>
+<dd><p>[<code class="docutils literal notranslate"><span class="pre">DLT_LINUX_EVDEV</span></code>] Linux evdev events from /dev/input/eventN devices.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.reg.linktype.LinkType.GSMTAP_UM">
+<span class="sig-name descname"><span class="pre">GSMTAP_UM</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">217</span></em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.GSMTAP_UM" title="Permalink to this definition">¶</a></dt>
+<dd><p>[<code class="docutils literal notranslate"><span class="pre">DLT_GSMTAP_UM</span></code>] GSM Um interface, preceded by a “gsmtap” header.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.reg.linktype.LinkType.GSMTAP_ABIS">
+<span class="sig-name descname"><span class="pre">GSMTAP_ABIS</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">218</span></em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.GSMTAP_ABIS" title="Permalink to this definition">¶</a></dt>
+<dd><p>[<code class="docutils literal notranslate"><span class="pre">DLT_GSMTAP_ABIS</span></code>] GSM Abis interface, preceded by a “gsmtap” header.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.reg.linktype.LinkType.MPLS">
+<span class="sig-name descname"><span class="pre">MPLS</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">219</span></em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.MPLS" title="Permalink to this definition">¶</a></dt>
+<dd><p>[<code class="docutils literal notranslate"><span class="pre">DLT_MPLS</span></code>] MPLS, with an MPLS label as the link-layer header.</p>
+</dd></dl>
+
+<dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.reg.linktype.LinkType.USB_LINUX_MMAPPED">
 <span class="sig-name descname"><span class="pre">USB_LINUX_MMAPPED</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">220</span></em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.USB_LINUX_MMAPPED" title="Permalink to this definition">¶</a></dt>
 <dd><p>[<code class="docutils literal notranslate"><span class="pre">DLT_USB_LINUX_MMAPPED</span></code>] USB packets, beginning with a Linux USB header,
-as specified by the struct usbmon_packet in the Documentation/usb/usbmon.txt
-file in the Linux source tree. All 64 bytes of the header are present. All
-fields in the header are in host byte order. When performing a live capture,
-the host byte order is the byte order of the machine on that the packets are
-captured. When reading a pcap file, the byte order is the byte order for the
-file, as specified by the file’s magic number; when reading a pcapng file,
-the byte order is the byte order for the section of the pcapng file, as
-specified by the Section Header Block. For isochronous transfers, the ndesc
-field specifies the number of isochronous descriptors that follow.</p>
+as specified by the struct usbmon_packet in the
+Documentation/usb/usbmon.txt file in the Linux source tree. All 64 bytes of
+the header are present. All fields in the header are in host byte order.
+When performing a live capture, the host byte order is the byte order of the
+machine on that the packets are captured. When reading a pcap file, the byte
+order is the byte order for the file, as specified by the file’s magic
+number; when reading a pcapng file, the byte order is the byte order for the
+section of the pcapng file, as specified by the Section Header Block. For
+isochronous transfers, the ndesc field specifies the number of isochronous
+descriptors that follow.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.reg.linktype.LinkType.DECT">
+<span class="sig-name descname"><span class="pre">DECT</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">221</span></em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.DECT" title="Permalink to this definition">¶</a></dt>
+<dd><p>[<code class="docutils literal notranslate"><span class="pre">DLT_DECT</span></code>] DECT packets, with a pseudo-header.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.reg.linktype.LinkType.AOS">
+<span class="sig-name descname"><span class="pre">AOS</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">222</span></em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.AOS" title="Permalink to this definition">¶</a></dt>
+<dd><p>[<code class="docutils literal notranslate"><span class="pre">DLT_AOS</span></code>] AOS Space Data Link Protocol.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.reg.linktype.LinkType.WIHART">
+<span class="sig-name descname"><span class="pre">WIHART</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">223</span></em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.WIHART" title="Permalink to this definition">¶</a></dt>
+<dd><p>[<code class="docutils literal notranslate"><span class="pre">DLT_WIHART</span></code>] WirelessHART (Highway Addressable Remote Transducer) from
+the HART Communication Foundation (IEC/PAS 62591).</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -647,12 +1021,12 @@ field specifies the number of isochronous descriptors that follow.</p>
 <dt class="sig sig-object py" id="pcapkit.const.reg.linktype.LinkType.FC_2_WITH_FRAME_DELIMS">
 <span class="sig-name descname"><span class="pre">FC_2_WITH_FRAME_DELIMS</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">225</span></em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.FC_2_WITH_FRAME_DELIMS" title="Permalink to this definition">¶</a></dt>
 <dd><p>[<code class="docutils literal notranslate"><span class="pre">DLT_FC_2_WITH_FRAME_DELIMS</span></code>] Fibre Channel FC-2 frames, beginning an
-encoding of the SOF, followed by a Frame_Header, and ending with an encoding
-of the SOF. The encodings represent the frame delimiters as 4-byte sequences
-representing the corresponding ordered sets, with K28.5 represented as 0xBC,
-and the D symbols as the corresponding byte values; for example, SOFi2,
-which is K28.5 - D21.5 - D1.2 - D21.2, is represented as 0xBC 0xB5 0x55
-0x55.</p>
+encoding of the SOF, followed by a Frame_Header, and ending with an
+encoding of the SOF. The encodings represent the frame delimiters as 4-byte
+sequences representing the corresponding ordered sets, with K28.5
+represented as 0xBC, and the D symbols as the corresponding byte values; for
+example, SOFi2, which is K28.5 - D21.5 - D1.2 - D21.2, is represented as
+0xBC 0xB5 0x55 0x55.</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -697,6 +1071,24 @@ before the message sequence.</p>
 </dd></dl>
 
 <dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.reg.linktype.LinkType.JUNIPER_VS">
+<span class="sig-name descname"><span class="pre">JUNIPER_VS</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">232</span></em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.JUNIPER_VS" title="Permalink to this definition">¶</a></dt>
+<dd><p>[<code class="docutils literal notranslate"><span class="pre">DLT_JUNIPER_VS</span></code>] Juniper Networks private data link type.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.reg.linktype.LinkType.JUNIPER_SRX_E2E">
+<span class="sig-name descname"><span class="pre">JUNIPER_SRX_E2E</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">233</span></em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.JUNIPER_SRX_E2E" title="Permalink to this definition">¶</a></dt>
+<dd><p>[<code class="docutils literal notranslate"><span class="pre">DLT_JUNIPER_SRX_E2E</span></code>] Juniper Networks private data link type.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.reg.linktype.LinkType.JUNIPER_FIBRECHANNEL">
+<span class="sig-name descname"><span class="pre">JUNIPER_FIBRECHANNEL</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">234</span></em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.JUNIPER_FIBRECHANNEL" title="Permalink to this definition">¶</a></dt>
+<dd><p>[<code class="docutils literal notranslate"><span class="pre">DLT_JUNIPER_FIBRECHANNEL</span></code>] Juniper Networks private data link type.</p>
+</dd></dl>
+
+<dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.reg.linktype.LinkType.DVB_CI">
 <span class="sig-name descname"><span class="pre">DVB_CI</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">235</span></em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.DVB_CI" title="Permalink to this definition">¶</a></dt>
 <dd><p>[<code class="docutils literal notranslate"><span class="pre">DLT_DVB_CI</span></code>] DVB-CI (DVB Common Interface for communication between a PC
@@ -718,6 +1110,12 @@ to, but not the same as, 27.010).</p>
 5066, starting with the synchronization sequence, and including both header
 and data CRCs. The current version of STANAG 5066 is backwards-compatible
 with the 1.0.2 version, although newer versions are classified.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.reg.linktype.LinkType.JUNIPER_ATM_CEMIC">
+<span class="sig-name descname"><span class="pre">JUNIPER_ATM_CEMIC</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">238</span></em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.JUNIPER_ATM_CEMIC" title="Permalink to this definition">¶</a></dt>
+<dd><p>[<code class="docutils literal notranslate"><span class="pre">DLT_JUNIPER_ATM_CEMIC</span></code>] Juniper Networks private data link type.</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -775,6 +1173,12 @@ frame data for the LLCP Protocol as specified by NFCForum-TS-LLCP_1.1.</p>
 </dd></dl>
 
 <dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.reg.linktype.LinkType.PFSYNC">
+<span class="sig-name descname"><span class="pre">PFSYNC</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">246</span></em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.PFSYNC" title="Permalink to this definition">¶</a></dt>
+<dd><p>[<a href="#id4"><span class="problematic" id="id5">``</span></a><a href="#id6"><span class="problematic" id="id7">``</span></a>] Packet filter state syncing.</p>
+</dd></dl>
+
+<dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.reg.linktype.LinkType.INFINIBAND">
 <span class="sig-name descname"><span class="pre">INFINIBAND</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">247</span></em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.INFINIBAND" title="Permalink to this definition">¶</a></dt>
 <dd><p>[<code class="docutils literal notranslate"><span class="pre">DLT_INFINIBAND</span></code>] Raw InfiniBand frames, starting with the Local Routing
@@ -810,6 +1214,14 @@ number of industrial control protocols.</p>
 packets, in the format described in section 2.1 “PACKET FORMAT” of volume 6
 of the Bluetooth Specification Version 4.0 (see PDF page 2200), but without
 the Preamble.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.reg.linktype.LinkType.WIRESHARK_UPPER_PDU">
+<span class="sig-name descname"><span class="pre">WIRESHARK_UPPER_PDU</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">252</span></em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.WIRESHARK_UPPER_PDU" title="Permalink to this definition">¶</a></dt>
+<dd><p>[<code class="docutils literal notranslate"><span class="pre">DLT_WIRESHARK_UPPER_PDU</span></code>] Upper-protocol layer PDU saves from Wireshark;
+the actual contents are determined by two tags, one or more of which is
+stored with each packet.</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -915,6 +1327,13 @@ header.</p>
 </dd></dl>
 
 <dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.reg.linktype.LinkType.OPENFLOW">
+<span class="sig-name descname"><span class="pre">OPENFLOW</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">267</span></em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.OPENFLOW" title="Permalink to this definition">¶</a></dt>
+<dd><p>[<code class="docutils literal notranslate"><span class="pre">DLT_OPENFLOW</span></code>] OpenFlow messages with an additional 12-octet header, as
+used in OpenBSD switch interface monitoring.</p>
+</dd></dl>
+
+<dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.reg.linktype.LinkType.SDLC">
 <span class="sig-name descname"><span class="pre">SDLC</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">268</span></em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.SDLC" title="Permalink to this definition">¶</a></dt>
 <dd><p>[<code class="docutils literal notranslate"><span class="pre">DLT_SDLC</span></code>] SDLC packets, as specified by Chapter 1, “DLC Links”, section
@@ -922,6 +1341,12 @@ header.</p>
 Formats, GA27-3136-20, without the flag fields, zero-bit insertion, or Frame
 Check Sequence field, containing SNA path information units (PIUs) as the
 payload.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.reg.linktype.LinkType.TI_LLN_SNIFFER">
+<span class="sig-name descname"><span class="pre">TI_LLN_SNIFFER</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">269</span></em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.TI_LLN_SNIFFER" title="Permalink to this definition">¶</a></dt>
+<dd><p>[<code class="docutils literal notranslate"><span class="pre">DLT_TI_LLN_SNIFFER</span></code>] TI LLN sniffer frames.</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -970,6 +1395,12 @@ specified by VESA DisplayPort (DP) Standard preceded by a pseudo-header.</p>
 <dt class="sig sig-object py" id="pcapkit.const.reg.linktype.LinkType.LINUX_SLL2">
 <span class="sig-name descname"><span class="pre">LINUX_SLL2</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">276</span></em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.LINUX_SLL2" title="Permalink to this definition">¶</a></dt>
 <dd><p>[<code class="docutils literal notranslate"><span class="pre">DLT_LINUX_SLL2</span></code>] Linux “cooked” capture encapsulation v2.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.reg.linktype.LinkType.SERCOS_MONITOR">
+<span class="sig-name descname"><span class="pre">SERCOS_MONITOR</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">277</span></em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.SERCOS_MONITOR" title="Permalink to this definition">¶</a></dt>
+<dd><p>[<code class="docutils literal notranslate"><span class="pre">DLT_SERCOS_MONITOR</span></code>] Sercos Monitor.</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -1037,7 +1468,7 @@ field in the Ethernet header.</p>
 <span class="sig-name descname"><span class="pre">ELEE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">286</span></em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.ELEE" title="Permalink to this definition">¶</a></dt>
 <dd><p>[<code class="docutils literal notranslate"><span class="pre">DLT_ELEE</span></code>] Payload of lawful intercept packets using the ELEE protocol.
 The packet begins with the ELEE header; it does not include any transport-
-layer or lower-layer headers for protcols used to transport ELEE packets.</p>
+layer or lower-layer headers for protocols used to transport ELEE packets.</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -1053,7 +1484,8 @@ Z-Wave chip over an RS-232 or USB serial connection, as described in section
 <span class="sig-name descname"><span class="pre">USB_2_0</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">288</span></em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.USB_2_0" title="Permalink to this definition">¶</a></dt>
 <dd><p>[<code class="docutils literal notranslate"><span class="pre">DLT_USB_2_0</span></code>] USB 2.0, 1.1, or 1.0 packet, beginning with a PID, as
 described by Chapter 8 “Protocol Layer” of the the Universal Serial Bus
-Specification Revision 2.0.</p>
+Specification Revision 2.0. Deprecated in favor of speed specific USB 2.0,
+1.1, or 1.0 linktypes.</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -1072,10 +1504,48 @@ header.</p>
 </dd></dl>
 
 <dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.reg.linktype.LinkType.NETANALYZER_NG">
+<span class="sig-name descname"><span class="pre">NETANALYZER_NG</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">291</span></em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.NETANALYZER_NG" title="Permalink to this definition">¶</a></dt>
+<dd><p>[<code class="docutils literal notranslate"><span class="pre">DLT_NETANALYZER_NG</span></code>] Hilscher Gesellschaft fuer Systemautomation mbH
+netANALYZER NG hardware and software (specification).</p>
+</dd></dl>
+
+<dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.reg.linktype.LinkType.ZBOSS_NCP">
 <span class="sig-name descname"><span class="pre">ZBOSS_NCP</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">292</span></em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.ZBOSS_NCP" title="Permalink to this definition">¶</a></dt>
 <dd><p>[<code class="docutils literal notranslate"><span class="pre">DLT_ZBOSS_NCP</span></code>] Serial NCP (Network Co-Processor) protocol for Zigbee
 stack ZBOSS by DSR. ZBOSS NCP protocol, beginning with a header.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.reg.linktype.LinkType.USB_2_0_LOW_SPEED">
+<span class="sig-name descname"><span class="pre">USB_2_0_LOW_SPEED</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">293</span></em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.USB_2_0_LOW_SPEED" title="Permalink to this definition">¶</a></dt>
+<dd><p>[<code class="docutils literal notranslate"><span class="pre">DLT_USB_2_0_LOW_SPEED</span></code>] Low-Speed USB 2.0, 1.1, or 1.0 packet, beginning
+with a PID, as described by Chapter 8 “Protocol Layer” of the the Universal
+Serial Bus Specification Revision 2.0.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.reg.linktype.LinkType.USB_2_0_FULL_SPEED">
+<span class="sig-name descname"><span class="pre">USB_2_0_FULL_SPEED</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">294</span></em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.USB_2_0_FULL_SPEED" title="Permalink to this definition">¶</a></dt>
+<dd><p>[<code class="docutils literal notranslate"><span class="pre">DLT_USB_2_0_FULL_SPEED</span></code>] Full-Speed USB 2.0, 1.1, or 1.0 packet,
+beginning with a PID, as described by Chapter 8 “Protocol Layer” of the the
+Universal Serial Bus Specification Revision 2.0.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.reg.linktype.LinkType.USB_2_0_HIGH_SPEED">
+<span class="sig-name descname"><span class="pre">USB_2_0_HIGH_SPEED</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">295</span></em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.USB_2_0_HIGH_SPEED" title="Permalink to this definition">¶</a></dt>
+<dd><p>[<code class="docutils literal notranslate"><span class="pre">DLT_USB_2_0_HIGH_SPEED</span></code>] High-Speed USB 2.0 packet, beginning with a
+PID, as described by Chapter 8 “Protocol Layer” of the the Universal Serial
+Bus Specification Revision 2.0.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.reg.linktype.LinkType.AUERSWALD_LOG">
+<span class="sig-name descname"><span class="pre">AUERSWALD_LOG</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">296</span></em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.AUERSWALD_LOG" title="Permalink to this definition">¶</a></dt>
+<dd><p>[<code class="docutils literal notranslate"><span class="pre">DLT_AUERSWALD_LOG</span></code>] Auerswald Logger Protocol, as described in this
+document.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -2143,7 +2613,7 @@ which is automatically generated from <code class="xref py py-class docutils lit
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.reg.transtype.TransType.TCP">
 <span class="sig-name descname"><span class="pre">TCP</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">6</span></em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.TCP" title="Permalink to this definition">¶</a></dt>
-<dd><p>Transmission Control [RFC-ietf-tcpm-rfc793bis-28]</p>
+<dd><p>Transmission Control [<span class="target" id="index-41"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9293.html"><strong>RFC 9293</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -2155,7 +2625,7 @@ which is automatically generated from <code class="xref py py-class docutils lit
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.reg.transtype.TransType.EGP">
 <span class="sig-name descname"><span class="pre">EGP</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">8</span></em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.EGP" title="Permalink to this definition">¶</a></dt>
-<dd><p>Exterior Gateway Protocol [<span class="target" id="index-41"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc888.html"><strong>RFC 888</strong></a>][David Mills]</p>
+<dd><p>Exterior Gateway Protocol [<span class="target" id="index-42"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc888.html"><strong>RFC 888</strong></a>][David Mills]</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -2174,7 +2644,7 @@ Assigned Numbers Authority]</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.reg.transtype.TransType.NVP_II">
 <span class="sig-name descname"><span class="pre">NVP_II</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">11</span></em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.NVP_II" title="Permalink to this definition">¶</a></dt>
-<dd><p>Network Voice Protocol [<span class="target" id="index-42"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc741.html"><strong>RFC 741</strong></a>][Steve Casner]</p>
+<dd><p>Network Voice Protocol [<span class="target" id="index-43"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc741.html"><strong>RFC 741</strong></a>][Steve Casner]</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -2200,7 +2670,7 @@ in IEEE Transactions on Communication, Volume COM-28, Number 4, April
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.reg.transtype.TransType.EMCON">
 <span class="sig-name descname"><span class="pre">EMCON</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">14</span></em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.EMCON" title="Permalink to this definition">¶</a></dt>
-<dd><p>EMCON [&lt;mystery contact&gt;]</p>
+<dd><p>EMCON [Bich Nguyen]</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -2219,7 +2689,7 @@ in IEEE Transactions on Communication, Volume COM-28, Number 4, April
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.reg.transtype.TransType.UDP">
 <span class="sig-name descname"><span class="pre">UDP</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">17</span></em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.UDP" title="Permalink to this definition">¶</a></dt>
-<dd><p>User Datagram [<span class="target" id="index-43"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc768.html"><strong>RFC 768</strong></a>][Jon Postel]</p>
+<dd><p>User Datagram [<span class="target" id="index-44"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc768.html"><strong>RFC 768</strong></a>][Jon Postel]</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -2238,7 +2708,7 @@ USC/Information Sciences Institute, May 1979.][Jon Postel]</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.reg.transtype.TransType.HMP">
 <span class="sig-name descname"><span class="pre">HMP</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">20</span></em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.HMP" title="Permalink to this definition">¶</a></dt>
-<dd><p>Host Monitoring [<span class="target" id="index-44"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc869.html"><strong>RFC 869</strong></a>][Bob Hinden]</p>
+<dd><p>Host Monitoring [<span class="target" id="index-45"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc869.html"><strong>RFC 869</strong></a>][Bob Hinden]</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -2293,25 +2763,25 @@ CT., October 1980.][XEROX]</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.reg.transtype.TransType.RDP">
 <span class="sig-name descname"><span class="pre">RDP</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">27</span></em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.RDP" title="Permalink to this definition">¶</a></dt>
-<dd><p>Reliable Data Protocol [<span class="target" id="index-45"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc908.html"><strong>RFC 908</strong></a>][Bob Hinden]</p>
+<dd><p>Reliable Data Protocol [<span class="target" id="index-46"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc908.html"><strong>RFC 908</strong></a>][Bob Hinden]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.reg.transtype.TransType.IRTP">
 <span class="sig-name descname"><span class="pre">IRTP</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">28</span></em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.IRTP" title="Permalink to this definition">¶</a></dt>
-<dd><p>Internet Reliable Transaction [<span class="target" id="index-46"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc938.html"><strong>RFC 938</strong></a>][Trudy Miller]</p>
+<dd><p>Internet Reliable Transaction [<span class="target" id="index-47"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc938.html"><strong>RFC 938</strong></a>][Trudy Miller]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.reg.transtype.TransType.ISO_TP4">
 <span class="sig-name descname"><span class="pre">ISO_TP4</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">29</span></em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.ISO_TP4" title="Permalink to this definition">¶</a></dt>
-<dd><p>ISO Transport Protocol Class 4 [<span class="target" id="index-47"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc905.html"><strong>RFC 905</strong></a>][&lt;mystery contact&gt;]</p>
+<dd><p>ISO Transport Protocol Class 4 [<span class="target" id="index-48"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc905.html"><strong>RFC 905</strong></a>][Robert Cole]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.reg.transtype.TransType.NETBLT">
 <span class="sig-name descname"><span class="pre">NETBLT</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">30</span></em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.NETBLT" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bulk Data Transfer Protocol [<span class="target" id="index-48"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc969.html"><strong>RFC 969</strong></a>][David Clark]</p>
+<dd><p>Bulk Data Transfer Protocol [<span class="target" id="index-49"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc969.html"><strong>RFC 969</strong></a>][David Clark]</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -2331,7 +2801,7 @@ California, June 1977.][Barry Howard]</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.reg.transtype.TransType.DCCP">
 <span class="sig-name descname"><span class="pre">DCCP</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">33</span></em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.DCCP" title="Permalink to this definition">¶</a></dt>
-<dd><p>Datagram Congestion Control Protocol [<span class="target" id="index-49"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4340.html"><strong>RFC 4340</strong></a>]</p>
+<dd><p>Datagram Congestion Control Protocol [<span class="target" id="index-50"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4340.html"><strong>RFC 4340</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -2379,7 +2849,7 @@ California, June 1977.][Barry Howard]</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.reg.transtype.TransType.IPv6">
 <span class="sig-name descname"><span class="pre">IPv6</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">41</span></em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.IPv6" title="Permalink to this definition">¶</a></dt>
-<dd><p>IPv6 encapsulation [<span class="target" id="index-50"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2473.html"><strong>RFC 2473</strong></a>]</p>
+<dd><p>IPv6 encapsulation [<span class="target" id="index-51"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2473.html"><strong>RFC 2473</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -2409,19 +2879,19 @@ California, June 1977.][Barry Howard]</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.reg.transtype.TransType.RSVP">
 <span class="sig-name descname"><span class="pre">RSVP</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">46</span></em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.RSVP" title="Permalink to this definition">¶</a></dt>
-<dd><p>Reservation Protocol [<span class="target" id="index-51"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2205.html"><strong>RFC 2205</strong></a>][<span class="target" id="index-52"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3209.html"><strong>RFC 3209</strong></a>][Bob Braden]</p>
+<dd><p>Reservation Protocol [<span class="target" id="index-52"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2205.html"><strong>RFC 2205</strong></a>][<span class="target" id="index-53"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3209.html"><strong>RFC 3209</strong></a>][Bob Braden]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.reg.transtype.TransType.GRE">
 <span class="sig-name descname"><span class="pre">GRE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">47</span></em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.GRE" title="Permalink to this definition">¶</a></dt>
-<dd><p>Generic Routing Encapsulation [<span class="target" id="index-53"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2784.html"><strong>RFC 2784</strong></a>][Tony Li]</p>
+<dd><p>Generic Routing Encapsulation [<span class="target" id="index-54"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2784.html"><strong>RFC 2784</strong></a>][Tony Li]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.reg.transtype.TransType.DSR">
 <span class="sig-name descname"><span class="pre">DSR</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">48</span></em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.DSR" title="Permalink to this definition">¶</a></dt>
-<dd><p>Dynamic Source Routing Protocol [<span class="target" id="index-54"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4728.html"><strong>RFC 4728</strong></a>]</p>
+<dd><p>Dynamic Source Routing Protocol [<span class="target" id="index-55"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4728.html"><strong>RFC 4728</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -2433,13 +2903,13 @@ California, June 1977.][Barry Howard]</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.reg.transtype.TransType.ESP">
 <span class="sig-name descname"><span class="pre">ESP</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">50</span></em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.ESP" title="Permalink to this definition">¶</a></dt>
-<dd><p>Encap Security Payload [<span class="target" id="index-55"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4303.html"><strong>RFC 4303</strong></a>]</p>
+<dd><p>Encap Security Payload [<span class="target" id="index-56"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4303.html"><strong>RFC 4303</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.reg.transtype.TransType.AH">
 <span class="sig-name descname"><span class="pre">AH</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">51</span></em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.AH" title="Permalink to this definition">¶</a></dt>
-<dd><p>Authentication Header [<span class="target" id="index-56"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4302.html"><strong>RFC 4302</strong></a>]</p>
+<dd><p>Authentication Header [<span class="target" id="index-57"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4302.html"><strong>RFC 4302</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -2457,7 +2927,7 @@ California, June 1977.][Barry Howard]</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.reg.transtype.TransType.NARP">
 <span class="sig-name descname"><span class="pre">NARP</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">54</span></em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.NARP" title="Permalink to this definition">¶</a></dt>
-<dd><p>NBMA Address Resolution Protocol [<span class="target" id="index-57"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1735.html"><strong>RFC 1735</strong></a>]</p>
+<dd><p>NBMA Address Resolution Protocol [<span class="target" id="index-58"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1735.html"><strong>RFC 1735</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -2482,19 +2952,19 @@ Oberg]</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.reg.transtype.TransType.IPv6_ICMP">
 <span class="sig-name descname"><span class="pre">IPv6_ICMP</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">58</span></em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.IPv6_ICMP" title="Permalink to this definition">¶</a></dt>
-<dd><p>ICMP for IPv6 [<span class="target" id="index-58"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8200.html"><strong>RFC 8200</strong></a>]</p>
+<dd><p>ICMP for IPv6 [<span class="target" id="index-59"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8200.html"><strong>RFC 8200</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.reg.transtype.TransType.IPv6_NoNxt">
 <span class="sig-name descname"><span class="pre">IPv6_NoNxt</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">59</span></em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.IPv6_NoNxt" title="Permalink to this definition">¶</a></dt>
-<dd><p>No Next Header for IPv6 [<span class="target" id="index-59"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8200.html"><strong>RFC 8200</strong></a>]</p>
+<dd><p>No Next Header for IPv6 [<span class="target" id="index-60"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8200.html"><strong>RFC 8200</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.reg.transtype.TransType.IPv6_Opts">
 <span class="sig-name descname"><span class="pre">IPv6_Opts</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">60</span></em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.IPv6_Opts" title="Permalink to this definition">¶</a></dt>
-<dd><p>Destination Options for IPv6 [<span class="target" id="index-60"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8200.html"><strong>RFC 8200</strong></a>]</p>
+<dd><p>Destination Options for IPv6 [<span class="target" id="index-61"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8200.html"><strong>RFC 8200</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -2671,13 +3141,13 @@ Protocol Specification, Draft Version”, Contract no. CS901145, November 16,
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.reg.transtype.TransType.EIGRP">
 <span class="sig-name descname"><span class="pre">EIGRP</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">88</span></em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.EIGRP" title="Permalink to this definition">¶</a></dt>
-<dd><p>EIGRP [<span class="target" id="index-61"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc7868.html"><strong>RFC 7868</strong></a>]</p>
+<dd><p>EIGRP [<span class="target" id="index-62"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc7868.html"><strong>RFC 7868</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.reg.transtype.TransType.OSPFIGP">
 <span class="sig-name descname"><span class="pre">OSPFIGP</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">89</span></em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.OSPFIGP" title="Permalink to this definition">¶</a></dt>
-<dd><p>OSPFIGP [<span class="target" id="index-62"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1583.html"><strong>RFC 1583</strong></a>][<span class="target" id="index-63"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2328.html"><strong>RFC 2328</strong></a>][<span class="target" id="index-64"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5340.html"><strong>RFC 5340</strong></a>][John Moy]</p>
+<dd><p>OSPFIGP [<span class="target" id="index-63"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1583.html"><strong>RFC 1583</strong></a>][<span class="target" id="index-64"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2328.html"><strong>RFC 2328</strong></a>][<span class="target" id="index-65"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5340.html"><strong>RFC 5340</strong></a>][John Moy]</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -2727,13 +3197,13 @@ California at Berkeley, June 1986.][Bruce Willins]</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.reg.transtype.TransType.ETHERIP">
 <span class="sig-name descname"><span class="pre">ETHERIP</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">97</span></em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.ETHERIP" title="Permalink to this definition">¶</a></dt>
-<dd><p>Ethernet-within-IP Encapsulation [<span class="target" id="index-65"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3378.html"><strong>RFC 3378</strong></a>]</p>
+<dd><p>Ethernet-within-IP Encapsulation [<span class="target" id="index-66"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3378.html"><strong>RFC 3378</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.reg.transtype.TransType.ENCAP">
 <span class="sig-name descname"><span class="pre">ENCAP</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">98</span></em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.ENCAP" title="Permalink to this definition">¶</a></dt>
-<dd><p>Encapsulation Header [<span class="target" id="index-66"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1241.html"><strong>RFC 1241</strong></a>][Robert Woodburn]</p>
+<dd><p>Encapsulation Header [<span class="target" id="index-67"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1241.html"><strong>RFC 1241</strong></a>][Robert Woodburn]</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -2763,7 +3233,7 @@ California at Berkeley, June 1986.][Bruce Willins]</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.reg.transtype.TransType.PIM">
 <span class="sig-name descname"><span class="pre">PIM</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">103</span></em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.PIM" title="Permalink to this definition">¶</a></dt>
-<dd><p>Protocol Independent Multicast [<span class="target" id="index-67"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc7761.html"><strong>RFC 7761</strong></a>][Dino Farinacci]</p>
+<dd><p>Protocol Independent Multicast [<span class="target" id="index-68"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc7761.html"><strong>RFC 7761</strong></a>][Dino Farinacci]</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -2793,7 +3263,7 @@ California at Berkeley, June 1986.][Bruce Willins]</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.reg.transtype.TransType.IPComp">
 <span class="sig-name descname"><span class="pre">IPComp</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">108</span></em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.IPComp" title="Permalink to this definition">¶</a></dt>
-<dd><p>IP Payload Compression Protocol [<span class="target" id="index-68"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2393.html"><strong>RFC 2393</strong></a>]</p>
+<dd><p>IP Payload Compression Protocol [<span class="target" id="index-69"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2393.html"><strong>RFC 2393</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -2817,7 +3287,7 @@ California at Berkeley, June 1986.][Bruce Willins]</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.reg.transtype.TransType.VRRP">
 <span class="sig-name descname"><span class="pre">VRRP</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">112</span></em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.VRRP" title="Permalink to this definition">¶</a></dt>
-<dd><p>Virtual Router Redundancy Protocol [<span class="target" id="index-69"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5798.html"><strong>RFC 5798</strong></a>]</p>
+<dd><p>Virtual Router Redundancy Protocol [<span class="target" id="index-70"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5798.html"><strong>RFC 5798</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -2835,7 +3305,7 @@ California at Berkeley, June 1986.][Bruce Willins]</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.reg.transtype.TransType.L2TP">
 <span class="sig-name descname"><span class="pre">L2TP</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">115</span></em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.L2TP" title="Permalink to this definition">¶</a></dt>
-<dd><p>Layer Two Tunneling Protocol [<span class="target" id="index-70"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3931.html"><strong>RFC 3931</strong></a>][Bernard Aboba]</p>
+<dd><p>Layer Two Tunneling Protocol [<span class="target" id="index-71"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3931.html"><strong>RFC 3931</strong></a>][Bernard Aboba]</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -2944,79 +3414,85 @@ simple-multicast]</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.reg.transtype.TransType.FC">
 <span class="sig-name descname"><span class="pre">FC</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">133</span></em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.FC" title="Permalink to this definition">¶</a></dt>
-<dd><p>Fibre Channel [Murali Rajagopal][<span class="target" id="index-71"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6172.html"><strong>RFC 6172</strong></a>]</p>
+<dd><p>Fibre Channel [Murali Rajagopal][<span class="target" id="index-72"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6172.html"><strong>RFC 6172</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.reg.transtype.TransType.RSVP_E2E_IGNORE">
 <span class="sig-name descname"><span class="pre">RSVP_E2E_IGNORE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">134</span></em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.RSVP_E2E_IGNORE" title="Permalink to this definition">¶</a></dt>
-<dd><p>[<span class="target" id="index-72"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3175.html"><strong>RFC 3175</strong></a>]</p>
+<dd><p>[<span class="target" id="index-73"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3175.html"><strong>RFC 3175</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.reg.transtype.TransType.Mobility_Header">
 <span class="sig-name descname"><span class="pre">Mobility_Header</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">135</span></em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.Mobility_Header" title="Permalink to this definition">¶</a></dt>
-<dd><p>[<span class="target" id="index-73"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6275.html"><strong>RFC 6275</strong></a>]</p>
+<dd><p>[<span class="target" id="index-74"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6275.html"><strong>RFC 6275</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.reg.transtype.TransType.UDPLite">
 <span class="sig-name descname"><span class="pre">UDPLite</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">136</span></em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.UDPLite" title="Permalink to this definition">¶</a></dt>
-<dd><p>[<span class="target" id="index-74"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3828.html"><strong>RFC 3828</strong></a>]</p>
+<dd><p>[<span class="target" id="index-75"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3828.html"><strong>RFC 3828</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.reg.transtype.TransType.MPLS_in_IP">
 <span class="sig-name descname"><span class="pre">MPLS_in_IP</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">137</span></em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.MPLS_in_IP" title="Permalink to this definition">¶</a></dt>
-<dd><p>[<span class="target" id="index-75"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4023.html"><strong>RFC 4023</strong></a>]</p>
+<dd><p>[<span class="target" id="index-76"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4023.html"><strong>RFC 4023</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.reg.transtype.TransType.manet">
 <span class="sig-name descname"><span class="pre">manet</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">138</span></em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.manet" title="Permalink to this definition">¶</a></dt>
-<dd><p>MANET Protocols [<span class="target" id="index-76"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5498.html"><strong>RFC 5498</strong></a>]</p>
+<dd><p>MANET Protocols [<span class="target" id="index-77"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5498.html"><strong>RFC 5498</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.reg.transtype.TransType.HIP">
 <span class="sig-name descname"><span class="pre">HIP</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">139</span></em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.HIP" title="Permalink to this definition">¶</a></dt>
-<dd><p>Host Identity Protocol [<span class="target" id="index-77"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc7401.html"><strong>RFC 7401</strong></a>]</p>
+<dd><p>Host Identity Protocol [<span class="target" id="index-78"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc7401.html"><strong>RFC 7401</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.reg.transtype.TransType.Shim6">
 <span class="sig-name descname"><span class="pre">Shim6</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">140</span></em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.Shim6" title="Permalink to this definition">¶</a></dt>
-<dd><p>Shim6 Protocol [<span class="target" id="index-78"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5533.html"><strong>RFC 5533</strong></a>]</p>
+<dd><p>Shim6 Protocol [<span class="target" id="index-79"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5533.html"><strong>RFC 5533</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.reg.transtype.TransType.WESP">
 <span class="sig-name descname"><span class="pre">WESP</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">141</span></em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.WESP" title="Permalink to this definition">¶</a></dt>
-<dd><p>Wrapped Encapsulating Security Payload [<span class="target" id="index-79"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5840.html"><strong>RFC 5840</strong></a>]</p>
+<dd><p>Wrapped Encapsulating Security Payload [<span class="target" id="index-80"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5840.html"><strong>RFC 5840</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.reg.transtype.TransType.ROHC">
 <span class="sig-name descname"><span class="pre">ROHC</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">142</span></em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.ROHC" title="Permalink to this definition">¶</a></dt>
-<dd><p>Robust Header Compression [<span class="target" id="index-80"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5858.html"><strong>RFC 5858</strong></a>]</p>
+<dd><p>Robust Header Compression [<span class="target" id="index-81"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5858.html"><strong>RFC 5858</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.reg.transtype.TransType.Ethernet">
 <span class="sig-name descname"><span class="pre">Ethernet</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">143</span></em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.Ethernet" title="Permalink to this definition">¶</a></dt>
-<dd><p>Ethernet [<span class="target" id="index-81"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8986.html"><strong>RFC 8986</strong></a>]</p>
+<dd><p>Ethernet [<span class="target" id="index-82"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8986.html"><strong>RFC 8986</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.reg.transtype.TransType.AGGFRAG">
+<span class="sig-name descname"><span class="pre">AGGFRAG</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">144</span></em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.AGGFRAG" title="Permalink to this definition">¶</a></dt>
+<dd><p>AGGFRAG encapsulation payload for ESP [<span class="target" id="index-83"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9347.html"><strong>RFC 9347</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.reg.transtype.TransType.Use_for_experimentation_and_testing_253">
 <span class="sig-name descname"><span class="pre">Use_for_experimentation_and_testing_253</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">253</span></em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.Use_for_experimentation_and_testing_253" title="Permalink to this definition">¶</a></dt>
-<dd><p>Use for experimentation and testing [<span class="target" id="index-82"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3692.html"><strong>RFC 3692</strong></a>]</p>
+<dd><p>Use for experimentation and testing [<span class="target" id="index-84"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3692.html"><strong>RFC 3692</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.reg.transtype.TransType.Use_for_experimentation_and_testing_254">
 <span class="sig-name descname"><span class="pre">Use_for_experimentation_and_testing_254</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">254</span></em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.Use_for_experimentation_and_testing_254" title="Permalink to this definition">¶</a></dt>
-<dd><p>Use for experimentation and testing [<span class="target" id="index-83"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3692.html"><strong>RFC 3692</strong></a>]</p>
+<dd><p>Use for experimentation and testing [<span class="target" id="index-85"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3692.html"><strong>RFC 3692</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -3042,15 +3518,15 @@ simple-multicast]</p>
 </dd></dl>
 
 <hr /><aside class="footnote-list brackets">
-<aside class="footnote brackets" id="id10" role="note">
+<aside class="footnote brackets" id="id8" role="note">
 <span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id1">*</a><span class="fn-bracket">]</span></span>
 <p><a class="reference external" href="http://www.tcpdump.org/linktypes.html">http://www.tcpdump.org/linktypes.html</a></p>
 </aside>
-<aside class="footnote brackets" id="id11" role="note">
+<aside class="footnote brackets" id="id9" role="note">
 <span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id2">†</a><span class="fn-bracket">]</span></span>
 <p><a class="reference external" href="https://www.iana.org/assignments/ieee-802-numbers/ieee-802-numbers.xhtml#ieee-802-numbers-1">https://www.iana.org/assignments/ieee-802-numbers/ieee-802-numbers.xhtml#ieee-802-numbers-1</a></p>
 </aside>
-<aside class="footnote brackets" id="id12" role="note">
+<aside class="footnote brackets" id="id10" role="note">
 <span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id3">‡</a><span class="fn-bracket">]</span></span>
 <p><a class="reference external" href="https://www.iana.org/assignments/protocol-numbers/protocol-numbers.xhtml#protocol-numbers-1">https://www.iana.org/assignments/protocol-numbers/protocol-numbers.xhtml#protocol-numbers-1</a></p>
 </aside>

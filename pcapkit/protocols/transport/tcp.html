@@ -10,9 +10,6 @@
     <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/alabaster.css" />
     <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
-    <script src="../../../_static/jquery.js"></script>
-    <script src="../../../_static/underscore.js"></script>
-    <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="../../../_static/doctools.js"></script>
     <script src="../../../_static/sphinx_highlight.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
@@ -314,44 +311,24 @@ enumeration:</p>
 <dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.TCP.name">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'Transmission</span> <span class="pre">Control</span> <span class="pre">Protocol'</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pcapkit.protocols.transport.tcp.TCP.name" title="Permalink to this definition">¶</a></dt>
 <dd><p>Name of current protocol.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Literal[“Transmission Control Protocol”]</p>
-</dd>
-</dl>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.TCP.length">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">length</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a></em><a class="headerlink" href="#pcapkit.protocols.transport.tcp.TCP.length" title="Permalink to this definition">¶</a></dt>
 <dd><p>Header length of current protocol.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></p>
-</dd>
-</dl>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.TCP.src">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">src</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a></em><a class="headerlink" href="#pcapkit.protocols.transport.tcp.TCP.src" title="Permalink to this definition">¶</a></dt>
 <dd><p>Source port.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></p>
-</dd>
-</dl>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.TCP.dst">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">dst</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a></em><a class="headerlink" href="#pcapkit.protocols.transport.tcp.TCP.dst" title="Permalink to this definition">¶</a></dt>
 <dd><p>Destination port.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></p>
-</dd>
-</dl>
 </dd></dl>
 
 <dl class="py method">
@@ -1589,7 +1566,7 @@ enumeration:</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.TCP.__proto__">
-<span class="sig-name descname"><span class="pre">__proto__</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">DefaultDict</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.11)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pcapkit.protocols.transport.tcp.TCP.__proto__" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">__proto__</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">DefaultDict[int,</span> <span class="pre">tuple[str,</span> <span class="pre">str]]</span></em><a class="headerlink" href="#pcapkit.protocols.transport.tcp.TCP.__proto__" title="Permalink to this definition">¶</a></dt>
 <dd><p>Protocol index mapping for decoding next layer,
 c.f. <a class="reference internal" href="transport.html#pcapkit.protocols.transport.transport.Transport._decode_next_layer" title="pcapkit.protocols.transport.transport.Transport._decode_next_layer"><code class="xref py py-meth docutils literal notranslate"><span class="pre">self._decode_next_layer</span></code></a>
 &amp; <a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.Protocol._import_next_layer" title="pcapkit.protocols.protocol.Protocol._import_next_layer"><code class="xref py py-meth docutils literal notranslate"><span class="pre">self._import_next_layer</span></code></a>.</p>
@@ -1602,7 +1579,7 @@ c.f. <a class="reference internal" href="transport.html#pcapkit.protocols.transp
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.TCP.__option__">
-<span class="sig-name descname"><span class="pre">__option__</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">DefaultDict</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">OptionParser</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pcapkit.protocols.transport.tcp.TCP.__option__" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">__option__</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">DefaultDict[int,</span> <span class="pre">str</span> <span class="pre">|</span> <span class="pre">OptionParser]</span></em><a class="headerlink" href="#pcapkit.protocols.transport.tcp.TCP.__option__" title="Permalink to this definition">¶</a></dt>
 <dd><p>Option code to method
 mapping, c.f. <a class="reference internal" href="#pcapkit.protocols.transport.tcp.TCP._read_tcp_options" title="pcapkit.protocols.transport.tcp.TCP._read_tcp_options"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_read_tcp_options()</span></code></a>. Method names are expected to be
 referred to the class by <code class="docutils literal notranslate"><span class="pre">_read_mode_${name}</span></code>, and if such name not
@@ -1617,7 +1594,7 @@ itself.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.TCP.__mp_option__">
-<span class="sig-name descname"><span class="pre">__mp_option__</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">DefaultDict</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">MPOptionParser</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pcapkit.protocols.transport.tcp.TCP.__mp_option__" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">__mp_option__</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">DefaultDict[int,</span> <span class="pre">str</span> <span class="pre">|</span> <span class="pre">MPOptionParser]</span></em><a class="headerlink" href="#pcapkit.protocols.transport.tcp.TCP.__mp_option__" title="Permalink to this definition">¶</a></dt>
 <dd><p>Option code to length mapping,</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
@@ -1648,61 +1625,61 @@ itself.</p>
 </dl>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.transport.tcp.TCP.srcport">
-<span class="sig-name descname"><span class="pre">srcport</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a></em><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.TCP.srcport" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">srcport</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.TCP.srcport" title="Permalink to this definition">¶</a></dt>
 <dd><p>Source port.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.transport.tcp.TCP.dstport">
-<span class="sig-name descname"><span class="pre">dstport</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a></em><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.TCP.dstport" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">dstport</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.TCP.dstport" title="Permalink to this definition">¶</a></dt>
 <dd><p>Destination port.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.transport.tcp.TCP.seq">
-<span class="sig-name descname"><span class="pre">seq</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a></em><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.TCP.seq" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">seq</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.TCP.seq" title="Permalink to this definition">¶</a></dt>
 <dd><p>Sequence number.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.transport.tcp.TCP.ack">
-<span class="sig-name descname"><span class="pre">ack</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a></em><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.TCP.ack" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">ack</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.TCP.ack" title="Permalink to this definition">¶</a></dt>
 <dd><p>Acknowledgment number.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.transport.tcp.TCP.hdr_len">
-<span class="sig-name descname"><span class="pre">hdr_len</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a></em><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.TCP.hdr_len" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">hdr_len</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.TCP.hdr_len" title="Permalink to this definition">¶</a></dt>
 <dd><p>Data offset.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.transport.tcp.TCP.flags">
-<span class="sig-name descname"><span class="pre">flags</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#pcapkit.protocols.data.transport.tcp.Flags" title="pcapkit.protocols.data.transport.tcp.Flags"><span class="pre">Flags</span></a></em><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.TCP.flags" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">flags</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Flags</span></em><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.TCP.flags" title="Permalink to this definition">¶</a></dt>
 <dd><p>Flags.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.transport.tcp.TCP.window_size">
-<span class="sig-name descname"><span class="pre">window_size</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a></em><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.TCP.window_size" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">window_size</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.TCP.window_size" title="Permalink to this definition">¶</a></dt>
 <dd><p>Window size.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.transport.tcp.TCP.checksum">
-<span class="sig-name descname"><span class="pre">checksum</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.11)"><span class="pre">bytes</span></a></em><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.TCP.checksum" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">checksum</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bytes</span></em><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.TCP.checksum" title="Permalink to this definition">¶</a></dt>
 <dd><p>Checksum.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.transport.tcp.TCP.urgent_pointer">
-<span class="sig-name descname"><span class="pre">urgent_pointer</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a></em><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.TCP.urgent_pointer" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">urgent_pointer</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.TCP.urgent_pointer" title="Permalink to this definition">¶</a></dt>
 <dd><p>Urgent pointer.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.transport.tcp.TCP.options">
-<span class="sig-name descname"><span class="pre">options</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="../../corekit/multidict.html#pcapkit.corekit.multidict.OrderedMultiDict" title="pcapkit.corekit.multidict.OrderedMultiDict"><span class="pre">OrderedMultiDict</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="../../const/ipv4.html#pcapkit.const.ipv4.option_number.OptionNumber" title="pcapkit.const.ipv4.option_number.OptionNumber"><span class="pre">OptionNumber</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="#pcapkit.protocols.data.transport.tcp.Option" title="pcapkit.protocols.data.transport.tcp.Option"><span class="pre">Option</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.TCP.options" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">options</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">OrderedMultiDict[OptionNumber,</span> <span class="pre">Option]</span></em><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.TCP.options" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -1725,55 +1702,55 @@ itself.</p>
 </dl>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.transport.tcp.Flags.ns">
-<span class="sig-name descname"><span class="pre">ns</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><span class="pre">bool</span></a></em><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.Flags.ns" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">ns</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></em><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.Flags.ns" title="Permalink to this definition">¶</a></dt>
 <dd><p>ECN-nonce concealment protection.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.transport.tcp.Flags.cwr">
-<span class="sig-name descname"><span class="pre">cwr</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><span class="pre">bool</span></a></em><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.Flags.cwr" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">cwr</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></em><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.Flags.cwr" title="Permalink to this definition">¶</a></dt>
 <dd><p>Congestion window reduced.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.transport.tcp.Flags.ece">
-<span class="sig-name descname"><span class="pre">ece</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><span class="pre">bool</span></a></em><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.Flags.ece" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">ece</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></em><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.Flags.ece" title="Permalink to this definition">¶</a></dt>
 <dd><p>ECN-Echo.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.transport.tcp.Flags.urg">
-<span class="sig-name descname"><span class="pre">urg</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><span class="pre">bool</span></a></em><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.Flags.urg" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">urg</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></em><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.Flags.urg" title="Permalink to this definition">¶</a></dt>
 <dd><p>Urgent.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.transport.tcp.Flags.ack">
-<span class="sig-name descname"><span class="pre">ack</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><span class="pre">bool</span></a></em><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.Flags.ack" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">ack</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></em><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.Flags.ack" title="Permalink to this definition">¶</a></dt>
 <dd><p>Acknowledgment.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.transport.tcp.Flags.psh">
-<span class="sig-name descname"><span class="pre">psh</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><span class="pre">bool</span></a></em><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.Flags.psh" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">psh</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></em><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.Flags.psh" title="Permalink to this definition">¶</a></dt>
 <dd><p>Push function.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.transport.tcp.Flags.rst">
-<span class="sig-name descname"><span class="pre">rst</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><span class="pre">bool</span></a></em><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.Flags.rst" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">rst</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></em><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.Flags.rst" title="Permalink to this definition">¶</a></dt>
 <dd><p>Reset connection.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.transport.tcp.Flags.syn">
-<span class="sig-name descname"><span class="pre">syn</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><span class="pre">bool</span></a></em><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.Flags.syn" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">syn</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></em><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.Flags.syn" title="Permalink to this definition">¶</a></dt>
 <dd><p>Synchronize sequence numbers.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.transport.tcp.Flags.fin">
-<span class="sig-name descname"><span class="pre">fin</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><span class="pre">bool</span></a></em><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.Flags.fin" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">fin</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></em><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.Flags.fin" title="Permalink to this definition">¶</a></dt>
 <dd><p>Last packet from sender.</p>
 </dd></dl>
 
@@ -1797,13 +1774,13 @@ itself.</p>
 </dl>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.transport.tcp.Option.kind">
-<span class="sig-name descname"><span class="pre">kind</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="../../const/ipv4.html#pcapkit.const.ipv4.option_number.OptionNumber" title="pcapkit.const.ipv4.option_number.OptionNumber"><span class="pre">OptionNumber</span></a></em><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.Option.kind" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">kind</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">OptionNumber</span></em><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.Option.kind" title="Permalink to this definition">¶</a></dt>
 <dd><p>Option kind.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.transport.tcp.Option.length">
-<span class="sig-name descname"><span class="pre">length</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a></em><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.Option.length" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">length</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.Option.length" title="Permalink to this definition">¶</a></dt>
 <dd><p>Option length.</p>
 </dd></dl>
 
@@ -1827,7 +1804,7 @@ itself.</p>
 </dl>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.transport.tcp.UnassignedOption.data">
-<span class="sig-name descname"><span class="pre">data</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.11)"><span class="pre">bytes</span></a></em><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.UnassignedOption.data" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">data</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bytes</span></em><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.UnassignedOption.data" title="Permalink to this definition">¶</a></dt>
 <dd><p>Option data.</p>
 </dd></dl>
 
@@ -1887,7 +1864,7 @@ itself.</p>
 </dl>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.transport.tcp.MaximumSegmentSize.mss">
-<span class="sig-name descname"><span class="pre">mss</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a></em><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.MaximumSegmentSize.mss" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">mss</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.MaximumSegmentSize.mss" title="Permalink to this definition">¶</a></dt>
 <dd><p>Maximum segment size.</p>
 </dd></dl>
 
@@ -1911,7 +1888,7 @@ itself.</p>
 </dl>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.transport.tcp.WindowScale.shift">
-<span class="sig-name descname"><span class="pre">shift</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a></em><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.WindowScale.shift" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">shift</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.WindowScale.shift" title="Permalink to this definition">¶</a></dt>
 <dd><p>Window scale.</p>
 </dd></dl>
 
@@ -1953,7 +1930,7 @@ itself.</p>
 </dl>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.transport.tcp.SACK.sack">
-<span class="sig-name descname"><span class="pre">sack</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.11)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.SACK.sack" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">sack</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">tuple[int,</span> <span class="pre">...]</span></em><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.SACK.sack" title="Permalink to this definition">¶</a></dt>
 <dd><p>SACK blocks.</p>
 </dd></dl>
 
@@ -1977,7 +1954,7 @@ itself.</p>
 </dl>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.transport.tcp.Echo.data">
-<span class="sig-name descname"><span class="pre">data</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.11)"><span class="pre">bytes</span></a></em><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.Echo.data" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">data</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bytes</span></em><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.Echo.data" title="Permalink to this definition">¶</a></dt>
 <dd><p>Echo data.</p>
 </dd></dl>
 
@@ -2001,7 +1978,7 @@ itself.</p>
 </dl>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.transport.tcp.EchoReply.data">
-<span class="sig-name descname"><span class="pre">data</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.11)"><span class="pre">bytes</span></a></em><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.EchoReply.data" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">data</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bytes</span></em><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.EchoReply.data" title="Permalink to this definition">¶</a></dt>
 <dd><p>Echo data.</p>
 </dd></dl>
 
@@ -2025,13 +2002,13 @@ itself.</p>
 </dl>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.transport.tcp.Timestamp.timestamp">
-<span class="sig-name descname"><span class="pre">timestamp</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a></em><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.Timestamp.timestamp" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">timestamp</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.Timestamp.timestamp" title="Permalink to this definition">¶</a></dt>
 <dd><p>Timestamp .</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.transport.tcp.Timestamp.echo">
-<span class="sig-name descname"><span class="pre">echo</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.11)"><span class="pre">bytes</span></a></em><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.Timestamp.echo" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">echo</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bytes</span></em><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.Timestamp.echo" title="Permalink to this definition">¶</a></dt>
 <dd><p>Echo data.</p>
 </dd></dl>
 
@@ -2073,13 +2050,13 @@ itself.</p>
 </dl>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.transport.tcp.PartialOrderConnectionProfile.start">
-<span class="sig-name descname"><span class="pre">start</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><span class="pre">bool</span></a></em><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.PartialOrderConnectionProfile.start" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">start</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.PartialOrderConnectionProfile.start" title="Permalink to this definition">¶</a></dt>
 <dd><p>Start flag.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.transport.tcp.PartialOrderConnectionProfile.end">
-<span class="sig-name descname"><span class="pre">end</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><span class="pre">bool</span></a></em><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.PartialOrderConnectionProfile.end" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">end</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.PartialOrderConnectionProfile.end" title="Permalink to this definition">¶</a></dt>
 <dd><p>End flag.</p>
 </dd></dl>
 
@@ -2103,7 +2080,7 @@ itself.</p>
 </dl>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.transport.tcp.CC.cc">
-<span class="sig-name descname"><span class="pre">cc</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a></em><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.CC.cc" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">cc</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.CC.cc" title="Permalink to this definition">¶</a></dt>
 <dd><p>Connection count.</p>
 </dd></dl>
 
@@ -2127,7 +2104,7 @@ itself.</p>
 </dl>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.transport.tcp.CCNew.cc">
-<span class="sig-name descname"><span class="pre">cc</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a></em><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.CCNew.cc" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">cc</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.CCNew.cc" title="Permalink to this definition">¶</a></dt>
 <dd><p>Connection count.</p>
 </dd></dl>
 
@@ -2151,7 +2128,7 @@ itself.</p>
 </dl>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.transport.tcp.CCEcho.cc">
-<span class="sig-name descname"><span class="pre">cc</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a></em><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.CCEcho.cc" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">cc</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.CCEcho.cc" title="Permalink to this definition">¶</a></dt>
 <dd><p>Connection count.</p>
 </dd></dl>
 
@@ -2175,7 +2152,7 @@ itself.</p>
 </dl>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.transport.tcp.AlternateChecksumRequest.chksum">
-<span class="sig-name descname"><span class="pre">chksum</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="../../const/tcp.html#pcapkit.const.tcp.checksum.Checksum" title="pcapkit.const.tcp.checksum.Checksum"><span class="pre">Checksum</span></a></em><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.AlternateChecksumRequest.chksum" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">chksum</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Checksum</span></em><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.AlternateChecksumRequest.chksum" title="Permalink to this definition">¶</a></dt>
 <dd><p>Checksum algorithm.</p>
 </dd></dl>
 
@@ -2199,7 +2176,7 @@ itself.</p>
 </dl>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.transport.tcp.AlternateChecksumData.data">
-<span class="sig-name descname"><span class="pre">data</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.11)"><span class="pre">bytes</span></a></em><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.AlternateChecksumData.data" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">data</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bytes</span></em><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.AlternateChecksumData.data" title="Permalink to this definition">¶</a></dt>
 <dd><p>Checksum data.</p>
 </dd></dl>
 
@@ -2223,7 +2200,7 @@ itself.</p>
 </dl>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.transport.tcp.MD5Signature.digest">
-<span class="sig-name descname"><span class="pre">digest</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.11)"><span class="pre">bytes</span></a></em><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.MD5Signature.digest" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">digest</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bytes</span></em><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.MD5Signature.digest" title="Permalink to this definition">¶</a></dt>
 <dd><p>MD5 signature.</p>
 </dd></dl>
 
@@ -2247,19 +2224,19 @@ itself.</p>
 </dl>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.transport.tcp.QuickStartResponse.req_rate">
-<span class="sig-name descname"><span class="pre">req_rate</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a></em><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.QuickStartResponse.req_rate" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">req_rate</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.QuickStartResponse.req_rate" title="Permalink to this definition">¶</a></dt>
 <dd><p>Rate request.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.transport.tcp.QuickStartResponse.ttl_diff">
-<span class="sig-name descname"><span class="pre">ttl_diff</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a></em><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.QuickStartResponse.ttl_diff" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">ttl_diff</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.QuickStartResponse.ttl_diff" title="Permalink to this definition">¶</a></dt>
 <dd><p>TTL difference.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.transport.tcp.QuickStartResponse.nounce">
-<span class="sig-name descname"><span class="pre">nounce</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a></em><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.QuickStartResponse.nounce" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">nounce</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.QuickStartResponse.nounce" title="Permalink to this definition">¶</a></dt>
 <dd><p>QS nounce.</p>
 </dd></dl>
 
@@ -2307,19 +2284,19 @@ itself.</p>
 </dl>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.transport.tcp.Authentication.key_id">
-<span class="sig-name descname"><span class="pre">key_id</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a></em><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.Authentication.key_id" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">key_id</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.Authentication.key_id" title="Permalink to this definition">¶</a></dt>
 <dd><p>Key ID.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.transport.tcp.Authentication.next_key_id">
-<span class="sig-name descname"><span class="pre">next_key_id</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a></em><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.Authentication.next_key_id" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">next_key_id</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.Authentication.next_key_id" title="Permalink to this definition">¶</a></dt>
 <dd><p>Receive next key ID.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.transport.tcp.Authentication.mac">
-<span class="sig-name descname"><span class="pre">mac</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.11)"><span class="pre">bytes</span></a></em><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.Authentication.mac" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">mac</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bytes</span></em><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.Authentication.mac" title="Permalink to this definition">¶</a></dt>
 <dd><p>MAC.</p>
 </dd></dl>
 
@@ -2343,7 +2320,7 @@ itself.</p>
 </dl>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.transport.tcp.FastOpenCookie.cookie">
-<span class="sig-name descname"><span class="pre">cookie</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.11)"><span class="pre">bytes</span></a></em><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.FastOpenCookie.cookie" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">cookie</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bytes</span></em><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.FastOpenCookie.cookie" title="Permalink to this definition">¶</a></dt>
 <dd><p>Cookie.</p>
 </dd></dl>
 
@@ -2367,7 +2344,7 @@ itself.</p>
 </dl>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.transport.tcp.MPTCP.subtype">
-<span class="sig-name descname"><span class="pre">subtype</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="../../const/tcp.html#pcapkit.const.tcp.mp_tcp_option.MPTCPOption" title="pcapkit.const.tcp.mp_tcp_option.MPTCPOption"><span class="pre">MPTCPOption</span></a></em><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.MPTCP.subtype" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">subtype</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">MPTCPOption</span></em><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.MPTCP.subtype" title="Permalink to this definition">¶</a></dt>
 <dd><p>Subtype.</p>
 </dd></dl>
 
@@ -2391,7 +2368,7 @@ itself.</p>
 </dl>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.transport.tcp.MPTCPUnknown.data">
-<span class="sig-name descname"><span class="pre">data</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.11)"><span class="pre">bytes</span></a></em><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.MPTCPUnknown.data" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">data</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bytes</span></em><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.MPTCPUnknown.data" title="Permalink to this definition">¶</a></dt>
 <dd><p>Data.</p>
 </dd></dl>
 
@@ -2415,25 +2392,25 @@ itself.</p>
 </dl>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.transport.tcp.MPTCPCapable.version">
-<span class="sig-name descname"><span class="pre">version</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a></em><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.MPTCPCapable.version" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">version</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.MPTCPCapable.version" title="Permalink to this definition">¶</a></dt>
 <dd><p>Version.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.transport.tcp.MPTCPCapable.flags">
-<span class="sig-name descname"><span class="pre">flags</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#pcapkit.protocols.data.transport.tcp.MPTCPCapableFlag" title="pcapkit.protocols.data.transport.tcp.MPTCPCapableFlag"><span class="pre">MPTCPCapableFlag</span></a></em><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.MPTCPCapable.flags" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">flags</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">MPTCPCapableFlag</span></em><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.MPTCPCapable.flags" title="Permalink to this definition">¶</a></dt>
 <dd><p>Flags.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.transport.tcp.MPTCPCapable.skey">
-<span class="sig-name descname"><span class="pre">skey</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a></em><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.MPTCPCapable.skey" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">skey</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.MPTCPCapable.skey" title="Permalink to this definition">¶</a></dt>
 <dd><p>Option sender’s key.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.transport.tcp.MPTCPCapable.rkey">
-<span class="sig-name descname"><span class="pre">rkey</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.MPTCPCapable.rkey" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">rkey</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional[int]</span></em><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.MPTCPCapable.rkey" title="Permalink to this definition">¶</a></dt>
 <dd><p>Option receiver’s key.</p>
 </dd></dl>
 
@@ -2457,19 +2434,19 @@ itself.</p>
 </dl>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.transport.tcp.MPTCPCapableFlag.req">
-<span class="sig-name descname"><span class="pre">req</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><span class="pre">bool</span></a></em><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.MPTCPCapableFlag.req" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">req</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></em><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.MPTCPCapableFlag.req" title="Permalink to this definition">¶</a></dt>
 <dd><p>Checksum require flag.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.transport.tcp.MPTCPCapableFlag.ext">
-<span class="sig-name descname"><span class="pre">ext</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><span class="pre">bool</span></a></em><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.MPTCPCapableFlag.ext" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">ext</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></em><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.MPTCPCapableFlag.ext" title="Permalink to this definition">¶</a></dt>
 <dd><p>Extensibility flag.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.transport.tcp.MPTCPCapableFlag.hsa">
-<span class="sig-name descname"><span class="pre">hsa</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><span class="pre">bool</span></a></em><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.MPTCPCapableFlag.hsa" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">hsa</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></em><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.MPTCPCapableFlag.hsa" title="Permalink to this definition">¶</a></dt>
 <dd><p>HMAC-SHA1 flag.</p>
 </dd></dl>
 
@@ -2511,31 +2488,31 @@ itself.</p>
 </dl>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.transport.tcp.MPTCPJoinSYN.connection">
-<span class="sig-name descname"><span class="pre">connection</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'SYN'</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.MPTCPJoinSYN.connection" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">connection</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Literal[&quot;SYN&quot;]</span></em><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.MPTCPJoinSYN.connection" title="Permalink to this definition">¶</a></dt>
 <dd><p>Connection type.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.transport.tcp.MPTCPJoinSYN.backup">
-<span class="sig-name descname"><span class="pre">backup</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><span class="pre">bool</span></a></em><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.MPTCPJoinSYN.backup" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">backup</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.MPTCPJoinSYN.backup" title="Permalink to this definition">¶</a></dt>
 <dd><p>Backup path flag.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.transport.tcp.MPTCPJoinSYN.addr_id">
-<span class="sig-name descname"><span class="pre">addr_id</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a></em><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.MPTCPJoinSYN.addr_id" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">addr_id</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.MPTCPJoinSYN.addr_id" title="Permalink to this definition">¶</a></dt>
 <dd><p>Address ID.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.transport.tcp.MPTCPJoinSYN.token">
-<span class="sig-name descname"><span class="pre">token</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.11)"><span class="pre">bytes</span></a></em><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.MPTCPJoinSYN.token" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">token</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bytes</span></em><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.MPTCPJoinSYN.token" title="Permalink to this definition">¶</a></dt>
 <dd><p>Receiver’s token.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.transport.tcp.MPTCPJoinSYN.nounce">
-<span class="sig-name descname"><span class="pre">nounce</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a></em><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.MPTCPJoinSYN.nounce" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">nounce</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.MPTCPJoinSYN.nounce" title="Permalink to this definition">¶</a></dt>
 <dd><p>Sendder’s random number.</p>
 </dd></dl>
 
@@ -2559,31 +2536,31 @@ itself.</p>
 </dl>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.transport.tcp.MPTCPJoinSYNACK.connection">
-<span class="sig-name descname"><span class="pre">connection</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'SYN/ACK'</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.MPTCPJoinSYNACK.connection" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">connection</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Literal[&quot;SYN/ACK&quot;]</span></em><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.MPTCPJoinSYNACK.connection" title="Permalink to this definition">¶</a></dt>
 <dd><p>Connection type.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.transport.tcp.MPTCPJoinSYNACK.backup">
-<span class="sig-name descname"><span class="pre">backup</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><span class="pre">bool</span></a></em><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.MPTCPJoinSYNACK.backup" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">backup</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.MPTCPJoinSYNACK.backup" title="Permalink to this definition">¶</a></dt>
 <dd><p>Backup path flag.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.transport.tcp.MPTCPJoinSYNACK.addr_id">
-<span class="sig-name descname"><span class="pre">addr_id</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a></em><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.MPTCPJoinSYNACK.addr_id" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">addr_id</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.MPTCPJoinSYNACK.addr_id" title="Permalink to this definition">¶</a></dt>
 <dd><p>Address ID.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.transport.tcp.MPTCPJoinSYNACK.hmac">
-<span class="sig-name descname"><span class="pre">hmac</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.11)"><span class="pre">bytes</span></a></em><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.MPTCPJoinSYNACK.hmac" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">hmac</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bytes</span></em><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.MPTCPJoinSYNACK.hmac" title="Permalink to this definition">¶</a></dt>
 <dd><p>Sender’s truncated HMAC.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.transport.tcp.MPTCPJoinSYNACK.nounce">
-<span class="sig-name descname"><span class="pre">nounce</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a></em><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.MPTCPJoinSYNACK.nounce" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">nounce</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.MPTCPJoinSYNACK.nounce" title="Permalink to this definition">¶</a></dt>
 <dd><p>Sendder’s random number.</p>
 </dd></dl>
 
@@ -2607,13 +2584,13 @@ itself.</p>
 </dl>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.transport.tcp.MPTCPJoinACK.connection">
-<span class="sig-name descname"><span class="pre">connection</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'ACK'</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.MPTCPJoinACK.connection" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">connection</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Literal[&quot;ACK&quot;]</span></em><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.MPTCPJoinACK.connection" title="Permalink to this definition">¶</a></dt>
 <dd><p>Connection type.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.transport.tcp.MPTCPJoinACK.hmac">
-<span class="sig-name descname"><span class="pre">hmac</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.11)"><span class="pre">bytes</span></a></em><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.MPTCPJoinACK.hmac" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">hmac</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bytes</span></em><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.MPTCPJoinACK.hmac" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -2636,37 +2613,37 @@ itself.</p>
 </dl>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.transport.tcp.MPTCPDSS.flags">
-<span class="sig-name descname"><span class="pre">flags</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#pcapkit.protocols.data.transport.tcp.MPTCPDSSFlag" title="pcapkit.protocols.data.transport.tcp.MPTCPDSSFlag"><span class="pre">MPTCPDSSFlag</span></a></em><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.MPTCPDSS.flags" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">flags</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">MPTCPDSSFlag</span></em><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.MPTCPDSS.flags" title="Permalink to this definition">¶</a></dt>
 <dd><p>Flags.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.transport.tcp.MPTCPDSS.ack">
-<span class="sig-name descname"><span class="pre">ack</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.MPTCPDSS.ack" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">ack</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional[int]</span></em><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.MPTCPDSS.ack" title="Permalink to this definition">¶</a></dt>
 <dd><p>Data ACK.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.transport.tcp.MPTCPDSS.dsn">
-<span class="sig-name descname"><span class="pre">dsn</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.MPTCPDSS.dsn" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">dsn</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional[int]</span></em><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.MPTCPDSS.dsn" title="Permalink to this definition">¶</a></dt>
 <dd><p>Data sequence number.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.transport.tcp.MPTCPDSS.ssn">
-<span class="sig-name descname"><span class="pre">ssn</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.MPTCPDSS.ssn" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">ssn</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional[int]</span></em><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.MPTCPDSS.ssn" title="Permalink to this definition">¶</a></dt>
 <dd><p>Subflow sequence number.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.transport.tcp.MPTCPDSS.dl_len">
-<span class="sig-name descname"><span class="pre">dl_len</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.MPTCPDSS.dl_len" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">dl_len</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional[int]</span></em><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.MPTCPDSS.dl_len" title="Permalink to this definition">¶</a></dt>
 <dd><p>Data-level length.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.transport.tcp.MPTCPDSS.checksum">
-<span class="sig-name descname"><span class="pre">checksum</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.11)"><span class="pre">bytes</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.MPTCPDSS.checksum" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">checksum</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional[bytes]</span></em><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.MPTCPDSS.checksum" title="Permalink to this definition">¶</a></dt>
 <dd><p>Checksum.</p>
 </dd></dl>
 
@@ -2690,32 +2667,32 @@ itself.</p>
 </dl>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.transport.tcp.MPTCPDSSFlag.data_fin">
-<span class="sig-name descname"><span class="pre">data_fin</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><span class="pre">bool</span></a></em><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.MPTCPDSSFlag.data_fin" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">data_fin</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></em><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.MPTCPDSSFlag.data_fin" title="Permalink to this definition">¶</a></dt>
 <dd><p><code class="docutils literal notranslate"><span class="pre">DATA_FIN</span></code> flag.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.transport.tcp.MPTCPDSSFlag.dsn_oct">
-<span class="sig-name descname"><span class="pre">dsn_oct</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><span class="pre">bool</span></a></em><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.MPTCPDSSFlag.dsn_oct" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">dsn_oct</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></em><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.MPTCPDSSFlag.dsn_oct" title="Permalink to this definition">¶</a></dt>
 <dd><p>Data sequence number is 8 octets (if not set, DSN is 4 octets).</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.transport.tcp.MPTCPDSSFlag.data_pre">
-<span class="sig-name descname"><span class="pre">data_pre</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><span class="pre">bool</span></a></em><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.MPTCPDSSFlag.data_pre" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">data_pre</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></em><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.MPTCPDSSFlag.data_pre" title="Permalink to this definition">¶</a></dt>
 <dd><p>Data Sequence Number (DSN), Subflow Sequence Number (SSN), Data-Level
 Length, and Checksum present.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.transport.tcp.MPTCPDSSFlag.ack_oct">
-<span class="sig-name descname"><span class="pre">ack_oct</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><span class="pre">bool</span></a></em><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.MPTCPDSSFlag.ack_oct" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">ack_oct</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></em><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.MPTCPDSSFlag.ack_oct" title="Permalink to this definition">¶</a></dt>
 <dd><p>Data ACK is 8 octets (if not set, Data ACK is 4 octets).</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.transport.tcp.MPTCPDSSFlag.ack_pre">
-<span class="sig-name descname"><span class="pre">ack_pre</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><span class="pre">bool</span></a></em><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.MPTCPDSSFlag.ack_pre" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">ack_pre</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></em><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.MPTCPDSSFlag.ack_pre" title="Permalink to this definition">¶</a></dt>
 <dd><p>Data ACK present.</p>
 </dd></dl>
 
@@ -2739,13 +2716,13 @@ Length, and Checksum present.</p>
 </dl>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.transport.tcp.MPTCPAddAddress.version">
-<span class="sig-name descname"><span class="pre">version</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a></em><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.MPTCPAddAddress.version" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">version</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.MPTCPAddAddress.version" title="Permalink to this definition">¶</a></dt>
 <dd><p>IP version.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.transport.tcp.MPTCPAddAddress.addr_id">
-<span class="sig-name descname"><span class="pre">addr_id</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a></em><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.MPTCPAddAddress.addr_id" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">addr_id</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.MPTCPAddAddress.addr_id" title="Permalink to this definition">¶</a></dt>
 <dd><p>Address ID.</p>
 </dd></dl>
 
@@ -2757,7 +2734,7 @@ Length, and Checksum present.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.transport.tcp.MPTCPAddAddress.port">
-<span class="sig-name descname"><span class="pre">port</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.MPTCPAddAddress.port" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">port</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional[int]</span></em><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.MPTCPAddAddress.port" title="Permalink to this definition">¶</a></dt>
 <dd><p>Port number.</p>
 </dd></dl>
 
@@ -2781,7 +2758,7 @@ Length, and Checksum present.</p>
 </dl>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.transport.tcp.MPTCPRemoveAddress.addr_id">
-<span class="sig-name descname"><span class="pre">addr_id</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.11)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.MPTCPRemoveAddress.addr_id" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">addr_id</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">tuple[int,</span> <span class="pre">...]</span></em><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.MPTCPRemoveAddress.addr_id" title="Permalink to this definition">¶</a></dt>
 <dd><p>Address ID.</p>
 </dd></dl>
 
@@ -2805,13 +2782,13 @@ Length, and Checksum present.</p>
 </dl>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.transport.tcp.MPTCPPriority.backup">
-<span class="sig-name descname"><span class="pre">backup</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><span class="pre">bool</span></a></em><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.MPTCPPriority.backup" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">backup</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.MPTCPPriority.backup" title="Permalink to this definition">¶</a></dt>
 <dd><p>Backup path flag.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.transport.tcp.MPTCPPriority.addr_id">
-<span class="sig-name descname"><span class="pre">addr_id</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.MPTCPPriority.addr_id" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">addr_id</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional[int]</span></em><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.MPTCPPriority.addr_id" title="Permalink to this definition">¶</a></dt>
 <dd><p>Address ID.</p>
 </dd></dl>
 
@@ -2835,7 +2812,7 @@ Length, and Checksum present.</p>
 </dl>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.transport.tcp.MPTCPFallback.dsn">
-<span class="sig-name descname"><span class="pre">dsn</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a></em><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.MPTCPFallback.dsn" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">dsn</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.MPTCPFallback.dsn" title="Permalink to this definition">¶</a></dt>
 <dd><p>Data sequence number.</p>
 </dd></dl>
 
@@ -2859,7 +2836,7 @@ Length, and Checksum present.</p>
 </dl>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.transport.tcp.MPTCPFastclose.rkey">
-<span class="sig-name descname"><span class="pre">rkey</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.11)"><span class="pre">bytes</span></a></em><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.MPTCPFastclose.rkey" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">rkey</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bytes</span></em><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.MPTCPFastclose.rkey" title="Permalink to this definition">¶</a></dt>
 <dd><p>Option receiver’s key.</p>
 </dd></dl>
 

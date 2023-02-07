@@ -9,9 +9,6 @@
     <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../../../../_static/alabaster.css" />
     <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
-    <script src="../../../../_static/jquery.js"></script>
-    <script src="../../../../_static/underscore.js"></script>
-    <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="../../../../_static/doctools.js"></script>
     <script src="../../../../_static/sphinx_highlight.js"></script>
     <link rel="index" title="Index" href="../../../../genindex.html" />
@@ -134,13 +131,17 @@
     <span class="c1">#: User logged out; service terminated.</span>
     <span class="n">CODE_231</span> <span class="o">=</span> <span class="mi">231</span>
 
-    <span class="c1">#: Logout command noted, will complete when transfer done.</span>
+    <span class="c1">#: Logout command noted, will complete when transfer done. Alternatively: User</span>
+    <span class="c1">#: logged in, authorized by security data exchange.</span>
     <span class="n">CODE_232</span> <span class="o">=</span> <span class="mi">232</span>
 
     <span class="c1">#: Specifies that the server accepts the authentication mechanism specified by</span>
-    <span class="c1">#: the client, and the exchange of security data is complete. A higher level</span>
-    <span class="c1">#: nonstandard code created by Microsoft.</span>
+    <span class="c1">#: the client, and no security data needs to be exchanged.</span>
     <span class="n">CODE_234</span> <span class="o">=</span> <span class="mi">234</span>
+
+    <span class="c1">#: Specifies that the server accepts the security data given by the client, and</span>
+    <span class="c1">#: no further security data needs to be exchanged.</span>
+    <span class="n">CODE_235</span> <span class="o">=</span> <span class="mi">235</span>
 
     <span class="c1">#: Requested file action okay, completed.</span>
     <span class="n">CODE_250</span> <span class="o">=</span> <span class="mi">250</span>
@@ -153,6 +154,14 @@
 
     <span class="c1">#: Need account for login.</span>
     <span class="n">CODE_332</span> <span class="o">=</span> <span class="mi">332</span>
+
+    <span class="c1">#: Specifies that the server accepts the authentication mechanism specified by</span>
+    <span class="c1">#: the client, but some security data needs to be exchanged.</span>
+    <span class="n">CODE_334</span> <span class="o">=</span> <span class="mi">334</span>
+
+    <span class="c1">#: Specifies that the server accepts the security data given by the client, but</span>
+    <span class="c1">#: further security data needs to be exchanged.</span>
+    <span class="n">CODE_335</span> <span class="o">=</span> <span class="mi">335</span>
 
     <span class="c1">#: Requested file action pending further information</span>
     <span class="n">CODE_350</span> <span class="o">=</span> <span class="mi">350</span>
@@ -201,7 +210,7 @@
     <span class="c1">#: Need account for storing files.</span>
     <span class="n">CODE_532</span> <span class="o">=</span> <span class="mi">532</span>
 
-    <span class="c1">#: Could Not Connect to Server - Policy Requires SSL</span>
+    <span class="c1">#: Request denied for policy reasons.</span>
     <span class="n">CODE_534</span> <span class="o">=</span> <span class="mi">534</span>
 
     <span class="c1">#: Requested action not taken. File unavailable (e.g., file not found, no</span>

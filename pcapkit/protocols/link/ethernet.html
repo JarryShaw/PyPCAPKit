@@ -10,9 +10,6 @@
     <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/alabaster.css" />
     <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
-    <script src="../../../_static/jquery.js"></script>
-    <script src="../../../_static/underscore.js"></script>
-    <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="../../../_static/doctools.js"></script>
     <script src="../../../_static/sphinx_highlight.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
@@ -103,55 +100,30 @@ header types.</p>
 <dt class="sig sig-object py" id="pcapkit.protocols.link.ethernet.Ethernet.name">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Literal" title="(in Python v3.11)"><span class="pre">Literal</span></a><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'Ethernet</span> <span class="pre">Protocol'</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pcapkit.protocols.link.ethernet.Ethernet.name" title="Permalink to this definition">¶</a></dt>
 <dd><p>Name of current protocol.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Literal" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Literal</span></code></a>[‘Ethernet Protocol’]</p>
-</dd>
-</dl>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="pcapkit.protocols.link.ethernet.Ethernet.length">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">length</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Literal" title="(in Python v3.11)"><span class="pre">Literal</span></a><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">14</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pcapkit.protocols.link.ethernet.Ethernet.length" title="Permalink to this definition">¶</a></dt>
 <dd><p>Header length of current protocol.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Literal" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Literal</span></code></a>[14]</p>
-</dd>
-</dl>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="pcapkit.protocols.link.ethernet.Ethernet.protocol">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">protocol</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="../../const/reg.html#pcapkit.const.reg.ethertype.EtherType" title="pcapkit.const.reg.ethertype.EtherType"><span class="pre">EtherType</span></a></em><a class="headerlink" href="#pcapkit.protocols.link.ethernet.Ethernet.protocol" title="Permalink to this definition">¶</a></dt>
 <dd><p>Name of next layer protocol.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference internal" href="../../const/reg.html#pcapkit.const.reg.ethertype.EtherType" title="pcapkit.const.reg.ethertype.EtherType"><code class="xref py py-class docutils literal notranslate"><span class="pre">EtherType</span></code></a></p>
-</dd>
-</dl>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="pcapkit.protocols.link.ethernet.Ethernet.src">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">src</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a></em><a class="headerlink" href="#pcapkit.protocols.link.ethernet.Ethernet.src" title="Permalink to this definition">¶</a></dt>
 <dd><p>Source mac address.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></p>
-</dd>
-</dl>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="pcapkit.protocols.link.ethernet.Ethernet.dst">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">dst</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a></em><a class="headerlink" href="#pcapkit.protocols.link.ethernet.Ethernet.dst" title="Permalink to this definition">¶</a></dt>
 <dd><p>Destination mac address.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></p>
-</dd>
-</dl>
 </dd></dl>
 
 <dl class="py method">
@@ -227,19 +199,19 @@ header types.</p>
 </dl>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.link.ethernet.Ethernet.dst">
-<span class="sig-name descname"><span class="pre">dst</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a></em><a class="headerlink" href="#pcapkit.protocols.data.link.ethernet.Ethernet.dst" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">dst</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#pcapkit.protocols.data.link.ethernet.Ethernet.dst" title="Permalink to this definition">¶</a></dt>
 <dd><p>Destination MAC address.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.link.ethernet.Ethernet.src">
-<span class="sig-name descname"><span class="pre">src</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a></em><a class="headerlink" href="#pcapkit.protocols.data.link.ethernet.Ethernet.src" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">src</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#pcapkit.protocols.data.link.ethernet.Ethernet.src" title="Permalink to this definition">¶</a></dt>
 <dd><p>Source MAC address.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.link.ethernet.Ethernet.type">
-<span class="sig-name descname"><span class="pre">type</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="../../const/reg.html#pcapkit.const.reg.ethertype.EtherType" title="pcapkit.const.reg.ethertype.EtherType"><span class="pre">EtherType</span></a></em><a class="headerlink" href="#pcapkit.protocols.data.link.ethernet.Ethernet.type" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">type</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">EtherType</span></em><a class="headerlink" href="#pcapkit.protocols.data.link.ethernet.Ethernet.type" title="Permalink to this definition">¶</a></dt>
 <dd><p>Protocol (internet layer).</p>
 </dd></dl>
 

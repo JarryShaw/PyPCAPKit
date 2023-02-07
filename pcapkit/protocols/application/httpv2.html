@@ -10,9 +10,6 @@
     <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/alabaster.css" />
     <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
-    <script src="../../../_static/jquery.js"></script>
-    <script src="../../../_static/underscore.js"></script>
-    <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="../../../_static/doctools.js"></script>
     <script src="../../../_static/sphinx_highlight.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
@@ -145,33 +142,18 @@ enumeration:</p>
 <dt class="sig sig-object py" id="pcapkit.protocols.application.httpv2.HTTP.alias">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">alias</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'HTTP/2'</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pcapkit.protocols.application.httpv2.HTTP.alias" title="Permalink to this definition">¶</a></dt>
 <dd><p>Acronym of current protocol.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Literal" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Literal</span></code></a>[‘HTTP/2’]</p>
-</dd>
-</dl>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="pcapkit.protocols.application.httpv2.HTTP.length">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">length</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Literal" title="(in Python v3.11)"><span class="pre">Literal</span></a><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">9</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pcapkit.protocols.application.httpv2.HTTP.length" title="Permalink to this definition">¶</a></dt>
 <dd><p>Header length of current protocol.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Literal" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Literal</span></code></a>[9]</p>
-</dd>
-</dl>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="pcapkit.protocols.application.httpv2.HTTP.version">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">version</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Literal" title="(in Python v3.11)"><span class="pre">Literal</span></a><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'2'</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pcapkit.protocols.application.httpv2.HTTP.version" title="Permalink to this definition">¶</a></dt>
 <dd><p>Version of current protocol.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Literal" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Literal</span></code></a>[‘2’]</p>
-</dd>
-</dl>
 </dd></dl>
 
 <dl class="py method">
@@ -232,7 +214,7 @@ enumeration:</p>
 <dd><p>Index ID of the protocol.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Literal" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Literal</span></code></a>[‘HTTP’]]</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Literal" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Literal</span></code></a>[<code class="docutils literal notranslate"><span class="pre">'HTTP'</span></code>]]</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>Index ID of the protocol.</p>
@@ -683,7 +665,7 @@ enumeration:</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.application.httpv2.HTTP.__frame__">
-<span class="sig-name descname"><span class="pre">__frame__</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">DefaultDict</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">FrameParser</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pcapkit.protocols.application.httpv2.HTTP.__frame__" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">__frame__</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">DefaultDict[int,</span> <span class="pre">str</span> <span class="pre">|</span> <span class="pre">FrameParser]</span></em><a class="headerlink" href="#pcapkit.protocols.application.httpv2.HTTP.__frame__" title="Permalink to this definition">¶</a></dt>
 <dd><p>Frame code to method
 mapping, c.f. <a class="reference internal" href="#pcapkit.protocols.application.httpv2.HTTP.read" title="pcapkit.protocols.application.httpv2.HTTP.read"><code class="xref py py-meth docutils literal notranslate"><span class="pre">read()</span></code></a>. Method names are expected to be referred to
 the class by <code class="docutils literal notranslate"><span class="pre">_read_http_${name}</span></code>, and if such name not found, the
@@ -717,25 +699,25 @@ value should then be a method that can parse the frame by itself.</p>
 </dl>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.application.httpv2.HTTP.length">
-<span class="sig-name descname"><span class="pre">length</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a></em><a class="headerlink" href="#pcapkit.protocols.data.application.httpv2.HTTP.length" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">length</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#pcapkit.protocols.data.application.httpv2.HTTP.length" title="Permalink to this definition">¶</a></dt>
 <dd><p>Length.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.application.httpv2.HTTP.type">
-<span class="sig-name descname"><span class="pre">type</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="../../const/http.html#pcapkit.const.http.frame.Frame" title="pcapkit.const.http.frame.Frame"><span class="pre">Frame</span></a></em><a class="headerlink" href="#pcapkit.protocols.data.application.httpv2.HTTP.type" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">type</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Frame</span></em><a class="headerlink" href="#pcapkit.protocols.data.application.httpv2.HTTP.type" title="Permalink to this definition">¶</a></dt>
 <dd><p>Frame type.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.application.httpv2.HTTP.flags">
-<span class="sig-name descname"><span class="pre">flags</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#pcapkit.protocols.data.application.httpv2.Flags" title="pcapkit.protocols.data.application.httpv2.Flags"><span class="pre">Flags</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pcapkit.protocols.data.application.httpv2.HTTP.flags" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">flags</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional[Flags]</span></em><a class="headerlink" href="#pcapkit.protocols.data.application.httpv2.HTTP.flags" title="Permalink to this definition">¶</a></dt>
 <dd><p>Flags.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.application.httpv2.HTTP.sid">
-<span class="sig-name descname"><span class="pre">sid</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a></em><a class="headerlink" href="#pcapkit.protocols.data.application.httpv2.HTTP.sid" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">sid</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#pcapkit.protocols.data.application.httpv2.HTTP.sid" title="Permalink to this definition">¶</a></dt>
 <dd><p>Stream ID.</p>
 </dd></dl>
 
@@ -777,7 +759,7 @@ value should then be a method that can parse the frame by itself.</p>
 </dl>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.application.httpv2.UnassignedFrame.data">
-<span class="sig-name descname"><span class="pre">data</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.11)"><span class="pre">bytes</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pcapkit.protocols.data.application.httpv2.UnassignedFrame.data" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">data</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional[bytes]</span></em><a class="headerlink" href="#pcapkit.protocols.data.application.httpv2.UnassignedFrame.data" title="Permalink to this definition">¶</a></dt>
 <dd><p>Frame payload.</p>
 </dd></dl>
 
@@ -801,19 +783,19 @@ value should then be a method that can parse the frame by itself.</p>
 </dl>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.application.httpv2.DataFrame.flags">
-<span class="sig-name descname"><span class="pre">flags</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#pcapkit.protocols.data.application.httpv2.DataFrameFlags" title="pcapkit.protocols.data.application.httpv2.DataFrameFlags"><span class="pre">DataFrameFlags</span></a></em><a class="headerlink" href="#pcapkit.protocols.data.application.httpv2.DataFrame.flags" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">flags</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">DataFrameFlags</span></em><a class="headerlink" href="#pcapkit.protocols.data.application.httpv2.DataFrame.flags" title="Permalink to this definition">¶</a></dt>
 <dd><p>Flags.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.application.httpv2.DataFrame.pad_len">
-<span class="sig-name descname"><span class="pre">pad_len</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a></em><a class="headerlink" href="#pcapkit.protocols.data.application.httpv2.DataFrame.pad_len" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">pad_len</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#pcapkit.protocols.data.application.httpv2.DataFrame.pad_len" title="Permalink to this definition">¶</a></dt>
 <dd><p>Padded length.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.application.httpv2.DataFrame.data">
-<span class="sig-name descname"><span class="pre">data</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.11)"><span class="pre">bytes</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pcapkit.protocols.data.application.httpv2.DataFrame.data" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">data</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional[bytes]</span></em><a class="headerlink" href="#pcapkit.protocols.data.application.httpv2.DataFrame.data" title="Permalink to this definition">¶</a></dt>
 <dd><p>Frame payload.</p>
 </dd></dl>
 
@@ -837,13 +819,13 @@ value should then be a method that can parse the frame by itself.</p>
 </dl>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.application.httpv2.DataFrameFlags.END_STREAM">
-<span class="sig-name descname"><span class="pre">END_STREAM</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><span class="pre">bool</span></a></em><a class="headerlink" href="#pcapkit.protocols.data.application.httpv2.DataFrameFlags.END_STREAM" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">END_STREAM</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></em><a class="headerlink" href="#pcapkit.protocols.data.application.httpv2.DataFrameFlags.END_STREAM" title="Permalink to this definition">¶</a></dt>
 <dd><p><code class="docutils literal notranslate"><span class="pre">END_STREAM</span></code> flag.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.application.httpv2.DataFrameFlags.PADDED">
-<span class="sig-name descname"><span class="pre">PADDED</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><span class="pre">bool</span></a></em><a class="headerlink" href="#pcapkit.protocols.data.application.httpv2.DataFrameFlags.PADDED" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">PADDED</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></em><a class="headerlink" href="#pcapkit.protocols.data.application.httpv2.DataFrameFlags.PADDED" title="Permalink to this definition">¶</a></dt>
 <dd><p><code class="docutils literal notranslate"><span class="pre">PADDED</span></code> flag.</p>
 </dd></dl>
 
@@ -867,37 +849,37 @@ value should then be a method that can parse the frame by itself.</p>
 </dl>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.application.httpv2.HeadersFrame.flags">
-<span class="sig-name descname"><span class="pre">flags</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#pcapkit.protocols.data.application.httpv2.HeadersFrameFlags" title="pcapkit.protocols.data.application.httpv2.HeadersFrameFlags"><span class="pre">HeadersFrameFlags</span></a></em><a class="headerlink" href="#pcapkit.protocols.data.application.httpv2.HeadersFrame.flags" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">flags</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">HeadersFrameFlags</span></em><a class="headerlink" href="#pcapkit.protocols.data.application.httpv2.HeadersFrame.flags" title="Permalink to this definition">¶</a></dt>
 <dd><p>Flags.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.application.httpv2.HeadersFrame.pad_len">
-<span class="sig-name descname"><span class="pre">pad_len</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a></em><a class="headerlink" href="#pcapkit.protocols.data.application.httpv2.HeadersFrame.pad_len" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">pad_len</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#pcapkit.protocols.data.application.httpv2.HeadersFrame.pad_len" title="Permalink to this definition">¶</a></dt>
 <dd><p>Padded length.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.application.httpv2.HeadersFrame.excl_dependency">
-<span class="sig-name descname"><span class="pre">excl_dependency</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><span class="pre">bool</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pcapkit.protocols.data.application.httpv2.HeadersFrame.excl_dependency" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">excl_dependency</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional[bool]</span></em><a class="headerlink" href="#pcapkit.protocols.data.application.httpv2.HeadersFrame.excl_dependency" title="Permalink to this definition">¶</a></dt>
 <dd><p>Exclusive dependency.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.application.httpv2.HeadersFrame.stream_dependency">
-<span class="sig-name descname"><span class="pre">stream_dependency</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pcapkit.protocols.data.application.httpv2.HeadersFrame.stream_dependency" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">stream_dependency</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional[int]</span></em><a class="headerlink" href="#pcapkit.protocols.data.application.httpv2.HeadersFrame.stream_dependency" title="Permalink to this definition">¶</a></dt>
 <dd><p>Stream dependency.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.application.httpv2.HeadersFrame.weight">
-<span class="sig-name descname"><span class="pre">weight</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pcapkit.protocols.data.application.httpv2.HeadersFrame.weight" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">weight</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional[int]</span></em><a class="headerlink" href="#pcapkit.protocols.data.application.httpv2.HeadersFrame.weight" title="Permalink to this definition">¶</a></dt>
 <dd><p>Weight.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.application.httpv2.HeadersFrame.fragment">
-<span class="sig-name descname"><span class="pre">fragment</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.11)"><span class="pre">bytes</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pcapkit.protocols.data.application.httpv2.HeadersFrame.fragment" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">fragment</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional[bytes]</span></em><a class="headerlink" href="#pcapkit.protocols.data.application.httpv2.HeadersFrame.fragment" title="Permalink to this definition">¶</a></dt>
 <dd><p>Header block fragment.</p>
 </dd></dl>
 
@@ -921,25 +903,25 @@ value should then be a method that can parse the frame by itself.</p>
 </dl>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.application.httpv2.HeadersFrameFlags.END_STREAM">
-<span class="sig-name descname"><span class="pre">END_STREAM</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><span class="pre">bool</span></a></em><a class="headerlink" href="#pcapkit.protocols.data.application.httpv2.HeadersFrameFlags.END_STREAM" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">END_STREAM</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></em><a class="headerlink" href="#pcapkit.protocols.data.application.httpv2.HeadersFrameFlags.END_STREAM" title="Permalink to this definition">¶</a></dt>
 <dd><p><code class="docutils literal notranslate"><span class="pre">END_STREAM</span></code> flag.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.application.httpv2.HeadersFrameFlags.END_HEADERS">
-<span class="sig-name descname"><span class="pre">END_HEADERS</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><span class="pre">bool</span></a></em><a class="headerlink" href="#pcapkit.protocols.data.application.httpv2.HeadersFrameFlags.END_HEADERS" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">END_HEADERS</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></em><a class="headerlink" href="#pcapkit.protocols.data.application.httpv2.HeadersFrameFlags.END_HEADERS" title="Permalink to this definition">¶</a></dt>
 <dd><p><code class="docutils literal notranslate"><span class="pre">END_HEADERS</span></code> flag.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.application.httpv2.HeadersFrameFlags.PADDED">
-<span class="sig-name descname"><span class="pre">PADDED</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><span class="pre">bool</span></a></em><a class="headerlink" href="#pcapkit.protocols.data.application.httpv2.HeadersFrameFlags.PADDED" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">PADDED</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></em><a class="headerlink" href="#pcapkit.protocols.data.application.httpv2.HeadersFrameFlags.PADDED" title="Permalink to this definition">¶</a></dt>
 <dd><p><code class="docutils literal notranslate"><span class="pre">PADDED</span></code> flag.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.application.httpv2.HeadersFrameFlags.PRIORITY">
-<span class="sig-name descname"><span class="pre">PRIORITY</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><span class="pre">bool</span></a></em><a class="headerlink" href="#pcapkit.protocols.data.application.httpv2.HeadersFrameFlags.PRIORITY" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">PRIORITY</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></em><a class="headerlink" href="#pcapkit.protocols.data.application.httpv2.HeadersFrameFlags.PRIORITY" title="Permalink to this definition">¶</a></dt>
 <dd><p><code class="docutils literal notranslate"><span class="pre">PRIORITY</span></code> flag.</p>
 </dd></dl>
 
@@ -963,25 +945,25 @@ value should then be a method that can parse the frame by itself.</p>
 </dl>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.application.httpv2.PriorityFrame.flags">
-<span class="sig-name descname"><span class="pre">flags</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="pre">None</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pcapkit.protocols.data.application.httpv2.PriorityFrame.flags" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">flags</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Literal[None]</span></em><a class="headerlink" href="#pcapkit.protocols.data.application.httpv2.PriorityFrame.flags" title="Permalink to this definition">¶</a></dt>
 <dd><p>Flags.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.application.httpv2.PriorityFrame.excl_dependency">
-<span class="sig-name descname"><span class="pre">excl_dependency</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><span class="pre">bool</span></a></em><a class="headerlink" href="#pcapkit.protocols.data.application.httpv2.PriorityFrame.excl_dependency" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">excl_dependency</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#pcapkit.protocols.data.application.httpv2.PriorityFrame.excl_dependency" title="Permalink to this definition">¶</a></dt>
 <dd><p>Exclusive dependency.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.application.httpv2.PriorityFrame.stream_dependency">
-<span class="sig-name descname"><span class="pre">stream_dependency</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a></em><a class="headerlink" href="#pcapkit.protocols.data.application.httpv2.PriorityFrame.stream_dependency" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">stream_dependency</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#pcapkit.protocols.data.application.httpv2.PriorityFrame.stream_dependency" title="Permalink to this definition">¶</a></dt>
 <dd><p>Stream dependency.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.application.httpv2.PriorityFrame.weight">
-<span class="sig-name descname"><span class="pre">weight</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a></em><a class="headerlink" href="#pcapkit.protocols.data.application.httpv2.PriorityFrame.weight" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">weight</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#pcapkit.protocols.data.application.httpv2.PriorityFrame.weight" title="Permalink to this definition">¶</a></dt>
 <dd><p>Weight.</p>
 </dd></dl>
 
@@ -1005,13 +987,13 @@ value should then be a method that can parse the frame by itself.</p>
 </dl>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.application.httpv2.RstStreamFrame.flags">
-<span class="sig-name descname"><span class="pre">flags</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="pre">None</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pcapkit.protocols.data.application.httpv2.RstStreamFrame.flags" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">flags</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Literal[None]</span></em><a class="headerlink" href="#pcapkit.protocols.data.application.httpv2.RstStreamFrame.flags" title="Permalink to this definition">¶</a></dt>
 <dd><p>Flags.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.application.httpv2.RstStreamFrame.error">
-<span class="sig-name descname"><span class="pre">error</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="../../const/http.html#pcapkit.const.http.error_code.ErrorCode" title="pcapkit.const.http.error_code.ErrorCode"><span class="pre">ErrorCode</span></a></em><a class="headerlink" href="#pcapkit.protocols.data.application.httpv2.RstStreamFrame.error" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">error</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ErrorCode</span></em><a class="headerlink" href="#pcapkit.protocols.data.application.httpv2.RstStreamFrame.error" title="Permalink to this definition">¶</a></dt>
 <dd><p>Error code.</p>
 </dd></dl>
 
@@ -1035,13 +1017,13 @@ value should then be a method that can parse the frame by itself.</p>
 </dl>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.application.httpv2.SettingsFrame.flags">
-<span class="sig-name descname"><span class="pre">flags</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#pcapkit.protocols.data.application.httpv2.SettingsFrameFlags" title="pcapkit.protocols.data.application.httpv2.SettingsFrameFlags"><span class="pre">SettingsFrameFlags</span></a></em><a class="headerlink" href="#pcapkit.protocols.data.application.httpv2.SettingsFrame.flags" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">flags</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">SettingsFrameFlags</span></em><a class="headerlink" href="#pcapkit.protocols.data.application.httpv2.SettingsFrame.flags" title="Permalink to this definition">¶</a></dt>
 <dd><p>Flags.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.application.httpv2.SettingsFrame.settings">
-<span class="sig-name descname"><span class="pre">settings</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="../../corekit/multidict.html#pcapkit.corekit.multidict.OrderedMultiDict" title="pcapkit.corekit.multidict.OrderedMultiDict"><span class="pre">OrderedMultiDict</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="../../const/http.html#pcapkit.const.http.setting.Setting" title="pcapkit.const.http.setting.Setting"><span class="pre">Setting</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pcapkit.protocols.data.application.httpv2.SettingsFrame.settings" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">settings</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">OrderedMultiDict[Setting,</span> <span class="pre">int]</span></em><a class="headerlink" href="#pcapkit.protocols.data.application.httpv2.SettingsFrame.settings" title="Permalink to this definition">¶</a></dt>
 <dd><p>Settings.</p>
 </dd></dl>
 
@@ -1065,7 +1047,7 @@ value should then be a method that can parse the frame by itself.</p>
 </dl>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.application.httpv2.SettingsFrameFlags.ACK">
-<span class="sig-name descname"><span class="pre">ACK</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><span class="pre">bool</span></a></em><a class="headerlink" href="#pcapkit.protocols.data.application.httpv2.SettingsFrameFlags.ACK" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">ACK</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></em><a class="headerlink" href="#pcapkit.protocols.data.application.httpv2.SettingsFrameFlags.ACK" title="Permalink to this definition">¶</a></dt>
 <dd><p><code class="docutils literal notranslate"><span class="pre">ACK</span></code> flag.</p>
 </dd></dl>
 
@@ -1089,25 +1071,25 @@ value should then be a method that can parse the frame by itself.</p>
 </dl>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.application.httpv2.PushPromiseFrame.flags">
-<span class="sig-name descname"><span class="pre">flags</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#pcapkit.protocols.data.application.httpv2.PushPromiseFrameFlags" title="pcapkit.protocols.data.application.httpv2.PushPromiseFrameFlags"><span class="pre">PushPromiseFrameFlags</span></a></em><a class="headerlink" href="#pcapkit.protocols.data.application.httpv2.PushPromiseFrame.flags" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">flags</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">PushPromiseFrameFlags</span></em><a class="headerlink" href="#pcapkit.protocols.data.application.httpv2.PushPromiseFrame.flags" title="Permalink to this definition">¶</a></dt>
 <dd><p>Flags.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.application.httpv2.PushPromiseFrame.pad_len">
-<span class="sig-name descname"><span class="pre">pad_len</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a></em><a class="headerlink" href="#pcapkit.protocols.data.application.httpv2.PushPromiseFrame.pad_len" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">pad_len</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#pcapkit.protocols.data.application.httpv2.PushPromiseFrame.pad_len" title="Permalink to this definition">¶</a></dt>
 <dd><p>Padded length.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.application.httpv2.PushPromiseFrame.promised_sid">
-<span class="sig-name descname"><span class="pre">promised_sid</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a></em><a class="headerlink" href="#pcapkit.protocols.data.application.httpv2.PushPromiseFrame.promised_sid" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">promised_sid</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#pcapkit.protocols.data.application.httpv2.PushPromiseFrame.promised_sid" title="Permalink to this definition">¶</a></dt>
 <dd><p>Promised stream ID.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.application.httpv2.PushPromiseFrame.fragment">
-<span class="sig-name descname"><span class="pre">fragment</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.11)"><span class="pre">bytes</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pcapkit.protocols.data.application.httpv2.PushPromiseFrame.fragment" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">fragment</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional[bytes]</span></em><a class="headerlink" href="#pcapkit.protocols.data.application.httpv2.PushPromiseFrame.fragment" title="Permalink to this definition">¶</a></dt>
 <dd><p>Header block fragment.</p>
 </dd></dl>
 
@@ -1131,13 +1113,13 @@ value should then be a method that can parse the frame by itself.</p>
 </dl>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.application.httpv2.PushPromiseFrameFlags.END_HEADERS">
-<span class="sig-name descname"><span class="pre">END_HEADERS</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><span class="pre">bool</span></a></em><a class="headerlink" href="#pcapkit.protocols.data.application.httpv2.PushPromiseFrameFlags.END_HEADERS" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">END_HEADERS</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></em><a class="headerlink" href="#pcapkit.protocols.data.application.httpv2.PushPromiseFrameFlags.END_HEADERS" title="Permalink to this definition">¶</a></dt>
 <dd><p><code class="docutils literal notranslate"><span class="pre">END_HEADERS</span></code> flag.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.application.httpv2.PushPromiseFrameFlags.PADDED">
-<span class="sig-name descname"><span class="pre">PADDED</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><span class="pre">bool</span></a></em><a class="headerlink" href="#pcapkit.protocols.data.application.httpv2.PushPromiseFrameFlags.PADDED" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">PADDED</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></em><a class="headerlink" href="#pcapkit.protocols.data.application.httpv2.PushPromiseFrameFlags.PADDED" title="Permalink to this definition">¶</a></dt>
 <dd><p><code class="docutils literal notranslate"><span class="pre">PADDED</span></code> flag.</p>
 </dd></dl>
 
@@ -1161,13 +1143,13 @@ value should then be a method that can parse the frame by itself.</p>
 </dl>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.application.httpv2.PingFrame.flags">
-<span class="sig-name descname"><span class="pre">flags</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#pcapkit.protocols.data.application.httpv2.PingFrameFlags" title="pcapkit.protocols.data.application.httpv2.PingFrameFlags"><span class="pre">PingFrameFlags</span></a></em><a class="headerlink" href="#pcapkit.protocols.data.application.httpv2.PingFrame.flags" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">flags</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">PingFrameFlags</span></em><a class="headerlink" href="#pcapkit.protocols.data.application.httpv2.PingFrame.flags" title="Permalink to this definition">¶</a></dt>
 <dd><p>Flags.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.application.httpv2.PingFrame.data">
-<span class="sig-name descname"><span class="pre">data</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.11)"><span class="pre">bytes</span></a></em><a class="headerlink" href="#pcapkit.protocols.data.application.httpv2.PingFrame.data" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">data</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bytes</span></em><a class="headerlink" href="#pcapkit.protocols.data.application.httpv2.PingFrame.data" title="Permalink to this definition">¶</a></dt>
 <dd><p>Opaque data.</p>
 </dd></dl>
 
@@ -1191,7 +1173,7 @@ value should then be a method that can parse the frame by itself.</p>
 </dl>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.application.httpv2.PingFrameFlags.ACK">
-<span class="sig-name descname"><span class="pre">ACK</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><span class="pre">bool</span></a></em><a class="headerlink" href="#pcapkit.protocols.data.application.httpv2.PingFrameFlags.ACK" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">ACK</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></em><a class="headerlink" href="#pcapkit.protocols.data.application.httpv2.PingFrameFlags.ACK" title="Permalink to this definition">¶</a></dt>
 <dd><p><code class="docutils literal notranslate"><span class="pre">ACK</span></code> flag.</p>
 </dd></dl>
 
@@ -1215,25 +1197,25 @@ value should then be a method that can parse the frame by itself.</p>
 </dl>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.application.httpv2.GoawayFrame.flags">
-<span class="sig-name descname"><span class="pre">flags</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="pre">None</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pcapkit.protocols.data.application.httpv2.GoawayFrame.flags" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">flags</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Literal[None]</span></em><a class="headerlink" href="#pcapkit.protocols.data.application.httpv2.GoawayFrame.flags" title="Permalink to this definition">¶</a></dt>
 <dd><p>Flags.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.application.httpv2.GoawayFrame.last_sid">
-<span class="sig-name descname"><span class="pre">last_sid</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a></em><a class="headerlink" href="#pcapkit.protocols.data.application.httpv2.GoawayFrame.last_sid" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">last_sid</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#pcapkit.protocols.data.application.httpv2.GoawayFrame.last_sid" title="Permalink to this definition">¶</a></dt>
 <dd><p>Last stream ID.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.application.httpv2.GoawayFrame.error">
-<span class="sig-name descname"><span class="pre">error</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="../../const/http.html#pcapkit.const.http.error_code.ErrorCode" title="pcapkit.const.http.error_code.ErrorCode"><span class="pre">ErrorCode</span></a></em><a class="headerlink" href="#pcapkit.protocols.data.application.httpv2.GoawayFrame.error" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">error</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ErrorCode</span></em><a class="headerlink" href="#pcapkit.protocols.data.application.httpv2.GoawayFrame.error" title="Permalink to this definition">¶</a></dt>
 <dd><p>Error code.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.application.httpv2.GoawayFrame.debug_data">
-<span class="sig-name descname"><span class="pre">debug_data</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.11)"><span class="pre">bytes</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pcapkit.protocols.data.application.httpv2.GoawayFrame.debug_data" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">debug_data</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional[bytes]</span></em><a class="headerlink" href="#pcapkit.protocols.data.application.httpv2.GoawayFrame.debug_data" title="Permalink to this definition">¶</a></dt>
 <dd><p>Additional debug data.</p>
 </dd></dl>
 
@@ -1257,13 +1239,13 @@ value should then be a method that can parse the frame by itself.</p>
 </dl>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.application.httpv2.WindowUpdateFrame.flags">
-<span class="sig-name descname"><span class="pre">flags</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="pre">None</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pcapkit.protocols.data.application.httpv2.WindowUpdateFrame.flags" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">flags</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Literal[None]</span></em><a class="headerlink" href="#pcapkit.protocols.data.application.httpv2.WindowUpdateFrame.flags" title="Permalink to this definition">¶</a></dt>
 <dd><p>Flags.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.application.httpv2.WindowUpdateFrame.increment">
-<span class="sig-name descname"><span class="pre">increment</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a></em><a class="headerlink" href="#pcapkit.protocols.data.application.httpv2.WindowUpdateFrame.increment" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">increment</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#pcapkit.protocols.data.application.httpv2.WindowUpdateFrame.increment" title="Permalink to this definition">¶</a></dt>
 <dd><p>Window size increment.</p>
 </dd></dl>
 
@@ -1287,13 +1269,13 @@ value should then be a method that can parse the frame by itself.</p>
 </dl>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.application.httpv2.ContinuationFrame.flags">
-<span class="sig-name descname"><span class="pre">flags</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#pcapkit.protocols.data.application.httpv2.ContinuationFrameFlags" title="pcapkit.protocols.data.application.httpv2.ContinuationFrameFlags"><span class="pre">ContinuationFrameFlags</span></a></em><a class="headerlink" href="#pcapkit.protocols.data.application.httpv2.ContinuationFrame.flags" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">flags</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ContinuationFrameFlags</span></em><a class="headerlink" href="#pcapkit.protocols.data.application.httpv2.ContinuationFrame.flags" title="Permalink to this definition">¶</a></dt>
 <dd><p>Flags.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.application.httpv2.ContinuationFrame.fragment">
-<span class="sig-name descname"><span class="pre">fragment</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.11)"><span class="pre">bytes</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pcapkit.protocols.data.application.httpv2.ContinuationFrame.fragment" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">fragment</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional[bytes]</span></em><a class="headerlink" href="#pcapkit.protocols.data.application.httpv2.ContinuationFrame.fragment" title="Permalink to this definition">¶</a></dt>
 <dd><p>Header block fragment.</p>
 </dd></dl>
 
@@ -1317,7 +1299,7 @@ value should then be a method that can parse the frame by itself.</p>
 </dl>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.application.httpv2.ContinuationFrameFlags.END_HEADERS">
-<span class="sig-name descname"><span class="pre">END_HEADERS</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><span class="pre">bool</span></a></em><a class="headerlink" href="#pcapkit.protocols.data.application.httpv2.ContinuationFrameFlags.END_HEADERS" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">END_HEADERS</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></em><a class="headerlink" href="#pcapkit.protocols.data.application.httpv2.ContinuationFrameFlags.END_HEADERS" title="Permalink to this definition">¶</a></dt>
 <dd><p><code class="docutils literal notranslate"><span class="pre">END_HEADERS</span></code> flag.</p>
 </dd></dl>
 
