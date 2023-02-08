@@ -18,8 +18,8 @@ import ipaddress
 import time
 from typing import TYPE_CHECKING, cast
 
-from pcapkit.const.reg.linktype import LinkType as RegType_LinkType
-from pcapkit.const.reg.transtype import TransType as RegType_TransType
+from pcapkit.const.reg.linktype import LinkType as Enum_LinkType
+from pcapkit.const.reg.transtype import TransType as Enum_TransType
 from pcapkit.foundation.reassembly.ip import Packet as IP_Packet
 from pcapkit.foundation.reassembly.tcp import Packet as TCP_Packet
 from pcapkit.foundation.traceflow import Packet as TF_Packet
@@ -133,7 +133,7 @@ def ipv4_reassembly(packet: 'Packet', *, count: 'int' = -1) -> 'IP_Packet[IPv4Ad
                 cast('IPv4Address',
                      ipaddress.ip_address(ipv4.dst)),  # destination IP address
                 ipv4.id,                               # identification
-                RegType_TransType.get(ipv4.proto),     # payload protocol type
+                Enum_TransType.get(ipv4.proto),     # payload protocol type
             ),
             num=count,                                 # original packet range number
             fo=ipv4.frag,                              # fragment offset
@@ -186,7 +186,7 @@ def ipv6_reassembly(packet: 'Packet', *, count: 'int' = -1) -> 'IP_Packet[IPv6Ad
                 cast('IPv6Address',
                      ipaddress.ip_address(ipv6.dst)),     # destination IP address
                 ipv6.fl,                                  # label
-                RegType_TransType.get(ipv6_frag.nh),      # next header field in IPv6 Fragment Header
+                Enum_TransType.get(ipv6_frag.nh),      # next header field in IPv6 Fragment Header
             ),
             num=count,                                    # original packet range number
             fo=ipv6_frag.offset,                          # fragment offset
@@ -277,7 +277,7 @@ def tcp_traceflow(packet: 'Packet', *, count: 'int' = -1) -> 'TF_Packet | None':
         tcp = cast('TCP', packet['TCP'])
 
         data = TF_Packet(  # type: ignore[type-var]
-            protocol=RegType_LinkType.get(packet.name.upper()),  # data link type from global header
+            protocol=Enum_LinkType.get(packet.name.upper()),  # data link type from global header
             index=count,                                         # frame number
             frame=packet2dict(packet),                           # extracted packet
             syn=bool(tcp.flags.S),                               # TCP synchronise (SYN) flag

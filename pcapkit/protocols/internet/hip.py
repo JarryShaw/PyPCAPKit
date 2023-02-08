@@ -32,122 +32,115 @@ import datetime
 import ipaddress
 from typing import TYPE_CHECKING, overload
 
-from pcapkit.const.hip.certificate import Certificate as RegType_Certificate
-from pcapkit.const.hip.cipher import Cipher as RegType_Cipher
-from pcapkit.const.hip.di import DITypes as RegType_DITypes
-from pcapkit.const.hip.ecdsa_curve import ECDSACurve as RegType_ECDSACurve
-from pcapkit.const.hip.ecdsa_low_curve import ECDSALowCurve as RegType_ECDSALowCurve
-from pcapkit.const.hip.esp_transform_suite import ESPTransformSuite as RegType_ESPTransformSuite
-from pcapkit.const.hip.group import Group as RegType_Group
-from pcapkit.const.hip.hi_algorithm import HIAlgorithm as RegType_HIAlgorithm
-from pcapkit.const.hip.hit_suite import HITSuite as RegType_HITSuite
-from pcapkit.const.hip.nat_traversal import NATTraversal as RegType_NATTraversal
-from pcapkit.const.hip.notify_message import NotifyMessage as RegType_NotifyMessage
-from pcapkit.const.hip.packet import Packet as RegType_Packet
-from pcapkit.const.hip.parameter import Parameter as RegType_Parameter
-from pcapkit.const.hip.registration import Registration as RegType_Registration
-from pcapkit.const.hip.registration_failure import \
-    RegistrationFailure as RegType_RegistrationFailure
-from pcapkit.const.hip.suite import Suite as RegType_Suite
-from pcapkit.const.hip.transport import Transport as RegType_Transport
-from pcapkit.const.reg.transtype import TransType as RegType_TransType
+from pcapkit.const.hip.certificate import Certificate as Enum_Certificate
+from pcapkit.const.hip.cipher import Cipher as Enum_Cipher
+from pcapkit.const.hip.di import DITypes as Enum_DITypes
+from pcapkit.const.hip.ecdsa_curve import ECDSACurve as Enum_ECDSACurve
+from pcapkit.const.hip.ecdsa_low_curve import ECDSALowCurve as Enum_ECDSALowCurve
+from pcapkit.const.hip.esp_transform_suite import ESPTransformSuite as Enum_ESPTransformSuite
+from pcapkit.const.hip.group import Group as Enum_Group
+from pcapkit.const.hip.hi_algorithm import HIAlgorithm as Enum_HIAlgorithm
+from pcapkit.const.hip.hit_suite import HITSuite as Enum_HITSuite
+from pcapkit.const.hip.nat_traversal import NATTraversal as Enum_NATTraversal
+from pcapkit.const.hip.notify_message import NotifyMessage as Enum_NotifyMessage
+from pcapkit.const.hip.packet import Packet as Enum_Packet
+from pcapkit.const.hip.parameter import Parameter as Enum_Parameter
+from pcapkit.const.hip.registration import Registration as Enum_Registration
+from pcapkit.const.hip.registration_failure import RegistrationFailure as Enum_RegistrationFailure
+from pcapkit.const.hip.suite import Suite as Enum_Suite
+from pcapkit.const.hip.transport import Transport as Enum_Transport
+from pcapkit.const.reg.transtype import TransType as Enum_TransType
 from pcapkit.corekit.multidict import OrderedMultiDict
-from pcapkit.protocols.data.internet.hip import HIP as DataType_HIP
-from pcapkit.protocols.data.internet.hip import AckDataParameter as DataType_AckDataParameter
-from pcapkit.protocols.data.internet.hip import ACKParameter as DataType_ACKParameter
-from pcapkit.protocols.data.internet.hip import CertParameter as DataType_CertParameter
-from pcapkit.protocols.data.internet.hip import Control as DataType_Control
+from pcapkit.protocols.data.internet.hip import HIP as Data_HIP
+from pcapkit.protocols.data.internet.hip import AckDataParameter as Data_AckDataParameter
+from pcapkit.protocols.data.internet.hip import ACKParameter as Data_ACKParameter
+from pcapkit.protocols.data.internet.hip import CertParameter as Data_CertParameter
+from pcapkit.protocols.data.internet.hip import Control as Data_Control
 from pcapkit.protocols.data.internet.hip import \
-    DeffieHellmanParameter as DataType_DeffieHellmanParameter
+    DeffieHellmanParameter as Data_DeffieHellmanParameter
+from pcapkit.protocols.data.internet.hip import DHGroupListParameter as Data_DHGroupListParameter
 from pcapkit.protocols.data.internet.hip import \
-    DHGroupListParameter as DataType_DHGroupListParameter
+    EchoRequestSignedParameter as Data_EchoRequestSignedParameter
 from pcapkit.protocols.data.internet.hip import \
-    EchoRequestSignedParameter as DataType_EchoRequestSignedParameter
+    EchoRequestUnsignedParameter as Data_EchoRequestUnsignedParameter
 from pcapkit.protocols.data.internet.hip import \
-    EchoRequestUnsignedParameter as DataType_EchoRequestUnsignedParameter
+    EchoResponseSignedParameter as Data_EchoResponseSignedParameter
 from pcapkit.protocols.data.internet.hip import \
-    EchoResponseSignedParameter as DataType_EchoResponseSignedParameter
+    EchoResponseUnsignedParameter as Data_EchoResponseUnsignedParameter
+from pcapkit.protocols.data.internet.hip import EncryptedParameter as Data_EncryptedParameter
+from pcapkit.protocols.data.internet.hip import ESPInfoParameter as Data_ESPInfoParameter
+from pcapkit.protocols.data.internet.hip import ESPTransformParameter as Data_ESPTransformParameter
+from pcapkit.protocols.data.internet.hip import Flags as Data_Flags
+from pcapkit.protocols.data.internet.hip import FromParameter as Data_FromParameter
+from pcapkit.protocols.data.internet.hip import HIPCipherParameter as Data_HIPCipherParameter
+from pcapkit.protocols.data.internet.hip import HIPMAC2Parameter as Data_HIPMAC2Parameter
+from pcapkit.protocols.data.internet.hip import HIPMACParameter as Data_HIPMACParameter
 from pcapkit.protocols.data.internet.hip import \
-    EchoResponseUnsignedParameter as DataType_EchoResponseUnsignedParameter
-from pcapkit.protocols.data.internet.hip import EncryptedParameter as DataType_EncryptedParameter
-from pcapkit.protocols.data.internet.hip import ESPInfoParameter as DataType_ESPInfoParameter
+    HIPSignature2Parameter as Data_HIPSignature2Parameter
+from pcapkit.protocols.data.internet.hip import HIPSignatureParameter as Data_HIPSignatureParameter
+from pcapkit.protocols.data.internet.hip import HIPTransformParameter as Data_HIPTransformParameter
 from pcapkit.protocols.data.internet.hip import \
-    ESPTransformParameter as DataType_ESPTransformParameter
-from pcapkit.protocols.data.internet.hip import Flags as DataType_Flags
-from pcapkit.protocols.data.internet.hip import FromParameter as DataType_FromParameter
-from pcapkit.protocols.data.internet.hip import HIPCipherParameter as DataType_HIPCipherParameter
-from pcapkit.protocols.data.internet.hip import HIPMAC2Parameter as DataType_HIPMAC2Parameter
-from pcapkit.protocols.data.internet.hip import HIPMACParameter as DataType_HIPMACParameter
+    HIPTransportModeParameter as Data_HIPTransportModeParameter
+from pcapkit.protocols.data.internet.hip import HITSuiteListParameter as Data_HITSuiteParameter
+from pcapkit.protocols.data.internet.hip import HostIdentity as Data_HostIdentity
+from pcapkit.protocols.data.internet.hip import HostIDParameter as Data_HostIDParameter
+from pcapkit.protocols.data.internet.hip import Lifetime as Data_Lifetime
+from pcapkit.protocols.data.internet.hip import Locator as Data_Locator
+from pcapkit.protocols.data.internet.hip import LocatorData as Data_LocatorData
+from pcapkit.protocols.data.internet.hip import LocatorSetParameter as Data_LocatorSetParameter
 from pcapkit.protocols.data.internet.hip import \
-    HIPSignature2Parameter as DataType_HIPSignature2Parameter
+    NATTraversalModeParameter as Data_NATTraversalModeParameter
+from pcapkit.protocols.data.internet.hip import NotificationParameter as Data_NotificationParameter
+from pcapkit.protocols.data.internet.hip import OverlayIDParameter as Data_OverlayIDParameter
+from pcapkit.protocols.data.internet.hip import OverlayTTLParameter as Data_OverlayTTLParameter
+from pcapkit.protocols.data.internet.hip import PayloadMICParameter as Data_PayloadMICParameter
+from pcapkit.protocols.data.internet.hip import PuzzleParameter as Data_PuzzleParameter
+from pcapkit.protocols.data.internet.hip import R1CounterParameter as Data_R1CounterParameter
+from pcapkit.protocols.data.internet.hip import RegFailedParameter as Data_RegFailedParameter
+from pcapkit.protocols.data.internet.hip import RegFromParameter as Data_RegFromParameter
+from pcapkit.protocols.data.internet.hip import RegInfoParameter as Data_RegInfoParameter
+from pcapkit.protocols.data.internet.hip import RegRequestParameter as Data_RegRequestParameter
+from pcapkit.protocols.data.internet.hip import RegResponseParameter as Data_RegResponseParameter
+from pcapkit.protocols.data.internet.hip import RelayFromParameter as Data_RelayFromParameter
+from pcapkit.protocols.data.internet.hip import RelayHMACParameter as Data_RelayHMACParameter
+from pcapkit.protocols.data.internet.hip import RelayToParameter as Data_RelayToParameter
+from pcapkit.protocols.data.internet.hip import RouteDstParameter as Data_RouteDstParameter
+from pcapkit.protocols.data.internet.hip import RouteViaParameter as Data_RouteViaParameter
+from pcapkit.protocols.data.internet.hip import RVSHMACParameter as Data_RVSHMACParameter
+from pcapkit.protocols.data.internet.hip import SeqDataParameter as Data_SeqDataParameter
+from pcapkit.protocols.data.internet.hip import SEQParameter as Data_SEQParameter
+from pcapkit.protocols.data.internet.hip import SolutionParameter as Data_SolutionParameter
 from pcapkit.protocols.data.internet.hip import \
-    HIPSignatureParameter as DataType_HIPSignatureParameter
+    TransactionIDParameter as Data_TransactionIDParameter
 from pcapkit.protocols.data.internet.hip import \
-    HIPTransformParameter as DataType_HIPTransformParameter
+    TransactionPacingParameter as Data_TransactionPacingParameter
 from pcapkit.protocols.data.internet.hip import \
-    HIPTransportModeParameter as DataType_HIPTransportModeParameter
-from pcapkit.protocols.data.internet.hip import HITSuiteListParameter as DataType_HITSuiteParameter
-from pcapkit.protocols.data.internet.hip import HostIdentity as DataType_HostIdentity
-from pcapkit.protocols.data.internet.hip import HostIDParameter as DataType_HostIDParameter
-from pcapkit.protocols.data.internet.hip import Lifetime as DataType_Lifetime
-from pcapkit.protocols.data.internet.hip import Locator as DataType_Locator
-from pcapkit.protocols.data.internet.hip import LocatorData as DataType_LocatorData
-from pcapkit.protocols.data.internet.hip import LocatorSetParameter as DataType_LocatorSetParameter
-from pcapkit.protocols.data.internet.hip import \
-    NATTraversalModeParameter as DataType_NATTraversalModeParameter
-from pcapkit.protocols.data.internet.hip import \
-    NotificationParameter as DataType_NotificationParameter
-from pcapkit.protocols.data.internet.hip import OverlayIDParameter as DataType_OverlayIDParameter
-from pcapkit.protocols.data.internet.hip import OverlayTTLParameter as DataType_OverlayTTLParameter
-from pcapkit.protocols.data.internet.hip import PayloadMICParameter as DataType_PayloadMICParameter
-from pcapkit.protocols.data.internet.hip import PuzzleParameter as DataType_PuzzleParameter
-from pcapkit.protocols.data.internet.hip import R1CounterParameter as DataType_R1CounterParameter
-from pcapkit.protocols.data.internet.hip import RegFailedParameter as DataType_RegFailedParameter
-from pcapkit.protocols.data.internet.hip import RegFromParameter as DataType_RegFromParameter
-from pcapkit.protocols.data.internet.hip import RegInfoParameter as DataType_RegInfoParameter
-from pcapkit.protocols.data.internet.hip import RegRequestParameter as DataType_RegRequestParameter
-from pcapkit.protocols.data.internet.hip import \
-    RegResponseParameter as DataType_RegResponseParameter
-from pcapkit.protocols.data.internet.hip import RelayFromParameter as DataType_RelayFromParameter
-from pcapkit.protocols.data.internet.hip import RelayHMACParameter as DataType_RelayHMACParameter
-from pcapkit.protocols.data.internet.hip import RelayToParameter as DataType_RelayToParameter
-from pcapkit.protocols.data.internet.hip import RouteDstParameter as DataType_RouteDstParameter
-from pcapkit.protocols.data.internet.hip import RouteViaParameter as DataType_RouteViaParameter
-from pcapkit.protocols.data.internet.hip import RVSHMACParameter as DataType_RVSHMACParameter
-from pcapkit.protocols.data.internet.hip import SeqDataParameter as DataType_SeqDataParameter
-from pcapkit.protocols.data.internet.hip import SEQParameter as DataType_SEQParameter
-from pcapkit.protocols.data.internet.hip import SolutionParameter as DataType_SolutionParameter
-from pcapkit.protocols.data.internet.hip import \
-    TransactionIDParameter as DataType_TransactionIDParameter
-from pcapkit.protocols.data.internet.hip import \
-    TransactionPacingParameter as DataType_TransactionPacingParameter
-from pcapkit.protocols.data.internet.hip import \
-    TransportFormatListParameter as DataType_TransportFormatListParameter
-from pcapkit.protocols.data.internet.hip import UnassignedParameter as DataType_UnassignedParameter
-from pcapkit.protocols.data.internet.hip import ViaRVSParameter as DataType_ViaRVSParameter
+    TransportFormatListParameter as Data_TransportFormatListParameter
+from pcapkit.protocols.data.internet.hip import UnassignedParameter as Data_UnassignedParameter
+from pcapkit.protocols.data.internet.hip import ViaRVSParameter as Data_ViaRVSParameter
 from pcapkit.protocols.internet.internet import Internet
 from pcapkit.utilities.exceptions import ProtocolError, UnsupportedCall
 from pcapkit.utilities.warnings import ProtocolWarning, warn
 
 if TYPE_CHECKING:
     from ipaddress import IPv4Address, IPv6Address
-    from typing import Any, IO, Callable, NoReturn, Optional
+    from typing import IO, Any, Callable, NoReturn, Optional
 
     from mypy_extensions import NamedArg
     from typing_extensions import Literal
 
     from pcapkit.corekit.protochain import ProtoChain
-    from pcapkit.protocols.data.internet.hip import Parameter as DataType_Parameter
+    from pcapkit.protocols.data.internet.hip import Parameter as Data_Parameter
     from pcapkit.protocols.protocol import Protocol
 
-    Parameter = OrderedMultiDict[RegType_Parameter, DataType_Parameter]
-    ParameterParser = Callable[[int, bool, int, NamedArg(RegType_Parameter, 'desc'), NamedArg(int, 'length'), NamedArg(int, 'version'),  # pylint: disable=line-too-long
-                                NamedArg(Parameter, 'options')], DataType_Parameter]  # pylint: disable=line-too-long
+    Parameter = OrderedMultiDict[Enum_Parameter, Data_Parameter]
+    ParameterParser = Callable[[int, bool, int, NamedArg(Enum_Parameter, 'desc'), NamedArg(int, 'length'), NamedArg(int, 'version'),  # pylint: disable=line-too-long
+                                NamedArg(Parameter, 'options')], Data_Parameter]  # pylint: disable=line-too-long
 
 __all__ = ['HIP']
 
 
-class HIP(Internet[DataType_HIP]):
+class HIP(Internet[Data_HIP]):
     """This class implements Host Identity Protocol.
 
     This class currently supports parsing of the following HIP parameters,
@@ -318,7 +311,7 @@ class HIP(Internet[DataType_HIP]):
     # Methods.
     ##########################################################################
 
-    def read(self, length: 'Optional[int]' = None, *, extension: bool = False, **kwargs: 'Any') -> 'DataType_HIP':  # pylint: disable=arguments-differ,unused-argument
+    def read(self, length: 'Optional[int]' = None, *, extension: bool = False, **kwargs: 'Any') -> 'Data_HIP':  # pylint: disable=arguments-differ,unused-argument
         """Read Host Identity Protocol.
 
         Structure of HIP header [:rfc:`5201`][:rfc:`7401`]:
@@ -376,13 +369,13 @@ class HIP(Internet[DataType_HIP]):
         _shit = self._read_unpack(16)
         _rhit = self._read_unpack(16)
 
-        hip = DataType_HIP(
+        hip = Data_HIP(
             next=_next,
             length=(_hlen + 1) * 8,
-            type=RegType_Packet.get(int(_type[1:], base=2)),
+            type=Enum_Packet.get(int(_type[1:], base=2)),
             version=int(_vers[:4], base=2),
             chksum=_csum,
-            control=DataType_Control(
+            control=Data_Control(
                 anonymous=bool(int(_ctrl[15], base=2)),
             ),
             shit=_shit,
@@ -447,7 +440,7 @@ class HIP(Internet[DataType_HIP]):
         return 40
 
     @classmethod
-    def __index__(cls) -> 'RegType_TransType':  # pylint: disable=invalid-index-returned
+    def __index__(cls) -> 'Enum_TransType':  # pylint: disable=invalid-index-returned
         """Numeral registry index of the protocol.
 
         Returns:
@@ -456,7 +449,7 @@ class HIP(Internet[DataType_HIP]):
         .. _IANA: https://www.iana.org/assignments/protocol-numbers/protocol-numbers.xhtml
 
         """
-        return RegType_TransType.HIP  # type: ignore[return-value]
+        return Enum_TransType.HIP  # type: ignore[return-value]
 
     ##########################################################################
     # Utilities.
@@ -494,7 +487,7 @@ class HIP(Internet[DataType_HIP]):
             plen = 11 + clen - (clen + 3) % 8  # Total Length = 11 + Length - (Length + 3) % 8
 
             # extract parameter
-            dscp = RegType_Parameter.get(code)
+            dscp = Enum_Parameter.get(code)
             meth_name = f'_read_param_{dscp.name.lower()}'
             meth = getattr(self, meth_name, self._read_param_unassigned)  # type: ParameterParser
             data = meth(self, code, cbit, clen, desc=dscp, length=plen,  # type: ignore[arg-type]
@@ -511,8 +504,8 @@ class HIP(Internet[DataType_HIP]):
         return options
 
     def _read_param_unassigned(self, code: 'int', cbit: 'bool', clen: 'int', *,  # pylint: disable=unused-argument
-                               desc: 'RegType_Parameter', length: 'int', version: 'int',  # pylint: disable=unused-argument
-                               options: 'Parameter') -> 'DataType_UnassignedParameter':  # pylint: disable=unused-argument
+                               desc: 'Enum_Parameter', length: 'int', version: 'int',  # pylint: disable=unused-argument
+                               options: 'Parameter') -> 'Data_UnassignedParameter':  # pylint: disable=unused-argument
         """Read HIP unassigned parameters.
 
         Structure of HIP unassigned parameters [:rfc:`5201`][:rfc:`7401`]:
@@ -543,7 +536,7 @@ class HIP(Internet[DataType_HIP]):
             Parsed parameter data.
 
         """
-        unassigned = DataType_UnassignedParameter(
+        unassigned = Data_UnassignedParameter(
             type=desc,
             critical=cbit,
             length=clen,
@@ -557,8 +550,8 @@ class HIP(Internet[DataType_HIP]):
         return unassigned
 
     def _read_param_esp_info(self, code: 'int', cbit: 'bool', clen: 'int', *,
-                             desc: 'RegType_Parameter', length: 'int', version: 'int',  # pylint: disable=unused-argument
-                             options: 'Parameter') -> 'DataType_ESPInfoParameter':  # pylint: disable=unused-argument
+                             desc: 'Enum_Parameter', length: 'int', version: 'int',  # pylint: disable=unused-argument
+                             options: 'Parameter') -> 'Data_ESPInfoParameter':  # pylint: disable=unused-argument
         """Read HIP ``ESP_INFO`` parameter.
 
         Structure of HIP ``ESP_INFO`` parameter [:rfc:`7402`]:
@@ -601,7 +594,7 @@ class HIP(Internet[DataType_HIP]):
         _olds = self._read_unpack(2)
         _news = self._read_unpack(2)
 
-        esp_info = DataType_ESPInfoParameter(
+        esp_info = Data_ESPInfoParameter(
             type=desc,
             critical=cbit,
             length=clen,
@@ -613,8 +606,8 @@ class HIP(Internet[DataType_HIP]):
         return esp_info
 
     def _read_param_r1_counter(self, code: 'int', cbit: 'bool', clen: 'int', *,
-                               desc: 'RegType_Parameter', length: 'int', version: 'int',  # pylint: disable=unused-argument
-                               options: 'Parameter') -> 'DataType_R1CounterParameter':  # pylint: disable=unused-argument
+                               desc: 'Enum_Parameter', length: 'int', version: 'int',  # pylint: disable=unused-argument
+                               options: 'Parameter') -> 'Data_R1CounterParameter':  # pylint: disable=unused-argument
         """Read HIP ``R1_COUNTER`` parameter.
 
         Structure of HIP ``R1_COUNTER`` parameter [:rfc:`5201`][:rfc:`7401`]:
@@ -656,7 +649,7 @@ class HIP(Internet[DataType_HIP]):
         _resv = self._read_fileng(4)
         _genc = self._read_unpack(8)
 
-        r1_counter = DataType_R1CounterParameter(
+        r1_counter = Data_R1CounterParameter(
             type=desc,
             critical=cbit,
             length=clen,
@@ -666,8 +659,8 @@ class HIP(Internet[DataType_HIP]):
         return r1_counter
 
     def _read_param_locator_set(self, code: 'int', cbit: 'bool', clen: 'int', *,
-                                desc: 'RegType_Parameter', length: 'int', version: 'int',  # pylint: disable=unused-argument
-                                options: 'Parameter') -> 'DataType_LocatorSetParameter':  # pylint: disable=unused-argument
+                                desc: 'Enum_Parameter', length: 'int', version: 'int',  # pylint: disable=unused-argument
+                                options: 'Parameter') -> 'Data_LocatorSetParameter':  # pylint: disable=unused-argument
         """Read HIP ``LOCATOR_SET`` parameter.
 
         Structure of HIP ``LOCATOR_SET`` parameter [:rfc:`8046`]:
@@ -717,7 +710,7 @@ class HIP(Internet[DataType_HIP]):
             ProtocolError: If locator data is malformed.
 
         """
-        def _read_locator(kind: 'int', size: 'int') -> 'DataType_LocatorData | IPv4Address':
+        def _read_locator(kind: 'int', size: 'int') -> 'Data_LocatorData | IPv4Address':
             """Parse locator data.
 
             Args:
@@ -737,7 +730,7 @@ class HIP(Internet[DataType_HIP]):
             if kind == 0 and size == 16:
                 return ipaddress.ip_address(self._read_fileng(16))  # type: ignore[return-value]
             if kind == 1 and size == 20:
-                return DataType_LocatorData(
+                return Data_LocatorData(
                     spi=self._read_unpack(4),
                     ip=ipaddress.ip_address(self._read_fileng(16)),  # type: ignore[arg-type]
                 )
@@ -746,7 +739,7 @@ class HIP(Internet[DataType_HIP]):
         # length of read locators
         _size = 0
         # list of locators
-        _locs = []  # type: list[DataType_Locator]
+        _locs = []  # type: list[Data_Locator]
 
         while _size < clen:
             _traf = self._read_unpack(1)
@@ -756,7 +749,7 @@ class HIP(Internet[DataType_HIP]):
             _life = self._read_unpack(4)
             _lobj = _read_locator(_loct, _locl)
 
-            _locs.append(DataType_Locator(
+            _locs.append(Data_Locator(
                 traffic=_traf,
                 type=_loct,
                 length=_locl,
@@ -765,7 +758,7 @@ class HIP(Internet[DataType_HIP]):
                 locator=_lobj,
             ))
 
-        locator_set = DataType_LocatorSetParameter(
+        locator_set = Data_LocatorSetParameter(
             type=desc,
             critical=cbit,
             length=clen,
@@ -775,8 +768,8 @@ class HIP(Internet[DataType_HIP]):
         return locator_set
 
     def _read_param_puzzle(self, code: 'int', cbit: 'bool', clen: 'int', *,
-                           desc: 'RegType_Parameter', length: 'int', version: 'int',
-                           options: 'Parameter') -> 'DataType_PuzzleParameter':  # pylint: disable=unused-argument
+                           desc: 'Enum_Parameter', length: 'int', version: 'int',
+                           options: 'Parameter') -> 'Data_PuzzleParameter':  # pylint: disable=unused-argument
         """Read HIP ``PUZZLE`` parameter.
 
         Structure of HIP ``PUZZLE`` parameter [:rfc:`5201`][:rfc:`7401`]:
@@ -818,7 +811,7 @@ class HIP(Internet[DataType_HIP]):
         _opak = self._read_fileng(2)
         _rand = self._read_unpack(clen - 4)  # Length (clen) = 4 + RHASH_len / 8
 
-        puzzle = DataType_PuzzleParameter(
+        puzzle = Data_PuzzleParameter(
             type=desc,
             critical=cbit,
             length=clen,
@@ -835,8 +828,8 @@ class HIP(Internet[DataType_HIP]):
         return puzzle
 
     def _read_param_solution(self, code: 'int', cbit: 'bool', clen: 'int', *,
-                             desc: 'RegType_Parameter', length: 'int', version: 'int',
-                             options: 'Parameter') -> 'DataType_SolutionParameter':  # pylint: disable=unused-argument
+                             desc: 'Enum_Parameter', length: 'int', version: 'int',
+                             options: 'Parameter') -> 'Data_SolutionParameter':  # pylint: disable=unused-argument
         """Read HIP ``SOLUTION`` parameter.
 
         Structure of HIP ``SOLUTION`` parameter [:rfc:`5201`][:rfc:`7401`]:
@@ -886,7 +879,7 @@ class HIP(Internet[DataType_HIP]):
         _rand = self._read_unpack(_rlen // 8)
         _solv = self._read_unpack(_rlen // 8)
 
-        solution = DataType_SolutionParameter(
+        solution = Data_SolutionParameter(
             type=desc,
             critical=cbit,
             length=clen,
@@ -904,8 +897,8 @@ class HIP(Internet[DataType_HIP]):
         return solution
 
     def _read_param_seq(self, code: 'int', cbit: 'bool', clen: 'int', *,
-                        desc: 'RegType_Parameter', length: 'int', version: 'int',  # pylint: disable=unused-argument
-                        options: 'Parameter') -> 'DataType_SEQParameter':  # pylint: disable=unused-argument
+                        desc: 'Enum_Parameter', length: 'int', version: 'int',  # pylint: disable=unused-argument
+                        options: 'Parameter') -> 'Data_SEQParameter':  # pylint: disable=unused-argument
         """Read HIP ``SEQ`` parameter.
 
         Structure of HIP ``SEQ`` parameter [:rfc:`7401`]:
@@ -941,7 +934,7 @@ class HIP(Internet[DataType_HIP]):
 
         _upid = self._read_unpack(4)
 
-        seq = DataType_SEQParameter(
+        seq = Data_SEQParameter(
             type=desc,
             critical=cbit,
             length=clen,
@@ -951,8 +944,8 @@ class HIP(Internet[DataType_HIP]):
         return seq
 
     def _read_param_ack(self, code: 'int', cbit: 'bool', clen: 'int', *,
-                        desc: 'RegType_Parameter', length: 'int', version: 'int',  # pylint: disable=unused-argument
-                        options: 'Parameter') -> 'DataType_ACKParameter':  # pylint: disable=unused-argument
+                        desc: 'Enum_Parameter', length: 'int', version: 'int',  # pylint: disable=unused-argument
+                        options: 'Parameter') -> 'Data_ACKParameter':  # pylint: disable=unused-argument
         """Read HIP ``ACK`` parameter.
 
         Structure of HIP ``ACK`` parameter [:rfc:`7401`]:
@@ -992,7 +985,7 @@ class HIP(Internet[DataType_HIP]):
         for _ in range(clen // 4):
             _upid.append(self._read_unpack(4))
 
-        ack = DataType_ACKParameter(
+        ack = Data_ACKParameter(
             type=desc,
             critical=cbit,
             length=clen,
@@ -1002,8 +995,8 @@ class HIP(Internet[DataType_HIP]):
         return ack
 
     def _read_param_dh_group_list(self, code: 'int', cbit: 'bool', clen: 'int', *,  # pylint: disable=unused-argument
-                                  desc: 'RegType_Parameter', length: 'int', version: 'int',  # pylint: disable=unused-argument
-                                  options: 'Parameter') -> 'DataType_DHGroupListParameter':  # pylint: disable=unused-argument
+                                  desc: 'Enum_Parameter', length: 'int', version: 'int',  # pylint: disable=unused-argument
+                                  options: 'Parameter') -> 'Data_DHGroupListParameter':  # pylint: disable=unused-argument
         """Read HIP ``DH_GROUP_LIST`` parameter.
 
         Structure of HIP ``DH_GROUP_LIST`` parameter [:rfc:`7401`]:
@@ -1033,11 +1026,11 @@ class HIP(Internet[DataType_HIP]):
             Parsed parameter data.
 
         """
-        _dhid = []  # type: list[RegType_Group]
+        _dhid = []  # type: list[Enum_Group]
         for _ in range(clen):
-            _dhid.append(RegType_Group.get(self._read_unpack(1)))
+            _dhid.append(Enum_Group.get(self._read_unpack(1)))
 
-        dh_group_list = DataType_DHGroupListParameter(
+        dh_group_list = Data_DHGroupListParameter(
             type=desc,
             critical=cbit,
             length=clen,
@@ -1051,8 +1044,8 @@ class HIP(Internet[DataType_HIP]):
         return dh_group_list
 
     def _read_param_diffie_hellman(self, code: 'int', cbit: 'bool', clen: 'int', *,  # pylint: disable=unused-argument
-                                   desc: 'RegType_Parameter', length: 'int', version: 'int',  # pylint: disable=unused-argument
-                                   options: 'Parameter') -> 'DataType_DeffieHellmanParameter':  # pylint: disable=unused-argument
+                                   desc: 'Enum_Parameter', length: 'int', version: 'int',  # pylint: disable=unused-argument
+                                   options: 'Parameter') -> 'Data_DeffieHellmanParameter':  # pylint: disable=unused-argument
         """Read HIP ``DIFFIE_HELLMAN`` parameter.
 
         Structure of HIP ``DIFFIE_HELLMAN`` parameter [:rfc:`7401`]:
@@ -1088,11 +1081,11 @@ class HIP(Internet[DataType_HIP]):
         _vlen = self._read_unpack(2)
         _pval = self._read_fileng(_vlen)
 
-        diffie_hellman = DataType_DeffieHellmanParameter(
+        diffie_hellman = Data_DeffieHellmanParameter(
             type=desc,
             critical=cbit,
             length=clen,
-            group_id=RegType_Group.get(_gpid),
+            group_id=Enum_Group.get(_gpid),
             pub_len=_vlen,
             pub_val=_pval,
         )
@@ -1104,8 +1097,8 @@ class HIP(Internet[DataType_HIP]):
         return diffie_hellman
 
     def _read_param_hip_transform(self, code: 'int', cbit: 'bool', clen: 'int', *,
-                                  desc: 'RegType_Parameter', length: 'int', version: 'int',
-                                  options: 'Parameter') -> 'DataType_HIPTransformParameter':  # pylint: disable=unused-argument
+                                  desc: 'Enum_Parameter', length: 'int', version: 'int',
+                                  options: 'Parameter') -> 'Data_HIPTransformParameter':  # pylint: disable=unused-argument
         """Read HIP ``HIP_TRANSFORM`` parameter.
 
         Structure of HIP ``HIP_TRANSFORM`` parameter [:rfc:`5201`]:
@@ -1143,11 +1136,11 @@ class HIP(Internet[DataType_HIP]):
         if clen % 2 != 0:
             raise ProtocolError(f'HIPv{version}: [ParamNo {code}] invalid format')
 
-        _stid = []  # type: list[RegType_Suite]
+        _stid = []  # type: list[Enum_Suite]
         for _ in range(clen // 2):
-            _stid.append(RegType_Suite.get(self._read_unpack(2)))
+            _stid.append(Enum_Suite.get(self._read_unpack(2)))
 
-        hip_transform = DataType_HIPTransformParameter(
+        hip_transform = Data_HIPTransformParameter(
             type=desc,
             critical=cbit,
             length=clen,
@@ -1161,8 +1154,8 @@ class HIP(Internet[DataType_HIP]):
         return hip_transform
 
     def _read_param_hip_cipher(self, code: 'int', cbit: 'bool', clen: 'int', *,  # pylint: disable=unused-argument
-                               desc: 'RegType_Parameter', length: 'int', version: 'int',
-                               options: 'Parameter') -> 'DataType_HIPCipherParameter':  # pylint: disable=unused-argument
+                               desc: 'Enum_Parameter', length: 'int', version: 'int',
+                               options: 'Parameter') -> 'Data_HIPCipherParameter':  # pylint: disable=unused-argument
         """Read HIP ``HIP_CIPHER`` parameter.
 
         Structure of HIP ``HIP_CIPHER`` parameter [:rfc:`7401`]:
@@ -1198,16 +1191,16 @@ class HIP(Internet[DataType_HIP]):
         if clen % 2 != 0:
             raise ProtocolError(f'HIPv{version}: [ParamNo {code}] invalid format')
 
-        _cpid = []  # type: list[RegType_Cipher]
+        _cpid = []  # type: list[Enum_Cipher]
         for index, _ in enumerate(range(clen // 2)):
             # NOTE: The sender of a HIP_CIPHER parameter MUST make sure that there are no
             # more than six (6) Cipher IDs in one HIP_CIPHER parameter. [:rfc:`7401#section-5.2.8`]
             if index > 5:
                 warn(f'HIPv{version}: [ParamNo {code}] invalid format', ProtocolWarning)
                 # raise ProtocolError(f'HIPv{version}: [ParamNo {code}] invalid format')
-            _cpid.append(RegType_Cipher.get(self._read_unpack(2)))
+            _cpid.append(Enum_Cipher.get(self._read_unpack(2)))
 
-        hip_cipher = DataType_HIPCipherParameter(
+        hip_cipher = Data_HIPCipherParameter(
             type=desc,
             critical=cbit,
             length=clen,
@@ -1221,8 +1214,8 @@ class HIP(Internet[DataType_HIP]):
         return hip_cipher
 
     def _read_param_nat_traversal_mode(self, code: 'int', cbit: 'bool', clen: 'int', *,  # pylint: disable=unused-argument
-                                       desc: 'RegType_Parameter', length: 'int', version: 'int',  # pylint: disable=unused-argument
-                                       options: 'Parameter') -> 'DataType_NATTraversalModeParameter':  # pylint: disable=unused-argument,line-too-long
+                                       desc: 'Enum_Parameter', length: 'int', version: 'int',  # pylint: disable=unused-argument
+                                       options: 'Parameter') -> 'Data_NATTraversalModeParameter':  # pylint: disable=unused-argument,line-too-long
         """Read HIP ``NAT_TRAVERSAL_MODE`` parameter.
 
         Structure of HIP ``NAT_TRAVERSAL_MODE`` parameter [:rfc:`5770`]:
@@ -1261,11 +1254,11 @@ class HIP(Internet[DataType_HIP]):
             raise ProtocolError(f'HIPv{version}: [ParamNo {code}] invalid format')
 
         _resv = self._read_fileng(2)
-        _mdid = []  # type: list[RegType_NATTraversal]
+        _mdid = []  # type: list[Enum_NATTraversal]
         for _ in range((clen - 2) // 2):
-            _mdid.append(RegType_NATTraversal.get(self._read_unpack(2)))
+            _mdid.append(Enum_NATTraversal.get(self._read_unpack(2)))
 
-        nat_traversal_mode = DataType_NATTraversalModeParameter(
+        nat_traversal_mode = Data_NATTraversalModeParameter(
             type=desc,
             critical=cbit,
             length=clen,
@@ -1279,8 +1272,8 @@ class HIP(Internet[DataType_HIP]):
         return nat_traversal_mode
 
     def _read_param_transaction_pacing(self, code: 'int', cbit: 'bool', clen: 'int', *,
-                                       desc: 'RegType_Parameter', length: 'int', version: 'int',  # pylint: disable=unused-argument
-                                       options: 'Parameter') -> 'DataType_TransactionPacingParameter':  # pylint: disable=unused-argument,line-too-long
+                                       desc: 'Enum_Parameter', length: 'int', version: 'int',  # pylint: disable=unused-argument
+                                       options: 'Parameter') -> 'Data_TransactionPacingParameter':  # pylint: disable=unused-argument,line-too-long
         """Read HIP ``TRANSACTION_PACING`` parameter.
 
         Structure of HIP ``TRANSACTION_PACING`` parameter [:rfc:`5770`]:
@@ -1316,7 +1309,7 @@ class HIP(Internet[DataType_HIP]):
 
         _data = self._read_unpack(4)
 
-        transaction_pacing = DataType_TransactionPacingParameter(
+        transaction_pacing = Data_TransactionPacingParameter(
             type=desc,
             critical=cbit,
             length=clen,
@@ -1326,8 +1319,8 @@ class HIP(Internet[DataType_HIP]):
         return transaction_pacing
 
     def _read_param_encrypted(self, code: 'int', cbit: 'bool', clen: 'int', *,  # pylint: disable=unused-argument
-                              desc: 'RegType_Parameter', length: 'int', version: 'int',  # pylint: disable=unused-argument
-                              options: 'Parameter') -> 'DataType_EncryptedParameter':  # pylint: disable=unused-argument
+                              desc: 'Enum_Parameter', length: 'int', version: 'int',  # pylint: disable=unused-argument
+                              options: 'Parameter') -> 'Data_EncryptedParameter':  # pylint: disable=unused-argument
         """Read HIP ``ENCRYPTED`` parameter.
 
         Structure of HIP ``ENCRYPTED`` parameter [:rfc:`7401`]:
@@ -1367,7 +1360,7 @@ class HIP(Internet[DataType_HIP]):
         _resv = self._read_fileng(4)
         _data = self._read_fileng(clen-4)
 
-        encrypted = DataType_EncryptedParameter(
+        encrypted = Data_EncryptedParameter(
             type=desc,
             critical=cbit,
             length=clen,
@@ -1381,8 +1374,8 @@ class HIP(Internet[DataType_HIP]):
         return encrypted
 
     def _read_param_host_id(self, code: 'int', cbit: 'bool', clen: 'int', *,  # pylint: disable=unused-argument
-                            desc: 'RegType_Parameter', length: 'int', version: 'int',  # pylint: disable=unused-argument
-                            options: 'Parameter') -> 'DataType_HostIDParameter':  # pylint: disable=unused-argument
+                            desc: 'Enum_Parameter', length: 'int', version: 'int',  # pylint: disable=unused-argument
+                            options: 'Parameter') -> 'Data_HostIDParameter':  # pylint: disable=unused-argument
         """Read HIP ``HOST_ID`` parameter.
 
         Structure of HIP ``HOST_ID`` parameter [:rfc:`7401`]:
@@ -1416,7 +1409,7 @@ class HIP(Internet[DataType_HIP]):
             Parsed parameter data.
 
         """
-        def _read_host_identity(length: 'int', code: 'int') -> 'tuple[RegType_HIAlgorithm, DataType_HostIdentity | bytes]':  # pylint: disable=line-too-long
+        def _read_host_identity(length: 'int', code: 'int') -> 'tuple[Enum_HIAlgorithm, Data_HostIdentity | bytes]':  # pylint: disable=line-too-long
             """Read host identity.
 
             Args:
@@ -1428,24 +1421,24 @@ class HIP(Internet[DataType_HIP]):
 
             """
             if TYPE_CHECKING:
-                host_id: 'DataType_HostIdentity | bytes'
+                host_id: 'Data_HostIdentity | bytes'
 
-            algorithm = RegType_HIAlgorithm.get(code)
-            if algorithm == RegType_HIAlgorithm.ECDSA:
-                host_id = DataType_HostIdentity(
-                    curve=RegType_ECDSACurve.get(self._read_unpack(2)),
+            algorithm = Enum_HIAlgorithm.get(code)
+            if algorithm == Enum_HIAlgorithm.ECDSA:
+                host_id = Data_HostIdentity(
+                    curve=Enum_ECDSACurve.get(self._read_unpack(2)),
                     pubkey=self._read_fileng(length-2),
                 )
-            elif algorithm == RegType_HIAlgorithm.ECDSA_LOW:
-                host_id = DataType_HostIdentity(
-                    curve=RegType_ECDSALowCurve.get(self._read_unpack(2)),
+            elif algorithm == Enum_HIAlgorithm.ECDSA_LOW:
+                host_id = Data_HostIdentity(
+                    curve=Enum_ECDSALowCurve.get(self._read_unpack(2)),
                     pubkey=self._read_fileng(length-2),
                 )
             else:
                 host_id = self._read_fileng(length)
             return algorithm, host_id
 
-        def _read_domain_identifier(di_data: 'str') -> 'tuple[RegType_DITypes, int, bytes]':
+        def _read_domain_identifier(di_data: 'str') -> 'tuple[Enum_DITypes, int, bytes]':
             """Read domain identifier.
 
             Args:
@@ -1455,7 +1448,7 @@ class HIP(Internet[DataType_HIP]):
                 A :data:`tuple` of DI type enumeration, DI content length and DI data.
 
             """
-            di_type = RegType_DITypes.get(int(di_data[:4], base=2))
+            di_type = Enum_DITypes.get(int(di_data[:4], base=2))
             di_len = int(di_data[4:], base=2)
             domain_id = self._read_fileng(di_len)
             return di_type, di_len, domain_id
@@ -1466,7 +1459,7 @@ class HIP(Internet[DataType_HIP]):
         _hidf = _read_host_identity(_hlen, _algo)
         _didf = _read_domain_identifier(_didt)
 
-        host_id = DataType_HostIDParameter(
+        host_id = Data_HostIDParameter(
             type=desc,
             critical=cbit,
             length=clen,
@@ -1485,8 +1478,8 @@ class HIP(Internet[DataType_HIP]):
         return host_id
 
     def _read_param_hit_suite_list(self, code: 'int', cbit: 'bool', clen: 'int', *,  # pylint: disable=unused-argument
-                                   desc: 'RegType_Parameter', length: 'int', version: 'int',  # pylint: disable=unused-argument
-                                   options: 'Parameter') -> 'DataType_HITSuiteParameter':  # pylint: disable=unused-argument
+                                   desc: 'Enum_Parameter', length: 'int', version: 'int',  # pylint: disable=unused-argument
+                                   options: 'Parameter') -> 'Data_HITSuiteParameter':  # pylint: disable=unused-argument
         """Read HIP ``HIT_SUITE_LIST`` parameter.
 
         Structure of HIP ``HIT_SUITE_LIST`` parameter [:rfc:`7401`]:
@@ -1516,11 +1509,11 @@ class HIP(Internet[DataType_HIP]):
             Parsed parameter data.
 
         """
-        _hsid = []  # type: list[RegType_HITSuite]
+        _hsid = []  # type: list[Enum_HITSuite]
         for _ in range(clen):
-            _hsid.append(RegType_HITSuite.get(self._read_unpack(1)))
+            _hsid.append(Enum_HITSuite.get(self._read_unpack(1)))
 
-        hit_suite_list = DataType_HITSuiteParameter(
+        hit_suite_list = Data_HITSuiteParameter(
             type=desc,
             critical=cbit,
             length=clen,
@@ -1534,8 +1527,8 @@ class HIP(Internet[DataType_HIP]):
         return hit_suite_list
 
     def _read_param_cert(self, code: 'int', cbit: 'bool', clen: 'int', *,  # pylint: disable=unused-argument
-                         desc: 'RegType_Parameter', length: 'int', version: 'int',  # pylint: disable=unused-argument
-                         options: 'Parameter') -> 'DataType_CertParameter':  # pylint: disable=unused-argument
+                         desc: 'Enum_Parameter', length: 'int', version: 'int',  # pylint: disable=unused-argument
+                         options: 'Parameter') -> 'Data_CertParameter':  # pylint: disable=unused-argument
         """Read HIP ``CERT`` parameter.
 
         Structure of HIP ``CERT`` parameter [:rfc:`7401`]:
@@ -1573,14 +1566,14 @@ class HIP(Internet[DataType_HIP]):
         _cttp = self._read_unpack(1)
         _ctdt = self._read_fileng(clen-4)
 
-        cert = DataType_CertParameter(
+        cert = Data_CertParameter(
             type=desc,
             critical=cbit,
             length=clen,
-            cert_group=RegType_Group.get(_ctgp),
+            cert_group=Enum_Group.get(_ctgp),
             cert_count=_ctct,
             cert_id=_ctid,
-            cert_type=RegType_Certificate.get(_cttp),
+            cert_type=Enum_Certificate.get(_cttp),
             cert=_ctdt,
         )
 
@@ -1591,8 +1584,8 @@ class HIP(Internet[DataType_HIP]):
         return cert
 
     def _read_param_notification(self, code: 'int', cbit: 'bool', clen: 'int', *,  # pylint: disable=unused-argument
-                                 desc: 'RegType_Parameter', length: 'int', version: 'int',  # pylint: disable=unused-argument
-                                 options: 'Parameter') -> 'DataType_NotificationParameter':  # pylint: disable=unused-argument
+                                 desc: 'Enum_Parameter', length: 'int', version: 'int',  # pylint: disable=unused-argument
+                                 options: 'Parameter') -> 'Data_NotificationParameter':  # pylint: disable=unused-argument
         """Read HIP ``NOTIFICATION`` parameter.
 
         Structure of HIP ``NOTIFICATION`` parameter [:rfc:`7401`]:
@@ -1629,9 +1622,9 @@ class HIP(Internet[DataType_HIP]):
         _code = self._read_unpack(2)
         _data = self._read_fileng(clen - 4)
 
-        _type = RegType_NotifyMessage.get(_code)
+        _type = Enum_NotifyMessage.get(_code)
 
-        notification = DataType_NotificationParameter(
+        notification = Data_NotificationParameter(
             type=desc,
             critical=cbit,
             length=clen,
@@ -1646,8 +1639,8 @@ class HIP(Internet[DataType_HIP]):
         return notification
 
     def _read_param_echo_request_signed(self, code: 'int', cbit: 'bool', clen: 'int', *,  # pylint: disable=unused-argument
-                                        desc: 'RegType_Parameter', length: 'int', version: 'int',  # pylint: disable=unused-argument
-                                        options: 'Parameter') -> 'DataType_EchoRequestSignedParameter':  # pylint: disable=unused-argument
+                                        desc: 'Enum_Parameter', length: 'int', version: 'int',  # pylint: disable=unused-argument
+                                        options: 'Parameter') -> 'Data_EchoRequestSignedParameter':  # pylint: disable=unused-argument
         """Read HIP ``ECHO_REQUEST_SIGNED`` parameter.
 
         Structure of HIP ``ECHO_REQUEST_SIGNED`` parameter [:rfc:`7401`]:
@@ -1677,7 +1670,7 @@ class HIP(Internet[DataType_HIP]):
         """
         _data = self._read_fileng(clen)
 
-        echo_request_signed = DataType_EchoRequestSignedParameter(
+        echo_request_signed = Data_EchoRequestSignedParameter(
             type=desc,
             critical=cbit,
             length=clen,
@@ -1691,8 +1684,8 @@ class HIP(Internet[DataType_HIP]):
         return echo_request_signed
 
     def _read_param_reg_info(self, code: 'int', cbit: 'bool', clen: 'int', *,  # pylint: disable=unused-argument
-                             desc: 'RegType_Parameter', length: 'int', version: 'int',  # pylint: disable=unused-argument
-                             options: 'Parameter') -> 'DataType_RegInfoParameter':  # pylint: disable=unused-argument
+                             desc: 'Enum_Parameter', length: 'int', version: 'int',  # pylint: disable=unused-argument
+                             options: 'Parameter') -> 'Data_RegInfoParameter':  # pylint: disable=unused-argument
         """Read HIP ``REG_INFO`` parameter.
 
         Structure of HIP ``REG_INFO`` parameter [:rfc:`8003`]:
@@ -1730,17 +1723,17 @@ class HIP(Internet[DataType_HIP]):
         _mint = self._read_unpack(1)
         _maxt = self._read_unpack(1)
 
-        _type = []  # type: list[RegType_Registration]
+        _type = []  # type: list[Enum_Registration]
         for _ in range(clen-2):
             _code = self._read_unpack(1)
-            _kind = RegType_Registration.get(_code)
+            _kind = Enum_Registration.get(_code)
             _type.append(_kind)
 
-        reg_info = DataType_RegInfoParameter(
+        reg_info = Data_RegInfoParameter(
             type=desc,
             critical=cbit,
             length=clen,
-            lifetime=DataType_Lifetime(
+            lifetime=Data_Lifetime(
                 min=datetime.timedelta(seconds=_mint),
                 max=datetime.timedelta(seconds=_maxt),
             ),
@@ -1754,8 +1747,8 @@ class HIP(Internet[DataType_HIP]):
         return reg_info
 
     def _read_param_reg_request(self, code: 'int', cbit: 'bool', clen: 'int', *,  # pylint: disable=unused-argument
-                                desc: 'RegType_Parameter', length: 'int', version: 'int',  # pylint: disable=unused-argument
-                                options: 'Parameter') -> 'DataType_RegRequestParameter':  # pylint: disable=unused-argument
+                                desc: 'Enum_Parameter', length: 'int', version: 'int',  # pylint: disable=unused-argument
+                                options: 'Parameter') -> 'Data_RegRequestParameter':  # pylint: disable=unused-argument
         """Read HIP ``REG_REQUEST`` parameter.
 
         Structure of HIP ``REG_REQUEST`` parameter [:rfc:`8003`]:
@@ -1793,17 +1786,17 @@ class HIP(Internet[DataType_HIP]):
         _mint = self._read_unpack(1)
         _maxt = self._read_unpack(1)
 
-        _type = []  # type: list[RegType_Registration]
+        _type = []  # type: list[Enum_Registration]
         for _ in range(clen-2):
             _code = self._read_unpack(1)
-            _kind = RegType_Registration.get(_code)
+            _kind = Enum_Registration.get(_code)
             _type.append(_kind)
 
-        reg_request = DataType_RegRequestParameter(
+        reg_request = Data_RegRequestParameter(
             type=desc,
             critical=cbit,
             length=clen,
-            lifetime=DataType_Lifetime(
+            lifetime=Data_Lifetime(
                 min=datetime.timedelta(seconds=_mint),
                 max=datetime.timedelta(seconds=_maxt),
             ),
@@ -1817,8 +1810,8 @@ class HIP(Internet[DataType_HIP]):
         return reg_request
 
     def _read_param_reg_response(self, code: 'int', cbit: 'bool', clen: 'int', *,  # pylint: disable=unused-argument
-                                 desc: 'RegType_Parameter', length: 'int', version: 'int',  # pylint: disable=unused-argument
-                                 options: 'Parameter') -> 'DataType_RegResponseParameter':  # pylint: disable=unused-argument
+                                 desc: 'Enum_Parameter', length: 'int', version: 'int',  # pylint: disable=unused-argument
+                                 options: 'Parameter') -> 'Data_RegResponseParameter':  # pylint: disable=unused-argument
         """Read HIP ``REG_RESPONSE`` parameter.
 
         Structure of HIP ``REG_RESPONSE`` parameter [:rfc:`8003`]:
@@ -1856,17 +1849,17 @@ class HIP(Internet[DataType_HIP]):
         _mint = self._read_unpack(1)
         _maxt = self._read_unpack(1)
 
-        _type = []  # type: list[RegType_Registration]
+        _type = []  # type: list[Enum_Registration]
         for _ in range(clen-2):
             _code = self._read_unpack(1)
-            _kind = RegType_Registration.get(_code)
+            _kind = Enum_Registration.get(_code)
             _type.append(_kind)
 
-        reg_response = DataType_RegResponseParameter(
+        reg_response = Data_RegResponseParameter(
             type=desc,
             critical=cbit,
             length=clen,
-            lifetime=DataType_Lifetime(
+            lifetime=Data_Lifetime(
                 min=datetime.timedelta(seconds=_mint),
                 max=datetime.timedelta(seconds=_maxt),
             ),
@@ -1880,8 +1873,8 @@ class HIP(Internet[DataType_HIP]):
         return reg_response
 
     def _read_param_reg_failed(self, code: 'int', cbit: 'bool', clen: 'int', *,  # pylint: disable=unused-argument
-                               desc: 'RegType_Parameter', length: 'int', version: 'int',  # pylint: disable=unused-argument
-                               options: 'Parameter') -> 'DataType_RegFailedParameter':  # pylint: disable=unused-argument
+                               desc: 'Enum_Parameter', length: 'int', version: 'int',  # pylint: disable=unused-argument
+                               options: 'Parameter') -> 'Data_RegFailedParameter':  # pylint: disable=unused-argument
         """Read HIP ``REG_FAILED`` parameter.
 
         Structure of HIP ``REG_FAILED`` parameter [:rfc:`8003`]:
@@ -1919,17 +1912,17 @@ class HIP(Internet[DataType_HIP]):
         _mint = self._read_unpack(1)
         _maxt = self._read_unpack(1)
 
-        _type = []  # type: list[RegType_RegistrationFailure]
+        _type = []  # type: list[Enum_RegistrationFailure]
         for _ in range(clen-2):
             _code = self._read_unpack(1)
-            _kind = RegType_RegistrationFailure.get(_code)
+            _kind = Enum_RegistrationFailure.get(_code)
             _type.append(_kind)
 
-        reg_failed = DataType_RegFailedParameter(
+        reg_failed = Data_RegFailedParameter(
             type=desc,
             critical=cbit,
             length=clen,
-            lifetime=DataType_Lifetime(
+            lifetime=Data_Lifetime(
                 min=datetime.timedelta(seconds=_mint),
                 max=datetime.timedelta(seconds=_maxt),
             ),
@@ -1943,8 +1936,8 @@ class HIP(Internet[DataType_HIP]):
         return reg_failed
 
     def _read_param_reg_from(self, code: 'int', cbit: 'bool', clen: 'int', *,  # pylint: disable=unused-argument
-                             desc: 'RegType_Parameter', length: 'int', version: 'int',  # pylint: disable=unused-argument
-                             options: 'Parameter') -> 'DataType_RegFromParameter':  # pylint: disable=unused-argument
+                             desc: 'Enum_Parameter', length: 'int', version: 'int',  # pylint: disable=unused-argument
+                             options: 'Parameter') -> 'Data_RegFromParameter':  # pylint: disable=unused-argument
         """Read HIP ``REG_FROM`` parameter.
 
         Structure of HIP ``REG_FROM`` parameter [:rfc:`5770`]:
@@ -1988,7 +1981,7 @@ class HIP(Internet[DataType_HIP]):
         _resv = self._read_fileng(1)
         _addr = self._read_fileng(16)
 
-        reg_from = DataType_RegFromParameter(
+        reg_from = Data_RegFromParameter(
             type=desc,
             critical=cbit,
             length=clen,
@@ -2000,8 +1993,8 @@ class HIP(Internet[DataType_HIP]):
         return reg_from
 
     def _read_param_echo_response_signed(self, code: 'int', cbit: 'bool', clen: 'int', *,  # pylint: disable=unused-argument
-                                         desc: 'RegType_Parameter', length: 'int', version: 'int',  # pylint: disable=unused-argument
-                                         options: 'Parameter') -> 'DataType_EchoResponseSignedParameter':  # pylint: disable=unused-argument
+                                         desc: 'Enum_Parameter', length: 'int', version: 'int',  # pylint: disable=unused-argument
+                                         options: 'Parameter') -> 'Data_EchoResponseSignedParameter':  # pylint: disable=unused-argument
         """Read HIP ``ECHO_RESPONSE_SIGNED`` parameter.
 
         Structure of HIP ``ECHO_RESPONSE_SIGNED`` parameter [:rfc:`7401`]:
@@ -2031,7 +2024,7 @@ class HIP(Internet[DataType_HIP]):
         """
         _data = self._read_fileng(clen)
 
-        echo_response_signed = DataType_EchoResponseSignedParameter(
+        echo_response_signed = Data_EchoResponseSignedParameter(
             type=desc,
             critical=cbit,
             length=clen,
@@ -2045,8 +2038,8 @@ class HIP(Internet[DataType_HIP]):
         return echo_response_signed
 
     def _read_param_transport_format_list(self, code: 'int', cbit: 'bool', clen: 'int', *,  # pylint: disable=unused-argument
-                                          desc: 'RegType_Parameter', length: 'int', version: 'int',  # pylint: disable=unused-argument
-                                          options: 'Parameter') -> 'DataType_TransportFormatListParameter':  # pylint: disable=unused-argument
+                                          desc: 'Enum_Parameter', length: 'int', version: 'int',  # pylint: disable=unused-argument
+                                          options: 'Parameter') -> 'Data_TransportFormatListParameter':  # pylint: disable=unused-argument
         """Read HIP ``TRANSPORT_FORMAT_LIST`` parameter.
 
         Structure of HIP ``TRANSPORT_FORMAT_LIST`` parameter [:rfc:`7401`]:
@@ -2086,7 +2079,7 @@ class HIP(Internet[DataType_HIP]):
         for _ in range(clen // 2):
             _tfid.append(self._read_unpack(2))
 
-        transport_format_list = DataType_TransportFormatListParameter(
+        transport_format_list = Data_TransportFormatListParameter(
             type=desc,
             critical=cbit,
             length=clen,
@@ -2100,8 +2093,8 @@ class HIP(Internet[DataType_HIP]):
         return transport_format_list
 
     def _read_param_esp_transform(self, code: 'int', cbit: 'bool', clen: 'int', *,  # pylint: disable=unused-argument
-                                  desc: 'RegType_Parameter', length: 'int', version: 'int',  # pylint: disable=unused-argument
-                                  options: 'Parameter') -> 'DataType_ESPTransformParameter':  # pylint: disable=unused-argument
+                                  desc: 'Enum_Parameter', length: 'int', version: 'int',  # pylint: disable=unused-argument
+                                  options: 'Parameter') -> 'Data_ESPTransformParameter':  # pylint: disable=unused-argument
         """Read HIP ``ESP_TRANSFORM`` parameter.
 
         Structure of HIP ``ESP_TRANSFORM`` parameter [:rfc:`7402`]:
@@ -2140,12 +2133,12 @@ class HIP(Internet[DataType_HIP]):
             raise ProtocolError(f'HIPv{version}: [ParamNo {code}] invalid format')
 
         _resv = self._read_fileng(2)
-        _stid = []  # type: list[RegType_ESPTransformSuite]
+        _stid = []  # type: list[Enum_ESPTransformSuite]
         for _ in range((clen - 2) // 2):
             _code = self._read_unpack(2)
-            _stid.append(RegType_ESPTransformSuite.get(_code))
+            _stid.append(Enum_ESPTransformSuite.get(_code))
 
-        esp_transform = DataType_ESPTransformParameter(
+        esp_transform = Data_ESPTransformParameter(
             type=desc,
             critical=cbit,
             length=clen,
@@ -2159,8 +2152,8 @@ class HIP(Internet[DataType_HIP]):
         return esp_transform
 
     def _read_param_seq_data(self, code: 'int', cbit: 'bool', clen: 'int', *,  # pylint: disable=unused-argument
-                             desc: 'RegType_Parameter', length: 'int', version: 'int',  # pylint: disable=unused-argument
-                             options: 'Parameter') -> 'DataType_SeqDataParameter':  # pylint: disable=unused-argument
+                             desc: 'Enum_Parameter', length: 'int', version: 'int',  # pylint: disable=unused-argument
+                             options: 'Parameter') -> 'Data_SeqDataParameter':  # pylint: disable=unused-argument
         """Read HIP ``SEQ_DATA`` parameter.
 
         Structure of HIP ``SEQ_DATA`` parameter [:rfc:`6078`]:
@@ -2196,7 +2189,7 @@ class HIP(Internet[DataType_HIP]):
 
         _seqn = self._read_unpack(4)
 
-        seq_data = DataType_SeqDataParameter(
+        seq_data = Data_SeqDataParameter(
             type=desc,
             critical=cbit,
             length=clen,
@@ -2206,8 +2199,8 @@ class HIP(Internet[DataType_HIP]):
         return seq_data
 
     def _read_param_ack_data(self, code: 'int', cbit: 'bool', clen: 'int', *,  # pylint: disable=unused-argument
-                             desc: 'RegType_Parameter', length: 'int', version: 'int',  # pylint: disable=unused-argument
-                             options: 'Parameter') -> 'DataType_AckDataParameter':  # pylint: disable=unused-argument
+                             desc: 'Enum_Parameter', length: 'int', version: 'int',  # pylint: disable=unused-argument
+                             options: 'Parameter') -> 'Data_AckDataParameter':  # pylint: disable=unused-argument
         """Read HIP ``ACK_DATA`` parameter.
 
         Structure of HIP ``ACK_DATA`` parameter [:rfc:`6078`]:
@@ -2246,7 +2239,7 @@ class HIP(Internet[DataType_HIP]):
         for _ in range(clen // 4):
             _ackn.append(self._read_unpack(4))
 
-        ack_data = DataType_AckDataParameter(
+        ack_data = Data_AckDataParameter(
             type=desc,
             critical=cbit,
             length=clen,
@@ -2256,8 +2249,8 @@ class HIP(Internet[DataType_HIP]):
         return ack_data
 
     def _read_param_payload_mic(self, code: 'int', cbit: 'bool', clen: 'int', *,  # pylint: disable=unused-argument
-                                desc: 'RegType_Parameter', length: 'int', version: 'int',  # pylint: disable=unused-argument
-                                options: 'Parameter') -> 'DataType_PayloadMICParameter':  # pylint: disable=unused-argument
+                                desc: 'Enum_Parameter', length: 'int', version: 'int',  # pylint: disable=unused-argument
+                                options: 'Parameter') -> 'Data_PayloadMICParameter':  # pylint: disable=unused-argument
         """Read HIP ``PAYLOAD_MIC`` parameter.
 
         Structure of HIP ``PAYLOAD_MIC`` parameter [:rfc:`6078`]:
@@ -2297,7 +2290,7 @@ class HIP(Internet[DataType_HIP]):
         _data = self._read_fileng(4)
         _micv = self._read_fileng(clen-8)
 
-        payload_mic = DataType_PayloadMICParameter(
+        payload_mic = Data_PayloadMICParameter(
             type=desc,
             critical=cbit,
             length=clen,
@@ -2313,8 +2306,8 @@ class HIP(Internet[DataType_HIP]):
         return payload_mic
 
     def _read_param_transaction_id(self, code: 'int', cbit: 'bool', clen: 'int', *,  # pylint: disable=unused-argument
-                                   desc: 'RegType_Parameter', length: 'int', version: 'int',  # pylint: disable=unused-argument
-                                   options: 'Parameter') -> 'DataType_TransactionIDParameter':  # pylint: disable=unused-argument
+                                   desc: 'Enum_Parameter', length: 'int', version: 'int',  # pylint: disable=unused-argument
+                                   options: 'Parameter') -> 'Data_TransactionIDParameter':  # pylint: disable=unused-argument
         """Read HIP ``TRANSACTION_ID`` parameter.
 
         Structure of HIP ``TRANSACTION_ID`` parameter [:rfc:`6078`]:
@@ -2346,7 +2339,7 @@ class HIP(Internet[DataType_HIP]):
         """
         _tsid = self._read_unpack(clen)
 
-        transaction_id = DataType_TransactionIDParameter(
+        transaction_id = Data_TransactionIDParameter(
             type=desc,
             critical=cbit,
             length=clen,
@@ -2360,8 +2353,8 @@ class HIP(Internet[DataType_HIP]):
         return transaction_id
 
     def _read_param_overlay_id(self, code: 'int', cbit: 'bool', clen: 'int', *,  # pylint: disable=unused-argument
-                               desc: 'RegType_Parameter', length: 'int', version: 'int',  # pylint: disable=unused-argument
-                               options: 'Parameter') -> 'DataType_OverlayIDParameter':  # pylint: disable=unused-argument
+                               desc: 'Enum_Parameter', length: 'int', version: 'int',  # pylint: disable=unused-argument
+                               options: 'Parameter') -> 'Data_OverlayIDParameter':  # pylint: disable=unused-argument
         """Read HIP ``OVERLAY_ID`` parameter.
 
         Structure of HIP ``OVERLAY_ID`` parameter [:rfc:`6079`]:
@@ -2393,7 +2386,7 @@ class HIP(Internet[DataType_HIP]):
         """
         _olid = self._read_unpack(clen)
 
-        overlay_id = DataType_OverlayIDParameter(
+        overlay_id = Data_OverlayIDParameter(
             type=desc,
             critical=cbit,
             length=clen,
@@ -2407,8 +2400,8 @@ class HIP(Internet[DataType_HIP]):
         return overlay_id
 
     def _read_param_route_dst(self, code: 'int', cbit: 'bool', clen: 'int', *,  # pylint: disable=unused-argument
-                              desc: 'RegType_Parameter', length: 'int', version: 'int',  # pylint: disable=unused-argument
-                              options: 'Parameter') -> 'DataType_RouteDstParameter':  # pylint: disable=unused-argument
+                              desc: 'Enum_Parameter', length: 'int', version: 'int',  # pylint: disable=unused-argument
+                              options: 'Parameter') -> 'Data_RouteDstParameter':  # pylint: disable=unused-argument
         """Read HIP ``ROUTE_DST`` parameter.
 
         Structure of HIP ``ROUTE_DST`` parameter [:rfc:`6028`]:
@@ -2462,11 +2455,11 @@ class HIP(Internet[DataType_HIP]):
         for _ in range((clen - 4) // 16):
             _addr.append(ipaddress.ip_address(self._read_fileng(16)))  # type: ignore[arg-type]
 
-        route_dst = DataType_RouteDstParameter(
+        route_dst = Data_RouteDstParameter(
             type=desc,
             critical=cbit,
             length=clen,
-            flags=DataType_Flags(
+            flags=Data_Flags(
                 symmetric=bool(int(_flag[0], base=2)),
                 must_follow=bool(int(_flag[1], base=2)),
             ),
@@ -2476,8 +2469,8 @@ class HIP(Internet[DataType_HIP]):
         return route_dst
 
     def _read_param_hip_transport_mode(self, code: 'int', cbit: 'bool', clen: 'int', *,  # pylint: disable=unused-argument
-                                       desc: 'RegType_Parameter', length: 'int', version: 'int',  # pylint: disable=unused-argument
-                                       options: 'Parameter') -> 'DataType_HIPTransportModeParameter':  # pylint: disable=unused-argument
+                                       desc: 'Enum_Parameter', length: 'int', version: 'int',  # pylint: disable=unused-argument
+                                       options: 'Parameter') -> 'Data_HIPTransportModeParameter':  # pylint: disable=unused-argument
         """Read HIP ``HIP_TRANSPORT_MODE`` parameter.
 
         Structure of HIP ``HIP_TRANSPORT_MODE`` parameter [:rfc:`6261`]:
@@ -2517,12 +2510,12 @@ class HIP(Internet[DataType_HIP]):
 
         _port = self._read_unpack(2)
 
-        _mdid = []  # type: list[RegType_Transport]
+        _mdid = []  # type: list[Enum_Transport]
         for _ in range((clen - 2) // 2):
             _code = self._read_unpack(2)
-            _mdid.append(RegType_Transport.get(_code))
+            _mdid.append(Enum_Transport.get(_code))
 
-        hip_transport_mode = DataType_HIPTransportModeParameter(
+        hip_transport_mode = Data_HIPTransportModeParameter(
             type=desc,
             critical=cbit,
             length=clen,
@@ -2537,8 +2530,8 @@ class HIP(Internet[DataType_HIP]):
         return hip_transport_mode
 
     def _read_param_hip_mac(self, code: 'int', cbit: 'bool', clen: 'int', *,  # pylint: disable=unused-argument
-                            desc: 'RegType_Parameter', length: 'int', version: 'int',  # pylint: disable=unused-argument
-                            options: 'Parameter') -> 'DataType_HIPMACParameter':  # pylint: disable=unused-argument
+                            desc: 'Enum_Parameter', length: 'int', version: 'int',  # pylint: disable=unused-argument
+                            options: 'Parameter') -> 'Data_HIPMACParameter':  # pylint: disable=unused-argument
         """Read HIP ``HIP_MAC`` parameter.
 
         Structure of HIP ``HIP_MAC`` parameter [:rfc:`7401`]:
@@ -2572,7 +2565,7 @@ class HIP(Internet[DataType_HIP]):
         """
         _hmac = self._read_fileng(clen)
 
-        hip_mac = DataType_HIPMACParameter(
+        hip_mac = Data_HIPMACParameter(
             type=desc,
             critical=cbit,
             length=clen,
@@ -2586,8 +2579,8 @@ class HIP(Internet[DataType_HIP]):
         return hip_mac
 
     def _read_param_hip_mac_2(self, code: 'int', cbit: 'bool', clen: 'int', *,  # pylint: disable=unused-argument
-                              desc: 'RegType_Parameter', length: 'int', version: 'int',  # pylint: disable=unused-argument
-                              options: 'Parameter') -> 'DataType_HIPMAC2Parameter':  # pylint: disable=unused-argument
+                              desc: 'Enum_Parameter', length: 'int', version: 'int',  # pylint: disable=unused-argument
+                              options: 'Parameter') -> 'Data_HIPMAC2Parameter':  # pylint: disable=unused-argument
         """Read HIP ``HIP_MAC_2`` parameter.
 
         Structure of HIP ``HIP_MAC_2`` parameter [:rfc:`7401`]:
@@ -2621,7 +2614,7 @@ class HIP(Internet[DataType_HIP]):
         """
         _hmac = self._read_fileng(clen)
 
-        hip_mac_2 = DataType_HIPMAC2Parameter(
+        hip_mac_2 = Data_HIPMAC2Parameter(
             type=desc,
             critical=cbit,
             length=clen,
@@ -2635,8 +2628,8 @@ class HIP(Internet[DataType_HIP]):
         return hip_mac_2
 
     def _read_param_hip_signature_2(self, code: 'int', cbit: 'bool', clen: 'int', *,  # pylint: disable=unused-argument
-                                    desc: 'RegType_Parameter', length: 'int', version: 'int',  # pylint: disable=unused-argument
-                                    options: 'Parameter') -> 'DataType_HIPSignature2Parameter':  # pylint: disable=unused-argument
+                                    desc: 'Enum_Parameter', length: 'int', version: 'int',  # pylint: disable=unused-argument
+                                    options: 'Parameter') -> 'Data_HIPSignature2Parameter':  # pylint: disable=unused-argument
         """Read HIP ``HIP_SIGNATURE_2`` parameter.
 
         Structure of HIP ``HIP_SIGNATURE_2`` parameter [:rfc:`7401`]:
@@ -2669,11 +2662,11 @@ class HIP(Internet[DataType_HIP]):
         _algo = self._read_unpack(2)
         _sign = self._read_fileng(clen-2)
 
-        hip_signature_2 = DataType_HIPSignature2Parameter(
+        hip_signature_2 = Data_HIPSignature2Parameter(
             type=desc,
             critical=cbit,
             length=clen,
-            algorithm=RegType_HIAlgorithm.get(_algo),
+            algorithm=Enum_HIAlgorithm.get(_algo),
             signature=_sign,
         )
 
@@ -2684,8 +2677,8 @@ class HIP(Internet[DataType_HIP]):
         return hip_signature_2
 
     def _read_param_hip_signature(self, code: 'int', cbit: 'bool', clen: 'int', *,  # pylint: disable=unused-argument
-                                  desc: 'RegType_Parameter', length: 'int', version: 'int',  # pylint: disable=unused-argument
-                                  options: 'Parameter') -> 'DataType_HIPSignatureParameter':  # pylint: disable=unused-argument
+                                  desc: 'Enum_Parameter', length: 'int', version: 'int',  # pylint: disable=unused-argument
+                                  options: 'Parameter') -> 'Data_HIPSignatureParameter':  # pylint: disable=unused-argument
         """Read HIP ``HIP_SIGNATURE`` parameter.
 
         Structure of HIP ``HIP_SIGNATURE`` parameter [:rfc:`7401`]:
@@ -2718,11 +2711,11 @@ class HIP(Internet[DataType_HIP]):
         _algo = self._read_unpack(2)
         _sign = self._read_fileng(clen-2)
 
-        hip_signature = DataType_HIPSignatureParameter(
+        hip_signature = Data_HIPSignatureParameter(
             type=desc,
             critical=cbit,
             length=clen,
-            algorithm=RegType_HIAlgorithm.get(_algo),
+            algorithm=Enum_HIAlgorithm.get(_algo),
             signature=_sign,
         )
 
@@ -2733,8 +2726,8 @@ class HIP(Internet[DataType_HIP]):
         return hip_signature
 
     def _read_param_echo_request_unsigned(self, code: 'int', cbit: 'bool', clen: 'int', *,  # pylint: disable=unused-argument
-                                          desc: 'RegType_Parameter', length: 'int', version: 'int',  # pylint: disable=unused-argument
-                                          options: 'Parameter') -> 'DataType_EchoRequestUnsignedParameter':  # pylint: disable=unused-argument
+                                          desc: 'Enum_Parameter', length: 'int', version: 'int',  # pylint: disable=unused-argument
+                                          options: 'Parameter') -> 'Data_EchoRequestUnsignedParameter':  # pylint: disable=unused-argument
         """Read HIP ``ECHO_REQUEST_UNSIGNED`` parameter.
 
         Structure of HIP ``ECHO_REQUEST_UNSIGNED`` parameter [:rfc:`7401`]:
@@ -2764,7 +2757,7 @@ class HIP(Internet[DataType_HIP]):
         """
         _data = self._read_fileng(clen)
 
-        echo_request_unsigned = DataType_EchoRequestUnsignedParameter(
+        echo_request_unsigned = Data_EchoRequestUnsignedParameter(
             type=desc,
             critical=cbit,
             length=clen,
@@ -2778,8 +2771,8 @@ class HIP(Internet[DataType_HIP]):
         return echo_request_unsigned
 
     def _read_param_echo_response_unsigned(self, code: 'int', cbit: 'bool', clen: 'int', *,  # pylint: disable=unused-argument
-                                           desc: 'RegType_Parameter', length: 'int', version: 'int',  # pylint: disable=unused-argument
-                                           options: 'Parameter') -> 'DataType_EchoResponseUnsignedParameter':  # pylint: disable=unused-argument
+                                           desc: 'Enum_Parameter', length: 'int', version: 'int',  # pylint: disable=unused-argument
+                                           options: 'Parameter') -> 'Data_EchoResponseUnsignedParameter':  # pylint: disable=unused-argument
         """Read HIP ``ECHO_RESPONSE_UNSIGNED`` parameter.
 
         Structure of HIP ``ECHO_RESPONSE_UNSIGNED`` parameter [:rfc:`7401`]:
@@ -2809,7 +2802,7 @@ class HIP(Internet[DataType_HIP]):
         """
         _data = self._read_fileng(clen)
 
-        echo_response_unsigned = DataType_EchoResponseUnsignedParameter(
+        echo_response_unsigned = Data_EchoResponseUnsignedParameter(
             type=desc,
             critical=cbit,
             length=clen,
@@ -2823,8 +2816,8 @@ class HIP(Internet[DataType_HIP]):
         return echo_response_unsigned
 
     def _read_param_relay_from(self, code: 'int', cbit: 'bool', clen: 'int', *,  # pylint: disable=unused-argument
-                               desc: 'RegType_Parameter', length: 'int', version: 'int',  # pylint: disable=unused-argument
-                               options: 'Parameter') -> 'DataType_RelayFromParameter':  # pylint: disable=unused-argument
+                               desc: 'Enum_Parameter', length: 'int', version: 'int',  # pylint: disable=unused-argument
+                               options: 'Parameter') -> 'Data_RelayFromParameter':  # pylint: disable=unused-argument
         """Read HIP ``RELAY_FROM`` parameter.
 
         Structure of HIP ``RELAY_FROM`` parameter [:rfc:`5770`]:
@@ -2868,7 +2861,7 @@ class HIP(Internet[DataType_HIP]):
         _resv = self._read_fileng(1)
         _addr = self._read_fileng(16)
 
-        relay_from = DataType_RelayFromParameter(
+        relay_from = Data_RelayFromParameter(
             type=desc,
             critical=cbit,
             length=clen,
@@ -2880,8 +2873,8 @@ class HIP(Internet[DataType_HIP]):
         return relay_from
 
     def _read_param_relay_to(self, code: 'int', cbit: 'bool', clen: 'int', *,  # pylint: disable=unused-argument
-                             desc: 'RegType_Parameter', length: 'int', version: 'int',  # pylint: disable=unused-argument
-                             options: 'Parameter') -> 'DataType_RelayToParameter':  # pylint: disable=unused-argument
+                             desc: 'Enum_Parameter', length: 'int', version: 'int',  # pylint: disable=unused-argument
+                             options: 'Parameter') -> 'Data_RelayToParameter':  # pylint: disable=unused-argument
         """Read HIP ``RELAY_TO`` parameter.
 
         Structure of HIP ``RELAY_TO`` parameter [:rfc:`5770`]:
@@ -2925,7 +2918,7 @@ class HIP(Internet[DataType_HIP]):
         _resv = self._read_fileng(1)
         _addr = self._read_fileng(16)
 
-        relay_to = DataType_RelayToParameter(
+        relay_to = Data_RelayToParameter(
             type=desc,
             critical=cbit,
             length=clen,
@@ -2937,8 +2930,8 @@ class HIP(Internet[DataType_HIP]):
         return relay_to
 
     def _read_param_overlay_ttl(self, code: 'int', cbit: 'bool', clen: 'int', *,  # pylint: disable=unused-argument
-                                desc: 'RegType_Parameter', length: 'int', version: 'int',  # pylint: disable=unused-argument
-                                options: 'Parameter') -> 'DataType_OverlayTTLParameter':  # pylint: disable=unused-argument
+                                desc: 'Enum_Parameter', length: 'int', version: 'int',  # pylint: disable=unused-argument
+                                options: 'Parameter') -> 'Data_OverlayTTLParameter':  # pylint: disable=unused-argument
         """Read HIP ``OVERLAY_TTL`` parameter.
 
         Structure of HIP ``OVERLAY_TTL`` parameter [:rfc:`6078`]:
@@ -2974,7 +2967,7 @@ class HIP(Internet[DataType_HIP]):
 
         _ttln = self._read_unpack(2)
 
-        overlay_ttl = DataType_OverlayTTLParameter(
+        overlay_ttl = Data_OverlayTTLParameter(
             type=desc,
             critical=cbit,
             length=clen,
@@ -2984,8 +2977,8 @@ class HIP(Internet[DataType_HIP]):
         return overlay_ttl
 
     def _read_param_route_via(self, code: 'int', cbit: 'bool', clen: 'int', *,  # pylint: disable=unused-argument
-                              desc: 'RegType_Parameter', length: 'int', version: 'int',  # pylint: disable=unused-argument
-                              options: 'Parameter') -> 'DataType_RouteViaParameter':  # pylint: disable=unused-argument
+                              desc: 'Enum_Parameter', length: 'int', version: 'int',  # pylint: disable=unused-argument
+                              options: 'Parameter') -> 'Data_RouteViaParameter':  # pylint: disable=unused-argument
         """Read HIP ``ROUTE_VIA`` parameter.
 
         Structure of HIP ``ROUTE_VIA`` parameter [:rfc:`6028`]:
@@ -3039,11 +3032,11 @@ class HIP(Internet[DataType_HIP]):
         for _ in range((clen - 4) // 16):
             _addr.append(ipaddress.ip_address(self._read_fileng(16)))  # type: ignore[arg-type]
 
-        route_via = DataType_RouteViaParameter(
+        route_via = Data_RouteViaParameter(
             type=desc,
             critical=cbit,
             length=clen,
-            flags=DataType_Flags(
+            flags=Data_Flags(
                 symmetric=bool(int(_flag[0], base=2)),
                 must_follow=bool(int(_flag[1], base=2)),
             ),
@@ -3053,8 +3046,8 @@ class HIP(Internet[DataType_HIP]):
         return route_via
 
     def _read_param_from(self, code: 'int', cbit: 'bool', clen: 'int', *,  # pylint: disable=unused-argument
-                         desc: 'RegType_Parameter', length: 'int', version: 'int',  # pylint: disable=unused-argument
-                         options: 'Parameter') -> 'DataType_FromParameter':  # pylint: disable=unused-argument
+                         desc: 'Enum_Parameter', length: 'int', version: 'int',  # pylint: disable=unused-argument
+                         options: 'Parameter') -> 'Data_FromParameter':  # pylint: disable=unused-argument
         """Read HIP ``FROM`` parameter.
 
         Structure of HIP ``FROM`` parameter [:rfc:`8004`]:
@@ -3093,7 +3086,7 @@ class HIP(Internet[DataType_HIP]):
 
         _addr = self._read_fileng(16)
 
-        from_ = DataType_FromParameter(
+        from_ = Data_FromParameter(
             type=desc,
             critical=cbit,
             length=clen,
@@ -3103,8 +3096,8 @@ class HIP(Internet[DataType_HIP]):
         return from_
 
     def _read_param_rvs_hmac(self, code: 'int', cbit: 'bool', clen: 'int', *,  # pylint: disable=unused-argument
-                             desc: 'RegType_Parameter', length: 'int', version: 'int',  # pylint: disable=unused-argument
-                             options: 'Parameter') -> 'DataType_RVSHMACParameter':  # pylint: disable=unused-argument
+                             desc: 'Enum_Parameter', length: 'int', version: 'int',  # pylint: disable=unused-argument
+                             options: 'Parameter') -> 'Data_RVSHMACParameter':  # pylint: disable=unused-argument
         """Read HIP ``RVS_HMAC`` parameter.
 
         Structure of HIP ``RVS_HMAC`` parameter [:rfc:`8004`]:
@@ -3136,7 +3129,7 @@ class HIP(Internet[DataType_HIP]):
         """
         _hmac = self._read_fileng(clen)
 
-        rvs_hmac = DataType_RVSHMACParameter(
+        rvs_hmac = Data_RVSHMACParameter(
             type=desc,
             critical=cbit,
             length=clen,
@@ -3150,8 +3143,8 @@ class HIP(Internet[DataType_HIP]):
         return rvs_hmac
 
     def _read_param_via_rvs(self, code: 'int', cbit: 'bool', clen: 'int', *,  # pylint: disable=unused-argument
-                            desc: 'RegType_Parameter', length: 'int', version: 'int',  # pylint: disable=unused-argument
-                            options: 'Parameter') -> 'DataType_ViaRVSParameter':  # pylint: disable=unused-argument
+                            desc: 'Enum_Parameter', length: 'int', version: 'int',  # pylint: disable=unused-argument
+                            options: 'Parameter') -> 'Data_ViaRVSParameter':  # pylint: disable=unused-argument
         """Read HIP ``VIA_RVS`` parameter.
 
         Structure of HIP ``VIA_RVS`` parameter [:rfc:`6028`]:
@@ -3200,7 +3193,7 @@ class HIP(Internet[DataType_HIP]):
         for _ in range(clen // 16):
             _addr.append(ipaddress.ip_address(self._read_fileng(16)))  # type: ignore[arg-type]
 
-        via_rvs = DataType_ViaRVSParameter(
+        via_rvs = Data_ViaRVSParameter(
             type=desc,
             critical=cbit,
             length=clen,
@@ -3210,8 +3203,8 @@ class HIP(Internet[DataType_HIP]):
         return via_rvs
 
     def _read_param_relay_hmac(self, code: 'int', cbit: 'bool', clen: 'int', *,  # pylint: disable=unused-argument
-                               desc: 'RegType_Parameter', length: 'int', version: 'int',  # pylint: disable=unused-argument
-                               options: 'Parameter') -> 'DataType_RelayHMACParameter':  # pylint: disable=unused-argument
+                               desc: 'Enum_Parameter', length: 'int', version: 'int',  # pylint: disable=unused-argument
+                               options: 'Parameter') -> 'Data_RelayHMACParameter':  # pylint: disable=unused-argument
         """Read HIP ``RELAY_HMAC`` parameter.
 
         Structure of HIP ``RELAY_HMAC`` parameter [:rfc:`5770`]:
@@ -3243,7 +3236,7 @@ class HIP(Internet[DataType_HIP]):
         """
         _hmac = self._read_fileng(clen)
 
-        relay_hmac = DataType_RelayHMACParameter(
+        relay_hmac = Data_RelayHMACParameter(
             type=desc,
             critical=cbit,
             length=clen,

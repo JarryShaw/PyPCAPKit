@@ -25,8 +25,8 @@ import sys
 import textwrap
 from typing import TYPE_CHECKING
 
-from pcapkit.const.reg.linktype import LinkType as RegType_LinkType
-from pcapkit.protocols.data.link.ethernet import Ethernet as DataType_Ethernet
+from pcapkit.const.reg.linktype import LinkType as Enum_LinkType
+from pcapkit.protocols.data.link.ethernet import Ethernet as Data_Ethernet
 from pcapkit.protocols.link.link import Link
 
 if TYPE_CHECKING:
@@ -34,7 +34,7 @@ if TYPE_CHECKING:
 
     from typing_extensions import Literal
 
-    from pcapkit.const.reg.ethertype import EtherType as RegType_EtherType
+    from pcapkit.const.reg.ethertype import EtherType as Enum_EtherType
 
 __all__ = ['Ethernet']
 
@@ -42,7 +42,7 @@ __all__ = ['Ethernet']
 py38 = ((version_info := sys.version_info).major >= 3 and version_info.minor >= 8)
 
 
-class Ethernet(Link[DataType_Ethernet]):
+class Ethernet(Link[Data_Ethernet]):
     """This class implements Ethernet Protocol."""
 
     ##########################################################################
@@ -60,7 +60,7 @@ class Ethernet(Link[DataType_Ethernet]):
         return 14
 
     @property
-    def protocol(self) -> 'RegType_EtherType':
+    def protocol(self) -> 'Enum_EtherType':
         """Name of next layer protocol."""
         return self._info.type
 
@@ -80,7 +80,7 @@ class Ethernet(Link[DataType_Ethernet]):
     # Methods.
     ##########################################################################
 
-    def read(self, length: 'Optional[int]' = None, **kwargs: 'Any') -> 'DataType_Ethernet':  # pylint: disable=unused-argument
+    def read(self, length: 'Optional[int]' = None, **kwargs: 'Any') -> 'Data_Ethernet':  # pylint: disable=unused-argument
         """Read Ethernet Protocol.
 
         Structure of Ethernet header [:rfc:`7042`]:
@@ -114,7 +114,7 @@ class Ethernet(Link[DataType_Ethernet]):
         _srcm = self._read_mac_addr()
         _type = self._read_protos(2)
 
-        ethernet = DataType_Ethernet(
+        ethernet = Data_Ethernet(
             dst=_dstm,
             src=_srcm,
             type=_type,
@@ -142,7 +142,7 @@ class Ethernet(Link[DataType_Ethernet]):
         return 14
 
     @classmethod
-    def __index__(cls) -> 'RegType_LinkType':  # pylint: disable=invalid-index-returned
+    def __index__(cls) -> 'Enum_LinkType':  # pylint: disable=invalid-index-returned
         """Numeral registry index of the protocol.
 
         Returns:
@@ -152,7 +152,7 @@ class Ethernet(Link[DataType_Ethernet]):
         .. _tcpdump: https://www.tcpdump.org/linktypes.html
 
         """
-        return RegType_LinkType.ETHERNET  # type: ignore[return-value]
+        return Enum_LinkType.ETHERNET  # type: ignore[return-value]
 
     ##########################################################################
     # Utilities.

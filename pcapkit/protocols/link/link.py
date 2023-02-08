@@ -11,7 +11,7 @@ which is a base class for link layer protocols, e.g. :class:`~pcapkit.protocols.
 import collections
 from typing import TYPE_CHECKING, Generic
 
-from pcapkit.const.reg.ethertype import EtherType as RegType_EtherType
+from pcapkit.const.reg.ethertype import EtherType as Enum_EtherType
 from pcapkit.protocols.protocol import PT, Protocol
 
 if TYPE_CHECKING:
@@ -60,11 +60,11 @@ class Link(Protocol[PT], Generic[PT]):  # pylint: disable=abstract-method
     __proto__ = collections.defaultdict(
         lambda: ('pcapkit.protocols.misc.raw', 'Raw'),
         {
-            RegType_EtherType.Address_Resolution_Protocol:         ('pcapkit.protocols.link.arp',      'ARP'),
-            RegType_EtherType.Reverse_Address_Resolution_Protocol: ('pcapkit.protocols.link.rarp',     'RARP'),
-            RegType_EtherType.Customer_VLAN_Tag_Type:              ('pcapkit.protocols.link.vlan',     'VLAN'),
-            RegType_EtherType.Internet_Protocol_version_4:         ('pcapkit.protocols.internet.ipv4', 'IPv4'),
-            RegType_EtherType.Internet_Protocol_version_6:         ('pcapkit.protocols.internet.ipv6', 'IPv6'),
+            Enum_EtherType.Address_Resolution_Protocol:         ('pcapkit.protocols.link.arp',      'ARP'),
+            Enum_EtherType.Reverse_Address_Resolution_Protocol: ('pcapkit.protocols.link.rarp',     'RARP'),
+            Enum_EtherType.Customer_VLAN_Tag_Type:              ('pcapkit.protocols.link.vlan',     'VLAN'),
+            Enum_EtherType.Internet_Protocol_version_4:         ('pcapkit.protocols.internet.ipv4', 'IPv4'),
+            Enum_EtherType.Internet_Protocol_version_6:         ('pcapkit.protocols.internet.ipv6', 'IPv6'),
 
             # c.f., https://en.wikipedia.org/wiki/EtherType#Values
             0x8137: ('pcapkit.protocols.internet.ipx',  'IPX'),
@@ -86,7 +86,7 @@ class Link(Protocol[PT], Generic[PT]):  # pylint: disable=abstract-method
     ##########################################################################
 
     @classmethod
-    def register(cls, code: 'RegType_EtherType', module: str, class_: str) -> 'None':
+    def register(cls, code: 'Enum_EtherType', module: str, class_: str) -> 'None':
         r"""Register a new protocol class.
 
         Notes:
@@ -105,7 +105,7 @@ class Link(Protocol[PT], Generic[PT]):  # pylint: disable=abstract-method
     # Utilities.
     ##########################################################################
 
-    def _read_protos(self, size: int) -> 'RegType_EtherType':
+    def _read_protos(self, size: int) -> 'Enum_EtherType':
         """Read next layer protocol type.
 
         Arguments:
@@ -116,5 +116,5 @@ class Link(Protocol[PT], Generic[PT]):  # pylint: disable=abstract-method
 
         """
         _byte = self._read_unpack(size)
-        _prot = RegType_EtherType.get(_byte)
+        _prot = Enum_EtherType.get(_byte)
         return _prot

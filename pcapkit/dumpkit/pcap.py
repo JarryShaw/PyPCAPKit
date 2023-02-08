@@ -17,12 +17,12 @@ from pcapkit.protocols.misc.pcap.header import Header
 
 if TYPE_CHECKING:
     from enum import IntEnum as StdlibIntEnum
-    from typing import Any, IO, Optional
+    from typing import IO, Any, Optional
 
     from aenum import IntEnum as AenumIntEnum
     from typing_extensions import Literal
 
-    from pcapkit.const.reg.linktype import LinkType as RegType_LinkType
+    from pcapkit.const.reg.linktype import LinkType as Enum_LinkType
 
 __all__ = [
     'PCAPIO',
@@ -45,7 +45,7 @@ class PCAPIO(dictdumper.Dumper):
     # Data models.
     ##########################################################################
 
-    def __init__(self, fname: 'str', *, protocol: 'RegType_LinkType | StdlibIntEnum | AenumIntEnum | str | int',
+    def __init__(self, fname: 'str', *, protocol: 'Enum_LinkType | StdlibIntEnum | AenumIntEnum | str | int',
                  byteorder: 'Literal["big", "little"]' = sys.byteorder,
                  nanosecond: 'bool' = False, **kwargs: 'Any') -> 'None':  # pylint: disable=arguments-differ
         """Initialise dumper.
@@ -62,7 +62,7 @@ class PCAPIO(dictdumper.Dumper):
         self._fnum = 1
         #: bool: Nanosecond-resolution file flag.
         self._nsec = nanosecond
-        #: RegType_LinkType | StdlibIntEnum | AenumIntEnum | str | int: Data link type.
+        #: Enum_LinkType | StdlibIntEnum | AenumIntEnum | str | int: Data link type.
         self._link = protocol
 
         super().__init__(fname, protocol=protocol, byteorder=byteorder, nanosecond=nanosecond, **kwargs)
@@ -86,7 +86,7 @@ class PCAPIO(dictdumper.Dumper):
     # Utilities.
     ##########################################################################
 
-    def _dump_header(self, *, protocol: 'RegType_LinkType | StdlibIntEnum | AenumIntEnum | str | int',  # pylint: disable=arguments-differ
+    def _dump_header(self, *, protocol: 'Enum_LinkType | StdlibIntEnum | AenumIntEnum | str | int',  # pylint: disable=arguments-differ
                      byteorder: 'Literal["big", "little"]' = sys.byteorder, nanosecond: 'bool' = False,
                      **kwargs: 'Any') -> 'None':  # pylint: disable=unused-argument
         """Initially dump file heads and tails.

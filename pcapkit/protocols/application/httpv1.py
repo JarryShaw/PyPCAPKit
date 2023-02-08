@@ -30,9 +30,9 @@ from typing import TYPE_CHECKING
 
 from pcapkit.corekit.multidict import OrderedMultiDict
 from pcapkit.protocols.application.http import HTTP as HTTPBase
-from pcapkit.protocols.data.application.httpv1 import HTTP as DataType_HTTP
-from pcapkit.protocols.data.application.httpv1 import RequestHeader as DataType_RequestHeader
-from pcapkit.protocols.data.application.httpv1 import ResponseHeader as DataType_ResponseHeader
+from pcapkit.protocols.data.application.httpv1 import HTTP as Data_HTTP
+from pcapkit.protocols.data.application.httpv1 import RequestHeader as Data_RequestHeader
+from pcapkit.protocols.data.application.httpv1 import ResponseHeader as Data_ResponseHeader
 from pcapkit.utilities.exceptions import ProtocolError
 
 if TYPE_CHECKING:
@@ -40,7 +40,7 @@ if TYPE_CHECKING:
 
     from typing_extensions import Literal
 
-    from pcapkit.protocols.data.application.httpv1 import Header as DataType_Header
+    from pcapkit.protocols.data.application.httpv1 import Header as Data_Header
 
 __all__ = ['HTTP']
 
@@ -59,7 +59,7 @@ _RE_VERSION = re.compile(rb"HTTP/(?P<version>\d\.\d)")
 _RE_STATUS = re.compile(rb'\d{3}')
 
 
-class HTTP(HTTPBase[DataType_HTTP]):
+class HTTP(HTTPBase[Data_HTTP]):
     """This class implements Hypertext Transfer Protocol (HTTP/1.*)."""
 
     ##########################################################################
@@ -87,7 +87,7 @@ class HTTP(HTTPBase[DataType_HTTP]):
     # Methods.
     ##########################################################################
 
-    def read(self, length: 'Optional[int]' = None, **kwargs: 'Any') -> 'DataType_HTTP':  # pylint: disable=unused-argument
+    def read(self, length: 'Optional[int]' = None, **kwargs: 'Any') -> 'Data_HTTP':  # pylint: disable=unused-argument
         """Read Hypertext Transfer Protocol (HTTP/1.*).
 
         Structure of HTTP/1.* packet [:rfc:`7230`]:
@@ -120,7 +120,7 @@ class HTTP(HTTPBase[DataType_HTTP]):
         header_line, header_unpacked = self._read_http_header(header)
         body_unpacked = self._read_http_body(body) or None
 
-        http = DataType_HTTP(
+        http = Data_HTTP(
             receipt=header_line,
             header=header_unpacked,
             body=body_unpacked,
@@ -157,7 +157,7 @@ class HTTP(HTTPBase[DataType_HTTP]):
     # Utilities.
     ##########################################################################
 
-    def _read_http_header(self, header: 'bytes') -> 'tuple[DataType_Header, OrderedMultiDict[str, str]]':
+    def _read_http_header(self, header: 'bytes') -> 'tuple[Data_Header, OrderedMultiDict[str, str]]':
         """Read HTTP/1.* header.
 
         Structure of HTTP/1.* header [:rfc:`7230`]:
@@ -185,21 +185,21 @@ class HTTP(HTTPBase[DataType_HTTP]):
         lists = (re.split(rb'\s*:\s*', field, 1) for field in fields)
 
         if TYPE_CHECKING:
-            header_line: 'DataType_Header'
+            header_line: 'Data_Header'
 
         match1 = re.match(_RE_METHOD, para1)
         match2 = re.match(_RE_VERSION, para3)
         match3 = re.match(_RE_VERSION, para1)
         match4 = re.match(_RE_STATUS, para2)
         if match1 and match2:
-            header_line = DataType_RequestHeader(
+            header_line = Data_RequestHeader(
                 type='request',
                 method=self.decode(para1),
                 uri=self.decode(para2),
                 version=self.decode(match2.group('version')),
             )
         elif match3 and match4:
-            header_line = DataType_ResponseHeader(
+            header_line = Data_ResponseHeader(
                 type='response',
                 version=self.decode(match3.group('version')),
                 status=int(para2),

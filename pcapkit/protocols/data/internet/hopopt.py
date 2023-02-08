@@ -10,7 +10,7 @@ if TYPE_CHECKING:
     from ipaddress import IPv4Address, IPv6Address
     from typing import Optional
 
-    from pcapkit.const.ipv6.option import Option as RegType_Option
+    from pcapkit.const.ipv6.option import Option as Enum_Option
     from pcapkit.const.ipv6.qs_function import QSFunction
     from pcapkit.const.ipv6.router_alert import RouterAlert
     from pcapkit.const.ipv6.seed_id import SeedID
@@ -37,7 +37,7 @@ class Option(Info):
     """Data model for HOPOPT option data."""
 
     #: Option type.
-    type: 'RegType_Option'
+    type: 'Enum_Option'
     #: Unknown option cation.
     action: 'int'
     #: Change flag.
@@ -54,10 +54,10 @@ class HOPOPT(Info):
     #: Header extension length.
     length: 'int'
     #: HOPOPT options.
-    options: 'OrderedMultiDict[RegType_Option, Option]'
+    options: 'OrderedMultiDict[Enum_Option, Option]'
 
     if TYPE_CHECKING:
-        def __init__(self, next: 'TransType', length: 'int', options: 'OrderedMultiDict[RegType_Option, Option]') -> 'None': ...  # pylint: disable=super-init-not-called,unused-argument,redefined-builtin,multiple-statements,line-too-long
+        def __init__(self, next: 'TransType', length: 'int', options: 'OrderedMultiDict[Enum_Option, Option]') -> 'None': ...  # pylint: disable=super-init-not-called,unused-argument,redefined-builtin,multiple-statements,line-too-long
 
 
 class UnassignedOption(Option):
@@ -67,14 +67,14 @@ class UnassignedOption(Option):
     data: 'bytes'
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'RegType_Option', action: 'int', change: 'bool', length: 'int', data: 'bytes') -> 'None': ...  # pylint: disable=super-init-not-called,unused-argument,redefined-builtin,multiple-statements,line-too-long
+        def __init__(self, type: 'Enum_Option', action: 'int', change: 'bool', length: 'int', data: 'bytes') -> 'None': ...  # pylint: disable=super-init-not-called,unused-argument,redefined-builtin,multiple-statements,line-too-long
 
 
 class PadOption(Option):
     """Data model for HOPOPT padding options."""
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'RegType_Option', action: 'int', change: 'bool', length: 'int') -> 'None': ...  # pylint: disable=super-init-not-called,unused-argument,redefined-builtin,multiple-statements,line-too-long
+        def __init__(self, type: 'Enum_Option', action: 'int', change: 'bool', length: 'int') -> 'None': ...  # pylint: disable=super-init-not-called,unused-argument,redefined-builtin,multiple-statements,line-too-long
 
 
 class TunnelEncapsulationLimitOption(Option):
@@ -84,7 +84,7 @@ class TunnelEncapsulationLimitOption(Option):
     limit: 'int'
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'RegType_Option', action: 'int', change: 'bool', length: 'int', limit: 'int') -> 'None': ...  # pylint: disable=super-init-not-called,unused-argument,redefined-builtin,multiple-statements,line-too-long
+        def __init__(self, type: 'Enum_Option', action: 'int', change: 'bool', length: 'int', limit: 'int') -> 'None': ...  # pylint: disable=super-init-not-called,unused-argument,redefined-builtin,multiple-statements,line-too-long
 
 
 class RouterAlertOption(Option):
@@ -94,7 +94,7 @@ class RouterAlertOption(Option):
     value: 'RouterAlert'
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'RegType_Option', action: 'int', change: 'bool', length: 'int', value: 'RouterAlert') -> 'None': ...  # pylint: disable=super-init-not-called,unused-argument,redefined-builtin,multiple-statements,line-too-long
+        def __init__(self, type: 'Enum_Option', action: 'int', change: 'bool', length: 'int', value: 'RouterAlert') -> 'None': ...  # pylint: disable=super-init-not-called,unused-argument,redefined-builtin,multiple-statements,line-too-long
 
 
 class CALIPSOOption(Option):
@@ -113,7 +113,7 @@ class CALIPSOOption(Option):
         #: Compartment bitmap.
         cmpt_bitmap: 'tuple[int, ...]'
 
-        def __init__(self, type: 'RegType_Option', action: 'int', change: 'bool', length: 'int', domain: 'int', cmpt_len: 'int', level: 'int', checksum: 'bytes') -> 'None': ...  # pylint: disable=super-init-not-called,unused-argument,redefined-builtin,multiple-statements,line-too-long
+        def __init__(self, type: 'Enum_Option', action: 'int', change: 'bool', length: 'int', domain: 'int', cmpt_len: 'int', level: 'int', checksum: 'bytes') -> 'None': ...  # pylint: disable=super-init-not-called,unused-argument,redefined-builtin,multiple-statements,line-too-long
 
 
 class SMFDPDOption(Option):
@@ -136,7 +136,7 @@ class SMFIdentificationBasedDPDOption(SMFDPDOption):
     id: 'int'
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'RegType_Option', action: 'int', change: 'bool', length: 'int', dpd_type: 'SMFDPDMode', tid_type: 'TaggerID', tid_len: 'int', tid: 'Optional[int | IPv4Address | IPv6Address]', id: 'int') -> 'None': ...  # pylint: disable=super-init-not-called,unused-argument,redefined-builtin,multiple-statements,line-too-long
+        def __init__(self, type: 'Enum_Option', action: 'int', change: 'bool', length: 'int', dpd_type: 'SMFDPDMode', tid_type: 'TaggerID', tid_len: 'int', tid: 'Optional[int | IPv4Address | IPv6Address]', id: 'int') -> 'None': ...  # pylint: disable=super-init-not-called,unused-argument,redefined-builtin,multiple-statements,line-too-long
 
 
 class SMFHashBasedDPDOption(SMFDPDOption):
@@ -146,7 +146,7 @@ class SMFHashBasedDPDOption(SMFDPDOption):
     hav: 'bytes'
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'RegType_Option', action: 'int', change: 'bool', length: 'int', dpd_type: 'SMFDPDMode', tid_type: 'TaggerID', hav: 'bytes') -> 'None': ...  # pylint: disable=super-init-not-called,unused-argument,redefined-builtin,multiple-statements,line-too-long
+        def __init__(self, type: 'Enum_Option', action: 'int', change: 'bool', length: 'int', dpd_type: 'SMFDPDMode', tid_type: 'TaggerID', hav: 'bytes') -> 'None': ...  # pylint: disable=super-init-not-called,unused-argument,redefined-builtin,multiple-statements,line-too-long
 
 
 class PDMOption(Option):
@@ -166,7 +166,7 @@ class PDMOption(Option):
     deltatls: 'timedelta'
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'RegType_Option', action: 'int', change: 'bool', length: 'int', scaledtlr: 'timedelta', scaledtls: 'timedelta', psntp: 'int', psnlr: 'int', deltatlr: 'timedelta', deltatls: 'timedelta') -> 'None': ...  # pylint: disable=super-init-not-called,unused-argument,redefined-builtin,multiple-statements,line-too-long
+        def __init__(self, type: 'Enum_Option', action: 'int', change: 'bool', length: 'int', scaledtlr: 'timedelta', scaledtls: 'timedelta', psntp: 'int', psnlr: 'int', deltatlr: 'timedelta', deltatls: 'timedelta') -> 'None': ...  # pylint: disable=super-init-not-called,unused-argument,redefined-builtin,multiple-statements,line-too-long
 
 
 class QuickStartOption(Option):
@@ -182,7 +182,7 @@ class QuickStartOption(Option):
     nounce: 'int'
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'RegType_Option', action: 'int', change: 'bool', length: 'int', func: 'QSFunction', rate: 'int', ttl: 'Optional[timedelta]', nounce: 'int') -> 'None': ...  # pylint: disable=super-init-not-called,unused-argument,redefined-builtin,multiple-statements,line-too-long
+        def __init__(self, type: 'Enum_Option', action: 'int', change: 'bool', length: 'int', func: 'QSFunction', rate: 'int', ttl: 'Optional[timedelta]', nounce: 'int') -> 'None': ...  # pylint: disable=super-init-not-called,unused-argument,redefined-builtin,multiple-statements,line-too-long
 
 
 class RPLFlags(Info):
@@ -210,7 +210,7 @@ class RPLOption(Option):
     rank:' int'
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'RegType_Option', action: 'int', change: 'bool', length: 'int', flags: 'RPLFlags', id: 'int', rank: 'int') -> 'None': ...  # pylint: disable=super-init-not-called,unused-argument,redefined-builtin,multiple-statements,line-too-long
+        def __init__(self, type: 'Enum_Option', action: 'int', change: 'bool', length: 'int', flags: 'RPLFlags', id: 'int', rank: 'int') -> 'None': ...  # pylint: disable=super-init-not-called,unused-argument,redefined-builtin,multiple-statements,line-too-long
 
 
 class MPLFlags(Info):
@@ -238,7 +238,7 @@ class MPLOption(Option):
     seed_id: 'Optional[int]'
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'RegType_Option', action: 'int', change: 'bool', length: 'int', seed_type: 'int', flags: 'MPLFlags', seq: 'int', seed_id: 'Optional[int]') -> 'None': ...  # pylint: disable=super-init-not-called,unused-argument,redefined-builtin,multiple-statements,line-too-long
+        def __init__(self, type: 'Enum_Option', action: 'int', change: 'bool', length: 'int', seed_type: 'int', flags: 'MPLFlags', seq: 'int', seed_id: 'Optional[int]') -> 'None': ...  # pylint: disable=super-init-not-called,unused-argument,redefined-builtin,multiple-statements,line-too-long
 
 
 class ILNPOption(Option):
@@ -248,7 +248,7 @@ class ILNPOption(Option):
     nounce: 'bytes'
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'RegType_Option', action: 'int', change: 'bool', length: 'int', nounce: 'bytes') -> 'None': ...  # pylint: disable=super-init-not-called,unused-argument,redefined-builtin,multiple-statements,line-too-long
+        def __init__(self, type: 'Enum_Option', action: 'int', change: 'bool', length: 'int', nounce: 'bytes') -> 'None': ...  # pylint: disable=super-init-not-called,unused-argument,redefined-builtin,multiple-statements,line-too-long
 
 
 class LineIdentificationOption(Option):
@@ -260,7 +260,7 @@ class LineIdentificationOption(Option):
     line_id: 'int'
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'RegType_Option', action: 'int', change: 'bool', length: 'int', line_id_len: 'int', line_id: 'int') -> 'None': ...  # pylint: disable=super-init-not-called,unused-argument,redefined-builtin,multiple-statements,line-too-long
+        def __init__(self, type: 'Enum_Option', action: 'int', change: 'bool', length: 'int', line_id_len: 'int', line_id: 'int') -> 'None': ...  # pylint: disable=super-init-not-called,unused-argument,redefined-builtin,multiple-statements,line-too-long
 
 
 class JumboPayloadOption(Option):
@@ -270,7 +270,7 @@ class JumboPayloadOption(Option):
     payload_len: 'int'
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'RegType_Option', action: 'int', change: 'bool', length: 'int', payload_len: 'int') -> 'None': ...  # pylint: disable=super-init-not-called,unused-argument,redefined-builtin,multiple-statements,line-too-long
+        def __init__(self, type: 'Enum_Option', action: 'int', change: 'bool', length: 'int', payload_len: 'int') -> 'None': ...  # pylint: disable=super-init-not-called,unused-argument,redefined-builtin,multiple-statements,line-too-long
 
 
 class HomeAddressOption(Option):
@@ -280,7 +280,7 @@ class HomeAddressOption(Option):
     address: 'IPv6Address'
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'RegType_Option', action: 'int', change: 'bool', length: 'int', address: 'IPv6Address') -> 'None': ...  # pylint: disable=super-init-not-called,unused-argument,redefined-builtin,multiple-statements,line-too-long
+        def __init__(self, type: 'Enum_Option', action: 'int', change: 'bool', length: 'int', address: 'IPv6Address') -> 'None': ...  # pylint: disable=super-init-not-called,unused-argument,redefined-builtin,multiple-statements,line-too-long
 
 
 class DFFFlags(Info):
@@ -306,4 +306,4 @@ class IPDFFOption(Option):
     seq: 'int'
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'RegType_Option', action: 'int', change: 'bool', length: 'int', version: 'int', flags: 'DFFFlags', seq: 'int') -> 'None': ...  # pylint: disable=super-init-not-called,unused-argument,redefined-builtin,multiple-statements,line-too-long
+        def __init__(self, type: 'Enum_Option', action: 'int', change: 'bool', length: 'int', version: 'int', flags: 'DFFFlags', seq: 'int') -> 'None': ...  # pylint: disable=super-init-not-called,unused-argument,redefined-builtin,multiple-statements,line-too-long

@@ -38,12 +38,12 @@ import sys
 import textwrap
 from typing import TYPE_CHECKING
 
-from pcapkit.const.arp.hardware import Hardware as RegType_Hardware
-from pcapkit.const.arp.operation import Operation as RegType_Operation
-from pcapkit.const.reg.ethertype import EtherType as RegType_EtherType
-from pcapkit.protocols.data.link.arp import ARP as DataType_ARP
-from pcapkit.protocols.data.link.arp import Address as DataType_Address
-from pcapkit.protocols.data.link.arp import Type as DataType_Type
+from pcapkit.const.arp.hardware import Hardware as Enum_Hardware
+from pcapkit.const.arp.operation import Operation as Enum_Operation
+from pcapkit.const.reg.ethertype import EtherType as Enum_EtherType
+from pcapkit.protocols.data.link.arp import ARP as Data_ARP
+from pcapkit.protocols.data.link.arp import Address as Data_Address
+from pcapkit.protocols.data.link.arp import Type as Data_Type
 from pcapkit.protocols.link.link import Link
 from pcapkit.utilities.compat import cached_property
 
@@ -59,7 +59,7 @@ __all__ = ['ARP']
 py38 = ((version_info := sys.version_info).major >= 3 and version_info.minor >= 8)
 
 
-class ARP(Link[DataType_ARP]):
+class ARP(Link[Data_ARP]):
     """This class implements all protocols in ARP family.
 
     - Address Resolution Protocol (:class:`~pcapkit.protocols.link.arp.ARP`) [:rfc:`826`]
@@ -93,19 +93,19 @@ class ARP(Link[DataType_ARP]):
         return self._info.len
 
     @cached_property
-    def src(self) -> 'DataType_Address':
+    def src(self) -> 'Data_Address':
         """Sender hardware & protocol address."""
-        return DataType_Address(self._info.sha, self._info.spa)
+        return Data_Address(self._info.sha, self._info.spa)
 
     @cached_property
-    def dst(self) -> 'DataType_Address':
+    def dst(self) -> 'Data_Address':
         """Target hardware & protocol address."""
-        return DataType_Address(self._info.tha, self._info.tpa)
+        return Data_Address(self._info.tha, self._info.tpa)
 
     @cached_property
-    def type(self) -> 'DataType_Type':
+    def type(self) -> 'Data_Type':
         """Hardware & protocol type."""
-        return DataType_Type(self._info.htype, self._info.ptype)
+        return Data_Type(self._info.htype, self._info.ptype)
 
     ##########################################################################
     # Methods.
@@ -116,7 +116,7 @@ class ARP(Link[DataType_ARP]):
         """Index ID of the protocol."""
         return ('ARP', 'InARP')
 
-    def read(self, length: 'Optional[int]' = None, **kwargs: 'Any') -> 'DataType_ARP':  # pylint: disable=unused-argument
+    def read(self, length: 'Optional[int]' = None, **kwargs: 'Any') -> 'Data_ARP':  # pylint: disable=unused-argument
         r"""Read Address Resolution Protocol.
 
         Data structure of ARP Request header [:rfc:`826`]:
@@ -173,15 +173,15 @@ class ARP(Link[DataType_ARP]):
             self._acnm = 'ARP'
             self._name = 'Address Resolution Protocol'
 
-        _htype = RegType_Hardware.get(_hwty)
-        _ptype = RegType_EtherType.get(_ptty)
+        _htype = Enum_Hardware.get(_hwty)
+        _ptype = Enum_EtherType.get(_ptty)
 
-        arp = DataType_ARP(
+        arp = Data_ARP(
             htype=_htype,
             ptype=_ptype,
             hlen=_hlen,
             plen=_plen,
-            oper=RegType_Operation.get(_oper),
+            oper=Enum_Operation.get(_oper),
             sha=_shwa,
             spa=_spta,
             tha=_thwa,
@@ -211,7 +211,7 @@ class ARP(Link[DataType_ARP]):
         return 28
 
     @classmethod
-    def __index__(cls) -> 'RegType_EtherType':  # pylint: disable=invalid-index-returned
+    def __index__(cls) -> 'Enum_EtherType':  # pylint: disable=invalid-index-returned
         """Numeral registry index of the protocol.
 
         Returns:
@@ -220,7 +220,7 @@ class ARP(Link[DataType_ARP]):
         .. _IANA: https://www.iana.org/assignments/ieee-802-numbers/ieee-802-numbers.xhtml
 
         """
-        return RegType_EtherType.Address_Resolution_Protocol  # type: ignore[return-value]
+        return Enum_EtherType.Address_Resolution_Protocol  # type: ignore[return-value]
 
     ##########################################################################
     # Utilities.
@@ -263,8 +263,8 @@ class ARP(Link[DataType_ARP]):
             protocol address.
 
         """
-        if ptype == RegType_EtherType.Internet_Protocol_version_4:  # IPv4
+        if ptype == Enum_EtherType.Internet_Protocol_version_4:  # IPv4
             return ipaddress.ip_address(self._read_fileng(length))
-        if ptype == RegType_EtherType.Internet_Protocol_version_6:  # IPv6
+        if ptype == Enum_EtherType.Internet_Protocol_version_6:  # IPv6
             return ipaddress.ip_address(self._read_fileng(length))
         return self._read_fileng(length).hex()

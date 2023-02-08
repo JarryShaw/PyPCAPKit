@@ -36,41 +36,39 @@ import datetime
 import ipaddress
 from typing import TYPE_CHECKING
 
-from pcapkit.const.ipv4.classification_level import \
-    ClassificationLevel as RegType_ClassificationLevel
-from pcapkit.const.ipv4.option_class import OptionClass as RegType_OptionClass
-from pcapkit.const.ipv4.option_number import OptionNumber as RegType_OptionNumber
-from pcapkit.const.ipv4.protection_authority import \
-    ProtectionAuthority as RegType_ProtectionAuthority
-from pcapkit.const.ipv4.qs_function import QSFunction as RegType_QSFunction
-from pcapkit.const.ipv4.router_alert import RouterAlert as RegType_RouterAlert
-from pcapkit.const.ipv4.tos_del import ToSDelay as RegType_ToSDelay
-from pcapkit.const.ipv4.tos_ecn import ToSECN as RegType_ToSECN
-from pcapkit.const.ipv4.tos_pre import ToSPrecedence as RegType_ToSPrecedence
-from pcapkit.const.ipv4.tos_rel import ToSReliability as RegType_ToSReliability
-from pcapkit.const.ipv4.tos_thr import ToSThroughput as RegType_ToSThroughput
-from pcapkit.const.ipv4.ts_flag import TSFlag as RegType_TSFlag
-from pcapkit.const.reg.transtype import TransType as RegType_TransType
+from pcapkit.const.ipv4.classification_level import ClassificationLevel as Enum_ClassificationLevel
+from pcapkit.const.ipv4.option_class import OptionClass as Enum_OptionClass
+from pcapkit.const.ipv4.option_number import OptionNumber as Enum_OptionNumber
+from pcapkit.const.ipv4.protection_authority import ProtectionAuthority as Enum_ProtectionAuthority
+from pcapkit.const.ipv4.qs_function import QSFunction as Enum_QSFunction
+from pcapkit.const.ipv4.router_alert import RouterAlert as Enum_RouterAlert
+from pcapkit.const.ipv4.tos_del import ToSDelay as Enum_ToSDelay
+from pcapkit.const.ipv4.tos_ecn import ToSECN as Enum_ToSECN
+from pcapkit.const.ipv4.tos_pre import ToSPrecedence as Enum_ToSPrecedence
+from pcapkit.const.ipv4.tos_rel import ToSReliability as Enum_ToSReliability
+from pcapkit.const.ipv4.tos_thr import ToSThroughput as Enum_ToSThroughput
+from pcapkit.const.ipv4.ts_flag import TSFlag as Enum_TSFlag
+from pcapkit.const.reg.transtype import TransType as Enum_TransType
 from pcapkit.corekit.multidict import OrderedMultiDict
-from pcapkit.protocols.data.internet.ipv4 import EOOLOption as DataType_EOOLOption
-from pcapkit.protocols.data.internet.ipv4 import ESECOption as DataType_ESECOption
-from pcapkit.protocols.data.internet.ipv4 import Flags as DataType_Flags
-from pcapkit.protocols.data.internet.ipv4 import IPv4 as DataType_IPv4
-from pcapkit.protocols.data.internet.ipv4 import LSROption as DataType_LSROption
-from pcapkit.protocols.data.internet.ipv4 import MTUPOption as DataType_MTUPOption
-from pcapkit.protocols.data.internet.ipv4 import MTUROption as DataType_MTUROption
-from pcapkit.protocols.data.internet.ipv4 import NOPOption as DataType_NOPOption
-from pcapkit.protocols.data.internet.ipv4 import OptionType as DataType_OptionType
-from pcapkit.protocols.data.internet.ipv4 import QSOption as DataType_QSOption
-from pcapkit.protocols.data.internet.ipv4 import RROption as DataType_RROption
-from pcapkit.protocols.data.internet.ipv4 import RTRALTOption as DataType_RTRALTOption
-from pcapkit.protocols.data.internet.ipv4 import SECOption as DataType_SECOption
-from pcapkit.protocols.data.internet.ipv4 import SIDOption as DataType_SIDOption
-from pcapkit.protocols.data.internet.ipv4 import SSROption as DataType_SSROption
-from pcapkit.protocols.data.internet.ipv4 import ToSField as DataType_ToSField
-from pcapkit.protocols.data.internet.ipv4 import TROption as DataType_TROption
-from pcapkit.protocols.data.internet.ipv4 import TSOption as DataType_TSOption
-from pcapkit.protocols.data.internet.ipv4 import UnassignedOption as DataType_UnassignedOption
+from pcapkit.protocols.data.internet.ipv4 import EOOLOption as Data_EOOLOption
+from pcapkit.protocols.data.internet.ipv4 import ESECOption as Data_ESECOption
+from pcapkit.protocols.data.internet.ipv4 import Flags as Data_Flags
+from pcapkit.protocols.data.internet.ipv4 import IPv4 as Data_IPv4
+from pcapkit.protocols.data.internet.ipv4 import LSROption as Data_LSROption
+from pcapkit.protocols.data.internet.ipv4 import MTUPOption as Data_MTUPOption
+from pcapkit.protocols.data.internet.ipv4 import MTUROption as Data_MTUROption
+from pcapkit.protocols.data.internet.ipv4 import NOPOption as Data_NOPOption
+from pcapkit.protocols.data.internet.ipv4 import OptionType as Data_OptionType
+from pcapkit.protocols.data.internet.ipv4 import QSOption as Data_QSOption
+from pcapkit.protocols.data.internet.ipv4 import RROption as Data_RROption
+from pcapkit.protocols.data.internet.ipv4 import RTRALTOption as Data_RTRALTOption
+from pcapkit.protocols.data.internet.ipv4 import SECOption as Data_SECOption
+from pcapkit.protocols.data.internet.ipv4 import SIDOption as Data_SIDOption
+from pcapkit.protocols.data.internet.ipv4 import SSROption as Data_SSROption
+from pcapkit.protocols.data.internet.ipv4 import ToSField as Data_ToSField
+from pcapkit.protocols.data.internet.ipv4 import TROption as Data_TROption
+from pcapkit.protocols.data.internet.ipv4 import TSOption as Data_TSOption
+from pcapkit.protocols.data.internet.ipv4 import UnassignedOption as Data_UnassignedOption
 from pcapkit.protocols.internet.ip import IP
 from pcapkit.utilities.exceptions import ProtocolError
 
@@ -82,15 +80,15 @@ if TYPE_CHECKING:
     from mypy_extensions import NamedArg
     from typing_extensions import Literal
 
-    from pcapkit.protocols.data.internet.ipv4 import Option as DataType_Option
+    from pcapkit.protocols.data.internet.ipv4 import Option as Data_Option
 
-    Option = OrderedMultiDict[RegType_OptionNumber, DataType_Option]
-    OptionParser = Callable[[RegType_OptionNumber, NamedArg(Option, 'options')], DataType_Option]
+    Option = OrderedMultiDict[Enum_OptionNumber, Data_Option]
+    OptionParser = Callable[[Enum_OptionNumber, NamedArg(Option, 'options')], Data_Option]
 
 __all__ = ['IPv4']
 
 
-class IPv4(IP[DataType_IPv4]):
+class IPv4(IP[Data_IPv4]):
     """This class implements Internet Protocol version 4.
 
     This class currently supports parsing of the following IPv4 options,
@@ -148,7 +146,7 @@ class IPv4(IP[DataType_IPv4]):
         return self._info.hdr_len
 
     @property
-    def protocol(self) -> 'RegType_TransType':
+    def protocol(self) -> 'Enum_TransType':
         """Name of next layer protocol."""
         return self._info.protocol
 
@@ -168,7 +166,7 @@ class IPv4(IP[DataType_IPv4]):
     # Methods.
     ##########################################################################
 
-    def read(self, length: 'Optional[int]' = None, **kwargs: 'Any') -> 'DataType_IPv4':  # pylint: disable=unused-argument
+    def read(self, length: 'Optional[int]' = None, **kwargs: 'Any') -> 'Data_IPv4':  # pylint: disable=unused-argument
         """Read Internet Protocol version 4 (IPv4).
 
         Structure of IPv4 header [:rfc:`791`]:
@@ -217,19 +215,19 @@ class IPv4(IP[DataType_IPv4]):
         if _vers != 4:
             raise ProtocolError(f'[IPv4] invalid version: {_vers}')
 
-        ipv4 = DataType_IPv4(
+        ipv4 = Data_IPv4(
             version=_vers,  # type: ignore[arg-type]
             hdr_len=int(_vihl[1], base=16) * 4,
-            tos=DataType_ToSField.from_dict({
-                'pre': RegType_ToSPrecedence.get(int(_dscp[:3], base=2)),
-                'del': RegType_ToSDelay.get(int(_dscp[3], base=2)),
-                'thr': RegType_ToSThroughput.get(int(_dscp[4], base=2)),
-                'rel': RegType_ToSReliability.get(int(_dscp[5], base=2)),
-                'ecn': RegType_ToSECN.get(int(_dscp[6:], base=2)),
+            tos=Data_ToSField.from_dict({
+                'pre': Enum_ToSPrecedence.get(int(_dscp[:3], base=2)),
+                'del': Enum_ToSDelay.get(int(_dscp[3], base=2)),
+                'thr': Enum_ToSThroughput.get(int(_dscp[4], base=2)),
+                'rel': Enum_ToSReliability.get(int(_dscp[5], base=2)),
+                'ecn': Enum_ToSECN.get(int(_dscp[6:], base=2)),
             }),
             len=_tlen,
             id=_iden,
-            flags=DataType_Flags(
+            flags=Data_Flags(
                 df=bool(int(_frag[1])),
                 mf=bool(int(_frag[2])),
             ),
@@ -280,7 +278,7 @@ class IPv4(IP[DataType_IPv4]):
         return 20
 
     @classmethod
-    def __index__(cls) -> 'RegType_TransType':  # pylint: disable=invalid-index-returned
+    def __index__(cls) -> 'Enum_TransType':  # pylint: disable=invalid-index-returned
         """Numeral registry index of the protocol.
 
         Returns:
@@ -289,7 +287,7 @@ class IPv4(IP[DataType_IPv4]):
         .. _IANA: https://www.iana.org/assignments/protocol-numbers/protocol-numbers.xhtml
 
         """
-        return RegType_TransType.IPv4  # type: ignore[return-value]
+        return Enum_TransType.IPv4  # type: ignore[return-value]
 
     ##########################################################################
     # Utilities.
@@ -307,7 +305,7 @@ class IPv4(IP[DataType_IPv4]):
         # return _addr
         return ipaddress.ip_address(_byte)  # type: ignore[return-value]
 
-    def _read_ipv4_opt_type(self, code: 'int') -> 'DataType_OptionType':
+    def _read_ipv4_opt_type(self, code: 'int') -> 'Data_OptionType':
         """Read option type field.
 
         Arguments:
@@ -321,10 +319,10 @@ class IPv4(IP[DataType_IPv4]):
         bin_ = bin(code)[2:].zfill(8)
 
         oflg = bool(int(bin_[0], base=2))
-        ocls = RegType_OptionClass.get(int(bin_[1:3], base=2))
+        ocls = Enum_OptionClass.get(int(bin_[1:3], base=2))
         onum = int(bin_[3:], base=2)
 
-        return DataType_OptionType.from_dict({
+        return Data_OptionType.from_dict({
             'change': oflg,
             'class': ocls,
             'number': onum,
@@ -353,7 +351,7 @@ class IPv4(IP[DataType_IPv4]):
                 break
 
             # get options type
-            kind = RegType_OptionNumber.get(code)
+            kind = Enum_OptionNumber.get(code)
 
             # extract option data
             meth_name = f'_read_opt_{kind.name.lower()}'
@@ -365,7 +363,7 @@ class IPv4(IP[DataType_IPv4]):
             options.add(kind, data)
 
             # break when End of Option List (EOOL) triggered
-            if kind == RegType_OptionNumber.EOOL:
+            if kind == Enum_OptionNumber.EOOL:
                 break
 
         # get padding
@@ -374,7 +372,7 @@ class IPv4(IP[DataType_IPv4]):
 
         return options
 
-    def _read_opt_unassigned(self, kind: 'RegType_OptionNumber', *, options: 'Option') -> 'DataType_UnassignedOption':  # pylint: disable=unused-argument
+    def _read_opt_unassigned(self, kind: 'Enum_OptionNumber', *, options: 'Option') -> 'Data_UnassignedOption':  # pylint: disable=unused-argument
         """Read IPv4 unassigned options.
 
         Structure of IPv4 unassigned options [:rfc:`791`]:
@@ -402,7 +400,7 @@ class IPv4(IP[DataType_IPv4]):
         if size < 3:
             raise ProtocolError(f'{self.alias}: [OptNo {kind}] invalid format')
 
-        data = DataType_UnassignedOption(
+        data = Data_UnassignedOption(
             code=kind,
             type=self._read_ipv4_opt_type(kind),
             length=size,
@@ -411,7 +409,7 @@ class IPv4(IP[DataType_IPv4]):
 
         return data
 
-    def _read_opt_eool(self, kind: 'RegType_OptionNumber', *, options: 'Option') -> 'DataType_EOOLOption':  # pylint: disable=unused-argument
+    def _read_opt_eool(self, kind: 'Enum_OptionNumber', *, options: 'Option') -> 'Data_EOOLOption':  # pylint: disable=unused-argument
         """Read IPv4 End of Option List (``EOOL``) option.
 
         Structure of IPv4 End of Option List (``EOOL``) option [:rfc:`719`]:
@@ -431,7 +429,7 @@ class IPv4(IP[DataType_IPv4]):
             Parsed option data.
 
         """
-        data = DataType_EOOLOption(
+        data = Data_EOOLOption(
             code=kind,
             type=self._read_ipv4_opt_type(kind),
             length=1,
@@ -439,7 +437,7 @@ class IPv4(IP[DataType_IPv4]):
 
         return data
 
-    def _read_opt_nop(self, kind: 'RegType_OptionNumber', *, options: 'Option') -> 'DataType_NOPOption':  # pylint: disable=unused-argument
+    def _read_opt_nop(self, kind: 'Enum_OptionNumber', *, options: 'Option') -> 'Data_NOPOption':  # pylint: disable=unused-argument
         """Read IPv4 No Operation (``NOP``) option.
 
         Structure of IPv4 No Operation (``NOP``) option [:rfc:`719`]:
@@ -459,7 +457,7 @@ class IPv4(IP[DataType_IPv4]):
             Parsed option data.
 
         """
-        data = DataType_NOPOption(
+        data = Data_NOPOption(
             code=kind,
             type=self._read_ipv4_opt_type(kind),
             length=1,
@@ -467,7 +465,7 @@ class IPv4(IP[DataType_IPv4]):
 
         return data
 
-    def _read_opt_sec(self, kind: 'RegType_OptionNumber', *, options: 'Option') -> 'DataType_SECOption':  # pylint: disable=unused-argument
+    def _read_opt_sec(self, kind: 'Enum_OptionNumber', *, options: 'Option') -> 'Data_SECOption':  # pylint: disable=unused-argument
         """Read IPv4 Security (``SEC``) option.
 
         Structure of IPv4 Security (``SEC``) option [:rfc:`1108`]:
@@ -500,7 +498,7 @@ class IPv4(IP[DataType_IPv4]):
         _clvl = self._read_unpack(1)
 
         if size > 3:
-            _data = OrderedMultiDict()  # type: OrderedMultiDict[RegType_ProtectionAuthority, bool]
+            _data = OrderedMultiDict()  # type: OrderedMultiDict[Enum_ProtectionAuthority, bool]
             for counter in range(3, size):
                 _flag = self._read_binary(1)
                 if (counter < size - 1 and int(_flag[7], base=2) != 1) \
@@ -508,22 +506,22 @@ class IPv4(IP[DataType_IPv4]):
                     raise ProtocolError(f'{self.alias}: [OptNo {kind}] invalid format')
 
                 for (index, bit) in enumerate(_flag):
-                    _auth = RegType_ProtectionAuthority.get(index)
+                    _auth = Enum_ProtectionAuthority.get(index)
                     _data.add(_auth, bool(int(bit, base=2)))
         else:
             _data = None  # type: ignore[assignment]
 
-        data = DataType_SECOption(
+        data = Data_SECOption(
             code=kind,
             type=self._read_ipv4_opt_type(kind),
             length=size,
-            level=RegType_ClassificationLevel.get(_clvl),
+            level=Enum_ClassificationLevel.get(_clvl),
             flags=_data,
         )
 
         return data
 
-    def _read_opt_lsr(self, kind: 'RegType_OptionNumber', *, options: 'Option') -> 'DataType_LSROption':  # pylint: disable=unused-argument
+    def _read_opt_lsr(self, kind: 'Enum_OptionNumber', *, options: 'Option') -> 'Data_LSROption':  # pylint: disable=unused-argument
         """Read IPv4 Loose Source Route (``LSR``) option.
 
         Structure of IPv4 Loose Source Route (``LSR``) option [:rfc:`791`]:
@@ -560,7 +558,7 @@ class IPv4(IP[DataType_IPv4]):
             counter += 4
             address.append(self._read_ipv4_addr())
 
-        data = DataType_LSROption(
+        data = Data_LSROption(
             code=kind,
             type=self._read_ipv4_opt_type(kind),
             length=size,
@@ -570,7 +568,7 @@ class IPv4(IP[DataType_IPv4]):
 
         return data
 
-    def _read_opt_ts(self, kind: 'RegType_OptionNumber', *, options: 'Option') -> 'DataType_TSOption':  # pylint: disable=unused-argument
+    def _read_opt_ts(self, kind: 'Enum_OptionNumber', *, options: 'Option') -> 'Data_TSOption':  # pylint: disable=unused-argument
         """Read IPv4 Time Stamp (``TS``) option.
 
         Structure of IPv4 Time Stamp (``TS``) option [:rfc:`791`]:
@@ -611,10 +609,10 @@ class IPv4(IP[DataType_IPv4]):
         if _tptr < 5:
             raise ProtocolError(f'{self.alias}: [OptNo {kind}] invalid format')
 
-        _flag = RegType_TSFlag.get(_tflg)
+        _flag = Enum_TSFlag.get(_tflg)
 
         endpoint = min(_tptr, size)
-        if _flag == RegType_TSFlag.Timestamp_Only:
+        if _flag == Enum_TSFlag.Timestamp_Only:
             if (size - 4) % 4 != 0:
                 raise ProtocolError(f'{self.alias}: [OptNo {kind}] invalid format')
             counter = 5
@@ -625,7 +623,7 @@ class IPv4(IP[DataType_IPv4]):
                 time = self._read_unpack(4, lilendian=True)
                 _tsls.append(datetime.datetime.fromtimestamp(time))
             timestamp = tuple(_tsls) or None
-        elif _flag in (RegType_TSFlag.IP_with_Timestamp, RegType_TSFlag.Prespecified_IP_with_Timestamp):
+        elif _flag in (Enum_TSFlag.IP_with_Timestamp, Enum_TSFlag.Prespecified_IP_with_Timestamp):
             if (size - 4) % 8 != 0:
                 raise ProtocolError(f'{self.alias}: [OptNo {kind}] invalid format')
 
@@ -640,7 +638,7 @@ class IPv4(IP[DataType_IPv4]):
         else:
             timestamp = self._read_fileng(size - 4) or None  # type: ignore[assignment]
 
-        data = DataType_TSOption(
+        data = Data_TSOption(
             code=kind,
             type=self._read_ipv4_opt_type(kind),
             length=size,
@@ -652,7 +650,7 @@ class IPv4(IP[DataType_IPv4]):
 
         return data
 
-    def _read_opt_esec(self, kind: 'RegType_OptionNumber', *, options: 'Option') -> 'DataType_ESECOption':  # pylint: disable=unused-argument
+    def _read_opt_esec(self, kind: 'Enum_OptionNumber', *, options: 'Option') -> 'Data_ESECOption':  # pylint: disable=unused-argument
         """Read IPv4 Extended Security (``ESEC``) option.
 
         Structure of IPv4 Extended Security (``ESEC``) option [:rfc:`1108`]:
@@ -684,7 +682,7 @@ class IPv4(IP[DataType_IPv4]):
         _clvl = self._read_unpack(1)
 
         if size > 3:
-            _data = OrderedMultiDict()  # type: OrderedMultiDict[RegType_ProtectionAuthority, bool]
+            _data = OrderedMultiDict()  # type: OrderedMultiDict[Enum_ProtectionAuthority, bool]
             for counter in range(3, size):
                 _flag = self._read_binary(1)
                 if (counter < size - 1 and int(_flag[7], base=2) != 1) \
@@ -692,22 +690,22 @@ class IPv4(IP[DataType_IPv4]):
                     raise ProtocolError(f'{self.alias}: [OptNo {kind}] invalid format')
 
                 for (index, bit) in enumerate(_flag):
-                    _auth = RegType_ProtectionAuthority.get(index)
+                    _auth = Enum_ProtectionAuthority.get(index)
                     _data.add(_auth, bool(int(bit, base=2)))
         else:
             _data = None  # type: ignore[assignment]
 
-        data = DataType_ESECOption(
+        data = Data_ESECOption(
             code=kind,
             type=self._read_ipv4_opt_type(kind),
             length=size,
-            level=RegType_ClassificationLevel.get(_clvl),
+            level=Enum_ClassificationLevel.get(_clvl),
             flags=_data,
         )
 
         return data
 
-    def _read_opt_rr(self, kind: 'RegType_OptionNumber', *, options: 'Option') -> 'DataType_RROption':  # pylint: disable=unused-argument
+    def _read_opt_rr(self, kind: 'Enum_OptionNumber', *, options: 'Option') -> 'Data_RROption':  # pylint: disable=unused-argument
         """Read IPv4 Record Route (``RR``) option.
 
         Structure of IPv4 Record Route (``RR``) option [:rfc:`791`]:
@@ -745,7 +743,7 @@ class IPv4(IP[DataType_IPv4]):
             counter += 4
             address.append(self._read_ipv4_addr())
 
-        data = DataType_RROption(
+        data = Data_RROption(
             code=kind,
             type=self._read_ipv4_opt_type(kind),
             length=size,
@@ -755,7 +753,7 @@ class IPv4(IP[DataType_IPv4]):
 
         return data
 
-    def _read_opt_sid(self, kind: 'RegType_OptionNumber', *, options: 'Option') -> 'DataType_SIDOption':  # pylint: disable=unused-argument
+    def _read_opt_sid(self, kind: 'Enum_OptionNumber', *, options: 'Option') -> 'Data_SIDOption':  # pylint: disable=unused-argument
         """Read IPv4 Stream ID (``SID``) option.
 
         Structure of IPv4 Stream ID (``SID``) option [:rfc:`791`][:rfc:`6814`]:
@@ -782,7 +780,7 @@ class IPv4(IP[DataType_IPv4]):
         if size != 4:
             raise ProtocolError(f'{self.alias}: [OptNo {kind}] invalid format')
 
-        data = DataType_SIDOption(
+        data = Data_SIDOption(
             code=kind,
             type=self._read_ipv4_opt_type(kind),
             length=size,
@@ -791,7 +789,7 @@ class IPv4(IP[DataType_IPv4]):
 
         return data
 
-    def _read_opt_ssr(self, kind: 'RegType_OptionNumber', *, options: 'Option') -> 'DataType_SSROption':  # pylint: disable=unused-argument
+    def _read_opt_ssr(self, kind: 'Enum_OptionNumber', *, options: 'Option') -> 'Data_SSROption':  # pylint: disable=unused-argument
         """Read IPv4 Strict Source Route (``SSR``) option.
 
         Structure of IPv4 Strict Source Route (``SSR``) option [:rfc:`791`]:
@@ -829,7 +827,7 @@ class IPv4(IP[DataType_IPv4]):
             counter += 4
             address.append(self._read_ipv4_addr())
 
-        data = DataType_SSROption(
+        data = Data_SSROption(
             code=kind,
             type=self._read_ipv4_opt_type(kind),
             length=size,
@@ -839,7 +837,7 @@ class IPv4(IP[DataType_IPv4]):
 
         return data
 
-    def _read_opt_mtup(self, kind: 'RegType_OptionNumber', *, options: 'Option') -> 'DataType_MTUPOption':  # pylint: disable=unused-argument
+    def _read_opt_mtup(self, kind: 'Enum_OptionNumber', *, options: 'Option') -> 'Data_MTUPOption':  # pylint: disable=unused-argument
         """Read IPv4 MTU Probe (``MTUP``) option.
 
         Structure of IPv4 MTU Probe (``MTUP``) option [:rfc:`1063`][:rfc:`1191`]:
@@ -865,7 +863,7 @@ class IPv4(IP[DataType_IPv4]):
         if size != 4:
             raise ProtocolError(f'{self.alias}: [OptNo {kind}] invalid format')
 
-        data = DataType_MTUPOption(
+        data = Data_MTUPOption(
             code=kind,
             type=self._read_ipv4_opt_type(kind),
             length=size,
@@ -874,7 +872,7 @@ class IPv4(IP[DataType_IPv4]):
 
         return data
 
-    def _read_opt_mtur(self, kind: 'RegType_OptionNumber', *, options: 'Option') -> 'DataType_MTUROption':  # pylint: disable=unused-argument
+    def _read_opt_mtur(self, kind: 'Enum_OptionNumber', *, options: 'Option') -> 'Data_MTUROption':  # pylint: disable=unused-argument
         """Read IPv4 MTU Reply (``MTUR``) option.
 
         Structure of IPv4 MTU Reply (``MTUR``) option [:rfc:`1063`][:rfc:`1191`]:
@@ -900,7 +898,7 @@ class IPv4(IP[DataType_IPv4]):
         if size != 4:
             raise ProtocolError(f'{self.alias}: [OptNo {kind}] invalid format')
 
-        data = DataType_MTUROption(
+        data = Data_MTUROption(
             code=kind,
             type=self._read_ipv4_opt_type(kind),
             length=size,
@@ -909,7 +907,7 @@ class IPv4(IP[DataType_IPv4]):
 
         return data
 
-    def _read_opt_tr(self, kind: 'RegType_OptionNumber', *, options: 'Option') -> 'DataType_TROption':  # pylint: disable=unused-argument
+    def _read_opt_tr(self, kind: 'Enum_OptionNumber', *, options: 'Option') -> 'Data_TROption':  # pylint: disable=unused-argument
         """Read IPv4 Traceroute (``TR``) option.
 
         Structure of IPv4 Traceroute (``TR``) option [:rfc:`1393`][:rfc:`6814`]:
@@ -945,7 +943,7 @@ class IPv4(IP[DataType_IPv4]):
         _rhcn = self._read_unpack(2)
         _ipad = self._read_ipv4_addr()
 
-        data = DataType_TROption.from_dict({
+        data = Data_TROption.from_dict({
             'code': kind,
             'type': self._read_ipv4_opt_type(kind),
             'length': size,
@@ -957,7 +955,7 @@ class IPv4(IP[DataType_IPv4]):
 
         return data
 
-    def _read_opt_rtralt(self, kind: 'RegType_OptionNumber', *, options: 'Option') -> 'DataType_RTRALTOption':  # pylint: disable=unused-argument
+    def _read_opt_rtralt(self, kind: 'Enum_OptionNumber', *, options: 'Option') -> 'Data_RTRALTOption':  # pylint: disable=unused-argument
         """Read IPv4 Router Alert (``RTRALT``) option.
 
         Structure of IPv4 Router Alert (``RTRALT``) option [:rfc:`2113`]:
@@ -985,16 +983,16 @@ class IPv4(IP[DataType_IPv4]):
 
         _code = self._read_unpack(2)
 
-        data = DataType_RTRALTOption(
+        data = Data_RTRALTOption(
             code=kind,
             type=self._read_ipv4_opt_type(kind),
             length=size,
-            alert=RegType_RouterAlert.get(_code),
+            alert=Enum_RouterAlert.get(_code),
         )
 
         return data
 
-    def _read_opt_qs(self, kind: 'RegType_OptionNumber', *, options: 'Option') -> 'DataType_QSOption':  # pylint: disable=unused-argument
+    def _read_opt_qs(self, kind: 'Enum_OptionNumber', *, options: 'Option') -> 'Data_QSOption':  # pylint: disable=unused-argument
         """Read IPv4 Quick Start (``QS``) option.
 
         Structure of IPv4 Quick Start (``QS``) option [:rfc:`4782`]:
@@ -1047,17 +1045,17 @@ class IPv4(IP[DataType_IPv4]):
         _nonr = self._read_binary(4)
         _qsnn = int(_nonr[:30], base=2)
 
-        _qsfn = RegType_QSFunction.get(_func)
-        if _qsfn not in (RegType_QSFunction.Quick_Start_Request, RegType_QSFunction.Report_of_Approved_Rate):
+        _qsfn = Enum_QSFunction.get(_func)
+        if _qsfn not in (Enum_QSFunction.Quick_Start_Request, Enum_QSFunction.Report_of_Approved_Rate):
             raise ProtocolError(f'{self.alias}: [OptNo {kind}] invalid format')
 
-        data = DataType_QSOption(
+        data = Data_QSOption(
             code=kind,
             type=self._read_ipv4_opt_type(kind),
             length=size,
             func=_qsfn,
             rate=40000 * (2 ** _rate) / 1000,
-            ttl=None if _func != RegType_QSFunction.Quick_Start_Request else datetime.timedelta(seconds=_ttlv),
+            ttl=None if _func != Enum_QSFunction.Quick_Start_Request else datetime.timedelta(seconds=_ttlv),
             nounce=_qsnn,
         )
 

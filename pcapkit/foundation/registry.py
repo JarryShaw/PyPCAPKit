@@ -42,34 +42,34 @@ if TYPE_CHECKING:
     from pcapkit.const.tcp.mp_tcp_option import MPTCPOption as TCP_MPTCPOption
     from pcapkit.const.tcp.option import Option as TCP_Option
     from pcapkit.corekit.multidict import OrderedMultiDict
-    from pcapkit.protocols.data.application.httpv2 import HTTP as DataType_HTTPv2
-    from pcapkit.protocols.data.internet.hopopt import Option as DataType_HOPOPT_Option
-    from pcapkit.protocols.data.internet.ipv6_opts import Option as DataType_IPv6_Opts_Option
+    from pcapkit.protocols.data.application.httpv2 import HTTP as Data_HTTPv2
+    from pcapkit.protocols.data.internet.hopopt import Option as Data_HOPOPT_Option
+    from pcapkit.protocols.data.internet.ipv6_opts import Option as Data_IPv6_Opts_Option
     from pcapkit.protocols.data.internet.ipv6_route import \
-        RoutingType as DataType_IPv6_Route_RoutingType
-    from pcapkit.protocols.data.transport.tcp import MPTCP as DataType_TCP_MPTCP
-    from pcapkit.protocols.data.transport.tcp import Option as DataType_TCP_Option
+        RoutingType as Data_IPv6_Route_RoutingType
+    from pcapkit.protocols.data.transport.tcp import MPTCP as Data_TCP_MPTCP
+    from pcapkit.protocols.data.transport.tcp import Option as Data_TCP_Option
 
     #from pcapkit.protocols.application.httpv2 import FrameParser as HTTP_FrameParser
-    HTTP_FrameParser = Callable[[HTTPv2, HTTP_Frame, int, str, int], DataType_HTTPv2]
+    HTTP_FrameParser = Callable[[HTTPv2, HTTP_Frame, int, str, int], Data_HTTPv2]
     #from pcapkit.protocols.internet.hopopt import OptionParser as HOPOPT_OptionParser
     HOPOPT_OptionParser = Callable[[HOPOPT, IPv6_Option, int, bool,
-                                    NamedArg(OrderedMultiDict[IPv6_Option, DataType_HOPOPT_Option], 'options')],
-                                   DataType_HOPOPT_Option]
+                                    NamedArg(OrderedMultiDict[IPv6_Option, Data_HOPOPT_Option], 'options')],
+                                   Data_HOPOPT_Option]
     #from pcapkit.protocols.internet.ipv6_opts import OptionParser as IPv6_Opts_OptionParser
     IPv6_Opts_OptionParser = Callable[[IPv6_Opts, IPv6_Option, int, bool,
-                                       NamedArg(OrderedMultiDict[IPv6_Option, DataType_IPv6_Opts_Option], 'options')],
-                                      DataType_IPv6_Opts_Option]
+                                       NamedArg(OrderedMultiDict[IPv6_Option, Data_IPv6_Opts_Option], 'options')],
+                                      Data_IPv6_Opts_Option]
     #from pcapkit.protocols.internet.ipv6_route import TypeParser as IPv6_Route_TypeParser
-    IPv6_Route_TypeParser = Callable[[IPv6_Route, int], DataType_IPv6_Route_RoutingType]
+    IPv6_Route_TypeParser = Callable[[IPv6_Route, int], Data_IPv6_Route_RoutingType]
     #from pcapkit.protocols.transport.tcp import MPOptionParser as TCP_MPOptionParser
     TCP_MPOptionParser = Callable[[TCP, TCP_MPTCPOption, int, str,
-                                   NamedArg(OrderedMultiDict[TCP_Option, DataType_TCP_Option], 'options')],
-                                  DataType_TCP_MPTCP]
+                                   NamedArg(OrderedMultiDict[TCP_Option, Data_TCP_Option], 'options')],
+                                  Data_TCP_MPTCP]
     #from pcapkit.protocols.transport.tcp import OptionParser as TCP_OptionParser
     TCP_OptionParser = Callable[[TCP, TCP_Option,
-                                 NamedArg(OrderedMultiDict[TCP_Option, DataType_TCP_Option], 'options')],
-                                DataType_TCP_Option]
+                                 NamedArg(OrderedMultiDict[TCP_Option, Data_TCP_Option], 'options')],
+                                Data_TCP_Option]
 
 __all__ = [
     'register_protocol',

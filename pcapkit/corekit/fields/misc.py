@@ -10,7 +10,7 @@ from pcapkit.utilities.exceptions import NoDefaultValue
 __all__ = ['ConditionalField', 'PayloadField']
 
 if TYPE_CHECKING:
-    from typing import Any, IO, Callable, Optional, Type
+    from typing import IO, Any, Callable, Optional, Type
 
     from pcapkit.corekit.fields.field import Field, NoValueType
     from pcapkit.protocols.protocol import Protocol
@@ -211,7 +211,8 @@ class PayloadField(_Field[_TP]):
         self._protocol = protocol
 
         if default is NoValue:
-            from pcapkit.protocols.misc.null import NoPayload  # pylint: disable=import-outside-top-level
+            from pcapkit.protocols.misc.null import \
+                NoPayload  # pylint: disable=import-outside-top-level
             default = cast('_TP', NoPayload())
         self._default = default
 

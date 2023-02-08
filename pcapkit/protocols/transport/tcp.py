@@ -42,52 +42,51 @@ import sys
 from typing import TYPE_CHECKING
 
 from pcapkit.const.reg.transtype import TransType
-from pcapkit.const.tcp.checksum import Checksum as RegType_Checksum
-from pcapkit.const.tcp.mp_tcp_option import MPTCPOption as RegType_MPTCPOption
-from pcapkit.const.tcp.option import Option as RegType_Option
+from pcapkit.const.tcp.checksum import Checksum as Enum_Checksum
+from pcapkit.const.tcp.mp_tcp_option import MPTCPOption as Enum_MPTCPOption
+from pcapkit.const.tcp.option import Option as Enum_Option
 from pcapkit.corekit.multidict import OrderedMultiDict
-from pcapkit.protocols.data.transport.tcp import CC as DataType_CC
-from pcapkit.protocols.data.transport.tcp import MPTCP as DataType_MPTCP
-from pcapkit.protocols.data.transport.tcp import MPTCPDSS as DataType_MPTCPDSS
-from pcapkit.protocols.data.transport.tcp import SACK as DataType_SACK
-from pcapkit.protocols.data.transport.tcp import TCP as DataType_TCP
+from pcapkit.protocols.data.transport.tcp import CC as Data_CC
+from pcapkit.protocols.data.transport.tcp import MPTCP as Data_MPTCP
+from pcapkit.protocols.data.transport.tcp import MPTCPDSS as Data_MPTCPDSS
+from pcapkit.protocols.data.transport.tcp import SACK as Data_SACK
+from pcapkit.protocols.data.transport.tcp import TCP as Data_TCP
+from pcapkit.protocols.data.transport.tcp import AlternateChecksumData as Data_AlternateChecksumData
 from pcapkit.protocols.data.transport.tcp import \
-    AlternateChecksumData as DataType_AlternateChecksumData
+    AlternateChecksumRequest as Data_AlternateChecksumRequest
+from pcapkit.protocols.data.transport.tcp import Authentication as Data_Authentication
+from pcapkit.protocols.data.transport.tcp import CCEcho as Data_CCEcho
+from pcapkit.protocols.data.transport.tcp import CCNew as Data_CCNew
+from pcapkit.protocols.data.transport.tcp import Echo as Data_Echo
+from pcapkit.protocols.data.transport.tcp import EchoReply as Data_EchoReply
+from pcapkit.protocols.data.transport.tcp import EndOfOptionList as Data_EndOfOptionList
+from pcapkit.protocols.data.transport.tcp import FastOpenCookie as Data_FastOpenCookie
+from pcapkit.protocols.data.transport.tcp import Flags as Data_Flags
+from pcapkit.protocols.data.transport.tcp import MaximumSegmentSize as Data_MaximumSegmentSize
+from pcapkit.protocols.data.transport.tcp import MD5Signature as Data_MD5Signature
+from pcapkit.protocols.data.transport.tcp import MPTCPAddAddress as Data_MPTCPAddAddress
+from pcapkit.protocols.data.transport.tcp import MPTCPCapable as Data_MPTCPCapable
+from pcapkit.protocols.data.transport.tcp import MPTCPCapableFlag as Data_MPTCPCapableFlag
+from pcapkit.protocols.data.transport.tcp import MPTCPDSSFlag as Data_MPTCPDSSFlag
+from pcapkit.protocols.data.transport.tcp import MPTCPFallback as Data_MPTCPFallback
+from pcapkit.protocols.data.transport.tcp import MPTCPFastclose as Data_MPTCPFastclose
+from pcapkit.protocols.data.transport.tcp import MPTCPJoinACK as Data_MPTCPJoinACK
+from pcapkit.protocols.data.transport.tcp import MPTCPJoinSYN as Data_MPTCPJoinSYN
+from pcapkit.protocols.data.transport.tcp import MPTCPJoinSYNACK as Data_MPTCPJoinSYNACK
+from pcapkit.protocols.data.transport.tcp import MPTCPPriority as Data_MPTCPPriority
+from pcapkit.protocols.data.transport.tcp import MPTCPRemoveAddress as Data_MPTCPRemoveAddress
+from pcapkit.protocols.data.transport.tcp import MPTCPUnknown as Data_MPTCPUnknown
+from pcapkit.protocols.data.transport.tcp import NoOperation as Data_NoOperation
 from pcapkit.protocols.data.transport.tcp import \
-    AlternateChecksumRequest as DataType_AlternateChecksumRequest
-from pcapkit.protocols.data.transport.tcp import Authentication as DataType_Authentication
-from pcapkit.protocols.data.transport.tcp import CCEcho as DataType_CCEcho
-from pcapkit.protocols.data.transport.tcp import CCNew as DataType_CCNew
-from pcapkit.protocols.data.transport.tcp import Echo as DataType_Echo
-from pcapkit.protocols.data.transport.tcp import EchoReply as DataType_EchoReply
-from pcapkit.protocols.data.transport.tcp import EndOfOptionList as DataType_EndOfOptionList
-from pcapkit.protocols.data.transport.tcp import FastOpenCookie as DataType_FastOpenCookie
-from pcapkit.protocols.data.transport.tcp import Flags as DataType_Flags
-from pcapkit.protocols.data.transport.tcp import MaximumSegmentSize as DataType_MaximumSegmentSize
-from pcapkit.protocols.data.transport.tcp import MD5Signature as DataType_MD5Signature
-from pcapkit.protocols.data.transport.tcp import MPTCPAddAddress as DataType_MPTCPAddAddress
-from pcapkit.protocols.data.transport.tcp import MPTCPCapable as DataType_MPTCPCapable
-from pcapkit.protocols.data.transport.tcp import MPTCPCapableFlag as DataType_MPTCPCapableFlag
-from pcapkit.protocols.data.transport.tcp import MPTCPDSSFlag as DataType_MPTCPDSSFlag
-from pcapkit.protocols.data.transport.tcp import MPTCPFallback as DataType_MPTCPFallback
-from pcapkit.protocols.data.transport.tcp import MPTCPFastclose as DataType_MPTCPFastclose
-from pcapkit.protocols.data.transport.tcp import MPTCPJoinACK as DataType_MPTCPJoinACK
-from pcapkit.protocols.data.transport.tcp import MPTCPJoinSYN as DataType_MPTCPJoinSYN
-from pcapkit.protocols.data.transport.tcp import MPTCPJoinSYNACK as DataType_MPTCPJoinSYNACK
-from pcapkit.protocols.data.transport.tcp import MPTCPPriority as DataType_MPTCPPriority
-from pcapkit.protocols.data.transport.tcp import MPTCPRemoveAddress as DataType_MPTCPRemoveAddress
-from pcapkit.protocols.data.transport.tcp import MPTCPUnknown as DataType_MPTCPUnknown
-from pcapkit.protocols.data.transport.tcp import NoOperation as DataType_NoOperation
+    PartialOrderConnectionPermitted as Data_PartialOrderConnectionPermitted
 from pcapkit.protocols.data.transport.tcp import \
-    PartialOrderConnectionPermitted as DataType_PartialOrderConnectionPermitted
-from pcapkit.protocols.data.transport.tcp import \
-    PartialOrderConnectionProfile as DataType_PartialOrderConnectionProfile
-from pcapkit.protocols.data.transport.tcp import QuickStartResponse as DataType_QuickStartResponse
-from pcapkit.protocols.data.transport.tcp import SACKPermitted as DataType_SACKPermitted
-from pcapkit.protocols.data.transport.tcp import Timestamp as DataType_Timestamp
-from pcapkit.protocols.data.transport.tcp import UnassignedOption as DataType_UnassignedOption
-from pcapkit.protocols.data.transport.tcp import UserTimeout as DataType_UserTimeout
-from pcapkit.protocols.data.transport.tcp import WindowScale as DataType_WindowScale
+    PartialOrderConnectionProfile as Data_PartialOrderConnectionProfile
+from pcapkit.protocols.data.transport.tcp import QuickStartResponse as Data_QuickStartResponse
+from pcapkit.protocols.data.transport.tcp import SACKPermitted as Data_SACKPermitted
+from pcapkit.protocols.data.transport.tcp import Timestamp as Data_Timestamp
+from pcapkit.protocols.data.transport.tcp import UnassignedOption as Data_UnassignedOption
+from pcapkit.protocols.data.transport.tcp import UserTimeout as Data_UserTimeout
+from pcapkit.protocols.data.transport.tcp import WindowScale as Data_WindowScale
 from pcapkit.protocols.transport.transport import Transport
 from pcapkit.utilities.exceptions import ProtocolError
 
@@ -97,18 +96,18 @@ if TYPE_CHECKING:
     from mypy_extensions import NamedArg
     from typing_extensions import Literal
 
-    from pcapkit.protocols.data.transport.tcp import MPTCPJoin as DataType_MPTCPJoin
-    from pcapkit.protocols.data.transport.tcp import Option as DataType_Option
+    from pcapkit.protocols.data.transport.tcp import MPTCPJoin as Data_MPTCPJoin
+    from pcapkit.protocols.data.transport.tcp import Option as Data_Option
 
-    Option = OrderedMultiDict[RegType_Option, DataType_Option]
-    OptionParser = Callable[['TCP', RegType_Option, NamedArg(Option, 'options')], DataType_Option]
-    MPOptionParser = Callable[['TCP', RegType_MPTCPOption, int, str, NamedArg(Option, 'options')], DataType_MPTCP]
+    Option = OrderedMultiDict[Enum_Option, Data_Option]
+    OptionParser = Callable[['TCP', Enum_Option, NamedArg(Option, 'options')], Data_Option]
+    MPOptionParser = Callable[['TCP', Enum_MPTCPOption, int, str, NamedArg(Option, 'options')], Data_MPTCP]
 
 
 __all__ = ['TCP']
 
 
-class TCP(Transport[DataType_TCP]):
+class TCP(Transport[Data_TCP]):
     """This class implements Transmission Control Protocol.
 
     This class currently supports parsing of the following protocols, which are
@@ -222,7 +221,7 @@ class TCP(Transport[DataType_TCP]):
         },
     )
 
-    #: DefaultDict[RegType_Option, str | OptionParser]: Option code to method
+    #: DefaultDict[Enum_Option, str | OptionParser]: Option code to method
     #: mapping, c.f. :meth:`_read_tcp_options`. Method names are expected to be
     #: referred to the class by ``_read_mode_${name}``, and if such name not
     #: found, the value should then be a method that can parse the option by
@@ -230,43 +229,43 @@ class TCP(Transport[DataType_TCP]):
     __option__ = collections.defaultdict(
         lambda: 'donone',
         {
-            RegType_Option.End_of_Option_List: 'eool',                 # [RFC 793] End of Option List
-            RegType_Option.No_Operation: 'nop',                        # [RFC 793] No-Operation
-            RegType_Option.Maximum_Segment_Size: 'mss',                # [RFC 793] Maximum Segment Size
-            RegType_Option.Window_Scale: 'ws',                         # [RFC 7323] Window Scale
-            RegType_Option.SACK_Permitted: 'sackpmt',                  # [RFC 2018] SACK Permitted
-            RegType_Option.SACK: 'sack',                               # [RFC 2018] SACK
-            RegType_Option.Echo: 'echo',                               # [RFC 1072] Echo
-            RegType_Option.Echo_Reply: 'echore',                       # [RFC 1072] Echo Reply
-            RegType_Option.Timestamps: 'ts',                           # [RFC 7323] Timestamps
-            RegType_Option.Partial_Order_Connection_Permitted: 'poc',  # [RFC 1693] POC Permitted
-            RegType_Option.Partial_Order_Service_Profile: 'pocsp',     # [RFC 1693] POC-Serv Profile
-            RegType_Option.CC: 'cc',                                   # [RFC 1644] Connection Count
-            RegType_Option.CC_NEW: 'ccnew',                            # [RFC 1644] CC.NEW
-            RegType_Option.CC_ECHO: 'ccecho',                          # [RFC 1644] CC.ECHO
-            RegType_Option.TCP_Alternate_Checksum_Request: 'chkreq',   # [RFC 1146] Alt-Chksum Request
-            RegType_Option.TCP_Alternate_Checksum_Data: 'chksum',      # [RFC 1146] Alt-Chksum Data
-            RegType_Option.MD5_Signature_Option: 'sig',                # [RFC 2385] MD5 Signature Option
-            RegType_Option.Quick_Start_Response: 'qs',                 # [RFC 4782] Quick-Start Response
-            RegType_Option.User_Timeout_Option: 'timeout',             # [RFC 5482] User Timeout Option
-            RegType_Option.TCP_Authentication_Option: 'ao',            # [RFC 5925] TCP Authentication Option
-            RegType_Option.Multipath_TCP: 'mp',                        # [RFC 6824] Multipath TCP
-            RegType_Option.TCP_Fast_Open_Cookie: 'fastopen',           # [RFC 7413] Fast Open
+            Enum_Option.End_of_Option_List: 'eool',                 # [RFC 793] End of Option List
+            Enum_Option.No_Operation: 'nop',                        # [RFC 793] No-Operation
+            Enum_Option.Maximum_Segment_Size: 'mss',                # [RFC 793] Maximum Segment Size
+            Enum_Option.Window_Scale: 'ws',                         # [RFC 7323] Window Scale
+            Enum_Option.SACK_Permitted: 'sackpmt',                  # [RFC 2018] SACK Permitted
+            Enum_Option.SACK: 'sack',                               # [RFC 2018] SACK
+            Enum_Option.Echo: 'echo',                               # [RFC 1072] Echo
+            Enum_Option.Echo_Reply: 'echore',                       # [RFC 1072] Echo Reply
+            Enum_Option.Timestamps: 'ts',                           # [RFC 7323] Timestamps
+            Enum_Option.Partial_Order_Connection_Permitted: 'poc',  # [RFC 1693] POC Permitted
+            Enum_Option.Partial_Order_Service_Profile: 'pocsp',     # [RFC 1693] POC-Serv Profile
+            Enum_Option.CC: 'cc',                                   # [RFC 1644] Connection Count
+            Enum_Option.CC_NEW: 'ccnew',                            # [RFC 1644] CC.NEW
+            Enum_Option.CC_ECHO: 'ccecho',                          # [RFC 1644] CC.ECHO
+            Enum_Option.TCP_Alternate_Checksum_Request: 'chkreq',   # [RFC 1146] Alt-Chksum Request
+            Enum_Option.TCP_Alternate_Checksum_Data: 'chksum',      # [RFC 1146] Alt-Chksum Data
+            Enum_Option.MD5_Signature_Option: 'sig',                # [RFC 2385] MD5 Signature Option
+            Enum_Option.Quick_Start_Response: 'qs',                 # [RFC 4782] Quick-Start Response
+            Enum_Option.User_Timeout_Option: 'timeout',             # [RFC 5482] User Timeout Option
+            Enum_Option.TCP_Authentication_Option: 'ao',            # [RFC 5925] TCP Authentication Option
+            Enum_Option.Multipath_TCP: 'mp',                        # [RFC 6824] Multipath TCP
+            Enum_Option.TCP_Fast_Open_Cookie: 'fastopen',           # [RFC 7413] Fast Open
         },
     )  # type: DefaultDict[int, str | OptionParser]
 
-    #: DefaultDict[RegType_MPTCPOption, str | MPOptionParser]: Option code to length mapping,
+    #: DefaultDict[Enum_MPTCPOption, str | MPOptionParser]: Option code to length mapping,
     __mp_option__ = collections.defaultdict(
         lambda: 'unknown',
         {
-            RegType_MPTCPOption.MP_CAPABLE: 'capable',
-            RegType_MPTCPOption.MP_JOIN: 'join',
-            RegType_MPTCPOption.DSS: 'dss',
-            RegType_MPTCPOption.ADD_ADDR: 'addaddr',
-            RegType_MPTCPOption.REMOVE_ADDR: 'removeaddr',
-            RegType_MPTCPOption.MP_PRIO: 'prio',
-            RegType_MPTCPOption.MP_FAIL: 'fail',
-            RegType_MPTCPOption.MP_FASTCLOSE: 'fastclose',
+            Enum_MPTCPOption.MP_CAPABLE: 'capable',
+            Enum_MPTCPOption.MP_JOIN: 'join',
+            Enum_MPTCPOption.DSS: 'dss',
+            Enum_MPTCPOption.ADD_ADDR: 'addaddr',
+            Enum_MPTCPOption.REMOVE_ADDR: 'removeaddr',
+            Enum_MPTCPOption.MP_PRIO: 'prio',
+            Enum_MPTCPOption.MP_FAIL: 'fail',
+            Enum_MPTCPOption.MP_FASTCLOSE: 'fastclose',
         },
     )  # type: DefaultDict[int, str | MPOptionParser]
 
@@ -298,7 +297,7 @@ class TCP(Transport[DataType_TCP]):
     # Methods.
     ##########################################################################
 
-    def read(self, length: 'Optional[int]' = None, **kwargs: 'Any') -> 'DataType_TCP':  # pylint: disable=unused-argument
+    def read(self, length: 'Optional[int]' = None, **kwargs: 'Any') -> 'Data_TCP':  # pylint: disable=unused-argument
         """Read Transmission Control Protocol (TCP).
 
         Structure of TCP header [:rfc:`793`]::
@@ -344,13 +343,13 @@ class TCP(Transport[DataType_TCP]):
         _csum = self._read_fileng(2)
         _urgp = self._read_unpack(2)
 
-        tcp = DataType_TCP(
+        tcp = Data_TCP(
             srcport=_srcp,
             dstport=_dstp,
             seq=_seqn,
             ack=_ackn,
             hdr_len=int(_lenf[:4], base=2) * 4,
-            flags=DataType_Flags(
+            flags=Data_Flags(
                 ns=bool(int(_lenf[7])),
                 cwr=bool(int(_flag[0])),
                 ece=bool(int(_flag[1])),
@@ -392,7 +391,7 @@ class TCP(Transport[DataType_TCP]):
         raise NotImplementedError
 
     @classmethod
-    def register_option(cls, code: 'RegType_Option', meth: 'str | OptionParser') -> 'None':
+    def register_option(cls, code: 'Enum_Option', meth: 'str | OptionParser') -> 'None':
         """Register an option parser.
 
         Args:
@@ -403,7 +402,7 @@ class TCP(Transport[DataType_TCP]):
         cls.__option__[code] = meth
 
     @classmethod
-    def register_mp_option(cls, code: 'RegType_MPTCPOption', meth: 'str | MPOptionParser') -> 'None':
+    def register_mp_option(cls, code: 'Enum_MPTCPOption', meth: 'str | MPOptionParser') -> 'None':
         """Register an MPTCP option parser.
 
         Args:
@@ -462,7 +461,7 @@ class TCP(Transport[DataType_TCP]):
                 break
 
             # fetch corresponding option
-            kind = RegType_Option.get(code)
+            kind = Enum_Option.get(code)
 
             # extract option data
             name = self.__option__[code]  # type: str | OptionParser
@@ -471,8 +470,8 @@ class TCP(Transport[DataType_TCP]):
                 meth = getattr(
                     self, meth_name,
                     self._read_mode_donone
-                )  # type: Callable[[RegType_Option, NamedArg(Option, 'options')], DataType_Option]
-                data = meth(kind, options=options)  # type: DataType_Option
+                )  # type: Callable[[Enum_Option, NamedArg(Option, 'options')], Data_Option]
+                data = meth(kind, options=options)  # type: Data_Option
             else:
                 data = name(self, kind, options=options)
 
@@ -481,7 +480,7 @@ class TCP(Transport[DataType_TCP]):
             options.add(kind, data)
 
             # break when eol triggered
-            if kind == RegType_Option.End_of_Option_List:
+            if kind == Enum_Option.End_of_Option_List:
                 break
 
         # get padding
@@ -491,7 +490,7 @@ class TCP(Transport[DataType_TCP]):
 
         return options
 
-    def _read_mode_donone(self, kind: 'RegType_Option', *, options: 'Option') -> 'DataType_UnassignedOption':  # pylint: disable=unused-argument
+    def _read_mode_donone(self, kind: 'Enum_Option', *, options: 'Option') -> 'Data_UnassignedOption':  # pylint: disable=unused-argument
         """Read options request no process.
 
         Arguments:
@@ -505,14 +504,14 @@ class TCP(Transport[DataType_TCP]):
         size = self._read_unpack(1)
         data = self._read_fileng(size - 2)
 
-        option = DataType_UnassignedOption(
+        option = Data_UnassignedOption(
             kind=kind,
             length=size,
             data=data,
         )
         return option
 
-    def _read_mode_eool(self, kind: 'RegType_Option', *, options: 'Option') -> 'DataType_EndOfOptionList':  # pylint: disable=unused-argument
+    def _read_mode_eool(self, kind: 'Enum_Option', *, options: 'Option') -> 'Data_EndOfOptionList':  # pylint: disable=unused-argument
         """Read TCP End of Option List option.
 
         Structure of TCP end of option list option [:rfc:`793`]:
@@ -532,12 +531,12 @@ class TCP(Transport[DataType_TCP]):
             Parsed option data.
 
         """
-        return DataType_EndOfOptionList(
+        return Data_EndOfOptionList(
             kind=kind,
             length=1,
         )
 
-    def _read_mode_nop(self, kind: 'RegType_Option', *, options: 'Option') -> 'DataType_NoOperation':  # pylint: disable=unused-argument
+    def _read_mode_nop(self, kind: 'Enum_Option', *, options: 'Option') -> 'Data_NoOperation':  # pylint: disable=unused-argument
         """Read TCP No Operation option.
 
         Structure of TCP maximum segment size option [:rfc:`793`]:
@@ -557,12 +556,12 @@ class TCP(Transport[DataType_TCP]):
             Parsed option data.
 
         """
-        return DataType_NoOperation(
+        return Data_NoOperation(
             kind=kind,
             length=1,
         )
 
-    def _read_mode_mss(self, kind: 'RegType_Option', *, options: 'Option') -> 'DataType_MaximumSegmentSize':  # pylint: disable=unused-argument
+    def _read_mode_mss(self, kind: 'Enum_Option', *, options: 'Option') -> 'Data_MaximumSegmentSize':  # pylint: disable=unused-argument
         """Read TCP max segment size option.
 
         Structure of TCP maximum segment size option [:rfc:`793`]:
@@ -590,14 +589,14 @@ class TCP(Transport[DataType_TCP]):
             raise ProtocolError(f'{self.alias}: [OptNo {kind.value}] invalid format')
         mss = self._read_unpack(size - 2)
 
-        data = DataType_MaximumSegmentSize(
+        data = Data_MaximumSegmentSize(
             kind=kind,
             length=size,
             mss=mss,
         )
         return data
 
-    def _read_mode_ws(self, kind: 'RegType_Option', *, options: 'Option') -> 'DataType_WindowScale':  # pylint: disable=unused-argument
+    def _read_mode_ws(self, kind: 'Enum_Option', *, options: 'Option') -> 'Data_WindowScale':  # pylint: disable=unused-argument
         """Read TCP windows scale option.
 
         Structure of TCP window scale option [:rfc:`7323`]:
@@ -625,14 +624,14 @@ class TCP(Transport[DataType_TCP]):
             raise ProtocolError(f'{self.alias}: [OptNo {kind.value}] invalid format')
         scnt = self._read_unpack(size - 2)
 
-        data = DataType_WindowScale(
+        data = Data_WindowScale(
             kind=kind,
             length=size,
             shift=scnt,
         )
         return data
 
-    def _read_mode_sackpmt(self, kind: 'RegType_Option', *, options: 'Option') -> 'DataType_SACKPermitted':  # pylint: disable=unused-argument
+    def _read_mode_sackpmt(self, kind: 'Enum_Option', *, options: 'Option') -> 'Data_SACKPermitted':  # pylint: disable=unused-argument
         """Read TCP SACK permitted option.
 
         Structure of TCP SACK permitted option [:rfc:`2018`]:
@@ -658,12 +657,12 @@ class TCP(Transport[DataType_TCP]):
         if size != 2:
             raise ProtocolError(f'{self.alias}: [OptNo {kind.value}] invalid format')
 
-        return DataType_SACKPermitted(
+        return Data_SACKPermitted(
             kind=kind,
             length=size,
         )
 
-    def _read_mode_sack(self, kind: 'RegType_Option', *, options: 'Option') -> 'DataType_SACK':  # pylint: disable=unused-argument
+    def _read_mode_sack(self, kind: 'Enum_Option', *, options: 'Option') -> 'Data_SACK':  # pylint: disable=unused-argument
         """Read TCP SACK option.
 
         Structure of TCP SACK option [:rfc:`2018`]:
@@ -703,14 +702,14 @@ class TCP(Transport[DataType_TCP]):
         for _ in range(size):
             sack.append(self._read_unpack(8))
 
-        data = DataType_SACK(
+        data = Data_SACK(
             kind=kind,
             length=size * 8 + 2,
             sack=tuple(sack),
         )
         return data
 
-    def _read_mode_echo(self, kind: 'RegType_Option', *, options: 'Option') -> 'DataType_Echo':  # pylint: disable=unused-argument
+    def _read_mode_echo(self, kind: 'Enum_Option', *, options: 'Option') -> 'Data_Echo':  # pylint: disable=unused-argument
         """Read TCP echo option.
 
         Structure of TCP echo option [:rfc:`1072`]:
@@ -737,14 +736,14 @@ class TCP(Transport[DataType_TCP]):
             raise ProtocolError(f'{self.alias}: [OptNo {kind.value}] invalid format')
         echo = self._read_fileng(4)
 
-        data = DataType_Echo(
+        data = Data_Echo(
             kind=kind,
             length=size,
             data=echo,
         )
         return data
 
-    def _read_mode_echore(self, kind: 'RegType_Option', *, options: 'Option') -> 'DataType_EchoReply':  # pylint: disable=unused-argument
+    def _read_mode_echore(self, kind: 'Enum_Option', *, options: 'Option') -> 'Data_EchoReply':  # pylint: disable=unused-argument
         """Read TCP echo reply option.
 
         Structure of TCP echo reply option [:rfc:`1072`]:
@@ -771,14 +770,14 @@ class TCP(Transport[DataType_TCP]):
             raise ProtocolError(f'{self.alias}: [OptNo {kind.value}] invalid format')
         echo = self._read_fileng(4)
 
-        data = DataType_EchoReply(
+        data = Data_EchoReply(
             kind=kind,
             length=size,
             data=echo,
         )
         return data
 
-    def _read_mode_ts(self, kind: 'RegType_Option', *, options: 'Option') -> 'DataType_Timestamp':  # pylint: disable=unused-argument
+    def _read_mode_ts(self, kind: 'Enum_Option', *, options: 'Option') -> 'Data_Timestamp':  # pylint: disable=unused-argument
         """Read TCP timestamps option.
 
         Structure of TCP timestamp option [:rfc:`7323`]:
@@ -807,7 +806,7 @@ class TCP(Transport[DataType_TCP]):
         tsval = self._read_unpack(4)
         tsecr = self._read_fileng(4)
 
-        data = DataType_Timestamp(
+        data = Data_Timestamp(
             kind=kind,
             length=size,
             timestamp=tsval,
@@ -815,8 +814,8 @@ class TCP(Transport[DataType_TCP]):
         )
         return data
 
-    def _read_mode_poc(self, kind: 'RegType_Option', *,
-                       options: 'Option') -> 'DataType_PartialOrderConnectionPermitted':  # pylint: disable=unused-argument
+    def _read_mode_poc(self, kind: 'Enum_Option', *,
+                       options: 'Option') -> 'Data_PartialOrderConnectionPermitted':  # pylint: disable=unused-argument
         """Read TCP partial order connection service profile option.
 
         Structure of TCP ``POC-Permitted`` option [:rfc:`1693`][:rfc:`6247`]:
@@ -842,13 +841,13 @@ class TCP(Transport[DataType_TCP]):
         if size != 2:
             raise ProtocolError(f'{self.alias}: [OptNo {kind.value}] invalid format')
 
-        return DataType_PartialOrderConnectionPermitted(
+        return Data_PartialOrderConnectionPermitted(
             kind=kind,
             length=size,
         )
 
-    def _read_mode_pocsp(self, kind: 'RegType_Option', *,
-                         options: 'Option') -> 'DataType_PartialOrderConnectionProfile':  # pylint: disable=unused-argument
+    def _read_mode_pocsp(self, kind: 'Enum_Option', *,
+                         options: 'Option') -> 'Data_PartialOrderConnectionProfile':  # pylint: disable=unused-argument
         """Read TCP partial order connection service profile option.
 
         Structure of TCP ``POC-SP`` option [:rfc:`1693`][:rfc:`6247`]:
@@ -876,7 +875,7 @@ class TCP(Transport[DataType_TCP]):
             raise ProtocolError(f'{self.alias}: [OptNo {kind.value}] invalid format')
         temp = self._read_binary(size)
 
-        data = DataType_PartialOrderConnectionProfile(
+        data = Data_PartialOrderConnectionProfile(
             kind=kind,
             length=size,
             start=bool(int(temp[0])),
@@ -885,7 +884,7 @@ class TCP(Transport[DataType_TCP]):
 
         return data
 
-    def _read_mode_cc(self, kind: 'RegType_Option', *, options: 'Option') -> 'DataType_CC':  # pylint: disable=unused-argument
+    def _read_mode_cc(self, kind: 'Enum_Option', *, options: 'Option') -> 'Data_CC':  # pylint: disable=unused-argument
         """Read TCP connection count option.
 
         Structure of TCP ``CC`` option [:rfc:`1644`]:
@@ -913,14 +912,14 @@ class TCP(Transport[DataType_TCP]):
             raise ProtocolError(f'{self.alias}: [OptNo {kind.value}] invalid format')
         cc = self._read_unpack(4)
 
-        data = DataType_CC(
+        data = Data_CC(
             kind=kind,
             length=size,
             cc=cc,
         )
         return data
 
-    def _read_mode_ccnew(self, kind: 'RegType_Option', *, options: 'Option') -> 'DataType_CCNew':  # pylint: disable=unused-argument
+    def _read_mode_ccnew(self, kind: 'Enum_Option', *, options: 'Option') -> 'Data_CCNew':  # pylint: disable=unused-argument
         """Read TCP connection count (new) option.
 
         Structure of TCP ``CC.NEW`` option [:rfc:`1644`]:
@@ -948,14 +947,14 @@ class TCP(Transport[DataType_TCP]):
             raise ProtocolError(f'{self.alias}: [OptNo {kind.value}] invalid format')
         cc = self._read_unpack(4)
 
-        data = DataType_CCNew(
+        data = Data_CCNew(
             kind=kind,
             length=size,
             cc=cc,
         )
         return data
 
-    def _read_mode_ccecho(self, kind: 'RegType_Option', *, options: 'Option') -> 'DataType_CCEcho':  # pylint: disable=unused-argument
+    def _read_mode_ccecho(self, kind: 'Enum_Option', *, options: 'Option') -> 'Data_CCEcho':  # pylint: disable=unused-argument
         """Read TCP connection count (echo) option.
 
         Structure of TCP ``CC.ECHO`` option [:rfc:`1644`]:
@@ -983,14 +982,14 @@ class TCP(Transport[DataType_TCP]):
             raise ProtocolError(f'{self.alias}: [OptNo {kind.value}] invalid format')
         cc = self._read_unpack(4)
 
-        data = DataType_CCEcho(
+        data = Data_CCEcho(
             kind=kind,
             length=size,
             cc=cc,
         )
         return data
 
-    def _read_mode_chkreq(self, kind: 'RegType_Option', *, options: 'Option') -> 'DataType_AlternateChecksumRequest':  # pylint: disable=unused-argument
+    def _read_mode_chkreq(self, kind: 'Enum_Option', *, options: 'Option') -> 'Data_AlternateChecksumRequest':  # pylint: disable=unused-argument
         """Read Alternate Checksum Request option.
 
         Structure of TCP ``CHKSUM-REQ`` [:rfc:`1146`][:rfc:`6247`]:
@@ -1015,9 +1014,9 @@ class TCP(Transport[DataType_TCP]):
         size = self._read_unpack(1)
         if size != 3:
             raise ProtocolError(f'{self.alias}: [OptNo {kind.value}] invalid format')
-        algo = RegType_Checksum.get(self._read_unpack(1))
+        algo = Enum_Checksum.get(self._read_unpack(1))
 
-        data = DataType_AlternateChecksumRequest(
+        data = Data_AlternateChecksumRequest(
             kind=kind,
             length=size,
             chksum=algo,
@@ -1025,7 +1024,7 @@ class TCP(Transport[DataType_TCP]):
 
         return data
 
-    def _read_mode_chksum(self, kind: 'RegType_Option', *, options: 'Option') -> 'DataType_AlternateChecksumData':  # pylint: disable=unused-argument
+    def _read_mode_chksum(self, kind: 'Enum_Option', *, options: 'Option') -> 'Data_AlternateChecksumData':  # pylint: disable=unused-argument
         """Read Alternate Checksum Data option.
 
         Structure of TCP ``CHKSUM`` [:rfc:`1146`][:rfc:`6247`]:
@@ -1047,7 +1046,7 @@ class TCP(Transport[DataType_TCP]):
         size = self._read_unpack(1)
         csum = self._read_fileng(size - 2)
 
-        data = DataType_AlternateChecksumData(
+        data = Data_AlternateChecksumData(
             kind=kind,
             length=size,
             data=csum,
@@ -1055,7 +1054,7 @@ class TCP(Transport[DataType_TCP]):
 
         return data
 
-    def _read_mode_sig(self, kind: 'RegType_Option', *, options: 'Option') -> 'DataType_MD5Signature':  # pylint: disable=unused-argument
+    def _read_mode_sig(self, kind: 'Enum_Option', *, options: 'Option') -> 'Data_MD5Signature':  # pylint: disable=unused-argument
         """Read MD5 Signature option.
 
         Structure of TCP ``SIG`` option [:rfc:`2385`]:
@@ -1090,14 +1089,14 @@ class TCP(Transport[DataType_TCP]):
             raise ProtocolError(f'{self.alias}: [OptNo {kind.value}] invalid format')
         sig = self._read_fileng(16)
 
-        data = DataType_MD5Signature(
+        data = Data_MD5Signature(
             kind=kind,
             length=size,
             digest=sig,
         )
         return data
 
-    def _read_mode_qs(self, kind: 'RegType_Option', *, options: 'Option') -> 'DataType_QuickStartResponse':  # pylint: disable=unused-argument
+    def _read_mode_qs(self, kind: 'Enum_Option', *, options: 'Option') -> 'Data_QuickStartResponse':  # pylint: disable=unused-argument
         """Read Quick-Start Response option.
 
         Structure of TCP ``QSopt`` [:rfc:`4782`]:
@@ -1131,7 +1130,7 @@ class TCP(Transport[DataType_TCP]):
         ttld = self._read_unpack(1)
         noun = self._read_binary(4)
 
-        data = DataType_QuickStartResponse(
+        data = Data_QuickStartResponse(
             kind=kind,
             length=size,
             req_rate=int(rvrr[4:], base=2),
@@ -1141,7 +1140,7 @@ class TCP(Transport[DataType_TCP]):
 
         return data
 
-    def _read_mode_timeout(self, kind: 'RegType_Option', *, options: 'Option') -> 'DataType_UserTimeout':  # pylint: disable=unused-argument
+    def _read_mode_timeout(self, kind: 'Enum_Option', *, options: 'Option') -> 'Data_UserTimeout':  # pylint: disable=unused-argument
         """Read User Timeout option.
 
         Structure of TCP ``TIMEOUT`` [:rfc:`5482`]:
@@ -1175,7 +1174,7 @@ class TCP(Transport[DataType_TCP]):
         else:
             time = datetime.timedelta(seconds=int(temp[0:], base=2))
 
-        data = DataType_UserTimeout(
+        data = Data_UserTimeout(
             kind=kind,
             length=size,
             timeout=time,
@@ -1183,7 +1182,7 @@ class TCP(Transport[DataType_TCP]):
 
         return data
 
-    def _read_mode_ao(self, kind: 'RegType_Option', *, options: 'Option') -> 'DataType_Authentication':  # pylint: disable=unused-argument
+    def _read_mode_ao(self, kind: 'Enum_Option', *, options: 'Option') -> 'Data_Authentication':  # pylint: disable=unused-argument
         """Read Authentication option.
 
         Structure of TCP ``AOopt`` [:rfc:`5925`]:
@@ -1218,7 +1217,7 @@ class TCP(Transport[DataType_TCP]):
         rkey = self._read_unpack(1)
         mac_ = self._read_fileng(size - 4)
 
-        data = DataType_Authentication(
+        data = Data_Authentication(
             kind=kind,
             length=size,
             key_id=key_,
@@ -1228,7 +1227,7 @@ class TCP(Transport[DataType_TCP]):
 
         return data
 
-    def _read_mode_mp(self, kind: 'RegType_Option', *, options: 'Option') -> 'DataType_MPTCP':  # pylint: disable=unused-argument
+    def _read_mode_mp(self, kind: 'Enum_Option', *, options: 'Option') -> 'Data_MPTCP':  # pylint: disable=unused-argument
         """Read Multipath TCP option.
 
         Structure of ``MP-TCP`` [:rfc:`6824`]:
@@ -1259,22 +1258,22 @@ class TCP(Transport[DataType_TCP]):
         dlen = size - 3                 # length of remaining data
 
         # fetch subtype-specific data
-        subtype = RegType_MPTCPOption.get(subt)
+        subtype = Enum_MPTCPOption.get(subt)
         name = self.__mp_option__[subt]  # type: str | MPOptionParser
         if isinstance(name, str):
             meth_name = f'_read_mptcp_{name}'
             meth = getattr(
                 self, meth_name,
                 self._read_mptcp_unknown
-            )  # type: Callable[[RegType_MPTCPOption, int, str, NamedArg(Option, 'options')], DataType_MPTCP]
+            )  # type: Callable[[Enum_MPTCPOption, int, str, NamedArg(Option, 'options')], Data_MPTCP]
             data = meth(subtype, dlen, bits, options=options)
         else:
             data = name(self, subtype, dlen, bits, options=options)
 
         return data
 
-    def _read_mptcp_unknown(self, kind: 'RegType_MPTCPOption', dlen: int,
-                            bits: str, *, options: 'Option') -> 'DataType_MPTCPUnknown':  # pylint: disable=unused-argument
+    def _read_mptcp_unknown(self, kind: 'Enum_MPTCPOption', dlen: int,
+                            bits: str, *, options: 'Option') -> 'Data_MPTCPUnknown':  # pylint: disable=unused-argument
         """Read unknown MPTCP subtype.
 
         Arguments:
@@ -1287,16 +1286,16 @@ class TCP(Transport[DataType_TCP]):
             Parsed option data.
 
         """
-        data = DataType_MPTCPUnknown(
-            kind=RegType_Option.Multipath_TCP,  # type: ignore[arg-type]
+        data = Data_MPTCPUnknown(
+            kind=Enum_Option.Multipath_TCP,  # type: ignore[arg-type]
             length=dlen + 3,
             subtype=kind,
             data=int(bits[:4], base=2).to_bytes(1, sys.byteorder) + self._read_fileng(dlen),
         )
         return data
 
-    def _read_mptcp_capable(self, kind: 'RegType_MPTCPOption', dlen: int,
-                            bits: str, *, options: 'Option') -> 'DataType_MPTCPCapable':  # pylint: disable=unused-argument
+    def _read_mptcp_capable(self, kind: 'Enum_MPTCPOption', dlen: int,
+                            bits: str, *, options: 'Option') -> 'Data_MPTCPCapable':  # pylint: disable=unused-argument
         """Read Multipath Capable option.
 
         Structure of ``MP_CAPABLE`` [:rfc:`6824`]:
@@ -1338,12 +1337,12 @@ class TCP(Transport[DataType_TCP]):
         skey = self._read_unpack(8)
         rkey = self._read_unpack(8) if dlen == 17 else None
 
-        data = DataType_MPTCPCapable(
-            kind=RegType_Option.Multipath_TCP,  # type: ignore[arg-type]
+        data = Data_MPTCPCapable(
+            kind=Enum_Option.Multipath_TCP,  # type: ignore[arg-type]
             length=dlen + 3,
             subtype=kind,
             version=vers,
-            flags=DataType_MPTCPCapableFlag(
+            flags=Data_MPTCPCapableFlag(
                 req=bool(int(bins[0])),
                 ext=bool(int(bins[1])),
                 hsa=bool(int(bins[7])),
@@ -1354,8 +1353,8 @@ class TCP(Transport[DataType_TCP]):
 
         return data
 
-    def _read_mptcp_join(self, kind: 'RegType_MPTCPOption', dlen: int,
-                         bits: str, *, options: 'Option') -> 'DataType_MPTCPJoin':
+    def _read_mptcp_join(self, kind: 'Enum_MPTCPOption', dlen: int,
+                         bits: str, *, options: 'Option') -> 'Data_MPTCPJoin':
         """Read Join Connection option.
 
         Arguments:
@@ -1379,8 +1378,8 @@ class TCP(Transport[DataType_TCP]):
             return self._read_join_ack(kind, dlen, bits, options=options)
         raise ProtocolError(f'{self.alias}: : [OptNo {kind.value}] invalid flags combination')
 
-    def _read_join_syn(self, kind: 'RegType_MPTCPOption', dlen: int,
-                       bits: str, *, options: 'Option') -> 'DataType_MPTCPJoinSYN':  # pylint: disable=unused-argument
+    def _read_join_syn(self, kind: 'Enum_MPTCPOption', dlen: int,
+                       bits: str, *, options: 'Option') -> 'Data_MPTCPJoinSYN':  # pylint: disable=unused-argument
         """Read Join Connection option for Initial SYN.
 
         Structure of ``MP_JOIN-SYN`` [:rfc:`6824`]:
@@ -1417,8 +1416,8 @@ class TCP(Transport[DataType_TCP]):
         rtkn = self._read_fileng(4)
         srno = self._read_unpack(4)
 
-        data = DataType_MPTCPJoinSYN(
-            kind=RegType_Option.Multipath_TCP,  # type: ignore[arg-type]
+        data = Data_MPTCPJoinSYN(
+            kind=Enum_Option.Multipath_TCP,  # type: ignore[arg-type]
             length=dlen + 3,
             subtype=kind,
             connection='SYN',
@@ -1430,8 +1429,8 @@ class TCP(Transport[DataType_TCP]):
 
         return data
 
-    def _read_join_synack(self, kind: 'RegType_MPTCPOption', dlen: int,
-                          bits: str, *, options: 'Option') -> 'DataType_MPTCPJoinSYNACK':  # pylint: disable=unused-argument
+    def _read_join_synack(self, kind: 'Enum_MPTCPOption', dlen: int,
+                          bits: str, *, options: 'Option') -> 'Data_MPTCPJoinSYNACK':  # pylint: disable=unused-argument
         """Read Join Connection option for Responding SYN/ACK.
 
         Structure of ``MP_JOIN-SYN/ACK`` [:rfc:`6824`]:
@@ -1470,8 +1469,8 @@ class TCP(Transport[DataType_TCP]):
         hmac = self._read_fileng(8)
         srno = self._read_unpack(4)
 
-        data = DataType_MPTCPJoinSYNACK(
-            kind=RegType_Option.Multipath_TCP,  # type: ignore[arg-type]
+        data = Data_MPTCPJoinSYNACK(
+            kind=Enum_Option.Multipath_TCP,  # type: ignore[arg-type]
             length=dlen + 3,
             subtype=kind,
             connection='SYN/ACK',
@@ -1483,8 +1482,8 @@ class TCP(Transport[DataType_TCP]):
 
         return data
 
-    def _read_join_ack(self, kind: 'RegType_MPTCPOption', dlen: int,
-                       bits: str, *, options: 'Option') -> 'DataType_MPTCPJoinACK':  # pylint: disable=unused-argument
+    def _read_join_ack(self, kind: 'Enum_MPTCPOption', dlen: int,
+                       bits: str, *, options: 'Option') -> 'Data_MPTCPJoinACK':  # pylint: disable=unused-argument
         """Read Join Connection option for Third ACK.
 
         Structure of ``MP_JOIN-ACK`` [:rfc:`6824`]:
@@ -1520,8 +1519,8 @@ class TCP(Transport[DataType_TCP]):
             raise ProtocolError(f'{self.alias}: [OptNo {kind.value}] invalid format')
         temp = self._read_fileng(20)
 
-        data = DataType_MPTCPJoinACK(
-            kind=RegType_Option.Multipath_TCP,  # type: ignore[arg-type]
+        data = Data_MPTCPJoinACK(
+            kind=Enum_Option.Multipath_TCP,  # type: ignore[arg-type]
             length=dlen + 3,
             subtype=kind,
             connection='ACK',
@@ -1530,8 +1529,8 @@ class TCP(Transport[DataType_TCP]):
 
         return data
 
-    def _read_mptcp_dss(self, kind: 'RegType_MPTCPOption', dlen: int,
-                        bits: str, *, options: 'Option') -> 'DataType_MPTCPDSS':  # pylint: disable=unused-argument
+    def _read_mptcp_dss(self, kind: 'Enum_MPTCPOption', dlen: int,
+                        bits: str, *, options: 'Option') -> 'Data_MPTCPDSS':  # pylint: disable=unused-argument
         """Read Data Sequence Signal (Data ACK and Data Sequence Mapping) option.
 
         Structure of ``DSS`` [:rfc:`6824`]:
@@ -1577,11 +1576,11 @@ class TCP(Transport[DataType_TCP]):
         dll_ = self._read_unpack(2) if Mflg else None
         chk_ = self._read_fileng(2) if Mflg else None
 
-        data = DataType_MPTCPDSS(
-            kind=RegType_Option.Multipath_TCP,  # type: ignore[arg-type]
+        data = Data_MPTCPDSS(
+            kind=Enum_Option.Multipath_TCP,  # type: ignore[arg-type]
             length=dlen + 3,
             subtype=kind,
-            flags=DataType_MPTCPDSSFlag(
+            flags=Data_MPTCPDSSFlag(
                 data_fin=bool(int(flag[3])),
                 dsn_oct=bool(int(flag[4])),
                 data_pre=Mflg,
@@ -1597,8 +1596,8 @@ class TCP(Transport[DataType_TCP]):
 
         return data
 
-    def _read_mptcp_addaddr(self, kind: 'RegType_MPTCPOption', dlen: int,
-                            bits: str, *, options: 'Option') -> 'DataType_MPTCPAddAddress':  # pylint: disable=unused-argument
+    def _read_mptcp_addaddr(self, kind: 'Enum_MPTCPOption', dlen: int,
+                            bits: str, *, options: 'Option') -> 'Data_MPTCPAddAddress':  # pylint: disable=unused-argument
         """Read Add Address option.
 
         Structure of ``ADD_ADDR`` [:rfc:`6824`]:
@@ -1641,8 +1640,8 @@ class TCP(Transport[DataType_TCP]):
         pt_l = dlen - 1 - ip_l
         port = self._read_unpack(2) if pt_l else None
 
-        data = DataType_MPTCPAddAddress(
-            kind=RegType_Option.Multipath_TCP,  # type: ignore[arg-type]
+        data = Data_MPTCPAddAddress(
+            kind=Enum_Option.Multipath_TCP,  # type: ignore[arg-type]
             length=dlen + 3,
             subtype=kind,
             version=vers,
@@ -1653,8 +1652,8 @@ class TCP(Transport[DataType_TCP]):
 
         return data
 
-    def _read_mptcp_remove(self, kind: 'RegType_MPTCPOption', dlen: int,
-                           bits: str, *, options: 'Option') -> 'DataType_MPTCPRemoveAddress':  # pylint: disable=unused-argument
+    def _read_mptcp_remove(self, kind: 'Enum_MPTCPOption', dlen: int,
+                           bits: str, *, options: 'Option') -> 'Data_MPTCPRemoveAddress':  # pylint: disable=unused-argument
         """Read Remove Address option.
 
         Structure of ``REMOVE_ADDR`` [:rfc:`6824`]:
@@ -1688,8 +1687,8 @@ class TCP(Transport[DataType_TCP]):
         for _ in range(dlen):
             adid.append(self._read_unpack(1))
 
-        data = DataType_MPTCPRemoveAddress(
-            kind=RegType_Option.Multipath_TCP,  # type: ignore[arg-type]
+        data = Data_MPTCPRemoveAddress(
+            kind=Enum_Option.Multipath_TCP,  # type: ignore[arg-type]
             length=dlen + 3,
             subtype=kind,
             addr_id=tuple(adid),
@@ -1697,8 +1696,8 @@ class TCP(Transport[DataType_TCP]):
 
         return data
 
-    def _read_mptcp_prio(self, kind: 'RegType_MPTCPOption', dlen: int,
-                         bits: str, *, options: 'Option') -> 'DataType_MPTCPPriority':  # pylint: disable=unused-argument
+    def _read_mptcp_prio(self, kind: 'Enum_MPTCPOption', dlen: int,
+                         bits: str, *, options: 'Option') -> 'Data_MPTCPPriority':  # pylint: disable=unused-argument
         """Read Change Subflow Priority option.
 
         Structure of ``MP_PRIO`` [RFC 6824]:
@@ -1728,8 +1727,8 @@ class TCP(Transport[DataType_TCP]):
             raise ProtocolError(f'{self.alias}: [OptNo {kind.value}] invalid format')
         temp = self._read_unpack(1) if dlen else None
 
-        data = DataType_MPTCPPriority(
-            kind=RegType_Option.Multipath_TCP,  # type: ignore[arg-type]
+        data = Data_MPTCPPriority(
+            kind=Enum_Option.Multipath_TCP,  # type: ignore[arg-type]
             length=dlen + 3,
             subtype=kind,
             backup=bool(int(bits[3])),
@@ -1738,8 +1737,8 @@ class TCP(Transport[DataType_TCP]):
 
         return data
 
-    def _read_mptcp_fail(self, kind: 'RegType_MPTCPOption', dlen: int,
-                         bits: str, *, options: 'Option') -> 'DataType_MPTCPFallback':  # pylint: disable=unused-argument
+    def _read_mptcp_fail(self, kind: 'Enum_MPTCPOption', dlen: int,
+                         bits: str, *, options: 'Option') -> 'Data_MPTCPFallback':  # pylint: disable=unused-argument
         """Read Fallback option.
 
         Structure of ``MP_FAIL`` [:rfc:`6824`]:
@@ -1775,8 +1774,8 @@ class TCP(Transport[DataType_TCP]):
         resv = self._read_fileng(1)  # pylint: disable=unused-variable
         dsn_ = self._read_unpack(8)
 
-        data = DataType_MPTCPFallback(
-            kind=RegType_Option.Multipath_TCP,  # type: ignore[arg-type]
+        data = Data_MPTCPFallback(
+            kind=Enum_Option.Multipath_TCP,  # type: ignore[arg-type]
             length=dlen + 3,
             subtype=kind,
             dsn=dsn_,
@@ -1784,8 +1783,8 @@ class TCP(Transport[DataType_TCP]):
 
         return data
 
-    def _read_mptcp_fastclose(self, kind: 'RegType_MPTCPOption', dlen: int,
-                              bits: str, *, options: 'Option') -> 'DataType_MPTCPFastclose':  # pylint: disable=unused-argument
+    def _read_mptcp_fastclose(self, kind: 'Enum_MPTCPOption', dlen: int,
+                              bits: str, *, options: 'Option') -> 'Data_MPTCPFastclose':  # pylint: disable=unused-argument
         """Read Fast Close option.
 
         Structure of ``MP_FASTCLOSE`` [RFC 6824]:
@@ -1821,8 +1820,8 @@ class TCP(Transport[DataType_TCP]):
         resv = self._read_fileng(1)  # pylint: disable=unused-variable
         rkey = self._read_fileng(8)
 
-        data = DataType_MPTCPFastclose(
-            kind=RegType_Option.Multipath_TCP,  # type: ignore[arg-type]
+        data = Data_MPTCPFastclose(
+            kind=Enum_Option.Multipath_TCP,  # type: ignore[arg-type]
             length=dlen + 3,
             subtype=kind,
             rkey=rkey,
@@ -1830,7 +1829,7 @@ class TCP(Transport[DataType_TCP]):
 
         return data
 
-    def _read_mode_fastopen(self, kind: 'RegType_Option', *, options: 'Option') -> 'DataType_FastOpenCookie':  # pylint: disable=unused-argument
+    def _read_mode_fastopen(self, kind: 'Enum_Option', *, options: 'Option') -> 'Data_FastOpenCookie':  # pylint: disable=unused-argument
         """Read Fast Open option.
 
         Structure of TCP ``FASTOPEN`` [:rfc:`7413`]:
@@ -1861,7 +1860,7 @@ class TCP(Transport[DataType_TCP]):
             raise ProtocolError(f'{self.alias}: [OptNo {kind.value}] invalid format')
         cookie = self._read_fileng(size - 2)
 
-        data = DataType_FastOpenCookie(
+        data = Data_FastOpenCookie(
             kind=kind,
             length=4,
             cookie=cookie,

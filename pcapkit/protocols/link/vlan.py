@@ -23,9 +23,9 @@ Octets      Bits        Name                    Description
 """
 from typing import TYPE_CHECKING
 
-from pcapkit.const.vlan.priority_level import PriorityLevel as RegType_PriorityLevel
-from pcapkit.protocols.data.link.vlan import TCI as DataType_TCI
-from pcapkit.protocols.data.link.vlan import VLAN as DataType_VLAN
+from pcapkit.const.vlan.priority_level import PriorityLevel as Enum_PriorityLevel
+from pcapkit.protocols.data.link.vlan import TCI as Data_TCI
+from pcapkit.protocols.data.link.vlan import VLAN as Data_VLAN
 from pcapkit.protocols.link.link import Link
 from pcapkit.utilities.exceptions import UnsupportedCall
 
@@ -34,12 +34,12 @@ if TYPE_CHECKING:
 
     from typing_extensions import Literal
 
-    from pcapkit.const.reg.ethertype import EtherType as RegType_EtherType
+    from pcapkit.const.reg.ethertype import EtherType as Enum_EtherType
 
 __all__ = ['VLAN']
 
 
-class VLAN(Link[DataType_VLAN]):
+class VLAN(Link[Data_VLAN]):
     """This class implements 802.1Q Customer VLAN Tag Type."""
 
     ##########################################################################
@@ -67,7 +67,7 @@ class VLAN(Link[DataType_VLAN]):
         return 4
 
     @property
-    def protocol(self) -> 'RegType_EtherType':
+    def protocol(self) -> 'Enum_EtherType':
         """Name of next layer protocol."""
         return self._info.type
 
@@ -75,7 +75,7 @@ class VLAN(Link[DataType_VLAN]):
     # Methods.
     ##########################################################################
 
-    def read(self, length: 'Optional[int]' = None, **kwargs: 'Any') -> 'DataType_VLAN':  # pylint: disable=unused-argument
+    def read(self, length: 'Optional[int]' = None, **kwargs: 'Any') -> 'Data_VLAN':  # pylint: disable=unused-argument
         """Read 802.1Q Customer VLAN Tag Type.
 
         Structure of 802.1Q Customer VLAN Tag Type [`IEEE 802.1Q <https://standards.ieee.org/ieee/802.1Q/6844/>`__]:
@@ -106,9 +106,9 @@ class VLAN(Link[DataType_VLAN]):
         _tcif = self._read_binary(2)
         _type = self._read_protos(2)
 
-        vlan = DataType_VLAN(
-            tci=DataType_TCI(
-                pcp=RegType_PriorityLevel.get(int(_tcif[:3], base=2)),
+        vlan = Data_VLAN(
+            tci=Data_TCI(
+                pcp=Enum_PriorityLevel.get(int(_tcif[:3], base=2)),
                 dei=bool(_tcif[3]),
                 vid=int(_tcif[4:], base=2),
             ),

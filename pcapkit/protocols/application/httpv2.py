@@ -25,35 +25,31 @@ Octets      Bits        Name                    Description
 import collections
 from typing import TYPE_CHECKING
 
-from pcapkit.const.http.error_code import ErrorCode as RegType_ErrorCode
-from pcapkit.const.http.frame import Frame as RegType_Frame
-from pcapkit.const.http.setting import Setting as RegType_Setting
+from pcapkit.const.http.error_code import ErrorCode as Enum_ErrorCode
+from pcapkit.const.http.frame import Frame as Enum_Frame
+from pcapkit.const.http.setting import Setting as Enum_Setting
 from pcapkit.corekit.multidict import OrderedMultiDict
 from pcapkit.protocols.application.http import HTTP as HTTPBase
-from pcapkit.protocols.data.application.httpv2 import HTTP as DataType_HTTP
+from pcapkit.protocols.data.application.httpv2 import HTTP as Data_HTTP
+from pcapkit.protocols.data.application.httpv2 import ContinuationFrame as Data_ContinuationFrame
 from pcapkit.protocols.data.application.httpv2 import \
-    ContinuationFrame as DataType_ContinuationFrame
+    ContinuationFrameFlags as Data_ContinuationFrameFlags
+from pcapkit.protocols.data.application.httpv2 import DataFrame as Data_DataFrame
+from pcapkit.protocols.data.application.httpv2 import DataFrameFlags as Data_DataFrameFlags
+from pcapkit.protocols.data.application.httpv2 import GoawayFrame as Data_GoawayFrame
+from pcapkit.protocols.data.application.httpv2 import HeadersFrame as Data_HeadersFrame
+from pcapkit.protocols.data.application.httpv2 import HeadersFrameFlags as Data_HeadersFrameFlags
+from pcapkit.protocols.data.application.httpv2 import PingFrame as Data_PingFrame
+from pcapkit.protocols.data.application.httpv2 import PingFrameFlags as Data_PingFrameFlags
+from pcapkit.protocols.data.application.httpv2 import PriorityFrame as Data_PriorityFrame
+from pcapkit.protocols.data.application.httpv2 import PushPromiseFrame as Data_PushPromiseFrame
 from pcapkit.protocols.data.application.httpv2 import \
-    ContinuationFrameFlags as DataType_ContinuationFrameFlags
-from pcapkit.protocols.data.application.httpv2 import DataFrame as DataType_DataFrame
-from pcapkit.protocols.data.application.httpv2 import DataFrameFlags as DataType_DataFrameFlags
-from pcapkit.protocols.data.application.httpv2 import GoawayFrame as DataType_GoawayFrame
-from pcapkit.protocols.data.application.httpv2 import HeadersFrame as DataType_HeadersFrame
-from pcapkit.protocols.data.application.httpv2 import \
-    HeadersFrameFlags as DataType_HeadersFrameFlags
-from pcapkit.protocols.data.application.httpv2 import PingFrame as DataType_PingFrame
-from pcapkit.protocols.data.application.httpv2 import PingFrameFlags as DataType_PingFrameFlags
-from pcapkit.protocols.data.application.httpv2 import PriorityFrame as DataType_PriorityFrame
-from pcapkit.protocols.data.application.httpv2 import PushPromiseFrame as DataType_PushPromiseFrame
-from pcapkit.protocols.data.application.httpv2 import \
-    PushPromiseFrameFlags as DataType_PushPromiseFrameFlags
-from pcapkit.protocols.data.application.httpv2 import RstStreamFrame as DataType_RstStreamFrame
-from pcapkit.protocols.data.application.httpv2 import SettingsFrame as DataType_SettingsFrame
-from pcapkit.protocols.data.application.httpv2 import \
-    SettingsFrameFlags as DataType_SettingsFrameFlags
-from pcapkit.protocols.data.application.httpv2 import UnassignedFrame as DataType_UnassignedFrame
-from pcapkit.protocols.data.application.httpv2 import \
-    WindowUpdateFrame as DataType_WindowUpdateFrame
+    PushPromiseFrameFlags as Data_PushPromiseFrameFlags
+from pcapkit.protocols.data.application.httpv2 import RstStreamFrame as Data_RstStreamFrame
+from pcapkit.protocols.data.application.httpv2 import SettingsFrame as Data_SettingsFrame
+from pcapkit.protocols.data.application.httpv2 import SettingsFrameFlags as Data_SettingsFrameFlags
+from pcapkit.protocols.data.application.httpv2 import UnassignedFrame as Data_UnassignedFrame
+from pcapkit.protocols.data.application.httpv2 import WindowUpdateFrame as Data_WindowUpdateFrame
 from pcapkit.utilities.exceptions import ProtocolError
 
 if TYPE_CHECKING:
@@ -61,12 +57,12 @@ if TYPE_CHECKING:
 
     from typing_extensions import Literal
 
-    FrameParser = Callable[['HTTP', RegType_Frame, int, str, int], DataType_HTTP]
+    FrameParser = Callable[['HTTP', Enum_Frame, int, str, int], Data_HTTP]
 
 __all__ = ['HTTP']
 
 
-class HTTP(HTTPBase[DataType_HTTP]):
+class HTTP(HTTPBase[Data_HTTP]):
     """This class implements Hypertext Transfer Protocol (HTTP/2).
 
     This class currently supports parsing of the following HTTP/2 frames,
@@ -105,23 +101,23 @@ class HTTP(HTTPBase[DataType_HTTP]):
     # Defaults.
     ##########################################################################
 
-    #: DefaultDict[RegType_Frame, str | FrameParser]: Frame code to method
+    #: DefaultDict[Enum_Frame, str | FrameParser]: Frame code to method
     #: mapping, c.f. :meth:`read`. Method names are expected to be referred to
     #: the class by ``_read_http_${name}``, and if such name not found, the
     #: value should then be a method that can parse the frame by itself.
     __frame__ = collections.defaultdict(
         lambda: 'none',
         {
-            RegType_Frame.DATA: 'data',                    # DATA
-            RegType_Frame.HEADERS: 'headers',              # HEADERS
-            RegType_Frame.PRIORITY: 'priority',            # PRIORITY
-            RegType_Frame.RST_STREAM: 'rst_stream',        # RST_STREAM
-            RegType_Frame.SETTINGS: 'settings',            # SETTINGS
-            RegType_Frame.PUSH_PROMISE: 'push_promise',    # PUSH_PROMISE
-            RegType_Frame.PING: 'ping',                    # PING
-            RegType_Frame.GOAWAY: 'goaway',                # GOAWAY
-            RegType_Frame.WINDOW_UPDATE: 'window_update',  # WINDOW_UPDATE
-            RegType_Frame.CONTINUATION: 'continuation',    # CONTINUATION
+            Enum_Frame.DATA: 'data',                    # DATA
+            Enum_Frame.HEADERS: 'headers',              # HEADERS
+            Enum_Frame.PRIORITY: 'priority',            # PRIORITY
+            Enum_Frame.RST_STREAM: 'rst_stream',        # RST_STREAM
+            Enum_Frame.SETTINGS: 'settings',            # SETTINGS
+            Enum_Frame.PUSH_PROMISE: 'push_promise',    # PUSH_PROMISE
+            Enum_Frame.PING: 'ping',                    # PING
+            Enum_Frame.GOAWAY: 'goaway',                # GOAWAY
+            Enum_Frame.WINDOW_UPDATE: 'window_update',  # WINDOW_UPDATE
+            Enum_Frame.CONTINUATION: 'continuation',    # CONTINUATION
         },
     )  # type: DefaultDict[int, str | FrameParser]
 
@@ -148,7 +144,7 @@ class HTTP(HTTPBase[DataType_HTTP]):
     # Methods.
     ##########################################################################
 
-    def read(self, length: 'Optional[int]' = None, **kwargs: 'Any') -> 'DataType_HTTP':
+    def read(self, length: 'Optional[int]' = None, **kwargs: 'Any') -> 'Data_HTTP':
         """Read Hypertext Transfer Protocol (HTTP/2).
 
         Structure of HTTP/2 packet [:rfc:`7540`]:
@@ -190,10 +186,10 @@ class HTTP(HTTPBase[DataType_HTTP]):
         if _tlen != length:
             raise ProtocolError(f'HTTP/2: [Type {_type}] invalid format')
 
-        http_type = RegType_Frame.get(_type)
+        http_type = Enum_Frame.get(_type)
         http_sid = int(_rsid[1:], base=2)
 
-        if http_type in (RegType_Frame.SETTINGS, RegType_Frame.PING) and http_sid != 0:
+        if http_type in (Enum_Frame.SETTINGS, Enum_Frame.PING) and http_sid != 0:
             raise ProtocolError(f'HTTP/2: [Type {_type}] invalid format')
 
         name = self.__frame__[http_type]  # type: str | FrameParser
@@ -202,7 +198,7 @@ class HTTP(HTTPBase[DataType_HTTP]):
             meth = getattr(
                 self, meth_name,
                 self._read_http_none
-            )  # type: Callable[[RegType_Frame, int, str, int], DataType_HTTP]
+            )  # type: Callable[[Enum_Frame, int, str, int], Data_HTTP]
             http = meth(http_type, length, _flag, http_sid)
         else:
             http = name(self, http_type, length, _flag, http_sid)
@@ -232,7 +228,7 @@ class HTTP(HTTPBase[DataType_HTTP]):
         return (cls.__name__,)  # type: ignore[return-value]
 
     @classmethod
-    def register_frame(cls, code: 'RegType_Frame', meth: 'str | FrameParser') -> 'None':
+    def register_frame(cls, code: 'Enum_Frame', meth: 'str | FrameParser') -> 'None':
         """Register a frame parser.
 
         Args:
@@ -254,8 +250,8 @@ class HTTP(HTTPBase[DataType_HTTP]):
     # Utilities.
     ##########################################################################
 
-    def _read_http_none(self, frame: 'RegType_Frame', length: 'int',
-                        flags: 'str', sid: 'int') -> 'DataType_UnassignedFrame':
+    def _read_http_none(self, frame: 'Enum_Frame', length: 'int',
+                        flags: 'str', sid: 'int') -> 'Data_UnassignedFrame':
         """Read HTTP packet with unassigned type.
 
         Args:
@@ -274,7 +270,7 @@ class HTTP(HTTPBase[DataType_HTTP]):
         if any((int(bit, base=2) for bit in flags)):
             raise ProtocolError(f'HTTP/2: [Type {frame}] invalid format')
 
-        data = DataType_UnassignedFrame(
+        data = Data_UnassignedFrame(
             length=length,
             type=frame,
             flags=None,
@@ -284,7 +280,7 @@ class HTTP(HTTPBase[DataType_HTTP]):
 
         return data
 
-    def _read_http_data(self, frame: 'RegType_Frame', length: 'int', flags: 'str', sid: 'int') -> 'DataType_DataFrame':
+    def _read_http_data(self, frame: 'Enum_Frame', length: 'int', flags: 'str', sid: 'int') -> 'Data_DataFrame':
         """Read HTTP/2 ``DATA`` frames.
 
         Structure of HTTP/2 ``DATA`` frame [:rfc:`7540`]:
@@ -318,7 +314,7 @@ class HTTP(HTTPBase[DataType_HTTP]):
             ProtocolError: If the packet is malformed.
 
         """
-        _flag = DataType_DataFrameFlags(
+        _flag = Data_DataFrameFlags(
             END_STREAM=bool(int(flags[0], base=2)),  # bit 0
             PADDED=bool(int(flags[3], base=2)),      # bit 3
         )
@@ -341,7 +337,7 @@ class HTTP(HTTPBase[DataType_HTTP]):
         _data = self._read_fileng(_dlen)
         _pads = self._read_binary(_plen)
 
-        data = DataType_DataFrame(
+        data = Data_DataFrame(
             length=length,
             type=frame,
             flags=_flag,
@@ -352,8 +348,8 @@ class HTTP(HTTPBase[DataType_HTTP]):
 
         return data
 
-    def _read_http_headers(self, frame: 'RegType_Frame', length: 'int',
-                           flags: 'str', sid: 'int') -> 'DataType_HeadersFrame':
+    def _read_http_headers(self, frame: 'Enum_Frame', length: 'int',
+                           flags: 'str', sid: 'int') -> 'Data_HeadersFrame':
         """Read HTTP/2 ``HEADERS`` frames.
 
         Structure of HTTP/2 ``HEADERS`` frame [:rfc:`7540`]:
@@ -391,7 +387,7 @@ class HTTP(HTTPBase[DataType_HTTP]):
             ProtocolError: If the packet is malformed.
 
         """
-        _flag = DataType_HeadersFrameFlags(
+        _flag = Data_HeadersFrameFlags(
             END_STREAM=bool(int(flags[0], base=2)),       # bit 0
             END_HEADERS=bool(int(flags[2], base=2)),      # bit 2
             PADDED=bool(int(flags[3], base=2)),           # bit 3
@@ -421,7 +417,7 @@ class HTTP(HTTPBase[DataType_HTTP]):
         _frag = self._read_fileng(_dlen) or None
         _pads = self._read_binary(_plen)
 
-        data = DataType_HeadersFrame(
+        data = Data_HeadersFrame(
             length=length,
             type=frame,
             flags=_flag,
@@ -435,8 +431,8 @@ class HTTP(HTTPBase[DataType_HTTP]):
 
         return data
 
-    def _read_http_priority(self, frame: 'RegType_Frame', length: 'int',
-                            flags: 'str', sid: 'int') -> 'DataType_PriorityFrame':  # pylint: disable=unused-argument
+    def _read_http_priority(self, frame: 'Enum_Frame', length: 'int',
+                            flags: 'str', sid: 'int') -> 'Data_PriorityFrame':  # pylint: disable=unused-argument
         """Read HTTP/2 ``PRIORITY`` frames.
 
         Structure of HTTP/2 ``PRIORITY`` frame [:rfc:`7540`]:
@@ -474,7 +470,7 @@ class HTTP(HTTPBase[DataType_HTTP]):
         _edep = self._read_binary(4)
         _wght = self._read_unpack(1)
 
-        data = DataType_PriorityFrame(
+        data = Data_PriorityFrame(
             length=length,
             type=frame,
             flags=None,
@@ -486,8 +482,8 @@ class HTTP(HTTPBase[DataType_HTTP]):
 
         return data
 
-    def _read_http_rst_stream(self, frame: 'RegType_Frame', length: 'int',
-                              flags: 'str', sid: 'int') -> 'DataType_RstStreamFrame':  # pylint: disable=unused-argument
+    def _read_http_rst_stream(self, frame: 'Enum_Frame', length: 'int',
+                              flags: 'str', sid: 'int') -> 'Data_RstStreamFrame':  # pylint: disable=unused-argument
         """Read HTTP/2 ``RST_STREAM`` frames.
 
         Structure of HTTP/2 ``RST_STREAM`` frame [:rfc:`7540`]:
@@ -522,18 +518,18 @@ class HTTP(HTTPBase[DataType_HTTP]):
 
         _code = self._read_unpack(4)
 
-        data = DataType_RstStreamFrame(
+        data = Data_RstStreamFrame(
             length=length,
             type=frame,
             flags=None,
             sid=sid,
-            error=RegType_ErrorCode.get(_code, _code),
+            error=Enum_ErrorCode.get(_code, _code),
         )
 
         return data
 
-    def _read_http_settings(self, frame: 'RegType_Frame', length: 'int',
-                            flags: 'str', sid: 'int') -> 'DataType_SettingsFrame':
+    def _read_http_settings(self, frame: 'Enum_Frame', length: 'int',
+                            flags: 'str', sid: 'int') -> 'Data_SettingsFrame':
         """Read HTTP/2 ``SETTINGS`` frames.
 
         Structure of HTTP/2 ``SETTINGS`` frame [:rfc:`7540`]:
@@ -569,22 +565,22 @@ class HTTP(HTTPBase[DataType_HTTP]):
         if length % 6 != 0 or sid != 0:
             raise ProtocolError(f'HTTP/2: [Type {frame}] invalid format')
 
-        _flag = DataType_SettingsFrameFlags(
+        _flag = Data_SettingsFrameFlags(
             ACK=bool(int(flags[0], base=2)),  # bit 0
         )
 
         if _flag.ACK and length != 0:
             raise ProtocolError(f'HTTP/2: [Type {frame}] invalid format')
 
-        _sets = OrderedMultiDict()  # type: OrderedMultiDict[RegType_Setting, int]
+        _sets = OrderedMultiDict()  # type: OrderedMultiDict[Enum_Setting, int]
         for _ in range(length // 6):
             _stid = self._read_unpack(2)
             _pval = self._read_unpack(4)
 
-            _pkey = RegType_Setting.get(_stid)
+            _pkey = Enum_Setting.get(_stid)
             _sets.add(_pkey, _pval)
 
-        data = DataType_SettingsFrame(
+        data = Data_SettingsFrame(
             length=length,
             type=frame,
             flags=_flag,
@@ -594,8 +590,8 @@ class HTTP(HTTPBase[DataType_HTTP]):
 
         return data
 
-    def _read_http_push_promise(self, frame: 'RegType_Frame', length: 'int',
-                                flags: 'str', sid: 'int') -> 'DataType_PushPromiseFrame':
+    def _read_http_push_promise(self, frame: 'Enum_Frame', length: 'int',
+                                flags: 'str', sid: 'int') -> 'Data_PushPromiseFrame':
         """Read HTTP/2 ``PUSH_PROMISE`` frames.
 
         Structure of HTTP/2 ``PUSH_PROMISE`` frame [:rfc:`7540`]:
@@ -634,7 +630,7 @@ class HTTP(HTTPBase[DataType_HTTP]):
         if length < 4:
             raise ProtocolError(f'HTTP/2: [Type {frame}] invalid format')
 
-        _flag = DataType_PushPromiseFrameFlags(
+        _flag = Data_PushPromiseFrameFlags(
             END_HEADERS=bool(int(flags[2], base=2)),  # bit 2
             PADDED=bool(int(flags[3], base=2)),       # bit 3
         )
@@ -653,7 +649,7 @@ class HTTP(HTTPBase[DataType_HTTP]):
         _frag = self._read_fileng(_dlen) or None
         _pads = self._read_binary(_plen)
 
-        data = DataType_PushPromiseFrame(
+        data = Data_PushPromiseFrame(
             length=length,
             type=frame,
             flags=_flag,
@@ -665,8 +661,8 @@ class HTTP(HTTPBase[DataType_HTTP]):
 
         return data
 
-    def _read_http_ping(self, frame: 'RegType_Frame', length: 'int',
-                        flags: 'str', sid: 'int') -> 'DataType_PingFrame':
+    def _read_http_ping(self, frame: 'Enum_Frame', length: 'int',
+                        flags: 'str', sid: 'int') -> 'Data_PingFrame':
         """Read HTTP/2 ``PING`` frames.
 
         Structure of HTTP/2 ``PING`` frame [:rfc:`7540`]:
@@ -701,13 +697,13 @@ class HTTP(HTTPBase[DataType_HTTP]):
         if length != 8:
             raise ProtocolError(f'HTTP/2: [Type {frame}] invalid format')
 
-        _flag = DataType_PingFrameFlags(
+        _flag = Data_PingFrameFlags(
             ACK=bool(int(flags[0], base=2)),  # bit 0
         )
 
         _data = self._read_fileng(8)
 
-        data = DataType_PingFrame(
+        data = Data_PingFrame(
             length=length,
             type=frame,
             flags=_flag,
@@ -717,8 +713,8 @@ class HTTP(HTTPBase[DataType_HTTP]):
 
         return data
 
-    def _read_http_goaway(self, frame: 'RegType_Frame', length: 'int',
-                          flags: 'str', sid: 'int') -> 'DataType_GoawayFrame':  # pylint: disable=unused-argument
+    def _read_http_goaway(self, frame: 'Enum_Frame', length: 'int',
+                          flags: 'str', sid: 'int') -> 'Data_GoawayFrame':  # pylint: disable=unused-argument
         """Read HTTP/2 ``GOAWAY`` frames.
 
         Structure of HTTP/2 ``GOAWAY`` frame [:rfc:`7540`]:
@@ -760,20 +756,20 @@ class HTTP(HTTPBase[DataType_HTTP]):
         _code = self._read_unpack(4)
         _data = self._read_fileng(_dlen) or None
 
-        data = DataType_GoawayFrame(
+        data = Data_GoawayFrame(
             length=length,
             type=frame,
             flags=None,
             sid=sid,
             last_sid=int(_rsid[1:], base=2),
-            error=RegType_ErrorCode.get(_code),
+            error=Enum_ErrorCode.get(_code),
             debug_data=_data,
         )
 
         return data
 
-    def _read_http_window_update(self, frame: 'RegType_Frame', length: 'int',
-                                 flags: 'str', sid: 'int') -> 'DataType_WindowUpdateFrame':  # pylint: disable=unused-argument
+    def _read_http_window_update(self, frame: 'Enum_Frame', length: 'int',
+                                 flags: 'str', sid: 'int') -> 'Data_WindowUpdateFrame':  # pylint: disable=unused-argument
         """Read HTTP/2 ``WINDOW_UPDATE`` frames.
 
         Structure of HTTP/2 ``WINDOW_UPDATE`` frame [:rfc:`7540`]:
@@ -808,7 +804,7 @@ class HTTP(HTTPBase[DataType_HTTP]):
 
         _size = self._read_binary(4)
 
-        data = DataType_WindowUpdateFrame(
+        data = Data_WindowUpdateFrame(
             length=length,
             type=frame,
             flags=None,
@@ -818,8 +814,8 @@ class HTTP(HTTPBase[DataType_HTTP]):
 
         return data
 
-    def _read_http_continuation(self, frame: 'RegType_Frame', length: 'int',
-                                flags: 'str', sid: 'int') -> 'DataType_ContinuationFrame':
+    def _read_http_continuation(self, frame: 'Enum_Frame', length: 'int',
+                                flags: 'str', sid: 'int') -> 'Data_ContinuationFrame':
         """Read HTTP/2 ``CONTINUATION`` frames.
 
         Structure of HTTP/2 ``CONTINUATION`` frame [:rfc:`7540`]:
@@ -849,13 +845,13 @@ class HTTP(HTTPBase[DataType_HTTP]):
             ProtocolError: If the packet is malformed.
 
         """
-        _flag = DataType_ContinuationFrameFlags(
+        _flag = Data_ContinuationFrameFlags(
             END_HEADERS=bool(int(flags[2], base=2)),  # bit 2
         )
 
         _frag = self._read_fileng(length) or None
 
-        data = DataType_ContinuationFrame(
+        data = Data_ContinuationFrame(
             length=length,
             type=frame,
             flags=_flag,

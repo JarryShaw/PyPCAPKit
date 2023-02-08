@@ -25,11 +25,11 @@ Octets      Bits        Name                    Description
 import textwrap
 from typing import TYPE_CHECKING
 
-from pcapkit.const.ipx.packet import Packet as RegType_Packet
-from pcapkit.const.ipx.socket import Socket as RegType_Socket
-from pcapkit.const.reg.transtype import TransType as RegType_TransType
-from pcapkit.protocols.data.internet.ipx import IPX as DataType_IPX
-from pcapkit.protocols.data.internet.ipx import Address as DataType_Address
+from pcapkit.const.ipx.packet import Packet as Enum_Packet
+from pcapkit.const.ipx.socket import Socket as Enum_Socket
+from pcapkit.const.reg.transtype import TransType as Enum_TransType
+from pcapkit.protocols.data.internet.ipx import IPX as Data_IPX
+from pcapkit.protocols.data.internet.ipx import Address as Data_Address
 from pcapkit.protocols.internet.internet import Internet
 
 if TYPE_CHECKING:
@@ -40,7 +40,7 @@ if TYPE_CHECKING:
 __all__ = ['IPX']
 
 
-class IPX(Internet[DataType_IPX]):
+class IPX(Internet[Data_IPX]):
     """This class implements Internetwork Packet Exchange."""
 
     ##########################################################################
@@ -58,7 +58,7 @@ class IPX(Internet[DataType_IPX]):
         return 30
 
     @property
-    def protocol(self) -> 'RegType_TransType':
+    def protocol(self) -> 'Enum_TransType':
         """Name of next layer protocol."""
         return self._info.type
 
@@ -76,7 +76,7 @@ class IPX(Internet[DataType_IPX]):
     # Methods.
     ##########################################################################
 
-    def read(self, length: 'Optional[int]' = None, **kwargs: 'Any') -> 'DataType_IPX':
+    def read(self, length: 'Optional[int]' = None, **kwargs: 'Any') -> 'Data_IPX':
         """Read Internetwork Packet Exchange.
 
          Args:
@@ -84,7 +84,7 @@ class IPX(Internet[DataType_IPX]):
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
-            DataType_IPX: Parsed packet data.
+            Parsed packet data.
 
         """
         if length is None:
@@ -97,11 +97,11 @@ class IPX(Internet[DataType_IPX]):
         _dsta = self._read_ipx_address()
         _srca = self._read_ipx_address()
 
-        ipx = DataType_IPX(
+        ipx = Data_IPX(
             chksum=_csum,
             len=_tlen,
             count=_ctrl,
-            type=RegType_Packet.get(_type),
+            type=Enum_Packet.get(_type),
             dst=_dsta,
             src=_srca,
         )
@@ -129,7 +129,7 @@ class IPX(Internet[DataType_IPX]):
         return 30
 
     @classmethod
-    def __index__(cls) -> 'RegType_TransType':  # pylint: disable=invalid-index-returned
+    def __index__(cls) -> 'Enum_TransType':  # pylint: disable=invalid-index-returned
         """Numeral registry index of the protocol.
 
         Returns:
@@ -138,13 +138,13 @@ class IPX(Internet[DataType_IPX]):
         .. _IANA: https://www.iana.org/assignments/protocol-numbers/protocol-numbers.xhtml
 
         """
-        return RegType_TransType.IPX_in_IP  # type: ignore[return-value]
+        return Enum_TransType.IPX_in_IP  # type: ignore[return-value]
 
     ##########################################################################
     # Utilities.
     ##########################################################################
 
-    def _read_ipx_address(self) -> 'DataType_Address':
+    def _read_ipx_address(self) -> 'Data_Address':
         """Read IPX address field.
 
         Returns:
@@ -167,10 +167,10 @@ class IPX(Internet[DataType_IPX]):
         _list = [_ntwk, _node, _sock.hex()]
         _addr = ':'.join(_list)
 
-        addr = DataType_Address(
+        addr = Data_Address(
             network=_ntwk,
             node=_maca,
-            socket=RegType_Socket.get(int(_sock.hex(), base=16)),
+            socket=Enum_Socket.get(int(_sock.hex(), base=16)),
             addr=_addr,
         )
 

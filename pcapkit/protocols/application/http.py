@@ -16,7 +16,7 @@ import contextlib
 from typing import TYPE_CHECKING, Generic
 
 from pcapkit.protocols.application.application import Application
-from pcapkit.protocols.data.application.http import HTTP as DataType_HTTP
+from pcapkit.protocols.data.application.http import HTTP as Data_HTTP
 from pcapkit.protocols.protocol import PT
 from pcapkit.utilities.exceptions import ProtocolError
 
@@ -30,7 +30,7 @@ if TYPE_CHECKING:
 __all__ = ['HTTP']
 
 
-class HTTP(Application[DataType_HTTP], Generic[PT]):
+class HTTP(Application[Data_HTTP], Generic[PT]):
     """This class implements all protocols in HTTP family.
 
     - Hypertext Transfer Protocol (HTTP/1.1) [:rfc:`7230`]
@@ -72,7 +72,7 @@ class HTTP(Application[DataType_HTTP], Generic[PT]):
         return ('HTTPv1', 'HTTPv2')
 
     def read(self, length: 'Optional[int]' = None, *,
-             version: 'Optional[Literal[1, 2]]' = None, **kwargs: 'Any') -> 'DataType_HTTP':
+             version: 'Optional[Literal[1, 2]]' = None, **kwargs: 'Any') -> 'Data_HTTP':
         """Read (parse) packet data.
 
         Args:

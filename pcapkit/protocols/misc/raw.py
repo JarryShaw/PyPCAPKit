@@ -12,20 +12,20 @@ import io
 from typing import TYPE_CHECKING, overload
 
 from pcapkit.corekit.protochain import ProtoChain
-from pcapkit.protocols.data.misc.raw import Raw as DataType_Raw
+from pcapkit.protocols.data.misc.raw import Raw as Data_Raw
 from pcapkit.protocols.misc.null import NoPayload
 from pcapkit.protocols.protocol import Protocol
 from pcapkit.utilities.exceptions import UnsupportedCall
 
 if TYPE_CHECKING:
-    from typing import Any, IO, NoReturn, Optional
+    from typing import IO, Any, NoReturn, Optional
 
     from typing_extensions import Literal
 
 __all__ = ['Raw']
 
 
-class Raw(Protocol[DataType_Raw]):
+class Raw(Protocol[Data_Raw]):
     """This class implements universal unknown protocol."""
 
     ##########################################################################
@@ -60,7 +60,7 @@ class Raw(Protocol[DataType_Raw]):
     ##########################################################################
 
     def read(self, length: 'Optional[int]' = None, *, error: 'Optional[Exception]' = None,  # pylint: disable=arguments-differ
-             alias: 'Optional[int]' = None, **kwargs: 'Any') -> 'DataType_Raw':  # pylint: disable=unused-argument
+             alias: 'Optional[int]' = None, **kwargs: 'Any') -> 'Data_Raw':  # pylint: disable=unused-argument
         """Read raw packet data.
 
         Args:
@@ -73,7 +73,7 @@ class Raw(Protocol[DataType_Raw]):
             The parsed packet data.
 
         """
-        raw = DataType_Raw(
+        raw = Data_Raw(
             protocol=alias,
             packet=self._data,
             error=error,

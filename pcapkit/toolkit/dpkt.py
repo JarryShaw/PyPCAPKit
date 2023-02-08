@@ -13,7 +13,7 @@ its caller.
 import ipaddress
 from typing import TYPE_CHECKING, cast
 
-from pcapkit.const.reg.transtype import TransType as RegType_TransType
+from pcapkit.const.reg.transtype import TransType as Enum_TransType
 from pcapkit.foundation.reassembly.ip import Packet as IP_Packet
 from pcapkit.foundation.reassembly.tcp import Packet as TCP_Packet
 from pcapkit.foundation.traceflow import Packet as TF_Packet
@@ -27,7 +27,7 @@ if TYPE_CHECKING:
     from dpkt.ip6 import IP6, IP6FragmentHeader
     from dpkt.tcp import TCP
 
-    from pcapkit.const.reg.linktype import LinkType as RegType_LinkType
+    from pcapkit.const.reg.linktype import LinkType as Enum_LinkType
 
 __all__ = [
     'ipv6_hdr_len', 'packet2chain', 'packet2dict',
@@ -79,7 +79,7 @@ def packet2chain(packet: 'Packet') -> 'str':
 
 
 def packet2dict(packet: 'Packet', timestamp: 'float', *,
-                data_link: 'RegType_LinkType') -> 'dict[str, Any]':
+                data_link: 'Enum_LinkType') -> 'dict[str, Any]':
     """Convert DPKT packet into :obj:`dict`.
 
     Args:
@@ -139,7 +139,7 @@ def ipv4_reassembly(packet: 'Packet', *, count: 'int' = -1) -> 'IP_Packet[IPv4Ad
                 cast('IPv4Address',
                      ipaddress.ip_address(ipv4.dst)),           # destination IP address
                 ipv4.id,                                        # identification
-                RegType_TransType.get(ipv4.p).name,             # payload protocol type
+                Enum_TransType.get(ipv4.p).name,             # payload protocol type
             ),
             num=count,                                          # original packet range number
             fo=ipv4.off,                                        # fragment offset
@@ -187,7 +187,7 @@ def ipv6_reassembly(packet: 'Packet', *, count: 'int' = -1) -> 'IP_Packet[IPv6Ad
                 cast('IPv6Address',
                      ipaddress.ip_address(ipv6.dst)),            # destination IP address
                 ipv6.flow,                                       # label
-                RegType_TransType.get(ipv6_frag.nh).name,        # next header field in IPv6 Fragment Header
+                Enum_TransType.get(ipv6_frag.nh).name,        # next header field in IPv6 Fragment Header
             ),
             num=count,                                           # original packet range number
             fo=ipv6_frag.nxt,                                    # fragment offset
@@ -256,7 +256,7 @@ def tcp_reassembly(packet: 'Packet', *, count: 'int' = -1) -> 'TCP_Packet | None
 
 
 def tcp_traceflow(packet: 'Packet', timestamp: 'float', *,
-                  data_link: 'RegType_LinkType', count: 'int' = -1) -> 'TF_Packet | None':
+                  data_link: 'Enum_LinkType', count: 'int' = -1) -> 'TF_Packet | None':
     """Trace packet flow for TCP.
 
     Args:

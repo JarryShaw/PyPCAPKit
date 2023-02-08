@@ -24,13 +24,13 @@ Octets      Bits        Name                    Description
 """
 from typing import TYPE_CHECKING, overload
 
-from pcapkit.const.reg.transtype import TransType as RegType_TransType
-from pcapkit.protocols.data.internet.ipv6_frag import IPv6_Frag as DataType_IPv6_Frag
+from pcapkit.const.reg.transtype import TransType as Enum_TransType
+from pcapkit.protocols.data.internet.ipv6_frag import IPv6_Frag as Data_IPv6_Frag
 from pcapkit.protocols.internet.internet import Internet
 from pcapkit.utilities.exceptions import UnsupportedCall
 
 if TYPE_CHECKING:
-    from typing import Any, IO, NoReturn, Optional
+    from typing import IO, Any, NoReturn, Optional
 
     from typing_extensions import Literal
 
@@ -40,7 +40,7 @@ if TYPE_CHECKING:
 __all__ = ['IPv6_Frag']
 
 
-class IPv6_Frag(Internet[DataType_IPv6_Frag]):
+class IPv6_Frag(Internet[Data_IPv6_Frag]):
     """This class implements Fragment Header for IPv6."""
 
     ##########################################################################
@@ -103,7 +103,7 @@ class IPv6_Frag(Internet[DataType_IPv6_Frag]):
     ##########################################################################
 
     def read(self, length: 'Optional[int]' = None, *, extension: 'bool' = False,  # pylint: disable=arguments-differ
-             **kwargs: 'Any') -> 'DataType_IPv6_Frag':  # pylint: disable=unused-argument
+             **kwargs: 'Any') -> 'Data_IPv6_Frag':  # pylint: disable=unused-argument
         """Read Fragment Header for IPv6.
 
         Structure of IPv6-Frag header [:rfc:`8200`]:
@@ -133,7 +133,7 @@ class IPv6_Frag(Internet[DataType_IPv6_Frag]):
         _offm = self._read_binary(2)
         _ipid = self._read_unpack(4)
 
-        ipv6_frag = DataType_IPv6_Frag(
+        ipv6_frag = Data_IPv6_Frag(
             next=_next,
             offset=int(_offm[:13], base=2),
             mf=bool(int(_offm[15], base=2)),
@@ -193,7 +193,7 @@ class IPv6_Frag(Internet[DataType_IPv6_Frag]):
         return 8
 
     @classmethod
-    def __index__(cls) -> 'RegType_TransType':  # pylint: disable=invalid-index-returned
+    def __index__(cls) -> 'Enum_TransType':  # pylint: disable=invalid-index-returned
         """Numeral registry index of the protocol.
 
         Returns:
@@ -202,4 +202,4 @@ class IPv6_Frag(Internet[DataType_IPv6_Frag]):
         .. _IANA: https://www.iana.org/assignments/protocol-numbers/protocol-numbers.xhtml
 
         """
-        return RegType_TransType.IPv6_Frag  # type: ignore[return-value]
+        return Enum_TransType.IPv6_Frag  # type: ignore[return-value]

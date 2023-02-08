@@ -18,7 +18,7 @@ import os
 import sys
 from typing import TYPE_CHECKING, cast
 
-from pcapkit.const.reg.linktype import LinkType as RegType_LinkType
+from pcapkit.const.reg.linktype import LinkType as Enum_LinkType
 from pcapkit.corekit.infoclass import Info
 from pcapkit.protocols.misc.pcap.frame import Frame
 from pcapkit.protocols.misc.pcap.header import Header
@@ -30,7 +30,7 @@ from pcapkit.utilities.warnings import (AttributeWarning, DPKTWarning, EngineWar
 
 if TYPE_CHECKING:
     from types import ModuleType, TracebackType
-    from typing import Any, IO, Callable, DefaultDict, Iterator, Optional, TextIO, Type, Union
+    from typing import IO, Any, Callable, DefaultDict, Iterator, Optional, TextIO, Type, Union
 
     from dictdumper.dumper import Dumper
     from dpkt.dpkt import Packet as DPKTPacket
@@ -143,7 +143,7 @@ class Extractor:
     #: Version info.
     _vinfo: 'VersionInfo'
     #: Data link layer protocol.
-    _dlink: 'RegType_LinkType'
+    _dlink: 'Enum_LinkType'
     #: Nanosecond flag.
     _nnsec: 'bool'
     #: Output format.
@@ -958,11 +958,11 @@ class Extractor:
         self.record_header()
         self._ifile.seek(0, os.SEEK_SET)
 
-        if self._dlink == RegType_LinkType.ETHERNET:
+        if self._dlink == Enum_LinkType.ETHERNET:
             pkg = dpkt.ethernet.Ethernet
-        elif self._dlink.value == RegType_LinkType.IPV4:
+        elif self._dlink.value == Enum_LinkType.IPV4:
             pkg = dpkt.ip.IP
-        elif self._dlink.value == RegType_LinkType.IPV6:
+        elif self._dlink.value == Enum_LinkType.IPV6:
             pkg = dpkt.ip6.IP6
         else:
             warn('unrecognised link layer protocol; all analysis functions ignored',

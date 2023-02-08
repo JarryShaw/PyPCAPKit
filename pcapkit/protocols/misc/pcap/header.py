@@ -27,16 +27,16 @@ import operator
 import sys
 from typing import TYPE_CHECKING, overload
 
-from pcapkit.const.reg.linktype import LinkType as RegType_LinkType
+from pcapkit.const.reg.linktype import LinkType as Enum_LinkType
 from pcapkit.corekit.version import VersionInfo
-from pcapkit.protocols.data.misc.pcap.header import Header as DataType_Header
-from pcapkit.protocols.data.misc.pcap.header import MagicNumber as DataType_MagicNumber
+from pcapkit.protocols.data.misc.pcap.header import Header as Data_Header
+from pcapkit.protocols.data.misc.pcap.header import MagicNumber as Data_MagicNumber
 from pcapkit.protocols.protocol import Protocol
 from pcapkit.utilities.exceptions import EndianError, FileError, UnsupportedCall
 
 if TYPE_CHECKING:
     from enum import IntEnum as StdlibEnum
-    from typing import Any, IO, NoReturn, Optional, Type
+    from typing import IO, Any, NoReturn, Optional, Type
 
     from aenum import IntEnum as AenumEnum
     from typing_extensions import Literal
@@ -56,7 +56,7 @@ _MAGIC_NUM = {
 }
 
 
-class Header(Protocol[DataType_Header]):
+class Header(Protocol[Data_Header]):
     """PCAP file global header extractor."""
 
     ##########################################################################
@@ -89,7 +89,7 @@ class Header(Protocol[DataType_Header]):
         raise UnsupportedCall("'Header' object has no attribute 'payload'")
 
     @property
-    def protocol(self) -> 'RegType_LinkType':
+    def protocol(self) -> 'Enum_LinkType':
         """Data link type."""
         return self._info.network
 
@@ -117,7 +117,7 @@ class Header(Protocol[DataType_Header]):
     # Methods.
     ##########################################################################
 
-    def read(self, length: 'Optional[int]' = None, **kwargs: 'Any') -> 'DataType_Header':  # pylint: disable=unused-argument
+    def read(self, length: 'Optional[int]' = None, **kwargs: 'Any') -> 'Data_Header':  # pylint: disable=unused-argument
         """Read global header of PCAP file.
 
         Notes:
@@ -169,8 +169,8 @@ class Header(Protocol[DataType_Header]):
         _slen = self._read_unpack(4, lilendian=lilendian)
         _type = self._read_protos(4)
 
-        header = DataType_Header(
-            magic_number=DataType_MagicNumber(
+        header = Data_Header(
+            magic_number=Data_MagicNumber(
                 data=_magn,
                 byteorder=self._byte,
                 nanosecond=self._nsec,
@@ -189,7 +189,7 @@ class Header(Protocol[DataType_Header]):
              nanosecond: bool = False, version: 'tuple[int, int] | VersionInfo' = (2, 4),
              version_major: 'Optional[int]' = None, version_minor: 'Optional[int]' = None,
              thiszone: int = 0, sigfigs: int = 0, snaplen: int = 0x40_000,
-             network: 'RegType_LinkType | StdlibEnum | AenumEnum | str | int' = RegType_LinkType.NULL,
+             network: 'Enum_LinkType | StdlibEnum | AenumEnum | str | int' = Enum_LinkType.NULL,
              network_default: 'Optional[int]' = None,
              network_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,
              network_reversed: bool = False, **kwargs: 'Any') -> 'bytes':
@@ -294,7 +294,7 @@ class Header(Protocol[DataType_Header]):
     # Utilities.
     ##########################################################################
 
-    def _read_protos(self, size: int) -> 'RegType_LinkType':
+    def _read_protos(self, size: int) -> 'Enum_LinkType':
         """Read next layer protocol type.
 
         Arguments:
@@ -305,7 +305,7 @@ class Header(Protocol[DataType_Header]):
 
         """
         _byte = self._read_unpack(4, lilendian=True)
-        _prot = RegType_LinkType.get(_byte)
+        _prot = Enum_LinkType.get(_byte)
         return _prot
 
     def _make_magic(self, byteorder: 'Literal["big", "little"]' = sys.byteorder,

@@ -31,8 +31,8 @@ if TYPE_CHECKING:
     from dictdumper.dumper import Dumper
     from typing_extensions import Literal
 
-    from pcapkit.const.reg.linktype import LinkType as RegType_LinkType
-    from pcapkit.protocols.data.misc.pcap.frame import Frame as DataType_Frame
+    from pcapkit.const.reg.linktype import LinkType as Enum_LinkType
+    from pcapkit.protocols.data.misc.pcap.frame import Frame as Data_Frame
 
 __all__ = ['TraceFlow']
 
@@ -55,11 +55,11 @@ class Packet(Info, Generic[IPAddress]):
     """
 
     #: Data link type from global header.
-    protocol: 'RegType_LinkType'
+    protocol: 'Enum_LinkType'
     #: Frame number.
     index: 'int'
     #: Extracted frame info.
-    frame: 'DataType_Frame | dict[str, Any]'
+    frame: 'Data_Frame | dict[str, Any]'
     #: TCP synchronise (SYN) flag.
     syn: 'bool'
     #: TCP finish (FIN) flag.
@@ -76,7 +76,7 @@ class Packet(Info, Generic[IPAddress]):
     timestamp: 'float'
 
     if TYPE_CHECKING:
-        def __init__(self, protocol: 'RegType_LinkType', index: 'int', frame: 'DataType_Frame | dict[str, Any]', syn: 'bool', fin: 'bool', src: 'IPAddress', dst: 'IPAddress', srcport: 'int', dstport: 'int', timestamp: 'float') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long
+        def __init__(self, protocol: 'Enum_LinkType', index: 'int', frame: 'Data_Frame | dict[str, Any]', syn: 'bool', fin: 'bool', src: 'IPAddress', dst: 'IPAddress', srcport: 'int', dstport: 'int', timestamp: 'float') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long
 
 
 class Buffer(Info):

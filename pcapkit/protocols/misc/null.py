@@ -12,19 +12,19 @@ object whose payload is recursively
 import io
 from typing import TYPE_CHECKING, overload
 
-from pcapkit.protocols.data.misc.null import NoPayload as DataType_NoPayload
+from pcapkit.protocols.data.misc.null import NoPayload as Data_NoPayload
 from pcapkit.protocols.protocol import Protocol
 from pcapkit.utilities.exceptions import UnsupportedCall
 
 if TYPE_CHECKING:
-    from typing import Any, IO, NoReturn, Optional
+    from typing import IO, Any, NoReturn, Optional
 
     from typing_extensions import Literal
 
 __all__ = ['NoPayload']
 
 
-class NoPayload(Protocol[DataType_NoPayload]):
+class NoPayload(Protocol[Data_NoPayload]):
     """This class implements no-payload protocol."""
 
     ##########################################################################
@@ -58,7 +58,7 @@ class NoPayload(Protocol[DataType_NoPayload]):
     # Methods.
     ##########################################################################
 
-    def read(self, length: 'Optional[int]' = None, **kwargs: 'Any') -> 'DataType_NoPayload':  # pylint: disable=unused-argument
+    def read(self, length: 'Optional[int]' = None, **kwargs: 'Any') -> 'Data_NoPayload':  # pylint: disable=unused-argument
         """Read (parse) packet data.
 
         Args:
@@ -69,7 +69,7 @@ class NoPayload(Protocol[DataType_NoPayload]):
             Parsed packet data.
 
         """
-        return DataType_NoPayload()
+        return Data_NoPayload()
 
     def make(self, **kwargs: 'Any') -> 'bytes':
         """Make (construct) packet data.

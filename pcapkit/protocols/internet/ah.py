@@ -24,13 +24,13 @@ Octets      Bits        Name                    Description
 """
 from typing import TYPE_CHECKING, overload
 
-from pcapkit.const.reg.transtype import TransType as RegType_TransType
-from pcapkit.protocols.data.internet.ah import AH as DataType_AH
+from pcapkit.const.reg.transtype import TransType as Enum_TransType
+from pcapkit.protocols.data.internet.ah import AH as Data_AH
 from pcapkit.protocols.internet.ipsec import IPsec
 from pcapkit.utilities.exceptions import ProtocolError, UnsupportedCall, VersionError
 
 if TYPE_CHECKING:
-    from typing import Any, IO, NoReturn, Optional
+    from typing import IO, Any, NoReturn, Optional
 
     from typing_extensions import Literal
 
@@ -40,7 +40,7 @@ if TYPE_CHECKING:
 __all__ = ['AH']
 
 
-class AH(IPsec[DataType_AH]):
+class AH(IPsec[Data_AH]):
     """This class implements Authentication Header."""
 
     ##########################################################################
@@ -98,7 +98,7 @@ class AH(IPsec[DataType_AH]):
     ##########################################################################
 
     def read(self, length: 'Optional[int]' = None, *, version: 'Literal[4, 6]' = 4,  # pylint: disable=arguments-differ
-             extension: bool = False, **kwargs: 'Any') -> 'DataType_AH':  # pylint: disable=unused-argument
+             extension: bool = False, **kwargs: 'Any') -> 'Data_AH':  # pylint: disable=unused-argument
         """Read Authentication Header.
 
         Structure of AH header [:rfc:`4302`]:
@@ -143,7 +143,7 @@ class AH(IPsec[DataType_AH]):
         _vlen = _tlen - 12
         _chkv = self._read_fileng(_vlen)
 
-        ah = DataType_AH(
+        ah = Data_AH(
             next=_next,
             length=_tlen,
             spi=_scpi,
@@ -227,7 +227,7 @@ class AH(IPsec[DataType_AH]):
         return 20
 
     @classmethod
-    def __index__(cls) -> 'RegType_TransType':  # pylint: disable=invalid-index-returned
+    def __index__(cls) -> 'Enum_TransType':  # pylint: disable=invalid-index-returned
         """Numeral registry index of the protocol.
 
         Returns:
@@ -236,4 +236,4 @@ class AH(IPsec[DataType_AH]):
         .. _IANA: https://www.iana.org/assignments/protocol-numbers/protocol-numbers.xhtml
 
         """
-        return RegType_TransType.AH  # type: ignore[return-value]
+        return Enum_TransType.AH  # type: ignore[return-value]

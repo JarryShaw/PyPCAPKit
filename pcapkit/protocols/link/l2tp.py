@@ -49,9 +49,9 @@ as below:
 """
 from typing import TYPE_CHECKING
 
-from pcapkit.const.l2tp.type import Type as RegType_Type
-from pcapkit.protocols.data.link.l2tp import L2TP as DataType_L2TP
-from pcapkit.protocols.data.link.l2tp import Flags as DataType_Flags
+from pcapkit.const.l2tp.type import Type as Enum_Type
+from pcapkit.protocols.data.link.l2tp import L2TP as Data_L2TP
+from pcapkit.protocols.data.link.l2tp import Flags as Data_Flags
 from pcapkit.protocols.link.link import Link
 from pcapkit.utilities.exceptions import UnsupportedCall
 
@@ -63,7 +63,7 @@ if TYPE_CHECKING:
 __all__ = ['L2TP']
 
 
-class L2TP(Link[DataType_L2TP]):
+class L2TP(Link[Data_L2TP]):
     """This class implements Layer Two Tunnelling Protocol."""
 
     ##########################################################################
@@ -89,7 +89,7 @@ class L2TP(Link[DataType_L2TP]):
     # Methods.
     ##########################################################################
 
-    def read(self, length: 'Optional[int]' = None, **kwargs: 'Any') -> 'DataType_L2TP':  # pylint: disable=unused-argument
+    def read(self, length: 'Optional[int]' = None, **kwargs: 'Any') -> 'Data_L2TP':  # pylint: disable=unused-argument
         """Read Layer Two Tunnelling Protocol.
 
         Structure of L2TP header [:rfc:`2661`]:
@@ -121,8 +121,8 @@ class L2TP(Link[DataType_L2TP]):
 
         _flag = self._read_binary(1)
 
-        flags = DataType_Flags(
-            type=RegType_Type(int(_flag[0])),
+        flags = Data_Flags(
+            type=Enum_Type(int(_flag[0])),
             len=bool(int(_flag[1])),
             seq=bool(int(_flag[4])),
             offset=bool(int(_flag[6])),
@@ -137,7 +137,7 @@ class L2TP(Link[DataType_L2TP]):
         _nrec = self._read_unpack(2) if flags.seq else None
         _size = self._read_unpack(2) if flags.offset else 0
 
-        l2tp = DataType_L2TP(
+        l2tp = Data_L2TP(
             flags=flags,
             version=int(_vers, base=16),
             length=_hlen,

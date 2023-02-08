@@ -21,7 +21,7 @@ if TYPE_CHECKING:
     from pcapkit.const.hip.nat_traversal import NATTraversal
     from pcapkit.const.hip.notify_message import NotifyMessage
     from pcapkit.const.hip.packet import Packet
-    from pcapkit.const.hip.parameter import Parameter as RegType_Parameter
+    from pcapkit.const.hip.parameter import Parameter as Enum_Parameter
     from pcapkit.const.hip.registration import Registration
     from pcapkit.const.hip.registration_failure import RegistrationFailure
     from pcapkit.const.hip.suite import Suite
@@ -70,7 +70,7 @@ class Parameter(Info):
     """Data model for HIP parameter data."""
 
     #: Parameter type.
-    type: 'RegType_Parameter'
+    type: 'Enum_Parameter'
     #: Critical flag.
     critical: 'bool'
     #: Content length.
@@ -99,7 +99,7 @@ class HIP(Info):
 
     if TYPE_CHECKING:
         #: HIP parameters.
-        parameters: 'OrderedMultiDict[RegType_Parameter, Parameter]'
+        parameters: 'OrderedMultiDict[Enum_Parameter, Parameter]'
 
         def __init__(self, next: 'TransType', length: 'int', type: 'Packet', version: 'int', chksum: 'bytes', control: 'Control', shit: 'int', rhit: 'int') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
 
@@ -111,7 +111,7 @@ class UnassignedParameter(Parameter):
     contents: 'bytes'
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'RegType_Parameter', critical: 'bool', length: 'int', contents: 'bytes') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
+        def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', contents: 'bytes') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
 
 
 class ESPInfoParameter(Parameter):
@@ -125,7 +125,7 @@ class ESPInfoParameter(Parameter):
     new_spi: 'int'
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'RegType_Parameter', critical: 'bool', length: 'int', index: 'int', old_spi: 'int', new_spi: 'int') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
+        def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', index: 'int', old_spi: 'int', new_spi: 'int') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
 
 
 class R1CounterParameter(Parameter):
@@ -135,7 +135,7 @@ class R1CounterParameter(Parameter):
     counter: 'int'
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'RegType_Parameter', critical: 'bool', length: 'int', counter: 'int') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
+        def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', counter: 'int') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
 
 
 class LocatorData(Info):
@@ -177,7 +177,7 @@ class LocatorSetParameter(Parameter):
     locator_set: 'tuple[Locator, ...]'
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'RegType_Parameter', critical: 'bool', length: 'int', locator_set: 'tuple[Locator, ...]') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
+        def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', locator_set: 'tuple[Locator, ...]') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
 
 
 class PuzzleParameter(Parameter):
@@ -193,7 +193,7 @@ class PuzzleParameter(Parameter):
     random: 'int'
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'RegType_Parameter', critical: 'bool', length: 'int', index: 'int', lifetime: 'timedelta', opaque: 'bytes', random: 'int') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
+        def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', index: 'int', lifetime: 'timedelta', opaque: 'bytes', random: 'int') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
 
 
 class SolutionParameter(Parameter):
@@ -211,7 +211,7 @@ class SolutionParameter(Parameter):
     solution: 'int'
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'RegType_Parameter', critical: 'bool', length: 'int', index: 'int', lifetime: 'timedelta', opaque: 'bytes', random: 'int', solution: 'int') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
+        def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', index: 'int', lifetime: 'timedelta', opaque: 'bytes', random: 'int', solution: 'int') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
 
 
 class SEQParameter(Parameter):
@@ -221,7 +221,7 @@ class SEQParameter(Parameter):
     id: 'int'
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'RegType_Parameter', critical: 'bool', length: 'int', id: 'int') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
+        def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', id: 'int') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
 
 
 class ACKParameter(Parameter):
@@ -231,7 +231,7 @@ class ACKParameter(Parameter):
     update_id: 'tuple[int, ...]'
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'RegType_Parameter', critical: 'bool', length: 'int', update_id: 'tuple[int, ...]') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
+        def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', update_id: 'tuple[int, ...]') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
 
 
 class DHGroupListParameter(Parameter):
@@ -241,7 +241,7 @@ class DHGroupListParameter(Parameter):
     group_id: 'tuple[Group, ...]'
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'RegType_Parameter', critical: 'bool', length: 'int', group_id: 'tuple[Group, ...]') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
+        def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', group_id: 'tuple[Group, ...]') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
 
 
 class DeffieHellmanParameter(Parameter):
@@ -255,7 +255,7 @@ class DeffieHellmanParameter(Parameter):
     pub_val: 'bytes'
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'RegType_Parameter', critical: 'bool', length: 'int', group_id: 'Group', pub_len: 'int', pub_val: 'bytes') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
+        def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', group_id: 'Group', pub_len: 'int', pub_val: 'bytes') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
 
 
 class HIPTransformParameter(Parameter):
@@ -265,7 +265,7 @@ class HIPTransformParameter(Parameter):
     suite_id: 'tuple[Suite, ...]'
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'RegType_Parameter', critical: 'bool', length: 'int', suite_id: 'tuple[Suite, ...]') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
+        def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', suite_id: 'tuple[Suite, ...]') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
 
 
 class HIPCipherParameter(Parameter):
@@ -275,7 +275,7 @@ class HIPCipherParameter(Parameter):
     cipher_id: 'tuple[Cipher, ...]'
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'RegType_Parameter', critical: 'bool', length: 'int', cipher_id: 'tuple[Cipher, ...]') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
+        def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', cipher_id: 'tuple[Cipher, ...]') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
 
 
 class NATTraversalModeParameter(Parameter):
@@ -285,7 +285,7 @@ class NATTraversalModeParameter(Parameter):
     mode_id: 'tuple[NATTraversal, ...]'
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'RegType_Parameter', critical: 'bool', length: 'int', mode_id: 'tuple[NATTraversal, ...]') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
+        def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', mode_id: 'tuple[NATTraversal, ...]') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
 
 
 class TransactionPacingParameter(Parameter):
@@ -295,7 +295,7 @@ class TransactionPacingParameter(Parameter):
     min_ta: 'int'
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'RegType_Parameter', critical: 'bool', length: 'int', min_ta: 'int') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
+        def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', min_ta: 'int') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
 
 
 class EncryptedParameter(Parameter):
@@ -305,7 +305,7 @@ class EncryptedParameter(Parameter):
     raw: 'bytes'
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'RegType_Parameter', critical: 'bool', length: 'int', raw: 'bytes') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
+        def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', raw: 'bytes') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
 
 
 class HostIdentity(Info):
@@ -337,7 +337,7 @@ class HostIDParameter(Parameter):
     di: 'bytes'
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'RegType_Parameter', critical: 'bool', length: 'int', hi_len: 'int', di_type: 'DITypes', di_len: 'int', algorithm: 'HIAlgorithm', hi: 'HostIdentity | bytes', di: 'bytes') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
+        def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', hi_len: 'int', di_type: 'DITypes', di_len: 'int', algorithm: 'HIAlgorithm', hi: 'HostIdentity | bytes', di: 'bytes') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
 
 
 class HITSuiteListParameter(Parameter):
@@ -347,7 +347,7 @@ class HITSuiteListParameter(Parameter):
     suite_id: 'tuple[HITSuite, ...]'
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'RegType_Parameter', critical: 'bool', length: 'int', suite_id: 'tuple[HITSuite, ...]') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
+        def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', suite_id: 'tuple[HITSuite, ...]') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
 
 
 class CertParameter(Parameter):
@@ -365,7 +365,7 @@ class CertParameter(Parameter):
     cert: 'bytes'
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'RegType_Parameter', critical: 'bool', length: 'int', cert_group: 'Group', cert_count: 'int', cert_id: 'int', cert_type: 'Certificate', cert: 'bytes') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
+        def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', cert_group: 'Group', cert_count: 'int', cert_id: 'int', cert_type: 'Certificate', cert: 'bytes') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
 
 
 class NotificationParameter(Parameter):
@@ -377,7 +377,7 @@ class NotificationParameter(Parameter):
     msg: 'bytes'
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'RegType_Parameter', critical: 'bool', length: 'int', msg_type: 'NotifyMessage', msg: 'bytes') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
+        def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', msg_type: 'NotifyMessage', msg: 'bytes') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
 
 
 class EchoRequestSignedParameter(Parameter):
@@ -387,7 +387,7 @@ class EchoRequestSignedParameter(Parameter):
     opaque: 'bytes'
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'RegType_Parameter', critical: 'bool', length: 'int', opaque: 'bytes') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
+        def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', opaque: 'bytes') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
 
 
 class Lifetime(Info):
@@ -411,7 +411,7 @@ class RegInfoParameter(Parameter):
     reg_type: 'tuple[Registration, ...]'
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'RegType_Parameter', critical: 'bool', length: 'int', lifetime: 'Lifetime', reg_type: 'tuple[Registration, ...]') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
+        def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', lifetime: 'Lifetime', reg_type: 'tuple[Registration, ...]') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
 
 
 class RegRequestParameter(Parameter):
@@ -423,7 +423,7 @@ class RegRequestParameter(Parameter):
     reg_type: 'tuple[Registration, ...]'
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'RegType_Parameter', critical: 'bool', length: 'int', lifetime: 'Lifetime', reg_type: 'tuple[Registration, ...]') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
+        def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', lifetime: 'Lifetime', reg_type: 'tuple[Registration, ...]') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
 
 
 class RegResponseParameter(Parameter):
@@ -435,7 +435,7 @@ class RegResponseParameter(Parameter):
     reg_type: 'tuple[Registration, ...]'
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'RegType_Parameter', critical: 'bool', length: 'int', lifetime: 'Lifetime', reg_type: 'tuple[Registration, ...]') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
+        def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', lifetime: 'Lifetime', reg_type: 'tuple[Registration, ...]') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
 
 
 class RegFailedParameter(Parameter):
@@ -447,7 +447,7 @@ class RegFailedParameter(Parameter):
     reg_type: 'tuple[RegistrationFailure, ...]'
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'RegType_Parameter', critical: 'bool', length: 'int', lifetime: 'Lifetime', reg_type: 'tuple[RegistrationFailure, ...]') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
+        def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', lifetime: 'Lifetime', reg_type: 'tuple[RegistrationFailure, ...]') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
 
 
 class RegFromParameter(Parameter):
@@ -461,7 +461,7 @@ class RegFromParameter(Parameter):
     address: 'IPv6Address'
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'RegType_Parameter', critical: 'bool', length: 'int', port: 'int', protocol: 'TransType', address: 'IPv6Address') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
+        def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', port: 'int', protocol: 'TransType', address: 'IPv6Address') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
 
 
 class EchoResponseSignedParameter(Parameter):
@@ -471,7 +471,7 @@ class EchoResponseSignedParameter(Parameter):
     opaque: 'bytes'
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'RegType_Parameter', critical: 'bool', length: 'int', opaque: 'bytes') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
+        def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', opaque: 'bytes') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
 
 
 class TransportFormatListParameter(Parameter):
@@ -481,7 +481,7 @@ class TransportFormatListParameter(Parameter):
     tf_type: 'tuple[int, ...]'
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'RegType_Parameter', critical: 'bool', length: 'int', tf_type: 'tuple[int, ...]') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
+        def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', tf_type: 'tuple[int, ...]') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
 
 
 class ESPTransformParameter(Parameter):
@@ -491,7 +491,7 @@ class ESPTransformParameter(Parameter):
     suite_id: 'tuple[ESPTransformSuite, ...]'
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'RegType_Parameter', critical: 'bool', length: 'int', suite_id: 'tuple[ESPTransformSuite, ...]') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
+        def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', suite_id: 'tuple[ESPTransformSuite, ...]') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
 
 
 class SeqDataParameter(Parameter):
@@ -501,7 +501,7 @@ class SeqDataParameter(Parameter):
     seq: 'int'
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'RegType_Parameter', critical: 'bool', length: 'int', seq: 'int') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
+        def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', seq: 'int') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
 
 
 class AckDataParameter(Parameter):
@@ -511,7 +511,7 @@ class AckDataParameter(Parameter):
     ack: 'tuple[int, ...]'
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'RegType_Parameter', critical: 'bool', length: 'int', ack: 'tuple[int, ...]') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
+        def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', ack: 'tuple[int, ...]') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
 
 
 class PayloadMICParameter(Parameter):
@@ -525,7 +525,7 @@ class PayloadMICParameter(Parameter):
     mic: 'bytes'
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'RegType_Parameter', critical: 'bool', length: 'int', next: 'TransType', payload: 'bytes', mic: 'bytes') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
+        def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', next: 'TransType', payload: 'bytes', mic: 'bytes') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
 
 
 class TransactionIDParameter(Parameter):
@@ -535,7 +535,7 @@ class TransactionIDParameter(Parameter):
     id: 'int'
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'RegType_Parameter', critical: 'bool', length: 'int', id: 'int') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
+        def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', id: 'int') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
 
 
 class OverlayIDParameter(Parameter):
@@ -545,7 +545,7 @@ class OverlayIDParameter(Parameter):
     id: 'int'
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'RegType_Parameter', critical: 'bool', length: 'int', id: 'int') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
+        def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', id: 'int') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
 
 
 class Flags(Info):
@@ -569,7 +569,7 @@ class RouteDstParameter(Parameter):
     hit: 'tuple[IPv6Address, ...]'
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'RegType_Parameter', critical: 'bool', length: 'int', flags: 'Flags', hit: 'tuple[IPv6Address, ...]') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
+        def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', flags: 'Flags', hit: 'tuple[IPv6Address, ...]') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
 
 
 class HIPTransportModeParameter(Parameter):
@@ -581,7 +581,7 @@ class HIPTransportModeParameter(Parameter):
     mode_id: 'tuple[Transport, ...]'
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'RegType_Parameter', critical: 'bool', length: 'int', port: 'int', mode_id: 'tuple[Transport, ...]') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
+        def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', port: 'int', mode_id: 'tuple[Transport, ...]') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
 
 
 class HIPMACParameter(Parameter):
@@ -591,7 +591,7 @@ class HIPMACParameter(Parameter):
     hmac: 'bytes'
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'RegType_Parameter', critical: 'bool', length: 'int', hmac: 'bytes') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
+        def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', hmac: 'bytes') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
 
 
 class HIPMAC2Parameter(Parameter):
@@ -601,7 +601,7 @@ class HIPMAC2Parameter(Parameter):
     hmac: 'bytes'
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'RegType_Parameter', critical: 'bool', length: 'int', hmac: 'bytes') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
+        def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', hmac: 'bytes') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
 
 
 class HIPSignature2Parameter(Parameter):
@@ -613,7 +613,7 @@ class HIPSignature2Parameter(Parameter):
     signature: 'bytes'
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'RegType_Parameter', critical: 'bool', length: 'int', algorithm: 'HIAlgorithm', signature: 'bytes') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
+        def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', algorithm: 'HIAlgorithm', signature: 'bytes') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
 
 
 class HIPSignatureParameter(Parameter):
@@ -625,7 +625,7 @@ class HIPSignatureParameter(Parameter):
     signature: 'bytes'
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'RegType_Parameter', critical: 'bool', length: 'int', algorithm: 'HIAlgorithm', signature: 'bytes') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
+        def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', algorithm: 'HIAlgorithm', signature: 'bytes') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
 
 
 class EchoRequestUnsignedParameter(Parameter):
@@ -635,7 +635,7 @@ class EchoRequestUnsignedParameter(Parameter):
     opaque: 'bytes'
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'RegType_Parameter', critical: 'bool', length: 'int', opaque: 'bytes') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
+        def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', opaque: 'bytes') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
 
 
 class EchoResponseUnsignedParameter(Parameter):
@@ -645,7 +645,7 @@ class EchoResponseUnsignedParameter(Parameter):
     opaque: 'bytes'
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'RegType_Parameter', critical: 'bool', length: 'int', opaque: 'bytes') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
+        def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', opaque: 'bytes') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
 
 
 class RelayFromParameter(Parameter):
@@ -659,7 +659,7 @@ class RelayFromParameter(Parameter):
     address: 'IPv6Address'
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'RegType_Parameter', critical: 'bool', length: 'int', port: 'int', protocol: 'TransType', address: 'IPv6Address') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
+        def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', port: 'int', protocol: 'TransType', address: 'IPv6Address') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
 
 
 class RelayToParameter(Parameter):
@@ -673,7 +673,7 @@ class RelayToParameter(Parameter):
     address: 'IPv6Address'
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'RegType_Parameter', critical: 'bool', length: 'int', port: 'int', protocol: 'TransType', address: 'IPv6Address') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
+        def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', port: 'int', protocol: 'TransType', address: 'IPv6Address') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
 
 
 class OverlayTTLParameter(Parameter):
@@ -683,7 +683,7 @@ class OverlayTTLParameter(Parameter):
     ttl: 'timedelta'
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'RegType_Parameter', critical: 'bool', length: 'int', ttl: 'timedelta') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
+        def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', ttl: 'timedelta') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
 
 
 class RouteViaParameter(Parameter):
@@ -695,7 +695,7 @@ class RouteViaParameter(Parameter):
     hit: 'tuple[IPv6Address, ...]'
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'RegType_Parameter', critical: 'bool', length: 'int', flags: 'Flags', hit: 'tuple[IPv6Address, ...]') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
+        def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', flags: 'Flags', hit: 'tuple[IPv6Address, ...]') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
 
 
 class FromParameter(Parameter):
@@ -705,7 +705,7 @@ class FromParameter(Parameter):
     address: 'IPv6Address'
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'RegType_Parameter', critical: 'bool', length: 'int', address: 'IPv6Address') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
+        def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', address: 'IPv6Address') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
 
 
 class RVSHMACParameter(Parameter):
@@ -715,7 +715,7 @@ class RVSHMACParameter(Parameter):
     hmac: 'bytes'
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'RegType_Parameter', critical: 'bool', length: 'int', hmac: 'bytes') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
+        def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', hmac: 'bytes') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
 
 
 class ViaRVSParameter(Parameter):
@@ -725,7 +725,7 @@ class ViaRVSParameter(Parameter):
     address: 'tuple[IPv6Address, ...]'
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'RegType_Parameter', critical: 'bool', length: 'int', address: 'tuple[IPv6Address, ...]') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
+        def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', address: 'tuple[IPv6Address, ...]') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
 
 
 class RelayHMACParameter(Parameter):
@@ -735,4 +735,4 @@ class RelayHMACParameter(Parameter):
     hmac: 'bytes'
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'RegType_Parameter', critical: 'bool', length: 'int', hmac: 'bytes') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
+        def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', hmac: 'bytes') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long

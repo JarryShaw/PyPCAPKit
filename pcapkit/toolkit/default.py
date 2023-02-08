@@ -9,7 +9,7 @@ flag to indicate if usable for its caller.
 """
 from typing import TYPE_CHECKING, cast
 
-from pcapkit.const.ipv6.extension_header import ExtensionHeader as RegType_ExtensionHeader
+from pcapkit.const.ipv6.extension_header import ExtensionHeader as Enum_ExtensionHeader
 from pcapkit.foundation.reassembly.ip import Packet as IP_Packet
 from pcapkit.foundation.reassembly.tcp import Packet as TCP_Packet
 from pcapkit.foundation.traceflow import Packet as TF_Packet
@@ -38,7 +38,7 @@ def ipv4_reassembly(frame: 'Frame') -> 'IP_Packet[IPv4Address] | None':
 
         * If the ``frame`` can be used for IPv4 reassembly. A frame can be reassembled
           if it contains IPv4 layer (:class:`pcapkit.protocols.internet.ipv4.IPv4`) and
-          the **DF** (:attr:`IPv4.flags.df <pcapkit.protocols.internet.ipv4.DataType_IPv4_Flags.df>`)
+          the **DF** (:attr:`IPv4.flags.df <pcapkit.protocols.internet.ipv4.Data_IPv4_Flags.df>`)
           flag is :data:`False`.
         * If the ``frame`` can be reassembled, then the :obj:`dict` mapping of data for IPv4
           reassembly (c.f. :term:`ipv4.packet`) will be returned; otherwise, returns :data:`None`.
@@ -96,7 +96,7 @@ def ipv6_reassembly(frame: 'Frame') -> 'IP_Packet[IPv6Address] | None':
         ipv6 = cast('IPv6', frame['IPv6'])
         ipv6_info = ipv6.info
         if (ipv6_frag := ipv6.extension_headers.get(  # type: ignore[call-overload]
-            RegType_ExtensionHeader.IPv6_Frag
+            Enum_ExtensionHeader.IPv6_Frag
         )) is None:  # dismiss not fragmented frame
             return None
         ipv6_frag_info = cast('IPv6_Frag', ipv6_frag).info

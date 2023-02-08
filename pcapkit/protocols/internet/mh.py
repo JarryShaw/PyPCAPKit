@@ -25,14 +25,14 @@ Octets      Bits        Name                    Description
 
 from typing import TYPE_CHECKING, overload
 
-from pcapkit.const.mh.packet import Packet as RegType_Packet
-from pcapkit.const.reg.transtype import TransType as RegType_TransType
-from pcapkit.protocols.data.internet.mh import MH as DataType_MH
+from pcapkit.const.mh.packet import Packet as Enum_Packet
+from pcapkit.const.reg.transtype import TransType as Enum_TransType
+from pcapkit.protocols.data.internet.mh import MH as Data_MH
 from pcapkit.protocols.internet.internet import Internet
 from pcapkit.utilities.exceptions import UnsupportedCall
 
 if TYPE_CHECKING:
-    from typing import Any, IO, NoReturn, Optional
+    from typing import IO, Any, NoReturn, Optional
 
     from typing_extensions import Literal
 
@@ -42,7 +42,7 @@ if TYPE_CHECKING:
 __all__ = ['MH']
 
 
-class MH(Internet[DataType_MH]):
+class MH(Internet[Data_MH]):
     """This class implements Mobility Header."""
 
     ##########################################################################
@@ -100,7 +100,7 @@ class MH(Internet[DataType_MH]):
     ##########################################################################
 
     def read(self, length: 'Optional[int]' = None, *, version: 'Literal[4, 6]' = 4,  # pylint: disable=arguments-differ,unused-argument
-             extension: bool = False, **kwargs: 'Any') -> 'DataType_MH':  # pylint: disable=unused-argument
+             extension: bool = False, **kwargs: 'Any') -> 'Data_MH':  # pylint: disable=unused-argument
         """Read Mobility Header.
 
         Structure of MH header [:rfc:`6275`]:
@@ -139,10 +139,10 @@ class MH(Internet[DataType_MH]):
         _csum = self._read_fileng(2)
         _data = self._read_fileng((_hlen+1)*8)
 
-        mh = DataType_MH(
+        mh = Data_MH(
             next=_next,
             length=(_hlen + 1) * 8,
-            type=RegType_Packet.get(_type),
+            type=Enum_Packet.get(_type),
             chksum=_csum,
             data=_data,
         )
@@ -201,7 +201,7 @@ class MH(Internet[DataType_MH]):
         return 6
 
     @classmethod
-    def __index__(cls) -> 'RegType_TransType':  # pylint: disable=invalid-index-returned
+    def __index__(cls) -> 'Enum_TransType':  # pylint: disable=invalid-index-returned
         """Numeral registry index of the protocol.
 
         Returns:
@@ -210,4 +210,4 @@ class MH(Internet[DataType_MH]):
         .. _IANA: https://www.iana.org/assignments/protocol-numbers/protocol-numbers.xhtml
 
         """
-        return RegType_TransType.Mobility_Header  # type: ignore[return-value]
+        return Enum_TransType.Mobility_Header  # type: ignore[return-value]

@@ -15,9 +15,9 @@ from typing import TYPE_CHECKING
 from pcapkit.const.ftp.command import Command
 from pcapkit.const.ftp.return_code import ReturnCode
 from pcapkit.protocols.application.application import Application
-from pcapkit.protocols.data.application.ftp import FTP as DataType_FTP
-from pcapkit.protocols.data.application.ftp import Request as DataType_Request
-from pcapkit.protocols.data.application.ftp import Response as DataType_Response
+from pcapkit.protocols.data.application.ftp import FTP as Data_FTP
+from pcapkit.protocols.data.application.ftp import Request as Data_Request
+from pcapkit.protocols.data.application.ftp import Response as Data_Response
 from pcapkit.utilities.exceptions import ProtocolError, UnsupportedCall
 
 if TYPE_CHECKING:
@@ -28,7 +28,7 @@ if TYPE_CHECKING:
 __all__ = ['FTP']
 
 
-class FTP(Application[DataType_FTP]):
+class FTP(Application[Data_FTP]):
     """This class implements File Transfer Protocol."""
 
     ##########################################################################
@@ -54,7 +54,7 @@ class FTP(Application[DataType_FTP]):
     # Methods.
     ##########################################################################
 
-    def read(self, length: 'Optional[int]' = None, **kwargs: 'Any') -> 'DataType_FTP':  # pylint: disable=unused-argument
+    def read(self, length: 'Optional[int]' = None, **kwargs: 'Any') -> 'Data_FTP':  # pylint: disable=unused-argument
         """Read File Transfer Protocol (FTP).
 
         Args:
@@ -78,7 +78,7 @@ class FTP(Application[DataType_FTP]):
 
         if TYPE_CHECKING:
             pref: 'int | str'
-            ftp: 'DataType_Request | DataType_Response'
+            ftp: 'Data_Request | Data_Response'
 
         if re.match(r'^\d{3}', text):
             pref = int(text[:3])
@@ -89,7 +89,7 @@ class FTP(Application[DataType_FTP]):
             suff = text[4:] or None
 
             code = ReturnCode.get(pref)
-            ftp = DataType_Response(
+            ftp = Data_Response(
                 type='response',
                 code=code,
                 arg=suff,
@@ -104,7 +104,7 @@ class FTP(Application[DataType_FTP]):
                 pref, suff = text, None
 
             cmmd = Command[pref]
-            ftp = DataType_Request(
+            ftp = Data_Request(
                 type='request',
                 command=cmmd,
                 arg=suff,

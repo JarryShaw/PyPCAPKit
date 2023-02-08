@@ -24,32 +24,32 @@ import collections
 import ipaddress
 from typing import TYPE_CHECKING, overload
 
-from pcapkit.const.ipv6.routing import Routing as RegType_Routing
-from pcapkit.const.reg.transtype import TransType as RegType_TransType
-from pcapkit.protocols.data.internet.ipv6_route import RPL as DataType_RPL
-from pcapkit.protocols.data.internet.ipv6_route import IPv6_Route as DataType_IPv6_Route
-from pcapkit.protocols.data.internet.ipv6_route import SourceRoute as DataType_SourceRoute
-from pcapkit.protocols.data.internet.ipv6_route import Type2 as DataType_Type2
-from pcapkit.protocols.data.internet.ipv6_route import UnknownType as DataType_UnknownType
+from pcapkit.const.ipv6.routing import Routing as Enum_Routing
+from pcapkit.const.reg.transtype import TransType as Enum_TransType
+from pcapkit.protocols.data.internet.ipv6_route import RPL as Data_RPL
+from pcapkit.protocols.data.internet.ipv6_route import IPv6_Route as Data_IPv6_Route
+from pcapkit.protocols.data.internet.ipv6_route import SourceRoute as Data_SourceRoute
+from pcapkit.protocols.data.internet.ipv6_route import Type2 as Data_Type2
+from pcapkit.protocols.data.internet.ipv6_route import UnknownType as Data_UnknownType
 from pcapkit.protocols.internet.internet import Internet
 from pcapkit.utilities.exceptions import ProtocolError, UnsupportedCall
 
 if TYPE_CHECKING:
     from ipaddress import IPv6Address
-    from typing import Any, IO, Callable, DefaultDict, NoReturn, Optional
+    from typing import IO, Any, Callable, DefaultDict, NoReturn, Optional
 
     from typing_extensions import Literal
 
     from pcapkit.corekit.protochain import ProtoChain
-    from pcapkit.protocols.data.internet.ipv6_route import RoutingType as DataType_RoutingType
+    from pcapkit.protocols.data.internet.ipv6_route import RoutingType as Data_RoutingType
     from pcapkit.protocols.protocol import Protocol
 
-    TypeParser = Callable[['IPv6_Route', int], DataType_RoutingType]
+    TypeParser = Callable[['IPv6_Route', int], Data_RoutingType]
 
 __all__ = ['IPv6_Route']
 
 
-class IPv6_Route(Internet[DataType_IPv6_Route]):
+class IPv6_Route(Internet[Data_IPv6_Route]):
     """This class implements Routing Header for IPv6.
 
     This class currently supports parsing of the following Routing Header for IPv6
@@ -75,16 +75,16 @@ class IPv6_Route(Internet[DataType_IPv6_Route]):
     # Defaults.
     ##########################################################################
 
-    #: DefaultDict[RegType_Routing, str | TypeParser]: Type code to method
+    #: DefaultDict[Enum_Routing, str | TypeParser]: Type code to method
     #: mapping. Method names are expected to be referred to the class by
     #: ``_read_data_type_${name}``, and if such name not found, the value should
     #: then be a method that can parse the routing type by itself.
     __routing__ = collections.defaultdict(
         lambda: 'none',
         {
-            RegType_Routing.Source_Route: 'src',             # [RFC 5095] DEPRECATED
-            RegType_Routing.Type_2_Routing_Header: '2',      # [RFC 6275]
-            RegType_Routing.RPL_Source_Route_Header: 'rpl',  # [RFC 6554]
+            Enum_Routing.Source_Route: 'src',             # [RFC 5095] DEPRECATED
+            Enum_Routing.Type_2_Routing_Header: '2',      # [RFC 6275]
+            Enum_Routing.RPL_Source_Route_Header: 'rpl',  # [RFC 6554]
         },
     )  # type: DefaultDict[int, str | TypeParser]
 
@@ -149,7 +149,7 @@ class IPv6_Route(Internet[DataType_IPv6_Route]):
     ##########################################################################
 
     def read(self, length: 'Optional[int]' = None, *, extension: 'bool' = False,  # pylint: disable=arguments-differ
-             **kwargs: 'Any') -> 'DataType_IPv6_Route':  # pylint: disable=unused-argument
+             **kwargs: 'Any') -> 'Data_IPv6_Route':  # pylint: disable=unused-argument
         """Read Routing Header for IPv6.
 
         Structure of IPv6-Route header [:rfc:`8200`][:rfc:`5095`]:
@@ -183,10 +183,10 @@ class IPv6_Route(Internet[DataType_IPv6_Route]):
         _type = self._read_unpack(1)
         _left = self._read_unpack(1)
 
-        ipv6_route = DataType_IPv6_Route(
+        ipv6_route = Data_IPv6_Route(
             next=_next,
             length=(_hlen + 1) * 8,
-            type=RegType_Routing.get(_type),
+            type=Enum_Routing.get(_type),
             seg_left=_left,
         )
 
@@ -195,7 +195,7 @@ class IPv6_Route(Internet[DataType_IPv6_Route]):
             _name = self.__routing__[ipv6_route.type]  # type: str | TypeParser
             if isinstance(_name, str):
                 _name = f'_read_data_type_{_name.lower()}'
-                _meth = getattr(self, _name, self._read_data_type_none)  # type: Callable[[int], DataType_RoutingType]
+                _meth = getattr(self, _name, self._read_data_type_none)  # type: Callable[[int], Data_RoutingType]
                 _data = _meth(_dlen)
             else:
                 _data = _name(self, _dlen)
@@ -218,7 +218,7 @@ class IPv6_Route(Internet[DataType_IPv6_Route]):
         raise NotImplementedError
 
     @classmethod
-    def register_routing(cls, code: 'RegType_Routing', meth: 'str | TypeParser') -> 'None':
+    def register_routing(cls, code: 'Enum_Routing', meth: 'str | TypeParser') -> 'None':
         """Register an routing data parser.
 
         Args:
@@ -266,7 +266,7 @@ class IPv6_Route(Internet[DataType_IPv6_Route]):
         return 4
 
     @classmethod
-    def __index__(cls) -> 'RegType_TransType':  # pylint: disable=invalid-index-returned
+    def __index__(cls) -> 'Enum_TransType':  # pylint: disable=invalid-index-returned
         """Numeral registry index of the protocol.
 
         Returns:
@@ -275,13 +275,13 @@ class IPv6_Route(Internet[DataType_IPv6_Route]):
         .. _IANA: https://www.iana.org/assignments/protocol-numbers/protocol-numbers.xhtml
 
         """
-        return RegType_TransType.IPv6_Route  # type: ignore[return-value]
+        return Enum_TransType.IPv6_Route  # type: ignore[return-value]
 
     ##########################################################################
     # Utilities.
     ##########################################################################
 
-    def _read_data_type_none(self, length: 'int') -> 'DataType_UnknownType':
+    def _read_data_type_none(self, length: 'int') -> 'Data_UnknownType':
         """Read IPv6-Route unknown type data.
 
         Structure of IPv6-Route unknown type data [:rfc:`8200`][:rfc:`5095`]:
@@ -307,13 +307,13 @@ class IPv6_Route(Internet[DataType_IPv6_Route]):
         """
         _data = self._read_fileng(length)
 
-        data = DataType_UnknownType(
+        data = Data_UnknownType(
             data=_data,
         )
 
         return data
 
-    def _read_data_type_src(self, length: 'int') -> 'DataType_SourceRoute':
+    def _read_data_type_src(self, length: 'int') -> 'Data_SourceRoute':
         """Read IPv6-Route Source Route data.
 
         Structure of IPv6-Route Source Route data [:rfc:`5095`]:
@@ -366,13 +366,13 @@ class IPv6_Route(Internet[DataType_IPv6_Route]):
         for _ in range((length - 4) // 16):
             _addr.append(ipaddress.ip_address(self._read_fileng(16)))  # type: ignore[arg-type]
 
-        data = DataType_SourceRoute(
+        data = Data_SourceRoute(
             ip=tuple(_addr),
         )
 
         return data
 
-    def _read_data_type_2(self, length: 'int') -> 'DataType_Type2':
+    def _read_data_type_2(self, length: 'int') -> 'Data_Type2':
         """Read IPv6-Route Type 2 data.
 
         Structure of IPv6-Route Type 2 data [:rfc:`6275`]:
@@ -409,13 +409,13 @@ class IPv6_Route(Internet[DataType_IPv6_Route]):
         _resv = self._read_fileng(4)
         _home = self._read_fileng(16)
 
-        data = DataType_Type2(
+        data = Data_Type2(
             ip=ipaddress.ip_address(_home),  # type: ignore[arg-type]  # type: ignore[arg-type]
         )
 
         return data
 
-    def _read_data_type_rpl(self, length: 'int') -> 'DataType_RPL':
+    def _read_data_type_rpl(self, length: 'int') -> 'Data_RPL':
         """Read IPv6-Route RPL Source data.
 
         Structure of IPv6-Route RPL Source data [:rfc:`6554`]:
@@ -464,7 +464,7 @@ class IPv6_Route(Internet[DataType_IPv6_Route]):
 
         _pads = self._read_fileng(_plen)
 
-        data = DataType_RPL(
+        data = Data_RPL(
             cmpr_i=_inti,
             cmpr_e=_inte,
             pad=_plen,

@@ -16,7 +16,7 @@ from typing import TYPE_CHECKING
 import dictdumper
 
 if TYPE_CHECKING:
-    from typing import Any, IO, Optional
+    from typing import IO, Any, Optional
 
     from typing_extensions import Literal
 

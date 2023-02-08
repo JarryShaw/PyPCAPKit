@@ -12,7 +12,7 @@ import collections
 import importlib
 from typing import TYPE_CHECKING, Generic, cast
 
-from pcapkit.const.reg.transtype import TransType as RegType_TransType
+from pcapkit.const.reg.transtype import TransType as Enum_TransType
 from pcapkit.corekit.protochain import ProtoChain
 from pcapkit.protocols.protocol import PT, Protocol
 from pcapkit.utilities.decorators import beholder
@@ -79,19 +79,19 @@ class Internet(Protocol[PT], Generic[PT]):  # pylint: disable=abstract-method
     __proto__ = collections.defaultdict(
         lambda: ('pcapkit.protocols.misc.raw', 'Raw'),
         {
-            RegType_TransType.HOPOPT:          ('pcapkit.protocols.internet.hopopt',     'HOPOPT'),
-            RegType_TransType.IPv4:            ('pcapkit.protocols.internet.ipv4',       'IPv4'),
-            RegType_TransType.TCP:             ('pcapkit.protocols.transport.tcp',       'TCP'),
-            RegType_TransType.UDP:             ('pcapkit.protocols.transport.udp',       'UDP'),
-            RegType_TransType.IPv6:            ('pcapkit.protocols.internet.ipv6',       'IPv6'),
-            RegType_TransType.IPv6_Route:      ('pcapkit.protocols.internet.ipv6_route', 'IPv6_Route'),
-            RegType_TransType.IPv6_Frag:       ('pcapkit.protocols.internet.ipv6_frag',  'IPv6_Frag'),
-            RegType_TransType.AH:              ('pcapkit.protocols.internet.ah',         'AH'),
-            RegType_TransType.IPv6_NoNxt:      ('pcapkit.protocols.misc.raw',            'Raw'),
-            RegType_TransType.IPv6_Opts:       ('pcapkit.protocols.internet.ipv6_opts',  'IPv6_Opts'),
-            RegType_TransType.IPX_in_IP:       ('pcapkit.protocols.internet.ipx',        'IPX'),
-            RegType_TransType.Mobility_Header: ('pcapkit.protocols.internet.mh',         'MH'),
-            RegType_TransType.HIP:             ('pcapkit.protocols.internet.hip',        'HIP'),
+            Enum_TransType.HOPOPT:          ('pcapkit.protocols.internet.hopopt',     'HOPOPT'),
+            Enum_TransType.IPv4:            ('pcapkit.protocols.internet.ipv4',       'IPv4'),
+            Enum_TransType.TCP:             ('pcapkit.protocols.transport.tcp',       'TCP'),
+            Enum_TransType.UDP:             ('pcapkit.protocols.transport.udp',       'UDP'),
+            Enum_TransType.IPv6:            ('pcapkit.protocols.internet.ipv6',       'IPv6'),
+            Enum_TransType.IPv6_Route:      ('pcapkit.protocols.internet.ipv6_route', 'IPv6_Route'),
+            Enum_TransType.IPv6_Frag:       ('pcapkit.protocols.internet.ipv6_frag',  'IPv6_Frag'),
+            Enum_TransType.AH:              ('pcapkit.protocols.internet.ah',         'AH'),
+            Enum_TransType.IPv6_NoNxt:      ('pcapkit.protocols.misc.raw',            'Raw'),
+            Enum_TransType.IPv6_Opts:       ('pcapkit.protocols.internet.ipv6_opts',  'IPv6_Opts'),
+            Enum_TransType.IPX_in_IP:       ('pcapkit.protocols.internet.ipx',        'IPX'),
+            Enum_TransType.Mobility_Header: ('pcapkit.protocols.internet.mh',         'MH'),
+            Enum_TransType.HIP:             ('pcapkit.protocols.internet.hip',        'HIP'),
         },
     )
 
@@ -110,7 +110,7 @@ class Internet(Protocol[PT], Generic[PT]):  # pylint: disable=abstract-method
     ##########################################################################
 
     @classmethod
-    def register(cls, code: 'RegType_TransType', module: str, class_: str) -> 'None':
+    def register(cls, code: 'Enum_TransType', module: str, class_: str) -> 'None':
         r"""Register a new protocol class.
 
         Notes:
@@ -129,7 +129,7 @@ class Internet(Protocol[PT], Generic[PT]):  # pylint: disable=abstract-method
     # Utilities.
     ##########################################################################
 
-    def _read_protos(self, size: 'int') -> 'RegType_TransType':
+    def _read_protos(self, size: 'int') -> 'Enum_TransType':
         """Read next layer protocol type.
 
         Arguments:
@@ -140,7 +140,7 @@ class Internet(Protocol[PT], Generic[PT]):  # pylint: disable=abstract-method
 
         """
         _byte = self._read_unpack(size)
-        _prot = RegType_TransType.get(_byte)
+        _prot = Enum_TransType.get(_byte)
         return _prot
 
     def _decode_next_layer(self, dict_: 'PT', proto: 'Optional[int]' = None,  # pylint: disable=arguments-differ

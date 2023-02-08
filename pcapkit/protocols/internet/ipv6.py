@@ -27,11 +27,11 @@ Octets      Bits        Name                    Description
 import ipaddress
 from typing import TYPE_CHECKING
 
-from pcapkit.const.ipv6.extension_header import ExtensionHeader as RegType_ExtensionHeader
-from pcapkit.const.reg.transtype import TransType as RegType_TransType
+from pcapkit.const.ipv6.extension_header import ExtensionHeader as Enum_ExtensionHeader
+from pcapkit.const.reg.transtype import TransType as Enum_TransType
 from pcapkit.corekit.multidict import OrderedMultiDict
 from pcapkit.corekit.protochain import ProtoChain
-from pcapkit.protocols.data.internet.ipv6 import IPv6 as DataType_IPv6
+from pcapkit.protocols.data.internet.ipv6 import IPv6 as Data_IPv6
 from pcapkit.protocols.internet.ip import IP
 
 if TYPE_CHECKING:
@@ -45,7 +45,7 @@ if TYPE_CHECKING:
 __all__ = ['IPv6']
 
 
-class IPv6(IP[DataType_IPv6]):
+class IPv6(IP[Data_IPv6]):
     """This class implements Internet Protocol version 6."""
 
     ##########################################################################
@@ -63,7 +63,7 @@ class IPv6(IP[DataType_IPv6]):
         return 40
 
     @property
-    def protocol(self) -> 'RegType_TransType':
+    def protocol(self) -> 'Enum_TransType':
         """Name of next layer protocol."""
         return self._info.protocol
 
@@ -80,7 +80,7 @@ class IPv6(IP[DataType_IPv6]):
         return self._info.dst
 
     @property
-    def extension_headers(self) -> 'OrderedMultiDict[RegType_ExtensionHeader, Protocol]':
+    def extension_headers(self) -> 'OrderedMultiDict[Enum_ExtensionHeader, Protocol]':
         """IPv6 extension header records."""
         return self._exthdr
 
@@ -88,7 +88,7 @@ class IPv6(IP[DataType_IPv6]):
     # Methods.
     ##########################################################################
 
-    def read(self, length: 'Optional[int]' = None, **kwargs: 'Any') -> 'DataType_IPv6':  # pylint: disable=unused-argument
+    def read(self, length: 'Optional[int]' = None, **kwargs: 'Any') -> 'Data_IPv6':  # pylint: disable=unused-argument
         """Read Internet Protocol version 6 (IPv6).
 
         Structure of IPv6 header [:rfc:`2460`]:
@@ -137,7 +137,7 @@ class IPv6(IP[DataType_IPv6]):
         _srca = self._read_ip_addr()
         _dsta = self._read_ip_addr()
 
-        ipv6 = DataType_IPv6.from_dict({
+        ipv6 = Data_IPv6.from_dict({
             'version': _htet[0],
             'class': _htet[1],
             'label': _htet[2],
@@ -146,7 +146,7 @@ class IPv6(IP[DataType_IPv6]):
             'limit': _hlmt,
             'src': _srca,
             'dst': _dsta,
-        })  # type: DataType_IPv6
+        })  # type: Data_IPv6
 
         return self._decode_next_layer(ipv6, _next, ipv6.payload)  # pylint: disable=no-member
 
@@ -181,7 +181,7 @@ class IPv6(IP[DataType_IPv6]):
         return 40
 
     @classmethod
-    def __index__(cls) -> 'RegType_TransType':  # pylint: disable=invalid-index-returned
+    def __index__(cls) -> 'Enum_TransType':  # pylint: disable=invalid-index-returned
         """Numeral registry index of the protocol.
 
         Returns:
@@ -190,7 +190,7 @@ class IPv6(IP[DataType_IPv6]):
         .. _IANA: https://www.iana.org/assignments/protocol-numbers/protocol-numbers.xhtml
 
         """
-        return RegType_TransType.IPv6  # type: ignore[return-value]
+        return Enum_TransType.IPv6  # type: ignore[return-value]
 
     ##########################################################################
     # Utilities.
@@ -220,8 +220,8 @@ class IPv6(IP[DataType_IPv6]):
         """
         return ipaddress.ip_address(self._read_fileng(16))  # type: ignore[return-value]
 
-    def _decode_next_layer(self, ipv6: 'DataType_IPv6', proto: 'Optional[int]' = None,  # type: ignore[override] # pylint: disable=arguments-differ,arguments-renamed
-                           length: 'Optional[int]' = None) -> 'DataType_IPv6':  # pylint: disable=arguments-differ
+    def _decode_next_layer(self, ipv6: 'Data_IPv6', proto: 'Optional[int]' = None,  # type: ignore[override] # pylint: disable=arguments-differ,arguments-renamed
+                           length: 'Optional[int]' = None) -> 'Data_IPv6':  # pylint: disable=arguments-differ
         """Decode next layer extractor.
 
         Arguments:
@@ -234,7 +234,7 @@ class IPv6(IP[DataType_IPv6]):
 
         """
         #: Extension headers.
-        self._exthdr = OrderedMultiDict()  # type: OrderedMultiDict[RegType_ExtensionHeader, Protocol] # pylint: disable=attribute-defined-outside-init
+        self._exthdr = OrderedMultiDict()  # type: OrderedMultiDict[Enum_ExtensionHeader, Protocol] # pylint: disable=attribute-defined-outside-init
 
         hdr_len = self.length       # header length
         raw_len = ipv6.payload      # payload length
@@ -243,7 +243,7 @@ class IPv6(IP[DataType_IPv6]):
         # traverse if next header is an extensive header
         while True:
             try:
-                ex_proto = RegType_ExtensionHeader(proto)
+                ex_proto = Enum_ExtensionHeader(proto)
             except ValueError:
                 break
 
@@ -273,7 +273,7 @@ class IPv6(IP[DataType_IPv6]):
             self._exthdr.add(ex_proto, next_)
 
             # keep original data after fragment header
-            if ex_proto == RegType_ExtensionHeader.IPv6_Frag:
+            if ex_proto == Enum_ExtensionHeader.IPv6_Frag:
                 ipv6.__update__({
                     'fragment': self._read_packet(header=hdr_len, payload=raw_len),
                 })

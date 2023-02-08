@@ -18,7 +18,7 @@ from pcapkit.protocols.protocol import PT, Protocol
 from pcapkit.utilities.exceptions import IntError, UnsupportedCall
 
 if TYPE_CHECKING:
-    from typing import Any, IO, NoReturn, Optional
+    from typing import IO, Any, NoReturn, Optional
 
     from typing_extensions import Literal
 

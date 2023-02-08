@@ -13,7 +13,7 @@ usable for its caller.
 import ipaddress
 from typing import TYPE_CHECKING, cast
 
-from pcapkit.const.reg.linktype import LinkType as RegType_LinkType
+from pcapkit.const.reg.linktype import LinkType as Enum_LinkType
 from pcapkit.foundation.traceflow import Packet as TF_Packet
 
 if TYPE_CHECKING:
@@ -78,7 +78,7 @@ def tcp_traceflow(packet: 'Packet') -> 'TF_Packet | None':
         tcp = cast('Packet', packet.tcp)
 
         data = TF_Packet(  # type: ignore[type-var]
-            protocol=RegType_LinkType.get(packet.layers[0].layer_name.upper()),  # data link type from global header
+            protocol=Enum_LinkType.get(packet.layers[0].layer_name.upper()),  # data link type from global header
             index=int(packet.number),                                            # frame number
             frame=packet2dict(packet),                                           # extracted packet
             syn=bool(int(tcp.flags_syn)),                                        # TCP synchronise (SYN) flag

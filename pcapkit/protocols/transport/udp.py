@@ -22,8 +22,8 @@ Octets      Bits        Name                    Description
 import collections
 from typing import TYPE_CHECKING
 
-from pcapkit.const.reg.transtype import TransType as RegType_TransType
-from pcapkit.protocols.data.transport.udp import UDP as DataType_UDP
+from pcapkit.const.reg.transtype import TransType as Enum_TransType
+from pcapkit.protocols.data.transport.udp import UDP as Data_UDP
 from pcapkit.protocols.transport.transport import Transport
 
 if TYPE_CHECKING:
@@ -34,7 +34,7 @@ if TYPE_CHECKING:
 __all__ = ['UDP']
 
 
-class UDP(Transport[DataType_UDP]):
+class UDP(Transport[Data_UDP]):
     """This class implements User Datagram Protocol.
 
     This class currently supports parsing of the following protocols, which are
@@ -93,7 +93,7 @@ class UDP(Transport[DataType_UDP]):
     # Methods.
     ##########################################################################
 
-    def read(self, length: 'Optional[int]' = None, **kwargs: 'Any') -> 'DataType_UDP':  # pylint: disable=unused-argument
+    def read(self, length: 'Optional[int]' = None, **kwargs: 'Any') -> 'Data_UDP':  # pylint: disable=unused-argument
         """Read User Datagram Protocol (UDP).
 
         Structure of UDP header [:rfc:`768`]:
@@ -128,7 +128,7 @@ class UDP(Transport[DataType_UDP]):
         _tlen = self._read_unpack(2)
         _csum = self._read_fileng(2)
 
-        udp = DataType_UDP(
+        udp = Data_UDP(
             srcport=_srcp,
             dstport=_dstp,
             len=_tlen,
@@ -158,7 +158,7 @@ class UDP(Transport[DataType_UDP]):
         return 8
 
     @classmethod
-    def __index__(cls) -> 'RegType_TransType':  # pylint: disable=invalid-index-returned
+    def __index__(cls) -> 'Enum_TransType':  # pylint: disable=invalid-index-returned
         """Numeral registry index of the protocol.
 
         Returns:
@@ -167,4 +167,4 @@ class UDP(Transport[DataType_UDP]):
         .. _IANA: https://www.iana.org/assignments/protocol-numbers/protocol-numbers.xhtml
 
         """
-        return RegType_TransType.UDP  # type: ignore[return-value]
+        return Enum_TransType.UDP  # type: ignore[return-value]

@@ -27,7 +27,7 @@ Octets      Bits        Name                    Description
 """
 from typing import TYPE_CHECKING
 
-from pcapkit.const.reg.ethertype import EtherType as RegType_EtherType
+from pcapkit.const.reg.ethertype import EtherType as Enum_EtherType
 from pcapkit.protocols.link.arp import ARP
 
 if TYPE_CHECKING:
@@ -53,7 +53,7 @@ class RARP(ARP):  # pylint: disable=abstract-method
     ##########################################################################
 
     @classmethod
-    def __index__(cls) -> 'RegType_EtherType':  # pylint: disable=invalid-index-returned
+    def __index__(cls) -> 'Enum_EtherType':  # pylint: disable=invalid-index-returned
         """Numeral registry index of the protocol.
 
         Returns:
@@ -62,4 +62,4 @@ class RARP(ARP):  # pylint: disable=abstract-method
         .. _IANA: https://www.iana.org/assignments/ieee-802-numbers/ieee-802-numbers.xhtml
 
         """
-        return RegType_EtherType.Reverse_Address_Resolution_Protocol  # type: ignore[return-value]
+        return Enum_EtherType.Reverse_Address_Resolution_Protocol  # type: ignore[return-value]

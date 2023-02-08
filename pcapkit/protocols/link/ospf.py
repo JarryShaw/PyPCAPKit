@@ -34,11 +34,11 @@ as below:
 import ipaddress
 from typing import TYPE_CHECKING
 
-from pcapkit.const.ospf.authentication import Authentication as RegType_Authentication
-from pcapkit.const.ospf.packet import Packet as RegType_Packet
-from pcapkit.protocols.data.link.ospf import OSPF as DataType_OSPF
+from pcapkit.const.ospf.authentication import Authentication as Enum_Authentication
+from pcapkit.const.ospf.packet import Packet as Enum_Packet
+from pcapkit.protocols.data.link.ospf import OSPF as Data_OSPF
 from pcapkit.protocols.data.link.ospf import \
-    CrytographicAuthentication as DataType_CrytographicAuthentication
+    CrytographicAuthentication as Data_CrytographicAuthentication
 from pcapkit.protocols.link.link import Link
 from pcapkit.utilities.exceptions import UnsupportedCall
 
@@ -51,7 +51,7 @@ if TYPE_CHECKING:
 __all__ = ['OSPF']
 
 
-class OSPF(Link[DataType_OSPF]):
+class OSPF(Link[Data_OSPF]):
     """This class implements Open Shortest Path First."""
 
     ##########################################################################
@@ -74,7 +74,7 @@ class OSPF(Link[DataType_OSPF]):
         return 24
 
     @property
-    def type(self) -> 'RegType_Packet':
+    def type(self) -> 'Enum_Packet':
         """OSPF packet type."""
         return self._info.type
 
@@ -82,7 +82,7 @@ class OSPF(Link[DataType_OSPF]):
     # Methods.
     ##########################################################################
 
-    def read(self, length: 'Optional[int]' = None, **kwargs: 'Any') -> 'DataType_OSPF':
+    def read(self, length: 'Optional[int]' = None, **kwargs: 'Any') -> 'Data_OSPF':
         """Read Open Shortest Path First.
 
         Structure of OSPF header [:rfc:`2328`]:
@@ -124,17 +124,17 @@ class OSPF(Link[DataType_OSPF]):
         _csum = self._read_fileng(2)
         _autp = self._read_unpack(2)
 
-        ospf = DataType_OSPF(
+        ospf = Data_OSPF(
             version=_vers,
-            type=RegType_Packet.get(_type),
+            type=Enum_Packet.get(_type),
             len=_tlen,
             router_id=_rtid,
             area_id=_area,
             chksum=_csum,
-            autype=RegType_Authentication.get(_autp),
+            autype=Enum_Authentication.get(_autp),
         )
 
-        if ospf.autype == RegType_Authentication.Cryptographic_authentication:
+        if ospf.autype == Enum_Authentication.Cryptographic_authentication:
             ospf.__update__([
                 ('auth', self._read_encrypt_auth()),
             ])
@@ -189,7 +189,7 @@ class OSPF(Link[DataType_OSPF]):
         #_addr = '.'.join(str(_) for _ in _byte)
         return ipaddress.ip_address(self._read_fileng(4))  # type: ignore[return-value]
 
-    def _read_encrypt_auth(self) -> 'DataType_CrytographicAuthentication':
+    def _read_encrypt_auth(self) -> 'Data_CrytographicAuthentication':
         """Read Authentication field when Cryptographic Authentication is employed,
         i.e. :attr:`~OSPF.autype` is ``2``.
 
@@ -217,7 +217,7 @@ class OSPF(Link[DataType_OSPF]):
         _alen = self._read_unpack(1)
         _seqn = self._read_unpack(4)
 
-        auth = DataType_CrytographicAuthentication(
+        auth = Data_CrytographicAuthentication(
             key_id=_keys,
             len=_alen,
             seq=_seqn,
