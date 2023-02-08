@@ -3,8 +3,8 @@
 
 from typing import TYPE_CHECKING
 
-from pcapkit.protocols.data.data import Data
 from pcapkit.protocols.data.application.http import HTTP as Data_HTTP
+from pcapkit.protocols.data.data import Data
 
 if TYPE_CHECKING:
     from typing import Optional

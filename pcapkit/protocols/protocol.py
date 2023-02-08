@@ -28,10 +28,10 @@ import chardet
 
 from pcapkit.corekit.infoclass import Info
 from pcapkit.corekit.protochain import ProtoChain
-from pcapkit.protocols.schema.schema import Schema
 from pcapkit.protocols.data.data import Data
 from pcapkit.protocols.data.protocol import Packet as Data_Packet
 from pcapkit.protocols.schema.misc.null import NoPayload as Schema_NoPayload
+from pcapkit.protocols.schema.schema import Schema
 from pcapkit.utilities.compat import cached_property
 from pcapkit.utilities.decorators import beholder, seekset
 from pcapkit.utilities.exceptions import (ProtocolNotFound, ProtocolNotImplemented, StructError,
@@ -41,10 +41,8 @@ if TYPE_CHECKING:
     from enum import IntEnum as StdlibEnum
     from typing import IO, Any, DefaultDict, Optional, Type
 
-    from typing_extensions import Self
-
     from aenum import IntEnum as AenumEnum
-    from typing_extensions import Literal
+    from typing_extensions import Literal, Self
 
 __all__ = ['Protocol']
 
