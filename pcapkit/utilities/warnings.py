@@ -24,6 +24,7 @@ __all__ = [
     # RuntimeWarning
     'FileWarning', 'LayerWarning', 'ProtocolWarning', 'AttributeWarning',
     'DevModeWarning', 'VendorRequestWarning', 'VendorRuntimeWarning',
+    'UnknownFieldWarning',
     # ResourceWarning
     'DPKTWarning', 'ScapyWarning', 'PySharkWarning', 'EmojiWarning',
     'VendorWarning',
@@ -112,6 +113,10 @@ class VendorRequestWarning(BaseWarning, RuntimeWarning):
 
 class VendorRuntimeWarning(BaseWarning, RuntimeWarning):
     """Vendor failed during runtime."""
+
+
+class UnknownFieldWarning(BaseWarning, RuntimeWarning):
+    """Unknown field."""
 
 
 ##############################################################################
