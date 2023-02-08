@@ -3,7 +3,7 @@
 
 from typing import TYPE_CHECKING
 
-from pcapkit.corekit.infoclass import Info
+from pcapkit.protocols.data.data import Data
 
 if TYPE_CHECKING:
     from pcapkit.const.mh.packet import Packet
@@ -12,7 +12,7 @@ if TYPE_CHECKING:
 __all__ = ['MH']
 
 
-class MH(Info):
+class MH(Data):
     """Data model for MH protocol."""
 
     #: Next header.

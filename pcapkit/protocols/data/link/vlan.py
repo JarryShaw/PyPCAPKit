@@ -3,7 +3,7 @@
 
 from typing import TYPE_CHECKING
 
-from pcapkit.corekit.infoclass import Info
+from pcapkit.protocols.data.data import Data
 
 if TYPE_CHECKING:
     from pcapkit.const.reg.ethertype import EtherType
@@ -12,7 +12,7 @@ if TYPE_CHECKING:
 __all__ = ['VLAN', 'TCI']
 
 
-class TCI(Info):
+class TCI(Data):
     """Data model for tag control information."""
 
     #: Priority code point.
@@ -26,7 +26,7 @@ class TCI(Info):
         def __init__(self, pcp: 'PriorityLevel', dei: 'bool', vid: 'int') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements
 
 
-class VLAN(Info):
+class VLAN(Data):
     """Data model for 802.1Q customer VLAN tag type."""
 
     #: Tag control information.

@@ -4,7 +4,7 @@
 
 from typing import TYPE_CHECKING
 
-from pcapkit.corekit.infoclass import Info
+from pcapkit.protocols.data.data import Data
 
 if TYPE_CHECKING:
     from typing import Optional
@@ -20,7 +20,7 @@ __all__ = [
 ]
 
 
-class FTP(Info):
+class FTP(Data):
     """Data model for FTP protocol."""
 
     #: Type.

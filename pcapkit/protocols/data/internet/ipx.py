@@ -3,7 +3,7 @@
 
 from typing import TYPE_CHECKING
 
-from pcapkit.corekit.infoclass import Info
+from pcapkit.protocols.data.data import Data
 
 if TYPE_CHECKING:
     from pcapkit.const.ipx.packet import Packet
@@ -16,7 +16,7 @@ __all__ = [
 ]
 
 
-class Address(Info):
+class Address(Data):
     """Data model for IPX address."""
 
     #: Network number (``:`` separated).
@@ -32,7 +32,7 @@ class Address(Info):
         def __init__(self, network: 'str', node: 'str', socket: 'Socket', addr: 'str') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements
 
 
-class IPX(Info):
+class IPX(Data):
     """Data model for Internetwork Packet Exchange."""
 
     #: Checksum.

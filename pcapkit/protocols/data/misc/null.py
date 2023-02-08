@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 """data modules for no-payload packet"""
 
-from pcapkit.corekit.infoclass import Info
+from pcapkit.protocols.data.data import Data
 
 __all__ = ['NoPayload']
 
 
-class NoPayload(Info):
+class NoPayload(Data):
     """No-payload packet is an empty packet."""
 
     # NOTE: We add this method for both type annotation and to mark that this

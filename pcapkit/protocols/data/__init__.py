@@ -2,6 +2,9 @@
 # pylint: disable=unused-wildcard-import
 """data models for protocols"""
 
+# Base Class for Data Models
+from pcapkit.protocols.data.data import *
+
 # Base Class for Protocols
 from pcapkit.protocols.data.protocol import *
 

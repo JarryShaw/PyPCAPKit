@@ -3,7 +3,7 @@
 
 from typing import TYPE_CHECKING
 
-from pcapkit.corekit.infoclass import Info
+from pcapkit.protocols.data.data import Data
 
 if TYPE_CHECKING:
     from pcapkit.const.reg.transtype import TransType
@@ -11,7 +11,7 @@ if TYPE_CHECKING:
 __all__ = ['AH']
 
 
-class AH(Info):
+class AH(Data):
     """Data model for AH protocol."""
 
     #: Next header.

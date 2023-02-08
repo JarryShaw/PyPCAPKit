@@ -3,7 +3,7 @@
 
 from typing import TYPE_CHECKING
 
-from pcapkit.corekit.infoclass import Info
+from pcapkit.protocols.data.data import Data
 
 if TYPE_CHECKING:
     from ipaddress import IPv6Address
@@ -20,7 +20,7 @@ __all__ = [
 ]
 
 
-class IPv6(Info):
+class IPv6(Data):
     """Data model for Internet Protocol version 6.
 
     Important:

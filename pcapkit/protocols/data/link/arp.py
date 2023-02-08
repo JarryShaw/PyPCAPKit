@@ -3,7 +3,7 @@
 
 from typing import TYPE_CHECKING
 
-from pcapkit.corekit.infoclass import Info
+from pcapkit.protocols.data.data import Data
 
 if TYPE_CHECKING:
     from ipaddress import IPv4Address, IPv6Address
@@ -15,7 +15,7 @@ if TYPE_CHECKING:
 __all__ = ['Address', 'Type', 'ARP']
 
 
-class Address(Info):
+class Address(Data):
     """Data model for ARP addresses."""
 
     #: Hardware address.
@@ -27,7 +27,7 @@ class Address(Info):
         def __init__(self, hardware: 'str', protocol: 'str | IPv4Address | IPv6Address') -> 'None': ...  # pylint: disable=line-too-long,super-init-not-called,unused-argument,multiple-statements
 
 
-class Type(Info):
+class Type(Data):
     """Data model for ARP type."""
 
     #: Hardware type.
@@ -39,7 +39,7 @@ class Type(Info):
         def __init__(self, hardware: 'Hardware', protocol: 'EtherType | str') -> 'None': ...  # pylint: disable=line-too-long,super-init-not-called,unused-argument,multiple-statements
 
 
-class ARP(Info):
+class ARP(Data):
     """Data model for ARP packet."""
 
     #: Hardware type.

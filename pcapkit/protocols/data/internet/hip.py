@@ -3,7 +3,7 @@
 
 from typing import TYPE_CHECKING
 
-from pcapkit.corekit.infoclass import Info
+from pcapkit.protocols.data.data import Data
 
 if TYPE_CHECKING:
     from datetime import timedelta
@@ -56,7 +56,7 @@ __all__ = [
 ]
 
 
-class Control(Info):
+class Control(Data):
     """Data model for HIP controls."""
 
     #: Anonymous flag.
@@ -66,7 +66,7 @@ class Control(Info):
         def __init__(self, anonymous: 'bool') -> 'None': ...  # pylint: disable=super-init-not-called,unused-argument,multiple-statements
 
 
-class Parameter(Info):
+class Parameter(Data):
     """Data model for HIP parameter data."""
 
     #: Parameter type.
@@ -77,7 +77,7 @@ class Parameter(Info):
     length: 'int'
 
 
-class HIP(Info):
+class HIP(Data):
     """Data model for HIP header."""
 
     #: Next header.
@@ -138,7 +138,7 @@ class R1CounterParameter(Parameter):
         def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', counter: 'int') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
 
 
-class LocatorData(Info):
+class LocatorData(Data):
     """Data model for HIP locator data."""
 
     #: SPI.
@@ -150,7 +150,7 @@ class LocatorData(Info):
         def __init__(self, spi: 'int', ip: 'IPv4Address') -> 'None': ...  # pylint: disable=super-init-not-called,unused-argument,multiple-statements
 
 
-class Locator(Info):
+class Locator(Data):
     """Data model for HIP locator."""
 
     #: Traffic.
@@ -308,7 +308,7 @@ class EncryptedParameter(Parameter):
         def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', raw: 'bytes') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
 
 
-class HostIdentity(Info):
+class HostIdentity(Data):
     """Data model for host identity."""
 
     #: Curve type.
@@ -390,7 +390,7 @@ class EchoRequestSignedParameter(Parameter):
         def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', opaque: 'bytes') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
 
 
-class Lifetime(Info):
+class Lifetime(Data):
     """Data model for registration lifetime."""
 
     #: Minimum lifetime.
@@ -548,7 +548,7 @@ class OverlayIDParameter(Parameter):
         def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', id: 'int') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
 
 
-class Flags(Info):
+class Flags(Data):
     """Data model for flags in HIP ``HIP_PARAMETER_FLAGS`` parameter."""
 
     #: Symmetric flag.

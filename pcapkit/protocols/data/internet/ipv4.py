@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING
 
 from pcapkit.const.ipv4.option_class import OptionClass
 from pcapkit.const.ipv4.tos_del import ToSDelay
-from pcapkit.corekit.infoclass import Info
+from pcapkit.protocols.data.data import Data
 
 if TYPE_CHECKING:
     from datetime import datetime as dt_type
@@ -42,7 +42,7 @@ __all__ = [
 ]
 
 
-class ToSField(Info):
+class ToSField(Data):
     """Data model for IPv4 ToS fields.
 
     Important:
@@ -72,7 +72,7 @@ class ToSField(Info):
         return self  # type: ignore[return-value]
 
 
-class Flags(Info):
+class Flags(Data):
     """Data model for IPv4 Flags."""
 
     #: Don't fragment.
@@ -84,7 +84,7 @@ class Flags(Info):
         def __init__(self, df: 'bool', mf: 'bool') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
-class IPv4(Info):
+class IPv4(Data):
     """Data model for IPv4 packet."""
 
     #: Version.
@@ -118,7 +118,7 @@ class IPv4(Info):
         def __init__(self, version: 'Literal[4]', hdr_len: 'int', tos: 'ToSField', len: 'int', id: 'int', flags: 'Flags', offset: 'int', ttl: 'timedelta', protocol: 'TransType', checksum: 'bytes', src: 'IPv4Address', dst: 'IPv4Address') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
-class OptionType(Info):
+class OptionType(Data):
     """Data model for IPv4 option type data."""
 
     #: Change flag.
@@ -138,7 +138,7 @@ class OptionType(Info):
         return self  # type: ignore[return-value]
 
 
-class Option(Info):
+class Option(Data):
     """Data model for IPv4 options."""
 
     #: Option code.

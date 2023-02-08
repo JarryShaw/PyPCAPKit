@@ -3,14 +3,14 @@
 
 from typing import TYPE_CHECKING
 
-from pcapkit.corekit.infoclass import Info
+from pcapkit.protocols.data.data import Data
 
 __all__ = [
     'Packet',
 ]
 
 
-class Packet(Info):
+class Packet(Data):
     """Header and payload data."""
 
     #: packet header

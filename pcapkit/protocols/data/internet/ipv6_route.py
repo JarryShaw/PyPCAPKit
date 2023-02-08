@@ -3,7 +3,7 @@
 
 from typing import TYPE_CHECKING
 
-from pcapkit.corekit.infoclass import Info
+from pcapkit.protocols.data.data import Data
 
 if TYPE_CHECKING:
     from ipaddress import IPv6Address
@@ -19,7 +19,7 @@ __all__ = [
 ]
 
 
-class IPv6_Route(Info):
+class IPv6_Route(Data):
     """Data model for IPv6-Route protocol.
 
     .. seealso::
@@ -44,7 +44,7 @@ class IPv6_Route(Info):
         def __init__(self, next: 'TransType', length: 'int', type: 'Routing', seg_left: 'int'): ...  # pylint: disable=unused-argument,multiple-statements,super-init-not-called,redefined-builtin,line-too-long
 
 
-class RoutingType(Info):
+class RoutingType(Data):
     """Data model for Routing Type."""
 
 

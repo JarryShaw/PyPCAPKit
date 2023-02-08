@@ -29,6 +29,7 @@ import chardet
 from pcapkit.corekit.infoclass import Info
 from pcapkit.corekit.protochain import ProtoChain
 from pcapkit.corekit.schema import Schema
+from pcapkit.protocols.data.data import Data
 from pcapkit.protocols.data.protocol import Packet as Data_Packet
 from pcapkit.protocols.schema.misc.null import NoPayload as Schema_NoPayload
 from pcapkit.utilities.compat import cached_property
@@ -45,7 +46,7 @@ if TYPE_CHECKING:
 
 __all__ = ['Protocol']
 
-PT = TypeVar('PT', bound='Info')
+PT = TypeVar('PT', bound='Data')
 
 # readable characters' order list
 readable = [ord(char) for char in filter(lambda char: not char.isspace(), string.printable)]
@@ -54,21 +55,24 @@ readable = [ord(char) for char in filter(lambda char: not char.isspace(), string
 class Protocol(Generic[PT], metaclass=abc.ABCMeta):
     """Abstract base class for all protocol family."""
 
-    #: Parsed packet data.
-    _info: 'PT'
-    #: Raw packet data.
-    _data: 'bytes'
-    #: Source packet stream.
-    _file: 'IO[bytes]'
-    #： Next layer protocol instance.
-    _next: 'Protocol'
-    #: Protocol chain instance.
-    _protos: 'ProtoChain'
+    if TYPE_CHECKING:
+        #: Parsed packet data.
+        _info: 'PT'
+        #: Raw packet data.
+        _data: 'bytes'
+        #: Source packet stream.
+        _file: 'IO[bytes]'
+        #： Next layer protocol instance.
+        _next: 'Protocol'
+        #: Protocol chain instance.
+        _protos: 'ProtoChain'
 
-    # Internal data storage for cached properties.
-    __cached__: 'dict[str, Any]'
-    #: Protocol header schema definition.
-    __schema__: 'Type[Schema]'
+        # Internal data storage for cached properties.
+        __cached__: 'dict[str, Any]'
+        #: Protocol header schema definition.
+        __schema__: 'Type[Schema]'
+        #: Protocol header schema instance.
+        __header__: 'Optional[Schema]'
 
     ##########################################################################
     # Defaults.
@@ -329,6 +333,13 @@ class Protocol(Generic[PT], metaclass=abc.ABCMeta):
             report = protocol(payload_io, len(payload), **kwargs)  # type: ignore[abstract]
         return report
 
+    @classmethod
+    def from_schema(cls, schema: 'Schema') -> 'Protocol[PT]':
+        """Create protocol instance from schema."""
+        self = cls.__new__(cls)
+
+        return self
+
     ##########################################################################
     # Data models.
     ##########################################################################
@@ -339,6 +350,7 @@ class Protocol(Generic[PT], metaclass=abc.ABCMeta):
         # NOTE: Assign this attribute after ``__new__`` to avoid shared memory
         # reference between instances.
         self.__cached__ = {}
+        self.__header__ = None
 
         return self
 
@@ -402,7 +414,7 @@ class Protocol(Generic[PT], metaclass=abc.ABCMeta):
         self._data = _data
         #: io.BytesIO: Source packet stream.
         self._file = io.BytesIO(self._data)
-        #: pcapkit.corekit.infoclass.Info: Parsed packet data.
+        #: pcapkit.protocols.data.data.Data: Parsed packet data.
         self._info = self.read(length, **kwargs)
 
     def __init_subclass__(cls, /, schema: 'Type[Schema]' = Schema_NoPayload, **kwargs: 'Any') -> 'None':

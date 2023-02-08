@@ -3,7 +3,7 @@
 
 from typing import TYPE_CHECKING
 
-from pcapkit.corekit.infoclass import Info
+from pcapkit.protocols.data.data import Data
 
 if TYPE_CHECKING:
     from datetime import datetime
@@ -12,7 +12,7 @@ if TYPE_CHECKING:
 __all__ = ['Frame', 'FrameInfo']
 
 
-class FrameInfo(Info):
+class FrameInfo(Data):
     """Frame metadata information."""
 
     #: Timestamp seconds.
@@ -28,7 +28,7 @@ class FrameInfo(Info):
         def __init__(self, ts_sec: 'int', ts_usec: 'int', incl_len: 'int', orig_len: 'int') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,super-init-not-called
 
 
-class Frame(Info):
+class Frame(Data):
     """Frame header of PCAP file."""
 
     #: Metadata information.

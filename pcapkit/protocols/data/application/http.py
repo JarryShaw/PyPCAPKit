@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 """data model for HTTP protocol"""
 
-from pcapkit.corekit.infoclass import Info
+from pcapkit.protocols.data.data import Data
 
 __all__ = ['HTTP']
 
 
-class HTTP(Info):
+class HTTP(Data):
     """Data model for HTTP protocol."""

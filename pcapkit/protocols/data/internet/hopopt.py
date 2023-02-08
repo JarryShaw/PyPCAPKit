@@ -3,7 +3,7 @@
 
 from typing import TYPE_CHECKING
 
-from pcapkit.corekit.infoclass import Info
+from pcapkit.protocols.data.data import Data
 
 if TYPE_CHECKING:
     from datetime import timedelta
@@ -33,7 +33,7 @@ __all__ = [
 ]
 
 
-class Option(Info):
+class Option(Data):
     """Data model for HOPOPT option data."""
 
     #: Option type.
@@ -46,7 +46,7 @@ class Option(Info):
     length: 'int'
 
 
-class HOPOPT(Info):
+class HOPOPT(Data):
     """Data model for HOPOPT protocol."""
 
     #: Next header.
@@ -185,7 +185,7 @@ class QuickStartOption(Option):
         def __init__(self, type: 'Enum_Option', action: 'int', change: 'bool', length: 'int', func: 'QSFunction', rate: 'int', ttl: 'Optional[timedelta]', nounce: 'int') -> 'None': ...  # pylint: disable=super-init-not-called,unused-argument,redefined-builtin,multiple-statements,line-too-long
 
 
-class RPLFlags(Info):
+class RPLFlags(Data):
     """Data model for HOPOPT RPL option flags fields."""
 
     #: Down flag.
@@ -213,7 +213,7 @@ class RPLOption(Option):
         def __init__(self, type: 'Enum_Option', action: 'int', change: 'bool', length: 'int', flags: 'RPLFlags', id: 'int', rank: 'int') -> 'None': ...  # pylint: disable=super-init-not-called,unused-argument,redefined-builtin,multiple-statements,line-too-long
 
 
-class MPLFlags(Info):
+class MPLFlags(Data):
     """Data model for HOPOPT MPL option flags fields."""
 
     #: Max flag.
@@ -283,7 +283,7 @@ class HomeAddressOption(Option):
         def __init__(self, type: 'Enum_Option', action: 'int', change: 'bool', length: 'int', address: 'IPv6Address') -> 'None': ...  # pylint: disable=super-init-not-called,unused-argument,redefined-builtin,multiple-statements,line-too-long
 
 
-class DFFFlags(Info):
+class DFFFlags(Data):
     """Data model for HOPOPT ``IP_DFF`` option flags."""
 
     #: Duplicate flag.

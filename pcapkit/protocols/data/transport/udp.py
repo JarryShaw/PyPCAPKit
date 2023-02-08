@@ -3,12 +3,12 @@
 
 from typing import TYPE_CHECKING
 
-from pcapkit.corekit.infoclass import Info
+from pcapkit.protocols.data.data import Data
 
 __all__ = ['UDP']
 
 
-class UDP(Info):
+class UDP(Data):
     """Data model for UDP protocol."""
 
     #: Source port.

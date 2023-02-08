@@ -3,7 +3,7 @@
 
 from typing import TYPE_CHECKING
 
-from pcapkit.corekit.infoclass import Info
+from pcapkit.protocols.data.data import Data
 
 if TYPE_CHECKING:
     from datetime import timedelta
@@ -42,7 +42,7 @@ __all__ = [
 ]
 
 
-class Flags(Info):
+class Flags(Data):
     """Data model for TCP flags."""
 
     #: ECN-nonce concealment protection.
@@ -68,7 +68,7 @@ class Flags(Info):
         def __init__(self, ns: 'bool', cwr: 'bool', ece: 'bool', urg: 'bool', ack: 'bool', psh: 'bool', rst: 'bool', syn: 'bool', fin: 'bool') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
-class TCP(Info):
+class TCP(Data):
     """Data model for TCP packet."""
 
     #: Source port.
@@ -96,7 +96,7 @@ class TCP(Info):
         def __init__(self, srcport: 'int', dstport: 'int', seq: 'int', ack: 'int', hdr_len: 'int', flags: 'Flags', window_size: 'int', checksum: 'bytes', urgent_pointer: 'int') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
-class Option(Info):
+class Option(Data):
     """Data model for TCP options."""
 
     #: Option kind.
@@ -342,7 +342,7 @@ class MPTCPUnknown(MPTCP):
         def __init__(self, kind: 'OptionNumber', length: 'int', subtype: 'MPTCPOption', data: 'bytes') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
-class MPTCPCapableFlag(Info):
+class MPTCPCapableFlag(Data):
     """Data model for TCP MPTCP capable option flags."""
 
     #: Checksum require flag.
@@ -423,7 +423,7 @@ class MPTCPJoinACK(MPTCPJoin):
         def __init__(self, kind: 'OptionNumber', length: 'int', subtype: 'MPTCPOption', connection: 'Literal["ACK"]', hmac: 'bytes') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
-class MPTCPDSSFlag(Info):
+class MPTCPDSSFlag(Data):
     """Data model for TCP ``DSS`` option flags."""
 
     #: ``DATA_FIN`` flag.

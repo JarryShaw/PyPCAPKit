@@ -3,7 +3,7 @@
 
 from typing import TYPE_CHECKING
 
-from pcapkit.corekit.infoclass import Info
+from pcapkit.protocols.data.data import Data
 
 if TYPE_CHECKING:
     from typing import Optional
@@ -11,7 +11,7 @@ if TYPE_CHECKING:
 __all__ = ['Raw']
 
 
-class Raw(Info):
+class Raw(Data):
     """Raw packet is an unknown protocol."""
 
     #: Original enumeration of this protocol.

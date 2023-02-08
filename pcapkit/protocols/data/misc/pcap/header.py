@@ -3,7 +3,7 @@
 
 from typing import TYPE_CHECKING
 
-from pcapkit.corekit.infoclass import Info
+from pcapkit.protocols.data.data import Data
 
 if TYPE_CHECKING:
     from typing_extensions import Literal
@@ -14,7 +14,7 @@ if TYPE_CHECKING:
 __all__ = ['Header', 'MagicNumber']
 
 
-class MagicNumber(Info):
+class MagicNumber(Data):
     """Magic number of PCAP file."""
 
     #: Magic number sequence.
@@ -28,7 +28,7 @@ class MagicNumber(Info):
         def __init__(self, data: 'bytes', byteorder: 'Literal["big", "little"]', nanosecond: 'bool') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements
 
 
-class Header(Info):
+class Header(Data):
     """Global header of PCAP file."""
 
     #: Magic number.

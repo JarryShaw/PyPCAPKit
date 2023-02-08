@@ -3,7 +3,7 @@
 
 from typing import TYPE_CHECKING
 
-from pcapkit.corekit.infoclass import Info
+from pcapkit.protocols.data.data import Data
 
 if TYPE_CHECKING:
     from ipaddress import IPv4Address
@@ -14,7 +14,7 @@ if TYPE_CHECKING:
 __all__ = ['OSPF', 'CrytographicAuthentication']
 
 
-class CrytographicAuthentication(Info):
+class CrytographicAuthentication(Data):
     """Data model for OSPF crytographic authentication."""
 
     #: Key ID.
@@ -28,7 +28,7 @@ class CrytographicAuthentication(Info):
         def __init__(self, key_id: 'int', len: 'int', seq: 'int') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,redefined-builtin
 
 
-class OSPF(Info):
+class OSPF(Data):
     """Data model for OSPF packet."""
 
     #: Version number.

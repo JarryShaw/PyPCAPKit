@@ -3,7 +3,7 @@
 
 from typing import TYPE_CHECKING
 
-from pcapkit.corekit.infoclass import Info
+from pcapkit.protocols.data.data import Data
 from pcapkit.protocols.data.application.http import HTTP as Data_HTTP
 
 if TYPE_CHECKING:
@@ -35,7 +35,7 @@ class HTTP(Data_HTTP):
         def __init__(self, receipt: 'Header', header: 'OrderedMultiDict[str, str]', body: 'Optional[bytes]') -> None: ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
-class Header(Info):
+class Header(Data):
     """Data model for HTTP/1.* header line."""
 
     #: Receipt type.

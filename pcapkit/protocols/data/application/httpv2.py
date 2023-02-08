@@ -3,7 +3,7 @@
 
 from typing import TYPE_CHECKING
 
-from pcapkit.corekit.infoclass import Info
+from pcapkit.protocols.data.data import Data
 from pcapkit.protocols.data.application.http import HTTP as Data_HTTP
 
 if TYPE_CHECKING:
@@ -29,7 +29,7 @@ __all__ = [
 ]
 
 
-class Flags(Info):
+class Flags(Data):
     """Data model for HTTP/2 flags."""
 
 
