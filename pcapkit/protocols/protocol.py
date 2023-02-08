@@ -41,18 +41,21 @@ if TYPE_CHECKING:
     from enum import IntEnum as StdlibEnum
     from typing import IO, Any, DefaultDict, Optional, Type
 
+    from typing_extensions import Self
+
     from aenum import IntEnum as AenumEnum
     from typing_extensions import Literal
 
 __all__ = ['Protocol']
 
 PT = TypeVar('PT', bound='Data')
+ST = TypeVar('ST', bound='Schema')
 
 # readable characters' order list
 readable = [ord(char) for char in filter(lambda char: not char.isspace(), string.printable)]
 
 
-class Protocol(Generic[PT], metaclass=abc.ABCMeta):
+class Protocol(Generic[PT, ST], metaclass=abc.ABCMeta):
     """Abstract base class for all protocol family."""
 
     if TYPE_CHECKING:
@@ -70,9 +73,9 @@ class Protocol(Generic[PT], metaclass=abc.ABCMeta):
         # Internal data storage for cached properties.
         __cached__: 'dict[str, Any]'
         #: Protocol header schema definition.
-        __schema__: 'Type[Schema]'
+        __schema__: 'Type[ST]'
         #: Protocol header schema instance.
-        __header__: 'Optional[Schema]'
+        __header__: 'ST'
 
     ##########################################################################
     # Defaults.
@@ -165,6 +168,12 @@ class Protocol(Generic[PT], metaclass=abc.ABCMeta):
                 payload=self._read_packet(),
             )
 
+    # schema data
+    @cached_property
+    def schema(self) -> 'ST':
+        """Schema data of the protocol."""
+        return self.__header__
+
     ##########################################################################
     # Methods.
     ##########################################################################
@@ -183,8 +192,44 @@ class Protocol(Generic[PT], metaclass=abc.ABCMeta):
         return (cls.__name__,)
 
     @abc.abstractmethod
-    def read(self, length: 'Optional[int]' = None, **kwargs: 'Any') -> 'PT':
+    def read(self, **kwargs: 'Any') -> 'PT':
         """Read (parse) packet data.
+
+        Args:
+            **kwargs: Arbitrary keyword arguments.
+
+        Returns:
+            Parsed packet data.
+
+        """
+
+    @abc.abstractmethod
+    def make(self, **kwargs: 'Any') -> 'ST':
+        """Make (construct) packet data.
+
+        Args:
+            **kwargs: Arbitrary keyword arguments.
+
+        Returns:
+            Curated protocol schema data.
+
+        """
+
+    def pack(self, **kwargs: 'Any') -> 'bytes':
+        """Pack (construct) packet data.
+
+        Args:
+            **kwargs: Arbitrary keyword arguments.
+
+        Returns:
+            Constructed packet data.
+
+        """
+        self.__header__ = self.make(**kwargs)
+        return self.__header__.pack()
+
+    def unpack(self, length: 'Optional[int]' = None, **kwargs: 'Any') -> 'PT':
+        """Unpack (parse) packet data.
 
         Args:
             length: Length of packet data.
@@ -194,18 +239,9 @@ class Protocol(Generic[PT], metaclass=abc.ABCMeta):
             Parsed packet data.
 
         """
-
-    @abc.abstractmethod
-    def make(self, **kwargs: 'Any') -> 'bytes':
-        """Make (construct) packet data.
-
-        Args:
-            **kwargs: Arbitrary keyword arguments.
-
-        Returns:
-            bytes: Constructed packet data.
-
-        """
+        if cast('Optional[ST]', self.__header__) is None:
+            self.__header__ = self.__schema__.unpack(self._file, length)
+        return self.read(**kwargs)
 
     @staticmethod
     def decode(byte: bytes, *, encoding: 'Optional[str]' = None,
@@ -334,9 +370,13 @@ class Protocol(Generic[PT], metaclass=abc.ABCMeta):
         return report
 
     @classmethod
-    def from_schema(cls, schema: 'Schema') -> 'Protocol[PT]':
+    def from_schema(cls, schema: 'ST | dict[str, Any]') -> 'Self':  # type: ignore[valid-type]
         """Create protocol instance from schema."""
         self = cls.__new__(cls)
+
+        if not isinstance(schema, Schema):
+            schema = cast('ST', self.__schema__.from_dict(schema))
+        self.__header__ = schema
 
         return self
 
@@ -344,13 +384,13 @@ class Protocol(Generic[PT], metaclass=abc.ABCMeta):
     # Data models.
     ##########################################################################
 
-    def __new__(cls, *args: 'Any', **kwargs: 'Any') -> 'Protocol[PT]':  # pylint: disable=unused-argument
+    def __new__(cls, *args: 'Any', **kwargs: 'Any') -> 'Protocol[PT, ST]':  # pylint: disable=unused-argument
         self = super().__new__(cls)
 
         # NOTE: Assign this attribute after ``__new__`` to avoid shared memory
         # reference between instances.
         self.__cached__ = {}
-        self.__header__ = None
+        self.__header__ = None  # type: ignore[assignment]
 
         return self
 
@@ -406,7 +446,7 @@ class Protocol(Generic[PT], metaclass=abc.ABCMeta):
 
         """
         if file is None:
-            _data = self.make(**kwargs)
+            _data = self.pack(**kwargs)
         else:
             _data = file.read(length)  # type: ignore[arg-type]
 
@@ -415,9 +455,9 @@ class Protocol(Generic[PT], metaclass=abc.ABCMeta):
         #: io.BytesIO: Source packet stream.
         self._file = io.BytesIO(self._data)
         #: pcapkit.protocols.data.data.Data: Parsed packet data.
-        self._info = self.read(length, **kwargs)
+        self._info = self.unpack(length, **kwargs)
 
-    def __init_subclass__(cls, /, schema: 'Type[Schema]' = Schema_NoPayload, **kwargs: 'Any') -> 'None':
+    def __init_subclass__(cls, /, schema: 'Type[ST]' = Schema_NoPayload, **kwargs: 'Any') -> 'None':  # type: ignore[assignment]
         """Initialisation for subclasses.
 
         Args:
