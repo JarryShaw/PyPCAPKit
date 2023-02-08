@@ -60,7 +60,9 @@
 
 <span class="kn">from</span> <span class="nn">pcapkit.corekit.infoclass</span> <span class="kn">import</span> <span class="n">Info</span>
 <span class="kn">from</span> <span class="nn">pcapkit.corekit.protochain</span> <span class="kn">import</span> <span class="n">ProtoChain</span>
-<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.protocol</span> <span class="kn">import</span> <span class="n">Packet</span> <span class="k">as</span> <span class="n">DataType_Packet</span>
+<span class="kn">from</span> <span class="nn">pcapkit.corekit.schema</span> <span class="kn">import</span> <span class="n">Schema</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.protocol</span> <span class="kn">import</span> <span class="n">Packet</span> <span class="k">as</span> <span class="n">Data_Packet</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.schema.misc.null</span> <span class="kn">import</span> <span class="n">NoPayload</span> <span class="k">as</span> <span class="n">Schema_NoPayload</span>
 <span class="kn">from</span> <span class="nn">pcapkit.utilities.compat</span> <span class="kn">import</span> <span class="n">cached_property</span>
 <span class="kn">from</span> <span class="nn">pcapkit.utilities.decorators</span> <span class="kn">import</span> <span class="n">beholder</span><span class="p">,</span> <span class="n">seekset</span>
 <span class="kn">from</span> <span class="nn">pcapkit.utilities.exceptions</span> <span class="kn">import</span> <span class="p">(</span><span class="n">ProtocolNotFound</span><span class="p">,</span> <span class="n">ProtocolNotImplemented</span><span class="p">,</span> <span class="n">StructError</span><span class="p">,</span>
@@ -68,7 +70,7 @@
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
     <span class="kn">from</span> <span class="nn">enum</span> <span class="kn">import</span> <span class="n">IntEnum</span> <span class="k">as</span> <span class="n">StdlibEnum</span>
-    <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">BinaryIO</span><span class="p">,</span> <span class="n">DefaultDict</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Type</span>
+    <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">IO</span><span class="p">,</span> <span class="n">Any</span><span class="p">,</span> <span class="n">DefaultDict</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Type</span>
 
     <span class="kn">from</span> <span class="nn">aenum</span> <span class="kn">import</span> <span class="n">IntEnum</span> <span class="k">as</span> <span class="n">AenumEnum</span>
     <span class="kn">from</span> <span class="nn">typing_extensions</span> <span class="kn">import</span> <span class="n">Literal</span>
@@ -89,7 +91,7 @@
     <span class="c1">#: Raw packet data.</span>
     <span class="n">_data</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span>
     <span class="c1">#: Source packet stream.</span>
-    <span class="n">_file</span><span class="p">:</span> <span class="s1">&#39;BinaryIO&#39;</span>
+    <span class="n">_file</span><span class="p">:</span> <span class="s1">&#39;IO[bytes]&#39;</span>
     <span class="c1">#： Next layer protocol instance.</span>
     <span class="n">_next</span><span class="p">:</span> <span class="s1">&#39;Protocol&#39;</span>
     <span class="c1">#: Protocol chain instance.</span>
@@ -97,6 +99,8 @@
 
     <span class="c1"># Internal data storage for cached properties.</span>
     <span class="n">__cached__</span><span class="p">:</span> <span class="s1">&#39;dict[str, Any]&#39;</span>
+    <span class="c1">#: Protocol header schema definition.</span>
+    <span class="n">__schema__</span><span class="p">:</span> <span class="s1">&#39;Type[Schema]&#39;</span>
 
     <span class="c1">##########################################################################</span>
     <span class="c1"># Defaults.</span>
@@ -179,12 +183,12 @@
 
     <span class="c1"># packet data</span>
     <span class="nd">@cached_property</span>
-    <span class="k">def</span> <span class="nf">packet</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_Packet&#39;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;DataType_Packet data of the protocol.&quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">packet</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Data_Packet&#39;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Data_Packet data of the protocol.&quot;&quot;&quot;</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_packet</span><span class="p">(</span><span class="n">header</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">length</span><span class="p">)</span>
         <span class="k">except</span> <span class="n">UnsupportedCall</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">DataType_Packet</span><span class="p">(</span>
+            <span class="k">return</span> <span class="n">Data_Packet</span><span class="p">(</span>
                 <span class="n">header</span><span class="o">=</span><span class="sa">b</span><span class="s1">&#39;&#39;</span><span class="p">,</span>
                 <span class="n">payload</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_read_packet</span><span class="p">(),</span>
             <span class="p">)</span>
@@ -371,11 +375,11 @@
         <span class="k">return</span> <span class="bp">self</span>
 
     <span class="nd">@overload</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file</span><span class="p">:</span> <span class="s1">&#39;BinaryIO&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span> <span class="o">=</span> <span class="o">...</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file</span><span class="p">:</span> <span class="s1">&#39;IO[bytes]&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span> <span class="o">=</span> <span class="o">...</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>
     <span class="nd">@overload</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>
 
-<div class="viewcode-block" id="Protocol.__init__"><a class="viewcode-back" href="../../../pcapkit/protocols/protocol.html#pcapkit.protocols.protocol.Protocol.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file</span><span class="p">:</span> <span class="s1">&#39;Optional[BinaryIO]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
+<div class="viewcode-block" id="Protocol.__init__"><a class="viewcode-back" href="../../../pcapkit/protocols/protocol.html#pcapkit.protocols.protocol.Protocol.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file</span><span class="p">:</span> <span class="s1">&#39;Optional[IO[bytes]]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialisation.</span>
 
 <span class="sd">        Args:</span>
@@ -403,11 +407,11 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">__post_init__</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>  <span class="c1"># type: ignore[arg-type]</span></div>
 
     <span class="nd">@overload</span>
-    <span class="k">def</span> <span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file</span><span class="p">:</span> <span class="s1">&#39;BinaryIO&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span> <span class="o">=</span> <span class="o">...</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>
+    <span class="k">def</span> <span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file</span><span class="p">:</span> <span class="s1">&#39;IO[bytes]&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span> <span class="o">=</span> <span class="o">...</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>
     <span class="nd">@overload</span>
     <span class="k">def</span> <span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>
 
-<div class="viewcode-block" id="Protocol.__post_init__"><a class="viewcode-back" href="../../../pcapkit/protocols/protocol.html#pcapkit.protocols.protocol.Protocol.__post_init__">[docs]</a>    <span class="k">def</span> <span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file</span><span class="p">:</span> <span class="s1">&#39;Optional[BinaryIO]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<div class="viewcode-block" id="Protocol.__post_init__"><a class="viewcode-back" href="../../../pcapkit/protocols/protocol.html#pcapkit.protocols.protocol.Protocol.__post_init__">[docs]</a>    <span class="k">def</span> <span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file</span><span class="p">:</span> <span class="s1">&#39;Optional[IO[bytes]]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                       <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Post initialisation hook.</span>
 
@@ -432,6 +436,21 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_file</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">BytesIO</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">)</span>
         <span class="c1">#: pcapkit.corekit.infoclass.Info: Parsed packet data.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_info</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">length</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="nf">__init_subclass__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="o">/</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">&#39;Type[Schema]&#39;</span> <span class="o">=</span> <span class="n">Schema_NoPayload</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialisation for subclasses.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            schema: Schema class.</span>
+<span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
+
+<span class="sd">        This method is called when a subclass of :class:`Protocol` is defined.</span>
+<span class="sd">        It is used to set the :attr:`self.__schema__ &lt;pcapkit.protocols.protocol.Protocol.__schema__&gt;`</span>
+<span class="sd">        attribute of the subclass.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__init_subclass__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">cls</span><span class="o">.</span><span class="n">__schema__</span> <span class="o">=</span> <span class="n">schema</span>
 
 <div class="viewcode-block" id="Protocol.__repr__"><a class="viewcode-back" href="../../../pcapkit/protocols/protocol.html#pcapkit.protocols.protocol.Protocol.__repr__">[docs]</a>    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;str&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns representation of parsed protocol data.</span>
@@ -508,7 +527,7 @@
     <span class="k">def</span> <span class="fm">__length_hint__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Optional[int]&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return an estimated length for the object.&quot;&quot;&quot;</span>
 
-<div class="viewcode-block" id="Protocol.__iter__"><a class="viewcode-back" href="../../../pcapkit/protocols/protocol.html#pcapkit.protocols.protocol.Protocol.__iter__">[docs]</a>    <span class="k">def</span> <span class="fm">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;BinaryIO&#39;</span><span class="p">:</span>
+<div class="viewcode-block" id="Protocol.__iter__"><a class="viewcode-back" href="../../../pcapkit/protocols/protocol.html#pcapkit.protocols.protocol.Protocol.__iter__">[docs]</a>    <span class="k">def</span> <span class="fm">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;IO[bytes]&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Iterate through :attr:`self._data &lt;pcapkit.protocols.protocol.Protocol._data&gt;`.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">io</span><span class="o">.</span><span class="n">BytesIO</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">)</span></div>
 
@@ -713,11 +732,11 @@
     <span class="nd">@overload</span>
     <span class="k">def</span> <span class="nf">_read_packet</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">header</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">payload</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span> <span class="o">=</span> <span class="o">...</span><span class="p">,</span> <span class="n">discard</span><span class="p">:</span> <span class="s1">&#39;Literal[True]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;bytes&#39;</span><span class="p">:</span> <span class="o">...</span>
     <span class="nd">@overload</span>
-    <span class="k">def</span> <span class="nf">_read_packet</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">header</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">payload</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span> <span class="o">=</span> <span class="o">...</span><span class="p">,</span> <span class="n">discard</span><span class="p">:</span> <span class="s1">&#39;Literal[False]&#39;</span> <span class="o">=</span> <span class="o">...</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_Packet&#39;</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=line-too-long</span>
+    <span class="k">def</span> <span class="nf">_read_packet</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">header</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">payload</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span> <span class="o">=</span> <span class="o">...</span><span class="p">,</span> <span class="n">discard</span><span class="p">:</span> <span class="s1">&#39;Literal[False]&#39;</span> <span class="o">=</span> <span class="o">...</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Data_Packet&#39;</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=line-too-long</span>
 
 <div class="viewcode-block" id="Protocol._read_packet"><a class="viewcode-back" href="../../../pcapkit/protocols/protocol.html#pcapkit.protocols.protocol.Protocol._read_packet">[docs]</a>    <span class="nd">@seekset</span>  <span class="c1"># type: ignore[misc]</span>
     <span class="k">def</span> <span class="nf">_read_packet</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">header</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                     <span class="n">payload</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">discard</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;bytes | DataType_Packet&#39;</span><span class="p">:</span>
+                     <span class="n">payload</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">discard</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;bytes | Data_Packet&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Read raw packet data.</span>
 
 <span class="sd">        Arguments:</span>
@@ -730,7 +749,7 @@
 <span class="sd">        * If ``discard`` is set as :data:`True`, returns the packet body (in</span>
 <span class="sd">          :obj:`bytes`) only.</span>
 <span class="sd">        * Otherwise, returns the header and payload data as</span>
-<span class="sd">          :class:`~pcapkit.protocols.data.protocol.DataType_Packet` object.</span>
+<span class="sd">          :class:`~pcapkit.protocols.data.protocol.Data_Packet` object.</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">header</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -738,7 +757,7 @@
             <span class="n">data_payload</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_fileng</span><span class="p">(</span><span class="n">payload</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">discard</span><span class="p">:</span>
                 <span class="k">return</span> <span class="n">data_payload</span>
-            <span class="k">return</span> <span class="n">DataType_Packet</span><span class="p">(</span>
+            <span class="k">return</span> <span class="n">Data_Packet</span><span class="p">(</span>
                 <span class="n">header</span><span class="o">=</span><span class="n">data_header</span><span class="p">,</span>
                 <span class="n">payload</span><span class="o">=</span><span class="n">data_payload</span>
             <span class="p">)</span>

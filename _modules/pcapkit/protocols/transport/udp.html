@@ -54,8 +54,8 @@
 <span class="kn">import</span> <span class="nn">collections</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
 
-<span class="kn">from</span> <span class="nn">pcapkit.const.reg.transtype</span> <span class="kn">import</span> <span class="n">TransType</span> <span class="k">as</span> <span class="n">RegType_TransType</span>
-<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.transport.udp</span> <span class="kn">import</span> <span class="n">UDP</span> <span class="k">as</span> <span class="n">DataType_UDP</span>
+<span class="kn">from</span> <span class="nn">pcapkit.const.reg.transtype</span> <span class="kn">import</span> <span class="n">TransType</span> <span class="k">as</span> <span class="n">Enum_TransType</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.transport.udp</span> <span class="kn">import</span> <span class="n">UDP</span> <span class="k">as</span> <span class="n">Data_UDP</span>
 <span class="kn">from</span> <span class="nn">pcapkit.protocols.transport.transport</span> <span class="kn">import</span> <span class="n">Transport</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
@@ -66,7 +66,7 @@
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;UDP&#39;</span><span class="p">]</span>
 
 
-<div class="viewcode-block" id="UDP"><a class="viewcode-back" href="../../../../pcapkit/protocols/transport/udp.html#pcapkit.protocols.transport.udp.UDP">[docs]</a><span class="k">class</span> <span class="nc">UDP</span><span class="p">(</span><span class="n">Transport</span><span class="p">[</span><span class="n">DataType_UDP</span><span class="p">]):</span>
+<div class="viewcode-block" id="UDP"><a class="viewcode-back" href="../../../../pcapkit/protocols/transport/udp.html#pcapkit.protocols.transport.udp.UDP">[docs]</a><span class="k">class</span> <span class="nc">UDP</span><span class="p">(</span><span class="n">Transport</span><span class="p">[</span><span class="n">Data_UDP</span><span class="p">]):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;This class implements User Datagram Protocol.</span>
 
 <span class="sd">    This class currently supports parsing of the following protocols, which are</span>
@@ -125,7 +125,7 @@
     <span class="c1"># Methods.</span>
     <span class="c1">##########################################################################</span>
 
-<div class="viewcode-block" id="UDP.read"><a class="viewcode-back" href="../../../../pcapkit/protocols/transport/udp.html#pcapkit.protocols.transport.udp.UDP.read">[docs]</a>    <span class="k">def</span> <span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_UDP&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
+<div class="viewcode-block" id="UDP.read"><a class="viewcode-back" href="../../../../pcapkit/protocols/transport/udp.html#pcapkit.protocols.transport.udp.UDP.read">[docs]</a>    <span class="k">def</span> <span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Data_UDP&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Read User Datagram Protocol (UDP).</span>
 
 <span class="sd">        Structure of UDP header [:rfc:`768`]:</span>
@@ -160,7 +160,7 @@
         <span class="n">_tlen</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_unpack</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
         <span class="n">_csum</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_fileng</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
 
-        <span class="n">udp</span> <span class="o">=</span> <span class="n">DataType_UDP</span><span class="p">(</span>
+        <span class="n">udp</span> <span class="o">=</span> <span class="n">Data_UDP</span><span class="p">(</span>
             <span class="n">srcport</span><span class="o">=</span><span class="n">_srcp</span><span class="p">,</span>
             <span class="n">dstport</span><span class="o">=</span><span class="n">_dstp</span><span class="p">,</span>
             <span class="nb">len</span><span class="o">=</span><span class="n">_tlen</span><span class="p">,</span>
@@ -190,7 +190,7 @@
         <span class="k">return</span> <span class="mi">8</span>
 
 <div class="viewcode-block" id="UDP.__index__"><a class="viewcode-back" href="../../../../pcapkit/protocols/transport/udp.html#pcapkit.protocols.transport.udp.UDP.__index__">[docs]</a>    <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="fm">__index__</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;RegType_TransType&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=invalid-index-returned</span>
+    <span class="k">def</span> <span class="fm">__index__</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Enum_TransType&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=invalid-index-returned</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Numeral registry index of the protocol.</span>
 
 <span class="sd">        Returns:</span>
@@ -199,7 +199,7 @@
 <span class="sd">        .. _IANA: https://www.iana.org/assignments/protocol-numbers/protocol-numbers.xhtml</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="n">RegType_TransType</span><span class="o">.</span><span class="n">UDP</span>  <span class="c1"># type: ignore[return-value]</span></div></div>
+        <span class="k">return</span> <span class="n">Enum_TransType</span><span class="o">.</span><span class="n">UDP</span>  <span class="c1"># type: ignore[return-value]</span></div></div>
 </pre></div>
 
           </div>

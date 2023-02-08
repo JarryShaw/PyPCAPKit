@@ -50,8 +50,8 @@
 <span class="kn">import</span> <span class="nn">time</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">cast</span>
 
-<span class="kn">from</span> <span class="nn">pcapkit.const.reg.linktype</span> <span class="kn">import</span> <span class="n">LinkType</span> <span class="k">as</span> <span class="n">RegType_LinkType</span>
-<span class="kn">from</span> <span class="nn">pcapkit.const.reg.transtype</span> <span class="kn">import</span> <span class="n">TransType</span> <span class="k">as</span> <span class="n">RegType_TransType</span>
+<span class="kn">from</span> <span class="nn">pcapkit.const.reg.linktype</span> <span class="kn">import</span> <span class="n">LinkType</span> <span class="k">as</span> <span class="n">Enum_LinkType</span>
+<span class="kn">from</span> <span class="nn">pcapkit.const.reg.transtype</span> <span class="kn">import</span> <span class="n">TransType</span> <span class="k">as</span> <span class="n">Enum_TransType</span>
 <span class="kn">from</span> <span class="nn">pcapkit.foundation.reassembly.ip</span> <span class="kn">import</span> <span class="n">Packet</span> <span class="k">as</span> <span class="n">IP_Packet</span>
 <span class="kn">from</span> <span class="nn">pcapkit.foundation.reassembly.tcp</span> <span class="kn">import</span> <span class="n">Packet</span> <span class="k">as</span> <span class="n">TCP_Packet</span>
 <span class="kn">from</span> <span class="nn">pcapkit.foundation.traceflow</span> <span class="kn">import</span> <span class="n">Packet</span> <span class="k">as</span> <span class="n">TF_Packet</span>
@@ -165,7 +165,7 @@
                 <span class="n">cast</span><span class="p">(</span><span class="s1">&#39;IPv4Address&#39;</span><span class="p">,</span>
                      <span class="n">ipaddress</span><span class="o">.</span><span class="n">ip_address</span><span class="p">(</span><span class="n">ipv4</span><span class="o">.</span><span class="n">dst</span><span class="p">)),</span>  <span class="c1"># destination IP address</span>
                 <span class="n">ipv4</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>                               <span class="c1"># identification</span>
-                <span class="n">RegType_TransType</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">ipv4</span><span class="o">.</span><span class="n">proto</span><span class="p">),</span>     <span class="c1"># payload protocol type</span>
+                <span class="n">Enum_TransType</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">ipv4</span><span class="o">.</span><span class="n">proto</span><span class="p">),</span>     <span class="c1"># payload protocol type</span>
             <span class="p">),</span>
             <span class="n">num</span><span class="o">=</span><span class="n">count</span><span class="p">,</span>                                 <span class="c1"># original packet range number</span>
             <span class="n">fo</span><span class="o">=</span><span class="n">ipv4</span><span class="o">.</span><span class="n">frag</span><span class="p">,</span>                              <span class="c1"># fragment offset</span>
@@ -218,7 +218,7 @@
                 <span class="n">cast</span><span class="p">(</span><span class="s1">&#39;IPv6Address&#39;</span><span class="p">,</span>
                      <span class="n">ipaddress</span><span class="o">.</span><span class="n">ip_address</span><span class="p">(</span><span class="n">ipv6</span><span class="o">.</span><span class="n">dst</span><span class="p">)),</span>     <span class="c1"># destination IP address</span>
                 <span class="n">ipv6</span><span class="o">.</span><span class="n">fl</span><span class="p">,</span>                                  <span class="c1"># label</span>
-                <span class="n">RegType_TransType</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">ipv6_frag</span><span class="o">.</span><span class="n">nh</span><span class="p">),</span>      <span class="c1"># next header field in IPv6 Fragment Header</span>
+                <span class="n">Enum_TransType</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">ipv6_frag</span><span class="o">.</span><span class="n">nh</span><span class="p">),</span>      <span class="c1"># next header field in IPv6 Fragment Header</span>
             <span class="p">),</span>
             <span class="n">num</span><span class="o">=</span><span class="n">count</span><span class="p">,</span>                                    <span class="c1"># original packet range number</span>
             <span class="n">fo</span><span class="o">=</span><span class="n">ipv6_frag</span><span class="o">.</span><span class="n">offset</span><span class="p">,</span>                          <span class="c1"># fragment offset</span>
@@ -309,7 +309,7 @@
         <span class="n">tcp</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">&#39;TCP&#39;</span><span class="p">,</span> <span class="n">packet</span><span class="p">[</span><span class="s1">&#39;TCP&#39;</span><span class="p">])</span>
 
         <span class="n">data</span> <span class="o">=</span> <span class="n">TF_Packet</span><span class="p">(</span>  <span class="c1"># type: ignore[type-var]</span>
-            <span class="n">protocol</span><span class="o">=</span><span class="n">RegType_LinkType</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">packet</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">upper</span><span class="p">()),</span>  <span class="c1"># data link type from global header</span>
+            <span class="n">protocol</span><span class="o">=</span><span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">packet</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">upper</span><span class="p">()),</span>  <span class="c1"># data link type from global header</span>
             <span class="n">index</span><span class="o">=</span><span class="n">count</span><span class="p">,</span>                                         <span class="c1"># frame number</span>
             <span class="n">frame</span><span class="o">=</span><span class="n">packet2dict</span><span class="p">(</span><span class="n">packet</span><span class="p">),</span>                           <span class="c1"># extracted packet</span>
             <span class="n">syn</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">tcp</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">S</span><span class="p">),</span>                               <span class="c1"># TCP synchronise (SYN) flag</span>

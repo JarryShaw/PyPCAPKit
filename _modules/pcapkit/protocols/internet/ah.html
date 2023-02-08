@@ -56,13 +56,13 @@
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">overload</span>
 
-<span class="kn">from</span> <span class="nn">pcapkit.const.reg.transtype</span> <span class="kn">import</span> <span class="n">TransType</span> <span class="k">as</span> <span class="n">RegType_TransType</span>
-<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.internet.ah</span> <span class="kn">import</span> <span class="n">AH</span> <span class="k">as</span> <span class="n">DataType_AH</span>
+<span class="kn">from</span> <span class="nn">pcapkit.const.reg.transtype</span> <span class="kn">import</span> <span class="n">TransType</span> <span class="k">as</span> <span class="n">Enum_TransType</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.internet.ah</span> <span class="kn">import</span> <span class="n">AH</span> <span class="k">as</span> <span class="n">Data_AH</span>
 <span class="kn">from</span> <span class="nn">pcapkit.protocols.internet.ipsec</span> <span class="kn">import</span> <span class="n">IPsec</span>
 <span class="kn">from</span> <span class="nn">pcapkit.utilities.exceptions</span> <span class="kn">import</span> <span class="n">ProtocolError</span><span class="p">,</span> <span class="n">UnsupportedCall</span><span class="p">,</span> <span class="n">VersionError</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-    <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">BinaryIO</span><span class="p">,</span> <span class="n">NoReturn</span><span class="p">,</span> <span class="n">Optional</span>
+    <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">IO</span><span class="p">,</span> <span class="n">Any</span><span class="p">,</span> <span class="n">NoReturn</span><span class="p">,</span> <span class="n">Optional</span>
 
     <span class="kn">from</span> <span class="nn">typing_extensions</span> <span class="kn">import</span> <span class="n">Literal</span>
 
@@ -72,7 +72,7 @@
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;AH&#39;</span><span class="p">]</span>
 
 
-<div class="viewcode-block" id="AH"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/ah.html#pcapkit.protocols.internet.ah.AH">[docs]</a><span class="k">class</span> <span class="nc">AH</span><span class="p">(</span><span class="n">IPsec</span><span class="p">[</span><span class="n">DataType_AH</span><span class="p">]):</span>
+<div class="viewcode-block" id="AH"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/ah.html#pcapkit.protocols.internet.ah.AH">[docs]</a><span class="k">class</span> <span class="nc">AH</span><span class="p">(</span><span class="n">IPsec</span><span class="p">[</span><span class="n">Data_AH</span><span class="p">]):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;This class implements Authentication Header.&quot;&quot;&quot;</span>
 
     <span class="c1">##########################################################################</span>
@@ -130,7 +130,7 @@
     <span class="c1">##########################################################################</span>
 
 <div class="viewcode-block" id="AH.read"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/ah.html#pcapkit.protocols.internet.ah.AH.read">[docs]</a>    <span class="k">def</span> <span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">version</span><span class="p">:</span> <span class="s1">&#39;Literal[4, 6]&#39;</span> <span class="o">=</span> <span class="mi">4</span><span class="p">,</span>  <span class="c1"># pylint: disable=arguments-differ</span>
-             <span class="n">extension</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_AH&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
+             <span class="n">extension</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Data_AH&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Read Authentication Header.</span>
 
 <span class="sd">        Structure of AH header [:rfc:`4302`]:</span>
@@ -175,7 +175,7 @@
         <span class="n">_vlen</span> <span class="o">=</span> <span class="n">_tlen</span> <span class="o">-</span> <span class="mi">12</span>
         <span class="n">_chkv</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_fileng</span><span class="p">(</span><span class="n">_vlen</span><span class="p">)</span>
 
-        <span class="n">ah</span> <span class="o">=</span> <span class="n">DataType_AH</span><span class="p">(</span>
+        <span class="n">ah</span> <span class="o">=</span> <span class="n">Data_AH</span><span class="p">(</span>
             <span class="nb">next</span><span class="o">=</span><span class="n">_next</span><span class="p">,</span>
             <span class="n">length</span><span class="o">=</span><span class="n">_tlen</span><span class="p">,</span>
             <span class="n">spi</span><span class="o">=</span><span class="n">_scpi</span><span class="p">,</span>
@@ -226,13 +226,13 @@
     <span class="c1">##########################################################################</span>
 
     <span class="nd">@overload</span>
-    <span class="k">def</span> <span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file</span><span class="p">:</span> <span class="s1">&#39;BinaryIO&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span> <span class="o">=</span> <span class="o">...</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>  <span class="c1"># pylint: disable=arguments-differ</span>
+    <span class="k">def</span> <span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file</span><span class="p">:</span> <span class="s1">&#39;IO[bytes]&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span> <span class="o">=</span> <span class="o">...</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>  <span class="c1"># pylint: disable=arguments-differ</span>
                       <span class="n">version</span><span class="p">:</span> <span class="s1">&#39;Literal[4, 6]&#39;</span> <span class="o">=</span> <span class="o">...</span><span class="p">,</span> <span class="n">extension</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="o">...</span><span class="p">,</span>
                       <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>
     <span class="nd">@overload</span>
     <span class="k">def</span> <span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=arguments-differ</span>
 
-<div class="viewcode-block" id="AH.__post_init__"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/ah.html#pcapkit.protocols.internet.ah.AH.__post_init__">[docs]</a>    <span class="k">def</span> <span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file</span><span class="p">:</span> <span class="s1">&#39;Optional[BinaryIO]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>  <span class="c1"># pylint: disable=arguments-differ</span>
+<div class="viewcode-block" id="AH.__post_init__"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/ah.html#pcapkit.protocols.internet.ah.AH.__post_init__">[docs]</a>    <span class="k">def</span> <span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file</span><span class="p">:</span> <span class="s1">&#39;Optional[IO[bytes]]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>  <span class="c1"># pylint: disable=arguments-differ</span>
                       <span class="n">version</span><span class="p">:</span> <span class="s1">&#39;Literal[4, 6]&#39;</span> <span class="o">=</span> <span class="mi">4</span><span class="p">,</span> <span class="n">extension</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
                       <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Post initialisation hook.</span>
@@ -259,7 +259,7 @@
         <span class="k">return</span> <span class="mi">20</span>
 
 <div class="viewcode-block" id="AH.__index__"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/ah.html#pcapkit.protocols.internet.ah.AH.__index__">[docs]</a>    <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="fm">__index__</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;RegType_TransType&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=invalid-index-returned</span>
+    <span class="k">def</span> <span class="fm">__index__</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Enum_TransType&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=invalid-index-returned</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Numeral registry index of the protocol.</span>
 
 <span class="sd">        Returns:</span>
@@ -268,7 +268,7 @@
 <span class="sd">        .. _IANA: https://www.iana.org/assignments/protocol-numbers/protocol-numbers.xhtml</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="n">RegType_TransType</span><span class="o">.</span><span class="n">AH</span>  <span class="c1"># type: ignore[return-value]</span></div></div>
+        <span class="k">return</span> <span class="n">Enum_TransType</span><span class="o">.</span><span class="n">AH</span>  <span class="c1"># type: ignore[return-value]</span></div></div>
 </pre></div>
 
           </div>

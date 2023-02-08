@@ -62,9 +62,9 @@
 
 <span class="kn">from</span> <span class="nn">pcapkit.corekit.multidict</span> <span class="kn">import</span> <span class="n">OrderedMultiDict</span>
 <span class="kn">from</span> <span class="nn">pcapkit.protocols.application.http</span> <span class="kn">import</span> <span class="n">HTTP</span> <span class="k">as</span> <span class="n">HTTPBase</span>
-<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.application.httpv1</span> <span class="kn">import</span> <span class="n">HTTP</span> <span class="k">as</span> <span class="n">DataType_HTTP</span>
-<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.application.httpv1</span> <span class="kn">import</span> <span class="n">RequestHeader</span> <span class="k">as</span> <span class="n">DataType_RequestHeader</span>
-<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.application.httpv1</span> <span class="kn">import</span> <span class="n">ResponseHeader</span> <span class="k">as</span> <span class="n">DataType_ResponseHeader</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.application.httpv1</span> <span class="kn">import</span> <span class="n">HTTP</span> <span class="k">as</span> <span class="n">Data_HTTP</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.application.httpv1</span> <span class="kn">import</span> <span class="n">RequestHeader</span> <span class="k">as</span> <span class="n">Data_RequestHeader</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.application.httpv1</span> <span class="kn">import</span> <span class="n">ResponseHeader</span> <span class="k">as</span> <span class="n">Data_ResponseHeader</span>
 <span class="kn">from</span> <span class="nn">pcapkit.utilities.exceptions</span> <span class="kn">import</span> <span class="n">ProtocolError</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
@@ -72,7 +72,7 @@
 
     <span class="kn">from</span> <span class="nn">typing_extensions</span> <span class="kn">import</span> <span class="n">Literal</span>
 
-    <span class="kn">from</span> <span class="nn">pcapkit.protocols.data.application.httpv1</span> <span class="kn">import</span> <span class="n">Header</span> <span class="k">as</span> <span class="n">DataType_Header</span>
+    <span class="kn">from</span> <span class="nn">pcapkit.protocols.data.application.httpv1</span> <span class="kn">import</span> <span class="n">Header</span> <span class="k">as</span> <span class="n">Data_Header</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;HTTP&#39;</span><span class="p">]</span>
 
@@ -91,7 +91,7 @@
 <span class="n">_RE_STATUS</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">rb</span><span class="s1">&#39;\d</span><span class="si">{3}</span><span class="s1">&#39;</span><span class="p">)</span>
 
 
-<div class="viewcode-block" id="HTTP"><a class="viewcode-back" href="../../../../pcapkit/protocols/application/httpv1.html#pcapkit.protocols.application.httpv1.HTTP">[docs]</a><span class="k">class</span> <span class="nc">HTTP</span><span class="p">(</span><span class="n">HTTPBase</span><span class="p">[</span><span class="n">DataType_HTTP</span><span class="p">]):</span>
+<div class="viewcode-block" id="HTTP"><a class="viewcode-back" href="../../../../pcapkit/protocols/application/httpv1.html#pcapkit.protocols.application.httpv1.HTTP">[docs]</a><span class="k">class</span> <span class="nc">HTTP</span><span class="p">(</span><span class="n">HTTPBase</span><span class="p">[</span><span class="n">Data_HTTP</span><span class="p">]):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;This class implements Hypertext Transfer Protocol (HTTP/1.*).&quot;&quot;&quot;</span>
 
     <span class="c1">##########################################################################</span>
@@ -119,7 +119,7 @@
     <span class="c1"># Methods.</span>
     <span class="c1">##########################################################################</span>
 
-<div class="viewcode-block" id="HTTP.read"><a class="viewcode-back" href="../../../../pcapkit/protocols/application/httpv1.html#pcapkit.protocols.application.httpv1.HTTP.read">[docs]</a>    <span class="k">def</span> <span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_HTTP&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
+<div class="viewcode-block" id="HTTP.read"><a class="viewcode-back" href="../../../../pcapkit/protocols/application/httpv1.html#pcapkit.protocols.application.httpv1.HTTP.read">[docs]</a>    <span class="k">def</span> <span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Data_HTTP&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Read Hypertext Transfer Protocol (HTTP/1.*).</span>
 
 <span class="sd">        Structure of HTTP/1.* packet [:rfc:`7230`]:</span>
@@ -152,7 +152,7 @@
         <span class="n">header_line</span><span class="p">,</span> <span class="n">header_unpacked</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_http_header</span><span class="p">(</span><span class="n">header</span><span class="p">)</span>
         <span class="n">body_unpacked</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_http_body</span><span class="p">(</span><span class="n">body</span><span class="p">)</span> <span class="ow">or</span> <span class="kc">None</span>
 
-        <span class="n">http</span> <span class="o">=</span> <span class="n">DataType_HTTP</span><span class="p">(</span>
+        <span class="n">http</span> <span class="o">=</span> <span class="n">Data_HTTP</span><span class="p">(</span>
             <span class="n">receipt</span><span class="o">=</span><span class="n">header_line</span><span class="p">,</span>
             <span class="n">header</span><span class="o">=</span><span class="n">header_unpacked</span><span class="p">,</span>
             <span class="n">body</span><span class="o">=</span><span class="n">body_unpacked</span><span class="p">,</span>
@@ -189,7 +189,7 @@
     <span class="c1"># Utilities.</span>
     <span class="c1">##########################################################################</span>
 
-<div class="viewcode-block" id="HTTP._read_http_header"><a class="viewcode-back" href="../../../../pcapkit/protocols/application/httpv1.html#pcapkit.protocols.application.httpv1.HTTP._read_http_header">[docs]</a>    <span class="k">def</span> <span class="nf">_read_http_header</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">header</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;tuple[DataType_Header, OrderedMultiDict[str, str]]&#39;</span><span class="p">:</span>
+<div class="viewcode-block" id="HTTP._read_http_header"><a class="viewcode-back" href="../../../../pcapkit/protocols/application/httpv1.html#pcapkit.protocols.application.httpv1.HTTP._read_http_header">[docs]</a>    <span class="k">def</span> <span class="nf">_read_http_header</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">header</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;tuple[Data_Header, OrderedMultiDict[str, str]]&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Read HTTP/1.* header.</span>
 
 <span class="sd">        Structure of HTTP/1.* header [:rfc:`7230`]:</span>
@@ -217,21 +217,21 @@
         <span class="n">lists</span> <span class="o">=</span> <span class="p">(</span><span class="n">re</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="sa">rb</span><span class="s1">&#39;\s*:\s*&#39;</span><span class="p">,</span> <span class="n">field</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">fields</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-            <span class="n">header_line</span><span class="p">:</span> <span class="s1">&#39;DataType_Header&#39;</span>
+            <span class="n">header_line</span><span class="p">:</span> <span class="s1">&#39;Data_Header&#39;</span>
 
         <span class="n">match1</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">_RE_METHOD</span><span class="p">,</span> <span class="n">para1</span><span class="p">)</span>
         <span class="n">match2</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">_RE_VERSION</span><span class="p">,</span> <span class="n">para3</span><span class="p">)</span>
         <span class="n">match3</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">_RE_VERSION</span><span class="p">,</span> <span class="n">para1</span><span class="p">)</span>
         <span class="n">match4</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">_RE_STATUS</span><span class="p">,</span> <span class="n">para2</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">match1</span> <span class="ow">and</span> <span class="n">match2</span><span class="p">:</span>
-            <span class="n">header_line</span> <span class="o">=</span> <span class="n">DataType_RequestHeader</span><span class="p">(</span>
+            <span class="n">header_line</span> <span class="o">=</span> <span class="n">Data_RequestHeader</span><span class="p">(</span>
                 <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;request&#39;</span><span class="p">,</span>
                 <span class="n">method</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="n">para1</span><span class="p">),</span>
                 <span class="n">uri</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="n">para2</span><span class="p">),</span>
                 <span class="n">version</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="n">match2</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="s1">&#39;version&#39;</span><span class="p">)),</span>
             <span class="p">)</span>
         <span class="k">elif</span> <span class="n">match3</span> <span class="ow">and</span> <span class="n">match4</span><span class="p">:</span>
-            <span class="n">header_line</span> <span class="o">=</span> <span class="n">DataType_ResponseHeader</span><span class="p">(</span>
+            <span class="n">header_line</span> <span class="o">=</span> <span class="n">Data_ResponseHeader</span><span class="p">(</span>
                 <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;response&#39;</span><span class="p">,</span>
                 <span class="n">version</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="n">match3</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="s1">&#39;version&#39;</span><span class="p">)),</span>
                 <span class="n">status</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">para2</span><span class="p">),</span>

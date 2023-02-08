@@ -45,7 +45,7 @@
 <span class="kn">import</span> <span class="nn">ipaddress</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">cast</span>
 
-<span class="kn">from</span> <span class="nn">pcapkit.const.reg.linktype</span> <span class="kn">import</span> <span class="n">LinkType</span> <span class="k">as</span> <span class="n">RegType_LinkType</span>
+<span class="kn">from</span> <span class="nn">pcapkit.const.reg.linktype</span> <span class="kn">import</span> <span class="n">LinkType</span> <span class="k">as</span> <span class="n">Enum_LinkType</span>
 <span class="kn">from</span> <span class="nn">pcapkit.foundation.traceflow</span> <span class="kn">import</span> <span class="n">Packet</span> <span class="k">as</span> <span class="n">TF_Packet</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
@@ -110,7 +110,7 @@
         <span class="n">tcp</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">&#39;Packet&#39;</span><span class="p">,</span> <span class="n">packet</span><span class="o">.</span><span class="n">tcp</span><span class="p">)</span>
 
         <span class="n">data</span> <span class="o">=</span> <span class="n">TF_Packet</span><span class="p">(</span>  <span class="c1"># type: ignore[type-var]</span>
-            <span class="n">protocol</span><span class="o">=</span><span class="n">RegType_LinkType</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">packet</span><span class="o">.</span><span class="n">layers</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">layer_name</span><span class="o">.</span><span class="n">upper</span><span class="p">()),</span>  <span class="c1"># data link type from global header</span>
+            <span class="n">protocol</span><span class="o">=</span><span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">packet</span><span class="o">.</span><span class="n">layers</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">layer_name</span><span class="o">.</span><span class="n">upper</span><span class="p">()),</span>  <span class="c1"># data link type from global header</span>
             <span class="n">index</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">packet</span><span class="o">.</span><span class="n">number</span><span class="p">),</span>                                            <span class="c1"># frame number</span>
             <span class="n">frame</span><span class="o">=</span><span class="n">packet2dict</span><span class="p">(</span><span class="n">packet</span><span class="p">),</span>                                           <span class="c1"># extracted packet</span>
             <span class="n">syn</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">tcp</span><span class="o">.</span><span class="n">flags_syn</span><span class="p">)),</span>                                        <span class="c1"># TCP synchronise (SYN) flag</span>

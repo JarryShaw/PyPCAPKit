@@ -55,9 +55,9 @@
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
 
-<span class="kn">from</span> <span class="nn">pcapkit.const.vlan.priority_level</span> <span class="kn">import</span> <span class="n">PriorityLevel</span> <span class="k">as</span> <span class="n">RegType_PriorityLevel</span>
-<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.link.vlan</span> <span class="kn">import</span> <span class="n">TCI</span> <span class="k">as</span> <span class="n">DataType_TCI</span>
-<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.link.vlan</span> <span class="kn">import</span> <span class="n">VLAN</span> <span class="k">as</span> <span class="n">DataType_VLAN</span>
+<span class="kn">from</span> <span class="nn">pcapkit.const.vlan.priority_level</span> <span class="kn">import</span> <span class="n">PriorityLevel</span> <span class="k">as</span> <span class="n">Enum_PriorityLevel</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.link.vlan</span> <span class="kn">import</span> <span class="n">TCI</span> <span class="k">as</span> <span class="n">Data_TCI</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.link.vlan</span> <span class="kn">import</span> <span class="n">VLAN</span> <span class="k">as</span> <span class="n">Data_VLAN</span>
 <span class="kn">from</span> <span class="nn">pcapkit.protocols.link.link</span> <span class="kn">import</span> <span class="n">Link</span>
 <span class="kn">from</span> <span class="nn">pcapkit.utilities.exceptions</span> <span class="kn">import</span> <span class="n">UnsupportedCall</span>
 
@@ -66,12 +66,12 @@
 
     <span class="kn">from</span> <span class="nn">typing_extensions</span> <span class="kn">import</span> <span class="n">Literal</span>
 
-    <span class="kn">from</span> <span class="nn">pcapkit.const.reg.ethertype</span> <span class="kn">import</span> <span class="n">EtherType</span> <span class="k">as</span> <span class="n">RegType_EtherType</span>
+    <span class="kn">from</span> <span class="nn">pcapkit.const.reg.ethertype</span> <span class="kn">import</span> <span class="n">EtherType</span> <span class="k">as</span> <span class="n">Enum_EtherType</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;VLAN&#39;</span><span class="p">]</span>
 
 
-<div class="viewcode-block" id="VLAN"><a class="viewcode-back" href="../../../../pcapkit/protocols/link/vlan.html#pcapkit.protocols.link.vlan.VLAN">[docs]</a><span class="k">class</span> <span class="nc">VLAN</span><span class="p">(</span><span class="n">Link</span><span class="p">[</span><span class="n">DataType_VLAN</span><span class="p">]):</span>
+<div class="viewcode-block" id="VLAN"><a class="viewcode-back" href="../../../../pcapkit/protocols/link/vlan.html#pcapkit.protocols.link.vlan.VLAN">[docs]</a><span class="k">class</span> <span class="nc">VLAN</span><span class="p">(</span><span class="n">Link</span><span class="p">[</span><span class="n">Data_VLAN</span><span class="p">]):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;This class implements 802.1Q Customer VLAN Tag Type.&quot;&quot;&quot;</span>
 
     <span class="c1">##########################################################################</span>
@@ -99,7 +99,7 @@
         <span class="k">return</span> <span class="mi">4</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">protocol</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;RegType_EtherType&#39;</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">protocol</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Enum_EtherType&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Name of next layer protocol.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_info</span><span class="o">.</span><span class="n">type</span>
 
@@ -107,7 +107,7 @@
     <span class="c1"># Methods.</span>
     <span class="c1">##########################################################################</span>
 
-<div class="viewcode-block" id="VLAN.read"><a class="viewcode-back" href="../../../../pcapkit/protocols/link/vlan.html#pcapkit.protocols.link.vlan.VLAN.read">[docs]</a>    <span class="k">def</span> <span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_VLAN&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
+<div class="viewcode-block" id="VLAN.read"><a class="viewcode-back" href="../../../../pcapkit/protocols/link/vlan.html#pcapkit.protocols.link.vlan.VLAN.read">[docs]</a>    <span class="k">def</span> <span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Data_VLAN&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Read 802.1Q Customer VLAN Tag Type.</span>
 
 <span class="sd">        Structure of 802.1Q Customer VLAN Tag Type [`IEEE 802.1Q &lt;https://standards.ieee.org/ieee/802.1Q/6844/&gt;`__]:</span>
@@ -138,9 +138,9 @@
         <span class="n">_tcif</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_binary</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
         <span class="n">_type</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_protos</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
 
-        <span class="n">vlan</span> <span class="o">=</span> <span class="n">DataType_VLAN</span><span class="p">(</span>
-            <span class="n">tci</span><span class="o">=</span><span class="n">DataType_TCI</span><span class="p">(</span>
-                <span class="n">pcp</span><span class="o">=</span><span class="n">RegType_PriorityLevel</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">_tcif</span><span class="p">[:</span><span class="mi">3</span><span class="p">],</span> <span class="n">base</span><span class="o">=</span><span class="mi">2</span><span class="p">)),</span>
+        <span class="n">vlan</span> <span class="o">=</span> <span class="n">Data_VLAN</span><span class="p">(</span>
+            <span class="n">tci</span><span class="o">=</span><span class="n">Data_TCI</span><span class="p">(</span>
+                <span class="n">pcp</span><span class="o">=</span><span class="n">Enum_PriorityLevel</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">_tcif</span><span class="p">[:</span><span class="mi">3</span><span class="p">],</span> <span class="n">base</span><span class="o">=</span><span class="mi">2</span><span class="p">)),</span>
                 <span class="n">dei</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">_tcif</span><span class="p">[</span><span class="mi">3</span><span class="p">]),</span>
                 <span class="n">vid</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">_tcif</span><span class="p">[</span><span class="mi">4</span><span class="p">:],</span> <span class="n">base</span><span class="o">=</span><span class="mi">2</span><span class="p">),</span>
             <span class="p">),</span>

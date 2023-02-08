@@ -56,58 +56,58 @@
 <span class="kn">import</span> <span class="nn">ipaddress</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">overload</span>
 
-<span class="kn">from</span> <span class="nn">pcapkit.const.ipv6.option</span> <span class="kn">import</span> <span class="n">Option</span> <span class="k">as</span> <span class="n">RegType_Option</span>
-<span class="kn">from</span> <span class="nn">pcapkit.const.ipv6.qs_function</span> <span class="kn">import</span> <span class="n">QSFunction</span> <span class="k">as</span> <span class="n">RegType_QSFunction</span>
-<span class="kn">from</span> <span class="nn">pcapkit.const.ipv6.router_alert</span> <span class="kn">import</span> <span class="n">RouterAlert</span> <span class="k">as</span> <span class="n">RegType_RouterAlert</span>
-<span class="kn">from</span> <span class="nn">pcapkit.const.ipv6.seed_id</span> <span class="kn">import</span> <span class="n">SeedID</span> <span class="k">as</span> <span class="n">RegType_SeedID</span>
-<span class="kn">from</span> <span class="nn">pcapkit.const.ipv6.smf_dpd_mode</span> <span class="kn">import</span> <span class="n">SMFDPDMode</span> <span class="k">as</span> <span class="n">RegType_SMFDPDMode</span>
-<span class="kn">from</span> <span class="nn">pcapkit.const.ipv6.tagger_id</span> <span class="kn">import</span> <span class="n">TaggerID</span> <span class="k">as</span> <span class="n">RegType_TaggerID</span>
-<span class="kn">from</span> <span class="nn">pcapkit.const.reg.transtype</span> <span class="kn">import</span> <span class="n">TransType</span> <span class="k">as</span> <span class="n">RegType_TransType</span>
+<span class="kn">from</span> <span class="nn">pcapkit.const.ipv6.option</span> <span class="kn">import</span> <span class="n">Option</span> <span class="k">as</span> <span class="n">Enum_Option</span>
+<span class="kn">from</span> <span class="nn">pcapkit.const.ipv6.qs_function</span> <span class="kn">import</span> <span class="n">QSFunction</span> <span class="k">as</span> <span class="n">Enum_QSFunction</span>
+<span class="kn">from</span> <span class="nn">pcapkit.const.ipv6.router_alert</span> <span class="kn">import</span> <span class="n">RouterAlert</span> <span class="k">as</span> <span class="n">Enum_RouterAlert</span>
+<span class="kn">from</span> <span class="nn">pcapkit.const.ipv6.seed_id</span> <span class="kn">import</span> <span class="n">SeedID</span> <span class="k">as</span> <span class="n">Enum_SeedID</span>
+<span class="kn">from</span> <span class="nn">pcapkit.const.ipv6.smf_dpd_mode</span> <span class="kn">import</span> <span class="n">SMFDPDMode</span> <span class="k">as</span> <span class="n">Enum_SMFDPDMode</span>
+<span class="kn">from</span> <span class="nn">pcapkit.const.ipv6.tagger_id</span> <span class="kn">import</span> <span class="n">TaggerID</span> <span class="k">as</span> <span class="n">Enum_TaggerID</span>
+<span class="kn">from</span> <span class="nn">pcapkit.const.reg.transtype</span> <span class="kn">import</span> <span class="n">TransType</span> <span class="k">as</span> <span class="n">Enum_TransType</span>
 <span class="kn">from</span> <span class="nn">pcapkit.corekit.multidict</span> <span class="kn">import</span> <span class="n">OrderedMultiDict</span>
-<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.internet.hopopt</span> <span class="kn">import</span> <span class="n">HOPOPT</span> <span class="k">as</span> <span class="n">DataType_HOPOPT</span>
-<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.internet.hopopt</span> <span class="kn">import</span> <span class="n">CALIPSOOption</span> <span class="k">as</span> <span class="n">DataType_CALIPSOOption</span>
-<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.internet.hopopt</span> <span class="kn">import</span> <span class="n">DFFFlags</span> <span class="k">as</span> <span class="n">DataType_DFFFlags</span>
-<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.internet.hopopt</span> <span class="kn">import</span> <span class="n">HomeAddressOption</span> <span class="k">as</span> <span class="n">DataType_HomeAddressOption</span>
-<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.internet.hopopt</span> <span class="kn">import</span> <span class="n">ILNPOption</span> <span class="k">as</span> <span class="n">DataType_ILNPOption</span>
-<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.internet.hopopt</span> <span class="kn">import</span> <span class="n">IPDFFOption</span> <span class="k">as</span> <span class="n">DataType_IPDFFOption</span>
-<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.internet.hopopt</span> <span class="kn">import</span> <span class="n">JumboPayloadOption</span> <span class="k">as</span> <span class="n">DataType_JumboPayloadOption</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.internet.hopopt</span> <span class="kn">import</span> <span class="n">HOPOPT</span> <span class="k">as</span> <span class="n">Data_HOPOPT</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.internet.hopopt</span> <span class="kn">import</span> <span class="n">CALIPSOOption</span> <span class="k">as</span> <span class="n">Data_CALIPSOOption</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.internet.hopopt</span> <span class="kn">import</span> <span class="n">DFFFlags</span> <span class="k">as</span> <span class="n">Data_DFFFlags</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.internet.hopopt</span> <span class="kn">import</span> <span class="n">HomeAddressOption</span> <span class="k">as</span> <span class="n">Data_HomeAddressOption</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.internet.hopopt</span> <span class="kn">import</span> <span class="n">ILNPOption</span> <span class="k">as</span> <span class="n">Data_ILNPOption</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.internet.hopopt</span> <span class="kn">import</span> <span class="n">IPDFFOption</span> <span class="k">as</span> <span class="n">Data_IPDFFOption</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.internet.hopopt</span> <span class="kn">import</span> <span class="n">JumboPayloadOption</span> <span class="k">as</span> <span class="n">Data_JumboPayloadOption</span>
 <span class="kn">from</span> <span class="nn">pcapkit.protocols.data.internet.hopopt</span> <span class="kn">import</span> \
-    <span class="n">LineIdentificationOption</span> <span class="k">as</span> <span class="n">DataType_LineIdentificationOption</span>
-<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.internet.hopopt</span> <span class="kn">import</span> <span class="n">MPLFlags</span> <span class="k">as</span> <span class="n">DataType_MPLFlags</span>
-<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.internet.hopopt</span> <span class="kn">import</span> <span class="n">MPLOption</span> <span class="k">as</span> <span class="n">DataType_MPLOption</span>
-<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.internet.hopopt</span> <span class="kn">import</span> <span class="n">PadOption</span> <span class="k">as</span> <span class="n">DataType_PadOption</span>
-<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.internet.hopopt</span> <span class="kn">import</span> <span class="n">PDMOption</span> <span class="k">as</span> <span class="n">DataType_PDMOption</span>
-<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.internet.hopopt</span> <span class="kn">import</span> <span class="n">QuickStartOption</span> <span class="k">as</span> <span class="n">DataType_QuickStartOption</span>
-<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.internet.hopopt</span> <span class="kn">import</span> <span class="n">RouterAlertOption</span> <span class="k">as</span> <span class="n">DataType_RouterAlertOption</span>
-<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.internet.hopopt</span> <span class="kn">import</span> <span class="n">RPLFlags</span> <span class="k">as</span> <span class="n">DataType_RPLFlags</span>
-<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.internet.hopopt</span> <span class="kn">import</span> <span class="n">RPLOption</span> <span class="k">as</span> <span class="n">DataType_RPLOption</span>
+    <span class="n">LineIdentificationOption</span> <span class="k">as</span> <span class="n">Data_LineIdentificationOption</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.internet.hopopt</span> <span class="kn">import</span> <span class="n">MPLFlags</span> <span class="k">as</span> <span class="n">Data_MPLFlags</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.internet.hopopt</span> <span class="kn">import</span> <span class="n">MPLOption</span> <span class="k">as</span> <span class="n">Data_MPLOption</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.internet.hopopt</span> <span class="kn">import</span> <span class="n">PadOption</span> <span class="k">as</span> <span class="n">Data_PadOption</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.internet.hopopt</span> <span class="kn">import</span> <span class="n">PDMOption</span> <span class="k">as</span> <span class="n">Data_PDMOption</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.internet.hopopt</span> <span class="kn">import</span> <span class="n">QuickStartOption</span> <span class="k">as</span> <span class="n">Data_QuickStartOption</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.internet.hopopt</span> <span class="kn">import</span> <span class="n">RouterAlertOption</span> <span class="k">as</span> <span class="n">Data_RouterAlertOption</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.internet.hopopt</span> <span class="kn">import</span> <span class="n">RPLFlags</span> <span class="k">as</span> <span class="n">Data_RPLFlags</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.internet.hopopt</span> <span class="kn">import</span> <span class="n">RPLOption</span> <span class="k">as</span> <span class="n">Data_RPLOption</span>
 <span class="kn">from</span> <span class="nn">pcapkit.protocols.data.internet.hopopt</span> <span class="kn">import</span> \
-    <span class="n">SMFHashBasedDPDOption</span> <span class="k">as</span> <span class="n">DataType_SMFHashBasedDPDOption</span>
+    <span class="n">SMFHashBasedDPDOption</span> <span class="k">as</span> <span class="n">Data_SMFHashBasedDPDOption</span>
 <span class="kn">from</span> <span class="nn">pcapkit.protocols.data.internet.hopopt</span> <span class="kn">import</span> \
-    <span class="n">SMFIdentificationBasedDPDOption</span> <span class="k">as</span> <span class="n">DataType_SMFIdentificationBasedDPDOption</span>
+    <span class="n">SMFIdentificationBasedDPDOption</span> <span class="k">as</span> <span class="n">Data_SMFIdentificationBasedDPDOption</span>
 <span class="kn">from</span> <span class="nn">pcapkit.protocols.data.internet.hopopt</span> <span class="kn">import</span> \
-    <span class="n">TunnelEncapsulationLimitOption</span> <span class="k">as</span> <span class="n">DataType_TunnelEncapsulationLimitOption</span>
-<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.internet.hopopt</span> <span class="kn">import</span> <span class="n">UnassignedOption</span> <span class="k">as</span> <span class="n">DataType_UnassignedOption</span>
+    <span class="n">TunnelEncapsulationLimitOption</span> <span class="k">as</span> <span class="n">Data_TunnelEncapsulationLimitOption</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.internet.hopopt</span> <span class="kn">import</span> <span class="n">UnassignedOption</span> <span class="k">as</span> <span class="n">Data_UnassignedOption</span>
 <span class="kn">from</span> <span class="nn">pcapkit.protocols.internet.internet</span> <span class="kn">import</span> <span class="n">Internet</span>
 <span class="kn">from</span> <span class="nn">pcapkit.utilities.exceptions</span> <span class="kn">import</span> <span class="n">ProtocolError</span><span class="p">,</span> <span class="n">UnsupportedCall</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-    <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">BinaryIO</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">DefaultDict</span><span class="p">,</span> <span class="n">NoReturn</span><span class="p">,</span> <span class="n">Optional</span>
+    <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">IO</span><span class="p">,</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">DefaultDict</span><span class="p">,</span> <span class="n">NoReturn</span><span class="p">,</span> <span class="n">Optional</span>
 
     <span class="kn">from</span> <span class="nn">mypy_extensions</span> <span class="kn">import</span> <span class="n">NamedArg</span>
     <span class="kn">from</span> <span class="nn">typing_extensions</span> <span class="kn">import</span> <span class="n">Literal</span>
 
     <span class="kn">from</span> <span class="nn">pcapkit.corekit.protochain</span> <span class="kn">import</span> <span class="n">ProtoChain</span>
-    <span class="kn">from</span> <span class="nn">pcapkit.protocols.data.internet.hopopt</span> <span class="kn">import</span> <span class="n">Option</span> <span class="k">as</span> <span class="n">DataType_Option</span>
+    <span class="kn">from</span> <span class="nn">pcapkit.protocols.data.internet.hopopt</span> <span class="kn">import</span> <span class="n">Option</span> <span class="k">as</span> <span class="n">Data_Option</span>
     <span class="kn">from</span> <span class="nn">pcapkit.protocols.protocol</span> <span class="kn">import</span> <span class="n">Protocol</span>
 
-    <span class="n">Option</span> <span class="o">=</span> <span class="n">OrderedMultiDict</span><span class="p">[</span><span class="n">RegType_Option</span><span class="p">,</span> <span class="n">DataType_Option</span><span class="p">]</span>
-    <span class="n">OptionParser</span> <span class="o">=</span> <span class="n">Callable</span><span class="p">[[</span><span class="s1">&#39;HOPOPT&#39;</span><span class="p">,</span> <span class="n">RegType_Option</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">bool</span><span class="p">,</span> <span class="n">NamedArg</span><span class="p">(</span><span class="n">Option</span><span class="p">,</span> <span class="s1">&#39;options&#39;</span><span class="p">)],</span> <span class="n">DataType_Option</span><span class="p">]</span>
+    <span class="n">Option</span> <span class="o">=</span> <span class="n">OrderedMultiDict</span><span class="p">[</span><span class="n">Enum_Option</span><span class="p">,</span> <span class="n">Data_Option</span><span class="p">]</span>
+    <span class="n">OptionParser</span> <span class="o">=</span> <span class="n">Callable</span><span class="p">[[</span><span class="s1">&#39;HOPOPT&#39;</span><span class="p">,</span> <span class="n">Enum_Option</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">bool</span><span class="p">,</span> <span class="n">NamedArg</span><span class="p">(</span><span class="n">Option</span><span class="p">,</span> <span class="s1">&#39;options&#39;</span><span class="p">)],</span> <span class="n">Data_Option</span><span class="p">]</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;HOPOPT&#39;</span><span class="p">]</span>
 
 
-<div class="viewcode-block" id="HOPOPT"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/hopopt.html#pcapkit.protocols.internet.hopopt.HOPOPT">[docs]</a><span class="k">class</span> <span class="nc">HOPOPT</span><span class="p">(</span><span class="n">Internet</span><span class="p">[</span><span class="n">DataType_HOPOPT</span><span class="p">]):</span>
+<div class="viewcode-block" id="HOPOPT"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/hopopt.html#pcapkit.protocols.internet.hopopt.HOPOPT">[docs]</a><span class="k">class</span> <span class="nc">HOPOPT</span><span class="p">(</span><span class="n">Internet</span><span class="p">[</span><span class="n">Data_HOPOPT</span><span class="p">]):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;This class implements IPv6 Hop-by-Hop Options.</span>
 
 <span class="sd">    This class currently supports parsing of the following IPv6 Hop-by-Hop</span>
@@ -156,7 +156,7 @@
     <span class="c1"># Defaults.</span>
     <span class="c1">##########################################################################</span>
 
-    <span class="c1">#: DefaultDict[RegType_Option, str | OptionParser]: Option code to method</span>
+    <span class="c1">#: DefaultDict[Enum_Option, str | OptionParser]: Option code to method</span>
     <span class="c1">#: mapping, c.f. :meth:`_read_hopopt_options`. Method names are expected</span>
     <span class="c1">#: to be referred to the class by ``_read_opt_${name}``, and if such name</span>
     <span class="c1">#: not found, the value should then be a method that can parse the option</span>
@@ -164,21 +164,21 @@
     <span class="n">__option__</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">defaultdict</span><span class="p">(</span>
         <span class="k">lambda</span><span class="p">:</span> <span class="s1">&#39;none&#39;</span><span class="p">,</span>
         <span class="p">{</span>
-            <span class="n">RegType_Option</span><span class="o">.</span><span class="n">Pad1</span><span class="p">:</span>                       <span class="s1">&#39;pad&#39;</span><span class="p">,</span>      <span class="c1"># [RFC 8200] 0</span>
-            <span class="n">RegType_Option</span><span class="o">.</span><span class="n">PadN</span><span class="p">:</span>                       <span class="s1">&#39;pad&#39;</span><span class="p">,</span>      <span class="c1"># [RFC 8200]</span>
-            <span class="n">RegType_Option</span><span class="o">.</span><span class="n">Tunnel_Encapsulation_Limit</span><span class="p">:</span> <span class="s1">&#39;tun&#39;</span><span class="p">,</span>      <span class="c1"># [RFC 2473] 1</span>
-            <span class="n">RegType_Option</span><span class="o">.</span><span class="n">Router_Alert</span><span class="p">:</span>               <span class="s1">&#39;ra&#39;</span><span class="p">,</span>       <span class="c1"># [RFC 2711] 2</span>
-            <span class="n">RegType_Option</span><span class="o">.</span><span class="n">CALIPSO</span><span class="p">:</span>                    <span class="s1">&#39;calipso&#39;</span><span class="p">,</span>  <span class="c1"># [RFC 5570]</span>
-            <span class="n">RegType_Option</span><span class="o">.</span><span class="n">SMF_DPD</span><span class="p">:</span>                    <span class="s1">&#39;smf_dpd&#39;</span><span class="p">,</span>  <span class="c1"># [RFC 6621]</span>
-            <span class="n">RegType_Option</span><span class="o">.</span><span class="n">PDM</span><span class="p">:</span>                        <span class="s1">&#39;pdm&#39;</span><span class="p">,</span>      <span class="c1"># [RFC 8250] 10</span>
-            <span class="n">RegType_Option</span><span class="o">.</span><span class="n">Quick_Start</span><span class="p">:</span>                <span class="s1">&#39;qs&#39;</span><span class="p">,</span>       <span class="c1"># [RFC 4782][RFC Errata 2034] 6</span>
-            <span class="n">RegType_Option</span><span class="o">.</span><span class="n">RPL_Option_0x63</span><span class="p">:</span>            <span class="s1">&#39;rpl&#39;</span><span class="p">,</span>      <span class="c1"># [RFC 6553]</span>
-            <span class="n">RegType_Option</span><span class="o">.</span><span class="n">MPL_Option</span><span class="p">:</span>                 <span class="s1">&#39;mpl&#39;</span><span class="p">,</span>      <span class="c1"># [RFC 7731]</span>
-            <span class="n">RegType_Option</span><span class="o">.</span><span class="n">ILNP_Nonce</span><span class="p">:</span>                 <span class="s1">&#39;ilnp&#39;</span><span class="p">,</span>     <span class="c1"># [RFC 6744]</span>
-            <span class="n">RegType_Option</span><span class="o">.</span><span class="n">Line_Identification_Option</span><span class="p">:</span> <span class="s1">&#39;lio&#39;</span><span class="p">,</span>      <span class="c1"># [RFC 6788]</span>
-            <span class="n">RegType_Option</span><span class="o">.</span><span class="n">Jumbo_Payload</span><span class="p">:</span>              <span class="s1">&#39;jumbo&#39;</span><span class="p">,</span>    <span class="c1"># [RFC 2675]</span>
-            <span class="n">RegType_Option</span><span class="o">.</span><span class="n">Home_Address</span><span class="p">:</span>               <span class="s1">&#39;home&#39;</span><span class="p">,</span>     <span class="c1"># [RFC 6275]</span>
-            <span class="n">RegType_Option</span><span class="o">.</span><span class="n">IP_DFF</span><span class="p">:</span>                     <span class="s1">&#39;ip_dff&#39;</span><span class="p">,</span>   <span class="c1"># [RFC 6971]</span>
+            <span class="n">Enum_Option</span><span class="o">.</span><span class="n">Pad1</span><span class="p">:</span>                       <span class="s1">&#39;pad&#39;</span><span class="p">,</span>      <span class="c1"># [RFC 8200] 0</span>
+            <span class="n">Enum_Option</span><span class="o">.</span><span class="n">PadN</span><span class="p">:</span>                       <span class="s1">&#39;pad&#39;</span><span class="p">,</span>      <span class="c1"># [RFC 8200]</span>
+            <span class="n">Enum_Option</span><span class="o">.</span><span class="n">Tunnel_Encapsulation_Limit</span><span class="p">:</span> <span class="s1">&#39;tun&#39;</span><span class="p">,</span>      <span class="c1"># [RFC 2473] 1</span>
+            <span class="n">Enum_Option</span><span class="o">.</span><span class="n">Router_Alert</span><span class="p">:</span>               <span class="s1">&#39;ra&#39;</span><span class="p">,</span>       <span class="c1"># [RFC 2711] 2</span>
+            <span class="n">Enum_Option</span><span class="o">.</span><span class="n">CALIPSO</span><span class="p">:</span>                    <span class="s1">&#39;calipso&#39;</span><span class="p">,</span>  <span class="c1"># [RFC 5570]</span>
+            <span class="n">Enum_Option</span><span class="o">.</span><span class="n">SMF_DPD</span><span class="p">:</span>                    <span class="s1">&#39;smf_dpd&#39;</span><span class="p">,</span>  <span class="c1"># [RFC 6621]</span>
+            <span class="n">Enum_Option</span><span class="o">.</span><span class="n">PDM</span><span class="p">:</span>                        <span class="s1">&#39;pdm&#39;</span><span class="p">,</span>      <span class="c1"># [RFC 8250] 10</span>
+            <span class="n">Enum_Option</span><span class="o">.</span><span class="n">Quick_Start</span><span class="p">:</span>                <span class="s1">&#39;qs&#39;</span><span class="p">,</span>       <span class="c1"># [RFC 4782][RFC Errata 2034] 6</span>
+            <span class="n">Enum_Option</span><span class="o">.</span><span class="n">RPL_Option_0x63</span><span class="p">:</span>            <span class="s1">&#39;rpl&#39;</span><span class="p">,</span>      <span class="c1"># [RFC 6553]</span>
+            <span class="n">Enum_Option</span><span class="o">.</span><span class="n">MPL_Option</span><span class="p">:</span>                 <span class="s1">&#39;mpl&#39;</span><span class="p">,</span>      <span class="c1"># [RFC 7731]</span>
+            <span class="n">Enum_Option</span><span class="o">.</span><span class="n">ILNP_Nonce</span><span class="p">:</span>                 <span class="s1">&#39;ilnp&#39;</span><span class="p">,</span>     <span class="c1"># [RFC 6744]</span>
+            <span class="n">Enum_Option</span><span class="o">.</span><span class="n">Line_Identification_Option</span><span class="p">:</span> <span class="s1">&#39;lio&#39;</span><span class="p">,</span>      <span class="c1"># [RFC 6788]</span>
+            <span class="n">Enum_Option</span><span class="o">.</span><span class="n">Jumbo_Payload</span><span class="p">:</span>              <span class="s1">&#39;jumbo&#39;</span><span class="p">,</span>    <span class="c1"># [RFC 2675]</span>
+            <span class="n">Enum_Option</span><span class="o">.</span><span class="n">Home_Address</span><span class="p">:</span>               <span class="s1">&#39;home&#39;</span><span class="p">,</span>     <span class="c1"># [RFC 6275]</span>
+            <span class="n">Enum_Option</span><span class="o">.</span><span class="n">IP_DFF</span><span class="p">:</span>                     <span class="s1">&#39;ip_dff&#39;</span><span class="p">,</span>   <span class="c1"># [RFC 6971]</span>
         <span class="p">},</span>
     <span class="p">)</span>  <span class="c1"># type: DefaultDict[int, str | OptionParser]</span>
 
@@ -237,7 +237,7 @@
     <span class="c1"># Methods.</span>
     <span class="c1">##########################################################################</span>
 
-<div class="viewcode-block" id="HOPOPT.read"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/hopopt.html#pcapkit.protocols.internet.hopopt.HOPOPT.read">[docs]</a>    <span class="k">def</span> <span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">extension</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_HOPOPT&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=arguments-differ,unused-argument</span>
+<div class="viewcode-block" id="HOPOPT.read"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/hopopt.html#pcapkit.protocols.internet.hopopt.HOPOPT.read">[docs]</a>    <span class="k">def</span> <span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">extension</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Data_HOPOPT&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=arguments-differ,unused-argument</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Read IPv6 Hop-by-Hop Options.</span>
 
 <span class="sd">        Structure of HOPOPT header [:rfc:`8200`]:</span>
@@ -270,7 +270,7 @@
         <span class="n">_hlen</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_unpack</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
         <span class="c1"># _opts = self._read_fileng(_hlen*8+6)</span>
 
-        <span class="n">hopopt</span> <span class="o">=</span> <span class="n">DataType_HOPOPT</span><span class="p">(</span>
+        <span class="n">hopopt</span> <span class="o">=</span> <span class="n">Data_HOPOPT</span><span class="p">(</span>
             <span class="nb">next</span><span class="o">=</span><span class="n">_next</span><span class="p">,</span>
             <span class="n">length</span><span class="o">=</span><span class="p">(</span><span class="n">_hlen</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="mi">8</span><span class="p">,</span>
             <span class="n">options</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_read_hopopt_options</span><span class="p">(</span><span class="n">_hlen</span> <span class="o">*</span> <span class="mi">8</span> <span class="o">+</span> <span class="mi">6</span><span class="p">),</span>
@@ -293,7 +293,7 @@
         <span class="k">raise</span> <span class="ne">NotImplementedError</span></div>
 
 <div class="viewcode-block" id="HOPOPT.register_option"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/hopopt.html#pcapkit.protocols.internet.hopopt.HOPOPT.register_option">[docs]</a>    <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">register_option</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">&#39;RegType_Option&#39;</span><span class="p">,</span> <span class="n">meth</span><span class="p">:</span> <span class="s1">&#39;str | OptionParser&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">register_option</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span><span class="p">,</span> <span class="n">meth</span><span class="p">:</span> <span class="s1">&#39;str | OptionParser&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Register an option parser.</span>
 
 <span class="sd">        Args:</span>
@@ -308,13 +308,13 @@
     <span class="c1">##########################################################################</span>
 
     <span class="nd">@overload</span>
-    <span class="k">def</span> <span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file</span><span class="p">:</span> <span class="s1">&#39;BinaryIO&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span> <span class="o">=</span> <span class="o">...</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>  <span class="c1"># pylint: disable=arguments-differ</span>
+    <span class="k">def</span> <span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file</span><span class="p">:</span> <span class="s1">&#39;IO[bytes]&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span> <span class="o">=</span> <span class="o">...</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>  <span class="c1"># pylint: disable=arguments-differ</span>
                       <span class="n">extension</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="o">...</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>
 
     <span class="nd">@overload</span>
     <span class="k">def</span> <span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=arguments-differ</span>
 
-<div class="viewcode-block" id="HOPOPT.__post_init__"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/hopopt.html#pcapkit.protocols.internet.hopopt.HOPOPT.__post_init__">[docs]</a>    <span class="k">def</span> <span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file</span><span class="p">:</span> <span class="s1">&#39;Optional[BinaryIO]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>  <span class="c1"># pylint: disable=arguments-differ</span>
+<div class="viewcode-block" id="HOPOPT.__post_init__"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/hopopt.html#pcapkit.protocols.internet.hopopt.HOPOPT.__post_init__">[docs]</a>    <span class="k">def</span> <span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file</span><span class="p">:</span> <span class="s1">&#39;Optional[IO[bytes]]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>  <span class="c1"># pylint: disable=arguments-differ</span>
                       <span class="n">extension</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Post initialisation hook.</span>
 
@@ -339,7 +339,7 @@
         <span class="k">return</span> <span class="mi">2</span>
 
 <div class="viewcode-block" id="HOPOPT.__index__"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/hopopt.html#pcapkit.protocols.internet.hopopt.HOPOPT.__index__">[docs]</a>    <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="fm">__index__</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;RegType_TransType&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=invalid-index-returned</span>
+    <span class="k">def</span> <span class="fm">__index__</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Enum_TransType&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=invalid-index-returned</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Numeral registry index of the protocol.</span>
 
 <span class="sd">        Returns:</span>
@@ -348,7 +348,7 @@
 <span class="sd">        .. _IANA: https://www.iana.org/assignments/protocol-numbers/protocol-numbers.xhtml</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="n">RegType_TransType</span><span class="o">.</span><span class="n">HOPOPT</span>  <span class="c1"># type: ignore[return-value]</span></div>
+        <span class="k">return</span> <span class="n">Enum_TransType</span><span class="o">.</span><span class="n">HOPOPT</span>  <span class="c1"># type: ignore[return-value]</span></div>
 
     <span class="c1">##########################################################################</span>
     <span class="c1"># Utilities.</span>
@@ -391,7 +391,7 @@
                 <span class="k">break</span>
 
             <span class="c1"># get option type</span>
-            <span class="n">kind</span> <span class="o">=</span> <span class="n">RegType_Option</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">code</span><span class="p">)</span>
+            <span class="n">kind</span> <span class="o">=</span> <span class="n">Enum_Option</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">code</span><span class="p">)</span>
             <span class="n">acts</span><span class="p">,</span> <span class="n">cflg</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_opt_type</span><span class="p">(</span><span class="n">code</span><span class="p">)</span>
 
             <span class="c1"># extract option data</span>
@@ -401,7 +401,7 @@
                 <span class="n">meth</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span>
                     <span class="bp">self</span><span class="p">,</span> <span class="n">meth_name</span><span class="p">,</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">_read_opt_none</span>
-                <span class="p">)</span>  <span class="c1"># type: Callable[[RegType_Option, int, bool, NamedArg(Option, &#39;options&#39;)], DataType_Option]</span>
+                <span class="p">)</span>  <span class="c1"># type: Callable[[Enum_Option, int, bool, NamedArg(Option, &#39;options&#39;)], Data_Option]</span>
                 <span class="n">data</span> <span class="o">=</span> <span class="n">meth</span><span class="p">(</span><span class="n">kind</span><span class="p">,</span> <span class="n">acts</span><span class="p">,</span> <span class="n">cflg</span><span class="p">,</span> <span class="n">options</span><span class="o">=</span><span class="n">options</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">data</span> <span class="o">=</span> <span class="n">name</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">,</span> <span class="n">acts</span><span class="p">,</span> <span class="n">cflg</span><span class="p">,</span> <span class="n">options</span><span class="o">=</span><span class="n">options</span><span class="p">)</span>
@@ -416,8 +416,8 @@
 
         <span class="k">return</span> <span class="n">options</span></div>
 
-<div class="viewcode-block" id="HOPOPT._read_opt_none"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/hopopt.html#pcapkit.protocols.internet.hopopt.HOPOPT._read_opt_none">[docs]</a>    <span class="k">def</span> <span class="nf">_read_opt_none</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">&#39;RegType_Option&#39;</span><span class="p">,</span> <span class="n">acts</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">cflg</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
-                       <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_UnassignedOption&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
+<div class="viewcode-block" id="HOPOPT._read_opt_none"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/hopopt.html#pcapkit.protocols.internet.hopopt.HOPOPT._read_opt_none">[docs]</a>    <span class="k">def</span> <span class="nf">_read_opt_none</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span><span class="p">,</span> <span class="n">acts</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">cflg</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                       <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Data_UnassignedOption&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Read HOPOPT unassigned options.</span>
 
 <span class="sd">        Structure of HOPOPT unassigned options [:rfc:`8200`]:</span>
@@ -441,7 +441,7 @@
         <span class="n">_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_unpack</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
         <span class="n">_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_fileng</span><span class="p">(</span><span class="n">_size</span><span class="p">)</span>
 
-        <span class="n">opt</span> <span class="o">=</span> <span class="n">DataType_UnassignedOption</span><span class="p">(</span>
+        <span class="n">opt</span> <span class="o">=</span> <span class="n">Data_UnassignedOption</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">code</span><span class="p">,</span>
             <span class="n">action</span><span class="o">=</span><span class="n">acts</span><span class="p">,</span>
             <span class="n">change</span><span class="o">=</span><span class="n">cflg</span><span class="p">,</span>
@@ -451,8 +451,8 @@
 
         <span class="k">return</span> <span class="n">opt</span></div>
 
-<div class="viewcode-block" id="HOPOPT._read_opt_pad"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/hopopt.html#pcapkit.protocols.internet.hopopt.HOPOPT._read_opt_pad">[docs]</a>    <span class="k">def</span> <span class="nf">_read_opt_pad</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">&#39;RegType_Option&#39;</span><span class="p">,</span> <span class="n">acts</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">cflg</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
-                      <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_PadOption&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
+<div class="viewcode-block" id="HOPOPT._read_opt_pad"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/hopopt.html#pcapkit.protocols.internet.hopopt.HOPOPT._read_opt_pad">[docs]</a>    <span class="k">def</span> <span class="nf">_read_opt_pad</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span><span class="p">,</span> <span class="n">acts</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">cflg</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                      <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Data_PadOption&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Read HOPOPT padding options.</span>
 
 <span class="sd">        Structure of HOPOPT padding options [:rfc:`8200`]:</span>
@@ -486,15 +486,15 @@
 <span class="sd">            ProtocolError: If ``code`` is **NOT** ``0`` or ``1``.</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="n">code</span> <span class="o">==</span> <span class="n">RegType_Option</span><span class="o">.</span><span class="n">Pad1</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">code</span> <span class="o">==</span> <span class="n">Enum_Option</span><span class="o">.</span><span class="n">Pad1</span><span class="p">:</span>
             <span class="n">_size</span> <span class="o">=</span> <span class="mi">1</span>
-        <span class="k">elif</span> <span class="n">code</span> <span class="o">==</span> <span class="n">RegType_Option</span><span class="o">.</span><span class="n">PadN</span><span class="p">:</span>
+        <span class="k">elif</span> <span class="n">code</span> <span class="o">==</span> <span class="n">Enum_Option</span><span class="o">.</span><span class="n">PadN</span><span class="p">:</span>
             <span class="n">_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_unpack</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="mi">2</span>
             <span class="n">_padn</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_fileng</span><span class="p">(</span><span class="n">_size</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1">] invalid format&#39;</span><span class="p">)</span>
 
-        <span class="n">opt</span> <span class="o">=</span> <span class="n">DataType_PadOption</span><span class="p">(</span>
+        <span class="n">opt</span> <span class="o">=</span> <span class="n">Data_PadOption</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">code</span><span class="p">,</span>
             <span class="n">action</span><span class="o">=</span><span class="n">acts</span><span class="p">,</span>
             <span class="n">change</span><span class="o">=</span><span class="n">cflg</span><span class="p">,</span>
@@ -503,8 +503,8 @@
 
         <span class="k">return</span> <span class="n">opt</span></div>
 
-<div class="viewcode-block" id="HOPOPT._read_opt_tun"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/hopopt.html#pcapkit.protocols.internet.hopopt.HOPOPT._read_opt_tun">[docs]</a>    <span class="k">def</span> <span class="nf">_read_opt_tun</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">&#39;RegType_Option&#39;</span><span class="p">,</span> <span class="n">acts</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">cflg</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
-                      <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_TunnelEncapsulationLimitOption&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
+<div class="viewcode-block" id="HOPOPT._read_opt_tun"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/hopopt.html#pcapkit.protocols.internet.hopopt.HOPOPT._read_opt_tun">[docs]</a>    <span class="k">def</span> <span class="nf">_read_opt_tun</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span><span class="p">,</span> <span class="n">acts</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">cflg</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                      <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Data_TunnelEncapsulationLimitOption&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Read HOPOPT Tunnel Encapsulation Limit option.</span>
 
 <span class="sd">        Structure of HOPOPT Tunnel Encapsulation Limit option [:rfc:`2473`]:</span>
@@ -535,7 +535,7 @@
             <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1">] invalid format&#39;</span><span class="p">)</span>
         <span class="n">_limt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_unpack</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
 
-        <span class="n">opt</span> <span class="o">=</span> <span class="n">DataType_TunnelEncapsulationLimitOption</span><span class="p">(</span>
+        <span class="n">opt</span> <span class="o">=</span> <span class="n">Data_TunnelEncapsulationLimitOption</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">code</span><span class="p">,</span>
             <span class="n">action</span><span class="o">=</span><span class="n">acts</span><span class="p">,</span>
             <span class="n">change</span><span class="o">=</span><span class="n">cflg</span><span class="p">,</span>
@@ -545,8 +545,8 @@
 
         <span class="k">return</span> <span class="n">opt</span></div>
 
-<div class="viewcode-block" id="HOPOPT._read_opt_ra"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/hopopt.html#pcapkit.protocols.internet.hopopt.HOPOPT._read_opt_ra">[docs]</a>    <span class="k">def</span> <span class="nf">_read_opt_ra</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">&#39;RegType_Option&#39;</span><span class="p">,</span> <span class="n">acts</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">cflg</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
-                     <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_RouterAlertOption&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
+<div class="viewcode-block" id="HOPOPT._read_opt_ra"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/hopopt.html#pcapkit.protocols.internet.hopopt.HOPOPT._read_opt_ra">[docs]</a>    <span class="k">def</span> <span class="nf">_read_opt_ra</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span><span class="p">,</span> <span class="n">acts</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">cflg</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                     <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Data_RouterAlertOption&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Read HOPOPT Router Alert option.</span>
 
 <span class="sd">        Structure of HOPOPT Router Alert option [:rfc:`2711`]:</span>
@@ -575,8 +575,8 @@
             <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1">] invalid format&#39;</span><span class="p">)</span>
         <span class="n">_rval</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_unpack</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
 
-        <span class="n">_enum</span> <span class="o">=</span> <span class="n">RegType_RouterAlert</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">_rval</span><span class="p">)</span>
-        <span class="n">opt</span> <span class="o">=</span> <span class="n">DataType_RouterAlertOption</span><span class="p">(</span>
+        <span class="n">_enum</span> <span class="o">=</span> <span class="n">Enum_RouterAlert</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">_rval</span><span class="p">)</span>
+        <span class="n">opt</span> <span class="o">=</span> <span class="n">Data_RouterAlertOption</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">code</span><span class="p">,</span>
             <span class="n">action</span><span class="o">=</span><span class="n">acts</span><span class="p">,</span>
             <span class="n">change</span><span class="o">=</span><span class="n">cflg</span><span class="p">,</span>
@@ -586,8 +586,8 @@
 
         <span class="k">return</span> <span class="n">opt</span></div>
 
-<div class="viewcode-block" id="HOPOPT._read_opt_calipso"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/hopopt.html#pcapkit.protocols.internet.hopopt.HOPOPT._read_opt_calipso">[docs]</a>    <span class="k">def</span> <span class="nf">_read_opt_calipso</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">&#39;RegType_Option&#39;</span><span class="p">,</span> <span class="n">acts</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">cflg</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
-                          <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_CALIPSOOption&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
+<div class="viewcode-block" id="HOPOPT._read_opt_calipso"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/hopopt.html#pcapkit.protocols.internet.hopopt.HOPOPT._read_opt_calipso">[docs]</a>    <span class="k">def</span> <span class="nf">_read_opt_calipso</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span><span class="p">,</span> <span class="n">acts</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">cflg</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                          <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Data_CALIPSOOption&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Read HOPOPT Common Architecture Label IPv6 Security Option (CALIPSO) option.</span>
 
 <span class="sd">        Structure of HOPOPT CALIPSO option [:rfc:`5570`]:</span>
@@ -627,7 +627,7 @@
         <span class="n">_sens</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_unpack</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
         <span class="n">_csum</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_fileng</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
 
-        <span class="n">opt</span> <span class="o">=</span> <span class="n">DataType_CALIPSOOption</span><span class="p">(</span>
+        <span class="n">opt</span> <span class="o">=</span> <span class="n">Data_CALIPSOOption</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">code</span><span class="p">,</span>
             <span class="n">action</span><span class="o">=</span><span class="n">acts</span><span class="p">,</span>
             <span class="n">change</span><span class="o">=</span><span class="n">cflg</span><span class="p">,</span>
@@ -653,8 +653,8 @@
 
         <span class="k">return</span> <span class="n">opt</span></div>
 
-<div class="viewcode-block" id="HOPOPT._read_opt_smf_dpd"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/hopopt.html#pcapkit.protocols.internet.hopopt.HOPOPT._read_opt_smf_dpd">[docs]</a>    <span class="k">def</span> <span class="nf">_read_opt_smf_dpd</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">&#39;RegType_Option&#39;</span><span class="p">,</span> <span class="n">acts</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">cflg</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
-                          <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_SMFIdentificationBasedDPDOption | DataType_SMFHashBasedDPDOption&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument,line-too-long</span>
+<div class="viewcode-block" id="HOPOPT._read_opt_smf_dpd"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/hopopt.html#pcapkit.protocols.internet.hopopt.HOPOPT._read_opt_smf_dpd">[docs]</a>    <span class="k">def</span> <span class="nf">_read_opt_smf_dpd</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span><span class="p">,</span> <span class="n">acts</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">cflg</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                          <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Data_SMFIdentificationBasedDPDOption | Data_SMFHashBasedDPDOption&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument,line-too-long</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Read HOPOPT Simplified Multicast Forwarding Duplicate Packet Detection (``SMF_DPD``) option.</span>
 
 <span class="sd">        Structure of HOPOPT ``SMF_DPD`` option [:rfc:`6621`]:</span>
@@ -702,16 +702,16 @@
         <span class="n">_tidd</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_binary</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">_tidd</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;0&#39;</span><span class="p">:</span>
-            <span class="n">_mode</span> <span class="o">=</span> <span class="n">RegType_SMFDPDMode</span><span class="o">.</span><span class="n">I_DPD</span>
-            <span class="n">_tidt</span> <span class="o">=</span> <span class="n">RegType_TaggerID</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">_tidd</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="mi">4</span><span class="p">])</span>
+            <span class="n">_mode</span> <span class="o">=</span> <span class="n">Enum_SMFDPDMode</span><span class="o">.</span><span class="n">I_DPD</span>
+            <span class="n">_tidt</span> <span class="o">=</span> <span class="n">Enum_TaggerID</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">_tidd</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="mi">4</span><span class="p">])</span>
             <span class="n">_tidl</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">_tidd</span><span class="p">[</span><span class="mi">4</span><span class="p">:],</span> <span class="n">base</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
 
-            <span class="k">if</span> <span class="n">_tidt</span> <span class="o">==</span> <span class="n">RegType_TaggerID</span><span class="o">.</span><span class="n">NULL</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">_tidt</span> <span class="o">==</span> <span class="n">Enum_TaggerID</span><span class="o">.</span><span class="n">NULL</span><span class="p">:</span>
                 <span class="k">if</span> <span class="n">_tidl</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
                     <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1">] invalid format&#39;</span><span class="p">)</span>
                 <span class="n">_iden</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_unpack</span><span class="p">(</span><span class="n">_size</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
 
-                <span class="n">opt</span> <span class="o">=</span> <span class="n">DataType_SMFIdentificationBasedDPDOption</span><span class="p">(</span>
+                <span class="n">opt</span> <span class="o">=</span> <span class="n">Data_SMFIdentificationBasedDPDOption</span><span class="p">(</span>
                     <span class="nb">type</span><span class="o">=</span><span class="n">code</span><span class="p">,</span>
                     <span class="n">action</span><span class="o">=</span><span class="n">acts</span><span class="p">,</span>
                     <span class="n">change</span><span class="o">=</span><span class="n">cflg</span><span class="p">,</span>
@@ -722,13 +722,13 @@
                     <span class="n">tid</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                     <span class="nb">id</span><span class="o">=</span><span class="n">_iden</span><span class="p">,</span>
                 <span class="p">)</span>
-            <span class="k">elif</span> <span class="n">_tidt</span> <span class="o">==</span> <span class="n">RegType_TaggerID</span><span class="o">.</span><span class="n">IPv4</span><span class="p">:</span>
+            <span class="k">elif</span> <span class="n">_tidt</span> <span class="o">==</span> <span class="n">Enum_TaggerID</span><span class="o">.</span><span class="n">IPv4</span><span class="p">:</span>
                 <span class="k">if</span> <span class="n">_tidl</span> <span class="o">!=</span> <span class="mi">3</span><span class="p">:</span>
                     <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1">] invalid format&#39;</span><span class="p">)</span>
                 <span class="n">_tidf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_fileng</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
                 <span class="n">_iden</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_unpack</span><span class="p">(</span><span class="n">_size</span><span class="o">-</span><span class="mi">4</span><span class="p">)</span>
 
-                <span class="n">opt</span> <span class="o">=</span> <span class="n">DataType_SMFIdentificationBasedDPDOption</span><span class="p">(</span>
+                <span class="n">opt</span> <span class="o">=</span> <span class="n">Data_SMFIdentificationBasedDPDOption</span><span class="p">(</span>
                     <span class="nb">type</span><span class="o">=</span><span class="n">code</span><span class="p">,</span>
                     <span class="n">action</span><span class="o">=</span><span class="n">acts</span><span class="p">,</span>
                     <span class="n">change</span><span class="o">=</span><span class="n">cflg</span><span class="p">,</span>
@@ -739,13 +739,13 @@
                     <span class="n">tid</span><span class="o">=</span><span class="n">ipaddress</span><span class="o">.</span><span class="n">ip_address</span><span class="p">(</span><span class="n">_tidf</span><span class="p">),</span>
                     <span class="nb">id</span><span class="o">=</span><span class="n">_iden</span><span class="p">,</span>
                 <span class="p">)</span>
-            <span class="k">elif</span> <span class="n">_tidt</span> <span class="o">==</span> <span class="n">RegType_TaggerID</span><span class="o">.</span><span class="n">IPv6</span><span class="p">:</span>
+            <span class="k">elif</span> <span class="n">_tidt</span> <span class="o">==</span> <span class="n">Enum_TaggerID</span><span class="o">.</span><span class="n">IPv6</span><span class="p">:</span>
                 <span class="k">if</span> <span class="n">_tidl</span> <span class="o">!=</span> <span class="mi">15</span><span class="p">:</span>
                     <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1">] invalid format&#39;</span><span class="p">)</span>
                 <span class="n">_tidf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_fileng</span><span class="p">(</span><span class="mi">15</span><span class="p">)</span>
                 <span class="n">_iden</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_unpack</span><span class="p">(</span><span class="n">_size</span><span class="o">-</span><span class="mi">15</span><span class="p">)</span>
 
-                <span class="n">opt</span> <span class="o">=</span> <span class="n">DataType_SMFIdentificationBasedDPDOption</span><span class="p">(</span>
+                <span class="n">opt</span> <span class="o">=</span> <span class="n">Data_SMFIdentificationBasedDPDOption</span><span class="p">(</span>
                     <span class="nb">type</span><span class="o">=</span><span class="n">code</span><span class="p">,</span>
                     <span class="n">action</span><span class="o">=</span><span class="n">acts</span><span class="p">,</span>
                     <span class="n">change</span><span class="o">=</span><span class="n">cflg</span><span class="p">,</span>
@@ -760,7 +760,7 @@
                 <span class="n">_tidf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_unpack</span><span class="p">(</span><span class="n">_tidl</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>  <span class="c1"># type: ignore[assignment]</span>
                 <span class="n">_iden</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_unpack</span><span class="p">(</span><span class="n">_size</span><span class="o">-</span><span class="n">_tidl</span><span class="o">-</span><span class="mi">2</span><span class="p">)</span>
 
-                <span class="n">opt</span> <span class="o">=</span> <span class="n">DataType_SMFIdentificationBasedDPDOption</span><span class="p">(</span>
+                <span class="n">opt</span> <span class="o">=</span> <span class="n">Data_SMFIdentificationBasedDPDOption</span><span class="p">(</span>
                     <span class="nb">type</span><span class="o">=</span><span class="n">code</span><span class="p">,</span>
                     <span class="n">action</span><span class="o">=</span><span class="n">acts</span><span class="p">,</span>
                     <span class="n">change</span><span class="o">=</span><span class="n">cflg</span><span class="p">,</span>
@@ -772,11 +772,11 @@
                     <span class="nb">id</span><span class="o">=</span><span class="n">_iden</span><span class="p">,</span>
                 <span class="p">)</span>
         <span class="k">elif</span> <span class="n">_tidd</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;1&#39;</span><span class="p">:</span>
-            <span class="n">_mode</span> <span class="o">=</span> <span class="n">RegType_SMFDPDMode</span><span class="o">.</span><span class="n">H_DPD</span>
-            <span class="n">_tidt</span> <span class="o">=</span> <span class="n">RegType_TaggerID</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">_tidd</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="mi">4</span><span class="p">])</span>
+            <span class="n">_mode</span> <span class="o">=</span> <span class="n">Enum_SMFDPDMode</span><span class="o">.</span><span class="n">H_DPD</span>
+            <span class="n">_tidt</span> <span class="o">=</span> <span class="n">Enum_TaggerID</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">_tidd</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="mi">4</span><span class="p">])</span>
             <span class="n">_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_fileng</span><span class="p">(</span><span class="n">_size</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
 
-            <span class="n">opt</span> <span class="o">=</span> <span class="n">DataType_SMFHashBasedDPDOption</span><span class="p">(</span>  <span class="c1"># type: ignore[assignment]</span>
+            <span class="n">opt</span> <span class="o">=</span> <span class="n">Data_SMFHashBasedDPDOption</span><span class="p">(</span>  <span class="c1"># type: ignore[assignment]</span>
                 <span class="nb">type</span><span class="o">=</span><span class="n">code</span><span class="p">,</span>
                 <span class="n">action</span><span class="o">=</span><span class="n">acts</span><span class="p">,</span>
                 <span class="n">change</span><span class="o">=</span><span class="n">cflg</span><span class="p">,</span>
@@ -790,8 +790,8 @@
 
         <span class="k">return</span> <span class="n">opt</span></div>
 
-<div class="viewcode-block" id="HOPOPT._read_opt_pdm"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/hopopt.html#pcapkit.protocols.internet.hopopt.HOPOPT._read_opt_pdm">[docs]</a>    <span class="k">def</span> <span class="nf">_read_opt_pdm</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">&#39;RegType_Option&#39;</span><span class="p">,</span> <span class="n">acts</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">cflg</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
-                      <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_PDMOption&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
+<div class="viewcode-block" id="HOPOPT._read_opt_pdm"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/hopopt.html#pcapkit.protocols.internet.hopopt.HOPOPT._read_opt_pdm">[docs]</a>    <span class="k">def</span> <span class="nf">_read_opt_pdm</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span><span class="p">,</span> <span class="n">acts</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">cflg</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                      <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Data_PDMOption&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Read HOPOPT Performance and Diagnostic Metrics (PDM) option.</span>
 
 <span class="sd">        Structure of HOPOPT PDM option [:rfc:`8250`]:</span>
@@ -831,7 +831,7 @@
         <span class="n">_dtlr</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_unpack</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
         <span class="n">_dtls</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_unpack</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
 
-        <span class="n">opt</span> <span class="o">=</span> <span class="n">DataType_PDMOption</span><span class="p">(</span>
+        <span class="n">opt</span> <span class="o">=</span> <span class="n">Data_PDMOption</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">code</span><span class="p">,</span>
             <span class="n">action</span><span class="o">=</span><span class="n">acts</span><span class="p">,</span>
             <span class="n">change</span><span class="o">=</span><span class="n">cflg</span><span class="p">,</span>
@@ -846,8 +846,8 @@
 
         <span class="k">return</span> <span class="n">opt</span></div>
 
-<div class="viewcode-block" id="HOPOPT._read_opt_qs"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/hopopt.html#pcapkit.protocols.internet.hopopt.HOPOPT._read_opt_qs">[docs]</a>    <span class="k">def</span> <span class="nf">_read_opt_qs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">&#39;RegType_Option&#39;</span><span class="p">,</span> <span class="n">acts</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">cflg</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
-                     <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_QuickStartOption&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument  # pylint: disable=unused-argument</span>
+<div class="viewcode-block" id="HOPOPT._read_opt_qs"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/hopopt.html#pcapkit.protocols.internet.hopopt.HOPOPT._read_opt_qs">[docs]</a>    <span class="k">def</span> <span class="nf">_read_opt_qs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span><span class="p">,</span> <span class="n">acts</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">cflg</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                     <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Data_QuickStartOption&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument  # pylint: disable=unused-argument</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Read HOPOPT Quick Start option.</span>
 
 <span class="sd">        Structure of HOPOPT Quick-Start option [:rfc:`4782`]:</span>
@@ -902,25 +902,25 @@
         <span class="n">_nonr</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_binary</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
         <span class="n">_qsnn</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">_nonr</span><span class="p">[:</span><span class="mi">30</span><span class="p">],</span> <span class="n">base</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
 
-        <span class="n">_qsfn</span> <span class="o">=</span> <span class="n">RegType_QSFunction</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">_func</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">_qsfn</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="n">RegType_QSFunction</span><span class="o">.</span><span class="n">Quick_Start_Request</span><span class="p">,</span> <span class="n">RegType_QSFunction</span><span class="o">.</span><span class="n">Report_of_Approved_Rate</span><span class="p">):</span>
+        <span class="n">_qsfn</span> <span class="o">=</span> <span class="n">Enum_QSFunction</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">_func</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">_qsfn</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="n">Enum_QSFunction</span><span class="o">.</span><span class="n">Quick_Start_Request</span><span class="p">,</span> <span class="n">Enum_QSFunction</span><span class="o">.</span><span class="n">Report_of_Approved_Rate</span><span class="p">):</span>
             <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1">] invalid format&#39;</span><span class="p">)</span>
 
-        <span class="n">data</span> <span class="o">=</span> <span class="n">DataType_QuickStartOption</span><span class="p">(</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">Data_QuickStartOption</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">code</span><span class="p">,</span>
             <span class="n">action</span><span class="o">=</span><span class="n">acts</span><span class="p">,</span>
             <span class="n">change</span><span class="o">=</span><span class="n">cflg</span><span class="p">,</span>
             <span class="n">length</span><span class="o">=</span><span class="n">_size</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span>
             <span class="n">func</span><span class="o">=</span><span class="n">_qsfn</span><span class="p">,</span>
             <span class="n">rate</span><span class="o">=</span><span class="mi">40000</span> <span class="o">*</span> <span class="p">(</span><span class="mi">2</span> <span class="o">**</span> <span class="n">_rate</span><span class="p">)</span> <span class="o">/</span> <span class="mi">1000</span><span class="p">,</span>
-            <span class="n">ttl</span><span class="o">=</span><span class="kc">None</span> <span class="k">if</span> <span class="n">_func</span> <span class="o">!=</span> <span class="n">RegType_QSFunction</span><span class="o">.</span><span class="n">Quick_Start_Request</span> <span class="k">else</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">seconds</span><span class="o">=</span><span class="n">_ttlv</span><span class="p">),</span>
+            <span class="n">ttl</span><span class="o">=</span><span class="kc">None</span> <span class="k">if</span> <span class="n">_func</span> <span class="o">!=</span> <span class="n">Enum_QSFunction</span><span class="o">.</span><span class="n">Quick_Start_Request</span> <span class="k">else</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">seconds</span><span class="o">=</span><span class="n">_ttlv</span><span class="p">),</span>
             <span class="n">nounce</span><span class="o">=</span><span class="n">_qsnn</span><span class="p">,</span>
         <span class="p">)</span>
 
         <span class="k">return</span> <span class="n">data</span></div>
 
-<div class="viewcode-block" id="HOPOPT._read_opt_rpl"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/hopopt.html#pcapkit.protocols.internet.hopopt.HOPOPT._read_opt_rpl">[docs]</a>    <span class="k">def</span> <span class="nf">_read_opt_rpl</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">&#39;RegType_Option&#39;</span><span class="p">,</span> <span class="n">acts</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">cflg</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
-                      <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_RPLOption&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
+<div class="viewcode-block" id="HOPOPT._read_opt_rpl"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/hopopt.html#pcapkit.protocols.internet.hopopt.HOPOPT._read_opt_rpl">[docs]</a>    <span class="k">def</span> <span class="nf">_read_opt_rpl</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span><span class="p">,</span> <span class="n">acts</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">cflg</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                      <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Data_RPLOption&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Read HOPOPT Routing Protocol for Low-Power and Lossy Networks (RPL) option.</span>
 
 <span class="sd">        Structure of HOPOPT RPL option [:rfc:`6553`]:</span>
@@ -957,12 +957,12 @@
         <span class="n">_rpld</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_unpack</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
         <span class="n">_rank</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_unpack</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
 
-        <span class="n">opt</span> <span class="o">=</span> <span class="n">DataType_RPLOption</span><span class="p">(</span>
+        <span class="n">opt</span> <span class="o">=</span> <span class="n">Data_RPLOption</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">code</span><span class="p">,</span>
             <span class="n">action</span><span class="o">=</span><span class="n">acts</span><span class="p">,</span>
             <span class="n">change</span><span class="o">=</span><span class="n">cflg</span><span class="p">,</span>
             <span class="n">length</span><span class="o">=</span><span class="n">_size</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span>
-            <span class="n">flags</span><span class="o">=</span><span class="n">DataType_RPLFlags</span><span class="p">(</span>
+            <span class="n">flags</span><span class="o">=</span><span class="n">Data_RPLFlags</span><span class="p">(</span>
                 <span class="n">down</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">_flag</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">base</span><span class="o">=</span><span class="mi">2</span><span class="p">)),</span>
                 <span class="n">rank_err</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">_flag</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">base</span><span class="o">=</span><span class="mi">2</span><span class="p">)),</span>
                 <span class="n">fwd_err</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">_flag</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">base</span><span class="o">=</span><span class="mi">2</span><span class="p">)),</span>
@@ -973,8 +973,8 @@
 
         <span class="k">return</span> <span class="n">opt</span></div>
 
-<div class="viewcode-block" id="HOPOPT._read_opt_mpl"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/hopopt.html#pcapkit.protocols.internet.hopopt.HOPOPT._read_opt_mpl">[docs]</a>    <span class="k">def</span> <span class="nf">_read_opt_mpl</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">&#39;RegType_Option&#39;</span><span class="p">,</span> <span class="n">acts</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">cflg</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
-                      <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_MPLOption&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
+<div class="viewcode-block" id="HOPOPT._read_opt_mpl"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/hopopt.html#pcapkit.protocols.internet.hopopt.HOPOPT._read_opt_mpl">[docs]</a>    <span class="k">def</span> <span class="nf">_read_opt_mpl</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span><span class="p">,</span> <span class="n">acts</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">cflg</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                      <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Data_MPLOption&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Read HOPOPT Multicast Protocol for Low-Power and Lossy Networks (MPL) option.</span>
 
 <span class="sd">        Structure of HOPOPT MPL option [:rfc:`7731`]:</span>
@@ -1008,7 +1008,7 @@
         <span class="n">_smvr</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_binary</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
         <span class="n">_seqn</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_unpack</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
 
-        <span class="n">_kind</span> <span class="o">=</span> <span class="n">RegType_SeedID</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">_smvr</span><span class="p">[:</span><span class="mi">2</span><span class="p">],</span> <span class="n">base</span><span class="o">=</span><span class="mi">2</span><span class="p">))</span>
+        <span class="n">_kind</span> <span class="o">=</span> <span class="n">Enum_SeedID</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">_smvr</span><span class="p">[:</span><span class="mi">2</span><span class="p">],</span> <span class="n">base</span><span class="o">=</span><span class="mi">2</span><span class="p">))</span>
         <span class="k">if</span> <span class="n">_kind</span> <span class="o">==</span> <span class="n">_kind</span><span class="o">.</span><span class="n">IPV6_SOURCE_ADDRESS</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">_size</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1">] invalid format&#39;</span><span class="p">)</span>
@@ -1032,13 +1032,13 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1">] invalid format&#39;</span><span class="p">)</span>
 
-        <span class="n">opt</span> <span class="o">=</span> <span class="n">DataType_MPLOption</span><span class="p">(</span>
+        <span class="n">opt</span> <span class="o">=</span> <span class="n">Data_MPLOption</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">code</span><span class="p">,</span>
             <span class="n">action</span><span class="o">=</span><span class="n">acts</span><span class="p">,</span>
             <span class="n">change</span><span class="o">=</span><span class="n">cflg</span><span class="p">,</span>
             <span class="n">length</span><span class="o">=</span><span class="n">_size</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span>
             <span class="n">seed_type</span><span class="o">=</span><span class="n">_kind</span><span class="p">,</span>
-            <span class="n">flags</span><span class="o">=</span><span class="n">DataType_MPLFlags</span><span class="p">(</span>
+            <span class="n">flags</span><span class="o">=</span><span class="n">Data_MPLFlags</span><span class="p">(</span>
                 <span class="nb">max</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">_smvr</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">base</span><span class="o">=</span><span class="mi">2</span><span class="p">)),</span>
                 <span class="n">verification</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">_smvr</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="n">base</span><span class="o">=</span><span class="mi">2</span><span class="p">)),</span>
             <span class="p">),</span>
@@ -1052,8 +1052,8 @@
 
         <span class="k">return</span> <span class="n">opt</span></div>
 
-<div class="viewcode-block" id="HOPOPT._read_opt_ilnp"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/hopopt.html#pcapkit.protocols.internet.hopopt.HOPOPT._read_opt_ilnp">[docs]</a>    <span class="k">def</span> <span class="nf">_read_opt_ilnp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">&#39;RegType_Option&#39;</span><span class="p">,</span> <span class="n">acts</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">cflg</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
-                       <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_ILNPOption&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
+<div class="viewcode-block" id="HOPOPT._read_opt_ilnp"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/hopopt.html#pcapkit.protocols.internet.hopopt.HOPOPT._read_opt_ilnp">[docs]</a>    <span class="k">def</span> <span class="nf">_read_opt_ilnp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span><span class="p">,</span> <span class="n">acts</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">cflg</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                       <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Data_ILNPOption&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Read HOPOPT Identifier-Locator Network Protocol (ILNP) Nonce option.</span>
 
 <span class="sd">        Structure of HOPOPT ILNP Nonce option [:rfc:`6744`]:</span>
@@ -1081,7 +1081,7 @@
         <span class="n">_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_unpack</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
         <span class="n">_nval</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_fileng</span><span class="p">(</span><span class="n">_size</span><span class="p">)</span>
 
-        <span class="n">opt</span> <span class="o">=</span> <span class="n">DataType_ILNPOption</span><span class="p">(</span>
+        <span class="n">opt</span> <span class="o">=</span> <span class="n">Data_ILNPOption</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">code</span><span class="p">,</span>
             <span class="n">action</span><span class="o">=</span><span class="n">acts</span><span class="p">,</span>
             <span class="n">change</span><span class="o">=</span><span class="n">cflg</span><span class="p">,</span>
@@ -1091,8 +1091,8 @@
 
         <span class="k">return</span> <span class="n">opt</span></div>
 
-<div class="viewcode-block" id="HOPOPT._read_opt_lio"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/hopopt.html#pcapkit.protocols.internet.hopopt.HOPOPT._read_opt_lio">[docs]</a>    <span class="k">def</span> <span class="nf">_read_opt_lio</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">&#39;RegType_Option&#39;</span><span class="p">,</span> <span class="n">acts</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">cflg</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
-                      <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_LineIdentificationOption&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
+<div class="viewcode-block" id="HOPOPT._read_opt_lio"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/hopopt.html#pcapkit.protocols.internet.hopopt.HOPOPT._read_opt_lio">[docs]</a>    <span class="k">def</span> <span class="nf">_read_opt_lio</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span><span class="p">,</span> <span class="n">acts</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">cflg</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                      <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Data_LineIdentificationOption&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Read HOPOPT Line-Identification option.</span>
 
 <span class="sd">        Structure of HOPOPT Line-Identification option [:rfc:`6788`]:</span>
@@ -1121,7 +1121,7 @@
         <span class="n">_llen</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_unpack</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
         <span class="n">_line</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_unpack</span><span class="p">(</span><span class="n">_llen</span><span class="p">)</span>
 
-        <span class="n">opt</span> <span class="o">=</span> <span class="n">DataType_LineIdentificationOption</span><span class="p">(</span>
+        <span class="n">opt</span> <span class="o">=</span> <span class="n">Data_LineIdentificationOption</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">code</span><span class="p">,</span>
             <span class="n">action</span><span class="o">=</span><span class="n">acts</span><span class="p">,</span>
             <span class="n">change</span><span class="o">=</span><span class="n">cflg</span><span class="p">,</span>
@@ -1136,8 +1136,8 @@
 
         <span class="k">return</span> <span class="n">opt</span></div>
 
-<div class="viewcode-block" id="HOPOPT._read_opt_jumbo"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/hopopt.html#pcapkit.protocols.internet.hopopt.HOPOPT._read_opt_jumbo">[docs]</a>    <span class="k">def</span> <span class="nf">_read_opt_jumbo</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">&#39;RegType_Option&#39;</span><span class="p">,</span> <span class="n">acts</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">cflg</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
-                        <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_JumboPayloadOption&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
+<div class="viewcode-block" id="HOPOPT._read_opt_jumbo"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/hopopt.html#pcapkit.protocols.internet.hopopt.HOPOPT._read_opt_jumbo">[docs]</a>    <span class="k">def</span> <span class="nf">_read_opt_jumbo</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span><span class="p">,</span> <span class="n">acts</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">cflg</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                        <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Data_JumboPayloadOption&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Read HOPOPT Jumbo Payload option.</span>
 
 <span class="sd">        Structure of HOPOPT Jumbo Payload option [:rfc:`2675`]:</span>
@@ -1168,7 +1168,7 @@
             <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1">] invalid format&#39;</span><span class="p">)</span>
         <span class="n">_jlen</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_unpack</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
 
-        <span class="n">opt</span> <span class="o">=</span> <span class="n">DataType_JumboPayloadOption</span><span class="p">(</span>
+        <span class="n">opt</span> <span class="o">=</span> <span class="n">Data_JumboPayloadOption</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">code</span><span class="p">,</span>
             <span class="n">action</span><span class="o">=</span><span class="n">acts</span><span class="p">,</span>
             <span class="n">change</span><span class="o">=</span><span class="n">cflg</span><span class="p">,</span>
@@ -1178,8 +1178,8 @@
 
         <span class="k">return</span> <span class="n">opt</span></div>
 
-<div class="viewcode-block" id="HOPOPT._read_opt_home"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/hopopt.html#pcapkit.protocols.internet.hopopt.HOPOPT._read_opt_home">[docs]</a>    <span class="k">def</span> <span class="nf">_read_opt_home</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">&#39;RegType_Option&#39;</span><span class="p">,</span> <span class="n">acts</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">cflg</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
-                       <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_HomeAddressOption&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
+<div class="viewcode-block" id="HOPOPT._read_opt_home"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/hopopt.html#pcapkit.protocols.internet.hopopt.HOPOPT._read_opt_home">[docs]</a>    <span class="k">def</span> <span class="nf">_read_opt_home</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span><span class="p">,</span> <span class="n">acts</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">cflg</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                       <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Data_HomeAddressOption&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Read HOPOPT Home Address option.</span>
 
 <span class="sd">        Structure of HOPOPT Home Address option [:rfc:`6275`]:</span>
@@ -1218,7 +1218,7 @@
             <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1">] invalid format&#39;</span><span class="p">)</span>
         <span class="n">_addr</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_fileng</span><span class="p">(</span><span class="mi">16</span><span class="p">)</span>
 
-        <span class="n">opt</span> <span class="o">=</span> <span class="n">DataType_HomeAddressOption</span><span class="p">(</span>
+        <span class="n">opt</span> <span class="o">=</span> <span class="n">Data_HomeAddressOption</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">code</span><span class="p">,</span>
             <span class="n">action</span><span class="o">=</span><span class="n">acts</span><span class="p">,</span>
             <span class="n">change</span><span class="o">=</span><span class="n">cflg</span><span class="p">,</span>
@@ -1228,8 +1228,8 @@
 
         <span class="k">return</span> <span class="n">opt</span></div>
 
-<div class="viewcode-block" id="HOPOPT._read_opt_ip_dff"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/hopopt.html#pcapkit.protocols.internet.hopopt.HOPOPT._read_opt_ip_dff">[docs]</a>    <span class="k">def</span> <span class="nf">_read_opt_ip_dff</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">&#39;RegType_Option&#39;</span><span class="p">,</span> <span class="n">acts</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">cflg</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
-                         <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_IPDFFOption&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
+<div class="viewcode-block" id="HOPOPT._read_opt_ip_dff"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/hopopt.html#pcapkit.protocols.internet.hopopt.HOPOPT._read_opt_ip_dff">[docs]</a>    <span class="k">def</span> <span class="nf">_read_opt_ip_dff</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span><span class="p">,</span> <span class="n">acts</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">cflg</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                         <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Data_IPDFFOption&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Read HOPOPT Depth-First Forwarding (``IP_DFF``) option.</span>
 
 <span class="sd">        Structure of HOPOPT ``IP_DFF`` option [:rfc:`6971`]:</span>
@@ -1263,13 +1263,13 @@
         <span class="n">_verf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_binary</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
         <span class="n">_seqn</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_unpack</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
 
-        <span class="n">opt</span> <span class="o">=</span> <span class="n">DataType_IPDFFOption</span><span class="p">(</span>
+        <span class="n">opt</span> <span class="o">=</span> <span class="n">Data_IPDFFOption</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">code</span><span class="p">,</span>
             <span class="n">action</span><span class="o">=</span><span class="n">acts</span><span class="p">,</span>
             <span class="n">change</span><span class="o">=</span><span class="n">cflg</span><span class="p">,</span>
             <span class="n">length</span><span class="o">=</span><span class="n">_size</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span>
             <span class="n">version</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">_verf</span><span class="p">[:</span><span class="mi">2</span><span class="p">],</span> <span class="n">base</span><span class="o">=</span><span class="mi">2</span><span class="p">),</span>
-            <span class="n">flags</span><span class="o">=</span><span class="n">DataType_DFFFlags</span><span class="p">(</span>
+            <span class="n">flags</span><span class="o">=</span><span class="n">Data_DFFFlags</span><span class="p">(</span>
                 <span class="n">dup</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">_verf</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">base</span><span class="o">=</span><span class="mi">2</span><span class="p">)),</span>
                 <span class="n">ret</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">_verf</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="n">base</span><span class="o">=</span><span class="mi">2</span><span class="p">)),</span>
             <span class="p">),</span>

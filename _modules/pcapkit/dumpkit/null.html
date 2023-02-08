@@ -48,7 +48,7 @@
 <span class="kn">import</span> <span class="nn">dictdumper</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-    <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">BinaryIO</span><span class="p">,</span> <span class="n">Optional</span>
+    <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">IO</span><span class="p">,</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Optional</span>
 
     <span class="kn">from</span> <span class="nn">typing_extensions</span> <span class="kn">import</span> <span class="n">Literal</span>
 
@@ -96,7 +96,7 @@
 
 <span class="sd">        &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="nf">_append_value</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="s1">&#39;dict[str, Any]&#39;</span><span class="p">,</span> <span class="n">file</span><span class="p">:</span> <span class="s1">&#39;BinaryIO&#39;</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
+    <span class="k">def</span> <span class="nf">_append_value</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="s1">&#39;dict[str, Any]&#39;</span><span class="p">,</span> <span class="n">file</span><span class="p">:</span> <span class="s1">&#39;IO[bytes]&#39;</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Call this function to write contents.</span>
 
 <span class="sd">        Args:</span>

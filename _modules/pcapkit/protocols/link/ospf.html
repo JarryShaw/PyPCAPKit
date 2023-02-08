@@ -66,11 +66,11 @@
 <span class="kn">import</span> <span class="nn">ipaddress</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
 
-<span class="kn">from</span> <span class="nn">pcapkit.const.ospf.authentication</span> <span class="kn">import</span> <span class="n">Authentication</span> <span class="k">as</span> <span class="n">RegType_Authentication</span>
-<span class="kn">from</span> <span class="nn">pcapkit.const.ospf.packet</span> <span class="kn">import</span> <span class="n">Packet</span> <span class="k">as</span> <span class="n">RegType_Packet</span>
-<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.link.ospf</span> <span class="kn">import</span> <span class="n">OSPF</span> <span class="k">as</span> <span class="n">DataType_OSPF</span>
+<span class="kn">from</span> <span class="nn">pcapkit.const.ospf.authentication</span> <span class="kn">import</span> <span class="n">Authentication</span> <span class="k">as</span> <span class="n">Enum_Authentication</span>
+<span class="kn">from</span> <span class="nn">pcapkit.const.ospf.packet</span> <span class="kn">import</span> <span class="n">Packet</span> <span class="k">as</span> <span class="n">Enum_Packet</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.link.ospf</span> <span class="kn">import</span> <span class="n">OSPF</span> <span class="k">as</span> <span class="n">Data_OSPF</span>
 <span class="kn">from</span> <span class="nn">pcapkit.protocols.data.link.ospf</span> <span class="kn">import</span> \
-    <span class="n">CrytographicAuthentication</span> <span class="k">as</span> <span class="n">DataType_CrytographicAuthentication</span>
+    <span class="n">CrytographicAuthentication</span> <span class="k">as</span> <span class="n">Data_CrytographicAuthentication</span>
 <span class="kn">from</span> <span class="nn">pcapkit.protocols.link.link</span> <span class="kn">import</span> <span class="n">Link</span>
 <span class="kn">from</span> <span class="nn">pcapkit.utilities.exceptions</span> <span class="kn">import</span> <span class="n">UnsupportedCall</span>
 
@@ -83,7 +83,7 @@
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;OSPF&#39;</span><span class="p">]</span>
 
 
-<div class="viewcode-block" id="OSPF"><a class="viewcode-back" href="../../../../pcapkit/protocols/link/ospf.html#pcapkit.protocols.link.ospf.OSPF">[docs]</a><span class="k">class</span> <span class="nc">OSPF</span><span class="p">(</span><span class="n">Link</span><span class="p">[</span><span class="n">DataType_OSPF</span><span class="p">]):</span>
+<div class="viewcode-block" id="OSPF"><a class="viewcode-back" href="../../../../pcapkit/protocols/link/ospf.html#pcapkit.protocols.link.ospf.OSPF">[docs]</a><span class="k">class</span> <span class="nc">OSPF</span><span class="p">(</span><span class="n">Link</span><span class="p">[</span><span class="n">Data_OSPF</span><span class="p">]):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;This class implements Open Shortest Path First.&quot;&quot;&quot;</span>
 
     <span class="c1">##########################################################################</span>
@@ -106,7 +106,7 @@
         <span class="k">return</span> <span class="mi">24</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;RegType_Packet&#39;</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Enum_Packet&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;OSPF packet type.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_info</span><span class="o">.</span><span class="n">type</span>
 
@@ -114,7 +114,7 @@
     <span class="c1"># Methods.</span>
     <span class="c1">##########################################################################</span>
 
-<div class="viewcode-block" id="OSPF.read"><a class="viewcode-back" href="../../../../pcapkit/protocols/link/ospf.html#pcapkit.protocols.link.ospf.OSPF.read">[docs]</a>    <span class="k">def</span> <span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_OSPF&#39;</span><span class="p">:</span>
+<div class="viewcode-block" id="OSPF.read"><a class="viewcode-back" href="../../../../pcapkit/protocols/link/ospf.html#pcapkit.protocols.link.ospf.OSPF.read">[docs]</a>    <span class="k">def</span> <span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Data_OSPF&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Read Open Shortest Path First.</span>
 
 <span class="sd">        Structure of OSPF header [:rfc:`2328`]:</span>
@@ -156,17 +156,17 @@
         <span class="n">_csum</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_fileng</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
         <span class="n">_autp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_unpack</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
 
-        <span class="n">ospf</span> <span class="o">=</span> <span class="n">DataType_OSPF</span><span class="p">(</span>
+        <span class="n">ospf</span> <span class="o">=</span> <span class="n">Data_OSPF</span><span class="p">(</span>
             <span class="n">version</span><span class="o">=</span><span class="n">_vers</span><span class="p">,</span>
-            <span class="nb">type</span><span class="o">=</span><span class="n">RegType_Packet</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">_type</span><span class="p">),</span>
+            <span class="nb">type</span><span class="o">=</span><span class="n">Enum_Packet</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">_type</span><span class="p">),</span>
             <span class="nb">len</span><span class="o">=</span><span class="n">_tlen</span><span class="p">,</span>
             <span class="n">router_id</span><span class="o">=</span><span class="n">_rtid</span><span class="p">,</span>
             <span class="n">area_id</span><span class="o">=</span><span class="n">_area</span><span class="p">,</span>
             <span class="n">chksum</span><span class="o">=</span><span class="n">_csum</span><span class="p">,</span>
-            <span class="n">autype</span><span class="o">=</span><span class="n">RegType_Authentication</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">_autp</span><span class="p">),</span>
+            <span class="n">autype</span><span class="o">=</span><span class="n">Enum_Authentication</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">_autp</span><span class="p">),</span>
         <span class="p">)</span>
 
-        <span class="k">if</span> <span class="n">ospf</span><span class="o">.</span><span class="n">autype</span> <span class="o">==</span> <span class="n">RegType_Authentication</span><span class="o">.</span><span class="n">Cryptographic_authentication</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">ospf</span><span class="o">.</span><span class="n">autype</span> <span class="o">==</span> <span class="n">Enum_Authentication</span><span class="o">.</span><span class="n">Cryptographic_authentication</span><span class="p">:</span>
             <span class="n">ospf</span><span class="o">.</span><span class="n">__update__</span><span class="p">([</span>
                 <span class="p">(</span><span class="s1">&#39;auth&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_encrypt_auth</span><span class="p">()),</span>
             <span class="p">])</span>
@@ -221,7 +221,7 @@
         <span class="c1">#_addr = &#39;.&#39;.join(str(_) for _ in _byte)</span>
         <span class="k">return</span> <span class="n">ipaddress</span><span class="o">.</span><span class="n">ip_address</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_read_fileng</span><span class="p">(</span><span class="mi">4</span><span class="p">))</span>  <span class="c1"># type: ignore[return-value]</span>
 
-<div class="viewcode-block" id="OSPF._read_encrypt_auth"><a class="viewcode-back" href="../../../../pcapkit/protocols/link/ospf.html#pcapkit.protocols.link.ospf.OSPF._read_encrypt_auth">[docs]</a>    <span class="k">def</span> <span class="nf">_read_encrypt_auth</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_CrytographicAuthentication&#39;</span><span class="p">:</span>
+<div class="viewcode-block" id="OSPF._read_encrypt_auth"><a class="viewcode-back" href="../../../../pcapkit/protocols/link/ospf.html#pcapkit.protocols.link.ospf.OSPF._read_encrypt_auth">[docs]</a>    <span class="k">def</span> <span class="nf">_read_encrypt_auth</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Data_CrytographicAuthentication&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Read Authentication field when Cryptographic Authentication is employed,</span>
 <span class="sd">        i.e. :attr:`~OSPF.autype` is ``2``.</span>
 
@@ -249,7 +249,7 @@
         <span class="n">_alen</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_unpack</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
         <span class="n">_seqn</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_unpack</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
 
-        <span class="n">auth</span> <span class="o">=</span> <span class="n">DataType_CrytographicAuthentication</span><span class="p">(</span>
+        <span class="n">auth</span> <span class="o">=</span> <span class="n">Data_CrytographicAuthentication</span><span class="p">(</span>
             <span class="n">key_id</span><span class="o">=</span><span class="n">_keys</span><span class="p">,</span>
             <span class="nb">len</span><span class="o">=</span><span class="n">_alen</span><span class="p">,</span>
             <span class="n">seq</span><span class="o">=</span><span class="n">_seqn</span><span class="p">,</span>

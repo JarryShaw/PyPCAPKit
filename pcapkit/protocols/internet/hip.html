@@ -289,7 +289,7 @@ enumeration:</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>file</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.BinaryIO" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">BinaryIO</span></code></a>]) – Source packet stream.</p></li>
+<li><p><strong>file</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.IO" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">IO</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a>]]) – Source packet stream.</p></li>
 <li><p><strong>length</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>]) – Length of packet data.</p></li>
 <li><p><strong>extension</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a>) – If the protocol is used as an IPv6 extension header.</p></li>
 <li><p><strong>**kwargs</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>) – Arbitrary keyword arguments.</p></li>
@@ -485,14 +485,14 @@ enumeration:</p>
 <li><p><strong>code</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – parameter code</p></li>
 <li><p><strong>cbit</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a>) – critical bit</p></li>
 <li><p><strong>clen</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – length of contents</p></li>
-<li><p><strong>desc</strong> (<em>RegType_Parameter</em>) – parameter type</p></li>
+<li><p><strong>desc</strong> (<em>Enum_Parameter</em>) – parameter type</p></li>
 <li><p><strong>length</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – remaining packet length</p></li>
 <li><p><strong>version</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – HIP protocol version</p></li>
 <li><p><strong>options</strong> (<a class="reference internal" href="../../const/hip.html#pcapkit.const.hip.parameter.Parameter" title="pcapkit.const.hip.parameter.Parameter"><em>Parameter</em></a>) – parsed HIP parameters</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>DataType_UnassignedParameter</p>
+<dd class="field-even"><p>Data_UnassignedParameter</p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Parsed parameter data.</p>
@@ -524,14 +524,14 @@ enumeration:</p>
 <li><p><strong>code</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – parameter code</p></li>
 <li><p><strong>cbit</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a>) – critical bit</p></li>
 <li><p><strong>clen</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – length of contents</p></li>
-<li><p><strong>desc</strong> (<em>RegType_Parameter</em>) – parameter type</p></li>
+<li><p><strong>desc</strong> (<em>Enum_Parameter</em>) – parameter type</p></li>
 <li><p><strong>length</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – remaining packet length</p></li>
 <li><p><strong>version</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – HIP protocol version</p></li>
 <li><p><strong>options</strong> (<a class="reference internal" href="../../const/hip.html#pcapkit.const.hip.parameter.Parameter" title="pcapkit.const.hip.parameter.Parameter"><em>Parameter</em></a>) – parsed HIP parameters</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>DataType_ESPInfoParameter</p>
+<dd class="field-even"><p>Data_ESPInfoParameter</p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Parsed parameter data.</p>
@@ -565,14 +565,14 @@ enumeration:</p>
 <li><p><strong>code</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – parameter code</p></li>
 <li><p><strong>cbit</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a>) – critical bit</p></li>
 <li><p><strong>clen</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – length of contents</p></li>
-<li><p><strong>desc</strong> (<em>RegType_Parameter</em>) – parameter type</p></li>
+<li><p><strong>desc</strong> (<em>Enum_Parameter</em>) – parameter type</p></li>
 <li><p><strong>length</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – remaining packet length</p></li>
 <li><p><strong>version</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – HIP protocol version</p></li>
 <li><p><strong>options</strong> (<a class="reference internal" href="../../const/hip.html#pcapkit.const.hip.parameter.Parameter" title="pcapkit.const.hip.parameter.Parameter"><em>Parameter</em></a>) – parsed HIP parameters</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>DataType_R1CounterParameter</p>
+<dd class="field-even"><p>Data_R1CounterParameter</p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Parsed parameter data.</p>
@@ -622,14 +622,14 @@ enumeration:</p>
 <li><p><strong>code</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – parameter code</p></li>
 <li><p><strong>cbit</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a>) – critical bit</p></li>
 <li><p><strong>clen</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – length of contents</p></li>
-<li><p><strong>desc</strong> (<em>RegType_Parameter</em>) – parameter type</p></li>
+<li><p><strong>desc</strong> (<em>Enum_Parameter</em>) – parameter type</p></li>
 <li><p><strong>length</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – remaining packet length</p></li>
 <li><p><strong>version</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – HIP protocol version</p></li>
 <li><p><strong>options</strong> (<a class="reference internal" href="../../const/hip.html#pcapkit.const.hip.parameter.Parameter" title="pcapkit.const.hip.parameter.Parameter"><em>Parameter</em></a>) – parsed HIP parameters</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>DataType_LocatorSetParameter</p>
+<dd class="field-even"><p>Data_LocatorSetParameter</p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Parsed parameter data.</p>
@@ -663,14 +663,14 @@ enumeration:</p>
 <li><p><strong>code</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – parameter code</p></li>
 <li><p><strong>cbit</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a>) – critical bit</p></li>
 <li><p><strong>clen</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – length of contents</p></li>
-<li><p><strong>desc</strong> (<em>RegType_Parameter</em>) – parameter type</p></li>
+<li><p><strong>desc</strong> (<em>Enum_Parameter</em>) – parameter type</p></li>
 <li><p><strong>length</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – remaining packet length</p></li>
 <li><p><strong>version</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – HIP protocol version</p></li>
 <li><p><strong>options</strong> (<a class="reference internal" href="../../const/hip.html#pcapkit.const.hip.parameter.Parameter" title="pcapkit.const.hip.parameter.Parameter"><em>Parameter</em></a>) – parsed HIP parameters</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>DataType_PuzzleParameter</p>
+<dd class="field-even"><p>Data_PuzzleParameter</p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Parsed parameter data.</p>
@@ -707,14 +707,14 @@ enumeration:</p>
 <li><p><strong>code</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – parameter code</p></li>
 <li><p><strong>cbit</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a>) – critical bit</p></li>
 <li><p><strong>clen</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – length of contents</p></li>
-<li><p><strong>desc</strong> (<em>RegType_Parameter</em>) – parameter type</p></li>
+<li><p><strong>desc</strong> (<em>Enum_Parameter</em>) – parameter type</p></li>
 <li><p><strong>length</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – remaining packet length</p></li>
 <li><p><strong>version</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – HIP protocol version</p></li>
 <li><p><strong>options</strong> (<a class="reference internal" href="../../const/hip.html#pcapkit.const.hip.parameter.Parameter" title="pcapkit.const.hip.parameter.Parameter"><em>Parameter</em></a>) – parsed HIP parameters</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>DataType_SolutionParameter</p>
+<dd class="field-even"><p>Data_SolutionParameter</p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Parsed parameter data.</p>
@@ -745,14 +745,14 @@ enumeration:</p>
 <li><p><strong>code</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – parameter code</p></li>
 <li><p><strong>cbit</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a>) – critical bit</p></li>
 <li><p><strong>clen</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – length of contents</p></li>
-<li><p><strong>desc</strong> (<em>RegType_Parameter</em>) – parameter type</p></li>
+<li><p><strong>desc</strong> (<em>Enum_Parameter</em>) – parameter type</p></li>
 <li><p><strong>length</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – remaining packet length</p></li>
 <li><p><strong>version</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – HIP protocol version</p></li>
 <li><p><strong>options</strong> (<a class="reference internal" href="../../const/hip.html#pcapkit.const.hip.parameter.Parameter" title="pcapkit.const.hip.parameter.Parameter"><em>Parameter</em></a>) – parsed HIP parameters</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>DataType_SEQParameter</p>
+<dd class="field-even"><p>Data_SEQParameter</p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Parsed parameter data.</p>
@@ -785,14 +785,14 @@ enumeration:</p>
 <li><p><strong>code</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – parameter code</p></li>
 <li><p><strong>cbit</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a>) – critical bit</p></li>
 <li><p><strong>clen</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – length of contents</p></li>
-<li><p><strong>desc</strong> (<em>RegType_Parameter</em>) – parameter type</p></li>
+<li><p><strong>desc</strong> (<em>Enum_Parameter</em>) – parameter type</p></li>
 <li><p><strong>length</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – remaining packet length</p></li>
 <li><p><strong>version</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – HIP protocol version</p></li>
 <li><p><strong>options</strong> (<a class="reference internal" href="../../const/hip.html#pcapkit.const.hip.parameter.Parameter" title="pcapkit.const.hip.parameter.Parameter"><em>Parameter</em></a>) – parsed HIP parameters</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>DataType_ACKParameter</p>
+<dd class="field-even"><p>Data_ACKParameter</p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Parsed parameter data.</p>
@@ -825,14 +825,14 @@ enumeration:</p>
 <li><p><strong>code</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – parameter code</p></li>
 <li><p><strong>cbit</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a>) – critical bit</p></li>
 <li><p><strong>clen</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – length of contents</p></li>
-<li><p><strong>desc</strong> (<em>RegType_Parameter</em>) – parameter type</p></li>
+<li><p><strong>desc</strong> (<em>Enum_Parameter</em>) – parameter type</p></li>
 <li><p><strong>length</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – remaining packet length</p></li>
 <li><p><strong>version</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – HIP protocol version</p></li>
 <li><p><strong>options</strong> (<a class="reference internal" href="../../const/hip.html#pcapkit.const.hip.parameter.Parameter" title="pcapkit.const.hip.parameter.Parameter"><em>Parameter</em></a>) – parsed HIP parameters</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>DataType_DHGroupListParameter</p>
+<dd class="field-even"><p>Data_DHGroupListParameter</p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Parsed parameter data.</p>
@@ -864,14 +864,14 @@ enumeration:</p>
 <li><p><strong>code</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – parameter code</p></li>
 <li><p><strong>cbit</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a>) – critical bit</p></li>
 <li><p><strong>clen</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – length of contents</p></li>
-<li><p><strong>desc</strong> (<em>RegType_Parameter</em>) – parameter type</p></li>
+<li><p><strong>desc</strong> (<em>Enum_Parameter</em>) – parameter type</p></li>
 <li><p><strong>length</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – remaining packet length</p></li>
 <li><p><strong>version</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – HIP protocol version</p></li>
 <li><p><strong>options</strong> (<a class="reference internal" href="../../const/hip.html#pcapkit.const.hip.parameter.Parameter" title="pcapkit.const.hip.parameter.Parameter"><em>Parameter</em></a>) – parsed HIP parameters</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>DataType_DeffieHellmanParameter</p>
+<dd class="field-even"><p>Data_DeffieHellmanParameter</p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Parsed parameter data.</p>
@@ -901,14 +901,14 @@ enumeration:</p>
 <li><p><strong>code</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – parameter code</p></li>
 <li><p><strong>cbit</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a>) – critical bit</p></li>
 <li><p><strong>clen</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – length of contents</p></li>
-<li><p><strong>desc</strong> (<em>RegType_Parameter</em>) – parameter type</p></li>
+<li><p><strong>desc</strong> (<em>Enum_Parameter</em>) – parameter type</p></li>
 <li><p><strong>length</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – remaining packet length</p></li>
 <li><p><strong>version</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – HIP protocol version</p></li>
 <li><p><strong>options</strong> (<a class="reference internal" href="../../const/hip.html#pcapkit.const.hip.parameter.Parameter" title="pcapkit.const.hip.parameter.Parameter"><em>Parameter</em></a>) – parsed HIP parameters</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>DataType_HIPTransformParameter</p>
+<dd class="field-even"><p>Data_HIPTransformParameter</p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Parsed parameter data.</p>
@@ -941,14 +941,14 @@ enumeration:</p>
 <li><p><strong>code</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – parameter code</p></li>
 <li><p><strong>cbit</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a>) – critical bit</p></li>
 <li><p><strong>clen</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – length of contents</p></li>
-<li><p><strong>desc</strong> (<em>RegType_Parameter</em>) – parameter type</p></li>
+<li><p><strong>desc</strong> (<em>Enum_Parameter</em>) – parameter type</p></li>
 <li><p><strong>length</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – remaining packet length</p></li>
 <li><p><strong>version</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – HIP protocol version</p></li>
 <li><p><strong>options</strong> (<a class="reference internal" href="../../const/hip.html#pcapkit.const.hip.parameter.Parameter" title="pcapkit.const.hip.parameter.Parameter"><em>Parameter</em></a>) – parsed HIP parameters</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>DataType_HIPCipherParameter</p>
+<dd class="field-even"><p>Data_HIPCipherParameter</p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Parsed parameter data.</p>
@@ -983,14 +983,14 @@ enumeration:</p>
 <li><p><strong>code</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – parameter code</p></li>
 <li><p><strong>cbit</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a>) – critical bit</p></li>
 <li><p><strong>clen</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – length of contents</p></li>
-<li><p><strong>desc</strong> (<em>RegType_Parameter</em>) – parameter type</p></li>
+<li><p><strong>desc</strong> (<em>Enum_Parameter</em>) – parameter type</p></li>
 <li><p><strong>length</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – remaining packet length</p></li>
 <li><p><strong>version</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – HIP protocol version</p></li>
 <li><p><strong>options</strong> (<a class="reference internal" href="../../const/hip.html#pcapkit.const.hip.parameter.Parameter" title="pcapkit.const.hip.parameter.Parameter"><em>Parameter</em></a>) – parsed HIP parameters</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>DataType_NATTraversalModeParameter</p>
+<dd class="field-even"><p>Data_NATTraversalModeParameter</p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Parsed parameter data.</p>
@@ -1021,14 +1021,14 @@ enumeration:</p>
 <li><p><strong>code</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – parameter code</p></li>
 <li><p><strong>cbit</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a>) – critical bit</p></li>
 <li><p><strong>clen</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – length of contents</p></li>
-<li><p><strong>desc</strong> (<em>RegType_Parameter</em>) – parameter type</p></li>
+<li><p><strong>desc</strong> (<em>Enum_Parameter</em>) – parameter type</p></li>
 <li><p><strong>length</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – remaining packet length</p></li>
 <li><p><strong>version</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – HIP protocol version</p></li>
 <li><p><strong>options</strong> (<a class="reference internal" href="../../const/hip.html#pcapkit.const.hip.parameter.Parameter" title="pcapkit.const.hip.parameter.Parameter"><em>Parameter</em></a>) – parsed HIP parameters</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>DataType_TransactionPacingParameter</p>
+<dd class="field-even"><p>Data_TransactionPacingParameter</p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Parsed parameter data.</p>
@@ -1068,14 +1068,14 @@ enumeration:</p>
 <li><p><strong>code</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – parameter code</p></li>
 <li><p><strong>cbit</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a>) – critical bit</p></li>
 <li><p><strong>clen</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – length of contents</p></li>
-<li><p><strong>desc</strong> (<em>RegType_Parameter</em>) – parameter type</p></li>
+<li><p><strong>desc</strong> (<em>Enum_Parameter</em>) – parameter type</p></li>
 <li><p><strong>length</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – remaining packet length</p></li>
 <li><p><strong>version</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – HIP protocol version</p></li>
 <li><p><strong>options</strong> (<a class="reference internal" href="../../const/hip.html#pcapkit.const.hip.parameter.Parameter" title="pcapkit.const.hip.parameter.Parameter"><em>Parameter</em></a>) – parsed HIP parameters</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>DataType_EncryptedParameter</p>
+<dd class="field-even"><p>Data_EncryptedParameter</p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Parsed parameter data.</p>
@@ -1109,14 +1109,14 @@ enumeration:</p>
 <li><p><strong>code</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – parameter code</p></li>
 <li><p><strong>cbit</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a>) – critical bit</p></li>
 <li><p><strong>clen</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – length of contents</p></li>
-<li><p><strong>desc</strong> (<em>RegType_Parameter</em>) – parameter type</p></li>
+<li><p><strong>desc</strong> (<em>Enum_Parameter</em>) – parameter type</p></li>
 <li><p><strong>length</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – remaining packet length</p></li>
 <li><p><strong>version</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – HIP protocol version</p></li>
 <li><p><strong>options</strong> (<a class="reference internal" href="../../const/hip.html#pcapkit.const.hip.parameter.Parameter" title="pcapkit.const.hip.parameter.Parameter"><em>Parameter</em></a>) – parsed HIP parameters</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>DataType_HostIDParameter</p>
+<dd class="field-even"><p>Data_HostIDParameter</p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Parsed parameter data.</p>
@@ -1146,14 +1146,14 @@ enumeration:</p>
 <li><p><strong>code</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – parameter code</p></li>
 <li><p><strong>cbit</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a>) – critical bit</p></li>
 <li><p><strong>clen</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – length of contents</p></li>
-<li><p><strong>desc</strong> (<em>RegType_Parameter</em>) – parameter type</p></li>
+<li><p><strong>desc</strong> (<em>Enum_Parameter</em>) – parameter type</p></li>
 <li><p><strong>length</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – remaining packet length</p></li>
 <li><p><strong>version</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – HIP protocol version</p></li>
 <li><p><strong>options</strong> (<a class="reference internal" href="../../const/hip.html#pcapkit.const.hip.parameter.Parameter" title="pcapkit.const.hip.parameter.Parameter"><em>Parameter</em></a>) – parsed HIP parameters</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>DataType_HITSuiteParameter</p>
+<dd class="field-even"><p>Data_HITSuiteParameter</p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Parsed parameter data.</p>
@@ -1185,14 +1185,14 @@ enumeration:</p>
 <li><p><strong>code</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – parameter code</p></li>
 <li><p><strong>cbit</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a>) – critical bit</p></li>
 <li><p><strong>clen</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – length of contents</p></li>
-<li><p><strong>desc</strong> (<em>RegType_Parameter</em>) – parameter type</p></li>
+<li><p><strong>desc</strong> (<em>Enum_Parameter</em>) – parameter type</p></li>
 <li><p><strong>length</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – remaining packet length</p></li>
 <li><p><strong>version</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – HIP protocol version</p></li>
 <li><p><strong>options</strong> (<a class="reference internal" href="../../const/hip.html#pcapkit.const.hip.parameter.Parameter" title="pcapkit.const.hip.parameter.Parameter"><em>Parameter</em></a>) – parsed HIP parameters</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>DataType_CertParameter</p>
+<dd class="field-even"><p>Data_CertParameter</p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Parsed parameter data.</p>
@@ -1225,14 +1225,14 @@ enumeration:</p>
 <li><p><strong>code</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – parameter code</p></li>
 <li><p><strong>cbit</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a>) – critical bit</p></li>
 <li><p><strong>clen</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – length of contents</p></li>
-<li><p><strong>desc</strong> (<em>RegType_Parameter</em>) – parameter type</p></li>
+<li><p><strong>desc</strong> (<em>Enum_Parameter</em>) – parameter type</p></li>
 <li><p><strong>length</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – remaining packet length</p></li>
 <li><p><strong>version</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – HIP protocol version</p></li>
 <li><p><strong>options</strong> (<a class="reference internal" href="../../const/hip.html#pcapkit.const.hip.parameter.Parameter" title="pcapkit.const.hip.parameter.Parameter"><em>Parameter</em></a>) – parsed HIP parameters</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>DataType_NotificationParameter</p>
+<dd class="field-even"><p>Data_NotificationParameter</p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Parsed parameter data.</p>
@@ -1260,14 +1260,14 @@ enumeration:</p>
 <li><p><strong>code</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – parameter code</p></li>
 <li><p><strong>cbit</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a>) – critical bit</p></li>
 <li><p><strong>clen</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – length of contents</p></li>
-<li><p><strong>desc</strong> (<em>RegType_Parameter</em>) – parameter type</p></li>
+<li><p><strong>desc</strong> (<em>Enum_Parameter</em>) – parameter type</p></li>
 <li><p><strong>length</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – remaining packet length</p></li>
 <li><p><strong>version</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – HIP protocol version</p></li>
 <li><p><strong>options</strong> (<a class="reference internal" href="../../const/hip.html#pcapkit.const.hip.parameter.Parameter" title="pcapkit.const.hip.parameter.Parameter"><em>Parameter</em></a>) – parsed HIP parameters</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>DataType_EchoRequestSignedParameter</p>
+<dd class="field-even"><p>Data_EchoRequestSignedParameter</p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Parsed parameter data.</p>
@@ -1299,14 +1299,14 @@ enumeration:</p>
 <li><p><strong>code</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – parameter code</p></li>
 <li><p><strong>cbit</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a>) – critical bit</p></li>
 <li><p><strong>clen</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – length of contents</p></li>
-<li><p><strong>desc</strong> (<em>RegType_Parameter</em>) – parameter type</p></li>
+<li><p><strong>desc</strong> (<em>Enum_Parameter</em>) – parameter type</p></li>
 <li><p><strong>length</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – remaining packet length</p></li>
 <li><p><strong>version</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – HIP protocol version</p></li>
 <li><p><strong>options</strong> (<a class="reference internal" href="../../const/hip.html#pcapkit.const.hip.parameter.Parameter" title="pcapkit.const.hip.parameter.Parameter"><em>Parameter</em></a>) – parsed HIP parameters</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>DataType_RegInfoParameter</p>
+<dd class="field-even"><p>Data_RegInfoParameter</p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Parsed parameter data.</p>
@@ -1341,14 +1341,14 @@ enumeration:</p>
 <li><p><strong>code</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – parameter code</p></li>
 <li><p><strong>cbit</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a>) – critical bit</p></li>
 <li><p><strong>clen</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – length of contents</p></li>
-<li><p><strong>desc</strong> (<em>RegType_Parameter</em>) – parameter type</p></li>
+<li><p><strong>desc</strong> (<em>Enum_Parameter</em>) – parameter type</p></li>
 <li><p><strong>length</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – remaining packet length</p></li>
 <li><p><strong>version</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – HIP protocol version</p></li>
 <li><p><strong>options</strong> (<a class="reference internal" href="../../const/hip.html#pcapkit.const.hip.parameter.Parameter" title="pcapkit.const.hip.parameter.Parameter"><em>Parameter</em></a>) – parsed HIP parameters</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>DataType_RegRequestParameter</p>
+<dd class="field-even"><p>Data_RegRequestParameter</p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Parsed parameter data.</p>
@@ -1383,14 +1383,14 @@ enumeration:</p>
 <li><p><strong>code</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – parameter code</p></li>
 <li><p><strong>cbit</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a>) – critical bit</p></li>
 <li><p><strong>clen</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – length of contents</p></li>
-<li><p><strong>desc</strong> (<em>RegType_Parameter</em>) – parameter type</p></li>
+<li><p><strong>desc</strong> (<em>Enum_Parameter</em>) – parameter type</p></li>
 <li><p><strong>length</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – remaining packet length</p></li>
 <li><p><strong>version</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – HIP protocol version</p></li>
 <li><p><strong>options</strong> (<a class="reference internal" href="../../const/hip.html#pcapkit.const.hip.parameter.Parameter" title="pcapkit.const.hip.parameter.Parameter"><em>Parameter</em></a>) – parsed HIP parameters</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>DataType_RegResponseParameter</p>
+<dd class="field-even"><p>Data_RegResponseParameter</p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Parsed parameter data.</p>
@@ -1425,14 +1425,14 @@ enumeration:</p>
 <li><p><strong>code</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – parameter code</p></li>
 <li><p><strong>cbit</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a>) – critical bit</p></li>
 <li><p><strong>clen</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – length of contents</p></li>
-<li><p><strong>desc</strong> (<em>RegType_Parameter</em>) – parameter type</p></li>
+<li><p><strong>desc</strong> (<em>Enum_Parameter</em>) – parameter type</p></li>
 <li><p><strong>length</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – remaining packet length</p></li>
 <li><p><strong>version</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – HIP protocol version</p></li>
 <li><p><strong>options</strong> (<a class="reference internal" href="../../const/hip.html#pcapkit.const.hip.parameter.Parameter" title="pcapkit.const.hip.parameter.Parameter"><em>Parameter</em></a>) – parsed HIP parameters</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>DataType_RegFailedParameter</p>
+<dd class="field-even"><p>Data_RegFailedParameter</p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Parsed parameter data.</p>
@@ -1468,14 +1468,14 @@ enumeration:</p>
 <li><p><strong>code</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – parameter code</p></li>
 <li><p><strong>cbit</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a>) – critical bit</p></li>
 <li><p><strong>clen</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – length of contents</p></li>
-<li><p><strong>desc</strong> (<em>RegType_Parameter</em>) – parameter type</p></li>
+<li><p><strong>desc</strong> (<em>Enum_Parameter</em>) – parameter type</p></li>
 <li><p><strong>length</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – remaining packet length</p></li>
 <li><p><strong>version</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – HIP protocol version</p></li>
 <li><p><strong>options</strong> (<a class="reference internal" href="../../const/hip.html#pcapkit.const.hip.parameter.Parameter" title="pcapkit.const.hip.parameter.Parameter"><em>Parameter</em></a>) – parsed HIP parameters</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>DataType_RegFromParameter</p>
+<dd class="field-even"><p>Data_RegFromParameter</p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Parsed parameter data.</p>
@@ -1506,14 +1506,14 @@ enumeration:</p>
 <li><p><strong>code</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – parameter code</p></li>
 <li><p><strong>cbit</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a>) – critical bit</p></li>
 <li><p><strong>clen</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – length of contents</p></li>
-<li><p><strong>desc</strong> (<em>RegType_Parameter</em>) – parameter type</p></li>
+<li><p><strong>desc</strong> (<em>Enum_Parameter</em>) – parameter type</p></li>
 <li><p><strong>length</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – remaining packet length</p></li>
 <li><p><strong>version</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – HIP protocol version</p></li>
 <li><p><strong>options</strong> (<a class="reference internal" href="../../const/hip.html#pcapkit.const.hip.parameter.Parameter" title="pcapkit.const.hip.parameter.Parameter"><em>Parameter</em></a>) – parsed HIP parameters</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>DataType_EchoResponseSignedParameter</p>
+<dd class="field-even"><p>Data_EchoResponseSignedParameter</p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Parsed parameter data.</p>
@@ -1543,14 +1543,14 @@ enumeration:</p>
 <li><p><strong>code</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – parameter code</p></li>
 <li><p><strong>cbit</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a>) – critical bit</p></li>
 <li><p><strong>clen</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – length of contents</p></li>
-<li><p><strong>desc</strong> (<em>RegType_Parameter</em>) – parameter type</p></li>
+<li><p><strong>desc</strong> (<em>Enum_Parameter</em>) – parameter type</p></li>
 <li><p><strong>length</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – remaining packet length</p></li>
 <li><p><strong>version</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – HIP protocol version</p></li>
 <li><p><strong>options</strong> (<a class="reference internal" href="../../const/hip.html#pcapkit.const.hip.parameter.Parameter" title="pcapkit.const.hip.parameter.Parameter"><em>Parameter</em></a>) – parsed HIP parameters</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>DataType_TransportFormatListParameter</p>
+<dd class="field-even"><p>Data_TransportFormatListParameter</p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Parsed parameter data.</p>
@@ -1585,14 +1585,14 @@ enumeration:</p>
 <li><p><strong>code</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – parameter code</p></li>
 <li><p><strong>cbit</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a>) – critical bit</p></li>
 <li><p><strong>clen</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – length of contents</p></li>
-<li><p><strong>desc</strong> (<em>RegType_Parameter</em>) – parameter type</p></li>
+<li><p><strong>desc</strong> (<em>Enum_Parameter</em>) – parameter type</p></li>
 <li><p><strong>length</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – remaining packet length</p></li>
 <li><p><strong>version</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – HIP protocol version</p></li>
 <li><p><strong>options</strong> (<a class="reference internal" href="../../const/hip.html#pcapkit.const.hip.parameter.Parameter" title="pcapkit.const.hip.parameter.Parameter"><em>Parameter</em></a>) – parsed HIP parameters</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>DataType_ESPTransformParameter</p>
+<dd class="field-even"><p>Data_ESPTransformParameter</p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Parsed parameter data.</p>
@@ -1623,14 +1623,14 @@ enumeration:</p>
 <li><p><strong>code</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – parameter code</p></li>
 <li><p><strong>cbit</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a>) – critical bit</p></li>
 <li><p><strong>clen</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – length of contents</p></li>
-<li><p><strong>desc</strong> (<em>RegType_Parameter</em>) – parameter type</p></li>
+<li><p><strong>desc</strong> (<em>Enum_Parameter</em>) – parameter type</p></li>
 <li><p><strong>length</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – remaining packet length</p></li>
 <li><p><strong>version</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – HIP protocol version</p></li>
 <li><p><strong>options</strong> (<a class="reference internal" href="../../const/hip.html#pcapkit.const.hip.parameter.Parameter" title="pcapkit.const.hip.parameter.Parameter"><em>Parameter</em></a>) – parsed HIP parameters</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>DataType_SeqDataParameter</p>
+<dd class="field-even"><p>Data_SeqDataParameter</p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Parsed parameter data.</p>
@@ -1662,14 +1662,14 @@ enumeration:</p>
 <li><p><strong>code</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – parameter code</p></li>
 <li><p><strong>cbit</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a>) – critical bit</p></li>
 <li><p><strong>clen</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – length of contents</p></li>
-<li><p><strong>desc</strong> (<em>RegType_Parameter</em>) – parameter type</p></li>
+<li><p><strong>desc</strong> (<em>Enum_Parameter</em>) – parameter type</p></li>
 <li><p><strong>length</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – remaining packet length</p></li>
 <li><p><strong>version</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – HIP protocol version</p></li>
 <li><p><strong>options</strong> (<a class="reference internal" href="../../const/hip.html#pcapkit.const.hip.parameter.Parameter" title="pcapkit.const.hip.parameter.Parameter"><em>Parameter</em></a>) – parsed HIP parameters</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>DataType_AckDataParameter</p>
+<dd class="field-even"><p>Data_AckDataParameter</p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Parsed parameter data.</p>
@@ -1707,14 +1707,14 @@ enumeration:</p>
 <li><p><strong>code</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – parameter code</p></li>
 <li><p><strong>cbit</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a>) – critical bit</p></li>
 <li><p><strong>clen</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – length of contents</p></li>
-<li><p><strong>desc</strong> (<em>RegType_Parameter</em>) – parameter type</p></li>
+<li><p><strong>desc</strong> (<em>Enum_Parameter</em>) – parameter type</p></li>
 <li><p><strong>length</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – remaining packet length</p></li>
 <li><p><strong>version</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – HIP protocol version</p></li>
 <li><p><strong>options</strong> (<a class="reference internal" href="../../const/hip.html#pcapkit.const.hip.parameter.Parameter" title="pcapkit.const.hip.parameter.Parameter"><em>Parameter</em></a>) – parsed HIP parameters</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>DataType_PayloadMICParameter</p>
+<dd class="field-even"><p>Data_PayloadMICParameter</p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Parsed parameter data.</p>
@@ -1744,14 +1744,14 @@ enumeration:</p>
 <li><p><strong>code</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – parameter code</p></li>
 <li><p><strong>cbit</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a>) – critical bit</p></li>
 <li><p><strong>clen</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – length of contents</p></li>
-<li><p><strong>desc</strong> (<em>RegType_Parameter</em>) – parameter type</p></li>
+<li><p><strong>desc</strong> (<em>Enum_Parameter</em>) – parameter type</p></li>
 <li><p><strong>length</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – remaining packet length</p></li>
 <li><p><strong>version</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – HIP protocol version</p></li>
 <li><p><strong>options</strong> (<a class="reference internal" href="../../const/hip.html#pcapkit.const.hip.parameter.Parameter" title="pcapkit.const.hip.parameter.Parameter"><em>Parameter</em></a>) – parsed HIP parameters</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>DataType_TransactionIDParameter</p>
+<dd class="field-even"><p>Data_TransactionIDParameter</p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Parsed parameter data.</p>
@@ -1781,14 +1781,14 @@ enumeration:</p>
 <li><p><strong>code</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – parameter code</p></li>
 <li><p><strong>cbit</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a>) – critical bit</p></li>
 <li><p><strong>clen</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – length of contents</p></li>
-<li><p><strong>desc</strong> (<em>RegType_Parameter</em>) – parameter type</p></li>
+<li><p><strong>desc</strong> (<em>Enum_Parameter</em>) – parameter type</p></li>
 <li><p><strong>length</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – remaining packet length</p></li>
 <li><p><strong>version</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – HIP protocol version</p></li>
 <li><p><strong>options</strong> (<a class="reference internal" href="../../const/hip.html#pcapkit.const.hip.parameter.Parameter" title="pcapkit.const.hip.parameter.Parameter"><em>Parameter</em></a>) – parsed HIP parameters</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>DataType_OverlayIDParameter</p>
+<dd class="field-even"><p>Data_OverlayIDParameter</p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Parsed parameter data.</p>
@@ -1829,14 +1829,14 @@ enumeration:</p>
 <li><p><strong>code</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – parameter code</p></li>
 <li><p><strong>cbit</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a>) – critical bit</p></li>
 <li><p><strong>clen</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – length of contents</p></li>
-<li><p><strong>desc</strong> (<em>RegType_Parameter</em>) – parameter type</p></li>
+<li><p><strong>desc</strong> (<em>Enum_Parameter</em>) – parameter type</p></li>
 <li><p><strong>length</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – remaining packet length</p></li>
 <li><p><strong>version</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – HIP protocol version</p></li>
 <li><p><strong>options</strong> (<a class="reference internal" href="../../const/hip.html#pcapkit.const.hip.parameter.Parameter" title="pcapkit.const.hip.parameter.Parameter"><em>Parameter</em></a>) – parsed HIP parameters</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>DataType_RouteDstParameter</p>
+<dd class="field-even"><p>Data_RouteDstParameter</p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Parsed parameter data.</p>
@@ -1871,14 +1871,14 @@ enumeration:</p>
 <li><p><strong>code</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – parameter code</p></li>
 <li><p><strong>cbit</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a>) – critical bit</p></li>
 <li><p><strong>clen</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – length of contents</p></li>
-<li><p><strong>desc</strong> (<em>RegType_Parameter</em>) – parameter type</p></li>
+<li><p><strong>desc</strong> (<em>Enum_Parameter</em>) – parameter type</p></li>
 <li><p><strong>length</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – remaining packet length</p></li>
 <li><p><strong>version</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – HIP protocol version</p></li>
 <li><p><strong>options</strong> (<a class="reference internal" href="../../const/hip.html#pcapkit.const.hip.parameter.Parameter" title="pcapkit.const.hip.parameter.Parameter"><em>Parameter</em></a>) – parsed HIP parameters</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>DataType_HIPTransportModeParameter</p>
+<dd class="field-even"><p>Data_HIPTransportModeParameter</p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Parsed parameter data.</p>
@@ -1913,14 +1913,14 @@ enumeration:</p>
 <li><p><strong>code</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – parameter code</p></li>
 <li><p><strong>cbit</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a>) – critical bit</p></li>
 <li><p><strong>clen</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – length of contents</p></li>
-<li><p><strong>desc</strong> (<em>RegType_Parameter</em>) – parameter type</p></li>
+<li><p><strong>desc</strong> (<em>Enum_Parameter</em>) – parameter type</p></li>
 <li><p><strong>length</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – remaining packet length</p></li>
 <li><p><strong>version</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – HIP protocol version</p></li>
 <li><p><strong>options</strong> (<a class="reference internal" href="../../const/hip.html#pcapkit.const.hip.parameter.Parameter" title="pcapkit.const.hip.parameter.Parameter"><em>Parameter</em></a>) – parsed HIP parameters</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>DataType_HIPMACParameter</p>
+<dd class="field-even"><p>Data_HIPMACParameter</p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Parsed parameter data.</p>
@@ -1952,14 +1952,14 @@ enumeration:</p>
 <li><p><strong>code</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – parameter code</p></li>
 <li><p><strong>cbit</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a>) – critical bit</p></li>
 <li><p><strong>clen</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – length of contents</p></li>
-<li><p><strong>desc</strong> (<em>RegType_Parameter</em>) – parameter type</p></li>
+<li><p><strong>desc</strong> (<em>Enum_Parameter</em>) – parameter type</p></li>
 <li><p><strong>length</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – remaining packet length</p></li>
 <li><p><strong>version</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – HIP protocol version</p></li>
 <li><p><strong>options</strong> (<a class="reference internal" href="../../const/hip.html#pcapkit.const.hip.parameter.Parameter" title="pcapkit.const.hip.parameter.Parameter"><em>Parameter</em></a>) – parsed HIP parameters</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>DataType_HIPMAC2Parameter</p>
+<dd class="field-even"><p>Data_HIPMAC2Parameter</p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Parsed parameter data.</p>
@@ -1989,14 +1989,14 @@ enumeration:</p>
 <li><p><strong>code</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – parameter code</p></li>
 <li><p><strong>cbit</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a>) – critical bit</p></li>
 <li><p><strong>clen</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – length of contents</p></li>
-<li><p><strong>desc</strong> (<em>RegType_Parameter</em>) – parameter type</p></li>
+<li><p><strong>desc</strong> (<em>Enum_Parameter</em>) – parameter type</p></li>
 <li><p><strong>length</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – remaining packet length</p></li>
 <li><p><strong>version</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – HIP protocol version</p></li>
 <li><p><strong>options</strong> (<a class="reference internal" href="../../const/hip.html#pcapkit.const.hip.parameter.Parameter" title="pcapkit.const.hip.parameter.Parameter"><em>Parameter</em></a>) – parsed HIP parameters</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>DataType_HIPSignature2Parameter</p>
+<dd class="field-even"><p>Data_HIPSignature2Parameter</p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Parsed parameter data.</p>
@@ -2026,14 +2026,14 @@ enumeration:</p>
 <li><p><strong>code</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – parameter code</p></li>
 <li><p><strong>cbit</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a>) – critical bit</p></li>
 <li><p><strong>clen</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – length of contents</p></li>
-<li><p><strong>desc</strong> (<em>RegType_Parameter</em>) – parameter type</p></li>
+<li><p><strong>desc</strong> (<em>Enum_Parameter</em>) – parameter type</p></li>
 <li><p><strong>length</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – remaining packet length</p></li>
 <li><p><strong>version</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – HIP protocol version</p></li>
 <li><p><strong>options</strong> (<a class="reference internal" href="../../const/hip.html#pcapkit.const.hip.parameter.Parameter" title="pcapkit.const.hip.parameter.Parameter"><em>Parameter</em></a>) – parsed HIP parameters</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>DataType_HIPSignatureParameter</p>
+<dd class="field-even"><p>Data_HIPSignatureParameter</p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Parsed parameter data.</p>
@@ -2061,14 +2061,14 @@ enumeration:</p>
 <li><p><strong>code</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – parameter code</p></li>
 <li><p><strong>cbit</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a>) – critical bit</p></li>
 <li><p><strong>clen</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – length of contents</p></li>
-<li><p><strong>desc</strong> (<em>RegType_Parameter</em>) – parameter type</p></li>
+<li><p><strong>desc</strong> (<em>Enum_Parameter</em>) – parameter type</p></li>
 <li><p><strong>length</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – remaining packet length</p></li>
 <li><p><strong>version</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – HIP protocol version</p></li>
 <li><p><strong>options</strong> (<a class="reference internal" href="../../const/hip.html#pcapkit.const.hip.parameter.Parameter" title="pcapkit.const.hip.parameter.Parameter"><em>Parameter</em></a>) – parsed HIP parameters</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>DataType_EchoRequestUnsignedParameter</p>
+<dd class="field-even"><p>Data_EchoRequestUnsignedParameter</p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Parsed parameter data.</p>
@@ -2096,14 +2096,14 @@ enumeration:</p>
 <li><p><strong>code</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – parameter code</p></li>
 <li><p><strong>cbit</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a>) – critical bit</p></li>
 <li><p><strong>clen</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – length of contents</p></li>
-<li><p><strong>desc</strong> (<em>RegType_Parameter</em>) – parameter type</p></li>
+<li><p><strong>desc</strong> (<em>Enum_Parameter</em>) – parameter type</p></li>
 <li><p><strong>length</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – remaining packet length</p></li>
 <li><p><strong>version</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – HIP protocol version</p></li>
 <li><p><strong>options</strong> (<a class="reference internal" href="../../const/hip.html#pcapkit.const.hip.parameter.Parameter" title="pcapkit.const.hip.parameter.Parameter"><em>Parameter</em></a>) – parsed HIP parameters</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>DataType_EchoResponseUnsignedParameter</p>
+<dd class="field-even"><p>Data_EchoResponseUnsignedParameter</p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Parsed parameter data.</p>
@@ -2136,14 +2136,14 @@ enumeration:</p>
 <li><p><strong>code</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – parameter code</p></li>
 <li><p><strong>cbit</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a>) – critical bit</p></li>
 <li><p><strong>clen</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – length of contents</p></li>
-<li><p><strong>desc</strong> (<em>RegType_Parameter</em>) – parameter type</p></li>
+<li><p><strong>desc</strong> (<em>Enum_Parameter</em>) – parameter type</p></li>
 <li><p><strong>length</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – remaining packet length</p></li>
 <li><p><strong>version</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – HIP protocol version</p></li>
 <li><p><strong>options</strong> (<a class="reference internal" href="../../const/hip.html#pcapkit.const.hip.parameter.Parameter" title="pcapkit.const.hip.parameter.Parameter"><em>Parameter</em></a>) – parsed HIP parameters</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>DataType_RelayFromParameter</p>
+<dd class="field-even"><p>Data_RelayFromParameter</p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Parsed parameter data.</p>
@@ -2179,14 +2179,14 @@ enumeration:</p>
 <li><p><strong>code</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – parameter code</p></li>
 <li><p><strong>cbit</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a>) – critical bit</p></li>
 <li><p><strong>clen</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – length of contents</p></li>
-<li><p><strong>desc</strong> (<em>RegType_Parameter</em>) – parameter type</p></li>
+<li><p><strong>desc</strong> (<em>Enum_Parameter</em>) – parameter type</p></li>
 <li><p><strong>length</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – remaining packet length</p></li>
 <li><p><strong>version</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – HIP protocol version</p></li>
 <li><p><strong>options</strong> (<a class="reference internal" href="../../const/hip.html#pcapkit.const.hip.parameter.Parameter" title="pcapkit.const.hip.parameter.Parameter"><em>Parameter</em></a>) – parsed HIP parameters</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>DataType_RelayToParameter</p>
+<dd class="field-even"><p>Data_RelayToParameter</p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Parsed parameter data.</p>
@@ -2217,14 +2217,14 @@ enumeration:</p>
 <li><p><strong>code</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – parameter code</p></li>
 <li><p><strong>cbit</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a>) – critical bit</p></li>
 <li><p><strong>clen</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – length of contents</p></li>
-<li><p><strong>desc</strong> (<em>RegType_Parameter</em>) – parameter type</p></li>
+<li><p><strong>desc</strong> (<em>Enum_Parameter</em>) – parameter type</p></li>
 <li><p><strong>length</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – remaining packet length</p></li>
 <li><p><strong>version</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – HIP protocol version</p></li>
 <li><p><strong>options</strong> (<a class="reference internal" href="../../const/hip.html#pcapkit.const.hip.parameter.Parameter" title="pcapkit.const.hip.parameter.Parameter"><em>Parameter</em></a>) – parsed HIP parameters</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>DataType_OverlayTTLParameter</p>
+<dd class="field-even"><p>Data_OverlayTTLParameter</p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Parsed parameter data.</p>
@@ -2268,14 +2268,14 @@ enumeration:</p>
 <li><p><strong>code</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – parameter code</p></li>
 <li><p><strong>cbit</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a>) – critical bit</p></li>
 <li><p><strong>clen</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – length of contents</p></li>
-<li><p><strong>desc</strong> (<em>RegType_Parameter</em>) – parameter type</p></li>
+<li><p><strong>desc</strong> (<em>Enum_Parameter</em>) – parameter type</p></li>
 <li><p><strong>length</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – remaining packet length</p></li>
 <li><p><strong>version</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – HIP protocol version</p></li>
 <li><p><strong>options</strong> (<a class="reference internal" href="../../const/hip.html#pcapkit.const.hip.parameter.Parameter" title="pcapkit.const.hip.parameter.Parameter"><em>Parameter</em></a>) – parsed HIP parameters</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>DataType_RouteViaParameter</p>
+<dd class="field-even"><p>Data_RouteViaParameter</p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Parsed parameter data.</p>
@@ -2309,14 +2309,14 @@ enumeration:</p>
 <li><p><strong>code</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – parameter code</p></li>
 <li><p><strong>cbit</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a>) – critical bit</p></li>
 <li><p><strong>clen</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – length of contents</p></li>
-<li><p><strong>desc</strong> (<em>RegType_Parameter</em>) – parameter type</p></li>
+<li><p><strong>desc</strong> (<em>Enum_Parameter</em>) – parameter type</p></li>
 <li><p><strong>length</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – remaining packet length</p></li>
 <li><p><strong>version</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – HIP protocol version</p></li>
 <li><p><strong>options</strong> (<a class="reference internal" href="../../const/hip.html#pcapkit.const.hip.parameter.Parameter" title="pcapkit.const.hip.parameter.Parameter"><em>Parameter</em></a>) – parsed HIP parameters</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>DataType_FromParameter</p>
+<dd class="field-even"><p>Data_FromParameter</p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Parsed parameter data.</p>
@@ -2349,14 +2349,14 @@ enumeration:</p>
 <li><p><strong>code</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – parameter code</p></li>
 <li><p><strong>cbit</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a>) – critical bit</p></li>
 <li><p><strong>clen</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – length of contents</p></li>
-<li><p><strong>desc</strong> (<em>RegType_Parameter</em>) – parameter type</p></li>
+<li><p><strong>desc</strong> (<em>Enum_Parameter</em>) – parameter type</p></li>
 <li><p><strong>length</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – remaining packet length</p></li>
 <li><p><strong>version</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – HIP protocol version</p></li>
 <li><p><strong>options</strong> (<a class="reference internal" href="../../const/hip.html#pcapkit.const.hip.parameter.Parameter" title="pcapkit.const.hip.parameter.Parameter"><em>Parameter</em></a>) – parsed HIP parameters</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>DataType_RVSHMACParameter</p>
+<dd class="field-even"><p>Data_RVSHMACParameter</p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Parsed parameter data.</p>
@@ -2395,14 +2395,14 @@ enumeration:</p>
 <li><p><strong>code</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – parameter code</p></li>
 <li><p><strong>cbit</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a>) – critical bit</p></li>
 <li><p><strong>clen</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – length of contents</p></li>
-<li><p><strong>desc</strong> (<em>RegType_Parameter</em>) – parameter type</p></li>
+<li><p><strong>desc</strong> (<em>Enum_Parameter</em>) – parameter type</p></li>
 <li><p><strong>length</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – remaining packet length</p></li>
 <li><p><strong>version</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – HIP protocol version</p></li>
 <li><p><strong>options</strong> (<a class="reference internal" href="../../const/hip.html#pcapkit.const.hip.parameter.Parameter" title="pcapkit.const.hip.parameter.Parameter"><em>Parameter</em></a>) – parsed HIP parameters</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>DataType_ViaRVSParameter</p>
+<dd class="field-even"><p>Data_ViaRVSParameter</p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Parsed parameter data.</p>
@@ -2435,14 +2435,14 @@ enumeration:</p>
 <li><p><strong>code</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – parameter code</p></li>
 <li><p><strong>cbit</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a>) – critical bit</p></li>
 <li><p><strong>clen</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – length of contents</p></li>
-<li><p><strong>desc</strong> (<em>RegType_Parameter</em>) – parameter type</p></li>
+<li><p><strong>desc</strong> (<em>Enum_Parameter</em>) – parameter type</p></li>
 <li><p><strong>length</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – remaining packet length</p></li>
 <li><p><strong>version</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – HIP protocol version</p></li>
 <li><p><strong>options</strong> (<a class="reference internal" href="../../const/hip.html#pcapkit.const.hip.parameter.Parameter" title="pcapkit.const.hip.parameter.Parameter"><em>Parameter</em></a>) – parsed HIP parameters</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>DataType_RelayHMACParameter</p>
+<dd class="field-even"><p>Data_RelayHMACParameter</p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Parsed parameter data.</p>
@@ -2520,7 +2520,7 @@ enumeration:</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.internet.hip.HIP.parameters">
-<span class="sig-name descname"><span class="pre">parameters</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">OrderedMultiDict[RegType_Parameter,</span> <span class="pre">Parameter]</span></em><a class="headerlink" href="#pcapkit.protocols.data.internet.hip.HIP.parameters" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">parameters</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">OrderedMultiDict[Enum_Parameter,</span> <span class="pre">Parameter]</span></em><a class="headerlink" href="#pcapkit.protocols.data.internet.hip.HIP.parameters" title="Permalink to this definition">¶</a></dt>
 <dd><p>HIP parameters.</p>
 </dd></dl>
 
@@ -2568,7 +2568,7 @@ enumeration:</p>
 </dl>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.internet.hip.Parameter.type">
-<span class="sig-name descname"><span class="pre">type</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">RegType_Parameter</span></em><a class="headerlink" href="#pcapkit.protocols.data.internet.hip.Parameter.type" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">type</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Enum_Parameter</span></em><a class="headerlink" href="#pcapkit.protocols.data.internet.hip.Parameter.type" title="Permalink to this definition">¶</a></dt>
 <dd><p>Parameter type.</p>
 </dd></dl>
 

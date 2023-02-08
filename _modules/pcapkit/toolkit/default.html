@@ -41,7 +41,7 @@
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">cast</span>
 
-<span class="kn">from</span> <span class="nn">pcapkit.const.ipv6.extension_header</span> <span class="kn">import</span> <span class="n">ExtensionHeader</span> <span class="k">as</span> <span class="n">RegType_ExtensionHeader</span>
+<span class="kn">from</span> <span class="nn">pcapkit.const.ipv6.extension_header</span> <span class="kn">import</span> <span class="n">ExtensionHeader</span> <span class="k">as</span> <span class="n">Enum_ExtensionHeader</span>
 <span class="kn">from</span> <span class="nn">pcapkit.foundation.reassembly.ip</span> <span class="kn">import</span> <span class="n">Packet</span> <span class="k">as</span> <span class="n">IP_Packet</span>
 <span class="kn">from</span> <span class="nn">pcapkit.foundation.reassembly.tcp</span> <span class="kn">import</span> <span class="n">Packet</span> <span class="k">as</span> <span class="n">TCP_Packet</span>
 <span class="kn">from</span> <span class="nn">pcapkit.foundation.traceflow</span> <span class="kn">import</span> <span class="n">Packet</span> <span class="k">as</span> <span class="n">TF_Packet</span>
@@ -70,7 +70,7 @@
 
 <span class="sd">        * If the ``frame`` can be used for IPv4 reassembly. A frame can be reassembled</span>
 <span class="sd">          if it contains IPv4 layer (:class:`pcapkit.protocols.internet.ipv4.IPv4`) and</span>
-<span class="sd">          the **DF** (:attr:`IPv4.flags.df &lt;pcapkit.protocols.internet.ipv4.DataType_IPv4_Flags.df&gt;`)</span>
+<span class="sd">          the **DF** (:attr:`IPv4.flags.df &lt;pcapkit.protocols.internet.ipv4.Data_IPv4_Flags.df&gt;`)</span>
 <span class="sd">          flag is :data:`False`.</span>
 <span class="sd">        * If the ``frame`` can be reassembled, then the :obj:`dict` mapping of data for IPv4</span>
 <span class="sd">          reassembly (c.f. :term:`ipv4.packet`) will be returned; otherwise, returns :data:`None`.</span>
@@ -128,7 +128,7 @@
         <span class="n">ipv6</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">&#39;IPv6&#39;</span><span class="p">,</span> <span class="n">frame</span><span class="p">[</span><span class="s1">&#39;IPv6&#39;</span><span class="p">])</span>
         <span class="n">ipv6_info</span> <span class="o">=</span> <span class="n">ipv6</span><span class="o">.</span><span class="n">info</span>
         <span class="k">if</span> <span class="p">(</span><span class="n">ipv6_frag</span> <span class="o">:=</span> <span class="n">ipv6</span><span class="o">.</span><span class="n">extension_headers</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>  <span class="c1"># type: ignore[call-overload]</span>
-            <span class="n">RegType_ExtensionHeader</span><span class="o">.</span><span class="n">IPv6_Frag</span>
+            <span class="n">Enum_ExtensionHeader</span><span class="o">.</span><span class="n">IPv6_Frag</span>
         <span class="p">))</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>  <span class="c1"># dismiss not fragmented frame</span>
             <span class="k">return</span> <span class="kc">None</span>
         <span class="n">ipv6_frag_info</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">&#39;IPv6_Frag&#39;</span><span class="p">,</span> <span class="n">ipv6_frag</span><span class="p">)</span><span class="o">.</span><span class="n">info</span>

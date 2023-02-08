@@ -74,52 +74,51 @@
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
 
 <span class="kn">from</span> <span class="nn">pcapkit.const.reg.transtype</span> <span class="kn">import</span> <span class="n">TransType</span>
-<span class="kn">from</span> <span class="nn">pcapkit.const.tcp.checksum</span> <span class="kn">import</span> <span class="n">Checksum</span> <span class="k">as</span> <span class="n">RegType_Checksum</span>
-<span class="kn">from</span> <span class="nn">pcapkit.const.tcp.mp_tcp_option</span> <span class="kn">import</span> <span class="n">MPTCPOption</span> <span class="k">as</span> <span class="n">RegType_MPTCPOption</span>
-<span class="kn">from</span> <span class="nn">pcapkit.const.tcp.option</span> <span class="kn">import</span> <span class="n">Option</span> <span class="k">as</span> <span class="n">RegType_Option</span>
+<span class="kn">from</span> <span class="nn">pcapkit.const.tcp.checksum</span> <span class="kn">import</span> <span class="n">Checksum</span> <span class="k">as</span> <span class="n">Enum_Checksum</span>
+<span class="kn">from</span> <span class="nn">pcapkit.const.tcp.mp_tcp_option</span> <span class="kn">import</span> <span class="n">MPTCPOption</span> <span class="k">as</span> <span class="n">Enum_MPTCPOption</span>
+<span class="kn">from</span> <span class="nn">pcapkit.const.tcp.option</span> <span class="kn">import</span> <span class="n">Option</span> <span class="k">as</span> <span class="n">Enum_Option</span>
 <span class="kn">from</span> <span class="nn">pcapkit.corekit.multidict</span> <span class="kn">import</span> <span class="n">OrderedMultiDict</span>
-<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.transport.tcp</span> <span class="kn">import</span> <span class="n">CC</span> <span class="k">as</span> <span class="n">DataType_CC</span>
-<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.transport.tcp</span> <span class="kn">import</span> <span class="n">MPTCP</span> <span class="k">as</span> <span class="n">DataType_MPTCP</span>
-<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.transport.tcp</span> <span class="kn">import</span> <span class="n">MPTCPDSS</span> <span class="k">as</span> <span class="n">DataType_MPTCPDSS</span>
-<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.transport.tcp</span> <span class="kn">import</span> <span class="n">SACK</span> <span class="k">as</span> <span class="n">DataType_SACK</span>
-<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.transport.tcp</span> <span class="kn">import</span> <span class="n">TCP</span> <span class="k">as</span> <span class="n">DataType_TCP</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.transport.tcp</span> <span class="kn">import</span> <span class="n">CC</span> <span class="k">as</span> <span class="n">Data_CC</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.transport.tcp</span> <span class="kn">import</span> <span class="n">MPTCP</span> <span class="k">as</span> <span class="n">Data_MPTCP</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.transport.tcp</span> <span class="kn">import</span> <span class="n">MPTCPDSS</span> <span class="k">as</span> <span class="n">Data_MPTCPDSS</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.transport.tcp</span> <span class="kn">import</span> <span class="n">SACK</span> <span class="k">as</span> <span class="n">Data_SACK</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.transport.tcp</span> <span class="kn">import</span> <span class="n">TCP</span> <span class="k">as</span> <span class="n">Data_TCP</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.transport.tcp</span> <span class="kn">import</span> <span class="n">AlternateChecksumData</span> <span class="k">as</span> <span class="n">Data_AlternateChecksumData</span>
 <span class="kn">from</span> <span class="nn">pcapkit.protocols.data.transport.tcp</span> <span class="kn">import</span> \
-    <span class="n">AlternateChecksumData</span> <span class="k">as</span> <span class="n">DataType_AlternateChecksumData</span>
+    <span class="n">AlternateChecksumRequest</span> <span class="k">as</span> <span class="n">Data_AlternateChecksumRequest</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.transport.tcp</span> <span class="kn">import</span> <span class="n">Authentication</span> <span class="k">as</span> <span class="n">Data_Authentication</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.transport.tcp</span> <span class="kn">import</span> <span class="n">CCEcho</span> <span class="k">as</span> <span class="n">Data_CCEcho</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.transport.tcp</span> <span class="kn">import</span> <span class="n">CCNew</span> <span class="k">as</span> <span class="n">Data_CCNew</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.transport.tcp</span> <span class="kn">import</span> <span class="n">Echo</span> <span class="k">as</span> <span class="n">Data_Echo</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.transport.tcp</span> <span class="kn">import</span> <span class="n">EchoReply</span> <span class="k">as</span> <span class="n">Data_EchoReply</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.transport.tcp</span> <span class="kn">import</span> <span class="n">EndOfOptionList</span> <span class="k">as</span> <span class="n">Data_EndOfOptionList</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.transport.tcp</span> <span class="kn">import</span> <span class="n">FastOpenCookie</span> <span class="k">as</span> <span class="n">Data_FastOpenCookie</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.transport.tcp</span> <span class="kn">import</span> <span class="n">Flags</span> <span class="k">as</span> <span class="n">Data_Flags</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.transport.tcp</span> <span class="kn">import</span> <span class="n">MaximumSegmentSize</span> <span class="k">as</span> <span class="n">Data_MaximumSegmentSize</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.transport.tcp</span> <span class="kn">import</span> <span class="n">MD5Signature</span> <span class="k">as</span> <span class="n">Data_MD5Signature</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.transport.tcp</span> <span class="kn">import</span> <span class="n">MPTCPAddAddress</span> <span class="k">as</span> <span class="n">Data_MPTCPAddAddress</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.transport.tcp</span> <span class="kn">import</span> <span class="n">MPTCPCapable</span> <span class="k">as</span> <span class="n">Data_MPTCPCapable</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.transport.tcp</span> <span class="kn">import</span> <span class="n">MPTCPCapableFlag</span> <span class="k">as</span> <span class="n">Data_MPTCPCapableFlag</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.transport.tcp</span> <span class="kn">import</span> <span class="n">MPTCPDSSFlag</span> <span class="k">as</span> <span class="n">Data_MPTCPDSSFlag</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.transport.tcp</span> <span class="kn">import</span> <span class="n">MPTCPFallback</span> <span class="k">as</span> <span class="n">Data_MPTCPFallback</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.transport.tcp</span> <span class="kn">import</span> <span class="n">MPTCPFastclose</span> <span class="k">as</span> <span class="n">Data_MPTCPFastclose</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.transport.tcp</span> <span class="kn">import</span> <span class="n">MPTCPJoinACK</span> <span class="k">as</span> <span class="n">Data_MPTCPJoinACK</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.transport.tcp</span> <span class="kn">import</span> <span class="n">MPTCPJoinSYN</span> <span class="k">as</span> <span class="n">Data_MPTCPJoinSYN</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.transport.tcp</span> <span class="kn">import</span> <span class="n">MPTCPJoinSYNACK</span> <span class="k">as</span> <span class="n">Data_MPTCPJoinSYNACK</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.transport.tcp</span> <span class="kn">import</span> <span class="n">MPTCPPriority</span> <span class="k">as</span> <span class="n">Data_MPTCPPriority</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.transport.tcp</span> <span class="kn">import</span> <span class="n">MPTCPRemoveAddress</span> <span class="k">as</span> <span class="n">Data_MPTCPRemoveAddress</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.transport.tcp</span> <span class="kn">import</span> <span class="n">MPTCPUnknown</span> <span class="k">as</span> <span class="n">Data_MPTCPUnknown</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.transport.tcp</span> <span class="kn">import</span> <span class="n">NoOperation</span> <span class="k">as</span> <span class="n">Data_NoOperation</span>
 <span class="kn">from</span> <span class="nn">pcapkit.protocols.data.transport.tcp</span> <span class="kn">import</span> \
-    <span class="n">AlternateChecksumRequest</span> <span class="k">as</span> <span class="n">DataType_AlternateChecksumRequest</span>
-<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.transport.tcp</span> <span class="kn">import</span> <span class="n">Authentication</span> <span class="k">as</span> <span class="n">DataType_Authentication</span>
-<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.transport.tcp</span> <span class="kn">import</span> <span class="n">CCEcho</span> <span class="k">as</span> <span class="n">DataType_CCEcho</span>
-<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.transport.tcp</span> <span class="kn">import</span> <span class="n">CCNew</span> <span class="k">as</span> <span class="n">DataType_CCNew</span>
-<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.transport.tcp</span> <span class="kn">import</span> <span class="n">Echo</span> <span class="k">as</span> <span class="n">DataType_Echo</span>
-<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.transport.tcp</span> <span class="kn">import</span> <span class="n">EchoReply</span> <span class="k">as</span> <span class="n">DataType_EchoReply</span>
-<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.transport.tcp</span> <span class="kn">import</span> <span class="n">EndOfOptionList</span> <span class="k">as</span> <span class="n">DataType_EndOfOptionList</span>
-<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.transport.tcp</span> <span class="kn">import</span> <span class="n">FastOpenCookie</span> <span class="k">as</span> <span class="n">DataType_FastOpenCookie</span>
-<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.transport.tcp</span> <span class="kn">import</span> <span class="n">Flags</span> <span class="k">as</span> <span class="n">DataType_Flags</span>
-<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.transport.tcp</span> <span class="kn">import</span> <span class="n">MaximumSegmentSize</span> <span class="k">as</span> <span class="n">DataType_MaximumSegmentSize</span>
-<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.transport.tcp</span> <span class="kn">import</span> <span class="n">MD5Signature</span> <span class="k">as</span> <span class="n">DataType_MD5Signature</span>
-<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.transport.tcp</span> <span class="kn">import</span> <span class="n">MPTCPAddAddress</span> <span class="k">as</span> <span class="n">DataType_MPTCPAddAddress</span>
-<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.transport.tcp</span> <span class="kn">import</span> <span class="n">MPTCPCapable</span> <span class="k">as</span> <span class="n">DataType_MPTCPCapable</span>
-<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.transport.tcp</span> <span class="kn">import</span> <span class="n">MPTCPCapableFlag</span> <span class="k">as</span> <span class="n">DataType_MPTCPCapableFlag</span>
-<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.transport.tcp</span> <span class="kn">import</span> <span class="n">MPTCPDSSFlag</span> <span class="k">as</span> <span class="n">DataType_MPTCPDSSFlag</span>
-<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.transport.tcp</span> <span class="kn">import</span> <span class="n">MPTCPFallback</span> <span class="k">as</span> <span class="n">DataType_MPTCPFallback</span>
-<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.transport.tcp</span> <span class="kn">import</span> <span class="n">MPTCPFastclose</span> <span class="k">as</span> <span class="n">DataType_MPTCPFastclose</span>
-<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.transport.tcp</span> <span class="kn">import</span> <span class="n">MPTCPJoinACK</span> <span class="k">as</span> <span class="n">DataType_MPTCPJoinACK</span>
-<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.transport.tcp</span> <span class="kn">import</span> <span class="n">MPTCPJoinSYN</span> <span class="k">as</span> <span class="n">DataType_MPTCPJoinSYN</span>
-<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.transport.tcp</span> <span class="kn">import</span> <span class="n">MPTCPJoinSYNACK</span> <span class="k">as</span> <span class="n">DataType_MPTCPJoinSYNACK</span>
-<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.transport.tcp</span> <span class="kn">import</span> <span class="n">MPTCPPriority</span> <span class="k">as</span> <span class="n">DataType_MPTCPPriority</span>
-<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.transport.tcp</span> <span class="kn">import</span> <span class="n">MPTCPRemoveAddress</span> <span class="k">as</span> <span class="n">DataType_MPTCPRemoveAddress</span>
-<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.transport.tcp</span> <span class="kn">import</span> <span class="n">MPTCPUnknown</span> <span class="k">as</span> <span class="n">DataType_MPTCPUnknown</span>
-<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.transport.tcp</span> <span class="kn">import</span> <span class="n">NoOperation</span> <span class="k">as</span> <span class="n">DataType_NoOperation</span>
+    <span class="n">PartialOrderConnectionPermitted</span> <span class="k">as</span> <span class="n">Data_PartialOrderConnectionPermitted</span>
 <span class="kn">from</span> <span class="nn">pcapkit.protocols.data.transport.tcp</span> <span class="kn">import</span> \
-    <span class="n">PartialOrderConnectionPermitted</span> <span class="k">as</span> <span class="n">DataType_PartialOrderConnectionPermitted</span>
-<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.transport.tcp</span> <span class="kn">import</span> \
-    <span class="n">PartialOrderConnectionProfile</span> <span class="k">as</span> <span class="n">DataType_PartialOrderConnectionProfile</span>
-<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.transport.tcp</span> <span class="kn">import</span> <span class="n">QuickStartResponse</span> <span class="k">as</span> <span class="n">DataType_QuickStartResponse</span>
-<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.transport.tcp</span> <span class="kn">import</span> <span class="n">SACKPermitted</span> <span class="k">as</span> <span class="n">DataType_SACKPermitted</span>
-<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.transport.tcp</span> <span class="kn">import</span> <span class="n">Timestamp</span> <span class="k">as</span> <span class="n">DataType_Timestamp</span>
-<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.transport.tcp</span> <span class="kn">import</span> <span class="n">UnassignedOption</span> <span class="k">as</span> <span class="n">DataType_UnassignedOption</span>
-<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.transport.tcp</span> <span class="kn">import</span> <span class="n">UserTimeout</span> <span class="k">as</span> <span class="n">DataType_UserTimeout</span>
-<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.transport.tcp</span> <span class="kn">import</span> <span class="n">WindowScale</span> <span class="k">as</span> <span class="n">DataType_WindowScale</span>
+    <span class="n">PartialOrderConnectionProfile</span> <span class="k">as</span> <span class="n">Data_PartialOrderConnectionProfile</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.transport.tcp</span> <span class="kn">import</span> <span class="n">QuickStartResponse</span> <span class="k">as</span> <span class="n">Data_QuickStartResponse</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.transport.tcp</span> <span class="kn">import</span> <span class="n">SACKPermitted</span> <span class="k">as</span> <span class="n">Data_SACKPermitted</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.transport.tcp</span> <span class="kn">import</span> <span class="n">Timestamp</span> <span class="k">as</span> <span class="n">Data_Timestamp</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.transport.tcp</span> <span class="kn">import</span> <span class="n">UnassignedOption</span> <span class="k">as</span> <span class="n">Data_UnassignedOption</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.transport.tcp</span> <span class="kn">import</span> <span class="n">UserTimeout</span> <span class="k">as</span> <span class="n">Data_UserTimeout</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.transport.tcp</span> <span class="kn">import</span> <span class="n">WindowScale</span> <span class="k">as</span> <span class="n">Data_WindowScale</span>
 <span class="kn">from</span> <span class="nn">pcapkit.protocols.transport.transport</span> <span class="kn">import</span> <span class="n">Transport</span>
 <span class="kn">from</span> <span class="nn">pcapkit.utilities.exceptions</span> <span class="kn">import</span> <span class="n">ProtocolError</span>
 
@@ -129,18 +128,18 @@
     <span class="kn">from</span> <span class="nn">mypy_extensions</span> <span class="kn">import</span> <span class="n">NamedArg</span>
     <span class="kn">from</span> <span class="nn">typing_extensions</span> <span class="kn">import</span> <span class="n">Literal</span>
 
-    <span class="kn">from</span> <span class="nn">pcapkit.protocols.data.transport.tcp</span> <span class="kn">import</span> <span class="n">MPTCPJoin</span> <span class="k">as</span> <span class="n">DataType_MPTCPJoin</span>
-    <span class="kn">from</span> <span class="nn">pcapkit.protocols.data.transport.tcp</span> <span class="kn">import</span> <span class="n">Option</span> <span class="k">as</span> <span class="n">DataType_Option</span>
+    <span class="kn">from</span> <span class="nn">pcapkit.protocols.data.transport.tcp</span> <span class="kn">import</span> <span class="n">MPTCPJoin</span> <span class="k">as</span> <span class="n">Data_MPTCPJoin</span>
+    <span class="kn">from</span> <span class="nn">pcapkit.protocols.data.transport.tcp</span> <span class="kn">import</span> <span class="n">Option</span> <span class="k">as</span> <span class="n">Data_Option</span>
 
-    <span class="n">Option</span> <span class="o">=</span> <span class="n">OrderedMultiDict</span><span class="p">[</span><span class="n">RegType_Option</span><span class="p">,</span> <span class="n">DataType_Option</span><span class="p">]</span>
-    <span class="n">OptionParser</span> <span class="o">=</span> <span class="n">Callable</span><span class="p">[[</span><span class="s1">&#39;TCP&#39;</span><span class="p">,</span> <span class="n">RegType_Option</span><span class="p">,</span> <span class="n">NamedArg</span><span class="p">(</span><span class="n">Option</span><span class="p">,</span> <span class="s1">&#39;options&#39;</span><span class="p">)],</span> <span class="n">DataType_Option</span><span class="p">]</span>
-    <span class="n">MPOptionParser</span> <span class="o">=</span> <span class="n">Callable</span><span class="p">[[</span><span class="s1">&#39;TCP&#39;</span><span class="p">,</span> <span class="n">RegType_MPTCPOption</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="n">NamedArg</span><span class="p">(</span><span class="n">Option</span><span class="p">,</span> <span class="s1">&#39;options&#39;</span><span class="p">)],</span> <span class="n">DataType_MPTCP</span><span class="p">]</span>
+    <span class="n">Option</span> <span class="o">=</span> <span class="n">OrderedMultiDict</span><span class="p">[</span><span class="n">Enum_Option</span><span class="p">,</span> <span class="n">Data_Option</span><span class="p">]</span>
+    <span class="n">OptionParser</span> <span class="o">=</span> <span class="n">Callable</span><span class="p">[[</span><span class="s1">&#39;TCP&#39;</span><span class="p">,</span> <span class="n">Enum_Option</span><span class="p">,</span> <span class="n">NamedArg</span><span class="p">(</span><span class="n">Option</span><span class="p">,</span> <span class="s1">&#39;options&#39;</span><span class="p">)],</span> <span class="n">Data_Option</span><span class="p">]</span>
+    <span class="n">MPOptionParser</span> <span class="o">=</span> <span class="n">Callable</span><span class="p">[[</span><span class="s1">&#39;TCP&#39;</span><span class="p">,</span> <span class="n">Enum_MPTCPOption</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="n">NamedArg</span><span class="p">(</span><span class="n">Option</span><span class="p">,</span> <span class="s1">&#39;options&#39;</span><span class="p">)],</span> <span class="n">Data_MPTCP</span><span class="p">]</span>
 
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;TCP&#39;</span><span class="p">]</span>
 
 
-<div class="viewcode-block" id="TCP"><a class="viewcode-back" href="../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP">[docs]</a><span class="k">class</span> <span class="nc">TCP</span><span class="p">(</span><span class="n">Transport</span><span class="p">[</span><span class="n">DataType_TCP</span><span class="p">]):</span>
+<div class="viewcode-block" id="TCP"><a class="viewcode-back" href="../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP">[docs]</a><span class="k">class</span> <span class="nc">TCP</span><span class="p">(</span><span class="n">Transport</span><span class="p">[</span><span class="n">Data_TCP</span><span class="p">]):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;This class implements Transmission Control Protocol.</span>
 
 <span class="sd">    This class currently supports parsing of the following protocols, which are</span>
@@ -254,7 +253,7 @@
         <span class="p">},</span>
     <span class="p">)</span>
 
-    <span class="c1">#: DefaultDict[RegType_Option, str | OptionParser]: Option code to method</span>
+    <span class="c1">#: DefaultDict[Enum_Option, str | OptionParser]: Option code to method</span>
     <span class="c1">#: mapping, c.f. :meth:`_read_tcp_options`. Method names are expected to be</span>
     <span class="c1">#: referred to the class by ``_read_mode_${name}``, and if such name not</span>
     <span class="c1">#: found, the value should then be a method that can parse the option by</span>
@@ -262,43 +261,43 @@
     <span class="n">__option__</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">defaultdict</span><span class="p">(</span>
         <span class="k">lambda</span><span class="p">:</span> <span class="s1">&#39;donone&#39;</span><span class="p">,</span>
         <span class="p">{</span>
-            <span class="n">RegType_Option</span><span class="o">.</span><span class="n">End_of_Option_List</span><span class="p">:</span> <span class="s1">&#39;eool&#39;</span><span class="p">,</span>                 <span class="c1"># [RFC 793] End of Option List</span>
-            <span class="n">RegType_Option</span><span class="o">.</span><span class="n">No_Operation</span><span class="p">:</span> <span class="s1">&#39;nop&#39;</span><span class="p">,</span>                        <span class="c1"># [RFC 793] No-Operation</span>
-            <span class="n">RegType_Option</span><span class="o">.</span><span class="n">Maximum_Segment_Size</span><span class="p">:</span> <span class="s1">&#39;mss&#39;</span><span class="p">,</span>                <span class="c1"># [RFC 793] Maximum Segment Size</span>
-            <span class="n">RegType_Option</span><span class="o">.</span><span class="n">Window_Scale</span><span class="p">:</span> <span class="s1">&#39;ws&#39;</span><span class="p">,</span>                         <span class="c1"># [RFC 7323] Window Scale</span>
-            <span class="n">RegType_Option</span><span class="o">.</span><span class="n">SACK_Permitted</span><span class="p">:</span> <span class="s1">&#39;sackpmt&#39;</span><span class="p">,</span>                  <span class="c1"># [RFC 2018] SACK Permitted</span>
-            <span class="n">RegType_Option</span><span class="o">.</span><span class="n">SACK</span><span class="p">:</span> <span class="s1">&#39;sack&#39;</span><span class="p">,</span>                               <span class="c1"># [RFC 2018] SACK</span>
-            <span class="n">RegType_Option</span><span class="o">.</span><span class="n">Echo</span><span class="p">:</span> <span class="s1">&#39;echo&#39;</span><span class="p">,</span>                               <span class="c1"># [RFC 1072] Echo</span>
-            <span class="n">RegType_Option</span><span class="o">.</span><span class="n">Echo_Reply</span><span class="p">:</span> <span class="s1">&#39;echore&#39;</span><span class="p">,</span>                       <span class="c1"># [RFC 1072] Echo Reply</span>
-            <span class="n">RegType_Option</span><span class="o">.</span><span class="n">Timestamps</span><span class="p">:</span> <span class="s1">&#39;ts&#39;</span><span class="p">,</span>                           <span class="c1"># [RFC 7323] Timestamps</span>
-            <span class="n">RegType_Option</span><span class="o">.</span><span class="n">Partial_Order_Connection_Permitted</span><span class="p">:</span> <span class="s1">&#39;poc&#39;</span><span class="p">,</span>  <span class="c1"># [RFC 1693] POC Permitted</span>
-            <span class="n">RegType_Option</span><span class="o">.</span><span class="n">Partial_Order_Service_Profile</span><span class="p">:</span> <span class="s1">&#39;pocsp&#39;</span><span class="p">,</span>     <span class="c1"># [RFC 1693] POC-Serv Profile</span>
-            <span class="n">RegType_Option</span><span class="o">.</span><span class="n">CC</span><span class="p">:</span> <span class="s1">&#39;cc&#39;</span><span class="p">,</span>                                   <span class="c1"># [RFC 1644] Connection Count</span>
-            <span class="n">RegType_Option</span><span class="o">.</span><span class="n">CC_NEW</span><span class="p">:</span> <span class="s1">&#39;ccnew&#39;</span><span class="p">,</span>                            <span class="c1"># [RFC 1644] CC.NEW</span>
-            <span class="n">RegType_Option</span><span class="o">.</span><span class="n">CC_ECHO</span><span class="p">:</span> <span class="s1">&#39;ccecho&#39;</span><span class="p">,</span>                          <span class="c1"># [RFC 1644] CC.ECHO</span>
-            <span class="n">RegType_Option</span><span class="o">.</span><span class="n">TCP_Alternate_Checksum_Request</span><span class="p">:</span> <span class="s1">&#39;chkreq&#39;</span><span class="p">,</span>   <span class="c1"># [RFC 1146] Alt-Chksum Request</span>
-            <span class="n">RegType_Option</span><span class="o">.</span><span class="n">TCP_Alternate_Checksum_Data</span><span class="p">:</span> <span class="s1">&#39;chksum&#39;</span><span class="p">,</span>      <span class="c1"># [RFC 1146] Alt-Chksum Data</span>
-            <span class="n">RegType_Option</span><span class="o">.</span><span class="n">MD5_Signature_Option</span><span class="p">:</span> <span class="s1">&#39;sig&#39;</span><span class="p">,</span>                <span class="c1"># [RFC 2385] MD5 Signature Option</span>
-            <span class="n">RegType_Option</span><span class="o">.</span><span class="n">Quick_Start_Response</span><span class="p">:</span> <span class="s1">&#39;qs&#39;</span><span class="p">,</span>                 <span class="c1"># [RFC 4782] Quick-Start Response</span>
-            <span class="n">RegType_Option</span><span class="o">.</span><span class="n">User_Timeout_Option</span><span class="p">:</span> <span class="s1">&#39;timeout&#39;</span><span class="p">,</span>             <span class="c1"># [RFC 5482] User Timeout Option</span>
-            <span class="n">RegType_Option</span><span class="o">.</span><span class="n">TCP_Authentication_Option</span><span class="p">:</span> <span class="s1">&#39;ao&#39;</span><span class="p">,</span>            <span class="c1"># [RFC 5925] TCP Authentication Option</span>
-            <span class="n">RegType_Option</span><span class="o">.</span><span class="n">Multipath_TCP</span><span class="p">:</span> <span class="s1">&#39;mp&#39;</span><span class="p">,</span>                        <span class="c1"># [RFC 6824] Multipath TCP</span>
-            <span class="n">RegType_Option</span><span class="o">.</span><span class="n">TCP_Fast_Open_Cookie</span><span class="p">:</span> <span class="s1">&#39;fastopen&#39;</span><span class="p">,</span>           <span class="c1"># [RFC 7413] Fast Open</span>
+            <span class="n">Enum_Option</span><span class="o">.</span><span class="n">End_of_Option_List</span><span class="p">:</span> <span class="s1">&#39;eool&#39;</span><span class="p">,</span>                 <span class="c1"># [RFC 793] End of Option List</span>
+            <span class="n">Enum_Option</span><span class="o">.</span><span class="n">No_Operation</span><span class="p">:</span> <span class="s1">&#39;nop&#39;</span><span class="p">,</span>                        <span class="c1"># [RFC 793] No-Operation</span>
+            <span class="n">Enum_Option</span><span class="o">.</span><span class="n">Maximum_Segment_Size</span><span class="p">:</span> <span class="s1">&#39;mss&#39;</span><span class="p">,</span>                <span class="c1"># [RFC 793] Maximum Segment Size</span>
+            <span class="n">Enum_Option</span><span class="o">.</span><span class="n">Window_Scale</span><span class="p">:</span> <span class="s1">&#39;ws&#39;</span><span class="p">,</span>                         <span class="c1"># [RFC 7323] Window Scale</span>
+            <span class="n">Enum_Option</span><span class="o">.</span><span class="n">SACK_Permitted</span><span class="p">:</span> <span class="s1">&#39;sackpmt&#39;</span><span class="p">,</span>                  <span class="c1"># [RFC 2018] SACK Permitted</span>
+            <span class="n">Enum_Option</span><span class="o">.</span><span class="n">SACK</span><span class="p">:</span> <span class="s1">&#39;sack&#39;</span><span class="p">,</span>                               <span class="c1"># [RFC 2018] SACK</span>
+            <span class="n">Enum_Option</span><span class="o">.</span><span class="n">Echo</span><span class="p">:</span> <span class="s1">&#39;echo&#39;</span><span class="p">,</span>                               <span class="c1"># [RFC 1072] Echo</span>
+            <span class="n">Enum_Option</span><span class="o">.</span><span class="n">Echo_Reply</span><span class="p">:</span> <span class="s1">&#39;echore&#39;</span><span class="p">,</span>                       <span class="c1"># [RFC 1072] Echo Reply</span>
+            <span class="n">Enum_Option</span><span class="o">.</span><span class="n">Timestamps</span><span class="p">:</span> <span class="s1">&#39;ts&#39;</span><span class="p">,</span>                           <span class="c1"># [RFC 7323] Timestamps</span>
+            <span class="n">Enum_Option</span><span class="o">.</span><span class="n">Partial_Order_Connection_Permitted</span><span class="p">:</span> <span class="s1">&#39;poc&#39;</span><span class="p">,</span>  <span class="c1"># [RFC 1693] POC Permitted</span>
+            <span class="n">Enum_Option</span><span class="o">.</span><span class="n">Partial_Order_Service_Profile</span><span class="p">:</span> <span class="s1">&#39;pocsp&#39;</span><span class="p">,</span>     <span class="c1"># [RFC 1693] POC-Serv Profile</span>
+            <span class="n">Enum_Option</span><span class="o">.</span><span class="n">CC</span><span class="p">:</span> <span class="s1">&#39;cc&#39;</span><span class="p">,</span>                                   <span class="c1"># [RFC 1644] Connection Count</span>
+            <span class="n">Enum_Option</span><span class="o">.</span><span class="n">CC_NEW</span><span class="p">:</span> <span class="s1">&#39;ccnew&#39;</span><span class="p">,</span>                            <span class="c1"># [RFC 1644] CC.NEW</span>
+            <span class="n">Enum_Option</span><span class="o">.</span><span class="n">CC_ECHO</span><span class="p">:</span> <span class="s1">&#39;ccecho&#39;</span><span class="p">,</span>                          <span class="c1"># [RFC 1644] CC.ECHO</span>
+            <span class="n">Enum_Option</span><span class="o">.</span><span class="n">TCP_Alternate_Checksum_Request</span><span class="p">:</span> <span class="s1">&#39;chkreq&#39;</span><span class="p">,</span>   <span class="c1"># [RFC 1146] Alt-Chksum Request</span>
+            <span class="n">Enum_Option</span><span class="o">.</span><span class="n">TCP_Alternate_Checksum_Data</span><span class="p">:</span> <span class="s1">&#39;chksum&#39;</span><span class="p">,</span>      <span class="c1"># [RFC 1146] Alt-Chksum Data</span>
+            <span class="n">Enum_Option</span><span class="o">.</span><span class="n">MD5_Signature_Option</span><span class="p">:</span> <span class="s1">&#39;sig&#39;</span><span class="p">,</span>                <span class="c1"># [RFC 2385] MD5 Signature Option</span>
+            <span class="n">Enum_Option</span><span class="o">.</span><span class="n">Quick_Start_Response</span><span class="p">:</span> <span class="s1">&#39;qs&#39;</span><span class="p">,</span>                 <span class="c1"># [RFC 4782] Quick-Start Response</span>
+            <span class="n">Enum_Option</span><span class="o">.</span><span class="n">User_Timeout_Option</span><span class="p">:</span> <span class="s1">&#39;timeout&#39;</span><span class="p">,</span>             <span class="c1"># [RFC 5482] User Timeout Option</span>
+            <span class="n">Enum_Option</span><span class="o">.</span><span class="n">TCP_Authentication_Option</span><span class="p">:</span> <span class="s1">&#39;ao&#39;</span><span class="p">,</span>            <span class="c1"># [RFC 5925] TCP Authentication Option</span>
+            <span class="n">Enum_Option</span><span class="o">.</span><span class="n">Multipath_TCP</span><span class="p">:</span> <span class="s1">&#39;mp&#39;</span><span class="p">,</span>                        <span class="c1"># [RFC 6824] Multipath TCP</span>
+            <span class="n">Enum_Option</span><span class="o">.</span><span class="n">TCP_Fast_Open_Cookie</span><span class="p">:</span> <span class="s1">&#39;fastopen&#39;</span><span class="p">,</span>           <span class="c1"># [RFC 7413] Fast Open</span>
         <span class="p">},</span>
     <span class="p">)</span>  <span class="c1"># type: DefaultDict[int, str | OptionParser]</span>
 
-    <span class="c1">#: DefaultDict[RegType_MPTCPOption, str | MPOptionParser]: Option code to length mapping,</span>
+    <span class="c1">#: DefaultDict[Enum_MPTCPOption, str | MPOptionParser]: Option code to length mapping,</span>
     <span class="n">__mp_option__</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">defaultdict</span><span class="p">(</span>
         <span class="k">lambda</span><span class="p">:</span> <span class="s1">&#39;unknown&#39;</span><span class="p">,</span>
         <span class="p">{</span>
-            <span class="n">RegType_MPTCPOption</span><span class="o">.</span><span class="n">MP_CAPABLE</span><span class="p">:</span> <span class="s1">&#39;capable&#39;</span><span class="p">,</span>
-            <span class="n">RegType_MPTCPOption</span><span class="o">.</span><span class="n">MP_JOIN</span><span class="p">:</span> <span class="s1">&#39;join&#39;</span><span class="p">,</span>
-            <span class="n">RegType_MPTCPOption</span><span class="o">.</span><span class="n">DSS</span><span class="p">:</span> <span class="s1">&#39;dss&#39;</span><span class="p">,</span>
-            <span class="n">RegType_MPTCPOption</span><span class="o">.</span><span class="n">ADD_ADDR</span><span class="p">:</span> <span class="s1">&#39;addaddr&#39;</span><span class="p">,</span>
-            <span class="n">RegType_MPTCPOption</span><span class="o">.</span><span class="n">REMOVE_ADDR</span><span class="p">:</span> <span class="s1">&#39;removeaddr&#39;</span><span class="p">,</span>
-            <span class="n">RegType_MPTCPOption</span><span class="o">.</span><span class="n">MP_PRIO</span><span class="p">:</span> <span class="s1">&#39;prio&#39;</span><span class="p">,</span>
-            <span class="n">RegType_MPTCPOption</span><span class="o">.</span><span class="n">MP_FAIL</span><span class="p">:</span> <span class="s1">&#39;fail&#39;</span><span class="p">,</span>
-            <span class="n">RegType_MPTCPOption</span><span class="o">.</span><span class="n">MP_FASTCLOSE</span><span class="p">:</span> <span class="s1">&#39;fastclose&#39;</span><span class="p">,</span>
+            <span class="n">Enum_MPTCPOption</span><span class="o">.</span><span class="n">MP_CAPABLE</span><span class="p">:</span> <span class="s1">&#39;capable&#39;</span><span class="p">,</span>
+            <span class="n">Enum_MPTCPOption</span><span class="o">.</span><span class="n">MP_JOIN</span><span class="p">:</span> <span class="s1">&#39;join&#39;</span><span class="p">,</span>
+            <span class="n">Enum_MPTCPOption</span><span class="o">.</span><span class="n">DSS</span><span class="p">:</span> <span class="s1">&#39;dss&#39;</span><span class="p">,</span>
+            <span class="n">Enum_MPTCPOption</span><span class="o">.</span><span class="n">ADD_ADDR</span><span class="p">:</span> <span class="s1">&#39;addaddr&#39;</span><span class="p">,</span>
+            <span class="n">Enum_MPTCPOption</span><span class="o">.</span><span class="n">REMOVE_ADDR</span><span class="p">:</span> <span class="s1">&#39;removeaddr&#39;</span><span class="p">,</span>
+            <span class="n">Enum_MPTCPOption</span><span class="o">.</span><span class="n">MP_PRIO</span><span class="p">:</span> <span class="s1">&#39;prio&#39;</span><span class="p">,</span>
+            <span class="n">Enum_MPTCPOption</span><span class="o">.</span><span class="n">MP_FAIL</span><span class="p">:</span> <span class="s1">&#39;fail&#39;</span><span class="p">,</span>
+            <span class="n">Enum_MPTCPOption</span><span class="o">.</span><span class="n">MP_FASTCLOSE</span><span class="p">:</span> <span class="s1">&#39;fastclose&#39;</span><span class="p">,</span>
         <span class="p">},</span>
     <span class="p">)</span>  <span class="c1"># type: DefaultDict[int, str | MPOptionParser]</span>
 
@@ -330,7 +329,7 @@
     <span class="c1"># Methods.</span>
     <span class="c1">##########################################################################</span>
 
-<div class="viewcode-block" id="TCP.read"><a class="viewcode-back" href="../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP.read">[docs]</a>    <span class="k">def</span> <span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_TCP&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
+<div class="viewcode-block" id="TCP.read"><a class="viewcode-back" href="../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP.read">[docs]</a>    <span class="k">def</span> <span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Data_TCP&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Read Transmission Control Protocol (TCP).</span>
 
 <span class="sd">        Structure of TCP header [:rfc:`793`]::</span>
@@ -376,13 +375,13 @@
         <span class="n">_csum</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_fileng</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
         <span class="n">_urgp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_unpack</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
 
-        <span class="n">tcp</span> <span class="o">=</span> <span class="n">DataType_TCP</span><span class="p">(</span>
+        <span class="n">tcp</span> <span class="o">=</span> <span class="n">Data_TCP</span><span class="p">(</span>
             <span class="n">srcport</span><span class="o">=</span><span class="n">_srcp</span><span class="p">,</span>
             <span class="n">dstport</span><span class="o">=</span><span class="n">_dstp</span><span class="p">,</span>
             <span class="n">seq</span><span class="o">=</span><span class="n">_seqn</span><span class="p">,</span>
             <span class="n">ack</span><span class="o">=</span><span class="n">_ackn</span><span class="p">,</span>
             <span class="n">hdr_len</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">_lenf</span><span class="p">[:</span><span class="mi">4</span><span class="p">],</span> <span class="n">base</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="mi">4</span><span class="p">,</span>
-            <span class="n">flags</span><span class="o">=</span><span class="n">DataType_Flags</span><span class="p">(</span>
+            <span class="n">flags</span><span class="o">=</span><span class="n">Data_Flags</span><span class="p">(</span>
                 <span class="n">ns</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">_lenf</span><span class="p">[</span><span class="mi">7</span><span class="p">])),</span>
                 <span class="n">cwr</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">_flag</span><span class="p">[</span><span class="mi">0</span><span class="p">])),</span>
                 <span class="n">ece</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">_flag</span><span class="p">[</span><span class="mi">1</span><span class="p">])),</span>
@@ -424,7 +423,7 @@
         <span class="k">raise</span> <span class="ne">NotImplementedError</span></div>
 
 <div class="viewcode-block" id="TCP.register_option"><a class="viewcode-back" href="../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP.register_option">[docs]</a>    <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">register_option</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">&#39;RegType_Option&#39;</span><span class="p">,</span> <span class="n">meth</span><span class="p">:</span> <span class="s1">&#39;str | OptionParser&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">register_option</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span><span class="p">,</span> <span class="n">meth</span><span class="p">:</span> <span class="s1">&#39;str | OptionParser&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Register an option parser.</span>
 
 <span class="sd">        Args:</span>
@@ -435,7 +434,7 @@
         <span class="bp">cls</span><span class="o">.</span><span class="n">__option__</span><span class="p">[</span><span class="n">code</span><span class="p">]</span> <span class="o">=</span> <span class="n">meth</span></div>
 
 <div class="viewcode-block" id="TCP.register_mp_option"><a class="viewcode-back" href="../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP.register_mp_option">[docs]</a>    <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">register_mp_option</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">&#39;RegType_MPTCPOption&#39;</span><span class="p">,</span> <span class="n">meth</span><span class="p">:</span> <span class="s1">&#39;str | MPOptionParser&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">register_mp_option</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">&#39;Enum_MPTCPOption&#39;</span><span class="p">,</span> <span class="n">meth</span><span class="p">:</span> <span class="s1">&#39;str | MPOptionParser&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Register an MPTCP option parser.</span>
 
 <span class="sd">        Args:</span>
@@ -494,7 +493,7 @@
                 <span class="k">break</span>
 
             <span class="c1"># fetch corresponding option</span>
-            <span class="n">kind</span> <span class="o">=</span> <span class="n">RegType_Option</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">code</span><span class="p">)</span>
+            <span class="n">kind</span> <span class="o">=</span> <span class="n">Enum_Option</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">code</span><span class="p">)</span>
 
             <span class="c1"># extract option data</span>
             <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__option__</span><span class="p">[</span><span class="n">code</span><span class="p">]</span>  <span class="c1"># type: str | OptionParser</span>
@@ -503,8 +502,8 @@
                 <span class="n">meth</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span>
                     <span class="bp">self</span><span class="p">,</span> <span class="n">meth_name</span><span class="p">,</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">_read_mode_donone</span>
-                <span class="p">)</span>  <span class="c1"># type: Callable[[RegType_Option, NamedArg(Option, &#39;options&#39;)], DataType_Option]</span>
-                <span class="n">data</span> <span class="o">=</span> <span class="n">meth</span><span class="p">(</span><span class="n">kind</span><span class="p">,</span> <span class="n">options</span><span class="o">=</span><span class="n">options</span><span class="p">)</span>  <span class="c1"># type: DataType_Option</span>
+                <span class="p">)</span>  <span class="c1"># type: Callable[[Enum_Option, NamedArg(Option, &#39;options&#39;)], Data_Option]</span>
+                <span class="n">data</span> <span class="o">=</span> <span class="n">meth</span><span class="p">(</span><span class="n">kind</span><span class="p">,</span> <span class="n">options</span><span class="o">=</span><span class="n">options</span><span class="p">)</span>  <span class="c1"># type: Data_Option</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">data</span> <span class="o">=</span> <span class="n">name</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">,</span> <span class="n">options</span><span class="o">=</span><span class="n">options</span><span class="p">)</span>
 
@@ -513,7 +512,7 @@
             <span class="n">options</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">kind</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
 
             <span class="c1"># break when eol triggered</span>
-            <span class="k">if</span> <span class="n">kind</span> <span class="o">==</span> <span class="n">RegType_Option</span><span class="o">.</span><span class="n">End_of_Option_List</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">kind</span> <span class="o">==</span> <span class="n">Enum_Option</span><span class="o">.</span><span class="n">End_of_Option_List</span><span class="p">:</span>
                 <span class="k">break</span>
 
         <span class="c1"># get padding</span>
@@ -523,7 +522,7 @@
 
         <span class="k">return</span> <span class="n">options</span></div>
 
-<div class="viewcode-block" id="TCP._read_mode_donone"><a class="viewcode-back" href="../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP._read_mode_donone">[docs]</a>    <span class="k">def</span> <span class="nf">_read_mode_donone</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;RegType_Option&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_UnassignedOption&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
+<div class="viewcode-block" id="TCP._read_mode_donone"><a class="viewcode-back" href="../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP._read_mode_donone">[docs]</a>    <span class="k">def</span> <span class="nf">_read_mode_donone</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Data_UnassignedOption&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Read options request no process.</span>
 
 <span class="sd">        Arguments:</span>
@@ -537,14 +536,14 @@
         <span class="n">size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_unpack</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
         <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_fileng</span><span class="p">(</span><span class="n">size</span> <span class="o">-</span> <span class="mi">2</span><span class="p">)</span>
 
-        <span class="n">option</span> <span class="o">=</span> <span class="n">DataType_UnassignedOption</span><span class="p">(</span>
+        <span class="n">option</span> <span class="o">=</span> <span class="n">Data_UnassignedOption</span><span class="p">(</span>
             <span class="n">kind</span><span class="o">=</span><span class="n">kind</span><span class="p">,</span>
             <span class="n">length</span><span class="o">=</span><span class="n">size</span><span class="p">,</span>
             <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">option</span></div>
 
-<div class="viewcode-block" id="TCP._read_mode_eool"><a class="viewcode-back" href="../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP._read_mode_eool">[docs]</a>    <span class="k">def</span> <span class="nf">_read_mode_eool</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;RegType_Option&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_EndOfOptionList&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
+<div class="viewcode-block" id="TCP._read_mode_eool"><a class="viewcode-back" href="../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP._read_mode_eool">[docs]</a>    <span class="k">def</span> <span class="nf">_read_mode_eool</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Data_EndOfOptionList&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Read TCP End of Option List option.</span>
 
 <span class="sd">        Structure of TCP end of option list option [:rfc:`793`]:</span>
@@ -564,12 +563,12 @@
 <span class="sd">            Parsed option data.</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="n">DataType_EndOfOptionList</span><span class="p">(</span>
+        <span class="k">return</span> <span class="n">Data_EndOfOptionList</span><span class="p">(</span>
             <span class="n">kind</span><span class="o">=</span><span class="n">kind</span><span class="p">,</span>
             <span class="n">length</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
         <span class="p">)</span></div>
 
-<div class="viewcode-block" id="TCP._read_mode_nop"><a class="viewcode-back" href="../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP._read_mode_nop">[docs]</a>    <span class="k">def</span> <span class="nf">_read_mode_nop</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;RegType_Option&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_NoOperation&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
+<div class="viewcode-block" id="TCP._read_mode_nop"><a class="viewcode-back" href="../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP._read_mode_nop">[docs]</a>    <span class="k">def</span> <span class="nf">_read_mode_nop</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Data_NoOperation&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Read TCP No Operation option.</span>
 
 <span class="sd">        Structure of TCP maximum segment size option [:rfc:`793`]:</span>
@@ -589,12 +588,12 @@
 <span class="sd">            Parsed option data.</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="n">DataType_NoOperation</span><span class="p">(</span>
+        <span class="k">return</span> <span class="n">Data_NoOperation</span><span class="p">(</span>
             <span class="n">kind</span><span class="o">=</span><span class="n">kind</span><span class="p">,</span>
             <span class="n">length</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
         <span class="p">)</span></div>
 
-<div class="viewcode-block" id="TCP._read_mode_mss"><a class="viewcode-back" href="../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP._read_mode_mss">[docs]</a>    <span class="k">def</span> <span class="nf">_read_mode_mss</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;RegType_Option&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_MaximumSegmentSize&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
+<div class="viewcode-block" id="TCP._read_mode_mss"><a class="viewcode-back" href="../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP._read_mode_mss">[docs]</a>    <span class="k">def</span> <span class="nf">_read_mode_mss</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Data_MaximumSegmentSize&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Read TCP max segment size option.</span>
 
 <span class="sd">        Structure of TCP maximum segment size option [:rfc:`793`]:</span>
@@ -622,14 +621,14 @@
             <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="n">kind</span><span class="o">.</span><span class="n">value</span><span class="si">}</span><span class="s1">] invalid format&#39;</span><span class="p">)</span>
         <span class="n">mss</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_unpack</span><span class="p">(</span><span class="n">size</span> <span class="o">-</span> <span class="mi">2</span><span class="p">)</span>
 
-        <span class="n">data</span> <span class="o">=</span> <span class="n">DataType_MaximumSegmentSize</span><span class="p">(</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">Data_MaximumSegmentSize</span><span class="p">(</span>
             <span class="n">kind</span><span class="o">=</span><span class="n">kind</span><span class="p">,</span>
             <span class="n">length</span><span class="o">=</span><span class="n">size</span><span class="p">,</span>
             <span class="n">mss</span><span class="o">=</span><span class="n">mss</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">data</span></div>
 
-<div class="viewcode-block" id="TCP._read_mode_ws"><a class="viewcode-back" href="../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP._read_mode_ws">[docs]</a>    <span class="k">def</span> <span class="nf">_read_mode_ws</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;RegType_Option&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_WindowScale&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
+<div class="viewcode-block" id="TCP._read_mode_ws"><a class="viewcode-back" href="../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP._read_mode_ws">[docs]</a>    <span class="k">def</span> <span class="nf">_read_mode_ws</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Data_WindowScale&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Read TCP windows scale option.</span>
 
 <span class="sd">        Structure of TCP window scale option [:rfc:`7323`]:</span>
@@ -657,14 +656,14 @@
             <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="n">kind</span><span class="o">.</span><span class="n">value</span><span class="si">}</span><span class="s1">] invalid format&#39;</span><span class="p">)</span>
         <span class="n">scnt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_unpack</span><span class="p">(</span><span class="n">size</span> <span class="o">-</span> <span class="mi">2</span><span class="p">)</span>
 
-        <span class="n">data</span> <span class="o">=</span> <span class="n">DataType_WindowScale</span><span class="p">(</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">Data_WindowScale</span><span class="p">(</span>
             <span class="n">kind</span><span class="o">=</span><span class="n">kind</span><span class="p">,</span>
             <span class="n">length</span><span class="o">=</span><span class="n">size</span><span class="p">,</span>
             <span class="n">shift</span><span class="o">=</span><span class="n">scnt</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">data</span></div>
 
-<div class="viewcode-block" id="TCP._read_mode_sackpmt"><a class="viewcode-back" href="../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP._read_mode_sackpmt">[docs]</a>    <span class="k">def</span> <span class="nf">_read_mode_sackpmt</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;RegType_Option&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_SACKPermitted&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
+<div class="viewcode-block" id="TCP._read_mode_sackpmt"><a class="viewcode-back" href="../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP._read_mode_sackpmt">[docs]</a>    <span class="k">def</span> <span class="nf">_read_mode_sackpmt</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Data_SACKPermitted&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Read TCP SACK permitted option.</span>
 
 <span class="sd">        Structure of TCP SACK permitted option [:rfc:`2018`]:</span>
@@ -690,12 +689,12 @@
         <span class="k">if</span> <span class="n">size</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="n">kind</span><span class="o">.</span><span class="n">value</span><span class="si">}</span><span class="s1">] invalid format&#39;</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="n">DataType_SACKPermitted</span><span class="p">(</span>
+        <span class="k">return</span> <span class="n">Data_SACKPermitted</span><span class="p">(</span>
             <span class="n">kind</span><span class="o">=</span><span class="n">kind</span><span class="p">,</span>
             <span class="n">length</span><span class="o">=</span><span class="n">size</span><span class="p">,</span>
         <span class="p">)</span></div>
 
-<div class="viewcode-block" id="TCP._read_mode_sack"><a class="viewcode-back" href="../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP._read_mode_sack">[docs]</a>    <span class="k">def</span> <span class="nf">_read_mode_sack</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;RegType_Option&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_SACK&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
+<div class="viewcode-block" id="TCP._read_mode_sack"><a class="viewcode-back" href="../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP._read_mode_sack">[docs]</a>    <span class="k">def</span> <span class="nf">_read_mode_sack</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Data_SACK&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Read TCP SACK option.</span>
 
 <span class="sd">        Structure of TCP SACK option [:rfc:`2018`]:</span>
@@ -735,14 +734,14 @@
         <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">size</span><span class="p">):</span>
             <span class="n">sack</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_read_unpack</span><span class="p">(</span><span class="mi">8</span><span class="p">))</span>
 
-        <span class="n">data</span> <span class="o">=</span> <span class="n">DataType_SACK</span><span class="p">(</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">Data_SACK</span><span class="p">(</span>
             <span class="n">kind</span><span class="o">=</span><span class="n">kind</span><span class="p">,</span>
             <span class="n">length</span><span class="o">=</span><span class="n">size</span> <span class="o">*</span> <span class="mi">8</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span>
             <span class="n">sack</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">sack</span><span class="p">),</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">data</span></div>
 
-<div class="viewcode-block" id="TCP._read_mode_echo"><a class="viewcode-back" href="../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP._read_mode_echo">[docs]</a>    <span class="k">def</span> <span class="nf">_read_mode_echo</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;RegType_Option&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_Echo&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
+<div class="viewcode-block" id="TCP._read_mode_echo"><a class="viewcode-back" href="../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP._read_mode_echo">[docs]</a>    <span class="k">def</span> <span class="nf">_read_mode_echo</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Data_Echo&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Read TCP echo option.</span>
 
 <span class="sd">        Structure of TCP echo option [:rfc:`1072`]:</span>
@@ -769,14 +768,14 @@
             <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="n">kind</span><span class="o">.</span><span class="n">value</span><span class="si">}</span><span class="s1">] invalid format&#39;</span><span class="p">)</span>
         <span class="n">echo</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_fileng</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
 
-        <span class="n">data</span> <span class="o">=</span> <span class="n">DataType_Echo</span><span class="p">(</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">Data_Echo</span><span class="p">(</span>
             <span class="n">kind</span><span class="o">=</span><span class="n">kind</span><span class="p">,</span>
             <span class="n">length</span><span class="o">=</span><span class="n">size</span><span class="p">,</span>
             <span class="n">data</span><span class="o">=</span><span class="n">echo</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">data</span></div>
 
-<div class="viewcode-block" id="TCP._read_mode_echore"><a class="viewcode-back" href="../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP._read_mode_echore">[docs]</a>    <span class="k">def</span> <span class="nf">_read_mode_echore</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;RegType_Option&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_EchoReply&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
+<div class="viewcode-block" id="TCP._read_mode_echore"><a class="viewcode-back" href="../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP._read_mode_echore">[docs]</a>    <span class="k">def</span> <span class="nf">_read_mode_echore</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Data_EchoReply&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Read TCP echo reply option.</span>
 
 <span class="sd">        Structure of TCP echo reply option [:rfc:`1072`]:</span>
@@ -803,14 +802,14 @@
             <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="n">kind</span><span class="o">.</span><span class="n">value</span><span class="si">}</span><span class="s1">] invalid format&#39;</span><span class="p">)</span>
         <span class="n">echo</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_fileng</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
 
-        <span class="n">data</span> <span class="o">=</span> <span class="n">DataType_EchoReply</span><span class="p">(</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">Data_EchoReply</span><span class="p">(</span>
             <span class="n">kind</span><span class="o">=</span><span class="n">kind</span><span class="p">,</span>
             <span class="n">length</span><span class="o">=</span><span class="n">size</span><span class="p">,</span>
             <span class="n">data</span><span class="o">=</span><span class="n">echo</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">data</span></div>
 
-<div class="viewcode-block" id="TCP._read_mode_ts"><a class="viewcode-back" href="../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP._read_mode_ts">[docs]</a>    <span class="k">def</span> <span class="nf">_read_mode_ts</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;RegType_Option&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_Timestamp&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
+<div class="viewcode-block" id="TCP._read_mode_ts"><a class="viewcode-back" href="../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP._read_mode_ts">[docs]</a>    <span class="k">def</span> <span class="nf">_read_mode_ts</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Data_Timestamp&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Read TCP timestamps option.</span>
 
 <span class="sd">        Structure of TCP timestamp option [:rfc:`7323`]:</span>
@@ -839,7 +838,7 @@
         <span class="n">tsval</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_unpack</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
         <span class="n">tsecr</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_fileng</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
 
-        <span class="n">data</span> <span class="o">=</span> <span class="n">DataType_Timestamp</span><span class="p">(</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">Data_Timestamp</span><span class="p">(</span>
             <span class="n">kind</span><span class="o">=</span><span class="n">kind</span><span class="p">,</span>
             <span class="n">length</span><span class="o">=</span><span class="n">size</span><span class="p">,</span>
             <span class="n">timestamp</span><span class="o">=</span><span class="n">tsval</span><span class="p">,</span>
@@ -847,8 +846,8 @@
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">data</span></div>
 
-<div class="viewcode-block" id="TCP._read_mode_poc"><a class="viewcode-back" href="../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP._read_mode_poc">[docs]</a>    <span class="k">def</span> <span class="nf">_read_mode_poc</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;RegType_Option&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
-                       <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_PartialOrderConnectionPermitted&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
+<div class="viewcode-block" id="TCP._read_mode_poc"><a class="viewcode-back" href="../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP._read_mode_poc">[docs]</a>    <span class="k">def</span> <span class="nf">_read_mode_poc</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                       <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Data_PartialOrderConnectionPermitted&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Read TCP partial order connection service profile option.</span>
 
 <span class="sd">        Structure of TCP ``POC-Permitted`` option [:rfc:`1693`][:rfc:`6247`]:</span>
@@ -874,13 +873,13 @@
         <span class="k">if</span> <span class="n">size</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="n">kind</span><span class="o">.</span><span class="n">value</span><span class="si">}</span><span class="s1">] invalid format&#39;</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="n">DataType_PartialOrderConnectionPermitted</span><span class="p">(</span>
+        <span class="k">return</span> <span class="n">Data_PartialOrderConnectionPermitted</span><span class="p">(</span>
             <span class="n">kind</span><span class="o">=</span><span class="n">kind</span><span class="p">,</span>
             <span class="n">length</span><span class="o">=</span><span class="n">size</span><span class="p">,</span>
         <span class="p">)</span></div>
 
-<div class="viewcode-block" id="TCP._read_mode_pocsp"><a class="viewcode-back" href="../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP._read_mode_pocsp">[docs]</a>    <span class="k">def</span> <span class="nf">_read_mode_pocsp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;RegType_Option&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
-                         <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_PartialOrderConnectionProfile&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
+<div class="viewcode-block" id="TCP._read_mode_pocsp"><a class="viewcode-back" href="../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP._read_mode_pocsp">[docs]</a>    <span class="k">def</span> <span class="nf">_read_mode_pocsp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                         <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Data_PartialOrderConnectionProfile&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Read TCP partial order connection service profile option.</span>
 
 <span class="sd">        Structure of TCP ``POC-SP`` option [:rfc:`1693`][:rfc:`6247`]:</span>
@@ -908,7 +907,7 @@
             <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="n">kind</span><span class="o">.</span><span class="n">value</span><span class="si">}</span><span class="s1">] invalid format&#39;</span><span class="p">)</span>
         <span class="n">temp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_binary</span><span class="p">(</span><span class="n">size</span><span class="p">)</span>
 
-        <span class="n">data</span> <span class="o">=</span> <span class="n">DataType_PartialOrderConnectionProfile</span><span class="p">(</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">Data_PartialOrderConnectionProfile</span><span class="p">(</span>
             <span class="n">kind</span><span class="o">=</span><span class="n">kind</span><span class="p">,</span>
             <span class="n">length</span><span class="o">=</span><span class="n">size</span><span class="p">,</span>
             <span class="n">start</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">temp</span><span class="p">[</span><span class="mi">0</span><span class="p">])),</span>
@@ -917,7 +916,7 @@
 
         <span class="k">return</span> <span class="n">data</span></div>
 
-<div class="viewcode-block" id="TCP._read_mode_cc"><a class="viewcode-back" href="../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP._read_mode_cc">[docs]</a>    <span class="k">def</span> <span class="nf">_read_mode_cc</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;RegType_Option&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_CC&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
+<div class="viewcode-block" id="TCP._read_mode_cc"><a class="viewcode-back" href="../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP._read_mode_cc">[docs]</a>    <span class="k">def</span> <span class="nf">_read_mode_cc</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Data_CC&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Read TCP connection count option.</span>
 
 <span class="sd">        Structure of TCP ``CC`` option [:rfc:`1644`]:</span>
@@ -945,14 +944,14 @@
             <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="n">kind</span><span class="o">.</span><span class="n">value</span><span class="si">}</span><span class="s1">] invalid format&#39;</span><span class="p">)</span>
         <span class="n">cc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_unpack</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
 
-        <span class="n">data</span> <span class="o">=</span> <span class="n">DataType_CC</span><span class="p">(</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">Data_CC</span><span class="p">(</span>
             <span class="n">kind</span><span class="o">=</span><span class="n">kind</span><span class="p">,</span>
             <span class="n">length</span><span class="o">=</span><span class="n">size</span><span class="p">,</span>
             <span class="n">cc</span><span class="o">=</span><span class="n">cc</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">data</span></div>
 
-<div class="viewcode-block" id="TCP._read_mode_ccnew"><a class="viewcode-back" href="../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP._read_mode_ccnew">[docs]</a>    <span class="k">def</span> <span class="nf">_read_mode_ccnew</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;RegType_Option&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_CCNew&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
+<div class="viewcode-block" id="TCP._read_mode_ccnew"><a class="viewcode-back" href="../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP._read_mode_ccnew">[docs]</a>    <span class="k">def</span> <span class="nf">_read_mode_ccnew</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Data_CCNew&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Read TCP connection count (new) option.</span>
 
 <span class="sd">        Structure of TCP ``CC.NEW`` option [:rfc:`1644`]:</span>
@@ -980,14 +979,14 @@
             <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="n">kind</span><span class="o">.</span><span class="n">value</span><span class="si">}</span><span class="s1">] invalid format&#39;</span><span class="p">)</span>
         <span class="n">cc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_unpack</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
 
-        <span class="n">data</span> <span class="o">=</span> <span class="n">DataType_CCNew</span><span class="p">(</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">Data_CCNew</span><span class="p">(</span>
             <span class="n">kind</span><span class="o">=</span><span class="n">kind</span><span class="p">,</span>
             <span class="n">length</span><span class="o">=</span><span class="n">size</span><span class="p">,</span>
             <span class="n">cc</span><span class="o">=</span><span class="n">cc</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">data</span></div>
 
-<div class="viewcode-block" id="TCP._read_mode_ccecho"><a class="viewcode-back" href="../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP._read_mode_ccecho">[docs]</a>    <span class="k">def</span> <span class="nf">_read_mode_ccecho</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;RegType_Option&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_CCEcho&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
+<div class="viewcode-block" id="TCP._read_mode_ccecho"><a class="viewcode-back" href="../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP._read_mode_ccecho">[docs]</a>    <span class="k">def</span> <span class="nf">_read_mode_ccecho</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Data_CCEcho&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Read TCP connection count (echo) option.</span>
 
 <span class="sd">        Structure of TCP ``CC.ECHO`` option [:rfc:`1644`]:</span>
@@ -1015,14 +1014,14 @@
             <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="n">kind</span><span class="o">.</span><span class="n">value</span><span class="si">}</span><span class="s1">] invalid format&#39;</span><span class="p">)</span>
         <span class="n">cc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_unpack</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
 
-        <span class="n">data</span> <span class="o">=</span> <span class="n">DataType_CCEcho</span><span class="p">(</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">Data_CCEcho</span><span class="p">(</span>
             <span class="n">kind</span><span class="o">=</span><span class="n">kind</span><span class="p">,</span>
             <span class="n">length</span><span class="o">=</span><span class="n">size</span><span class="p">,</span>
             <span class="n">cc</span><span class="o">=</span><span class="n">cc</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">data</span></div>
 
-<div class="viewcode-block" id="TCP._read_mode_chkreq"><a class="viewcode-back" href="../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP._read_mode_chkreq">[docs]</a>    <span class="k">def</span> <span class="nf">_read_mode_chkreq</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;RegType_Option&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_AlternateChecksumRequest&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
+<div class="viewcode-block" id="TCP._read_mode_chkreq"><a class="viewcode-back" href="../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP._read_mode_chkreq">[docs]</a>    <span class="k">def</span> <span class="nf">_read_mode_chkreq</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Data_AlternateChecksumRequest&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Read Alternate Checksum Request option.</span>
 
 <span class="sd">        Structure of TCP ``CHKSUM-REQ`` [:rfc:`1146`][:rfc:`6247`]:</span>
@@ -1047,9 +1046,9 @@
         <span class="n">size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_unpack</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">size</span> <span class="o">!=</span> <span class="mi">3</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="n">kind</span><span class="o">.</span><span class="n">value</span><span class="si">}</span><span class="s1">] invalid format&#39;</span><span class="p">)</span>
-        <span class="n">algo</span> <span class="o">=</span> <span class="n">RegType_Checksum</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_read_unpack</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
+        <span class="n">algo</span> <span class="o">=</span> <span class="n">Enum_Checksum</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_read_unpack</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
 
-        <span class="n">data</span> <span class="o">=</span> <span class="n">DataType_AlternateChecksumRequest</span><span class="p">(</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">Data_AlternateChecksumRequest</span><span class="p">(</span>
             <span class="n">kind</span><span class="o">=</span><span class="n">kind</span><span class="p">,</span>
             <span class="n">length</span><span class="o">=</span><span class="n">size</span><span class="p">,</span>
             <span class="n">chksum</span><span class="o">=</span><span class="n">algo</span><span class="p">,</span>
@@ -1057,7 +1056,7 @@
 
         <span class="k">return</span> <span class="n">data</span></div>
 
-<div class="viewcode-block" id="TCP._read_mode_chksum"><a class="viewcode-back" href="../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP._read_mode_chksum">[docs]</a>    <span class="k">def</span> <span class="nf">_read_mode_chksum</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;RegType_Option&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_AlternateChecksumData&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
+<div class="viewcode-block" id="TCP._read_mode_chksum"><a class="viewcode-back" href="../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP._read_mode_chksum">[docs]</a>    <span class="k">def</span> <span class="nf">_read_mode_chksum</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Data_AlternateChecksumData&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Read Alternate Checksum Data option.</span>
 
 <span class="sd">        Structure of TCP ``CHKSUM`` [:rfc:`1146`][:rfc:`6247`]:</span>
@@ -1079,7 +1078,7 @@
         <span class="n">size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_unpack</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
         <span class="n">csum</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_fileng</span><span class="p">(</span><span class="n">size</span> <span class="o">-</span> <span class="mi">2</span><span class="p">)</span>
 
-        <span class="n">data</span> <span class="o">=</span> <span class="n">DataType_AlternateChecksumData</span><span class="p">(</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">Data_AlternateChecksumData</span><span class="p">(</span>
             <span class="n">kind</span><span class="o">=</span><span class="n">kind</span><span class="p">,</span>
             <span class="n">length</span><span class="o">=</span><span class="n">size</span><span class="p">,</span>
             <span class="n">data</span><span class="o">=</span><span class="n">csum</span><span class="p">,</span>
@@ -1087,7 +1086,7 @@
 
         <span class="k">return</span> <span class="n">data</span></div>
 
-<div class="viewcode-block" id="TCP._read_mode_sig"><a class="viewcode-back" href="../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP._read_mode_sig">[docs]</a>    <span class="k">def</span> <span class="nf">_read_mode_sig</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;RegType_Option&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_MD5Signature&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
+<div class="viewcode-block" id="TCP._read_mode_sig"><a class="viewcode-back" href="../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP._read_mode_sig">[docs]</a>    <span class="k">def</span> <span class="nf">_read_mode_sig</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Data_MD5Signature&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Read MD5 Signature option.</span>
 
 <span class="sd">        Structure of TCP ``SIG`` option [:rfc:`2385`]:</span>
@@ -1122,14 +1121,14 @@
             <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="n">kind</span><span class="o">.</span><span class="n">value</span><span class="si">}</span><span class="s1">] invalid format&#39;</span><span class="p">)</span>
         <span class="n">sig</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_fileng</span><span class="p">(</span><span class="mi">16</span><span class="p">)</span>
 
-        <span class="n">data</span> <span class="o">=</span> <span class="n">DataType_MD5Signature</span><span class="p">(</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">Data_MD5Signature</span><span class="p">(</span>
             <span class="n">kind</span><span class="o">=</span><span class="n">kind</span><span class="p">,</span>
             <span class="n">length</span><span class="o">=</span><span class="n">size</span><span class="p">,</span>
             <span class="n">digest</span><span class="o">=</span><span class="n">sig</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">data</span></div>
 
-<div class="viewcode-block" id="TCP._read_mode_qs"><a class="viewcode-back" href="../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP._read_mode_qs">[docs]</a>    <span class="k">def</span> <span class="nf">_read_mode_qs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;RegType_Option&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_QuickStartResponse&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
+<div class="viewcode-block" id="TCP._read_mode_qs"><a class="viewcode-back" href="../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP._read_mode_qs">[docs]</a>    <span class="k">def</span> <span class="nf">_read_mode_qs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Data_QuickStartResponse&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Read Quick-Start Response option.</span>
 
 <span class="sd">        Structure of TCP ``QSopt`` [:rfc:`4782`]:</span>
@@ -1163,7 +1162,7 @@
         <span class="n">ttld</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_unpack</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
         <span class="n">noun</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_binary</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
 
-        <span class="n">data</span> <span class="o">=</span> <span class="n">DataType_QuickStartResponse</span><span class="p">(</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">Data_QuickStartResponse</span><span class="p">(</span>
             <span class="n">kind</span><span class="o">=</span><span class="n">kind</span><span class="p">,</span>
             <span class="n">length</span><span class="o">=</span><span class="n">size</span><span class="p">,</span>
             <span class="n">req_rate</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">rvrr</span><span class="p">[</span><span class="mi">4</span><span class="p">:],</span> <span class="n">base</span><span class="o">=</span><span class="mi">2</span><span class="p">),</span>
@@ -1173,7 +1172,7 @@
 
         <span class="k">return</span> <span class="n">data</span></div>
 
-<div class="viewcode-block" id="TCP._read_mode_timeout"><a class="viewcode-back" href="../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP._read_mode_timeout">[docs]</a>    <span class="k">def</span> <span class="nf">_read_mode_timeout</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;RegType_Option&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_UserTimeout&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
+<div class="viewcode-block" id="TCP._read_mode_timeout"><a class="viewcode-back" href="../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP._read_mode_timeout">[docs]</a>    <span class="k">def</span> <span class="nf">_read_mode_timeout</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Data_UserTimeout&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Read User Timeout option.</span>
 
 <span class="sd">        Structure of TCP ``TIMEOUT`` [:rfc:`5482`]:</span>
@@ -1207,7 +1206,7 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="n">time</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">seconds</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">temp</span><span class="p">[</span><span class="mi">0</span><span class="p">:],</span> <span class="n">base</span><span class="o">=</span><span class="mi">2</span><span class="p">))</span>
 
-        <span class="n">data</span> <span class="o">=</span> <span class="n">DataType_UserTimeout</span><span class="p">(</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">Data_UserTimeout</span><span class="p">(</span>
             <span class="n">kind</span><span class="o">=</span><span class="n">kind</span><span class="p">,</span>
             <span class="n">length</span><span class="o">=</span><span class="n">size</span><span class="p">,</span>
             <span class="n">timeout</span><span class="o">=</span><span class="n">time</span><span class="p">,</span>
@@ -1215,7 +1214,7 @@
 
         <span class="k">return</span> <span class="n">data</span></div>
 
-<div class="viewcode-block" id="TCP._read_mode_ao"><a class="viewcode-back" href="../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP._read_mode_ao">[docs]</a>    <span class="k">def</span> <span class="nf">_read_mode_ao</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;RegType_Option&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_Authentication&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
+<div class="viewcode-block" id="TCP._read_mode_ao"><a class="viewcode-back" href="../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP._read_mode_ao">[docs]</a>    <span class="k">def</span> <span class="nf">_read_mode_ao</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Data_Authentication&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Read Authentication option.</span>
 
 <span class="sd">        Structure of TCP ``AOopt`` [:rfc:`5925`]:</span>
@@ -1250,7 +1249,7 @@
         <span class="n">rkey</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_unpack</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
         <span class="n">mac_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_fileng</span><span class="p">(</span><span class="n">size</span> <span class="o">-</span> <span class="mi">4</span><span class="p">)</span>
 
-        <span class="n">data</span> <span class="o">=</span> <span class="n">DataType_Authentication</span><span class="p">(</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">Data_Authentication</span><span class="p">(</span>
             <span class="n">kind</span><span class="o">=</span><span class="n">kind</span><span class="p">,</span>
             <span class="n">length</span><span class="o">=</span><span class="n">size</span><span class="p">,</span>
             <span class="n">key_id</span><span class="o">=</span><span class="n">key_</span><span class="p">,</span>
@@ -1260,7 +1259,7 @@
 
         <span class="k">return</span> <span class="n">data</span></div>
 
-<div class="viewcode-block" id="TCP._read_mode_mp"><a class="viewcode-back" href="../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP._read_mode_mp">[docs]</a>    <span class="k">def</span> <span class="nf">_read_mode_mp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;RegType_Option&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_MPTCP&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
+<div class="viewcode-block" id="TCP._read_mode_mp"><a class="viewcode-back" href="../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP._read_mode_mp">[docs]</a>    <span class="k">def</span> <span class="nf">_read_mode_mp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Data_MPTCP&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Read Multipath TCP option.</span>
 
 <span class="sd">        Structure of ``MP-TCP`` [:rfc:`6824`]:</span>
@@ -1291,22 +1290,22 @@
         <span class="n">dlen</span> <span class="o">=</span> <span class="n">size</span> <span class="o">-</span> <span class="mi">3</span>                 <span class="c1"># length of remaining data</span>
 
         <span class="c1"># fetch subtype-specific data</span>
-        <span class="n">subtype</span> <span class="o">=</span> <span class="n">RegType_MPTCPOption</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">subt</span><span class="p">)</span>
+        <span class="n">subtype</span> <span class="o">=</span> <span class="n">Enum_MPTCPOption</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">subt</span><span class="p">)</span>
         <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__mp_option__</span><span class="p">[</span><span class="n">subt</span><span class="p">]</span>  <span class="c1"># type: str | MPOptionParser</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
             <span class="n">meth_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;_read_mptcp_</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1">&#39;</span>
             <span class="n">meth</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span>
                 <span class="bp">self</span><span class="p">,</span> <span class="n">meth_name</span><span class="p">,</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_read_mptcp_unknown</span>
-            <span class="p">)</span>  <span class="c1"># type: Callable[[RegType_MPTCPOption, int, str, NamedArg(Option, &#39;options&#39;)], DataType_MPTCP]</span>
+            <span class="p">)</span>  <span class="c1"># type: Callable[[Enum_MPTCPOption, int, str, NamedArg(Option, &#39;options&#39;)], Data_MPTCP]</span>
             <span class="n">data</span> <span class="o">=</span> <span class="n">meth</span><span class="p">(</span><span class="n">subtype</span><span class="p">,</span> <span class="n">dlen</span><span class="p">,</span> <span class="n">bits</span><span class="p">,</span> <span class="n">options</span><span class="o">=</span><span class="n">options</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">data</span> <span class="o">=</span> <span class="n">name</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">subtype</span><span class="p">,</span> <span class="n">dlen</span><span class="p">,</span> <span class="n">bits</span><span class="p">,</span> <span class="n">options</span><span class="o">=</span><span class="n">options</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">data</span></div>
 
-<div class="viewcode-block" id="TCP._read_mptcp_unknown"><a class="viewcode-back" href="../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP._read_mptcp_unknown">[docs]</a>    <span class="k">def</span> <span class="nf">_read_mptcp_unknown</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;RegType_MPTCPOption&#39;</span><span class="p">,</span> <span class="n">dlen</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
-                            <span class="n">bits</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_MPTCPUnknown&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
+<div class="viewcode-block" id="TCP._read_mptcp_unknown"><a class="viewcode-back" href="../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP._read_mptcp_unknown">[docs]</a>    <span class="k">def</span> <span class="nf">_read_mptcp_unknown</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;Enum_MPTCPOption&#39;</span><span class="p">,</span> <span class="n">dlen</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+                            <span class="n">bits</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Data_MPTCPUnknown&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Read unknown MPTCP subtype.</span>
 
 <span class="sd">        Arguments:</span>
@@ -1319,16 +1318,16 @@
 <span class="sd">            Parsed option data.</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">data</span> <span class="o">=</span> <span class="n">DataType_MPTCPUnknown</span><span class="p">(</span>
-            <span class="n">kind</span><span class="o">=</span><span class="n">RegType_Option</span><span class="o">.</span><span class="n">Multipath_TCP</span><span class="p">,</span>  <span class="c1"># type: ignore[arg-type]</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">Data_MPTCPUnknown</span><span class="p">(</span>
+            <span class="n">kind</span><span class="o">=</span><span class="n">Enum_Option</span><span class="o">.</span><span class="n">Multipath_TCP</span><span class="p">,</span>  <span class="c1"># type: ignore[arg-type]</span>
             <span class="n">length</span><span class="o">=</span><span class="n">dlen</span> <span class="o">+</span> <span class="mi">3</span><span class="p">,</span>
             <span class="n">subtype</span><span class="o">=</span><span class="n">kind</span><span class="p">,</span>
             <span class="n">data</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">bits</span><span class="p">[:</span><span class="mi">4</span><span class="p">],</span> <span class="n">base</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">to_bytes</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">sys</span><span class="o">.</span><span class="n">byteorder</span><span class="p">)</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_fileng</span><span class="p">(</span><span class="n">dlen</span><span class="p">),</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">data</span></div>
 
-<div class="viewcode-block" id="TCP._read_mptcp_capable"><a class="viewcode-back" href="../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP._read_mptcp_capable">[docs]</a>    <span class="k">def</span> <span class="nf">_read_mptcp_capable</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;RegType_MPTCPOption&#39;</span><span class="p">,</span> <span class="n">dlen</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
-                            <span class="n">bits</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_MPTCPCapable&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
+<div class="viewcode-block" id="TCP._read_mptcp_capable"><a class="viewcode-back" href="../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP._read_mptcp_capable">[docs]</a>    <span class="k">def</span> <span class="nf">_read_mptcp_capable</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;Enum_MPTCPOption&#39;</span><span class="p">,</span> <span class="n">dlen</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+                            <span class="n">bits</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Data_MPTCPCapable&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Read Multipath Capable option.</span>
 
 <span class="sd">        Structure of ``MP_CAPABLE`` [:rfc:`6824`]:</span>
@@ -1370,12 +1369,12 @@
         <span class="n">skey</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_unpack</span><span class="p">(</span><span class="mi">8</span><span class="p">)</span>
         <span class="n">rkey</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_unpack</span><span class="p">(</span><span class="mi">8</span><span class="p">)</span> <span class="k">if</span> <span class="n">dlen</span> <span class="o">==</span> <span class="mi">17</span> <span class="k">else</span> <span class="kc">None</span>
 
-        <span class="n">data</span> <span class="o">=</span> <span class="n">DataType_MPTCPCapable</span><span class="p">(</span>
-            <span class="n">kind</span><span class="o">=</span><span class="n">RegType_Option</span><span class="o">.</span><span class="n">Multipath_TCP</span><span class="p">,</span>  <span class="c1"># type: ignore[arg-type]</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">Data_MPTCPCapable</span><span class="p">(</span>
+            <span class="n">kind</span><span class="o">=</span><span class="n">Enum_Option</span><span class="o">.</span><span class="n">Multipath_TCP</span><span class="p">,</span>  <span class="c1"># type: ignore[arg-type]</span>
             <span class="n">length</span><span class="o">=</span><span class="n">dlen</span> <span class="o">+</span> <span class="mi">3</span><span class="p">,</span>
             <span class="n">subtype</span><span class="o">=</span><span class="n">kind</span><span class="p">,</span>
             <span class="n">version</span><span class="o">=</span><span class="n">vers</span><span class="p">,</span>
-            <span class="n">flags</span><span class="o">=</span><span class="n">DataType_MPTCPCapableFlag</span><span class="p">(</span>
+            <span class="n">flags</span><span class="o">=</span><span class="n">Data_MPTCPCapableFlag</span><span class="p">(</span>
                 <span class="n">req</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">bins</span><span class="p">[</span><span class="mi">0</span><span class="p">])),</span>
                 <span class="n">ext</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">bins</span><span class="p">[</span><span class="mi">1</span><span class="p">])),</span>
                 <span class="n">hsa</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">bins</span><span class="p">[</span><span class="mi">7</span><span class="p">])),</span>
@@ -1386,8 +1385,8 @@
 
         <span class="k">return</span> <span class="n">data</span></div>
 
-<div class="viewcode-block" id="TCP._read_mptcp_join"><a class="viewcode-back" href="../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP._read_mptcp_join">[docs]</a>    <span class="k">def</span> <span class="nf">_read_mptcp_join</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;RegType_MPTCPOption&#39;</span><span class="p">,</span> <span class="n">dlen</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
-                         <span class="n">bits</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_MPTCPJoin&#39;</span><span class="p">:</span>
+<div class="viewcode-block" id="TCP._read_mptcp_join"><a class="viewcode-back" href="../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP._read_mptcp_join">[docs]</a>    <span class="k">def</span> <span class="nf">_read_mptcp_join</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;Enum_MPTCPOption&#39;</span><span class="p">,</span> <span class="n">dlen</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+                         <span class="n">bits</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Data_MPTCPJoin&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Read Join Connection option.</span>
 
 <span class="sd">        Arguments:</span>
@@ -1411,8 +1410,8 @@
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_join_ack</span><span class="p">(</span><span class="n">kind</span><span class="p">,</span> <span class="n">dlen</span><span class="p">,</span> <span class="n">bits</span><span class="p">,</span> <span class="n">options</span><span class="o">=</span><span class="n">options</span><span class="p">)</span>
         <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: : [OptNo </span><span class="si">{</span><span class="n">kind</span><span class="o">.</span><span class="n">value</span><span class="si">}</span><span class="s1">] invalid flags combination&#39;</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="TCP._read_join_syn"><a class="viewcode-back" href="../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP._read_join_syn">[docs]</a>    <span class="k">def</span> <span class="nf">_read_join_syn</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;RegType_MPTCPOption&#39;</span><span class="p">,</span> <span class="n">dlen</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
-                       <span class="n">bits</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_MPTCPJoinSYN&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
+<div class="viewcode-block" id="TCP._read_join_syn"><a class="viewcode-back" href="../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP._read_join_syn">[docs]</a>    <span class="k">def</span> <span class="nf">_read_join_syn</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;Enum_MPTCPOption&#39;</span><span class="p">,</span> <span class="n">dlen</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+                       <span class="n">bits</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Data_MPTCPJoinSYN&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Read Join Connection option for Initial SYN.</span>
 
 <span class="sd">        Structure of ``MP_JOIN-SYN`` [:rfc:`6824`]:</span>
@@ -1449,8 +1448,8 @@
         <span class="n">rtkn</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_fileng</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
         <span class="n">srno</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_unpack</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
 
-        <span class="n">data</span> <span class="o">=</span> <span class="n">DataType_MPTCPJoinSYN</span><span class="p">(</span>
-            <span class="n">kind</span><span class="o">=</span><span class="n">RegType_Option</span><span class="o">.</span><span class="n">Multipath_TCP</span><span class="p">,</span>  <span class="c1"># type: ignore[arg-type]</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">Data_MPTCPJoinSYN</span><span class="p">(</span>
+            <span class="n">kind</span><span class="o">=</span><span class="n">Enum_Option</span><span class="o">.</span><span class="n">Multipath_TCP</span><span class="p">,</span>  <span class="c1"># type: ignore[arg-type]</span>
             <span class="n">length</span><span class="o">=</span><span class="n">dlen</span> <span class="o">+</span> <span class="mi">3</span><span class="p">,</span>
             <span class="n">subtype</span><span class="o">=</span><span class="n">kind</span><span class="p">,</span>
             <span class="n">connection</span><span class="o">=</span><span class="s1">&#39;SYN&#39;</span><span class="p">,</span>
@@ -1462,8 +1461,8 @@
 
         <span class="k">return</span> <span class="n">data</span></div>
 
-<div class="viewcode-block" id="TCP._read_join_synack"><a class="viewcode-back" href="../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP._read_join_synack">[docs]</a>    <span class="k">def</span> <span class="nf">_read_join_synack</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;RegType_MPTCPOption&#39;</span><span class="p">,</span> <span class="n">dlen</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
-                          <span class="n">bits</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_MPTCPJoinSYNACK&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
+<div class="viewcode-block" id="TCP._read_join_synack"><a class="viewcode-back" href="../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP._read_join_synack">[docs]</a>    <span class="k">def</span> <span class="nf">_read_join_synack</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;Enum_MPTCPOption&#39;</span><span class="p">,</span> <span class="n">dlen</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+                          <span class="n">bits</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Data_MPTCPJoinSYNACK&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Read Join Connection option for Responding SYN/ACK.</span>
 
 <span class="sd">        Structure of ``MP_JOIN-SYN/ACK`` [:rfc:`6824`]:</span>
@@ -1502,8 +1501,8 @@
         <span class="n">hmac</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_fileng</span><span class="p">(</span><span class="mi">8</span><span class="p">)</span>
         <span class="n">srno</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_unpack</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
 
-        <span class="n">data</span> <span class="o">=</span> <span class="n">DataType_MPTCPJoinSYNACK</span><span class="p">(</span>
-            <span class="n">kind</span><span class="o">=</span><span class="n">RegType_Option</span><span class="o">.</span><span class="n">Multipath_TCP</span><span class="p">,</span>  <span class="c1"># type: ignore[arg-type]</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">Data_MPTCPJoinSYNACK</span><span class="p">(</span>
+            <span class="n">kind</span><span class="o">=</span><span class="n">Enum_Option</span><span class="o">.</span><span class="n">Multipath_TCP</span><span class="p">,</span>  <span class="c1"># type: ignore[arg-type]</span>
             <span class="n">length</span><span class="o">=</span><span class="n">dlen</span> <span class="o">+</span> <span class="mi">3</span><span class="p">,</span>
             <span class="n">subtype</span><span class="o">=</span><span class="n">kind</span><span class="p">,</span>
             <span class="n">connection</span><span class="o">=</span><span class="s1">&#39;SYN/ACK&#39;</span><span class="p">,</span>
@@ -1515,8 +1514,8 @@
 
         <span class="k">return</span> <span class="n">data</span></div>
 
-<div class="viewcode-block" id="TCP._read_join_ack"><a class="viewcode-back" href="../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP._read_join_ack">[docs]</a>    <span class="k">def</span> <span class="nf">_read_join_ack</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;RegType_MPTCPOption&#39;</span><span class="p">,</span> <span class="n">dlen</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
-                       <span class="n">bits</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_MPTCPJoinACK&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
+<div class="viewcode-block" id="TCP._read_join_ack"><a class="viewcode-back" href="../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP._read_join_ack">[docs]</a>    <span class="k">def</span> <span class="nf">_read_join_ack</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;Enum_MPTCPOption&#39;</span><span class="p">,</span> <span class="n">dlen</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+                       <span class="n">bits</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Data_MPTCPJoinACK&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Read Join Connection option for Third ACK.</span>
 
 <span class="sd">        Structure of ``MP_JOIN-ACK`` [:rfc:`6824`]:</span>
@@ -1552,8 +1551,8 @@
             <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="n">kind</span><span class="o">.</span><span class="n">value</span><span class="si">}</span><span class="s1">] invalid format&#39;</span><span class="p">)</span>
         <span class="n">temp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_fileng</span><span class="p">(</span><span class="mi">20</span><span class="p">)</span>
 
-        <span class="n">data</span> <span class="o">=</span> <span class="n">DataType_MPTCPJoinACK</span><span class="p">(</span>
-            <span class="n">kind</span><span class="o">=</span><span class="n">RegType_Option</span><span class="o">.</span><span class="n">Multipath_TCP</span><span class="p">,</span>  <span class="c1"># type: ignore[arg-type]</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">Data_MPTCPJoinACK</span><span class="p">(</span>
+            <span class="n">kind</span><span class="o">=</span><span class="n">Enum_Option</span><span class="o">.</span><span class="n">Multipath_TCP</span><span class="p">,</span>  <span class="c1"># type: ignore[arg-type]</span>
             <span class="n">length</span><span class="o">=</span><span class="n">dlen</span> <span class="o">+</span> <span class="mi">3</span><span class="p">,</span>
             <span class="n">subtype</span><span class="o">=</span><span class="n">kind</span><span class="p">,</span>
             <span class="n">connection</span><span class="o">=</span><span class="s1">&#39;ACK&#39;</span><span class="p">,</span>
@@ -1562,8 +1561,8 @@
 
         <span class="k">return</span> <span class="n">data</span></div>
 
-<div class="viewcode-block" id="TCP._read_mptcp_dss"><a class="viewcode-back" href="../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP._read_mptcp_dss">[docs]</a>    <span class="k">def</span> <span class="nf">_read_mptcp_dss</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;RegType_MPTCPOption&#39;</span><span class="p">,</span> <span class="n">dlen</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
-                        <span class="n">bits</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_MPTCPDSS&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
+<div class="viewcode-block" id="TCP._read_mptcp_dss"><a class="viewcode-back" href="../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP._read_mptcp_dss">[docs]</a>    <span class="k">def</span> <span class="nf">_read_mptcp_dss</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;Enum_MPTCPOption&#39;</span><span class="p">,</span> <span class="n">dlen</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+                        <span class="n">bits</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Data_MPTCPDSS&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Read Data Sequence Signal (Data ACK and Data Sequence Mapping) option.</span>
 
 <span class="sd">        Structure of ``DSS`` [:rfc:`6824`]:</span>
@@ -1609,11 +1608,11 @@
         <span class="n">dll_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_unpack</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span> <span class="k">if</span> <span class="n">Mflg</span> <span class="k">else</span> <span class="kc">None</span>
         <span class="n">chk_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_fileng</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span> <span class="k">if</span> <span class="n">Mflg</span> <span class="k">else</span> <span class="kc">None</span>
 
-        <span class="n">data</span> <span class="o">=</span> <span class="n">DataType_MPTCPDSS</span><span class="p">(</span>
-            <span class="n">kind</span><span class="o">=</span><span class="n">RegType_Option</span><span class="o">.</span><span class="n">Multipath_TCP</span><span class="p">,</span>  <span class="c1"># type: ignore[arg-type]</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">Data_MPTCPDSS</span><span class="p">(</span>
+            <span class="n">kind</span><span class="o">=</span><span class="n">Enum_Option</span><span class="o">.</span><span class="n">Multipath_TCP</span><span class="p">,</span>  <span class="c1"># type: ignore[arg-type]</span>
             <span class="n">length</span><span class="o">=</span><span class="n">dlen</span> <span class="o">+</span> <span class="mi">3</span><span class="p">,</span>
             <span class="n">subtype</span><span class="o">=</span><span class="n">kind</span><span class="p">,</span>
-            <span class="n">flags</span><span class="o">=</span><span class="n">DataType_MPTCPDSSFlag</span><span class="p">(</span>
+            <span class="n">flags</span><span class="o">=</span><span class="n">Data_MPTCPDSSFlag</span><span class="p">(</span>
                 <span class="n">data_fin</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">flag</span><span class="p">[</span><span class="mi">3</span><span class="p">])),</span>
                 <span class="n">dsn_oct</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">flag</span><span class="p">[</span><span class="mi">4</span><span class="p">])),</span>
                 <span class="n">data_pre</span><span class="o">=</span><span class="n">Mflg</span><span class="p">,</span>
@@ -1629,8 +1628,8 @@
 
         <span class="k">return</span> <span class="n">data</span></div>
 
-<div class="viewcode-block" id="TCP._read_mptcp_addaddr"><a class="viewcode-back" href="../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP._read_mptcp_addaddr">[docs]</a>    <span class="k">def</span> <span class="nf">_read_mptcp_addaddr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;RegType_MPTCPOption&#39;</span><span class="p">,</span> <span class="n">dlen</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
-                            <span class="n">bits</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_MPTCPAddAddress&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
+<div class="viewcode-block" id="TCP._read_mptcp_addaddr"><a class="viewcode-back" href="../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP._read_mptcp_addaddr">[docs]</a>    <span class="k">def</span> <span class="nf">_read_mptcp_addaddr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;Enum_MPTCPOption&#39;</span><span class="p">,</span> <span class="n">dlen</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+                            <span class="n">bits</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Data_MPTCPAddAddress&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Read Add Address option.</span>
 
 <span class="sd">        Structure of ``ADD_ADDR`` [:rfc:`6824`]:</span>
@@ -1673,8 +1672,8 @@
         <span class="n">pt_l</span> <span class="o">=</span> <span class="n">dlen</span> <span class="o">-</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">ip_l</span>
         <span class="n">port</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_unpack</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span> <span class="k">if</span> <span class="n">pt_l</span> <span class="k">else</span> <span class="kc">None</span>
 
-        <span class="n">data</span> <span class="o">=</span> <span class="n">DataType_MPTCPAddAddress</span><span class="p">(</span>
-            <span class="n">kind</span><span class="o">=</span><span class="n">RegType_Option</span><span class="o">.</span><span class="n">Multipath_TCP</span><span class="p">,</span>  <span class="c1"># type: ignore[arg-type]</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">Data_MPTCPAddAddress</span><span class="p">(</span>
+            <span class="n">kind</span><span class="o">=</span><span class="n">Enum_Option</span><span class="o">.</span><span class="n">Multipath_TCP</span><span class="p">,</span>  <span class="c1"># type: ignore[arg-type]</span>
             <span class="n">length</span><span class="o">=</span><span class="n">dlen</span> <span class="o">+</span> <span class="mi">3</span><span class="p">,</span>
             <span class="n">subtype</span><span class="o">=</span><span class="n">kind</span><span class="p">,</span>
             <span class="n">version</span><span class="o">=</span><span class="n">vers</span><span class="p">,</span>
@@ -1685,8 +1684,8 @@
 
         <span class="k">return</span> <span class="n">data</span></div>
 
-<div class="viewcode-block" id="TCP._read_mptcp_remove"><a class="viewcode-back" href="../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP._read_mptcp_remove">[docs]</a>    <span class="k">def</span> <span class="nf">_read_mptcp_remove</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;RegType_MPTCPOption&#39;</span><span class="p">,</span> <span class="n">dlen</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
-                           <span class="n">bits</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_MPTCPRemoveAddress&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
+<div class="viewcode-block" id="TCP._read_mptcp_remove"><a class="viewcode-back" href="../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP._read_mptcp_remove">[docs]</a>    <span class="k">def</span> <span class="nf">_read_mptcp_remove</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;Enum_MPTCPOption&#39;</span><span class="p">,</span> <span class="n">dlen</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+                           <span class="n">bits</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Data_MPTCPRemoveAddress&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Read Remove Address option.</span>
 
 <span class="sd">        Structure of ``REMOVE_ADDR`` [:rfc:`6824`]:</span>
@@ -1720,8 +1719,8 @@
         <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">dlen</span><span class="p">):</span>
             <span class="n">adid</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_read_unpack</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
 
-        <span class="n">data</span> <span class="o">=</span> <span class="n">DataType_MPTCPRemoveAddress</span><span class="p">(</span>
-            <span class="n">kind</span><span class="o">=</span><span class="n">RegType_Option</span><span class="o">.</span><span class="n">Multipath_TCP</span><span class="p">,</span>  <span class="c1"># type: ignore[arg-type]</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">Data_MPTCPRemoveAddress</span><span class="p">(</span>
+            <span class="n">kind</span><span class="o">=</span><span class="n">Enum_Option</span><span class="o">.</span><span class="n">Multipath_TCP</span><span class="p">,</span>  <span class="c1"># type: ignore[arg-type]</span>
             <span class="n">length</span><span class="o">=</span><span class="n">dlen</span> <span class="o">+</span> <span class="mi">3</span><span class="p">,</span>
             <span class="n">subtype</span><span class="o">=</span><span class="n">kind</span><span class="p">,</span>
             <span class="n">addr_id</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">adid</span><span class="p">),</span>
@@ -1729,8 +1728,8 @@
 
         <span class="k">return</span> <span class="n">data</span></div>
 
-<div class="viewcode-block" id="TCP._read_mptcp_prio"><a class="viewcode-back" href="../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP._read_mptcp_prio">[docs]</a>    <span class="k">def</span> <span class="nf">_read_mptcp_prio</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;RegType_MPTCPOption&#39;</span><span class="p">,</span> <span class="n">dlen</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
-                         <span class="n">bits</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_MPTCPPriority&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
+<div class="viewcode-block" id="TCP._read_mptcp_prio"><a class="viewcode-back" href="../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP._read_mptcp_prio">[docs]</a>    <span class="k">def</span> <span class="nf">_read_mptcp_prio</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;Enum_MPTCPOption&#39;</span><span class="p">,</span> <span class="n">dlen</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+                         <span class="n">bits</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Data_MPTCPPriority&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Read Change Subflow Priority option.</span>
 
 <span class="sd">        Structure of ``MP_PRIO`` [RFC 6824]:</span>
@@ -1760,8 +1759,8 @@
             <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="n">kind</span><span class="o">.</span><span class="n">value</span><span class="si">}</span><span class="s1">] invalid format&#39;</span><span class="p">)</span>
         <span class="n">temp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_unpack</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="k">if</span> <span class="n">dlen</span> <span class="k">else</span> <span class="kc">None</span>
 
-        <span class="n">data</span> <span class="o">=</span> <span class="n">DataType_MPTCPPriority</span><span class="p">(</span>
-            <span class="n">kind</span><span class="o">=</span><span class="n">RegType_Option</span><span class="o">.</span><span class="n">Multipath_TCP</span><span class="p">,</span>  <span class="c1"># type: ignore[arg-type]</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">Data_MPTCPPriority</span><span class="p">(</span>
+            <span class="n">kind</span><span class="o">=</span><span class="n">Enum_Option</span><span class="o">.</span><span class="n">Multipath_TCP</span><span class="p">,</span>  <span class="c1"># type: ignore[arg-type]</span>
             <span class="n">length</span><span class="o">=</span><span class="n">dlen</span> <span class="o">+</span> <span class="mi">3</span><span class="p">,</span>
             <span class="n">subtype</span><span class="o">=</span><span class="n">kind</span><span class="p">,</span>
             <span class="n">backup</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">bits</span><span class="p">[</span><span class="mi">3</span><span class="p">])),</span>
@@ -1770,8 +1769,8 @@
 
         <span class="k">return</span> <span class="n">data</span></div>
 
-<div class="viewcode-block" id="TCP._read_mptcp_fail"><a class="viewcode-back" href="../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP._read_mptcp_fail">[docs]</a>    <span class="k">def</span> <span class="nf">_read_mptcp_fail</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;RegType_MPTCPOption&#39;</span><span class="p">,</span> <span class="n">dlen</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
-                         <span class="n">bits</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_MPTCPFallback&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
+<div class="viewcode-block" id="TCP._read_mptcp_fail"><a class="viewcode-back" href="../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP._read_mptcp_fail">[docs]</a>    <span class="k">def</span> <span class="nf">_read_mptcp_fail</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;Enum_MPTCPOption&#39;</span><span class="p">,</span> <span class="n">dlen</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+                         <span class="n">bits</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Data_MPTCPFallback&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Read Fallback option.</span>
 
 <span class="sd">        Structure of ``MP_FAIL`` [:rfc:`6824`]:</span>
@@ -1807,8 +1806,8 @@
         <span class="n">resv</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_fileng</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>  <span class="c1"># pylint: disable=unused-variable</span>
         <span class="n">dsn_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_unpack</span><span class="p">(</span><span class="mi">8</span><span class="p">)</span>
 
-        <span class="n">data</span> <span class="o">=</span> <span class="n">DataType_MPTCPFallback</span><span class="p">(</span>
-            <span class="n">kind</span><span class="o">=</span><span class="n">RegType_Option</span><span class="o">.</span><span class="n">Multipath_TCP</span><span class="p">,</span>  <span class="c1"># type: ignore[arg-type]</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">Data_MPTCPFallback</span><span class="p">(</span>
+            <span class="n">kind</span><span class="o">=</span><span class="n">Enum_Option</span><span class="o">.</span><span class="n">Multipath_TCP</span><span class="p">,</span>  <span class="c1"># type: ignore[arg-type]</span>
             <span class="n">length</span><span class="o">=</span><span class="n">dlen</span> <span class="o">+</span> <span class="mi">3</span><span class="p">,</span>
             <span class="n">subtype</span><span class="o">=</span><span class="n">kind</span><span class="p">,</span>
             <span class="n">dsn</span><span class="o">=</span><span class="n">dsn_</span><span class="p">,</span>
@@ -1816,8 +1815,8 @@
 
         <span class="k">return</span> <span class="n">data</span></div>
 
-<div class="viewcode-block" id="TCP._read_mptcp_fastclose"><a class="viewcode-back" href="../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP._read_mptcp_fastclose">[docs]</a>    <span class="k">def</span> <span class="nf">_read_mptcp_fastclose</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;RegType_MPTCPOption&#39;</span><span class="p">,</span> <span class="n">dlen</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
-                              <span class="n">bits</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_MPTCPFastclose&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
+<div class="viewcode-block" id="TCP._read_mptcp_fastclose"><a class="viewcode-back" href="../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP._read_mptcp_fastclose">[docs]</a>    <span class="k">def</span> <span class="nf">_read_mptcp_fastclose</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;Enum_MPTCPOption&#39;</span><span class="p">,</span> <span class="n">dlen</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+                              <span class="n">bits</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Data_MPTCPFastclose&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Read Fast Close option.</span>
 
 <span class="sd">        Structure of ``MP_FASTCLOSE`` [RFC 6824]:</span>
@@ -1853,8 +1852,8 @@
         <span class="n">resv</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_fileng</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>  <span class="c1"># pylint: disable=unused-variable</span>
         <span class="n">rkey</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_fileng</span><span class="p">(</span><span class="mi">8</span><span class="p">)</span>
 
-        <span class="n">data</span> <span class="o">=</span> <span class="n">DataType_MPTCPFastclose</span><span class="p">(</span>
-            <span class="n">kind</span><span class="o">=</span><span class="n">RegType_Option</span><span class="o">.</span><span class="n">Multipath_TCP</span><span class="p">,</span>  <span class="c1"># type: ignore[arg-type]</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">Data_MPTCPFastclose</span><span class="p">(</span>
+            <span class="n">kind</span><span class="o">=</span><span class="n">Enum_Option</span><span class="o">.</span><span class="n">Multipath_TCP</span><span class="p">,</span>  <span class="c1"># type: ignore[arg-type]</span>
             <span class="n">length</span><span class="o">=</span><span class="n">dlen</span> <span class="o">+</span> <span class="mi">3</span><span class="p">,</span>
             <span class="n">subtype</span><span class="o">=</span><span class="n">kind</span><span class="p">,</span>
             <span class="n">rkey</span><span class="o">=</span><span class="n">rkey</span><span class="p">,</span>
@@ -1862,7 +1861,7 @@
 
         <span class="k">return</span> <span class="n">data</span></div>
 
-<div class="viewcode-block" id="TCP._read_mode_fastopen"><a class="viewcode-back" href="../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP._read_mode_fastopen">[docs]</a>    <span class="k">def</span> <span class="nf">_read_mode_fastopen</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;RegType_Option&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_FastOpenCookie&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
+<div class="viewcode-block" id="TCP._read_mode_fastopen"><a class="viewcode-back" href="../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP._read_mode_fastopen">[docs]</a>    <span class="k">def</span> <span class="nf">_read_mode_fastopen</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Data_FastOpenCookie&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Read Fast Open option.</span>
 
 <span class="sd">        Structure of TCP ``FASTOPEN`` [:rfc:`7413`]:</span>
@@ -1893,7 +1892,7 @@
             <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="n">kind</span><span class="o">.</span><span class="n">value</span><span class="si">}</span><span class="s1">] invalid format&#39;</span><span class="p">)</span>
         <span class="n">cookie</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_fileng</span><span class="p">(</span><span class="n">size</span> <span class="o">-</span> <span class="mi">2</span><span class="p">)</span>
 
-        <span class="n">data</span> <span class="o">=</span> <span class="n">DataType_FastOpenCookie</span><span class="p">(</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">Data_FastOpenCookie</span><span class="p">(</span>
             <span class="n">kind</span><span class="o">=</span><span class="n">kind</span><span class="p">,</span>
             <span class="n">length</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
             <span class="n">cookie</span><span class="o">=</span><span class="n">cookie</span><span class="p">,</span>

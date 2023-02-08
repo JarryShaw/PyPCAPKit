@@ -45,7 +45,7 @@
 <span class="kn">import</span> <span class="nn">ipaddress</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">cast</span>
 
-<span class="kn">from</span> <span class="nn">pcapkit.const.reg.transtype</span> <span class="kn">import</span> <span class="n">TransType</span> <span class="k">as</span> <span class="n">RegType_TransType</span>
+<span class="kn">from</span> <span class="nn">pcapkit.const.reg.transtype</span> <span class="kn">import</span> <span class="n">TransType</span> <span class="k">as</span> <span class="n">Enum_TransType</span>
 <span class="kn">from</span> <span class="nn">pcapkit.foundation.reassembly.ip</span> <span class="kn">import</span> <span class="n">Packet</span> <span class="k">as</span> <span class="n">IP_Packet</span>
 <span class="kn">from</span> <span class="nn">pcapkit.foundation.reassembly.tcp</span> <span class="kn">import</span> <span class="n">Packet</span> <span class="k">as</span> <span class="n">TCP_Packet</span>
 <span class="kn">from</span> <span class="nn">pcapkit.foundation.traceflow</span> <span class="kn">import</span> <span class="n">Packet</span> <span class="k">as</span> <span class="n">TF_Packet</span>
@@ -59,7 +59,7 @@
     <span class="kn">from</span> <span class="nn">dpkt.ip6</span> <span class="kn">import</span> <span class="n">IP6</span><span class="p">,</span> <span class="n">IP6FragmentHeader</span>
     <span class="kn">from</span> <span class="nn">dpkt.tcp</span> <span class="kn">import</span> <span class="n">TCP</span>
 
-    <span class="kn">from</span> <span class="nn">pcapkit.const.reg.linktype</span> <span class="kn">import</span> <span class="n">LinkType</span> <span class="k">as</span> <span class="n">RegType_LinkType</span>
+    <span class="kn">from</span> <span class="nn">pcapkit.const.reg.linktype</span> <span class="kn">import</span> <span class="n">LinkType</span> <span class="k">as</span> <span class="n">Enum_LinkType</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
     <span class="s1">&#39;ipv6_hdr_len&#39;</span><span class="p">,</span> <span class="s1">&#39;packet2chain&#39;</span><span class="p">,</span> <span class="s1">&#39;packet2dict&#39;</span><span class="p">,</span>
@@ -111,7 +111,7 @@
 
 
 <div class="viewcode-block" id="packet2dict"><a class="viewcode-back" href="../../../pcapkit/toolkit/dpkt.html#pcapkit.toolkit.dpkt.packet2dict">[docs]</a><span class="k">def</span> <span class="nf">packet2dict</span><span class="p">(</span><span class="n">packet</span><span class="p">:</span> <span class="s1">&#39;Packet&#39;</span><span class="p">,</span> <span class="n">timestamp</span><span class="p">:</span> <span class="s1">&#39;float&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
-                <span class="n">data_link</span><span class="p">:</span> <span class="s1">&#39;RegType_LinkType&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;dict[str, Any]&#39;</span><span class="p">:</span>
+                <span class="n">data_link</span><span class="p">:</span> <span class="s1">&#39;Enum_LinkType&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;dict[str, Any]&#39;</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Convert DPKT packet into :obj:`dict`.</span>
 
 <span class="sd">    Args:</span>
@@ -171,7 +171,7 @@
                 <span class="n">cast</span><span class="p">(</span><span class="s1">&#39;IPv4Address&#39;</span><span class="p">,</span>
                      <span class="n">ipaddress</span><span class="o">.</span><span class="n">ip_address</span><span class="p">(</span><span class="n">ipv4</span><span class="o">.</span><span class="n">dst</span><span class="p">)),</span>           <span class="c1"># destination IP address</span>
                 <span class="n">ipv4</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>                                        <span class="c1"># identification</span>
-                <span class="n">RegType_TransType</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">ipv4</span><span class="o">.</span><span class="n">p</span><span class="p">)</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>             <span class="c1"># payload protocol type</span>
+                <span class="n">Enum_TransType</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">ipv4</span><span class="o">.</span><span class="n">p</span><span class="p">)</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>             <span class="c1"># payload protocol type</span>
             <span class="p">),</span>
             <span class="n">num</span><span class="o">=</span><span class="n">count</span><span class="p">,</span>                                          <span class="c1"># original packet range number</span>
             <span class="n">fo</span><span class="o">=</span><span class="n">ipv4</span><span class="o">.</span><span class="n">off</span><span class="p">,</span>                                        <span class="c1"># fragment offset</span>
@@ -219,7 +219,7 @@
                 <span class="n">cast</span><span class="p">(</span><span class="s1">&#39;IPv6Address&#39;</span><span class="p">,</span>
                      <span class="n">ipaddress</span><span class="o">.</span><span class="n">ip_address</span><span class="p">(</span><span class="n">ipv6</span><span class="o">.</span><span class="n">dst</span><span class="p">)),</span>            <span class="c1"># destination IP address</span>
                 <span class="n">ipv6</span><span class="o">.</span><span class="n">flow</span><span class="p">,</span>                                       <span class="c1"># label</span>
-                <span class="n">RegType_TransType</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">ipv6_frag</span><span class="o">.</span><span class="n">nh</span><span class="p">)</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>        <span class="c1"># next header field in IPv6 Fragment Header</span>
+                <span class="n">Enum_TransType</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">ipv6_frag</span><span class="o">.</span><span class="n">nh</span><span class="p">)</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>        <span class="c1"># next header field in IPv6 Fragment Header</span>
             <span class="p">),</span>
             <span class="n">num</span><span class="o">=</span><span class="n">count</span><span class="p">,</span>                                           <span class="c1"># original packet range number</span>
             <span class="n">fo</span><span class="o">=</span><span class="n">ipv6_frag</span><span class="o">.</span><span class="n">nxt</span><span class="p">,</span>                                    <span class="c1"># fragment offset</span>
@@ -288,7 +288,7 @@
 
 
 <div class="viewcode-block" id="tcp_traceflow"><a class="viewcode-back" href="../../../pcapkit/toolkit/dpkt.html#pcapkit.toolkit.dpkt.tcp_traceflow">[docs]</a><span class="k">def</span> <span class="nf">tcp_traceflow</span><span class="p">(</span><span class="n">packet</span><span class="p">:</span> <span class="s1">&#39;Packet&#39;</span><span class="p">,</span> <span class="n">timestamp</span><span class="p">:</span> <span class="s1">&#39;float&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
-                  <span class="n">data_link</span><span class="p">:</span> <span class="s1">&#39;RegType_LinkType&#39;</span><span class="p">,</span> <span class="n">count</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;TF_Packet | None&#39;</span><span class="p">:</span>
+                  <span class="n">data_link</span><span class="p">:</span> <span class="s1">&#39;Enum_LinkType&#39;</span><span class="p">,</span> <span class="n">count</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;TF_Packet | None&#39;</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Trace packet flow for TCP.</span>
 
 <span class="sd">    Args:</span>

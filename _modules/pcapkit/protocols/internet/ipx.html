@@ -57,11 +57,11 @@
 <span class="kn">import</span> <span class="nn">textwrap</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
 
-<span class="kn">from</span> <span class="nn">pcapkit.const.ipx.packet</span> <span class="kn">import</span> <span class="n">Packet</span> <span class="k">as</span> <span class="n">RegType_Packet</span>
-<span class="kn">from</span> <span class="nn">pcapkit.const.ipx.socket</span> <span class="kn">import</span> <span class="n">Socket</span> <span class="k">as</span> <span class="n">RegType_Socket</span>
-<span class="kn">from</span> <span class="nn">pcapkit.const.reg.transtype</span> <span class="kn">import</span> <span class="n">TransType</span> <span class="k">as</span> <span class="n">RegType_TransType</span>
-<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.internet.ipx</span> <span class="kn">import</span> <span class="n">IPX</span> <span class="k">as</span> <span class="n">DataType_IPX</span>
-<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.internet.ipx</span> <span class="kn">import</span> <span class="n">Address</span> <span class="k">as</span> <span class="n">DataType_Address</span>
+<span class="kn">from</span> <span class="nn">pcapkit.const.ipx.packet</span> <span class="kn">import</span> <span class="n">Packet</span> <span class="k">as</span> <span class="n">Enum_Packet</span>
+<span class="kn">from</span> <span class="nn">pcapkit.const.ipx.socket</span> <span class="kn">import</span> <span class="n">Socket</span> <span class="k">as</span> <span class="n">Enum_Socket</span>
+<span class="kn">from</span> <span class="nn">pcapkit.const.reg.transtype</span> <span class="kn">import</span> <span class="n">TransType</span> <span class="k">as</span> <span class="n">Enum_TransType</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.internet.ipx</span> <span class="kn">import</span> <span class="n">IPX</span> <span class="k">as</span> <span class="n">Data_IPX</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.internet.ipx</span> <span class="kn">import</span> <span class="n">Address</span> <span class="k">as</span> <span class="n">Data_Address</span>
 <span class="kn">from</span> <span class="nn">pcapkit.protocols.internet.internet</span> <span class="kn">import</span> <span class="n">Internet</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
@@ -72,7 +72,7 @@
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;IPX&#39;</span><span class="p">]</span>
 
 
-<div class="viewcode-block" id="IPX"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/ipx.html#pcapkit.protocols.internet.ipx.IPX">[docs]</a><span class="k">class</span> <span class="nc">IPX</span><span class="p">(</span><span class="n">Internet</span><span class="p">[</span><span class="n">DataType_IPX</span><span class="p">]):</span>
+<div class="viewcode-block" id="IPX"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/ipx.html#pcapkit.protocols.internet.ipx.IPX">[docs]</a><span class="k">class</span> <span class="nc">IPX</span><span class="p">(</span><span class="n">Internet</span><span class="p">[</span><span class="n">Data_IPX</span><span class="p">]):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;This class implements Internetwork Packet Exchange.&quot;&quot;&quot;</span>
 
     <span class="c1">##########################################################################</span>
@@ -90,7 +90,7 @@
         <span class="k">return</span> <span class="mi">30</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">protocol</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;RegType_TransType&#39;</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">protocol</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Enum_TransType&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Name of next layer protocol.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_info</span><span class="o">.</span><span class="n">type</span>
 
@@ -108,7 +108,7 @@
     <span class="c1"># Methods.</span>
     <span class="c1">##########################################################################</span>
 
-<div class="viewcode-block" id="IPX.read"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/ipx.html#pcapkit.protocols.internet.ipx.IPX.read">[docs]</a>    <span class="k">def</span> <span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_IPX&#39;</span><span class="p">:</span>
+<div class="viewcode-block" id="IPX.read"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/ipx.html#pcapkit.protocols.internet.ipx.IPX.read">[docs]</a>    <span class="k">def</span> <span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Data_IPX&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Read Internetwork Packet Exchange.</span>
 
 <span class="sd">         Args:</span>
@@ -116,7 +116,7 @@
 <span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            DataType_IPX: Parsed packet data.</span>
+<span class="sd">            Parsed packet data.</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">length</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -129,11 +129,11 @@
         <span class="n">_dsta</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_ipx_address</span><span class="p">()</span>
         <span class="n">_srca</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_ipx_address</span><span class="p">()</span>
 
-        <span class="n">ipx</span> <span class="o">=</span> <span class="n">DataType_IPX</span><span class="p">(</span>
+        <span class="n">ipx</span> <span class="o">=</span> <span class="n">Data_IPX</span><span class="p">(</span>
             <span class="n">chksum</span><span class="o">=</span><span class="n">_csum</span><span class="p">,</span>
             <span class="nb">len</span><span class="o">=</span><span class="n">_tlen</span><span class="p">,</span>
             <span class="n">count</span><span class="o">=</span><span class="n">_ctrl</span><span class="p">,</span>
-            <span class="nb">type</span><span class="o">=</span><span class="n">RegType_Packet</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">_type</span><span class="p">),</span>
+            <span class="nb">type</span><span class="o">=</span><span class="n">Enum_Packet</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">_type</span><span class="p">),</span>
             <span class="n">dst</span><span class="o">=</span><span class="n">_dsta</span><span class="p">,</span>
             <span class="n">src</span><span class="o">=</span><span class="n">_srca</span><span class="p">,</span>
         <span class="p">)</span>
@@ -161,7 +161,7 @@
         <span class="k">return</span> <span class="mi">30</span>
 
 <div class="viewcode-block" id="IPX.__index__"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/ipx.html#pcapkit.protocols.internet.ipx.IPX.__index__">[docs]</a>    <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="fm">__index__</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;RegType_TransType&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=invalid-index-returned</span>
+    <span class="k">def</span> <span class="fm">__index__</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Enum_TransType&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=invalid-index-returned</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Numeral registry index of the protocol.</span>
 
 <span class="sd">        Returns:</span>
@@ -170,13 +170,13 @@
 <span class="sd">        .. _IANA: https://www.iana.org/assignments/protocol-numbers/protocol-numbers.xhtml</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="n">RegType_TransType</span><span class="o">.</span><span class="n">IPX_in_IP</span>  <span class="c1"># type: ignore[return-value]</span></div>
+        <span class="k">return</span> <span class="n">Enum_TransType</span><span class="o">.</span><span class="n">IPX_in_IP</span>  <span class="c1"># type: ignore[return-value]</span></div>
 
     <span class="c1">##########################################################################</span>
     <span class="c1"># Utilities.</span>
     <span class="c1">##########################################################################</span>
 
-<div class="viewcode-block" id="IPX._read_ipx_address"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/ipx.html#pcapkit.protocols.internet.ipx.IPX._read_ipx_address">[docs]</a>    <span class="k">def</span> <span class="nf">_read_ipx_address</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_Address&#39;</span><span class="p">:</span>
+<div class="viewcode-block" id="IPX._read_ipx_address"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/ipx.html#pcapkit.protocols.internet.ipx.IPX._read_ipx_address">[docs]</a>    <span class="k">def</span> <span class="nf">_read_ipx_address</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Data_Address&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Read IPX address field.</span>
 
 <span class="sd">        Returns:</span>
@@ -199,10 +199,10 @@
         <span class="n">_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">_ntwk</span><span class="p">,</span> <span class="n">_node</span><span class="p">,</span> <span class="n">_sock</span><span class="o">.</span><span class="n">hex</span><span class="p">()]</span>
         <span class="n">_addr</span> <span class="o">=</span> <span class="s1">&#39;:&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">_list</span><span class="p">)</span>
 
-        <span class="n">addr</span> <span class="o">=</span> <span class="n">DataType_Address</span><span class="p">(</span>
+        <span class="n">addr</span> <span class="o">=</span> <span class="n">Data_Address</span><span class="p">(</span>
             <span class="n">network</span><span class="o">=</span><span class="n">_ntwk</span><span class="p">,</span>
             <span class="n">node</span><span class="o">=</span><span class="n">_maca</span><span class="p">,</span>
-            <span class="n">socket</span><span class="o">=</span><span class="n">RegType_Socket</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">_sock</span><span class="o">.</span><span class="n">hex</span><span class="p">(),</span> <span class="n">base</span><span class="o">=</span><span class="mi">16</span><span class="p">)),</span>
+            <span class="n">socket</span><span class="o">=</span><span class="n">Enum_Socket</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">_sock</span><span class="o">.</span><span class="n">hex</span><span class="p">(),</span> <span class="n">base</span><span class="o">=</span><span class="mi">16</span><span class="p">)),</span>
             <span class="n">addr</span><span class="o">=</span><span class="n">_addr</span><span class="p">,</span>
         <span class="p">)</span>
 

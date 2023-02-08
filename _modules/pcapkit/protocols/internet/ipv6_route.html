@@ -56,32 +56,32 @@
 <span class="kn">import</span> <span class="nn">ipaddress</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">overload</span>
 
-<span class="kn">from</span> <span class="nn">pcapkit.const.ipv6.routing</span> <span class="kn">import</span> <span class="n">Routing</span> <span class="k">as</span> <span class="n">RegType_Routing</span>
-<span class="kn">from</span> <span class="nn">pcapkit.const.reg.transtype</span> <span class="kn">import</span> <span class="n">TransType</span> <span class="k">as</span> <span class="n">RegType_TransType</span>
-<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.internet.ipv6_route</span> <span class="kn">import</span> <span class="n">RPL</span> <span class="k">as</span> <span class="n">DataType_RPL</span>
-<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.internet.ipv6_route</span> <span class="kn">import</span> <span class="n">IPv6_Route</span> <span class="k">as</span> <span class="n">DataType_IPv6_Route</span>
-<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.internet.ipv6_route</span> <span class="kn">import</span> <span class="n">SourceRoute</span> <span class="k">as</span> <span class="n">DataType_SourceRoute</span>
-<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.internet.ipv6_route</span> <span class="kn">import</span> <span class="n">Type2</span> <span class="k">as</span> <span class="n">DataType_Type2</span>
-<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.internet.ipv6_route</span> <span class="kn">import</span> <span class="n">UnknownType</span> <span class="k">as</span> <span class="n">DataType_UnknownType</span>
+<span class="kn">from</span> <span class="nn">pcapkit.const.ipv6.routing</span> <span class="kn">import</span> <span class="n">Routing</span> <span class="k">as</span> <span class="n">Enum_Routing</span>
+<span class="kn">from</span> <span class="nn">pcapkit.const.reg.transtype</span> <span class="kn">import</span> <span class="n">TransType</span> <span class="k">as</span> <span class="n">Enum_TransType</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.internet.ipv6_route</span> <span class="kn">import</span> <span class="n">RPL</span> <span class="k">as</span> <span class="n">Data_RPL</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.internet.ipv6_route</span> <span class="kn">import</span> <span class="n">IPv6_Route</span> <span class="k">as</span> <span class="n">Data_IPv6_Route</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.internet.ipv6_route</span> <span class="kn">import</span> <span class="n">SourceRoute</span> <span class="k">as</span> <span class="n">Data_SourceRoute</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.internet.ipv6_route</span> <span class="kn">import</span> <span class="n">Type2</span> <span class="k">as</span> <span class="n">Data_Type2</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.internet.ipv6_route</span> <span class="kn">import</span> <span class="n">UnknownType</span> <span class="k">as</span> <span class="n">Data_UnknownType</span>
 <span class="kn">from</span> <span class="nn">pcapkit.protocols.internet.internet</span> <span class="kn">import</span> <span class="n">Internet</span>
 <span class="kn">from</span> <span class="nn">pcapkit.utilities.exceptions</span> <span class="kn">import</span> <span class="n">ProtocolError</span><span class="p">,</span> <span class="n">UnsupportedCall</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
     <span class="kn">from</span> <span class="nn">ipaddress</span> <span class="kn">import</span> <span class="n">IPv6Address</span>
-    <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">BinaryIO</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">DefaultDict</span><span class="p">,</span> <span class="n">NoReturn</span><span class="p">,</span> <span class="n">Optional</span>
+    <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">IO</span><span class="p">,</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">DefaultDict</span><span class="p">,</span> <span class="n">NoReturn</span><span class="p">,</span> <span class="n">Optional</span>
 
     <span class="kn">from</span> <span class="nn">typing_extensions</span> <span class="kn">import</span> <span class="n">Literal</span>
 
     <span class="kn">from</span> <span class="nn">pcapkit.corekit.protochain</span> <span class="kn">import</span> <span class="n">ProtoChain</span>
-    <span class="kn">from</span> <span class="nn">pcapkit.protocols.data.internet.ipv6_route</span> <span class="kn">import</span> <span class="n">RoutingType</span> <span class="k">as</span> <span class="n">DataType_RoutingType</span>
+    <span class="kn">from</span> <span class="nn">pcapkit.protocols.data.internet.ipv6_route</span> <span class="kn">import</span> <span class="n">RoutingType</span> <span class="k">as</span> <span class="n">Data_RoutingType</span>
     <span class="kn">from</span> <span class="nn">pcapkit.protocols.protocol</span> <span class="kn">import</span> <span class="n">Protocol</span>
 
-    <span class="n">TypeParser</span> <span class="o">=</span> <span class="n">Callable</span><span class="p">[[</span><span class="s1">&#39;IPv6_Route&#39;</span><span class="p">,</span> <span class="nb">int</span><span class="p">],</span> <span class="n">DataType_RoutingType</span><span class="p">]</span>
+    <span class="n">TypeParser</span> <span class="o">=</span> <span class="n">Callable</span><span class="p">[[</span><span class="s1">&#39;IPv6_Route&#39;</span><span class="p">,</span> <span class="nb">int</span><span class="p">],</span> <span class="n">Data_RoutingType</span><span class="p">]</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;IPv6_Route&#39;</span><span class="p">]</span>
 
 
-<div class="viewcode-block" id="IPv6_Route"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/ipv6_route.html#pcapkit.protocols.internet.ipv6_route.IPv6_Route">[docs]</a><span class="k">class</span> <span class="nc">IPv6_Route</span><span class="p">(</span><span class="n">Internet</span><span class="p">[</span><span class="n">DataType_IPv6_Route</span><span class="p">]):</span>
+<div class="viewcode-block" id="IPv6_Route"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/ipv6_route.html#pcapkit.protocols.internet.ipv6_route.IPv6_Route">[docs]</a><span class="k">class</span> <span class="nc">IPv6_Route</span><span class="p">(</span><span class="n">Internet</span><span class="p">[</span><span class="n">Data_IPv6_Route</span><span class="p">]):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;This class implements Routing Header for IPv6.</span>
 
 <span class="sd">    This class currently supports parsing of the following Routing Header for IPv6</span>
@@ -107,16 +107,16 @@
     <span class="c1"># Defaults.</span>
     <span class="c1">##########################################################################</span>
 
-    <span class="c1">#: DefaultDict[RegType_Routing, str | TypeParser]: Type code to method</span>
+    <span class="c1">#: DefaultDict[Enum_Routing, str | TypeParser]: Type code to method</span>
     <span class="c1">#: mapping. Method names are expected to be referred to the class by</span>
     <span class="c1">#: ``_read_data_type_${name}``, and if such name not found, the value should</span>
     <span class="c1">#: then be a method that can parse the routing type by itself.</span>
     <span class="n">__routing__</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">defaultdict</span><span class="p">(</span>
         <span class="k">lambda</span><span class="p">:</span> <span class="s1">&#39;none&#39;</span><span class="p">,</span>
         <span class="p">{</span>
-            <span class="n">RegType_Routing</span><span class="o">.</span><span class="n">Source_Route</span><span class="p">:</span> <span class="s1">&#39;src&#39;</span><span class="p">,</span>             <span class="c1"># [RFC 5095] DEPRECATED</span>
-            <span class="n">RegType_Routing</span><span class="o">.</span><span class="n">Type_2_Routing_Header</span><span class="p">:</span> <span class="s1">&#39;2&#39;</span><span class="p">,</span>      <span class="c1"># [RFC 6275]</span>
-            <span class="n">RegType_Routing</span><span class="o">.</span><span class="n">RPL_Source_Route_Header</span><span class="p">:</span> <span class="s1">&#39;rpl&#39;</span><span class="p">,</span>  <span class="c1"># [RFC 6554]</span>
+            <span class="n">Enum_Routing</span><span class="o">.</span><span class="n">Source_Route</span><span class="p">:</span> <span class="s1">&#39;src&#39;</span><span class="p">,</span>             <span class="c1"># [RFC 5095] DEPRECATED</span>
+            <span class="n">Enum_Routing</span><span class="o">.</span><span class="n">Type_2_Routing_Header</span><span class="p">:</span> <span class="s1">&#39;2&#39;</span><span class="p">,</span>      <span class="c1"># [RFC 6275]</span>
+            <span class="n">Enum_Routing</span><span class="o">.</span><span class="n">RPL_Source_Route_Header</span><span class="p">:</span> <span class="s1">&#39;rpl&#39;</span><span class="p">,</span>  <span class="c1"># [RFC 6554]</span>
         <span class="p">},</span>
     <span class="p">)</span>  <span class="c1"># type: DefaultDict[int, str | TypeParser]</span>
 
@@ -181,7 +181,7 @@
     <span class="c1">##########################################################################</span>
 
 <div class="viewcode-block" id="IPv6_Route.read"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/ipv6_route.html#pcapkit.protocols.internet.ipv6_route.IPv6_Route.read">[docs]</a>    <span class="k">def</span> <span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">extension</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>  <span class="c1"># pylint: disable=arguments-differ</span>
-             <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_IPv6_Route&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
+             <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Data_IPv6_Route&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Read Routing Header for IPv6.</span>
 
 <span class="sd">        Structure of IPv6-Route header [:rfc:`8200`][:rfc:`5095`]:</span>
@@ -215,10 +215,10 @@
         <span class="n">_type</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_unpack</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
         <span class="n">_left</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_unpack</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
 
-        <span class="n">ipv6_route</span> <span class="o">=</span> <span class="n">DataType_IPv6_Route</span><span class="p">(</span>
+        <span class="n">ipv6_route</span> <span class="o">=</span> <span class="n">Data_IPv6_Route</span><span class="p">(</span>
             <span class="nb">next</span><span class="o">=</span><span class="n">_next</span><span class="p">,</span>
             <span class="n">length</span><span class="o">=</span><span class="p">(</span><span class="n">_hlen</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="mi">8</span><span class="p">,</span>
-            <span class="nb">type</span><span class="o">=</span><span class="n">RegType_Routing</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">_type</span><span class="p">),</span>
+            <span class="nb">type</span><span class="o">=</span><span class="n">Enum_Routing</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">_type</span><span class="p">),</span>
             <span class="n">seg_left</span><span class="o">=</span><span class="n">_left</span><span class="p">,</span>
         <span class="p">)</span>
 
@@ -227,7 +227,7 @@
             <span class="n">_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__routing__</span><span class="p">[</span><span class="n">ipv6_route</span><span class="o">.</span><span class="n">type</span><span class="p">]</span>  <span class="c1"># type: str | TypeParser</span>
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
                 <span class="n">_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;_read_data_type_</span><span class="si">{</span><span class="n">_name</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="si">}</span><span class="s1">&#39;</span>
-                <span class="n">_meth</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">_name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_data_type_none</span><span class="p">)</span>  <span class="c1"># type: Callable[[int], DataType_RoutingType]</span>
+                <span class="n">_meth</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">_name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_data_type_none</span><span class="p">)</span>  <span class="c1"># type: Callable[[int], Data_RoutingType]</span>
                 <span class="n">_data</span> <span class="o">=</span> <span class="n">_meth</span><span class="p">(</span><span class="n">_dlen</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">_data</span> <span class="o">=</span> <span class="n">_name</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">_dlen</span><span class="p">)</span>
@@ -250,7 +250,7 @@
         <span class="k">raise</span> <span class="ne">NotImplementedError</span></div>
 
 <div class="viewcode-block" id="IPv6_Route.register_routing"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/ipv6_route.html#pcapkit.protocols.internet.ipv6_route.IPv6_Route.register_routing">[docs]</a>    <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">register_routing</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">&#39;RegType_Routing&#39;</span><span class="p">,</span> <span class="n">meth</span><span class="p">:</span> <span class="s1">&#39;str | TypeParser&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">register_routing</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">&#39;Enum_Routing&#39;</span><span class="p">,</span> <span class="n">meth</span><span class="p">:</span> <span class="s1">&#39;str | TypeParser&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Register an routing data parser.</span>
 
 <span class="sd">        Args:</span>
@@ -265,13 +265,13 @@
     <span class="c1">##########################################################################</span>
 
     <span class="nd">@overload</span>
-    <span class="k">def</span> <span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file</span><span class="p">:</span> <span class="s1">&#39;BinaryIO&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span> <span class="o">=</span> <span class="o">...</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>  <span class="c1"># pylint: disable=arguments-differ</span>
+    <span class="k">def</span> <span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file</span><span class="p">:</span> <span class="s1">&#39;IO[bytes]&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span> <span class="o">=</span> <span class="o">...</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>  <span class="c1"># pylint: disable=arguments-differ</span>
                       <span class="n">extension</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="o">...</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>
 
     <span class="nd">@overload</span>
     <span class="k">def</span> <span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=arguments-differ</span>
 
-<div class="viewcode-block" id="IPv6_Route.__post_init__"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/ipv6_route.html#pcapkit.protocols.internet.ipv6_route.IPv6_Route.__post_init__">[docs]</a>    <span class="k">def</span> <span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file</span><span class="p">:</span> <span class="s1">&#39;Optional[BinaryIO]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>  <span class="c1"># pylint: disable=arguments-differ</span>
+<div class="viewcode-block" id="IPv6_Route.__post_init__"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/ipv6_route.html#pcapkit.protocols.internet.ipv6_route.IPv6_Route.__post_init__">[docs]</a>    <span class="k">def</span> <span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file</span><span class="p">:</span> <span class="s1">&#39;Optional[IO[bytes]]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>  <span class="c1"># pylint: disable=arguments-differ</span>
                       <span class="n">extension</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Post initialisation hook.</span>
 
@@ -298,7 +298,7 @@
         <span class="k">return</span> <span class="mi">4</span>
 
 <div class="viewcode-block" id="IPv6_Route.__index__"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/ipv6_route.html#pcapkit.protocols.internet.ipv6_route.IPv6_Route.__index__">[docs]</a>    <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="fm">__index__</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;RegType_TransType&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=invalid-index-returned</span>
+    <span class="k">def</span> <span class="fm">__index__</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Enum_TransType&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=invalid-index-returned</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Numeral registry index of the protocol.</span>
 
 <span class="sd">        Returns:</span>
@@ -307,13 +307,13 @@
 <span class="sd">        .. _IANA: https://www.iana.org/assignments/protocol-numbers/protocol-numbers.xhtml</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="n">RegType_TransType</span><span class="o">.</span><span class="n">IPv6_Route</span>  <span class="c1"># type: ignore[return-value]</span></div>
+        <span class="k">return</span> <span class="n">Enum_TransType</span><span class="o">.</span><span class="n">IPv6_Route</span>  <span class="c1"># type: ignore[return-value]</span></div>
 
     <span class="c1">##########################################################################</span>
     <span class="c1"># Utilities.</span>
     <span class="c1">##########################################################################</span>
 
-<div class="viewcode-block" id="IPv6_Route._read_data_type_none"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/ipv6_route.html#pcapkit.protocols.internet.ipv6_route.IPv6_Route._read_data_type_none">[docs]</a>    <span class="k">def</span> <span class="nf">_read_data_type_none</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_UnknownType&#39;</span><span class="p">:</span>
+<div class="viewcode-block" id="IPv6_Route._read_data_type_none"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/ipv6_route.html#pcapkit.protocols.internet.ipv6_route.IPv6_Route._read_data_type_none">[docs]</a>    <span class="k">def</span> <span class="nf">_read_data_type_none</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Data_UnknownType&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Read IPv6-Route unknown type data.</span>
 
 <span class="sd">        Structure of IPv6-Route unknown type data [:rfc:`8200`][:rfc:`5095`]:</span>
@@ -339,13 +339,13 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_fileng</span><span class="p">(</span><span class="n">length</span><span class="p">)</span>
 
-        <span class="n">data</span> <span class="o">=</span> <span class="n">DataType_UnknownType</span><span class="p">(</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">Data_UnknownType</span><span class="p">(</span>
             <span class="n">data</span><span class="o">=</span><span class="n">_data</span><span class="p">,</span>
         <span class="p">)</span>
 
         <span class="k">return</span> <span class="n">data</span></div>
 
-<div class="viewcode-block" id="IPv6_Route._read_data_type_src"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/ipv6_route.html#pcapkit.protocols.internet.ipv6_route.IPv6_Route._read_data_type_src">[docs]</a>    <span class="k">def</span> <span class="nf">_read_data_type_src</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_SourceRoute&#39;</span><span class="p">:</span>
+<div class="viewcode-block" id="IPv6_Route._read_data_type_src"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/ipv6_route.html#pcapkit.protocols.internet.ipv6_route.IPv6_Route._read_data_type_src">[docs]</a>    <span class="k">def</span> <span class="nf">_read_data_type_src</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Data_SourceRoute&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Read IPv6-Route Source Route data.</span>
 
 <span class="sd">        Structure of IPv6-Route Source Route data [:rfc:`5095`]:</span>
@@ -398,13 +398,13 @@
         <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">((</span><span class="n">length</span> <span class="o">-</span> <span class="mi">4</span><span class="p">)</span> <span class="o">//</span> <span class="mi">16</span><span class="p">):</span>
             <span class="n">_addr</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ipaddress</span><span class="o">.</span><span class="n">ip_address</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_read_fileng</span><span class="p">(</span><span class="mi">16</span><span class="p">)))</span>  <span class="c1"># type: ignore[arg-type]</span>
 
-        <span class="n">data</span> <span class="o">=</span> <span class="n">DataType_SourceRoute</span><span class="p">(</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">Data_SourceRoute</span><span class="p">(</span>
             <span class="n">ip</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">_addr</span><span class="p">),</span>
         <span class="p">)</span>
 
         <span class="k">return</span> <span class="n">data</span></div>
 
-<div class="viewcode-block" id="IPv6_Route._read_data_type_2"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/ipv6_route.html#pcapkit.protocols.internet.ipv6_route.IPv6_Route._read_data_type_2">[docs]</a>    <span class="k">def</span> <span class="nf">_read_data_type_2</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_Type2&#39;</span><span class="p">:</span>
+<div class="viewcode-block" id="IPv6_Route._read_data_type_2"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/ipv6_route.html#pcapkit.protocols.internet.ipv6_route.IPv6_Route._read_data_type_2">[docs]</a>    <span class="k">def</span> <span class="nf">_read_data_type_2</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Data_Type2&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Read IPv6-Route Type 2 data.</span>
 
 <span class="sd">        Structure of IPv6-Route Type 2 data [:rfc:`6275`]:</span>
@@ -441,13 +441,13 @@
         <span class="n">_resv</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_fileng</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
         <span class="n">_home</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_fileng</span><span class="p">(</span><span class="mi">16</span><span class="p">)</span>
 
-        <span class="n">data</span> <span class="o">=</span> <span class="n">DataType_Type2</span><span class="p">(</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">Data_Type2</span><span class="p">(</span>
             <span class="n">ip</span><span class="o">=</span><span class="n">ipaddress</span><span class="o">.</span><span class="n">ip_address</span><span class="p">(</span><span class="n">_home</span><span class="p">),</span>  <span class="c1"># type: ignore[arg-type]  # type: ignore[arg-type]</span>
         <span class="p">)</span>
 
         <span class="k">return</span> <span class="n">data</span></div>
 
-<div class="viewcode-block" id="IPv6_Route._read_data_type_rpl"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/ipv6_route.html#pcapkit.protocols.internet.ipv6_route.IPv6_Route._read_data_type_rpl">[docs]</a>    <span class="k">def</span> <span class="nf">_read_data_type_rpl</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_RPL&#39;</span><span class="p">:</span>
+<div class="viewcode-block" id="IPv6_Route._read_data_type_rpl"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/ipv6_route.html#pcapkit.protocols.internet.ipv6_route.IPv6_Route._read_data_type_rpl">[docs]</a>    <span class="k">def</span> <span class="nf">_read_data_type_rpl</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Data_RPL&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Read IPv6-Route RPL Source data.</span>
 
 <span class="sd">        Structure of IPv6-Route RPL Source data [:rfc:`6554`]:</span>
@@ -496,7 +496,7 @@
 
         <span class="n">_pads</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_fileng</span><span class="p">(</span><span class="n">_plen</span><span class="p">)</span>
 
-        <span class="n">data</span> <span class="o">=</span> <span class="n">DataType_RPL</span><span class="p">(</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">Data_RPL</span><span class="p">(</span>
             <span class="n">cmpr_i</span><span class="o">=</span><span class="n">_inti</span><span class="p">,</span>
             <span class="n">cmpr_e</span><span class="o">=</span><span class="n">_inte</span><span class="p">,</span>
             <span class="n">pad</span><span class="o">=</span><span class="n">_plen</span><span class="p">,</span>

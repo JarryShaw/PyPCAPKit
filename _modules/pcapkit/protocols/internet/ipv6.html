@@ -59,11 +59,11 @@
 <span class="kn">import</span> <span class="nn">ipaddress</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
 
-<span class="kn">from</span> <span class="nn">pcapkit.const.ipv6.extension_header</span> <span class="kn">import</span> <span class="n">ExtensionHeader</span> <span class="k">as</span> <span class="n">RegType_ExtensionHeader</span>
-<span class="kn">from</span> <span class="nn">pcapkit.const.reg.transtype</span> <span class="kn">import</span> <span class="n">TransType</span> <span class="k">as</span> <span class="n">RegType_TransType</span>
+<span class="kn">from</span> <span class="nn">pcapkit.const.ipv6.extension_header</span> <span class="kn">import</span> <span class="n">ExtensionHeader</span> <span class="k">as</span> <span class="n">Enum_ExtensionHeader</span>
+<span class="kn">from</span> <span class="nn">pcapkit.const.reg.transtype</span> <span class="kn">import</span> <span class="n">TransType</span> <span class="k">as</span> <span class="n">Enum_TransType</span>
 <span class="kn">from</span> <span class="nn">pcapkit.corekit.multidict</span> <span class="kn">import</span> <span class="n">OrderedMultiDict</span>
 <span class="kn">from</span> <span class="nn">pcapkit.corekit.protochain</span> <span class="kn">import</span> <span class="n">ProtoChain</span>
-<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.internet.ipv6</span> <span class="kn">import</span> <span class="n">IPv6</span> <span class="k">as</span> <span class="n">DataType_IPv6</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.internet.ipv6</span> <span class="kn">import</span> <span class="n">IPv6</span> <span class="k">as</span> <span class="n">Data_IPv6</span>
 <span class="kn">from</span> <span class="nn">pcapkit.protocols.internet.ip</span> <span class="kn">import</span> <span class="n">IP</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
@@ -77,7 +77,7 @@
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;IPv6&#39;</span><span class="p">]</span>
 
 
-<div class="viewcode-block" id="IPv6"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/ipv6.html#pcapkit.protocols.internet.ipv6.IPv6">[docs]</a><span class="k">class</span> <span class="nc">IPv6</span><span class="p">(</span><span class="n">IP</span><span class="p">[</span><span class="n">DataType_IPv6</span><span class="p">]):</span>
+<div class="viewcode-block" id="IPv6"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/ipv6.html#pcapkit.protocols.internet.ipv6.IPv6">[docs]</a><span class="k">class</span> <span class="nc">IPv6</span><span class="p">(</span><span class="n">IP</span><span class="p">[</span><span class="n">Data_IPv6</span><span class="p">]):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;This class implements Internet Protocol version 6.&quot;&quot;&quot;</span>
 
     <span class="c1">##########################################################################</span>
@@ -95,7 +95,7 @@
         <span class="k">return</span> <span class="mi">40</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">protocol</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;RegType_TransType&#39;</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">protocol</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Enum_TransType&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Name of next layer protocol.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_info</span><span class="o">.</span><span class="n">protocol</span>
 
@@ -112,7 +112,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_info</span><span class="o">.</span><span class="n">dst</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">extension_headers</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;OrderedMultiDict[RegType_ExtensionHeader, Protocol]&#39;</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">extension_headers</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;OrderedMultiDict[Enum_ExtensionHeader, Protocol]&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;IPv6 extension header records.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_exthdr</span>
 
@@ -120,7 +120,7 @@
     <span class="c1"># Methods.</span>
     <span class="c1">##########################################################################</span>
 
-<div class="viewcode-block" id="IPv6.read"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/ipv6.html#pcapkit.protocols.internet.ipv6.IPv6.read">[docs]</a>    <span class="k">def</span> <span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_IPv6&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
+<div class="viewcode-block" id="IPv6.read"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/ipv6.html#pcapkit.protocols.internet.ipv6.IPv6.read">[docs]</a>    <span class="k">def</span> <span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Data_IPv6&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Read Internet Protocol version 6 (IPv6).</span>
 
 <span class="sd">        Structure of IPv6 header [:rfc:`2460`]:</span>
@@ -169,7 +169,7 @@
         <span class="n">_srca</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_ip_addr</span><span class="p">()</span>
         <span class="n">_dsta</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_ip_addr</span><span class="p">()</span>
 
-        <span class="n">ipv6</span> <span class="o">=</span> <span class="n">DataType_IPv6</span><span class="o">.</span><span class="n">from_dict</span><span class="p">({</span>
+        <span class="n">ipv6</span> <span class="o">=</span> <span class="n">Data_IPv6</span><span class="o">.</span><span class="n">from_dict</span><span class="p">({</span>
             <span class="s1">&#39;version&#39;</span><span class="p">:</span> <span class="n">_htet</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
             <span class="s1">&#39;class&#39;</span><span class="p">:</span> <span class="n">_htet</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
             <span class="s1">&#39;label&#39;</span><span class="p">:</span> <span class="n">_htet</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span>
@@ -178,7 +178,7 @@
             <span class="s1">&#39;limit&#39;</span><span class="p">:</span> <span class="n">_hlmt</span><span class="p">,</span>
             <span class="s1">&#39;src&#39;</span><span class="p">:</span> <span class="n">_srca</span><span class="p">,</span>
             <span class="s1">&#39;dst&#39;</span><span class="p">:</span> <span class="n">_dsta</span><span class="p">,</span>
-        <span class="p">})</span>  <span class="c1"># type: DataType_IPv6</span>
+        <span class="p">})</span>  <span class="c1"># type: Data_IPv6</span>
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_decode_next_layer</span><span class="p">(</span><span class="n">ipv6</span><span class="p">,</span> <span class="n">_next</span><span class="p">,</span> <span class="n">ipv6</span><span class="o">.</span><span class="n">payload</span><span class="p">)</span>  <span class="c1"># pylint: disable=no-member</span></div>
 
@@ -213,7 +213,7 @@
         <span class="k">return</span> <span class="mi">40</span>
 
 <div class="viewcode-block" id="IPv6.__index__"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/ipv6.html#pcapkit.protocols.internet.ipv6.IPv6.__index__">[docs]</a>    <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="fm">__index__</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;RegType_TransType&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=invalid-index-returned</span>
+    <span class="k">def</span> <span class="fm">__index__</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Enum_TransType&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=invalid-index-returned</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Numeral registry index of the protocol.</span>
 
 <span class="sd">        Returns:</span>
@@ -222,7 +222,7 @@
 <span class="sd">        .. _IANA: https://www.iana.org/assignments/protocol-numbers/protocol-numbers.xhtml</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="n">RegType_TransType</span><span class="o">.</span><span class="n">IPv6</span>  <span class="c1"># type: ignore[return-value]</span></div>
+        <span class="k">return</span> <span class="n">Enum_TransType</span><span class="o">.</span><span class="n">IPv6</span>  <span class="c1"># type: ignore[return-value]</span></div>
 
     <span class="c1">##########################################################################</span>
     <span class="c1"># Utilities.</span>
@@ -252,8 +252,8 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">ipaddress</span><span class="o">.</span><span class="n">ip_address</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_read_fileng</span><span class="p">(</span><span class="mi">16</span><span class="p">))</span>  <span class="c1"># type: ignore[return-value]</span></div>
 
-<div class="viewcode-block" id="IPv6._decode_next_layer"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/ipv6.html#pcapkit.protocols.internet.ipv6.IPv6._decode_next_layer">[docs]</a>    <span class="k">def</span> <span class="nf">_decode_next_layer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ipv6</span><span class="p">:</span> <span class="s1">&#39;DataType_IPv6&#39;</span><span class="p">,</span> <span class="n">proto</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># type: ignore[override] # pylint: disable=arguments-differ,arguments-renamed</span>
-                           <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_IPv6&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=arguments-differ</span>
+<div class="viewcode-block" id="IPv6._decode_next_layer"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/ipv6.html#pcapkit.protocols.internet.ipv6.IPv6._decode_next_layer">[docs]</a>    <span class="k">def</span> <span class="nf">_decode_next_layer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ipv6</span><span class="p">:</span> <span class="s1">&#39;Data_IPv6&#39;</span><span class="p">,</span> <span class="n">proto</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># type: ignore[override] # pylint: disable=arguments-differ,arguments-renamed</span>
+                           <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Data_IPv6&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=arguments-differ</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Decode next layer extractor.</span>
 
 <span class="sd">        Arguments:</span>
@@ -266,7 +266,7 @@
 
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1">#: Extension headers.</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_exthdr</span> <span class="o">=</span> <span class="n">OrderedMultiDict</span><span class="p">()</span>  <span class="c1"># type: OrderedMultiDict[RegType_ExtensionHeader, Protocol] # pylint: disable=attribute-defined-outside-init</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_exthdr</span> <span class="o">=</span> <span class="n">OrderedMultiDict</span><span class="p">()</span>  <span class="c1"># type: OrderedMultiDict[Enum_ExtensionHeader, Protocol] # pylint: disable=attribute-defined-outside-init</span>
 
         <span class="n">hdr_len</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">length</span>       <span class="c1"># header length</span>
         <span class="n">raw_len</span> <span class="o">=</span> <span class="n">ipv6</span><span class="o">.</span><span class="n">payload</span>      <span class="c1"># payload length</span>
@@ -275,7 +275,7 @@
         <span class="c1"># traverse if next header is an extensive header</span>
         <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
             <span class="k">try</span><span class="p">:</span>
-                <span class="n">ex_proto</span> <span class="o">=</span> <span class="n">RegType_ExtensionHeader</span><span class="p">(</span><span class="n">proto</span><span class="p">)</span>
+                <span class="n">ex_proto</span> <span class="o">=</span> <span class="n">Enum_ExtensionHeader</span><span class="p">(</span><span class="n">proto</span><span class="p">)</span>
             <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
                 <span class="k">break</span>
 
@@ -305,7 +305,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">_exthdr</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">ex_proto</span><span class="p">,</span> <span class="n">next_</span><span class="p">)</span>
 
             <span class="c1"># keep original data after fragment header</span>
-            <span class="k">if</span> <span class="n">ex_proto</span> <span class="o">==</span> <span class="n">RegType_ExtensionHeader</span><span class="o">.</span><span class="n">IPv6_Frag</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">ex_proto</span> <span class="o">==</span> <span class="n">Enum_ExtensionHeader</span><span class="o">.</span><span class="n">IPv6_Frag</span><span class="p">:</span>
                 <span class="n">ipv6</span><span class="o">.</span><span class="n">__update__</span><span class="p">({</span>
                     <span class="s1">&#39;fragment&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_packet</span><span class="p">(</span><span class="n">header</span><span class="o">=</span><span class="n">hdr_len</span><span class="p">,</span> <span class="n">payload</span><span class="o">=</span><span class="n">raw_len</span><span class="p">),</span>
                 <span class="p">})</span>

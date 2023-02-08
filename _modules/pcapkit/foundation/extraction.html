@@ -50,7 +50,7 @@
 <span class="kn">import</span> <span class="nn">sys</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">cast</span>
 
-<span class="kn">from</span> <span class="nn">pcapkit.const.reg.linktype</span> <span class="kn">import</span> <span class="n">LinkType</span> <span class="k">as</span> <span class="n">RegType_LinkType</span>
+<span class="kn">from</span> <span class="nn">pcapkit.const.reg.linktype</span> <span class="kn">import</span> <span class="n">LinkType</span> <span class="k">as</span> <span class="n">Enum_LinkType</span>
 <span class="kn">from</span> <span class="nn">pcapkit.corekit.infoclass</span> <span class="kn">import</span> <span class="n">Info</span>
 <span class="kn">from</span> <span class="nn">pcapkit.protocols.misc.pcap.frame</span> <span class="kn">import</span> <span class="n">Frame</span>
 <span class="kn">from</span> <span class="nn">pcapkit.protocols.misc.pcap.header</span> <span class="kn">import</span> <span class="n">Header</span>
@@ -62,7 +62,7 @@
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
     <span class="kn">from</span> <span class="nn">types</span> <span class="kn">import</span> <span class="n">ModuleType</span><span class="p">,</span> <span class="n">TracebackType</span>
-    <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">BinaryIO</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">DefaultDict</span><span class="p">,</span> <span class="n">Iterator</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">TextIO</span><span class="p">,</span> <span class="n">Type</span><span class="p">,</span> <span class="n">Union</span>
+    <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">IO</span><span class="p">,</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">DefaultDict</span><span class="p">,</span> <span class="n">Iterator</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">TextIO</span><span class="p">,</span> <span class="n">Type</span><span class="p">,</span> <span class="n">Union</span>
 
     <span class="kn">from</span> <span class="nn">dictdumper.dumper</span> <span class="kn">import</span> <span class="n">Dumper</span>
     <span class="kn">from</span> <span class="nn">dpkt.dpkt</span> <span class="kn">import</span> <span class="n">Packet</span> <span class="k">as</span> <span class="n">DPKTPacket</span>
@@ -166,7 +166,7 @@
     <span class="n">_extmp</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span>
 
     <span class="c1">#: Input file object.</span>
-    <span class="n">_ifile</span><span class="p">:</span> <span class="s1">&#39;BinaryIO&#39;</span>
+    <span class="n">_ifile</span><span class="p">:</span> <span class="s1">&#39;IO[bytes]&#39;</span>
     <span class="c1">#: Output file object.</span>
     <span class="n">_ofile</span><span class="p">:</span> <span class="s1">&#39;Dumper | Type[Dumper]&#39;</span>
 
@@ -175,7 +175,7 @@
     <span class="c1">#: Version info.</span>
     <span class="n">_vinfo</span><span class="p">:</span> <span class="s1">&#39;VersionInfo&#39;</span>
     <span class="c1">#: Data link layer protocol.</span>
-    <span class="n">_dlink</span><span class="p">:</span> <span class="s1">&#39;RegType_LinkType&#39;</span>
+    <span class="n">_dlink</span><span class="p">:</span> <span class="s1">&#39;Enum_LinkType&#39;</span>
     <span class="c1">#: Nanosecond flag.</span>
     <span class="n">_nnsec</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span>
     <span class="c1">#: Output format.</span>
@@ -990,11 +990,11 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">record_header</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_ifile</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">SEEK_SET</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dlink</span> <span class="o">==</span> <span class="n">RegType_LinkType</span><span class="o">.</span><span class="n">ETHERNET</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dlink</span> <span class="o">==</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">ETHERNET</span><span class="p">:</span>
             <span class="n">pkg</span> <span class="o">=</span> <span class="n">dpkt</span><span class="o">.</span><span class="n">ethernet</span><span class="o">.</span><span class="n">Ethernet</span>
-        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dlink</span><span class="o">.</span><span class="n">value</span> <span class="o">==</span> <span class="n">RegType_LinkType</span><span class="o">.</span><span class="n">IPV4</span><span class="p">:</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dlink</span><span class="o">.</span><span class="n">value</span> <span class="o">==</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">IPV4</span><span class="p">:</span>
             <span class="n">pkg</span> <span class="o">=</span> <span class="n">dpkt</span><span class="o">.</span><span class="n">ip</span><span class="o">.</span><span class="n">IP</span>
-        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dlink</span><span class="o">.</span><span class="n">value</span> <span class="o">==</span> <span class="n">RegType_LinkType</span><span class="o">.</span><span class="n">IPV6</span><span class="p">:</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dlink</span><span class="o">.</span><span class="n">value</span> <span class="o">==</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">IPV6</span><span class="p">:</span>
             <span class="n">pkg</span> <span class="o">=</span> <span class="n">dpkt</span><span class="o">.</span><span class="n">ip6</span><span class="o">.</span><span class="n">IP6</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">warn</span><span class="p">(</span><span class="s1">&#39;unrecognised link layer protocol; all analysis functions ignored&#39;</span><span class="p">,</span>

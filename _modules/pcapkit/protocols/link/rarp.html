@@ -59,7 +59,7 @@
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
 
-<span class="kn">from</span> <span class="nn">pcapkit.const.reg.ethertype</span> <span class="kn">import</span> <span class="n">EtherType</span> <span class="k">as</span> <span class="n">RegType_EtherType</span>
+<span class="kn">from</span> <span class="nn">pcapkit.const.reg.ethertype</span> <span class="kn">import</span> <span class="n">EtherType</span> <span class="k">as</span> <span class="n">Enum_EtherType</span>
 <span class="kn">from</span> <span class="nn">pcapkit.protocols.link.arp</span> <span class="kn">import</span> <span class="n">ARP</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
@@ -85,7 +85,7 @@
     <span class="c1">##########################################################################</span>
 
 <div class="viewcode-block" id="RARP.__index__"><a class="viewcode-back" href="../../../../pcapkit/protocols/link/rarp.html#pcapkit.protocols.link.rarp.RARP.__index__">[docs]</a>    <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="fm">__index__</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;RegType_EtherType&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=invalid-index-returned</span>
+    <span class="k">def</span> <span class="fm">__index__</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Enum_EtherType&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=invalid-index-returned</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Numeral registry index of the protocol.</span>
 
 <span class="sd">        Returns:</span>
@@ -94,7 +94,7 @@
 <span class="sd">        .. _IANA: https://www.iana.org/assignments/ieee-802-numbers/ieee-802-numbers.xhtml</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="n">RegType_EtherType</span><span class="o">.</span><span class="n">Reverse_Address_Resolution_Protocol</span>  <span class="c1"># type: ignore[return-value]</span></div></div>
+        <span class="k">return</span> <span class="n">Enum_EtherType</span><span class="o">.</span><span class="n">Reverse_Address_Resolution_Protocol</span>  <span class="c1"># type: ignore[return-value]</span></div></div>
 </pre></div>
 
           </div>

@@ -397,7 +397,7 @@ enumeration:</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>code</strong> (<em>RegType_Option</em>) – TCP option code.</p></li>
+<li><p><strong>code</strong> (<em>Enum_Option</em>) – TCP option code.</p></li>
 <li><p><strong>meth</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em> | </em><em>OptionParser</em>) – Method name or callable to parse the option.</p></li>
 </ul>
 </dd>
@@ -414,7 +414,7 @@ enumeration:</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>code</strong> (<em>RegType_MPTCPOption</em>) – MPTCP option code.</p></li>
+<li><p><strong>code</strong> (<em>Enum_MPTCPOption</em>) – MPTCP option code.</p></li>
 <li><p><strong>meth</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em> | </em><em>MPOptionParser</em>) – Method name or callable to parse the option.</p></li>
 </ul>
 </dd>
@@ -451,12 +451,12 @@ enumeration:</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>kind</strong> (<em>RegType_Option</em>) – option kind value</p></li>
+<li><p><strong>kind</strong> (<em>Enum_Option</em>) – option kind value</p></li>
 <li><p><strong>options</strong> (<a class="reference internal" href="../../const/ipv6.html#pcapkit.const.ipv6.option.Option" title="pcapkit.const.ipv6.option.Option"><em>Option</em></a>) – extracted TCP options</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>DataType_UnassignedOption</p>
+<dd class="field-even"><p>Data_UnassignedOption</p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Parsed option data.</p>
@@ -478,12 +478,12 @@ enumeration:</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>kind</strong> (<em>RegType_Option</em>) – option kind value</p></li>
+<li><p><strong>kind</strong> (<em>Enum_Option</em>) – option kind value</p></li>
 <li><p><strong>options</strong> (<a class="reference internal" href="../../const/ipv6.html#pcapkit.const.ipv6.option.Option" title="pcapkit.const.ipv6.option.Option"><em>Option</em></a>) – extracted TCP options</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>DataType_EndOfOptionList</p>
+<dd class="field-even"><p>Data_EndOfOptionList</p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Parsed option data.</p>
@@ -505,12 +505,12 @@ enumeration:</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>kind</strong> (<em>RegType_Option</em>) – option kind value</p></li>
+<li><p><strong>kind</strong> (<em>Enum_Option</em>) – option kind value</p></li>
 <li><p><strong>options</strong> (<a class="reference internal" href="../../const/ipv6.html#pcapkit.const.ipv6.option.Option" title="pcapkit.const.ipv6.option.Option"><em>Option</em></a>) – extracted TCP options</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>DataType_NoOperation</p>
+<dd class="field-even"><p>Data_NoOperation</p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Parsed option data.</p>
@@ -532,12 +532,12 @@ enumeration:</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>kind</strong> (<em>RegType_Option</em>) – option kind value</p></li>
+<li><p><strong>kind</strong> (<em>Enum_Option</em>) – option kind value</p></li>
 <li><p><strong>options</strong> (<a class="reference internal" href="../../const/ipv6.html#pcapkit.const.ipv6.option.Option" title="pcapkit.const.ipv6.option.Option"><em>Option</em></a>) – extracted TCP options</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>DataType_MaximumSegmentSize</p>
+<dd class="field-even"><p>Data_MaximumSegmentSize</p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Parsed option data.</p>
@@ -562,12 +562,12 @@ enumeration:</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>kind</strong> (<em>RegType_Option</em>) – option kind value</p></li>
+<li><p><strong>kind</strong> (<em>Enum_Option</em>) – option kind value</p></li>
 <li><p><strong>options</strong> (<a class="reference internal" href="../../const/ipv6.html#pcapkit.const.ipv6.option.Option" title="pcapkit.const.ipv6.option.Option"><em>Option</em></a>) – extracted TCP options</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>DataType_WindowScale</p>
+<dd class="field-even"><p>Data_WindowScale</p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Parsed option data.</p>
@@ -591,12 +591,12 @@ enumeration:</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>kind</strong> (<em>RegType_Option</em>) – option kind value</p></li>
+<li><p><strong>kind</strong> (<em>Enum_Option</em>) – option kind value</p></li>
 <li><p><strong>options</strong> (<a class="reference internal" href="../../const/ipv6.html#pcapkit.const.ipv6.option.Option" title="pcapkit.const.ipv6.option.Option"><em>Option</em></a>) – extracted TCP options</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>DataType_SACKPermitted</p>
+<dd class="field-even"><p>Data_SACKPermitted</p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Parsed option data.</p>
@@ -632,12 +632,12 @@ enumeration:</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>kind</strong> (<em>RegType_Option</em>) – option kind value</p></li>
+<li><p><strong>kind</strong> (<em>Enum_Option</em>) – option kind value</p></li>
 <li><p><strong>options</strong> (<a class="reference internal" href="../../const/ipv6.html#pcapkit.const.ipv6.option.Option" title="pcapkit.const.ipv6.option.Option"><em>Option</em></a>) – extracted TCP options</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>DataType_SACK</p>
+<dd class="field-even"><p>Data_SACK</p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Parsed option data.</p>
@@ -661,12 +661,12 @@ enumeration:</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>kind</strong> (<em>RegType_Option</em>) – option kind value</p></li>
+<li><p><strong>kind</strong> (<em>Enum_Option</em>) – option kind value</p></li>
 <li><p><strong>options</strong> (<a class="reference internal" href="../../const/ipv6.html#pcapkit.const.ipv6.option.Option" title="pcapkit.const.ipv6.option.Option"><em>Option</em></a>) – extracted TCP options</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>DataType_Echo</p>
+<dd class="field-even"><p>Data_Echo</p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Parsed option data.</p>
@@ -690,12 +690,12 @@ enumeration:</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>kind</strong> (<em>RegType_Option</em>) – option kind value</p></li>
+<li><p><strong>kind</strong> (<em>Enum_Option</em>) – option kind value</p></li>
 <li><p><strong>options</strong> (<a class="reference internal" href="../../const/ipv6.html#pcapkit.const.ipv6.option.Option" title="pcapkit.const.ipv6.option.Option"><em>Option</em></a>) – extracted TCP options</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>DataType_EchoReply</p>
+<dd class="field-even"><p>Data_EchoReply</p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Parsed option data.</p>
@@ -720,12 +720,12 @@ enumeration:</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>kind</strong> (<em>RegType_Option</em>) – option kind value</p></li>
+<li><p><strong>kind</strong> (<em>Enum_Option</em>) – option kind value</p></li>
 <li><p><strong>options</strong> (<a class="reference internal" href="../../const/ipv6.html#pcapkit.const.ipv6.option.Option" title="pcapkit.const.ipv6.option.Option"><em>Option</em></a>) – extracted TCP options</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>DataType_Timestamp</p>
+<dd class="field-even"><p>Data_Timestamp</p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Parsed option data.</p>
@@ -749,12 +749,12 @@ enumeration:</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>kind</strong> (<em>RegType_Option</em>) – option kind value</p></li>
+<li><p><strong>kind</strong> (<em>Enum_Option</em>) – option kind value</p></li>
 <li><p><strong>options</strong> (<a class="reference internal" href="../../const/ipv6.html#pcapkit.const.ipv6.option.Option" title="pcapkit.const.ipv6.option.Option"><em>Option</em></a>) – extracted TCP options</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>DataType_PartialOrderConnectionPermitted</p>
+<dd class="field-even"><p>Data_PartialOrderConnectionPermitted</p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Parsed option data.</p>
@@ -779,12 +779,12 @@ enumeration:</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>kind</strong> (<em>RegType_Option</em>) – option kind value</p></li>
+<li><p><strong>kind</strong> (<em>Enum_Option</em>) – option kind value</p></li>
 <li><p><strong>options</strong> (<a class="reference internal" href="../../const/ipv6.html#pcapkit.const.ipv6.option.Option" title="pcapkit.const.ipv6.option.Option"><em>Option</em></a>) – extracted TCP options</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>DataType_PartialOrderConnectionProfile</p>
+<dd class="field-even"><p>Data_PartialOrderConnectionProfile</p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Parsed option data.</p>
@@ -809,12 +809,12 @@ enumeration:</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>kind</strong> (<em>RegType_Option</em>) – option kind value</p></li>
+<li><p><strong>kind</strong> (<em>Enum_Option</em>) – option kind value</p></li>
 <li><p><strong>options</strong> (<a class="reference internal" href="../../const/ipv6.html#pcapkit.const.ipv6.option.Option" title="pcapkit.const.ipv6.option.Option"><em>Option</em></a>) – extracted TCP options</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>DataType_CC</p>
+<dd class="field-even"><p>Data_CC</p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Parsed option data.</p>
@@ -839,12 +839,12 @@ enumeration:</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>kind</strong> (<em>RegType_Option</em>) – option kind value</p></li>
+<li><p><strong>kind</strong> (<em>Enum_Option</em>) – option kind value</p></li>
 <li><p><strong>options</strong> (<a class="reference internal" href="../../const/ipv6.html#pcapkit.const.ipv6.option.Option" title="pcapkit.const.ipv6.option.Option"><em>Option</em></a>) – extracted TCP options</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>DataType_CCNew</p>
+<dd class="field-even"><p>Data_CCNew</p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Parsed option data.</p>
@@ -869,12 +869,12 @@ enumeration:</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>kind</strong> (<em>RegType_Option</em>) – option kind value</p></li>
+<li><p><strong>kind</strong> (<em>Enum_Option</em>) – option kind value</p></li>
 <li><p><strong>options</strong> (<a class="reference internal" href="../../const/ipv6.html#pcapkit.const.ipv6.option.Option" title="pcapkit.const.ipv6.option.Option"><em>Option</em></a>) – extracted TCP options</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>DataType_CCEcho</p>
+<dd class="field-even"><p>Data_CCEcho</p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Parsed option data.</p>
@@ -898,12 +898,12 @@ enumeration:</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>kind</strong> (<em>RegType_Option</em>) – option kind value</p></li>
+<li><p><strong>kind</strong> (<em>Enum_Option</em>) – option kind value</p></li>
 <li><p><strong>options</strong> (<a class="reference internal" href="../../const/ipv6.html#pcapkit.const.ipv6.option.Option" title="pcapkit.const.ipv6.option.Option"><em>Option</em></a>) – extracted TCP options</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>DataType_AlternateChecksumRequest</p>
+<dd class="field-even"><p>Data_AlternateChecksumRequest</p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Parsed option data.</p>
@@ -927,12 +927,12 @@ enumeration:</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>kind</strong> (<em>RegType_Option</em>) – option kind value</p></li>
+<li><p><strong>kind</strong> (<em>Enum_Option</em>) – option kind value</p></li>
 <li><p><strong>options</strong> (<a class="reference internal" href="../../const/ipv6.html#pcapkit.const.ipv6.option.Option" title="pcapkit.const.ipv6.option.Option"><em>Option</em></a>) – extracted TCP options</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>DataType_AlternateChecksumData</p>
+<dd class="field-even"><p>Data_AlternateChecksumData</p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Parsed option data.</p>
@@ -961,12 +961,12 @@ enumeration:</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>kind</strong> (<em>RegType_Option</em>) – option kind value</p></li>
+<li><p><strong>kind</strong> (<em>Enum_Option</em>) – option kind value</p></li>
 <li><p><strong>options</strong> (<a class="reference internal" href="../../const/ipv6.html#pcapkit.const.ipv6.option.Option" title="pcapkit.const.ipv6.option.Option"><em>Option</em></a>) – extracted TCP options</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>DataType_MD5Signature</p>
+<dd class="field-even"><p>Data_MD5Signature</p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Parsed option data.</p>
@@ -995,12 +995,12 @@ enumeration:</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>kind</strong> (<em>RegType_Option</em>) – option kind value</p></li>
+<li><p><strong>kind</strong> (<em>Enum_Option</em>) – option kind value</p></li>
 <li><p><strong>options</strong> (<a class="reference internal" href="../../const/ipv6.html#pcapkit.const.ipv6.option.Option" title="pcapkit.const.ipv6.option.Option"><em>Option</em></a>) – extracted TCP options</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>DataType_QuickStartResponse</p>
+<dd class="field-even"><p>Data_QuickStartResponse</p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Parsed option data.</p>
@@ -1026,12 +1026,12 @@ enumeration:</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>kind</strong> (<em>RegType_Option</em>) – option kind value</p></li>
+<li><p><strong>kind</strong> (<em>Enum_Option</em>) – option kind value</p></li>
 <li><p><strong>options</strong> (<a class="reference internal" href="../../const/ipv6.html#pcapkit.const.ipv6.option.Option" title="pcapkit.const.ipv6.option.Option"><em>Option</em></a>) – extracted TCP options</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>DataType_UserTimeout</p>
+<dd class="field-even"><p>Data_UserTimeout</p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Parsed option data.</p>
@@ -1061,12 +1061,12 @@ enumeration:</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>kind</strong> (<em>RegType_Option</em>) – option kind value</p></li>
+<li><p><strong>kind</strong> (<em>Enum_Option</em>) – option kind value</p></li>
 <li><p><strong>options</strong> (<a class="reference internal" href="../../const/ipv6.html#pcapkit.const.ipv6.option.Option" title="pcapkit.const.ipv6.option.Option"><em>Option</em></a>) – extracted TCP options</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>DataType_Authentication</p>
+<dd class="field-even"><p>Data_Authentication</p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Parsed option data.</p>
@@ -1095,12 +1095,12 @@ enumeration:</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>kind</strong> (<em>RegType_Option</em>) – option kind value</p></li>
+<li><p><strong>kind</strong> (<em>Enum_Option</em>) – option kind value</p></li>
 <li><p><strong>options</strong> (<a class="reference internal" href="../../const/ipv6.html#pcapkit.const.ipv6.option.Option" title="pcapkit.const.ipv6.option.Option"><em>Option</em></a>) – extracted TCP options</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>DataType_MPTCP</p>
+<dd class="field-even"><p>Data_MPTCP</p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Parsed option data.</p>
@@ -1125,12 +1125,12 @@ enumeration:</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>kind</strong> (<em>RegType_Option</em>) – option kind value</p></li>
+<li><p><strong>kind</strong> (<em>Enum_Option</em>) – option kind value</p></li>
 <li><p><strong>options</strong> (<a class="reference internal" href="../../const/ipv6.html#pcapkit.const.ipv6.option.Option" title="pcapkit.const.ipv6.option.Option"><em>Option</em></a>) – extracted TCP options</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>DataType_FastOpenCookie</p>
+<dd class="field-even"><p>Data_FastOpenCookie</p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Parsed option data.</p>
@@ -1148,14 +1148,14 @@ enumeration:</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>kind</strong> (<em>RegType_MPTCPOption</em>) – option kind value</p></li>
+<li><p><strong>kind</strong> (<em>Enum_MPTCPOption</em>) – option kind value</p></li>
 <li><p><strong>dlen</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>) – length of remaining data</p></li>
 <li><p><strong>bits</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>) – 4-bit data</p></li>
 <li><p><strong>options</strong> (<a class="reference internal" href="../../const/ipv6.html#pcapkit.const.ipv6.option.Option" title="pcapkit.const.ipv6.option.Option"><em>Option</em></a>) – extracted TCP options</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>DataType_MPTCPUnknown</p>
+<dd class="field-even"><p>Data_MPTCPUnknown</p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Parsed option data.</p>
@@ -1186,14 +1186,14 @@ enumeration:</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>kind</strong> (<em>RegType_MPTCPOption</em>) – option kind value</p></li>
+<li><p><strong>kind</strong> (<em>Enum_MPTCPOption</em>) – option kind value</p></li>
 <li><p><strong>dlen</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>) – length of remaining data</p></li>
 <li><p><strong>bits</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>) – 4-bit data</p></li>
 <li><p><strong>options</strong> (<a class="reference internal" href="../../const/ipv6.html#pcapkit.const.ipv6.option.Option" title="pcapkit.const.ipv6.option.Option"><em>Option</em></a>) – extracted TCP options</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>DataType_MPTCPCapable</p>
+<dd class="field-even"><p>Data_MPTCPCapable</p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Parsed option data.</p>
@@ -1211,14 +1211,14 @@ enumeration:</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>kind</strong> (<em>RegType_MPTCPOption</em>) – option kind value</p></li>
+<li><p><strong>kind</strong> (<em>Enum_MPTCPOption</em>) – option kind value</p></li>
 <li><p><strong>dlen</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>) – length of remaining data</p></li>
 <li><p><strong>bits</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>) – 4-bit data</p></li>
 <li><p><strong>options</strong> (<a class="reference internal" href="../../const/ipv6.html#pcapkit.const.ipv6.option.Option" title="pcapkit.const.ipv6.option.Option"><em>Option</em></a>) – extracted TCP options</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>DataType_MPTCPJoin</p>
+<dd class="field-even"><p>Data_MPTCPJoin</p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Parsed option data.</p>
@@ -1256,14 +1256,14 @@ enumeration:</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>kind</strong> (<em>RegType_MPTCPOption</em>) – option kind value</p></li>
+<li><p><strong>kind</strong> (<em>Enum_MPTCPOption</em>) – option kind value</p></li>
 <li><p><strong>dlen</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>) – length of remaining data</p></li>
 <li><p><strong>bits</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>) – 4-bit data</p></li>
 <li><p><strong>options</strong> (<a class="reference internal" href="../../const/ipv6.html#pcapkit.const.ipv6.option.Option" title="pcapkit.const.ipv6.option.Option"><em>Option</em></a>) – extracted TCP options</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>DataType_MPTCPDSS</p>
+<dd class="field-even"><p>Data_MPTCPDSS</p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Parsed option data.</p>
@@ -1290,14 +1290,14 @@ enumeration:</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>kind</strong> (<em>RegType_MPTCPOption</em>) – option kind value</p></li>
+<li><p><strong>kind</strong> (<em>Enum_MPTCPOption</em>) – option kind value</p></li>
 <li><p><strong>dlen</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>) – length of remaining data</p></li>
 <li><p><strong>bits</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>) – 4-bit data</p></li>
 <li><p><strong>options</strong> (<a class="reference internal" href="../../const/ipv6.html#pcapkit.const.ipv6.option.Option" title="pcapkit.const.ipv6.option.Option"><em>Option</em></a>) – extracted TCP options</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>DataType_MPTCPAddAddress</p>
+<dd class="field-even"><p>Data_MPTCPAddAddress</p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Parsed option data.</p>
@@ -1324,14 +1324,14 @@ enumeration:</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>kind</strong> (<em>RegType_MPTCPOption</em>) – option kind value</p></li>
+<li><p><strong>kind</strong> (<em>Enum_MPTCPOption</em>) – option kind value</p></li>
 <li><p><strong>dlen</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>) – length of remaining data</p></li>
 <li><p><strong>bits</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>) – 4-bit data</p></li>
 <li><p><strong>options</strong> (<a class="reference internal" href="../../const/ipv6.html#pcapkit.const.ipv6.option.Option" title="pcapkit.const.ipv6.option.Option"><em>Option</em></a>) – extracted TCP options</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>DataType_MPTCPRemoveAddress</p>
+<dd class="field-even"><p>Data_MPTCPRemoveAddress</p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Parsed option data.</p>
@@ -1357,14 +1357,14 @@ enumeration:</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>kind</strong> (<em>RegType_MPTCPOption</em>) – option kind value</p></li>
+<li><p><strong>kind</strong> (<em>Enum_MPTCPOption</em>) – option kind value</p></li>
 <li><p><strong>dlen</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>) – length of remaining data</p></li>
 <li><p><strong>bits</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>) – 4-bit data</p></li>
 <li><p><strong>options</strong> (<a class="reference internal" href="../../const/ipv6.html#pcapkit.const.ipv6.option.Option" title="pcapkit.const.ipv6.option.Option"><em>Option</em></a>) – extracted TCP options</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>DataType_MPTCPPriority</p>
+<dd class="field-even"><p>Data_MPTCPPriority</p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Parsed option data.</p>
@@ -1394,14 +1394,14 @@ enumeration:</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>kind</strong> (<em>RegType_MPTCPOption</em>) – option kind value</p></li>
+<li><p><strong>kind</strong> (<em>Enum_MPTCPOption</em>) – option kind value</p></li>
 <li><p><strong>dlen</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>) – length of remaining data</p></li>
 <li><p><strong>bits</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>) – 4-bit data</p></li>
 <li><p><strong>options</strong> (<a class="reference internal" href="../../const/ipv6.html#pcapkit.const.ipv6.option.Option" title="pcapkit.const.ipv6.option.Option"><em>Option</em></a>) – extracted TCP options</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>DataType_MPTCPFallback</p>
+<dd class="field-even"><p>Data_MPTCPFallback</p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Parsed option data.</p>
@@ -1431,14 +1431,14 @@ enumeration:</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>kind</strong> (<em>RegType_MPTCPOption</em>) – option kind value</p></li>
+<li><p><strong>kind</strong> (<em>Enum_MPTCPOption</em>) – option kind value</p></li>
 <li><p><strong>dlen</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>) – length of remaining data</p></li>
 <li><p><strong>bits</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>) – 4-bit data</p></li>
 <li><p><strong>options</strong> (<a class="reference internal" href="../../const/ipv6.html#pcapkit.const.ipv6.option.Option" title="pcapkit.const.ipv6.option.Option"><em>Option</em></a>) – extracted TCP options</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>DataType_MPTCPFastclose</p>
+<dd class="field-even"><p>Data_MPTCPFastclose</p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Parsed option data.</p>
@@ -1468,14 +1468,14 @@ enumeration:</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>kind</strong> (<em>RegType_MPTCPOption</em>) – option kind value</p></li>
+<li><p><strong>kind</strong> (<em>Enum_MPTCPOption</em>) – option kind value</p></li>
 <li><p><strong>dlen</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>) – length of remaining data</p></li>
 <li><p><strong>bits</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>) – 4-bit data</p></li>
 <li><p><strong>options</strong> (<a class="reference internal" href="../../const/ipv6.html#pcapkit.const.ipv6.option.Option" title="pcapkit.const.ipv6.option.Option"><em>Option</em></a>) – extracted TCP options</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>DataType_MPTCPJoinSYN</p>
+<dd class="field-even"><p>Data_MPTCPJoinSYN</p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Parsed option data.</p>
@@ -1507,14 +1507,14 @@ enumeration:</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>kind</strong> (<em>RegType_MPTCPOption</em>) – option kind value</p></li>
+<li><p><strong>kind</strong> (<em>Enum_MPTCPOption</em>) – option kind value</p></li>
 <li><p><strong>dlen</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>) – length of remaining data</p></li>
 <li><p><strong>bits</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>) – 4-bit data</p></li>
 <li><p><strong>options</strong> (<a class="reference internal" href="../../const/ipv6.html#pcapkit.const.ipv6.option.Option" title="pcapkit.const.ipv6.option.Option"><em>Option</em></a>) – extracted TCP options</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>DataType_MPTCPJoinSYNACK</p>
+<dd class="field-even"><p>Data_MPTCPJoinSYNACK</p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Parsed option data.</p>
@@ -1546,14 +1546,14 @@ enumeration:</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>kind</strong> (<em>RegType_MPTCPOption</em>) – option kind value</p></li>
+<li><p><strong>kind</strong> (<em>Enum_MPTCPOption</em>) – option kind value</p></li>
 <li><p><strong>dlen</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>) – length of remaining data</p></li>
 <li><p><strong>bits</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>) – 4-bit data</p></li>
 <li><p><strong>options</strong> (<a class="reference internal" href="../../const/ipv6.html#pcapkit.const.ipv6.option.Option" title="pcapkit.const.ipv6.option.Option"><em>Option</em></a>) – extracted TCP options</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>DataType_MPTCPJoinACK</p>
+<dd class="field-even"><p>Data_MPTCPJoinACK</p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Parsed option data.</p>
@@ -1587,7 +1587,7 @@ found, the value should then be a method that can parse the option by
 itself.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>DefaultDict[RegType_Option, <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)">str</a> | OptionParser]</p>
+<dd class="field-odd"><p>DefaultDict[Enum_Option, <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)">str</a> | OptionParser]</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1598,7 +1598,7 @@ itself.</p>
 <dd><p>Option code to length mapping,</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>DefaultDict[RegType_MPTCPOption, <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)">str</a> | MPOptionParser]</p>
+<dd class="field-odd"><p>DefaultDict[Enum_MPTCPOption, <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)">str</a> | MPOptionParser]</p>
 </dd>
 </dl>
 </dd></dl>

@@ -63,8 +63,8 @@
     <span class="kn">from</span> <span class="nn">dictdumper.dumper</span> <span class="kn">import</span> <span class="n">Dumper</span>
     <span class="kn">from</span> <span class="nn">typing_extensions</span> <span class="kn">import</span> <span class="n">Literal</span>
 
-    <span class="kn">from</span> <span class="nn">pcapkit.const.reg.linktype</span> <span class="kn">import</span> <span class="n">LinkType</span> <span class="k">as</span> <span class="n">RegType_LinkType</span>
-    <span class="kn">from</span> <span class="nn">pcapkit.protocols.data.misc.pcap.frame</span> <span class="kn">import</span> <span class="n">Frame</span> <span class="k">as</span> <span class="n">DataType_Frame</span>
+    <span class="kn">from</span> <span class="nn">pcapkit.const.reg.linktype</span> <span class="kn">import</span> <span class="n">LinkType</span> <span class="k">as</span> <span class="n">Enum_LinkType</span>
+    <span class="kn">from</span> <span class="nn">pcapkit.protocols.data.misc.pcap.frame</span> <span class="kn">import</span> <span class="n">Frame</span> <span class="k">as</span> <span class="n">Data_Frame</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;TraceFlow&#39;</span><span class="p">]</span>
 
@@ -87,11 +87,11 @@
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="c1">#: Data link type from global header.</span>
-    <span class="n">protocol</span><span class="p">:</span> <span class="s1">&#39;RegType_LinkType&#39;</span>
+    <span class="n">protocol</span><span class="p">:</span> <span class="s1">&#39;Enum_LinkType&#39;</span>
     <span class="c1">#: Frame number.</span>
     <span class="n">index</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span>
     <span class="c1">#: Extracted frame info.</span>
-    <span class="n">frame</span><span class="p">:</span> <span class="s1">&#39;DataType_Frame | dict[str, Any]&#39;</span>
+    <span class="n">frame</span><span class="p">:</span> <span class="s1">&#39;Data_Frame | dict[str, Any]&#39;</span>
     <span class="c1">#: TCP synchronise (SYN) flag.</span>
     <span class="n">syn</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span>
     <span class="c1">#: TCP finish (FIN) flag.</span>
@@ -108,7 +108,7 @@
     <span class="n">timestamp</span><span class="p">:</span> <span class="s1">&#39;float&#39;</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">protocol</span><span class="p">:</span> <span class="s1">&#39;RegType_LinkType&#39;</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">frame</span><span class="p">:</span> <span class="s1">&#39;DataType_Frame | dict[str, Any]&#39;</span><span class="p">,</span> <span class="n">syn</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span><span class="p">,</span> <span class="n">fin</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span><span class="p">,</span> <span class="n">src</span><span class="p">:</span> <span class="s1">&#39;IPAddress&#39;</span><span class="p">,</span> <span class="n">dst</span><span class="p">:</span> <span class="s1">&#39;IPAddress&#39;</span><span class="p">,</span> <span class="n">srcport</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">dstport</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">timestamp</span><span class="p">:</span> <span class="s1">&#39;float&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long</span></div>
+        <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">protocol</span><span class="p">:</span> <span class="s1">&#39;Enum_LinkType&#39;</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">frame</span><span class="p">:</span> <span class="s1">&#39;Data_Frame | dict[str, Any]&#39;</span><span class="p">,</span> <span class="n">syn</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span><span class="p">,</span> <span class="n">fin</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span><span class="p">,</span> <span class="n">src</span><span class="p">:</span> <span class="s1">&#39;IPAddress&#39;</span><span class="p">,</span> <span class="n">dst</span><span class="p">:</span> <span class="s1">&#39;IPAddress&#39;</span><span class="p">,</span> <span class="n">srcport</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">dstport</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">timestamp</span><span class="p">:</span> <span class="s1">&#39;float&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long</span></div>
 
 
 <div class="viewcode-block" id="Buffer"><a class="viewcode-back" href="../../../pcapkit/foundation/traceflow.html#pcapkit.foundation.traceflow.Buffer">[docs]</a><span class="k">class</span> <span class="nc">Buffer</span><span class="p">(</span><span class="n">Info</span><span class="p">):</span>

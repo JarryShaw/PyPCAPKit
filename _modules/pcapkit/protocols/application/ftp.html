@@ -47,9 +47,9 @@
 <span class="kn">from</span> <span class="nn">pcapkit.const.ftp.command</span> <span class="kn">import</span> <span class="n">Command</span>
 <span class="kn">from</span> <span class="nn">pcapkit.const.ftp.return_code</span> <span class="kn">import</span> <span class="n">ReturnCode</span>
 <span class="kn">from</span> <span class="nn">pcapkit.protocols.application.application</span> <span class="kn">import</span> <span class="n">Application</span>
-<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.application.ftp</span> <span class="kn">import</span> <span class="n">FTP</span> <span class="k">as</span> <span class="n">DataType_FTP</span>
-<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.application.ftp</span> <span class="kn">import</span> <span class="n">Request</span> <span class="k">as</span> <span class="n">DataType_Request</span>
-<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.application.ftp</span> <span class="kn">import</span> <span class="n">Response</span> <span class="k">as</span> <span class="n">DataType_Response</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.application.ftp</span> <span class="kn">import</span> <span class="n">FTP</span> <span class="k">as</span> <span class="n">Data_FTP</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.application.ftp</span> <span class="kn">import</span> <span class="n">Request</span> <span class="k">as</span> <span class="n">Data_Request</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.application.ftp</span> <span class="kn">import</span> <span class="n">Response</span> <span class="k">as</span> <span class="n">Data_Response</span>
 <span class="kn">from</span> <span class="nn">pcapkit.utilities.exceptions</span> <span class="kn">import</span> <span class="n">ProtocolError</span><span class="p">,</span> <span class="n">UnsupportedCall</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
@@ -60,7 +60,7 @@
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;FTP&#39;</span><span class="p">]</span>
 
 
-<div class="viewcode-block" id="FTP"><a class="viewcode-back" href="../../../../pcapkit/protocols/application/ftp.html#pcapkit.protocols.application.ftp.FTP">[docs]</a><span class="k">class</span> <span class="nc">FTP</span><span class="p">(</span><span class="n">Application</span><span class="p">[</span><span class="n">DataType_FTP</span><span class="p">]):</span>
+<div class="viewcode-block" id="FTP"><a class="viewcode-back" href="../../../../pcapkit/protocols/application/ftp.html#pcapkit.protocols.application.ftp.FTP">[docs]</a><span class="k">class</span> <span class="nc">FTP</span><span class="p">(</span><span class="n">Application</span><span class="p">[</span><span class="n">Data_FTP</span><span class="p">]):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;This class implements File Transfer Protocol.&quot;&quot;&quot;</span>
 
     <span class="c1">##########################################################################</span>
@@ -86,7 +86,7 @@
     <span class="c1"># Methods.</span>
     <span class="c1">##########################################################################</span>
 
-<div class="viewcode-block" id="FTP.read"><a class="viewcode-back" href="../../../../pcapkit/protocols/application/ftp.html#pcapkit.protocols.application.ftp.FTP.read">[docs]</a>    <span class="k">def</span> <span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_FTP&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
+<div class="viewcode-block" id="FTP.read"><a class="viewcode-back" href="../../../../pcapkit/protocols/application/ftp.html#pcapkit.protocols.application.ftp.FTP.read">[docs]</a>    <span class="k">def</span> <span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Data_FTP&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Read File Transfer Protocol (FTP).</span>
 
 <span class="sd">        Args:</span>
@@ -110,7 +110,7 @@
 
         <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
             <span class="n">pref</span><span class="p">:</span> <span class="s1">&#39;int | str&#39;</span>
-            <span class="n">ftp</span><span class="p">:</span> <span class="s1">&#39;DataType_Request | DataType_Response&#39;</span>
+            <span class="n">ftp</span><span class="p">:</span> <span class="s1">&#39;Data_Request | Data_Response&#39;</span>
 
         <span class="k">if</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;^\d</span><span class="si">{3}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">text</span><span class="p">):</span>
             <span class="n">pref</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">text</span><span class="p">[:</span><span class="mi">3</span><span class="p">])</span>
@@ -121,7 +121,7 @@
             <span class="n">suff</span> <span class="o">=</span> <span class="n">text</span><span class="p">[</span><span class="mi">4</span><span class="p">:]</span> <span class="ow">or</span> <span class="kc">None</span>
 
             <span class="n">code</span> <span class="o">=</span> <span class="n">ReturnCode</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">pref</span><span class="p">)</span>
-            <span class="n">ftp</span> <span class="o">=</span> <span class="n">DataType_Response</span><span class="p">(</span>
+            <span class="n">ftp</span> <span class="o">=</span> <span class="n">Data_Response</span><span class="p">(</span>
                 <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;response&#39;</span><span class="p">,</span>
                 <span class="n">code</span><span class="o">=</span><span class="n">code</span><span class="p">,</span>
                 <span class="n">arg</span><span class="o">=</span><span class="n">suff</span><span class="p">,</span>
@@ -136,7 +136,7 @@
                 <span class="n">pref</span><span class="p">,</span> <span class="n">suff</span> <span class="o">=</span> <span class="n">text</span><span class="p">,</span> <span class="kc">None</span>
 
             <span class="n">cmmd</span> <span class="o">=</span> <span class="n">Command</span><span class="p">[</span><span class="n">pref</span><span class="p">]</span>
-            <span class="n">ftp</span> <span class="o">=</span> <span class="n">DataType_Request</span><span class="p">(</span>
+            <span class="n">ftp</span> <span class="o">=</span> <span class="n">Data_Request</span><span class="p">(</span>
                 <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;request&#39;</span><span class="p">,</span>
                 <span class="n">command</span><span class="o">=</span><span class="n">cmmd</span><span class="p">,</span>
                 <span class="n">arg</span><span class="o">=</span><span class="n">suff</span><span class="p">,</span>

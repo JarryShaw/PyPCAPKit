@@ -57,14 +57,14 @@
 
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">overload</span>
 
-<span class="kn">from</span> <span class="nn">pcapkit.const.mh.packet</span> <span class="kn">import</span> <span class="n">Packet</span> <span class="k">as</span> <span class="n">RegType_Packet</span>
-<span class="kn">from</span> <span class="nn">pcapkit.const.reg.transtype</span> <span class="kn">import</span> <span class="n">TransType</span> <span class="k">as</span> <span class="n">RegType_TransType</span>
-<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.internet.mh</span> <span class="kn">import</span> <span class="n">MH</span> <span class="k">as</span> <span class="n">DataType_MH</span>
+<span class="kn">from</span> <span class="nn">pcapkit.const.mh.packet</span> <span class="kn">import</span> <span class="n">Packet</span> <span class="k">as</span> <span class="n">Enum_Packet</span>
+<span class="kn">from</span> <span class="nn">pcapkit.const.reg.transtype</span> <span class="kn">import</span> <span class="n">TransType</span> <span class="k">as</span> <span class="n">Enum_TransType</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.internet.mh</span> <span class="kn">import</span> <span class="n">MH</span> <span class="k">as</span> <span class="n">Data_MH</span>
 <span class="kn">from</span> <span class="nn">pcapkit.protocols.internet.internet</span> <span class="kn">import</span> <span class="n">Internet</span>
 <span class="kn">from</span> <span class="nn">pcapkit.utilities.exceptions</span> <span class="kn">import</span> <span class="n">UnsupportedCall</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-    <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">BinaryIO</span><span class="p">,</span> <span class="n">NoReturn</span><span class="p">,</span> <span class="n">Optional</span>
+    <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">IO</span><span class="p">,</span> <span class="n">Any</span><span class="p">,</span> <span class="n">NoReturn</span><span class="p">,</span> <span class="n">Optional</span>
 
     <span class="kn">from</span> <span class="nn">typing_extensions</span> <span class="kn">import</span> <span class="n">Literal</span>
 
@@ -74,7 +74,7 @@
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;MH&#39;</span><span class="p">]</span>
 
 
-<div class="viewcode-block" id="MH"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.internet.mh.MH">[docs]</a><span class="k">class</span> <span class="nc">MH</span><span class="p">(</span><span class="n">Internet</span><span class="p">[</span><span class="n">DataType_MH</span><span class="p">]):</span>
+<div class="viewcode-block" id="MH"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.internet.mh.MH">[docs]</a><span class="k">class</span> <span class="nc">MH</span><span class="p">(</span><span class="n">Internet</span><span class="p">[</span><span class="n">Data_MH</span><span class="p">]):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;This class implements Mobility Header.&quot;&quot;&quot;</span>
 
     <span class="c1">##########################################################################</span>
@@ -132,7 +132,7 @@
     <span class="c1">##########################################################################</span>
 
 <div class="viewcode-block" id="MH.read"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.internet.mh.MH.read">[docs]</a>    <span class="k">def</span> <span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">version</span><span class="p">:</span> <span class="s1">&#39;Literal[4, 6]&#39;</span> <span class="o">=</span> <span class="mi">4</span><span class="p">,</span>  <span class="c1"># pylint: disable=arguments-differ,unused-argument</span>
-             <span class="n">extension</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_MH&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
+             <span class="n">extension</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Data_MH&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Read Mobility Header.</span>
 
 <span class="sd">        Structure of MH header [:rfc:`6275`]:</span>
@@ -171,10 +171,10 @@
         <span class="n">_csum</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_fileng</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
         <span class="n">_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_fileng</span><span class="p">((</span><span class="n">_hlen</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="mi">8</span><span class="p">)</span>
 
-        <span class="n">mh</span> <span class="o">=</span> <span class="n">DataType_MH</span><span class="p">(</span>
+        <span class="n">mh</span> <span class="o">=</span> <span class="n">Data_MH</span><span class="p">(</span>
             <span class="nb">next</span><span class="o">=</span><span class="n">_next</span><span class="p">,</span>
             <span class="n">length</span><span class="o">=</span><span class="p">(</span><span class="n">_hlen</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="mi">8</span><span class="p">,</span>
-            <span class="nb">type</span><span class="o">=</span><span class="n">RegType_Packet</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">_type</span><span class="p">),</span>
+            <span class="nb">type</span><span class="o">=</span><span class="n">Enum_Packet</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">_type</span><span class="p">),</span>
             <span class="n">chksum</span><span class="o">=</span><span class="n">_csum</span><span class="p">,</span>
             <span class="n">data</span><span class="o">=</span><span class="n">_data</span><span class="p">,</span>
         <span class="p">)</span>
@@ -200,13 +200,13 @@
     <span class="c1">##########################################################################</span>
 
     <span class="nd">@overload</span>
-    <span class="k">def</span> <span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file</span><span class="p">:</span> <span class="s1">&#39;BinaryIO&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span> <span class="o">=</span> <span class="o">...</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>  <span class="c1"># pylint: disable=arguments-differ</span>
+    <span class="k">def</span> <span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file</span><span class="p">:</span> <span class="s1">&#39;IO[bytes]&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span> <span class="o">=</span> <span class="o">...</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>  <span class="c1"># pylint: disable=arguments-differ</span>
                       <span class="n">version</span><span class="p">:</span> <span class="s1">&#39;Literal[4, 6]&#39;</span> <span class="o">=</span> <span class="o">...</span><span class="p">,</span> <span class="n">extension</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="o">...</span><span class="p">,</span>
                       <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>
     <span class="nd">@overload</span>
     <span class="k">def</span> <span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=arguments-differ</span>
 
-<div class="viewcode-block" id="MH.__post_init__"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.internet.mh.MH.__post_init__">[docs]</a>    <span class="k">def</span> <span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file</span><span class="p">:</span> <span class="s1">&#39;Optional[BinaryIO]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>  <span class="c1"># pylint: disable=arguments-differ</span>
+<div class="viewcode-block" id="MH.__post_init__"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.internet.mh.MH.__post_init__">[docs]</a>    <span class="k">def</span> <span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file</span><span class="p">:</span> <span class="s1">&#39;Optional[IO[bytes]]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>  <span class="c1"># pylint: disable=arguments-differ</span>
                       <span class="n">version</span><span class="p">:</span> <span class="s1">&#39;Literal[4, 6]&#39;</span> <span class="o">=</span> <span class="mi">4</span><span class="p">,</span> <span class="n">extension</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>  <span class="c1"># pylint: disable=unused-argument</span>
                       <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Post initialisation hook.</span>
@@ -233,7 +233,7 @@
         <span class="k">return</span> <span class="mi">6</span>
 
 <div class="viewcode-block" id="MH.__index__"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.internet.mh.MH.__index__">[docs]</a>    <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="fm">__index__</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;RegType_TransType&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=invalid-index-returned</span>
+    <span class="k">def</span> <span class="fm">__index__</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Enum_TransType&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=invalid-index-returned</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Numeral registry index of the protocol.</span>
 
 <span class="sd">        Returns:</span>
@@ -242,7 +242,7 @@
 <span class="sd">        .. _IANA: https://www.iana.org/assignments/protocol-numbers/protocol-numbers.xhtml</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="n">RegType_TransType</span><span class="o">.</span><span class="n">Mobility_Header</span>  <span class="c1"># type: ignore[return-value]</span></div></div>
+        <span class="k">return</span> <span class="n">Enum_TransType</span><span class="o">.</span><span class="n">Mobility_Header</span>  <span class="c1"># type: ignore[return-value]</span></div></div>
 </pre></div>
 
           </div>

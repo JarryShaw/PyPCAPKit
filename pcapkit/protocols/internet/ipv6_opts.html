@@ -146,7 +146,7 @@ attribute:</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>file</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.BinaryIO" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">BinaryIO</span></code></a>]) – Source packet stream.</p></li>
+<li><p><strong>file</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.IO" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">IO</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a>]]) – Source packet stream.</p></li>
 <li><p><strong>length</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>]) – Length of packet data.</p></li>
 <li><p><strong>extension</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a>) – If the protocol is used as an IPv6 extension header.</p></li>
 <li><p><strong>**kwargs</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>) – Arbitrary keyword arguments.</p></li>
@@ -281,7 +281,7 @@ attribute:</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>code</strong> (<em>RegType_Option</em>) – IPv6-Opts option code.</p></li>
+<li><p><strong>code</strong> (<em>Enum_Option</em>) – IPv6-Opts option code.</p></li>
 <li><p><strong>meth</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em> | </em><em>OptionParser</em>) – Method name or callable to parse the option.</p></li>
 </ul>
 </dd>
@@ -346,14 +346,14 @@ action and change flag), c.f. [<span class="target" id="index-1"></span><a class
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>code</strong> (<em>RegType_Option</em>) – option type value</p></li>
+<li><p><strong>code</strong> (<em>Enum_Option</em>) – option type value</p></li>
 <li><p><strong>acts</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – unknown option action value</p></li>
 <li><p><strong>cflg</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a>) – change flag value</p></li>
 <li><p><strong>options</strong> (<a class="reference internal" href="../../const/ipv6.html#pcapkit.const.ipv6.option.Option" title="pcapkit.const.ipv6.option.Option"><em>Option</em></a>) – extracted IPv6-Opts options</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>DataType_UnassignedOption</p>
+<dd class="field-even"><p>Data_UnassignedOption</p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Parsed option data.</p>
@@ -385,7 +385,7 @@ action and change flag), c.f. [<span class="target" id="index-1"></span><a class
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>code</strong> (<em>RegType_Option</em>) – option type value</p></li>
+<li><p><strong>code</strong> (<em>Enum_Option</em>) – option type value</p></li>
 <li><p><strong>acts</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – unknown option action value</p></li>
 <li><p><strong>cflg</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a>) – change flag value</p></li>
 <li><p><strong>options</strong> (<a class="reference internal" href="../../const/ipv6.html#pcapkit.const.ipv6.option.Option" title="pcapkit.const.ipv6.option.Option"><em>Option</em></a>) – extracted IPv6-Opts options</p></li>
@@ -395,7 +395,7 @@ action and change flag), c.f. [<span class="target" id="index-1"></span><a class
 <dd class="field-even"><p>parsed option data</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Union[DataType_Opt_Pad1, DataType_Opt_PadN]</p>
+<dd class="field-odd"><p>Union[Data_Opt_Pad1, Data_Opt_PadN]</p>
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
 <dd class="field-even"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><strong>ProtocolError</strong></a> – If <code class="docutils literal notranslate"><span class="pre">code</span></code> is <strong>NOT</strong> <code class="docutils literal notranslate"><span class="pre">0</span></code> or <code class="docutils literal notranslate"><span class="pre">1</span></code>.</p>
@@ -418,14 +418,14 @@ action and change flag), c.f. [<span class="target" id="index-1"></span><a class
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>code</strong> (<em>RegType_Option</em>) – option type value</p></li>
+<li><p><strong>code</strong> (<em>Enum_Option</em>) – option type value</p></li>
 <li><p><strong>acts</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – unknown option action value</p></li>
 <li><p><strong>cflg</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a>) – change flag value</p></li>
 <li><p><strong>options</strong> (<a class="reference internal" href="../../const/ipv6.html#pcapkit.const.ipv6.option.Option" title="pcapkit.const.ipv6.option.Option"><em>Option</em></a>) – extracted IPv6-Opts options</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>DataType_TunnelEncapsulationLimitOption</p>
+<dd class="field-even"><p>Data_TunnelEncapsulationLimitOption</p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Parsed option data.</p>
@@ -449,14 +449,14 @@ action and change flag), c.f. [<span class="target" id="index-1"></span><a class
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>code</strong> (<em>RegType_Option</em>) – option type value</p></li>
+<li><p><strong>code</strong> (<em>Enum_Option</em>) – option type value</p></li>
 <li><p><strong>acts</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – unknown option action value</p></li>
 <li><p><strong>cflg</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a>) – change flag value</p></li>
 <li><p><strong>options</strong> (<a class="reference internal" href="../../const/ipv6.html#pcapkit.const.ipv6.option.Option" title="pcapkit.const.ipv6.option.Option"><em>Option</em></a>) – extracted IPv6-Opts options</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>DataType_RouterAlertOption</p>
+<dd class="field-even"><p>Data_RouterAlertOption</p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Parsed option data.</p>
@@ -486,14 +486,14 @@ action and change flag), c.f. [<span class="target" id="index-1"></span><a class
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>code</strong> (<em>RegType_Option</em>) – option type value</p></li>
+<li><p><strong>code</strong> (<em>Enum_Option</em>) – option type value</p></li>
 <li><p><strong>acts</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – unknown option action value</p></li>
 <li><p><strong>cflg</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a>) – change flag value</p></li>
 <li><p><strong>options</strong> (<a class="reference internal" href="../../const/ipv6.html#pcapkit.const.ipv6.option.Option" title="pcapkit.const.ipv6.option.Option"><em>Option</em></a>) – extracted IPv6-Opts options</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>DataType_CALIPSOOption</p>
+<dd class="field-even"><p>Data_CALIPSOOption</p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Parsed option data.</p>
@@ -538,14 +538,14 @@ action and change flag), c.f. [<span class="target" id="index-1"></span><a class
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>code</strong> (<em>RegType_Option</em>) – option type value</p></li>
+<li><p><strong>code</strong> (<em>Enum_Option</em>) – option type value</p></li>
 <li><p><strong>acts</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – unknown option action value</p></li>
 <li><p><strong>cflg</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a>) – change flag value</p></li>
 <li><p><strong>options</strong> (<a class="reference internal" href="../../const/ipv6.html#pcapkit.const.ipv6.option.Option" title="pcapkit.const.ipv6.option.Option"><em>Option</em></a>) – extracted IPv6-Opts options</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>DataType_SMFIdentificationBasedDPDOption | DataType_SMFHashBasedDPDOption</p>
+<dd class="field-even"><p>Data_SMFIdentificationBasedDPDOption | Data_SMFHashBasedDPDOption</p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Parsed option data.</p>
@@ -575,14 +575,14 @@ action and change flag), c.f. [<span class="target" id="index-1"></span><a class
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>code</strong> (<em>RegType_Option</em>) – option type value</p></li>
+<li><p><strong>code</strong> (<em>Enum_Option</em>) – option type value</p></li>
 <li><p><strong>acts</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – unknown option action value</p></li>
 <li><p><strong>cflg</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a>) – change flag value</p></li>
 <li><p><strong>options</strong> (<a class="reference internal" href="../../const/ipv6.html#pcapkit.const.ipv6.option.Option" title="pcapkit.const.ipv6.option.Option"><em>Option</em></a>) – extracted IPv6-Opts options</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>DataType_PDMOption</p>
+<dd class="field-even"><p>Data_PDMOption</p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Parsed option data.</p>
@@ -627,14 +627,14 @@ action and change flag), c.f. [<span class="target" id="index-1"></span><a class
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>code</strong> (<em>RegType_Option</em>) – option type value</p></li>
+<li><p><strong>code</strong> (<em>Enum_Option</em>) – option type value</p></li>
 <li><p><strong>acts</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – unknown option action value</p></li>
 <li><p><strong>cflg</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a>) – change flag value</p></li>
 <li><p><strong>options</strong> (<a class="reference internal" href="../../const/ipv6.html#pcapkit.const.ipv6.option.Option" title="pcapkit.const.ipv6.option.Option"><em>Option</em></a>) – extracted IPv6-Opts options</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>DataType_QuickStartOption</p>
+<dd class="field-even"><p>Data_QuickStartOption</p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Parsed option data.</p>
@@ -664,14 +664,14 @@ action and change flag), c.f. [<span class="target" id="index-1"></span><a class
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>code</strong> (<em>RegType_Option</em>) – option type value</p></li>
+<li><p><strong>code</strong> (<em>Enum_Option</em>) – option type value</p></li>
 <li><p><strong>acts</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – unknown option action value</p></li>
 <li><p><strong>cflg</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a>) – change flag value</p></li>
 <li><p><strong>options</strong> (<a class="reference internal" href="../../const/ipv6.html#pcapkit.const.ipv6.option.Option" title="pcapkit.const.ipv6.option.Option"><em>Option</em></a>) – extracted IPv6-Opts options</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>DataType_RPLOption</p>
+<dd class="field-even"><p>Data_RPLOption</p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Parsed option data.</p>
@@ -699,14 +699,14 @@ action and change flag), c.f. [<span class="target" id="index-1"></span><a class
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>code</strong> (<em>RegType_Option</em>) – option type value</p></li>
+<li><p><strong>code</strong> (<em>Enum_Option</em>) – option type value</p></li>
 <li><p><strong>acts</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – unknown option action value</p></li>
 <li><p><strong>cflg</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a>) – change flag value</p></li>
 <li><p><strong>options</strong> (<a class="reference internal" href="../../const/ipv6.html#pcapkit.const.ipv6.option.Option" title="pcapkit.const.ipv6.option.Option"><em>Option</em></a>) – extracted IPv6-Opts options</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>DataType_MPLOption</p>
+<dd class="field-even"><p>Data_MPLOption</p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Parsed option data.</p>
@@ -734,14 +734,14 @@ action and change flag), c.f. [<span class="target" id="index-1"></span><a class
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>code</strong> (<em>RegType_Option</em>) – option type value</p></li>
+<li><p><strong>code</strong> (<em>Enum_Option</em>) – option type value</p></li>
 <li><p><strong>acts</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – unknown option action value</p></li>
 <li><p><strong>cflg</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a>) – change flag value</p></li>
 <li><p><strong>options</strong> (<a class="reference internal" href="../../const/ipv6.html#pcapkit.const.ipv6.option.Option" title="pcapkit.const.ipv6.option.Option"><em>Option</em></a>) – extracted IPv6-Opts options</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>DataType_ILNPOption</p>
+<dd class="field-even"><p>Data_ILNPOption</p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Parsed option data.</p>
@@ -766,14 +766,14 @@ action and change flag), c.f. [<span class="target" id="index-1"></span><a class
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>code</strong> (<em>RegType_Option</em>) – option type value</p></li>
+<li><p><strong>code</strong> (<em>Enum_Option</em>) – option type value</p></li>
 <li><p><strong>acts</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – unknown option action value</p></li>
 <li><p><strong>cflg</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a>) – change flag value</p></li>
 <li><p><strong>options</strong> (<a class="reference internal" href="../../const/ipv6.html#pcapkit.const.ipv6.option.Option" title="pcapkit.const.ipv6.option.Option"><em>Option</em></a>) – extracted IPv6-Opts options</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>DataType_LineIdentificationOption</p>
+<dd class="field-even"><p>Data_LineIdentificationOption</p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Parsed option data.</p>
@@ -796,14 +796,14 @@ action and change flag), c.f. [<span class="target" id="index-1"></span><a class
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>code</strong> (<em>RegType_Option</em>) – option type value</p></li>
+<li><p><strong>code</strong> (<em>Enum_Option</em>) – option type value</p></li>
 <li><p><strong>acts</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – unknown option action value</p></li>
 <li><p><strong>cflg</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a>) – change flag value</p></li>
 <li><p><strong>options</strong> (<a class="reference internal" href="../../const/ipv6.html#pcapkit.const.ipv6.option.Option" title="pcapkit.const.ipv6.option.Option"><em>Option</em></a>) – extracted IPv6-Opts options</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>DataType_JumboPayloadOption</p>
+<dd class="field-even"><p>Data_JumboPayloadOption</p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Parsed option data.</p>
@@ -837,14 +837,14 @@ action and change flag), c.f. [<span class="target" id="index-1"></span><a class
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>code</strong> (<em>RegType_Option</em>) – option type value</p></li>
+<li><p><strong>code</strong> (<em>Enum_Option</em>) – option type value</p></li>
 <li><p><strong>acts</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – unknown option action value</p></li>
 <li><p><strong>cflg</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a>) – change flag value</p></li>
 <li><p><strong>options</strong> (<a class="reference internal" href="../../const/ipv6.html#pcapkit.const.ipv6.option.Option" title="pcapkit.const.ipv6.option.Option"><em>Option</em></a>) – extracted IPv6-Opts options</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>DataType_HomeAddressOption</p>
+<dd class="field-even"><p>Data_HomeAddressOption</p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Parsed option data.</p>
@@ -872,14 +872,14 @@ action and change flag), c.f. [<span class="target" id="index-1"></span><a class
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>code</strong> (<em>RegType_Option</em>) – option type value</p></li>
+<li><p><strong>code</strong> (<em>Enum_Option</em>) – option type value</p></li>
 <li><p><strong>acts</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – unknown option action value</p></li>
 <li><p><strong>cflg</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a>) – change flag value</p></li>
 <li><p><strong>options</strong> (<a class="reference internal" href="../../const/ipv6.html#pcapkit.const.ipv6.option.Option" title="pcapkit.const.ipv6.option.Option"><em>Option</em></a>) – extracted IPv6-Opts options</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>DataType_IPDFFOption</p>
+<dd class="field-even"><p>Data_IPDFFOption</p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Parsed option data.</p>
@@ -924,7 +924,7 @@ action and change flag), c.f. [<span class="target" id="index-1"></span><a class
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.internet.ipv6_opts.IPv6_Opts.options">
-<span class="sig-name descname"><span class="pre">options</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">OrderedMultiDict[RegType_Option,</span> <span class="pre">Option]</span></em><a class="headerlink" href="#pcapkit.protocols.data.internet.ipv6_opts.IPv6_Opts.options" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">options</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">OrderedMultiDict[Enum_Option,</span> <span class="pre">Option]</span></em><a class="headerlink" href="#pcapkit.protocols.data.internet.ipv6_opts.IPv6_Opts.options" title="Permalink to this definition">¶</a></dt>
 <dd><p>IPv6-Opts options.</p>
 </dd></dl>
 
@@ -948,7 +948,7 @@ action and change flag), c.f. [<span class="target" id="index-1"></span><a class
 </dl>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.internet.ipv6_opts.Option.type">
-<span class="sig-name descname"><span class="pre">type</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">RegType_Option</span></em><a class="headerlink" href="#pcapkit.protocols.data.internet.ipv6_opts.Option.type" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">type</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Enum_Option</span></em><a class="headerlink" href="#pcapkit.protocols.data.internet.ipv6_opts.Option.type" title="Permalink to this definition">¶</a></dt>
 <dd><p>Option type.</p>
 </dd></dl>
 

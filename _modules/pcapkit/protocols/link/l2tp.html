@@ -81,9 +81,9 @@
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
 
-<span class="kn">from</span> <span class="nn">pcapkit.const.l2tp.type</span> <span class="kn">import</span> <span class="n">Type</span> <span class="k">as</span> <span class="n">RegType_Type</span>
-<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.link.l2tp</span> <span class="kn">import</span> <span class="n">L2TP</span> <span class="k">as</span> <span class="n">DataType_L2TP</span>
-<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.link.l2tp</span> <span class="kn">import</span> <span class="n">Flags</span> <span class="k">as</span> <span class="n">DataType_Flags</span>
+<span class="kn">from</span> <span class="nn">pcapkit.const.l2tp.type</span> <span class="kn">import</span> <span class="n">Type</span> <span class="k">as</span> <span class="n">Enum_Type</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.link.l2tp</span> <span class="kn">import</span> <span class="n">L2TP</span> <span class="k">as</span> <span class="n">Data_L2TP</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.link.l2tp</span> <span class="kn">import</span> <span class="n">Flags</span> <span class="k">as</span> <span class="n">Data_Flags</span>
 <span class="kn">from</span> <span class="nn">pcapkit.protocols.link.link</span> <span class="kn">import</span> <span class="n">Link</span>
 <span class="kn">from</span> <span class="nn">pcapkit.utilities.exceptions</span> <span class="kn">import</span> <span class="n">UnsupportedCall</span>
 
@@ -95,7 +95,7 @@
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;L2TP&#39;</span><span class="p">]</span>
 
 
-<div class="viewcode-block" id="L2TP"><a class="viewcode-back" href="../../../../pcapkit/protocols/link/l2tp.html#pcapkit.protocols.link.l2tp.L2TP">[docs]</a><span class="k">class</span> <span class="nc">L2TP</span><span class="p">(</span><span class="n">Link</span><span class="p">[</span><span class="n">DataType_L2TP</span><span class="p">]):</span>
+<div class="viewcode-block" id="L2TP"><a class="viewcode-back" href="../../../../pcapkit/protocols/link/l2tp.html#pcapkit.protocols.link.l2tp.L2TP">[docs]</a><span class="k">class</span> <span class="nc">L2TP</span><span class="p">(</span><span class="n">Link</span><span class="p">[</span><span class="n">Data_L2TP</span><span class="p">]):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;This class implements Layer Two Tunnelling Protocol.&quot;&quot;&quot;</span>
 
     <span class="c1">##########################################################################</span>
@@ -121,7 +121,7 @@
     <span class="c1"># Methods.</span>
     <span class="c1">##########################################################################</span>
 
-<div class="viewcode-block" id="L2TP.read"><a class="viewcode-back" href="../../../../pcapkit/protocols/link/l2tp.html#pcapkit.protocols.link.l2tp.L2TP.read">[docs]</a>    <span class="k">def</span> <span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_L2TP&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
+<div class="viewcode-block" id="L2TP.read"><a class="viewcode-back" href="../../../../pcapkit/protocols/link/l2tp.html#pcapkit.protocols.link.l2tp.L2TP.read">[docs]</a>    <span class="k">def</span> <span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Data_L2TP&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Read Layer Two Tunnelling Protocol.</span>
 
 <span class="sd">        Structure of L2TP header [:rfc:`2661`]:</span>
@@ -153,8 +153,8 @@
 
         <span class="n">_flag</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_binary</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
 
-        <span class="n">flags</span> <span class="o">=</span> <span class="n">DataType_Flags</span><span class="p">(</span>
-            <span class="nb">type</span><span class="o">=</span><span class="n">RegType_Type</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">_flag</span><span class="p">[</span><span class="mi">0</span><span class="p">])),</span>
+        <span class="n">flags</span> <span class="o">=</span> <span class="n">Data_Flags</span><span class="p">(</span>
+            <span class="nb">type</span><span class="o">=</span><span class="n">Enum_Type</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">_flag</span><span class="p">[</span><span class="mi">0</span><span class="p">])),</span>
             <span class="nb">len</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">_flag</span><span class="p">[</span><span class="mi">1</span><span class="p">])),</span>
             <span class="n">seq</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">_flag</span><span class="p">[</span><span class="mi">4</span><span class="p">])),</span>
             <span class="n">offset</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">_flag</span><span class="p">[</span><span class="mi">6</span><span class="p">])),</span>
@@ -169,7 +169,7 @@
         <span class="n">_nrec</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_unpack</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span> <span class="k">if</span> <span class="n">flags</span><span class="o">.</span><span class="n">seq</span> <span class="k">else</span> <span class="kc">None</span>
         <span class="n">_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_unpack</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span> <span class="k">if</span> <span class="n">flags</span><span class="o">.</span><span class="n">offset</span> <span class="k">else</span> <span class="mi">0</span>
 
-        <span class="n">l2tp</span> <span class="o">=</span> <span class="n">DataType_L2TP</span><span class="p">(</span>
+        <span class="n">l2tp</span> <span class="o">=</span> <span class="n">Data_L2TP</span><span class="p">(</span>
             <span class="n">flags</span><span class="o">=</span><span class="n">flags</span><span class="p">,</span>
             <span class="n">version</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">_vers</span><span class="p">,</span> <span class="n">base</span><span class="o">=</span><span class="mi">16</span><span class="p">),</span>
             <span class="n">length</span><span class="o">=</span><span class="n">_hlen</span><span class="p">,</span>

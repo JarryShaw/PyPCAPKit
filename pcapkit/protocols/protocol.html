@@ -61,7 +61,7 @@ utility arguments and methods of specified protocols.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>file</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.BinaryIO" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">BinaryIO</span></code></a>]) – Source packet stream.</p></li>
+<li><p><strong>file</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.IO" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">IO</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a>]]) – Source packet stream.</p></li>
 <li><p><strong>length</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>]) – Length of packet data.</p></li>
 <li><p><strong>_layer</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>) – Parse packet until <code class="docutils literal notranslate"><span class="pre">_layer</span></code>
 (<a class="reference internal" href="#pcapkit.protocols.protocol.Protocol._exlayer" title="pcapkit.protocols.protocol.Protocol._exlayer"><code class="xref py py-attr docutils literal notranslate"><span class="pre">self._exlayer</span></code></a>).</p></li>
@@ -83,7 +83,7 @@ utility arguments and methods of specified protocols.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>file</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.BinaryIO" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">BinaryIO</span></code></a>]) – Source packet stream.</p></li>
+<li><p><strong>file</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.IO" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">IO</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a>]]) – Source packet stream.</p></li>
 <li><p><strong>length</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>]) – Length of packet data.</p></li>
 <li><p><strong>**kwargs</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>) – Arbitrary keyword arguments.</p></li>
 </ul>
@@ -148,7 +148,7 @@ utility arguments and methods of specified protocols.</p>
 <dd><p>Iterate through <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol._data" title="pcapkit.protocols.protocol.Protocol._data"><code class="xref py py-attr docutils literal notranslate"><span class="pre">self._data</span></code></a>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.BinaryIO" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">BinaryIO</span></code></a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.IO" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">IO</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a>]</p>
 </dd>
 </dl>
 </dd></dl>
@@ -284,7 +284,7 @@ to handle the <code class="docutils literal notranslate"><span class="pre">name<
 <dl class="py property">
 <dt class="sig sig-object py" id="pcapkit.protocols.protocol.Protocol.packet">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">packet</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#pcapkit.protocols.data.protocol.Packet" title="pcapkit.protocols.data.protocol.Packet"><span class="pre">Packet</span></a></em><a class="headerlink" href="#pcapkit.protocols.protocol.Protocol.packet" title="Permalink to this definition">¶</a></dt>
-<dd><p>DataType_Packet data of the protocol.</p>
+<dd><p>Data_Packet data of the protocol.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -553,7 +553,7 @@ instance.</p>
 <li><p>If <code class="docutils literal notranslate"><span class="pre">discard</span></code> is set as <a class="reference external" href="https://docs.python.org/3/library/constants.html#True" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">True</span></code></a>, returns the packet body (in
 <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bytes</span></code></a>) only.</p></li>
 <li><p>Otherwise, returns the header and payload data as
-<code class="xref py py-class docutils literal notranslate"><span class="pre">DataType_Packet</span></code> object.</p></li>
+<code class="xref py py-class docutils literal notranslate"><span class="pre">Data_Packet</span></code> object.</p></li>
 </ul>
 </dd></dl>
 
@@ -680,7 +680,7 @@ The values should be a tuple representing the module name and class name.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.protocol.Protocol._file">
-<span class="sig-name descname"><span class="pre">_file</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.BinaryIO" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">BinaryIO</span></code></a></em><a class="headerlink" href="#pcapkit.protocols.protocol.Protocol._file" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">_file</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.IO" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">IO</span></code></a><span class="pre">[</span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a><span class="pre">]</span></em><a class="headerlink" href="#pcapkit.protocols.protocol.Protocol._file" title="Permalink to this definition">¶</a></dt>
 <dd><p>Source packet stream.</p>
 </dd></dl>
 

@@ -59,19 +59,19 @@
 <span class="kn">import</span> <span class="nn">time</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">overload</span>
 
-<span class="kn">from</span> <span class="nn">pcapkit.const.reg.linktype</span> <span class="kn">import</span> <span class="n">LinkType</span> <span class="k">as</span> <span class="n">RegType_LinkType</span>
-<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.misc.pcap.frame</span> <span class="kn">import</span> <span class="n">Frame</span> <span class="k">as</span> <span class="n">DataType_Frame</span>
-<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.misc.pcap.frame</span> <span class="kn">import</span> <span class="n">FrameInfo</span> <span class="k">as</span> <span class="n">DataType_FrameInfo</span>
+<span class="kn">from</span> <span class="nn">pcapkit.const.reg.linktype</span> <span class="kn">import</span> <span class="n">LinkType</span> <span class="k">as</span> <span class="n">Enum_LinkType</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.misc.pcap.frame</span> <span class="kn">import</span> <span class="n">Frame</span> <span class="k">as</span> <span class="n">Data_Frame</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.misc.pcap.frame</span> <span class="kn">import</span> <span class="n">FrameInfo</span> <span class="k">as</span> <span class="n">Data_FrameInfo</span>
 <span class="kn">from</span> <span class="nn">pcapkit.protocols.protocol</span> <span class="kn">import</span> <span class="n">Protocol</span>
 <span class="kn">from</span> <span class="nn">pcapkit.utilities.exceptions</span> <span class="kn">import</span> <span class="n">StructError</span><span class="p">,</span> <span class="n">UnsupportedCall</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
     <span class="kn">from</span> <span class="nn">decimal</span> <span class="kn">import</span> <span class="n">Decimal</span>
-    <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">BinaryIO</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Type</span>
+    <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">IO</span><span class="p">,</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Type</span>
 
     <span class="kn">from</span> <span class="nn">typing_extensions</span> <span class="kn">import</span> <span class="n">Literal</span>
 
-    <span class="kn">from</span> <span class="nn">pcapkit.protocols.data.misc.pcap.header</span> <span class="kn">import</span> <span class="n">Header</span> <span class="k">as</span> <span class="n">DataType_Header</span>
+    <span class="kn">from</span> <span class="nn">pcapkit.protocols.data.misc.pcap.header</span> <span class="kn">import</span> <span class="n">Header</span> <span class="k">as</span> <span class="n">Data_Header</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Frame&#39;</span><span class="p">]</span>
 
@@ -79,7 +79,7 @@
 <span class="n">py37</span> <span class="o">=</span> <span class="p">((</span><span class="n">version_info</span> <span class="o">:=</span> <span class="n">sys</span><span class="o">.</span><span class="n">version_info</span><span class="p">)</span><span class="o">.</span><span class="n">major</span> <span class="o">&gt;=</span> <span class="mi">3</span> <span class="ow">and</span> <span class="n">version_info</span><span class="o">.</span><span class="n">minor</span> <span class="o">&gt;=</span> <span class="mi">7</span><span class="p">)</span>
 
 
-<div class="viewcode-block" id="Frame"><a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcap/frame.html#pcapkit.protocols.misc.pcap.frame.Frame">[docs]</a><span class="k">class</span> <span class="nc">Frame</span><span class="p">(</span><span class="n">Protocol</span><span class="p">[</span><span class="n">DataType_Frame</span><span class="p">]):</span>
+<div class="viewcode-block" id="Frame"><a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcap/frame.html#pcapkit.protocols.misc.pcap.frame.Frame">[docs]</a><span class="k">class</span> <span class="nc">Frame</span><span class="p">(</span><span class="n">Protocol</span><span class="p">[</span><span class="n">Data_Frame</span><span class="p">]):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Per packet frame header extractor.</span>
 
 <span class="sd">    This class currently supports parsing of the following protocols, which are</span>
@@ -111,9 +111,9 @@
     <span class="n">__proto__</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">defaultdict</span><span class="p">(</span>
         <span class="k">lambda</span><span class="p">:</span> <span class="p">(</span><span class="s1">&#39;pcapkit.protocols.misc.raw&#39;</span><span class="p">,</span> <span class="s1">&#39;Raw&#39;</span><span class="p">),</span>
         <span class="p">{</span>
-            <span class="n">RegType_LinkType</span><span class="o">.</span><span class="n">ETHERNET</span><span class="p">:</span> <span class="p">(</span><span class="s1">&#39;pcapkit.protocols.link&#39;</span><span class="p">,</span> <span class="s1">&#39;Ethernet&#39;</span><span class="p">),</span>
-            <span class="n">RegType_LinkType</span><span class="o">.</span><span class="n">IPV4</span><span class="p">:</span>     <span class="p">(</span><span class="s1">&#39;pcapkit.protocols.internet&#39;</span><span class="p">,</span> <span class="s1">&#39;IPv4&#39;</span><span class="p">),</span>
-            <span class="n">RegType_LinkType</span><span class="o">.</span><span class="n">IPV6</span><span class="p">:</span>     <span class="p">(</span><span class="s1">&#39;pcapkit.protocols.internet&#39;</span><span class="p">,</span> <span class="s1">&#39;IPv6&#39;</span><span class="p">),</span>
+            <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">ETHERNET</span><span class="p">:</span> <span class="p">(</span><span class="s1">&#39;pcapkit.protocols.link&#39;</span><span class="p">,</span> <span class="s1">&#39;Ethernet&#39;</span><span class="p">),</span>
+            <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">IPV4</span><span class="p">:</span>     <span class="p">(</span><span class="s1">&#39;pcapkit.protocols.internet&#39;</span><span class="p">,</span> <span class="s1">&#39;IPv4&#39;</span><span class="p">),</span>
+            <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">IPV6</span><span class="p">:</span>     <span class="p">(</span><span class="s1">&#39;pcapkit.protocols.internet&#39;</span><span class="p">,</span> <span class="s1">&#39;IPv6&#39;</span><span class="p">),</span>
         <span class="p">},</span>
     <span class="p">)</span>
 
@@ -132,7 +132,7 @@
         <span class="k">return</span> <span class="mi">16</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">header</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_Header&#39;</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">header</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Data_Header&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Global header of the PCAP file.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ghdr</span>
 
@@ -141,7 +141,7 @@
     <span class="c1">##########################################################################</span>
 
 <div class="viewcode-block" id="Frame.register"><a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcap/frame.html#pcapkit.protocols.misc.pcap.frame.Frame.register">[docs]</a>    <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">register</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">&#39;RegType_LinkType&#39;</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">,</span> <span class="n">class_</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">register</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">&#39;Enum_LinkType&#39;</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">,</span> <span class="n">class_</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Register a new protocol class.</span>
 
 <span class="sd">        Notes:</span>
@@ -172,7 +172,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_protos</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">name</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="Frame.read"><a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcap/frame.html#pcapkit.protocols.misc.pcap.frame.Frame.read">[docs]</a>    <span class="k">def</span> <span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
-             <span class="n">_read</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_Frame&#39;</span><span class="p">:</span>
+             <span class="n">_read</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Data_Frame&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Read each block after global header.</span>
 
 <span class="sd">        Args:</span>
@@ -181,7 +181,7 @@
 <span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            DataType_Frame: Parsed packet data.</span>
+<span class="sd">            Data_Frame: Parsed packet data.</span>
 
 <span class="sd">        Raises:</span>
 <span class="sd">            EOFError: If :attr:`self._file &lt;pcapkit.protocols.protocol.Protocol._file&gt;` reaches EOF.</span>
@@ -205,8 +205,8 @@
             <span class="n">_epch</span> <span class="o">=</span> <span class="n">_tsss</span> <span class="o">+</span> <span class="n">decimal</span><span class="o">.</span><span class="n">Decimal</span><span class="p">(</span><span class="n">_tsus</span><span class="p">)</span> <span class="o">/</span> <span class="mi">1_000_000</span>
         <span class="n">_time</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">fromtimestamp</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">_epch</span><span class="p">))</span>
 
-        <span class="n">frame</span> <span class="o">=</span> <span class="n">DataType_Frame</span><span class="p">(</span>
-            <span class="n">frame_info</span><span class="o">=</span><span class="n">DataType_FrameInfo</span><span class="p">(</span>
+        <span class="n">frame</span> <span class="o">=</span> <span class="n">Data_Frame</span><span class="p">(</span>
+            <span class="n">frame_info</span><span class="o">=</span><span class="n">Data_FrameInfo</span><span class="p">(</span>
                 <span class="n">ts_sec</span><span class="o">=</span><span class="n">_tsss</span><span class="p">,</span>
                 <span class="n">ts_usec</span><span class="o">=</span><span class="n">_tsus</span><span class="p">,</span>
                 <span class="n">incl_len</span><span class="o">=</span><span class="n">_ilen</span><span class="p">,</span>
@@ -280,14 +280,14 @@
     <span class="c1">##########################################################################</span>
 
     <span class="nd">@overload</span>  <span class="c1"># type: ignore[override]</span>
-    <span class="k">def</span> <span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file</span><span class="p">:</span> <span class="s1">&#39;BinaryIO&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span> <span class="o">=</span> <span class="o">...</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>  <span class="c1"># pylint: disable=arguments-differ</span>
-                      <span class="n">num</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">header</span><span class="p">:</span> <span class="s1">&#39;DataType_Header&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>
+    <span class="k">def</span> <span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file</span><span class="p">:</span> <span class="s1">&#39;IO[bytes]&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span> <span class="o">=</span> <span class="o">...</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>  <span class="c1"># pylint: disable=arguments-differ</span>
+                      <span class="n">num</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">header</span><span class="p">:</span> <span class="s1">&#39;Data_Header&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>
     <span class="nd">@overload</span>
-    <span class="k">def</span> <span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">num</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">header</span><span class="p">:</span> <span class="s1">&#39;DataType_Header&#39;</span><span class="p">,</span>  <span class="c1"># pylint: disable=arguments-differ</span>
+    <span class="k">def</span> <span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">num</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">header</span><span class="p">:</span> <span class="s1">&#39;Data_Header&#39;</span><span class="p">,</span>  <span class="c1"># pylint: disable=arguments-differ</span>
                       <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>
 
-<div class="viewcode-block" id="Frame.__post_init__"><a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcap/frame.html#pcapkit.protocols.misc.pcap.frame.Frame.__post_init__">[docs]</a>    <span class="k">def</span> <span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file</span><span class="p">:</span> <span class="s1">&#39;Optional[BinaryIO]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>  <span class="c1"># pylint: disable=arguments-differ</span>
-                      <span class="n">num</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">header</span><span class="p">:</span> <span class="s1">&#39;DataType_Header&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
+<div class="viewcode-block" id="Frame.__post_init__"><a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcap/frame.html#pcapkit.protocols.misc.pcap.frame.Frame.__post_init__">[docs]</a>    <span class="k">def</span> <span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file</span><span class="p">:</span> <span class="s1">&#39;Optional[IO[bytes]]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>  <span class="c1"># pylint: disable=arguments-differ</span>
+                      <span class="n">num</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">header</span><span class="p">:</span> <span class="s1">&#39;Data_Header&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialisation.</span>
 
 <span class="sd">        Args:</span>
@@ -383,8 +383,8 @@
 
         <span class="k">return</span> <span class="n">ts_sec</span><span class="p">,</span> <span class="n">ts_usec</span>
 
-<div class="viewcode-block" id="Frame._decode_next_layer"><a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcap/frame.html#pcapkit.protocols.misc.pcap.frame.Frame._decode_next_layer">[docs]</a>    <span class="k">def</span> <span class="nf">_decode_next_layer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dict_</span><span class="p">:</span> <span class="s1">&#39;DataType_Frame&#39;</span><span class="p">,</span> <span class="n">proto</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                           <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_Frame&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=arguments-differ</span>
+<div class="viewcode-block" id="Frame._decode_next_layer"><a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcap/frame.html#pcapkit.protocols.misc.pcap.frame.Frame._decode_next_layer">[docs]</a>    <span class="k">def</span> <span class="nf">_decode_next_layer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dict_</span><span class="p">:</span> <span class="s1">&#39;Data_Frame&#39;</span><span class="p">,</span> <span class="n">proto</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                           <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Data_Frame&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=arguments-differ</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Decode next layer protocol.</span>
 
 <span class="sd">        Arguments:</span>
