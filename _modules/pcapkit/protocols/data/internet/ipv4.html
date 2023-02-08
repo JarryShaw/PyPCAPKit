@@ -37,7 +37,7 @@
 
 <span class="kn">from</span> <span class="nn">pcapkit.const.ipv4.option_class</span> <span class="kn">import</span> <span class="n">OptionClass</span>
 <span class="kn">from</span> <span class="nn">pcapkit.const.ipv4.tos_del</span> <span class="kn">import</span> <span class="n">ToSDelay</span>
-<span class="kn">from</span> <span class="nn">pcapkit.corekit.infoclass</span> <span class="kn">import</span> <span class="n">Info</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.data</span> <span class="kn">import</span> <span class="n">Data</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
     <span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span> <span class="k">as</span> <span class="n">dt_type</span>
@@ -74,7 +74,7 @@
 <span class="p">]</span>
 
 
-<div class="viewcode-block" id="ToSField"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/ipv4.html#pcapkit.protocols.data.internet.ipv4.ToSField">[docs]</a><span class="k">class</span> <span class="nc">ToSField</span><span class="p">(</span><span class="n">Info</span><span class="p">):</span>
+<div class="viewcode-block" id="ToSField"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/ipv4.html#pcapkit.protocols.data.internet.ipv4.ToSField">[docs]</a><span class="k">class</span> <span class="nc">ToSField</span><span class="p">(</span><span class="n">Data</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for IPv4 ToS fields.</span>
 
 <span class="sd">    Important:</span>
@@ -104,7 +104,7 @@
         <span class="k">return</span> <span class="bp">self</span>  <span class="c1"># type: ignore[return-value]</span></div>
 
 
-<div class="viewcode-block" id="Flags"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/ipv4.html#pcapkit.protocols.data.internet.ipv4.Flags">[docs]</a><span class="k">class</span> <span class="nc">Flags</span><span class="p">(</span><span class="n">Info</span><span class="p">):</span>
+<div class="viewcode-block" id="Flags"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/ipv4.html#pcapkit.protocols.data.internet.ipv4.Flags">[docs]</a><span class="k">class</span> <span class="nc">Flags</span><span class="p">(</span><span class="n">Data</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for IPv4 Flags.&quot;&quot;&quot;</span>
 
     <span class="c1">#: Don&#39;t fragment.</span>
@@ -116,7 +116,7 @@
         <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span><span class="p">,</span> <span class="n">mf</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
 
 
-<div class="viewcode-block" id="IPv4"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/ipv4.html#pcapkit.protocols.data.internet.ipv4.IPv4">[docs]</a><span class="k">class</span> <span class="nc">IPv4</span><span class="p">(</span><span class="n">Info</span><span class="p">):</span>
+<div class="viewcode-block" id="IPv4"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/ipv4.html#pcapkit.protocols.data.internet.ipv4.IPv4">[docs]</a><span class="k">class</span> <span class="nc">IPv4</span><span class="p">(</span><span class="n">Data</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for IPv4 packet.&quot;&quot;&quot;</span>
 
     <span class="c1">#: Version.</span>
@@ -150,7 +150,7 @@
         <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">version</span><span class="p">:</span> <span class="s1">&#39;Literal[4]&#39;</span><span class="p">,</span> <span class="n">hdr_len</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">tos</span><span class="p">:</span> <span class="s1">&#39;ToSField&#39;</span><span class="p">,</span> <span class="nb">len</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="nb">id</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">flags</span><span class="p">:</span> <span class="s1">&#39;Flags&#39;</span><span class="p">,</span> <span class="n">offset</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">ttl</span><span class="p">:</span> <span class="s1">&#39;timedelta&#39;</span><span class="p">,</span> <span class="n">protocol</span><span class="p">:</span> <span class="s1">&#39;TransType&#39;</span><span class="p">,</span> <span class="n">checksum</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">,</span> <span class="n">src</span><span class="p">:</span> <span class="s1">&#39;IPv4Address&#39;</span><span class="p">,</span> <span class="n">dst</span><span class="p">:</span> <span class="s1">&#39;IPv4Address&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
 
 
-<div class="viewcode-block" id="OptionType"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/ipv4.html#pcapkit.protocols.data.internet.ipv4.OptionType">[docs]</a><span class="k">class</span> <span class="nc">OptionType</span><span class="p">(</span><span class="n">Info</span><span class="p">):</span>
+<div class="viewcode-block" id="OptionType"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/ipv4.html#pcapkit.protocols.data.internet.ipv4.OptionType">[docs]</a><span class="k">class</span> <span class="nc">OptionType</span><span class="p">(</span><span class="n">Data</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for IPv4 option type data.&quot;&quot;&quot;</span>
 
     <span class="c1">#: Change flag.</span>
@@ -170,7 +170,7 @@
         <span class="k">return</span> <span class="bp">self</span>  <span class="c1"># type: ignore[return-value]</span></div>
 
 
-<div class="viewcode-block" id="Option"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/ipv4.html#pcapkit.protocols.data.internet.ipv4.Option">[docs]</a><span class="k">class</span> <span class="nc">Option</span><span class="p">(</span><span class="n">Info</span><span class="p">):</span>
+<div class="viewcode-block" id="Option"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/ipv4.html#pcapkit.protocols.data.internet.ipv4.Option">[docs]</a><span class="k">class</span> <span class="nc">Option</span><span class="p">(</span><span class="n">Data</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for IPv4 options.&quot;&quot;&quot;</span>
 
     <span class="c1">#: Option code.</span>

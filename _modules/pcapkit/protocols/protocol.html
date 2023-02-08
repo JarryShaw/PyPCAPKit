@@ -60,7 +60,8 @@
 
 <span class="kn">from</span> <span class="nn">pcapkit.corekit.infoclass</span> <span class="kn">import</span> <span class="n">Info</span>
 <span class="kn">from</span> <span class="nn">pcapkit.corekit.protochain</span> <span class="kn">import</span> <span class="n">ProtoChain</span>
-<span class="kn">from</span> <span class="nn">pcapkit.corekit.schema</span> <span class="kn">import</span> <span class="n">Schema</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.schema.schema</span> <span class="kn">import</span> <span class="n">Schema</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.data</span> <span class="kn">import</span> <span class="n">Data</span>
 <span class="kn">from</span> <span class="nn">pcapkit.protocols.data.protocol</span> <span class="kn">import</span> <span class="n">Packet</span> <span class="k">as</span> <span class="n">Data_Packet</span>
 <span class="kn">from</span> <span class="nn">pcapkit.protocols.schema.misc.null</span> <span class="kn">import</span> <span class="n">NoPayload</span> <span class="k">as</span> <span class="n">Schema_NoPayload</span>
 <span class="kn">from</span> <span class="nn">pcapkit.utilities.compat</span> <span class="kn">import</span> <span class="n">cached_property</span>
@@ -77,7 +78,7 @@
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Protocol&#39;</span><span class="p">]</span>
 
-<span class="n">PT</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s1">&#39;PT&#39;</span><span class="p">,</span> <span class="n">bound</span><span class="o">=</span><span class="s1">&#39;Info&#39;</span><span class="p">)</span>
+<span class="n">PT</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s1">&#39;PT&#39;</span><span class="p">,</span> <span class="n">bound</span><span class="o">=</span><span class="s1">&#39;Data&#39;</span><span class="p">)</span>
 
 <span class="c1"># readable characters&#39; order list</span>
 <span class="n">readable</span> <span class="o">=</span> <span class="p">[</span><span class="nb">ord</span><span class="p">(</span><span class="n">char</span><span class="p">)</span> <span class="k">for</span> <span class="n">char</span> <span class="ow">in</span> <span class="nb">filter</span><span class="p">(</span><span class="k">lambda</span> <span class="n">char</span><span class="p">:</span> <span class="ow">not</span> <span class="n">char</span><span class="o">.</span><span class="n">isspace</span><span class="p">(),</span> <span class="n">string</span><span class="o">.</span><span class="n">printable</span><span class="p">)]</span>
@@ -86,21 +87,24 @@
 <div class="viewcode-block" id="Protocol"><a class="viewcode-back" href="../../../pcapkit/protocols/protocol.html#pcapkit.protocols.protocol.Protocol">[docs]</a><span class="k">class</span> <span class="nc">Protocol</span><span class="p">(</span><span class="n">Generic</span><span class="p">[</span><span class="n">PT</span><span class="p">],</span> <span class="n">metaclass</span><span class="o">=</span><span class="n">abc</span><span class="o">.</span><span class="n">ABCMeta</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Abstract base class for all protocol family.&quot;&quot;&quot;</span>
 
-    <span class="c1">#: Parsed packet data.</span>
-    <span class="n">_info</span><span class="p">:</span> <span class="s1">&#39;PT&#39;</span>
-    <span class="c1">#: Raw packet data.</span>
-    <span class="n">_data</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span>
-    <span class="c1">#: Source packet stream.</span>
-    <span class="n">_file</span><span class="p">:</span> <span class="s1">&#39;IO[bytes]&#39;</span>
-    <span class="c1">#： Next layer protocol instance.</span>
-    <span class="n">_next</span><span class="p">:</span> <span class="s1">&#39;Protocol&#39;</span>
-    <span class="c1">#: Protocol chain instance.</span>
-    <span class="n">_protos</span><span class="p">:</span> <span class="s1">&#39;ProtoChain&#39;</span>
+    <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+        <span class="c1">#: Parsed packet data.</span>
+        <span class="n">_info</span><span class="p">:</span> <span class="s1">&#39;PT&#39;</span>
+        <span class="c1">#: Raw packet data.</span>
+        <span class="n">_data</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span>
+        <span class="c1">#: Source packet stream.</span>
+        <span class="n">_file</span><span class="p">:</span> <span class="s1">&#39;IO[bytes]&#39;</span>
+        <span class="c1">#： Next layer protocol instance.</span>
+        <span class="n">_next</span><span class="p">:</span> <span class="s1">&#39;Protocol&#39;</span>
+        <span class="c1">#: Protocol chain instance.</span>
+        <span class="n">_protos</span><span class="p">:</span> <span class="s1">&#39;ProtoChain&#39;</span>
 
-    <span class="c1"># Internal data storage for cached properties.</span>
-    <span class="n">__cached__</span><span class="p">:</span> <span class="s1">&#39;dict[str, Any]&#39;</span>
-    <span class="c1">#: Protocol header schema definition.</span>
-    <span class="n">__schema__</span><span class="p">:</span> <span class="s1">&#39;Type[Schema]&#39;</span>
+        <span class="c1"># Internal data storage for cached properties.</span>
+        <span class="n">__cached__</span><span class="p">:</span> <span class="s1">&#39;dict[str, Any]&#39;</span>
+        <span class="c1">#: Protocol header schema definition.</span>
+        <span class="n">__schema__</span><span class="p">:</span> <span class="s1">&#39;Type[Schema]&#39;</span>
+        <span class="c1">#: Protocol header schema instance.</span>
+        <span class="n">__header__</span><span class="p">:</span> <span class="s1">&#39;Optional[Schema]&#39;</span>
 
     <span class="c1">##########################################################################</span>
     <span class="c1"># Defaults.</span>
@@ -361,6 +365,13 @@
             <span class="n">report</span> <span class="o">=</span> <span class="n">protocol</span><span class="p">(</span><span class="n">payload_io</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">payload</span><span class="p">),</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>  <span class="c1"># type: ignore[abstract]</span>
         <span class="k">return</span> <span class="n">report</span></div>
 
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">from_schema</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">&#39;Schema&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Protocol[PT]&#39;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Create protocol instance from schema.&quot;&quot;&quot;</span>
+        <span class="bp">self</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">self</span>
+
     <span class="c1">##########################################################################</span>
     <span class="c1"># Data models.</span>
     <span class="c1">##########################################################################</span>
@@ -371,6 +382,7 @@
         <span class="c1"># NOTE: Assign this attribute after ``__new__`` to avoid shared memory</span>
         <span class="c1"># reference between instances.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__cached__</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__header__</span> <span class="o">=</span> <span class="kc">None</span>
 
         <span class="k">return</span> <span class="bp">self</span>
 
@@ -434,7 +446,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_data</span> <span class="o">=</span> <span class="n">_data</span>
         <span class="c1">#: io.BytesIO: Source packet stream.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_file</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">BytesIO</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">)</span>
-        <span class="c1">#: pcapkit.corekit.infoclass.Info: Parsed packet data.</span>
+        <span class="c1">#: pcapkit.protocols.data.data.Data: Parsed packet data.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_info</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">length</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
 
     <span class="k">def</span> <span class="nf">__init_subclass__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="o">/</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">&#39;Type[Schema]&#39;</span> <span class="o">=</span> <span class="n">Schema_NoPayload</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>

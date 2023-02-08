@@ -35,7 +35,7 @@
 
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
 
-<span class="kn">from</span> <span class="nn">pcapkit.corekit.infoclass</span> <span class="kn">import</span> <span class="n">Info</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.data</span> <span class="kn">import</span> <span class="n">Data</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
     <span class="kn">from</span> <span class="nn">ipaddress</span> <span class="kn">import</span> <span class="n">IPv4Address</span><span class="p">,</span> <span class="n">IPv6Address</span>
@@ -47,7 +47,7 @@
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Address&#39;</span><span class="p">,</span> <span class="s1">&#39;Type&#39;</span><span class="p">,</span> <span class="s1">&#39;ARP&#39;</span><span class="p">]</span>
 
 
-<div class="viewcode-block" id="Address"><a class="viewcode-back" href="../../../../../pcapkit/protocols/link/arp.html#pcapkit.protocols.data.link.arp.Address">[docs]</a><span class="k">class</span> <span class="nc">Address</span><span class="p">(</span><span class="n">Info</span><span class="p">):</span>
+<div class="viewcode-block" id="Address"><a class="viewcode-back" href="../../../../../pcapkit/protocols/link/arp.html#pcapkit.protocols.data.link.arp.Address">[docs]</a><span class="k">class</span> <span class="nc">Address</span><span class="p">(</span><span class="n">Data</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for ARP addresses.&quot;&quot;&quot;</span>
 
     <span class="c1">#: Hardware address.</span>
@@ -59,7 +59,7 @@
         <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">hardware</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">,</span> <span class="n">protocol</span><span class="p">:</span> <span class="s1">&#39;str | IPv4Address | IPv6Address&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=line-too-long,super-init-not-called,unused-argument,multiple-statements</span></div>
 
 
-<div class="viewcode-block" id="Type"><a class="viewcode-back" href="../../../../../pcapkit/protocols/link/arp.html#pcapkit.protocols.data.link.arp.Type">[docs]</a><span class="k">class</span> <span class="nc">Type</span><span class="p">(</span><span class="n">Info</span><span class="p">):</span>
+<div class="viewcode-block" id="Type"><a class="viewcode-back" href="../../../../../pcapkit/protocols/link/arp.html#pcapkit.protocols.data.link.arp.Type">[docs]</a><span class="k">class</span> <span class="nc">Type</span><span class="p">(</span><span class="n">Data</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for ARP type.&quot;&quot;&quot;</span>
 
     <span class="c1">#: Hardware type.</span>
@@ -71,7 +71,7 @@
         <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">hardware</span><span class="p">:</span> <span class="s1">&#39;Hardware&#39;</span><span class="p">,</span> <span class="n">protocol</span><span class="p">:</span> <span class="s1">&#39;EtherType | str&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=line-too-long,super-init-not-called,unused-argument,multiple-statements</span></div>
 
 
-<div class="viewcode-block" id="ARP"><a class="viewcode-back" href="../../../../../pcapkit/protocols/link/arp.html#pcapkit.protocols.data.link.arp.ARP">[docs]</a><span class="k">class</span> <span class="nc">ARP</span><span class="p">(</span><span class="n">Info</span><span class="p">):</span>
+<div class="viewcode-block" id="ARP"><a class="viewcode-back" href="../../../../../pcapkit/protocols/link/arp.html#pcapkit.protocols.data.link.arp.ARP">[docs]</a><span class="k">class</span> <span class="nc">ARP</span><span class="p">(</span><span class="n">Data</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for ARP packet.&quot;&quot;&quot;</span>
 
     <span class="c1">#: Hardware type.</span>

@@ -35,7 +35,7 @@
 
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
 
-<span class="kn">from</span> <span class="nn">pcapkit.corekit.infoclass</span> <span class="kn">import</span> <span class="n">Info</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.data</span> <span class="kn">import</span> <span class="n">Data</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
     <span class="kn">from</span> <span class="nn">ipaddress</span> <span class="kn">import</span> <span class="n">IPv6Address</span>
@@ -51,7 +51,7 @@
 <span class="p">]</span>
 
 
-<div class="viewcode-block" id="IPv6_Route"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/ipv6_route.html#pcapkit.protocols.data.internet.ipv6_route.IPv6_Route">[docs]</a><span class="k">class</span> <span class="nc">IPv6_Route</span><span class="p">(</span><span class="n">Info</span><span class="p">):</span>
+<div class="viewcode-block" id="IPv6_Route"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/ipv6_route.html#pcapkit.protocols.data.internet.ipv6_route.IPv6_Route">[docs]</a><span class="k">class</span> <span class="nc">IPv6_Route</span><span class="p">(</span><span class="n">Data</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for IPv6-Route protocol.</span>
 
 <span class="sd">    .. seealso::</span>
@@ -76,7 +76,7 @@
         <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">next</span><span class="p">:</span> <span class="s1">&#39;TransType&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Routing&#39;</span><span class="p">,</span> <span class="n">seg_left</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">):</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,multiple-statements,super-init-not-called,redefined-builtin,line-too-long</span></div>
 
 
-<div class="viewcode-block" id="RoutingType"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/ipv6_route.html#pcapkit.protocols.data.internet.ipv6_route.RoutingType">[docs]</a><span class="k">class</span> <span class="nc">RoutingType</span><span class="p">(</span><span class="n">Info</span><span class="p">):</span>
+<div class="viewcode-block" id="RoutingType"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/ipv6_route.html#pcapkit.protocols.data.internet.ipv6_route.RoutingType">[docs]</a><span class="k">class</span> <span class="nc">RoutingType</span><span class="p">(</span><span class="n">Data</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for Routing Type.&quot;&quot;&quot;</span></div>
 
 
