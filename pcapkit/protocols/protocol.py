@@ -28,7 +28,7 @@ import chardet
 
 from pcapkit.corekit.infoclass import Info
 from pcapkit.corekit.protochain import ProtoChain
-from pcapkit.corekit.schema import Schema
+from pcapkit.protocols.schema.schema import Schema
 from pcapkit.protocols.data.data import Data
 from pcapkit.protocols.data.protocol import Packet as Data_Packet
 from pcapkit.protocols.schema.misc.null import NoPayload as Schema_NoPayload

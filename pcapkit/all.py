@@ -57,7 +57,6 @@ __all__ = [
     'UByteField', 'EnumField',
     'BytesField', 'StringField', 'BitField',                # text protocol fields
     'ConditionalField', 'PayloadField',                     # misc protocol fields
-    'Schema',                                               # protocol schema
 
     # pcapkit.dumpkit
     'PCAPIO',                                               # PCAP Dumper
@@ -99,6 +98,7 @@ __all__ = [
                                                             # IPv6 Extension Header
     'TCP', 'UDP',                                           # Transport Layer
     'FTP', 'HTTP',                                          # Application Layer
+    'Schema', 'schema',                                     # Protocol Schema
 
     # pcapkit.toolkit
     'ipv4_reassembly', 'ipv6_reassembly', 'tcp_reassembly', 'tcp_traceflow',

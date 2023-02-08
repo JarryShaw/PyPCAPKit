@@ -10,15 +10,13 @@ class :class:`~pcapkit.corekit.infoclass.Info`,
 protocol collection class :class:`~pcapkit.corekit.protochain.ProtoChain`,
 and :class:`~pcapkit.corekit.multidict.MultiDict` family inspired from
 :mod:`Werkzeug` for multientry :obj:`dict` data mapping, the
-:class:`~pcapkit.corekit.fields.field.Field` family for data parsing,
-and :class:`~pcapkit.corekit.schema.Schema` for protocol schema.
+:class:`~pcapkit.corekit.fields.field.Field` family for data parsing.
 
 """
 from pcapkit.corekit.fields import *
 from pcapkit.corekit.infoclass import Info
 from pcapkit.corekit.multidict import MultiDict, OrderedMultiDict
 from pcapkit.corekit.protochain import ProtoChain
-from pcapkit.corekit.schema import Schema
 from pcapkit.corekit.version import VersionInfo
 
 __all__ = [
@@ -42,6 +40,4 @@ __all__ = [
     'BitField',
 
     'ConditionalField', 'PayloadField',
-
-    'Schema',
 ]

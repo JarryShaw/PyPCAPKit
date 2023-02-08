@@ -21,6 +21,10 @@ from pcapkit.protocols.internet import *
 from pcapkit.protocols.transport import *
 from pcapkit.protocols.application import *
 
+# Protocol Schema
+from pcapkit.protocols import schema
+from pcapkit.protocols.schema.schema import Schema
+
 if TYPE_CHECKING:
     from typing import Type
 
@@ -50,6 +54,9 @@ __all__ = [
 
     # Application Layer
     'FTP', 'HTTP', 'HTTPv1', 'HTTPv2',
+
+    # Protocol Schema
+    'Schema', 'schema',
 ]
 
 # protocol registry

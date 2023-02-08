@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """header schema for root protocol"""
 
-from pcapkit.corekit.schema import Schema
+from pcapkit.protocols.schema.schema import Schema
 
 __all__ = ['NoPayload']
 
