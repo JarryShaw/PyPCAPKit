@@ -28,7 +28,9 @@ import chardet
 
 from pcapkit.corekit.infoclass import Info
 from pcapkit.corekit.protochain import ProtoChain
+from pcapkit.corekit.schema import Schema
 from pcapkit.protocols.data.protocol import Packet as DataType_Packet
+from pcapkit.protocols.schema.misc.null import NoPayload as Schema_NoPayload
 from pcapkit.utilities.compat import cached_property
 from pcapkit.utilities.decorators import beholder, seekset
 from pcapkit.utilities.exceptions import (ProtocolNotFound, ProtocolNotImplemented, StructError,
@@ -36,7 +38,7 @@ from pcapkit.utilities.exceptions import (ProtocolNotFound, ProtocolNotImplement
 
 if TYPE_CHECKING:
     from enum import IntEnum as StdlibEnum
-    from typing import Any, BinaryIO, DefaultDict, Optional, Type
+    from typing import Any, IO, DefaultDict, Optional, Type
 
     from aenum import IntEnum as AenumEnum
     from typing_extensions import Literal
@@ -57,7 +59,7 @@ class Protocol(Generic[PT], metaclass=abc.ABCMeta):
     #: Raw packet data.
     _data: 'bytes'
     #: Source packet stream.
-    _file: 'BinaryIO'
+    _file: 'IO[bytes]'
     #： Next layer protocol instance.
     _next: 'Protocol'
     #: Protocol chain instance.
@@ -65,6 +67,8 @@ class Protocol(Generic[PT], metaclass=abc.ABCMeta):
 
     # Internal data storage for cached properties.
     __cached__: 'dict[str, Any]'
+    #: Protocol header schema definition.
+    __schema__: 'Type[Schema]'
 
     ##########################################################################
     # Defaults.
@@ -339,11 +343,11 @@ class Protocol(Generic[PT], metaclass=abc.ABCMeta):
         return self
 
     @overload
-    def __init__(self, file: 'BinaryIO', length: 'Optional[int]' = ..., **kwargs: 'Any') -> 'None': ...
+    def __init__(self, file: 'IO[bytes]', length: 'Optional[int]' = ..., **kwargs: 'Any') -> 'None': ...
     @overload
     def __init__(self, **kwargs: 'Any') -> 'None': ...
 
-    def __init__(self, file: 'Optional[BinaryIO]' = None, length: 'Optional[int]' = None, **kwargs: 'Any') -> 'None':
+    def __init__(self, file: 'Optional[IO[bytes]]' = None, length: 'Optional[int]' = None, **kwargs: 'Any') -> 'None':
         """Initialisation.
 
         Args:
@@ -371,11 +375,11 @@ class Protocol(Generic[PT], metaclass=abc.ABCMeta):
         self.__post_init__(file, length, **kwargs)  # type: ignore[arg-type]
 
     @overload
-    def __post_init__(self, file: 'BinaryIO', length: 'Optional[int]' = ..., **kwargs: 'Any') -> 'None': ...
+    def __post_init__(self, file: 'IO[bytes]', length: 'Optional[int]' = ..., **kwargs: 'Any') -> 'None': ...
     @overload
     def __post_init__(self, **kwargs: 'Any') -> 'None': ...
 
-    def __post_init__(self, file: 'Optional[BinaryIO]' = None,
+    def __post_init__(self, file: 'Optional[IO[bytes]]' = None,
                       length: 'Optional[int]' = None, **kwargs: 'Any') -> 'None':
         """Post initialisation hook.
 
@@ -400,6 +404,21 @@ class Protocol(Generic[PT], metaclass=abc.ABCMeta):
         self._file = io.BytesIO(self._data)
         #: pcapkit.corekit.infoclass.Info: Parsed packet data.
         self._info = self.read(length, **kwargs)
+
+    def __init_subclass__(cls, /, schema: 'Type[Schema]' = Schema_NoPayload, **kwargs: 'Any') -> 'None':
+        """Initialisation for subclasses.
+
+        Args:
+            schema: Schema class.
+            **kwargs: Arbitrary keyword arguments.
+
+        This method is called when a subclass of :class:`Protocol` is defined.
+        It is used to set the :attr:`self.__schema__ <pcapkit.protocols.protocol.Protocol.__schema__>`
+        attribute of the subclass.
+
+        """
+        super().__init_subclass__(**kwargs)
+        cls.__schema__ = schema
 
     def __repr__(self) -> 'str':
         """Returns representation of parsed protocol data.
@@ -476,7 +495,7 @@ class Protocol(Generic[PT], metaclass=abc.ABCMeta):
     def __length_hint__(self) -> 'Optional[int]':
         """Return an estimated length for the object."""
 
-    def __iter__(self) -> 'BinaryIO':
+    def __iter__(self) -> 'IO[bytes]':
         """Iterate through :attr:`self._data <pcapkit.protocols.protocol.Protocol._data>`."""
         return io.BytesIO(self._data)
 
