@@ -18,7 +18,7 @@ from pcapkit.protocols.protocol import Protocol
 from pcapkit.utilities.exceptions import UnsupportedCall
 
 if TYPE_CHECKING:
-    from typing import Any, BinaryIO, NoReturn, Optional
+    from typing import Any, IO, NoReturn, Optional
 
     from typing_extensions import Literal
 
@@ -100,11 +100,11 @@ class Raw(Protocol[DataType_Raw]):
     ##########################################################################
 
     @overload
-    def __post_init__(self, file: 'BinaryIO', length: 'Optional[int]' = ..., **kwargs: 'Any') -> 'None': ...
+    def __post_init__(self, file: 'IO[bytes]', length: 'Optional[int]' = ..., **kwargs: 'Any') -> 'None': ...
     @overload
     def __post_init__(self, **kwargs: 'Any') -> 'None': ...  # pylint: disable=arguments-differ
 
-    def __post_init__(self, file: 'Optional[BinaryIO]' = None,
+    def __post_init__(self, file: 'Optional[IO[bytes]]' = None,
                       length: 'Optional[int]' = None, **kwargs: 'Any') -> 'None':
         """Post initialisation hook.
 

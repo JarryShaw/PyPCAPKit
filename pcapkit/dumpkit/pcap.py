@@ -17,7 +17,7 @@ from pcapkit.protocols.misc.pcap.header import Header
 
 if TYPE_CHECKING:
     from enum import IntEnum as StdlibIntEnum
-    from typing import Any, BinaryIO, Optional
+    from typing import Any, IO, Optional
 
     from aenum import IntEnum as AenumIntEnum
     from typing_extensions import Literal
@@ -106,7 +106,7 @@ class PCAPIO(dictdumper.Dumper):
         with open(self._file, 'wb') as file:
             file.write(packet)
 
-    def _append_value(self, value: 'Frame', file: 'BinaryIO', name: 'str') -> 'None':  # pylint: disable=unused-argument
+    def _append_value(self, value: 'Frame', file: 'IO[bytes]', name: 'str') -> 'None':  # pylint: disable=unused-argument
         """Call this function to write contents.
 
         Args:

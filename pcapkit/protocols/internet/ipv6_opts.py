@@ -63,7 +63,7 @@ from pcapkit.protocols.internet.internet import Internet
 from pcapkit.utilities.exceptions import ProtocolError, UnsupportedCall
 
 if TYPE_CHECKING:
-    from typing import Any, BinaryIO, Callable, DefaultDict, NoReturn, Optional
+    from typing import Any, IO, Callable, DefaultDict, NoReturn, Optional
 
     from mypy_extensions import NamedArg
     from typing_extensions import Literal
@@ -286,13 +286,13 @@ class IPv6_Opts(Internet[DataType_IPv6_Opts]):
     ##########################################################################
 
     @overload
-    def __post_init__(self, file: 'BinaryIO', length: 'Optional[int]' = ..., *,  # pylint: disable=arguments-differ
+    def __post_init__(self, file: 'IO[bytes]', length: 'Optional[int]' = ..., *,  # pylint: disable=arguments-differ
                       extension: 'bool' = ..., **kwargs: 'Any') -> 'None': ...
 
     @overload
     def __post_init__(self, **kwargs: 'Any') -> 'None': ...  # pylint: disable=arguments-differ
 
-    def __post_init__(self, file: 'Optional[BinaryIO]' = None, length: 'Optional[int]' = None, *,  # pylint: disable=arguments-differ
+    def __post_init__(self, file: 'Optional[IO[bytes]]' = None, length: 'Optional[int]' = None, *,  # pylint: disable=arguments-differ
                       extension: 'bool' = False, **kwargs: 'Any') -> 'None':
         """Post initialisation hook.
 

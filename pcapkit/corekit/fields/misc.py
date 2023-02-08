@@ -10,7 +10,7 @@ from pcapkit.utilities.exceptions import NoDefaultValue
 __all__ = ['ConditionalField', 'PayloadField']
 
 if TYPE_CHECKING:
-    from typing import Any, BinaryIO, Callable, Optional, Type
+    from typing import Any, IO, Callable, Optional, Type
 
     from pcapkit.corekit.fields.field import Field, NoValueType
     from pcapkit.protocols.protocol import Protocol
@@ -238,7 +238,7 @@ class PayloadField(_Field[_TP]):
             return value
         return value.data
 
-    def unpack(self, buffer: 'bytes | BinaryIO',
+    def unpack(self, buffer: 'bytes | IO[bytes]',
                packet: 'dict[str, Any]', *,
                length: 'Optional[int]' = None) -> '_TP':
         """Unpack field value from :obj:`bytes`.
@@ -256,7 +256,7 @@ class PayloadField(_Field[_TP]):
             if length is None:
                 length = self.test_length(packet, len(buffer))
 
-            file = io.BytesIO(buffer)  # type: BinaryIO
+            file = io.BytesIO(buffer)  # type: IO[bytes]
         else:
             if length is None:
                 current = buffer.tell()

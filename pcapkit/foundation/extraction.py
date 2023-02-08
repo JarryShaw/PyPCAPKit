@@ -30,7 +30,7 @@ from pcapkit.utilities.warnings import (AttributeWarning, DPKTWarning, EngineWar
 
 if TYPE_CHECKING:
     from types import ModuleType, TracebackType
-    from typing import Any, BinaryIO, Callable, DefaultDict, Iterator, Optional, TextIO, Type, Union
+    from typing import Any, IO, Callable, DefaultDict, Iterator, Optional, TextIO, Type, Union
 
     from dictdumper.dumper import Dumper
     from dpkt.dpkt import Packet as DPKTPacket
@@ -134,7 +134,7 @@ class Extractor:
     _extmp: 'Any'
 
     #: Input file object.
-    _ifile: 'BinaryIO'
+    _ifile: 'IO[bytes]'
     #: Output file object.
     _ofile: 'Dumper | Type[Dumper]'
 

@@ -16,7 +16,7 @@ from typing import TYPE_CHECKING
 import dictdumper
 
 if TYPE_CHECKING:
-    from typing import Any, BinaryIO, Optional
+    from typing import Any, IO, Optional
 
     from typing_extensions import Literal
 
@@ -64,7 +64,7 @@ class NotImplementedIO(dictdumper.Dumper):
 
         """
 
-    def _append_value(self, value: 'dict[str, Any]', file: 'BinaryIO', name: 'str') -> 'None':  # pylint: disable=unused-argument
+    def _append_value(self, value: 'dict[str, Any]', file: 'IO[bytes]', name: 'str') -> 'None':  # pylint: disable=unused-argument
         """Call this function to write contents.
 
         Args:

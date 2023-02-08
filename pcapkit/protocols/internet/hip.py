@@ -131,7 +131,7 @@ from pcapkit.utilities.warnings import ProtocolWarning, warn
 
 if TYPE_CHECKING:
     from ipaddress import IPv4Address, IPv6Address
-    from typing import Any, BinaryIO, Callable, NoReturn, Optional
+    from typing import Any, IO, Callable, NoReturn, Optional
 
     from mypy_extensions import NamedArg
     from typing_extensions import Literal
@@ -416,13 +416,13 @@ class HIP(Internet[DataType_HIP]):
     ##########################################################################
 
     @overload
-    def __post_init__(self, file: 'BinaryIO', length: 'Optional[int]' = ..., *,  # pylint: disable=arguments-differ
+    def __post_init__(self, file: 'IO[bytes]', length: 'Optional[int]' = ..., *,  # pylint: disable=arguments-differ
                       extension: 'bool' = ..., **kwargs: 'Any') -> 'None': ...
 
     @overload
     def __post_init__(self, **kwargs: 'Any') -> 'None': ...  # pylint: disable=arguments-differ
 
-    def __post_init__(self, file: 'Optional[BinaryIO]' = None, length: 'Optional[int]' = None, *,  # pylint: disable=arguments-differ
+    def __post_init__(self, file: 'Optional[IO[bytes]]' = None, length: 'Optional[int]' = None, *,  # pylint: disable=arguments-differ
                       extension: 'bool' = False, **kwargs: 'Any') -> 'None':
         """Post initialisation hook.
 

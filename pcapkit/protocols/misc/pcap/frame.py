@@ -35,7 +35,7 @@ from pcapkit.utilities.exceptions import StructError, UnsupportedCall
 
 if TYPE_CHECKING:
     from decimal import Decimal
-    from typing import Any, BinaryIO, Optional, Type
+    from typing import Any, IO, Optional, Type
 
     from typing_extensions import Literal
 
@@ -248,13 +248,13 @@ class Frame(Protocol[DataType_Frame]):
     ##########################################################################
 
     @overload  # type: ignore[override]
-    def __post_init__(self, file: 'BinaryIO', length: 'Optional[int]' = ..., *,  # pylint: disable=arguments-differ
+    def __post_init__(self, file: 'IO[bytes]', length: 'Optional[int]' = ..., *,  # pylint: disable=arguments-differ
                       num: 'int', header: 'DataType_Header', **kwargs: 'Any') -> 'None': ...
     @overload
     def __post_init__(self, *, num: 'int', header: 'DataType_Header',  # pylint: disable=arguments-differ
                       **kwargs: 'Any') -> 'None': ...
 
-    def __post_init__(self, file: 'Optional[BinaryIO]' = None, length: 'Optional[int]' = None, *,  # pylint: disable=arguments-differ
+    def __post_init__(self, file: 'Optional[IO[bytes]]' = None, length: 'Optional[int]' = None, *,  # pylint: disable=arguments-differ
                       num: 'int', header: 'DataType_Header', **kwargs: 'Any') -> 'None':
         """Initialisation.
 

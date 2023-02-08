@@ -36,7 +36,7 @@ from pcapkit.utilities.exceptions import EndianError, FileError, UnsupportedCall
 
 if TYPE_CHECKING:
     from enum import IntEnum as StdlibEnum
-    from typing import Any, BinaryIO, NoReturn, Optional, Type
+    from typing import Any, IO, NoReturn, Optional, Type
 
     from aenum import IntEnum as AenumEnum
     from typing_extensions import Literal
@@ -241,11 +241,11 @@ class Header(Protocol[DataType_Header]):
     ##########################################################################
 
     @overload
-    def __post_init__(self, file: 'BinaryIO', length: 'Optional[int]' = ..., **kwargs: 'Any') -> 'None': ...
+    def __post_init__(self, file: 'IO[bytes]', length: 'Optional[int]' = ..., **kwargs: 'Any') -> 'None': ...
     @overload
     def __post_init__(self, **kwargs: 'Any') -> 'None': ...  # pylint: disable=arguments-differ
 
-    def __post_init__(self, file: 'Optional[BinaryIO]' = None,
+    def __post_init__(self, file: 'Optional[IO[bytes]]' = None,
                       length: 'Optional[int]' = None, **kwargs: 'Any') -> 'None':
         """Post initialisation hook.
 
