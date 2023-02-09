@@ -15,6 +15,7 @@ from pcapkit.corekit.protochain import ProtoChain
 from pcapkit.protocols.data.misc.raw import Raw as Data_Raw
 from pcapkit.protocols.misc.null import NoPayload
 from pcapkit.protocols.protocol import Protocol
+from pcapkit.protocols.schema.misc.raw import Raw as Schema_Raw
 from pcapkit.utilities.exceptions import UnsupportedCall
 
 if TYPE_CHECKING:
@@ -25,7 +26,7 @@ if TYPE_CHECKING:
 __all__ = ['Raw']
 
 
-class Raw(Protocol[Data_Raw]):
+class Raw(Protocol[Data_Raw, Schema_Raw]):
     """This class implements universal unknown protocol."""
 
     ##########################################################################
@@ -59,12 +60,11 @@ class Raw(Protocol[Data_Raw]):
     # Methods.
     ##########################################################################
 
-    def read(self, length: 'Optional[int]' = None, *, error: 'Optional[Exception]' = None,  # pylint: disable=arguments-differ
+    def read(self, *, error: 'Optional[Exception]' = None,  # pylint: disable=arguments-differ
              alias: 'Optional[int]' = None, **kwargs: 'Any') -> 'Data_Raw':  # pylint: disable=unused-argument
         """Read raw packet data.
 
         Args:
-            length: Length of packet data.
             error: Parsing errors if any.
             alias: Original enumeration of the unknown protocol.
             **kwargs: Arbitrary keyword arguments.
@@ -81,7 +81,7 @@ class Raw(Protocol[Data_Raw]):
 
         return raw
 
-    def make(self, **kwargs: 'Any') -> 'bytes':
+    def make(self, **kwargs: 'Any') -> 'Schema_Raw':
         """Make raw packet data.
 
         Args:
@@ -89,11 +89,12 @@ class Raw(Protocol[Data_Raw]):
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
-            Constructed packet data.
+            Constructed packet schema.
 
         """
-        packet = kwargs.get('packet', b'')
-        return packet
+        return Schema_Raw(
+            packet=kwargs.get('packet', b'')
+        )
 
     ##########################################################################
     # Data models.
@@ -123,7 +124,7 @@ class Raw(Protocol[Data_Raw]):
 
         """
         if file is None:
-            _data = self.make(**kwargs)
+            _data = self.pack(**kwargs)
         else:
             _data = file.read(length)  # type: ignore[arg-type]
 
@@ -132,10 +133,10 @@ class Raw(Protocol[Data_Raw]):
         #: io.BytesIO: Source packet stream.
         self._file = io.BytesIO(self._data)
         #: pcapkit.protocols.data.misc.raw.Raw: Parsed packet data.
-        self._info = self.read(length, **kwargs)
+        self._info = self.read(**kwargs)
 
         if self._info.protocol is not None and hasattr(self._info.protocol, 'name'):
-            alias = self._info.protocol.name  # type: ignore[attr-defined]
+            alias = self._info.protocol.name
         else:
             alias = self.alias
 
