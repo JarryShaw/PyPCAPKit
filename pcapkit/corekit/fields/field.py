@@ -80,6 +80,7 @@ class _Field(Generic[_T], metaclass=abc.ABCMeta):
             packet: packet data.
 
         """
+        self._callback(packet)  # type: ignore[attr-defined]
         return self
 
     def __repr__(self) -> 'str':
@@ -152,6 +153,8 @@ class Field(_Field[_T], Generic[_T]):
         length: field size (in bytes); if a callable is given, it should return
             an integer value and accept the current packet as its only argument.
         default: field default value, if any.
+        callback: callback function to be called upon
+            :meth:`self.__call__ <pcapkit.corekit.fields.field._Field.__call__>`.
 
     """
 
@@ -169,9 +172,11 @@ class Field(_Field[_T], Generic[_T]):
         return struct.calcsize(self.template)
 
     def __init__(self, length: 'int | Callable[[dict[str, Any]], int]',
-                 default: '_T | NoValueType' = NoValue) -> 'None':
+                 default: '_T | NoValueType' = NoValue,
+                 callback: 'Callable[[dict[str, Any]], None]' = lambda _: None) -> 'None':
         self._name = '<unknown>'
         self._default = default
+        self._callback = callback
 
         self._length_callback = None
         if not isinstance(length, int):
@@ -180,6 +185,7 @@ class Field(_Field[_T], Generic[_T]):
 
     def __call__(self, packet: 'dict[str, Any]') -> 'Field':
         """Update field attributes."""
+        self._callback(packet)
         if self._length_callback is not None:
             self._length = self._length_callback(packet)
         return self

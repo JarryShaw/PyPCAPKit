@@ -39,6 +39,8 @@ class NumberField(Field[int], Generic[_T]):
         default: field default value, if any.
         signed: whether the field is signed.
         byteorder: field byte order.
+        callback: callback function to be called upon
+            :meth:`self.__call__ <pcapkit.corekit.fields.field._Field.__call__>`.
 
     """
 
@@ -48,12 +50,13 @@ class NumberField(Field[int], Generic[_T]):
 
     def __init__(self, length: 'Optional[int | Callable[[dict[str, Any]], int]]' = None,
                  default: 'int | NoValueType' = NoValue, signed: 'bool' = False,
-                 byteorder: 'Literal["little", "big"]' = 'big') -> 'None':
+                 byteorder: 'Literal["little", "big"]' = 'big',
+                 callback: 'Callable[[dict[str, Any]], None]' = lambda _: None) -> 'None':
         if length is None:
             if self.__length__ is None:
                 raise IntError(f'Field has no length.')
             length = self.__length__
-        super().__init__(length, default)
+        super().__init__(length, default, callback)
 
         self._signed = signed if self.__signed__ is None else self.__signed__
         self._byteorder = byteorder
@@ -143,6 +146,8 @@ class Int32Field(NumberField):
         default: field default value, if any.
         signed: whether the field is signed.
         byteorder: field byte order.
+        callback: callback function to be called upon
+            :meth:`self.__call__ <pcapkit.corekit.fields.field._Field.__call__>`.
 
     """
 
@@ -159,6 +164,8 @@ class UInt32Field(NumberField):
         default: field default value, if any.
         signed: whether the field is signed.
         byteorder: field byte order.
+        callback: callback function to be called upon
+            :meth:`self.__call__ <pcapkit.corekit.fields.field._Field.__call__>`.
 
     """
 
@@ -175,6 +182,8 @@ class Int16Field(NumberField):
         default: field default value, if any.
         signed: whether the field is signed.
         byteorder: field byte order.
+        callback: callback function to be called upon
+            :meth:`self.__call__ <pcapkit.corekit.fields.field._Field.__call__>`.
 
     """
 
@@ -191,6 +200,8 @@ class UInt16Field(NumberField):
         default: field default value, if any.
         signed: whether the field is signed.
         byteorder: field byte order.
+        callback: callback function to be called upon
+            :meth:`self.__call__ <pcapkit.corekit.fields.field._Field.__call__>`.
 
     """
 
@@ -207,6 +218,8 @@ class Int64Field(NumberField):
         default: field default value, if any.
         signed: whether the field is signed.
         byteorder: field byte order.
+        callback: callback function to be called upon
+            :meth:`self.__call__ <pcapkit.corekit.fields.field._Field.__call__>`.
 
     """
 
@@ -223,6 +236,8 @@ class UInt64Field(NumberField):
         default: field default value, if any.
         signed: whether the field is signed.
         byteorder: field byte order.
+        callback: callback function to be called upon
+            :meth:`self.__call__ <pcapkit.corekit.fields.field._Field.__call__>`.
 
     """
 
@@ -239,6 +254,8 @@ class Int8Field(NumberField):
         default: field default value, if any.
         signed: whether the field is signed.
         byteorder: field byte order.
+        callback: callback function to be called upon
+            :meth:`self.__call__ <pcapkit.corekit.fields.field._Field.__call__>`.
 
     """
 
@@ -255,6 +272,8 @@ class UInt8Field(NumberField):
         default: field default value, if any.
         signed: whether the field is signed.
         byteorder: field byte order.
+        callback: callback function to be called upon
+            :meth:`self.__call__ <pcapkit.corekit.fields.field._Field.__call__>`.
 
     """
 
@@ -273,14 +292,17 @@ class EnumField(NumberField[enum.IntEnum | aenum.IntEnum]):
         signed: whether the field is signed.
         byteorder: field byte order.
         namespace: field namespace (a :class:`enum.IntEnum` class).
+        callback: callback function to be called upon
+            :meth:`self.__call__ <pcapkit.corekit.fields.field._Field.__call__>`.
 
     """
 
     def __init__(self, length: 'Optional[int | Callable[[dict[str, Any]], int]]' = None,
                  default: 'StdlibEnum | AenumEnum | NoValueType' = NoValue, signed: 'bool' = False,
                  byteorder: 'Literal["little", "big"]' = 'big',
-                 namespace: 'Optional[Type[StdlibEnum] | Type[AenumEnum]]' = None) -> 'None':
-        super().__init__(length, default, signed, byteorder)
+                 namespace: 'Optional[Type[StdlibEnum] | Type[AenumEnum]]' = None,
+                 callback: 'Callable[[dict[str, Any]], None]' = lambda _: None) -> 'None':
+        super().__init__(length, default, signed, byteorder, callback)
 
         self._namespace = namespace
 

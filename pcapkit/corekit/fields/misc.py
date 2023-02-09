@@ -166,6 +166,8 @@ class PayloadField(_Field[_TP]):
     Args:
         default: field default value.
         protocol: payload protocol.
+        callback: callback function to be called upon
+            :meth:`self.__call__ <pcapkit.corekit.fields.field._Field.__call__>`.
 
     """
 
@@ -202,9 +204,11 @@ class PayloadField(_Field[_TP]):
     def __init__(self, name: 'str' = 'payload',
                  default: '_TP | NoValueType | bytes' = NoValue,
                  protocol: 'Optional[Type[_TP] | str]' = None,
-                 length_hint: 'Callable[[dict[str, Any]], Optional[int]]' = lambda x: None) -> 'None':
+                 length_hint: 'Callable[[dict[str, Any]], Optional[int]]' = lambda _: None,
+                 callback: 'Callable[[dict[str, Any]], None]' = lambda _: None) -> 'None':
         self._name = name
         self._length_hint = length_hint
+        self._callback = callback
 
         if protocol is None:
             from pcapkit.protocols.misc.raw import Raw  # pylint: disable=import-outside-top-level

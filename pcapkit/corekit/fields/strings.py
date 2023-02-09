@@ -35,12 +35,15 @@ class _TextField(Field[_T], Generic[_T]):
         length: field size (in bytes); if a callable is given, it should return
             an integer value and accept the current packet as its only argument.
         default: field default value, if any.
+        callback: callback function to be called upon
+            :meth:`self.__call__ <pcapkit.corekit.fields.field._Field.__call__>`.
 
     """
 
     def __init__(self, length: 'int | Callable[[dict[str, Any]], int]',
-                 default: '_T | NoValueType' = NoValue) -> 'None':
-        super().__init__(length, default)  # type: ignore[arg-type]
+                 default: '_T | NoValueType' = NoValue,
+                 callback: 'Callable[[dict[str, Any]], None]' = lambda _: None) -> 'None':
+        super().__init__(length, default, callback)  # type: ignore[arg-type]
 
         self._template = f'{self._length}s'
 
@@ -61,6 +64,8 @@ class BytesField(_TextField[bytes]):
         length: field size (in bytes); if a callable is given, it should return
             an integer value and accept the current packet as its only argument.
         default: field default value, if any.
+        callback: callback function to be called upon
+            :meth:`self.__call__ <pcapkit.corekit.fields.field._Field.__call__>`.
 
     """
 
@@ -83,6 +88,8 @@ class StringField(_TextField[str]):
         unquote: Whether to unquote the decoded string as a URL. Should decoding failed ,
             the method will try again replacing ``'%'`` with ``'\x'`` then decoding the
             ``url`` as ``'utf-8'`` with ``'replace'`` for error handling.
+        callback: callback function to be called upon
+            :meth:`self.__call__ <pcapkit.corekit.fields.field._Field.__call__>`.
 
     .. |chardet| replace:: ``chardet``
     .. _chardet: https://chardet.readthedocs.io
@@ -92,8 +99,9 @@ class StringField(_TextField[str]):
     def __init__(self, length: 'int | Callable[[dict[str, Any]], int]',
                  default: 'str | NoValueType' = NoValue, encoding: 'Optional[str]' = None,
                  errors: 'Literal["strict", "ignore", "replace"]' = 'strict',
-                 unquote: 'bool' = False) -> 'None':
-        super().__init__(length, default)
+                 unquote: 'bool' = False,
+                 callback: 'Callable[[dict[str, Any]], None]' = lambda _: None) -> 'None':
+        super().__init__(length, default, callback)
 
         self._encoding = encoding
         self._errors = errors
@@ -150,13 +158,16 @@ class BitField(_TextField[Dict[str, Any]]):
             end index, converter function, which takes the flag value :obj:`int` as
             its only argument, and reverser function, which takes the converted flag value
             and returns the original :obj:`int` value).
+        callback: callback function to be called upon
+            :meth:`self.__call__ <pcapkit.corekit.fields.field._Field.__call__>`.
 
     """
 
     def __init__(self, length: 'int | Callable[[dict[str, Any]], int]',
                  default: 'dict[str, Any] | NoValueType' = NoValue,
-                 namespace: 'Optional[dict[str, NamespaceEntry]]' = None) -> 'None':
-        super().__init__(length, default)
+                 namespace: 'Optional[dict[str, NamespaceEntry]]' = None,
+                 callback: 'Callable[[dict[str, Any]], None]' = lambda _: None) -> 'None':
+        super().__init__(length, default, callback)
 
         self._namespace = namespace or {}
 
