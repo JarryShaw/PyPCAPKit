@@ -199,8 +199,9 @@ class PayloadField(_Field[_TP]):
         """
         self._protocol = protocol
 
-    def __init__(self, name: 'str' = 'payload', default: '_TP | NoValueType' = NoValue,
-                 protocol: 'Optional[Type[_TP]]' = None,
+    def __init__(self, name: 'str' = 'payload',
+                 default: '_TP | NoValueType | bytes' = NoValue,
+                 protocol: 'Optional[Type[_TP] | str]' = None,
                  length_hint: 'Callable[[dict[str, Any]], Optional[int]]' = lambda x: None) -> 'None':
         self._name = name
         self._length_hint = length_hint
@@ -208,12 +209,20 @@ class PayloadField(_Field[_TP]):
         if protocol is None:
             from pcapkit.protocols.misc.raw import Raw  # pylint: disable=import-outside-top-level
             protocol = cast('Type[_TP]', Raw)
+        elif isinstance(protocol, str):
+            from pcapkit.protocols import __proto__  # pylint: disable=import-outside-top-level
+            from pcapkit.protocols.misc.raw import Raw  # pylint: disable=import-outside-top-level
+
+            protocol = cast('Type[_TP]', getattr(__proto__, protocol, Raw))
         self._protocol = protocol
 
         if default is NoValue:
             from pcapkit.protocols.misc.null import \
                 NoPayload  # pylint: disable=import-outside-top-level
             default = cast('_TP', NoPayload())
+        elif isinstance(default, bytes):
+            from pcapkit.protocols.misc.raw import Raw  # pylint: disable=import-outside-top-level
+            default = cast('_TP', Raw(packet=default))
         self._default = default
 
         self._length = 0

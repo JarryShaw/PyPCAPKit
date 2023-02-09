@@ -52,9 +52,9 @@ __all__ = [
     'Info',                                                 # Info Class
     'ProtoChain',                                           # ProtoChain
     'VersionInfo',                                          # Version
-    'NumberField', 'IntField', 'UIntField', 'ShortField',   # numeric protocol fields
-    'UShortField', 'LongField', 'ULongField', 'ByteField',
-    'UByteField', 'EnumField',
+    'NumberField', 'Int32Field', 'UInt32Field', 'Int16Field',   # numeric protocol fields
+    'UInt16Field', 'Int64Field', 'UInt64Field', 'Int8Field',
+    'UInt8Field', 'EnumField',
     'BytesField', 'StringField', 'BitField',                # text protocol fields
     'ConditionalField', 'PayloadField',                     # misc protocol fields
 

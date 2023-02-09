@@ -29,10 +29,10 @@ __all__ = [
     'MultiDict', 'OrderedMultiDict',
 
     'NumberField',
-    'IntField', 'UIntField',
-    'ShortField', 'UShortField',
-    'LongField', 'ULongField',
-    'ByteField', 'UByteField',
+    'Int32Field', 'UInt32Field',
+    'Int16Field', 'UInt16Field',
+    'Int64Field', 'UInt64Field',
+    'Int8Field', 'UInt8Field',
     'EnumField',
 
     'BytesField',

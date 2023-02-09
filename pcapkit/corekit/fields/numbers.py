@@ -11,10 +11,10 @@ from pcapkit.utilities.exceptions import IntError
 
 __all__ = [
     'NumberField',
-    'IntField', 'UIntField',
-    'ShortField', 'UShortField',
-    'LongField', 'ULongField',
-    'ByteField', 'UByteField',
+    'Int32Field', 'UInt32Field',
+    'Int16Field', 'UInt16Field',
+    'Int64Field', 'UInt64Field',
+    'Int8Field', 'UInt8Field',
     'EnumField',
 ]
 
@@ -135,7 +135,7 @@ class NumberField(Field[int], Generic[_T]):
         )
 
 
-class IntField(NumberField):
+class Int32Field(NumberField):
     """Integer value for protocol fields.
 
     Args:
@@ -151,7 +151,7 @@ class IntField(NumberField):
     __signed__ = True
 
 
-class UIntField(NumberField):
+class UInt32Field(NumberField):
     """Unsigned integer value for protocol fields.
 
     Args:
@@ -167,7 +167,7 @@ class UIntField(NumberField):
     __signed__ = False
 
 
-class ShortField(NumberField):
+class Int16Field(NumberField):
     """Short integer value for protocol fields.
 
     Args:
@@ -183,7 +183,7 @@ class ShortField(NumberField):
     __signed__ = True
 
 
-class UShortField(NumberField):
+class UInt16Field(NumberField):
     """Unsigned short integer value for protocol fields.
 
     Args:
@@ -199,7 +199,7 @@ class UShortField(NumberField):
     __signed__ = False
 
 
-class LongField(NumberField):
+class Int64Field(NumberField):
     """Long integer value for protocol fields.
 
     Args:
@@ -215,7 +215,7 @@ class LongField(NumberField):
     __signed__ = True
 
 
-class ULongField(NumberField):
+class UInt64Field(NumberField):
     """Unsigned long integer value for protocol fields.
 
     Args:
@@ -231,7 +231,7 @@ class ULongField(NumberField):
     __signed__ = False
 
 
-class ByteField(NumberField):
+class Int8Field(NumberField):
     """Byte value for protocol fields.
 
     Args:
@@ -247,7 +247,7 @@ class ByteField(NumberField):
     __signed__ = True
 
 
-class UByteField(NumberField):
+class UInt8Field(NumberField):
     """Unsigned byte value for protocol fields.
 
     Args:
