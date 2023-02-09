@@ -54,9 +54,6 @@ __all__ = [
 
     # Application Layer
     'FTP', 'HTTP', 'HTTPv1', 'HTTPv2',
-
-    # Protocol Schema
-    'Schema', 'schema',
 ]
 
 # protocol registry
@@ -67,4 +64,7 @@ for name in __all__:
 __all__.extend((
     # Protocol Numbers
     'LINKTYPE', 'ETHERTYPE', 'TRANSTYPE',
+
+    # Protocol Schema
+    'Schema', 'schema',
 ))
