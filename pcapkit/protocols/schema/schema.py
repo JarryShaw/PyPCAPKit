@@ -4,8 +4,7 @@
 import collections.abc
 import io
 import itertools
-import math
-from typing import TYPE_CHECKING, Generic, TypeVar, cast
+from typing import TYPE_CHECKING, Generic, TypeVar
 
 from pcapkit.corekit.fields.field import NoValue, _Field
 from pcapkit.corekit.fields.misc import ConditionalField, PayloadField
@@ -292,9 +291,7 @@ class Schema(Mapping[str, VT], Generic[VT]):
 
     def pack(self) -> 'bytes':
         """Pack :class:`Schema` into :obj:`bytes`."""
-        buffer = self.__buffer__
         packet = self.__dict__
-
         for field in self.__fields__:
             if isinstance(field, PayloadField):
                 from pcapkit.protocols.protocol import \
@@ -302,13 +299,13 @@ class Schema(Mapping[str, VT], Generic[VT]):
 
                 data = getattr(self, field.name, None)
                 if data is None:
-                    buffer[field.name] = b''
+                    self.__buffer__[field.name] = b''
                 elif isinstance(data, Protocol):
-                    buffer[field.name] = bytes(data)
+                    self.__buffer__[field.name] = bytes(data)
                 elif isinstance(data, bytes):
-                    buffer[field.name] = data
+                    self.__buffer__[field.name] = data
                 elif isinstance(data, Schema):
-                    buffer[field.name] = data.pack()
+                    self.__buffer__[field.name] = data.pack()
                 else:
                     raise ProtocolUnbound(f'unsupported type {type(data)}')
                 continue
@@ -323,7 +320,7 @@ class Schema(Mapping[str, VT], Generic[VT]):
                 temp = field(packet).pack(value, self.__dict__)  # type: bytes | NoValueType
             except NoDefaultValue:
                 temp = NoValue
-            buffer[field.name] = temp
+            self.__buffer__[field.name] = temp
 
         self.__updated__ = False
         return self.__bytes__()
@@ -343,22 +340,20 @@ class Schema(Mapping[str, VT], Generic[VT]):
             length = len(data) if length is None else length
             data = io.BytesIO(data)
         else:
-            length = cast('int', math.inf) if length is None else length
+            if length is None:
+                current = data.tell()
+                length = data.seek(0, io.SEEK_END) - current
+                data.seek(current)
 
-        packet = self.__dict__
-        buffer = self.__buffer__
+        packet = self.__dict__.copy()
+        packet['__length__'] = length
 
         for field in self.__fields__:
             if isinstance(field, PayloadField):
-                if math.isinf(length):
-                    current = data.tell()
-                    default_length = data.seek(0, io.SEEK_END) - current
-                    data.seek(current)
-
-                payload_length = field.test_length(packet, default_length)
+                payload_length = field.test_length(packet, length)
                 payload = data.read(payload_length)
 
-                buffer[field.name] = payload
+                self.__buffer__[field.name] = payload
                 setattr(self, field.name, payload)
                 continue
 
@@ -368,7 +363,7 @@ class Schema(Mapping[str, VT], Generic[VT]):
                 field = field.field
 
             byte = data.read(field.length)
-            buffer[field.name] = byte
+            self.__buffer__[field.name] = byte
 
             value = field(packet).unpack(byte, packet)
             setattr(self, field.name, value)
