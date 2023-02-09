@@ -51,12 +51,12 @@ class NumberField(Field[int], Generic[_T]):
     def __init__(self, length: 'Optional[int | Callable[[dict[str, Any]], int]]' = None,
                  default: 'int | NoValueType' = NoValue, signed: 'bool' = False,
                  byteorder: 'Literal["little", "big"]' = 'big',
-                 callback: 'Callable[[dict[str, Any]], None]' = lambda _: None) -> 'None':
+                 callback: 'Callable[[NumberField[_T], dict[str, Any]], None]' = lambda *_: None) -> 'None':
         if length is None:
             if self.__length__ is None:
                 raise IntError(f'Field has no length.')
             length = self.__length__
-        super().__init__(length, default, callback)
+        super().__init__(length, default, callback)  # type: ignore[arg-type]
 
         self._signed = signed if self.__signed__ is None else self.__signed__
         self._byteorder = byteorder
@@ -301,8 +301,8 @@ class EnumField(NumberField[enum.IntEnum | aenum.IntEnum]):
                  default: 'StdlibEnum | AenumEnum | NoValueType' = NoValue, signed: 'bool' = False,
                  byteorder: 'Literal["little", "big"]' = 'big',
                  namespace: 'Optional[Type[StdlibEnum] | Type[AenumEnum]]' = None,
-                 callback: 'Callable[[dict[str, Any]], None]' = lambda _: None) -> 'None':
-        super().__init__(length, default, signed, byteorder, callback)
+                 callback: 'Callable[[EnumField, dict[str, Any]], None]' = lambda *_: None) -> 'None':
+        super().__init__(length, default, signed, byteorder, callback)  # type: ignore[arg-type]
 
         self._namespace = namespace
 

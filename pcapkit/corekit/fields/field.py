@@ -173,7 +173,7 @@ class Field(_Field[_T], Generic[_T]):
 
     def __init__(self, length: 'int | Callable[[dict[str, Any]], int]',
                  default: '_T | NoValueType' = NoValue,
-                 callback: 'Callable[[dict[str, Any]], None]' = lambda _: None) -> 'None':
+                 callback: 'Callable[[Field[_T], dict[str, Any]], None]' = lambda *_: None) -> 'None':
         self._name = '<unknown>'
         self._default = default
         self._callback = callback
@@ -185,7 +185,7 @@ class Field(_Field[_T], Generic[_T]):
 
     def __call__(self, packet: 'dict[str, Any]') -> 'Field':
         """Update field attributes."""
-        self._callback(packet)
+        self._callback(self, packet)
         if self._length_callback is not None:
             self._length = self._length_callback(packet)
         return self

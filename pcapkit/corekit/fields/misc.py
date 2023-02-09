@@ -205,7 +205,7 @@ class PayloadField(_Field[_TP]):
                  default: '_TP | NoValueType | bytes' = NoValue,
                  protocol: 'Optional[Type[_TP] | str]' = None,
                  length_hint: 'Callable[[dict[str, Any]], Optional[int]]' = lambda _: None,
-                 callback: 'Callable[[dict[str, Any]], None]' = lambda _: None) -> 'None':
+                 callback: 'Callable[[PayloadField[_TP], dict[str, Any]], None]' = lambda *_: None) -> 'None':
         self._name = name
         self._length_hint = length_hint
         self._callback = callback

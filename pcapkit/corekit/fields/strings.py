@@ -42,7 +42,7 @@ class _TextField(Field[_T], Generic[_T]):
 
     def __init__(self, length: 'int | Callable[[dict[str, Any]], int]',
                  default: '_T | NoValueType' = NoValue,
-                 callback: 'Callable[[dict[str, Any]], None]' = lambda _: None) -> 'None':
+                 callback: 'Callable[[_TextField[_T], dict[str, Any]], None]' = lambda *_: None) -> 'None':
         super().__init__(length, default, callback)  # type: ignore[arg-type]
 
         self._template = f'{self._length}s'
@@ -100,8 +100,8 @@ class StringField(_TextField[str]):
                  default: 'str | NoValueType' = NoValue, encoding: 'Optional[str]' = None,
                  errors: 'Literal["strict", "ignore", "replace"]' = 'strict',
                  unquote: 'bool' = False,
-                 callback: 'Callable[[dict[str, Any]], None]' = lambda _: None) -> 'None':
-        super().__init__(length, default, callback)
+                 callback: 'Callable[[StringField, dict[str, Any]], None]' = lambda *_: None) -> 'None':
+        super().__init__(length, default, callback)  # type: ignore[arg-type]
 
         self._encoding = encoding
         self._errors = errors
@@ -166,8 +166,8 @@ class BitField(_TextField[Dict[str, Any]]):
     def __init__(self, length: 'int | Callable[[dict[str, Any]], int]',
                  default: 'dict[str, Any] | NoValueType' = NoValue,
                  namespace: 'Optional[dict[str, NamespaceEntry]]' = None,
-                 callback: 'Callable[[dict[str, Any]], None]' = lambda _: None) -> 'None':
-        super().__init__(length, default, callback)
+                 callback: 'Callable[[BitField, dict[str, Any]], None]' = lambda *_: None) -> 'None':
+        super().__init__(length, default, callback)  # type: ignore[arg-type]
 
         self._namespace = namespace or {}
 
