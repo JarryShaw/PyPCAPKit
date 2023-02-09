@@ -21,5 +21,11 @@ from pcapkit.protocols.schema.schema import *
 from pcapkit.protocols.schema.misc import *
 
 __all__ = [
+
+    # PCAP file format
+    'Header',
+
+    # misc protocols
     'NoPayload',
+    'Raw',
 ]
