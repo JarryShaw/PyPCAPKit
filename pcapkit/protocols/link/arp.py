@@ -45,6 +45,7 @@ from pcapkit.protocols.data.link.arp import ARP as Data_ARP
 from pcapkit.protocols.data.link.arp import Address as Data_Address
 from pcapkit.protocols.data.link.arp import Type as Data_Type
 from pcapkit.protocols.link.link import Link
+from pcapkit.protocols.schema.link.arp import ARP as Schema_ARP
 from pcapkit.utilities.compat import cached_property
 
 if TYPE_CHECKING:
@@ -59,7 +60,7 @@ __all__ = ['ARP']
 py38 = ((version_info := sys.version_info).major >= 3 and version_info.minor >= 8)
 
 
-class ARP(Link[Data_ARP]):
+class ARP(Link[Data_ARP, Schema_ARP]):
     """This class implements all protocols in ARP family.
 
     - Address Resolution Protocol (:class:`~pcapkit.protocols.link.arp.ARP`) [:rfc:`826`]
@@ -149,16 +150,17 @@ class ARP(Link[Data_ARP]):
         """
         if length is None:
             length = self.__len__()
+        schema = self.__header__
 
-        _hwty = self._read_unpack(2)
-        _ptty = self._read_unpack(2)
-        _hlen = self._read_unpack(1)
-        _plen = self._read_unpack(1)
-        _oper = self._read_unpack(2)
-        _shwa = self._read_addr_resolve(_hlen, _hwty)
-        _spta = self._read_proto_resolve(_plen, _ptty)
-        _thwa = self._read_addr_resolve(_hlen, _hwty)
-        _tpta = self._read_proto_resolve(_plen, _ptty)
+        _hwty = schema.htype
+        _ptty = schema.ptype
+        _hlen = schema.hlen
+        _plen = schema.plen
+        _oper = schema.oper
+        _shwa = self._read_addr_resolve(schema.sha, _hwty)
+        _spta = self._read_proto_resolve(schema.spa, _ptty)
+        _thwa = self._read_addr_resolve(schema.tha, _hwty)
+        _tpta = self._read_proto_resolve(schema.tpa, _ptty)
 
         if _oper in (5, 6, 7):
             self._acnm = 'DRARP'
@@ -173,15 +175,12 @@ class ARP(Link[Data_ARP]):
             self._acnm = 'ARP'
             self._name = 'Address Resolution Protocol'
 
-        _htype = Enum_Hardware.get(_hwty)
-        _ptype = Enum_EtherType.get(_ptty)
-
         arp = Data_ARP(
-            htype=_htype,
-            ptype=_ptype,
+            htype=_hwty,
+            ptype=_ptty,
             hlen=_hlen,
             plen=_plen,
-            oper=Enum_Operation.get(_oper),
+            oper=_oper,
             sha=_shwa,
             spa=_spta,
             tha=_thwa,
@@ -190,7 +189,7 @@ class ARP(Link[Data_ARP]):
         )
         return self._decode_next_layer(arp, -1, length - arp.len)
 
-    def make(self, **kwargs: 'Any') -> 'NoReturn':
+    def make(self, **kwargs: 'Any') -> 'Schema_ARP':
         """Make (construct) packet data.
 
         Args:
@@ -200,7 +199,7 @@ class ARP(Link[Data_ARP]):
             Constructed packet data.
 
         """
-        raise NotImplementedError
+        return Schema_ARP(**kwargs)
 
     ##########################################################################
     # Data models.
@@ -226,11 +225,11 @@ class ARP(Link[Data_ARP]):
     # Utilities.
     ##########################################################################
 
-    def _read_addr_resolve(self, length: 'int', htype: 'int') -> 'str':
+    def _read_addr_resolve(self, addr: 'bytes', htype: 'int') -> 'str':
         """Resolve headware address according to protocol.
 
         Arguments:
-            length: Hardware address length.
+            haddr: Hardware address.
             htype: Hardware type.
 
         Returns:
@@ -239,20 +238,19 @@ class ARP(Link[Data_ARP]):
 
         """
         if htype == 1:  # Ethernet
-            _byte = self._read_fileng(length)
             if py38:
-                _addr = _byte.hex(':')
+                _addr = addr.hex(':')
             else:
-                _addr = ':'.join(textwrap.wrap(_byte.hex(), 2))
+                _addr = ':'.join(textwrap.wrap(addr.hex(), 2))
         else:
-            _addr = self._read_fileng(length).hex()
+            _addr = addr.hex()
         return _addr
 
-    def _read_proto_resolve(self, length: 'int', ptype: 'int') -> 'str | IPv4Address | IPv6Address':
+    def _read_proto_resolve(self, addr: 'bytes', ptype: 'int') -> 'str | IPv4Address | IPv6Address':
         """Resolve protocol address according to protocol.
 
         Arguments:
-            length: Protocol address length.
+            addr: Protocol address.
             ptype: Protocol type.
 
         Returns:
@@ -264,7 +262,7 @@ class ARP(Link[Data_ARP]):
 
         """
         if ptype == Enum_EtherType.Internet_Protocol_version_4:  # IPv4
-            return ipaddress.ip_address(self._read_fileng(length))
+            return ipaddress.ip_address(addr)
         if ptype == Enum_EtherType.Internet_Protocol_version_6:  # IPv6
-            return ipaddress.ip_address(self._read_fileng(length))
-        return self._read_fileng(length).hex()
+            return ipaddress.ip_address(addr)
+        return addr.hex()
