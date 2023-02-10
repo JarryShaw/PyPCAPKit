@@ -21,6 +21,10 @@ from pcapkit.protocols.internet import *
 from pcapkit.protocols.transport import *
 from pcapkit.protocols.application import *
 
+# Protocol Data
+from pcapkit.protocols import data
+from pcapkit.protocols.data.data import Data
+
 # Protocol Schema
 from pcapkit.protocols import schema
 from pcapkit.protocols.schema.schema import Schema
@@ -64,6 +68,9 @@ for name in __all__:
 __all__.extend((
     # Protocol Numbers
     'LINKTYPE', 'ETHERTYPE', 'TRANSTYPE',
+
+    # Protocol Data
+    'Data', 'data',
 
     # Protocol Schema
     'Schema', 'schema',

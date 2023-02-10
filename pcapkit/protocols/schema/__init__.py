@@ -24,6 +24,7 @@ __all__ = [
 
     # PCAP file format
     'Header',
+    'Frame',
 
     # misc protocols
     'NoPayload',

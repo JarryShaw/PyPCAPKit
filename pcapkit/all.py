@@ -99,6 +99,7 @@ __all__ = [
     'TCP', 'UDP',                                           # Transport Layer
     'FTP', 'HTTP',                                          # Application Layer
     'Schema', 'schema',                                     # Protocol Schema
+    'Data', 'data',                                         # Protocol Data
 
     # pcapkit.toolkit
     'ipv4_reassembly', 'ipv6_reassembly', 'tcp_reassembly', 'tcp_traceflow',
