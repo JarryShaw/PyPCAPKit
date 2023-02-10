@@ -31,7 +31,8 @@ from pcapkit.const.reg.linktype import LinkType as Enum_LinkType
 from pcapkit.protocols.data.misc.pcap.frame import Frame as Data_Frame
 from pcapkit.protocols.data.misc.pcap.frame import FrameInfo as Data_FrameInfo
 from pcapkit.protocols.protocol import Protocol
-from pcapkit.utilities.exceptions import StructError, UnsupportedCall
+from pcapkit.protocols.schema.misc.pcap.frame import Frame as Schema_Frame
+from pcapkit.utilities.exceptions import UnsupportedCall
 
 if TYPE_CHECKING:
     from decimal import Decimal
@@ -40,6 +41,7 @@ if TYPE_CHECKING:
     from typing_extensions import Literal
 
     from pcapkit.protocols.data.misc.pcap.header import Header as Data_Header
+    from pcapkit.protocols.schema.schema import Schema
 
 __all__ = ['Frame']
 
@@ -47,7 +49,7 @@ __all__ = ['Frame']
 py37 = ((version_info := sys.version_info).major >= 3 and version_info.minor >= 7)
 
 
-class Frame(Protocol[Data_Frame]):
+class Frame(Protocol[Data_Frame, Schema_Frame]):
     """Per packet frame header extractor.
 
     This class currently supports parsing of the following protocols, which are
@@ -139,33 +141,23 @@ class Frame(Protocol[Data_Frame]):
         """
         return self._protos.index(name)
 
-    def read(self, length: 'Optional[int]' = None, *,
-             _read: 'bool' = True, **kwargs: 'Any') -> 'Data_Frame':
+    def read(self, *, _read: 'bool' = True, **kwargs: 'Any') -> 'Data_Frame':
         r"""Read each block after global header.
 
         Args:
-            length: Length of packet data.
             \_read: If the class is called in a parsing scenario.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
             Data_Frame: Parsed packet data.
 
-        Raises:
-            EOFError: If :attr:`self._file <pcapkit.protocols.protocol.Protocol._file>` reaches EOF.
-
         """
-        try:
-            _temp = self._read_unpack(4, lilendian=True)
-        except StructError as exc:
-            if exc.eof:
-                raise EOFError  # pylint: disable=raise-missing-from
-            raise
+        schema = self.__header__
 
-        _tsss = _temp
-        _tsus = self._read_unpack(4, lilendian=True)
-        _ilen = self._read_unpack(4, lilendian=True)
-        _olen = self._read_unpack(4, lilendian=True)
+        _tsss = schema.ts_sec
+        _tsus = schema.ts_usec
+        _ilen = schema.incl_len
+        _olen = schema.orig_len
 
         if self._nsec:
             _epch = _tsss + decimal.Decimal(_tsus) / 1_000_000_000
@@ -207,10 +199,11 @@ class Frame(Protocol[Data_Frame]):
 
         return self._decode_next_layer(frame, self._ghdr.network, frame.len)
 
-    def make(self, *, timestamp: 'Optional[float | Decimal]' = None,  # type: ignore[override] # pylint: disable=arguments-differ
+    def make(self, *, timestamp: 'Optional[float | Decimal]' = None,  # pylint: disable=arguments-differ
              ts_sec: 'Optional[int]' = None, ts_usec: 'Optional[int]' = None,
              incl_len: 'Optional[int]' = None, orig_len: 'Optional[int]' = None,
-             packet: 'bytes', nanosecond: 'bool' = False, **kwargs: 'Any') -> 'bytes':
+             packet: 'bytes | Protocol | Schema' = b'',
+             nanosecond: 'bool' = False, **kwargs: 'Any') -> 'Schema_Frame':
         """Make frame packet data.
 
         Args:
@@ -234,13 +227,12 @@ class Frame(Protocol[Data_Frame]):
         if orig_len is None:
             orig_len = len(packet)
 
-        # make packet
-        return b'%s%s%s%s%s' % (
-            self._make_pack(ts_sec, size=4, lilendian=True),
-            self._make_pack(ts_usec, size=4, lilendian=True),
-            self._make_pack(incl_len, size=4, lilendian=True),
-            self._make_pack(orig_len, size=4, lilendian=True),
-            packet[:incl_len],
+        return Schema_Frame(
+            ts_sec=ts_sec,
+            ts_usec=ts_usec,
+            incl_len=incl_len,
+            orig_len=orig_len,
+            packet=packet,
         )
 
     ##########################################################################
@@ -282,7 +274,7 @@ class Frame(Protocol[Data_Frame]):
         if file is None:
             _read = False
             #: bytes: Raw packet data.
-            self._data = self.make(**kwargs)
+            self._data = self.pack(**kwargs)
             #: io.BytesIO: Source packet stream.
             self._file = io.BytesIO(self._data)
         else:
@@ -291,7 +283,7 @@ class Frame(Protocol[Data_Frame]):
             self._file = file
 
         #: pcapkit.corekit.infoclass.Info: Parsed packet data.
-        self._info = self.read(length, _read=_read, **kwargs)
+        self._info = self.unpack(_read=_read, **kwargs)
 
     def __length_hint__(self) -> 'Literal[16]':
         """Return an estimated length for the object."""
@@ -361,7 +353,7 @@ class Frame(Protocol[Data_Frame]):
             length: valid (*non-padding*) length
 
         Returns:
-            dict: current protocol with packet extracted
+            Current protocol with packet extracted.
 
         """
         next_ = self._import_next_layer(proto, length)  # type: ignore[misc,call-arg]
