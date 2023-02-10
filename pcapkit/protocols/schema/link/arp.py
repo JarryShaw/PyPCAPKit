@@ -14,6 +14,9 @@ from pcapkit.protocols.schema.schema import Schema
 
 __all__ = ['ARP']
 
+if TYPE_CHECKING:
+    from pcapkit.protocols.protocol import Protocol
+
 
 class ARP(Schema):
     """Header schema for ARP packet."""
@@ -27,7 +30,9 @@ class ARP(Schema):
     spa: 'bytes' = BytesField(length=lambda pkt: pkt['plen'])
     tha: 'bytes' = BytesField(length=lambda pkt: pkt['hlen'])
     tpa: 'bytes' = BytesField(length=lambda pkt: pkt['plen'])
-    payload: 'bytes' = PayloadField()
+    payload: 'bytes | Protocol | Schema' = PayloadField()
 
     if TYPE_CHECKING:
-        def __init__(self, htype: 'int', ptype: 'int', hlen: 'int', plen: 'int', oper: 'int', sha: 'bytes', spa: 'bytes', tha: 'bytes', tpa: 'bytes', payload: 'bytes') -> 'None': ...
+        def __init__(self, htype: 'int', ptype: 'int', hlen: 'int', plen: 'int',
+                     oper: 'int', sha: 'bytes', spa: 'bytes', tha: 'bytes',
+                     tpa: 'bytes', payload: 'bytes | Protocol | Schema') -> 'None': ...
