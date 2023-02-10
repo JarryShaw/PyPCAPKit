@@ -207,8 +207,8 @@ class Header(Protocol[Data_Header, Schema_Header]):
             Constructed packet data.
 
         """
-        magic_number, lilendian = self._make_magic(                    # make magic number
-            byteorder, lilendian, bigendian, nanosecond)
+        # make magic number
+        magic_number, lilendian = self._make_magic(byteorder, lilendian, bigendian, nanosecond)
 
         if version_major is None:
             version_major = version[0]
@@ -223,7 +223,7 @@ class Header(Protocol[Data_Header, Schema_Header]):
             sigfigs=sigfigs,
             snaplen=snaplen,
             network=self._make_index(network, network_default, namespace=network_namespace,  # type: ignore[call-overload]
-                                     reversed=network_reversed, pack=True, lilendian=lilendian),
+                                     reversed=network_reversed, pack=False),
         )
 
     ##########################################################################
