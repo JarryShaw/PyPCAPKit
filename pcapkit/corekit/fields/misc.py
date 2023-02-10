@@ -14,6 +14,7 @@ if TYPE_CHECKING:
 
     from pcapkit.corekit.fields.field import Field, NoValueType
     from pcapkit.protocols.protocol import Protocol
+    from pcapkit.protocols.schema.schema import Schema
 
 _TC = TypeVar('_TC', bound='Field')
 _TP = TypeVar('_TP', bound='Protocol')
@@ -232,7 +233,7 @@ class PayloadField(_Field[_TP]):
         self._length = 0
         self._template = '0s'
 
-    def pack(self, value: 'Optional[_TP | bytes]', packet: 'dict[str, Any]') -> 'bytes':
+    def pack(self, value: 'Optional[_TP | Schema | bytes]', packet: 'dict[str, Any]') -> 'bytes':
         """Pack field value into :obj:`bytes`.
 
         Args:
@@ -248,9 +249,12 @@ class PayloadField(_Field[_TP]):
                 raise NoDefaultValue(f'Field {self.name} has no default value.')
             value = cast('_TP', self._default)
 
+        from pcapkit.protocols.schema.schema import Schema  # pylint: disable=import-outside-top-level
         if isinstance(value, bytes):
             return value
-        return value.data
+        if isinstance(value, Schema):
+            return value.pack()
+        return value.data  # type: ignore[union-attr]
 
     def unpack(self, buffer: 'bytes | IO[bytes]',
                packet: 'dict[str, Any]', *,
