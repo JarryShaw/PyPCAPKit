@@ -190,10 +190,11 @@ class Protocol(Generic[PT, ST], metaclass=abc.ABCMeta):
         return (cls.__name__,)
 
     @abc.abstractmethod
-    def read(self, **kwargs: 'Any') -> 'PT':
+    def read(self, length: 'Optional[int]' = None, **kwargs: 'Any') -> 'PT':
         """Read (parse) packet data.
 
         Args:
+            length: Length of packet data.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
@@ -239,7 +240,7 @@ class Protocol(Generic[PT, ST], metaclass=abc.ABCMeta):
         """
         if cast('Optional[ST]', self.__header__) is None:
             self.__header__ = self.__schema__.unpack(self._file, length)
-        return self.read(**kwargs)
+        return self.read(length, **kwargs)
 
     @staticmethod
     def decode(byte: bytes, *, encoding: 'Optional[str]' = None,

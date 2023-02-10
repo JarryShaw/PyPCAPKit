@@ -60,11 +60,12 @@ class Raw(Protocol[Data_Raw, Schema_Raw]):
     # Methods.
     ##########################################################################
 
-    def read(self, *, error: 'Optional[Exception]' = None,  # pylint: disable=arguments-differ
+    def read(self, length: 'Optional[int]' = None, *, error: 'Optional[Exception]' = None,  # pylint: disable=arguments-differ
              alias: 'Optional[int]' = None, **kwargs: 'Any') -> 'Data_Raw':  # pylint: disable=unused-argument
         """Read raw packet data.
 
         Args:
+            length: Length of packet data.
             error: Parsing errors if any.
             alias: Original enumeration of the unknown protocol.
             **kwargs: Arbitrary keyword arguments.
@@ -133,7 +134,7 @@ class Raw(Protocol[Data_Raw, Schema_Raw]):
         #: io.BytesIO: Source packet stream.
         self._file = io.BytesIO(self._data)
         #: pcapkit.protocols.data.misc.raw.Raw: Parsed packet data.
-        self._info = self.read(**kwargs)
+        self._info = self.unpack(length, **kwargs)
 
         if self._info.protocol is not None and hasattr(self._info.protocol, 'name'):
             alias = self._info.protocol.name

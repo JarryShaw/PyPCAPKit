@@ -59,10 +59,11 @@ class NoPayload(Protocol[Data_NoPayload, Schema_NoPayload]):
     # Methods.
     ##########################################################################
 
-    def read(self, **kwargs: 'Any') -> 'Data_NoPayload':  # pylint: disable=unused-argument
+    def read(self, length: 'Optional[int]' = None, **kwargs: 'Any') -> 'Data_NoPayload':  # pylint: disable=unused-argument
         """Read (parse) packet data.
 
         Args:
+            length: Length of packet data.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:

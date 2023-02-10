@@ -141,10 +141,11 @@ class Frame(Protocol[Data_Frame, Schema_Frame]):
         """
         return self._protos.index(name)
 
-    def read(self, *, _read: 'bool' = True, **kwargs: 'Any') -> 'Data_Frame':
+    def read(self, length: 'Optional[int]' = None, *, _read: 'bool' = True, **kwargs: 'Any') -> 'Data_Frame':
         r"""Read each block after global header.
 
         Args:
+            length: Length of data to be read.
             \_read: If the class is called in a parsing scenario.
             **kwargs: Arbitrary keyword arguments.
 
@@ -283,7 +284,7 @@ class Frame(Protocol[Data_Frame, Schema_Frame]):
             self._file = file
 
         #: pcapkit.corekit.infoclass.Info: Parsed packet data.
-        self._info = self.unpack(_read=_read, **kwargs)
+        self._info = self.unpack(length, _read=_read, **kwargs)
 
     def __length_hint__(self) -> 'Literal[16]':
         """Return an estimated length for the object."""

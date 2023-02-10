@@ -118,7 +118,7 @@ class Header(Protocol[Data_Header, Schema_Header]):
     # Methods.
     ##########################################################################
 
-    def read(self, **kwargs: 'Any') -> 'Data_Header':  # pylint: disable=unused-argument
+    def read(self, length: 'Optional[int]' = None, **kwargs: 'Any') -> 'Data_Header':  # pylint: disable=unused-argument
         """Read global header of PCAP file.
 
         Notes:
@@ -130,6 +130,7 @@ class Header(Protocol[Data_Header, Schema_Header]):
             * ``a1 b2 3c 4d`` -- Big-endian nano-timestamp PCAP file.
 
         Args:
+            length: Length of data to be read.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
@@ -259,7 +260,7 @@ class Header(Protocol[Data_Header, Schema_Header]):
         if file is not None and hasattr(file, 'name'):  # set back source filename
             self._file.name = file.name
         #: pcapkit.corekit.infoclass.Info: Parsed packet data.
-        self._info = self.unpack()
+        self._info = self.unpack(length, **kwargs)
 
     def __len__(self) -> 'Literal[24]':
         """Total length of corresponding protocol."""
