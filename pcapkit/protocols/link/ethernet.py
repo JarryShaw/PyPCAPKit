@@ -21,6 +21,7 @@ below:
 .. [*] https://en.wikipedia.org/wiki/Ethernet
 
 """
+import re
 import sys
 import textwrap
 from typing import TYPE_CHECKING
@@ -28,21 +29,30 @@ from typing import TYPE_CHECKING
 from pcapkit.const.reg.linktype import LinkType as Enum_LinkType
 from pcapkit.protocols.data.link.ethernet import Ethernet as Data_Ethernet
 from pcapkit.protocols.link.link import Link
+from pcapkit.protocols.schema.link.ethernet import Ethernet as Schema_Ethernet
+from pcapkit.utilities.exceptions import ProtocolError
 
 if TYPE_CHECKING:
-    from typing import Any, NoReturn, Optional
+    from enum import IntEnum as StdlibEnum
+    from typing import Any, Optional, Type
 
+    from aenum import IntEnum as AenumEnum
     from typing_extensions import Literal
 
     from pcapkit.const.reg.ethertype import EtherType as Enum_EtherType
+    from pcapkit.protocols.schema.schema import Schema
+    from pcapkit.protocols.protocol import Protocol
 
 __all__ = ['Ethernet']
 
 # check Python version
 py38 = ((version_info := sys.version_info).major >= 3 and version_info.minor >= 8)
 
+# Ethernet address pattern
+PAT_MAC_ADDR = re.compile(rb'(?i)(?:[0-9a-f]{2}[:-]){5}[0-9a-f]{2}')
 
-class Ethernet(Link[Data_Ethernet]):
+
+class Ethernet(Link[Data_Ethernet, Schema_Ethernet]):
     """This class implements Ethernet Protocol."""
 
     ##########################################################################
@@ -110,9 +120,11 @@ class Ethernet(Link[Data_Ethernet]):
         if length is None:
             length = len(self)
 
-        _dstm = self._read_mac_addr()
-        _srcm = self._read_mac_addr()
-        _type = self._read_protos(2)
+        schema = self.__header__
+
+        _dstm = self._read_mac_addr(schema.dst)
+        _srcm = self._read_mac_addr(schema.src)
+        _type = schema.type
 
         ethernet = Data_Ethernet(
             dst=_dstm,
@@ -121,17 +133,40 @@ class Ethernet(Link[Data_Ethernet]):
         )
         return self._decode_next_layer(ethernet, _type, length - self.length)
 
-    def make(self, **kwargs: 'Any') -> 'NoReturn':
+    def make(self,
+             dst: 'str | bytes | bytearray' = '00:00:00:00:00:00',
+             src: 'str | bytes | bytearray' = '00:00:00:00:00:00',
+             type: 'Enum_EtherType | StdlibEnum | AenumEnum | str | int' = Enum_EtherType.Internet_Protocol_version_4,
+             type_default: 'Optional[int]' = None,
+             type_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
+             type_reversed: 'bool' = False,
+             payload: 'bytes | Protocol | Schema' = b'',
+             **kwargs: 'Any') -> 'Schema_Ethernet':
         """Make (construct) packet data.
 
         Args:
+            dst: Destination MAC address.
+            src: Source MAC address.
+            type: EtherType.
+            type_default: Default EtherType.
+            type_namespace: EtherType namespace.
+            type_reversed: Whether EtherType is reversed.
+            payload: Payload data.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
             Constructed packet data.
 
         """
-        raise NotImplementedError
+        _type = self._make_index(type, type_default, namespace=type_namespace,  # type: ignore[call-overload]
+                                 reversed=type_reversed, pack=False)
+
+        return Schema_Ethernet(
+            dst=self._make_mac_addr(dst),
+            src=self._make_mac_addr(src),
+            type=_type,
+            payload=payload,
+        )
 
     ##########################################################################
     # Data models.
@@ -158,16 +193,34 @@ class Ethernet(Link[Data_Ethernet]):
     # Utilities.
     ##########################################################################
 
-    def _read_mac_addr(self) -> 'str':
+    def _read_mac_addr(self, addr: 'bytes') -> 'str':
         """Read MAC address.
+
+        Args:
+            addr: MAC address.
 
         Returns:
             Colon (``:``) seperated *hex* encoded MAC address.
 
         """
-        _byte = self._read_fileng(6)
         if py38:
-            _addr = _byte.hex(':')
+            _addr = addr.hex(':')
         else:
-            _addr = ':'.join(textwrap.wrap(_byte.hex(), 2))
+            _addr = ':'.join(textwrap.wrap(addr.hex(), 2))
         return _addr
+
+    def _make_mac_addr(self, addr: 'str | bytes | bytearray') -> 'bytes':
+        """Make MAC address.
+
+        Args:
+            addr: MAC address.
+
+        Returns:
+            MAC address.
+
+        """
+        _addr = addr.encode() if isinstance(addr, str) else addr
+
+        if PAT_MAC_ADDR.fullmatch(_addr) is not None:
+            return _addr.replace(b':', b'').replace(b'-', b'')
+        raise ProtocolError(f'invalid MAC address: {addr!r}')
