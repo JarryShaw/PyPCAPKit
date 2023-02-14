@@ -5,8 +5,8 @@
 from typing import TYPE_CHECKING
 
 from pcapkit.const.reg.linktype import LinkType as Enum_LinkType
+from pcapkit.corekit.fields.numbers import EnumField, Int32Field, UInt16Field, UInt32Field
 from pcapkit.corekit.fields.strings import BytesField
-from pcapkit.corekit.fields.numbers import UInt16Field, UInt32Field, Int32Field, EnumField
 from pcapkit.protocols.schema.schema import Schema
 from pcapkit.utilities.exceptions import ProtocolError
 
@@ -14,6 +14,7 @@ __all__ = ['Header']
 
 if TYPE_CHECKING:
     from typing import Any
+
     from pcapkit.corekit.fields.numbers import NumberField
 
 

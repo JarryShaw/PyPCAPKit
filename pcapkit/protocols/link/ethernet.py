@@ -40,8 +40,8 @@ if TYPE_CHECKING:
     from typing_extensions import Literal
 
     from pcapkit.const.reg.ethertype import EtherType as Enum_EtherType
-    from pcapkit.protocols.schema.schema import Schema
     from pcapkit.protocols.protocol import Protocol
+    from pcapkit.protocols.schema.schema import Schema
 
 __all__ = ['Ethernet']
 

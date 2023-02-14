@@ -254,7 +254,8 @@ class PayloadField(_Field[_TP]):
                 raise NoDefaultValue(f'Field {self.name} has no default value.')
             value = cast('_TP', self._default)
 
-        from pcapkit.protocols.schema.schema import Schema  # pylint: disable=import-outside-top-level
+        from pcapkit.protocols.schema.schema import \
+            Schema  # pylint: disable=import-outside-top-level
         if isinstance(value, bytes):
             return value
         if isinstance(value, Schema):

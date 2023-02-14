@@ -6,9 +6,9 @@ import importlib
 from typing import TYPE_CHECKING, cast
 
 from pcapkit.const.reg.ethertype import EtherType as Enum_EtherType
+from pcapkit.corekit.fields.misc import PayloadField
 from pcapkit.corekit.fields.numbers import EnumField
 from pcapkit.corekit.fields.strings import BytesField
-from pcapkit.corekit.fields.misc import PayloadField
 from pcapkit.protocols.schema.schema import Schema
 
 __all__ = ['Ethernet']
