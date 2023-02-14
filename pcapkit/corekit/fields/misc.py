@@ -193,13 +193,18 @@ class PayloadField(_Field[_TP]):
         return self._protocol
 
     @protocol.setter
-    def protocol(self, protocol: 'Type[_TP]') -> 'None':
+    def protocol(self, protocol: 'Type[_TP] | str') -> 'None':
         """Set payload protocol.
 
         Arguments:
             protocol: payload protocol
 
         """
+        if isinstance(protocol, str):
+            from pcapkit.protocols import __proto__  # pylint: disable=import-outside-top-level
+            from pcapkit.protocols.misc.raw import Raw  # pylint: disable=import-outside-top-level
+
+            protocol = cast('Type[_TP]', __proto__.get(protocol, Raw))
         self._protocol = protocol
 
     def __init__(self, name: 'str' = 'payload',
@@ -218,7 +223,7 @@ class PayloadField(_Field[_TP]):
             from pcapkit.protocols import __proto__  # pylint: disable=import-outside-top-level
             from pcapkit.protocols.misc.raw import Raw  # pylint: disable=import-outside-top-level
 
-            protocol = cast('Type[_TP]', getattr(__proto__, protocol, Raw))
+            protocol = cast('Type[_TP]', __proto__.get(protocol, Raw))
         self._protocol = protocol
 
         if default is NoValue:

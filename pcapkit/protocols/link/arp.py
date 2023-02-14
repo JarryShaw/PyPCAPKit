@@ -350,7 +350,7 @@ class ARP(Link[Data_ARP, Schema_ARP]):
         if htype == Enum_Hardware.Ethernet:
             if PAT_MAC_ADDR.fullmatch(_addr) is not None:
                 return _addr.replace(b':', b'').replace(b'-', b'')
-            raise ProtocolError('Invalid MAC address: {!r}'.format(_addr))
+            raise ProtocolError(f'Invalid MAC address: {addr!r}')
         return _addr
 
     def _make_proto_resolve(self, addr: 'IPv4Address | IPv6Address | str | bytes', ptype: 'int') -> 'bytes':
