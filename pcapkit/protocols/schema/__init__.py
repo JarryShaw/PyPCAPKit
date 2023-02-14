@@ -23,6 +23,7 @@ from pcapkit.protocols.schema.misc import *
 __all__ = [
     # Link Layer Protocols
     'ARP',
+    'Ethernet',
 
     # Internet Layer Protocols
 
