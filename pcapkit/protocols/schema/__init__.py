@@ -25,6 +25,7 @@ __all__ = [
     'ARP',
     'Ethernet',
     'L2TP',
+    'OSPF', 'OSPF_CrytographicAuthentication',
 
     # Internet Layer Protocols
 

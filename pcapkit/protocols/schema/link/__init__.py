@@ -4,9 +4,13 @@
 from pcapkit.protocols.schema.link.arp import ARP
 from pcapkit.protocols.schema.link.ethernet import Ethernet
 from pcapkit.protocols.schema.link.l2tp import L2TP
+from pcapkit.protocols.schema.link.ospf import OSPF
+from pcapkit.protocols.schema.link.ospf import \
+    CrytographicAuthentication as OSPF_CrytographicAuthentication
 
 __all__ = [
     'ARP',
     'Ethernet',
     'L2TP',
+    'OSPF', 'OSPF_CrytographicAuthentication',
 ]
