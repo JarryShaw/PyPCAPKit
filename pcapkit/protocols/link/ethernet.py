@@ -119,7 +119,6 @@ class Ethernet(Link[Data_Ethernet, Schema_Ethernet]):
         """
         if length is None:
             length = len(self)
-
         schema = self.__header__
 
         _dstm = self._read_mac_addr(schema.dst)

@@ -4,7 +4,7 @@
 
 from typing import TYPE_CHECKING
 
-from pcapkit.corekit.fields.misc import PayloadField, ConditionalField
+from pcapkit.corekit.fields.misc import ConditionalField, PayloadField
 from pcapkit.corekit.fields.numbers import UInt16Field
 from pcapkit.corekit.fields.strings import BitField, PaddingField
 from pcapkit.protocols.schema.schema import Schema
@@ -13,7 +13,8 @@ __all__ = ['L2TP']
 
 if TYPE_CHECKING:
     from typing import Optional
-    from typing_extensions import TypedDict, Literal
+
+    from typing_extensions import Literal, TypedDict
 
     from pcapkit.protocols.protocol import Protocol
 

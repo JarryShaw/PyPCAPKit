@@ -58,10 +58,11 @@ from pcapkit.utilities.exceptions import UnsupportedCall
 
 if TYPE_CHECKING:
     from enum import IntEnum as StdlibEnum
-    from typing import Any, Optional, Type, NoReturn
-    from aenum import IntEnum as AenumEnum
+    from typing import Any, NoReturn, Optional, Type
 
+    from aenum import IntEnum as AenumEnum
     from typing_extensions import Literal
+
     from pcapkit.protocols.protocol import Protocol
     from pcapkit.protocols.schema.schema import Schema
 
