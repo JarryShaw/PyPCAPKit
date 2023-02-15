@@ -194,7 +194,6 @@ class L2TP(Link[Data_L2TP, Schema_L2TP]):
             Constructed packet data.
 
         """
-        padding = b'' if offset is None else bytes(offset)
         type_ = self._make_index(type, type_default, namespace=type_namespace,  # type: ignore[call-overload]
                                  reversed=type_reversed, pack=False)
 
@@ -213,7 +212,6 @@ class L2TP(Link[Data_L2TP, Schema_L2TP]):
             ns=ns,
             nr=nr,
             offset=offset,
-            padding=padding,
             payload=payload,
         )
 

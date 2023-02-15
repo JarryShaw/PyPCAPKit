@@ -8,6 +8,7 @@ from typing import TYPE_CHECKING, Generic, TypeVar
 
 from pcapkit.corekit.fields.field import NoValue, _Field
 from pcapkit.corekit.fields.misc import ConditionalField, PayloadField
+from pcapkit.corekit.fields.strings import PaddingField
 from pcapkit.utilities.compat import Mapping
 from pcapkit.utilities.exceptions import NoDefaultValue, ProtocolUnbound
 from pcapkit.utilities.warnings import UnknownFieldWarning, warn
@@ -293,6 +294,8 @@ class Schema(Mapping[str, VT], Generic[VT]):
         """Pack :class:`Schema` into :obj:`bytes`."""
         packet = self.__dict__
         for field in self.__fields__:
+            field = field(packet)
+
             if isinstance(field, PayloadField):
                 from pcapkit.protocols.protocol import \
                     Protocol  # pylint: disable=import-outside-toplevel
@@ -311,13 +314,17 @@ class Schema(Mapping[str, VT], Generic[VT]):
                 continue
 
             if isinstance(field, ConditionalField):
-                if not field(packet).test(packet):
+                if not field.test(packet):
                     continue
                 field = field.field
 
+            if isinstance(field, PaddingField):
+                self.__buffer__[field.name] = bytes(field.length)
+                continue
+
             value = getattr(self, field.name)
             try:
-                temp = field(packet).pack(value, self.__dict__)  # type: bytes | NoValueType
+                temp = field.pack(value, self.__dict__)  # type: bytes | NoValueType
             except NoDefaultValue:
                 temp = NoValue
             self.__buffer__[field.name] = temp
@@ -350,6 +357,8 @@ class Schema(Mapping[str, VT], Generic[VT]):
         packet['__length__'] = length
 
         for field in self.__fields__:
+            field = field(packet)
+
             if isinstance(field, PayloadField):
                 payload_length = field.test_length(packet, length)  # type: ignore[arg-type]
                 payload = data.read(payload_length)
@@ -359,14 +368,18 @@ class Schema(Mapping[str, VT], Generic[VT]):
                 continue
 
             if isinstance(field, ConditionalField):
-                if not field(packet).test(packet):
+                if not field.test(packet):
                     continue
                 field = field.field
+
+            if isinstance(field, PaddingField):
+                data.read(field.length)
+                continue
 
             byte = data.read(field.length)
             self.__buffer__[field.name] = byte
 
-            value = field(packet).unpack(byte, packet)
+            value = field.unpack(byte, packet)
             setattr(self, field.name, value)
 
             length -= field.length

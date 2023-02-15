@@ -30,7 +30,7 @@ class CrytographicAuthentication(Schema):
     seq: 'int' = UInt32Field()
 
     if TYPE_CHECKING:
-        def __init__(self, reserved: 'bytes', key_id: 'int', len: 'int', seq: 'int') -> 'None': ...
+        def __init__(self, key_id: 'int', len: 'int', seq: 'int') -> 'None': ...
 
 
 class OSPF(Schema):
@@ -58,4 +58,4 @@ class OSPF(Schema):
     if TYPE_CHECKING:
         def __init__(self, version: 'int', type: 'Enum_Packet', length: 'int', router_id: 'bytes',
                      area_id: 'bytes', checksum: 'bytes', auth_type: 'Enum_Authentication',
-                     auth_data: 'bytes | CrytographicAuthentication', payload: 'bytes | Protocol | Schema') -> 'None': ...
+                     auth_data: 'bytes', payload: 'bytes | Protocol | Schema') -> 'None': ...

@@ -83,5 +83,4 @@ class L2TP(Schema):
     if TYPE_CHECKING:
         def __init__(self, flags: 'FlagsType', length: 'Optional[int]', tunnel_id: 'int',
                      session_id: 'int', ns: 'Optional[int]', nr: 'Optional[int]',
-                     offset: 'Optional[int]', padding: 'bytes',
-                     payload: 'bytes | Protocol | Schema') -> 'None': ...
+                     offset: 'Optional[int]', payload: 'bytes | Protocol | Schema') -> 'None': ...
