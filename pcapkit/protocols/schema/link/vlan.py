@@ -1,0 +1,56 @@
+# -*- coding: utf-8 -*-
+# mypy: disable-error-code=assignment
+"""header schema for 802.1Q Customer VLAN Tag Type protocol"""
+
+from typing import TYPE_CHECKING
+
+from pcapkit.const.reg.ethertype import EtherType as Enum_EtherType
+from pcapkit.const.vlan.priority_level import PriorityLevel as Enum_PriorityLevel
+from pcapkit.corekit.fields.misc import PayloadField
+from pcapkit.corekit.fields.numbers import EnumField, UInt8Field, UInt16Field
+from pcapkit.corekit.fields.strings import BitField
+from pcapkit.protocols.schema.schema import Schema
+
+__all__ = ['VLAN']
+
+if TYPE_CHECKING:
+    from typing_extensions import TypedDict
+
+    from pcapkit.protocols.protocol import Protocol
+
+    class TCIType(TypedDict):
+        """Type of 802.1Q Customer VLAN Tag Type tag control information."""
+
+        pcp: int
+        dei: int
+        vid: int
+
+
+class TCI(Schema[int]):
+    """Header schema for 802.1Q Customer VLAN Tag Type tag control information."""
+
+    pcp: 'Enum_PriorityLevel' = EnumField(length=1, bit_length=3, namespace=Enum_PriorityLevel)
+    dei: 'bool' = UInt8Field(bit_length=1)
+    vid: 'int' = UInt16Field(bit_length=12)
+
+    if TYPE_CHECKING:
+        def __init__(self, pcp: 'Enum_PriorityLevel', dei: 'bool', vid: 'int') -> 'None': ...
+
+
+class VLAN(Schema):
+    """Header schema for 802.1Q Customer VLAN Tag Type packet."""
+
+    tci: 'TCIType' = BitField(
+        length=2,
+        namespace={
+            'pcp': (0, 3),
+            'dei': (3, 1),
+            'vid': (4, 12),
+        },
+    )
+    type: 'Enum_EtherType' = EnumField(length=2, namespace=Enum_EtherType)
+    payload: 'bytes' = PayloadField()
+
+    if TYPE_CHECKING:
+        def __init__(self, tci: 'TCIType', type: 'Enum_EtherType',
+                     payload: 'bytes | Protocol | Schema') -> 'None': ...

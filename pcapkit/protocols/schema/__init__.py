@@ -26,6 +26,7 @@ __all__ = [
     'Ethernet',
     'L2TP',
     'OSPF', 'OSPF_CrytographicAuthentication',
+    'VLAN', 'VLAN_TCI',
 
     # Internet Layer Protocols
 
