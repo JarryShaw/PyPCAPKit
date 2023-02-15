@@ -9,6 +9,9 @@ from pcapkit.protocols.schema.schema import Schema
 
 __all__ = ['Raw']
 
+if TYPE_CHECKING:
+    from pcapkit.protocols.protocol import Protocol
+
 
 class Raw(Schema):
     """Schema for raw packet."""
@@ -18,4 +21,4 @@ class Raw(Schema):
                                    length_hint=lambda x: x.get('__length__', None))
 
     if TYPE_CHECKING:
-        def __init__(self, packet: 'bytes') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements
+        def __init__(self, packet: 'bytes | Schema | Protocol') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements

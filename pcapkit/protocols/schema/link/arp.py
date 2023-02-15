@@ -30,7 +30,7 @@ class ARP(Schema):
     spa: 'bytes' = BytesField(length=lambda pkt: pkt['plen'])
     tha: 'bytes' = BytesField(length=lambda pkt: pkt['hlen'])
     tpa: 'bytes' = BytesField(length=lambda pkt: pkt['plen'])
-    payload: 'bytes | Protocol | Schema' = PayloadField()
+    payload: 'bytes' = PayloadField()
 
     if TYPE_CHECKING:
         def __init__(self, htype: 'int', ptype: 'int', hlen: 'int', plen: 'int',

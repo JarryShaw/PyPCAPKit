@@ -2,17 +2,17 @@
 # mypy: disable-error-code=assignment
 """header schema for L2TP protocol"""
 
-import importlib
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING
 
 from pcapkit.corekit.fields.misc import PayloadField, ConditionalField
-from pcapkit.corekit.fields.numbers import UInt32Field
+from pcapkit.corekit.fields.numbers import UInt16Field
 from pcapkit.corekit.fields.strings import BitField, PaddingField
 from pcapkit.protocols.schema.schema import Schema
 
 __all__ = ['L2TP']
 
 if TYPE_CHECKING:
+    from typing import Optional
     from typing_extensions import TypedDict, Literal
 
     from pcapkit.protocols.protocol import Protocol
@@ -43,26 +43,26 @@ class L2TP(Schema):
     })
     #: Length of L2TP packet.
     length: 'int' = ConditionalField(
-        UInt32Field(),
+        UInt16Field(),
         lambda packet: packet['flags'].get('length', False),
     )
     #: Tunnel ID of L2TP packet.
-    tunnel_id: 'int' = UInt32Field()
+    tunnel_id: 'int' = UInt16Field()
     #: Session ID of L2TP packet.
-    session_id: 'int' = UInt32Field()
+    session_id: 'int' = UInt16Field()
     #: Sequence number of L2TP packet.
     ns: 'int' = ConditionalField(
-        UInt32Field(),
+        UInt16Field(),
         lambda packet: packet['flags'].get('seq', False),
     )
     #: Next sequence number of L2TP packet.
     nr: 'int' = ConditionalField(
-        UInt32Field(),
+        UInt16Field(),
         lambda packet: packet['flags'].get('seq', False),
     )
     #: Offset size of L2TP packet.
     offset: 'int' = ConditionalField(
-        UInt32Field(),
+        UInt16Field(),
         lambda packet: packet['flags'].get('offset', False),
     )
     #: Padding of L2TP packet.
@@ -71,9 +71,10 @@ class L2TP(Schema):
         lambda packet: packet['flags'].get('offset', False),
     )
     #: Payload of L2TP packet.
-    payload: 'bytes | Protocol | Schema' = PayloadField()
+    payload: 'bytes' = PayloadField()
 
     if TYPE_CHECKING:
-        def __init__(self, flags: 'Flags', length: 'int', tunnel_id: 'int', session_id: 'int',
-                     ns: 'int', nr: 'int', offset: 'int', padding: 'bytes',
+        def __init__(self, flags: 'Flags', length: 'Optional[int]', tunnel_id: 'int',
+                     session_id: 'int', ns: 'Optional[int]', nr: 'Optional[int]',
+                     offset: 'Optional[int]', padding: 'bytes',
                      payload: 'bytes | Protocol | Schema') -> 'None': ...

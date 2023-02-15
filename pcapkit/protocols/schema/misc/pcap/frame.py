@@ -26,7 +26,7 @@ class Frame(Schema):
     #: Actual length of packet.
     orig_len: 'int' = UInt32Field(byteorder='little')
     #: Payload.
-    packet: 'bytes | Protocol | Schema' = PayloadField(length_hint=lambda pkt: pkt['incl_len'])
+    packet: 'bytes' = PayloadField(length_hint=lambda pkt: pkt['incl_len'])
 
     if TYPE_CHECKING:
         def __init__(self, ts_sec: 'int', ts_usec: 'int', incl_len: 'int',

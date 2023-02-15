@@ -121,9 +121,6 @@ class L2TP(Link[Data_L2TP, Schema_L2TP]):
             Parsed packet data.
 
         """
-        if length is None:
-            length = len(self)
-
         schema = self.__header__
         _flag = schema.flags
 
@@ -136,6 +133,8 @@ class L2TP(Link[Data_L2TP, Schema_L2TP]):
         )
 
         _size = schema.offset if flags.offset else 0
+        hdr_len = 6 + 2 * (flags.len + 2 * flags.seq + flags.offset) + _size
+
         l2tp = Data_L2TP(
             flags=flags,
             version=_flag['version'],
@@ -147,9 +146,6 @@ class L2TP(Link[Data_L2TP, Schema_L2TP]):
             offset=_size if flags.offset else None,
         )
 
-        length = schema.length if flags.len else length
-        hdr_len = 6 + 2 * (flags.len + 2 * flags.seq + flags.offset) + _size
-
         l2tp.__update__([
             ('hdr_len', hdr_len),
         ])
@@ -157,6 +153,7 @@ class L2TP(Link[Data_L2TP, Schema_L2TP]):
             self._read_fileng(_size)
             # l2tp['padding'] = self._read_fileng(_size)
 
+        length = schema.length if flags.len else (length or len(self))
         return self._decode_next_layer(l2tp, length - hdr_len)
 
     def make(self,
@@ -177,10 +174,23 @@ class L2TP(Link[Data_L2TP, Schema_L2TP]):
         """Make (construct) packet data.
 
         Args:
+            version: L2TP version.
+            type: L2TP type.
+            type_default: Default value of type.
+            type_namespace: Namespace of type.
+            type_reversed: Reversed namespace of type.
+            priority: Priority flag.
+            length: Length of packet data.
+            tunnel_id: Tunnel ID.
+            session_id: Session ID.
+            ns: Sequence number.
+            nr: Acknowledgement number.
+            offset: Offset size.
+            payload: Payload data.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
-            bytes: Constructed packet data.
+            Constructed packet data.
 
         """
         padding = b'' if offset is None else bytes(offset)
@@ -196,12 +206,12 @@ class L2TP(Link[Data_L2TP, Schema_L2TP]):
                 'prio': priority,
                 'version': version,
             },
-            length=length,  # type: ignore[arg-type]
+            length=length,
             tunnel_id=tunnel_id,
             session_id=session_id,
-            ns=ns,  # type: ignore[arg-type]
-            nr=nr,  # type: ignore[arg-type]
-            offset=offset,  # type: ignore[arg-type]
+            ns=ns,
+            nr=nr,
+            offset=offset,
             padding=padding,
             payload=payload,
         )

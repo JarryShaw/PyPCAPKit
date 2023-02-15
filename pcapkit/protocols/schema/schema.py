@@ -13,7 +13,7 @@ from pcapkit.utilities.exceptions import NoDefaultValue, ProtocolUnbound
 from pcapkit.utilities.warnings import UnknownFieldWarning, warn
 
 if TYPE_CHECKING:
-    from typing import IO, Any, Iterable, Iterator, Optional
+    from typing import IO, Any, Iterable, Iterator, Optional, Type
 
     from typing_extensions import Self
 
@@ -326,7 +326,8 @@ class Schema(Mapping[str, VT], Generic[VT]):
         return self.__bytes__()
 
     @classmethod
-    def unpack(cls, data: 'bytes | IO[bytes]', length: 'Optional[int]' = None) -> 'Self':  # type: ignore[valid-type]
+    def unpack(cls: 'Type[Self]', data: 'bytes | IO[bytes]',  # type: ignore[valid-type]
+               length: 'Optional[int]' = None) -> 'Self':  # type: ignore[valid-type]
         """Unpack :obj:`bytes` into :class:`Schema`.
 
         Args:
@@ -334,7 +335,7 @@ class Schema(Mapping[str, VT], Generic[VT]):
             length: Length of data.
 
         """
-        self = cls.__new__(cls)
+        self = cls.__new__(cls)  # type: ignore[call-overload]
 
         if isinstance(data, bytes):
             length = len(data) if length is None else length
@@ -350,7 +351,7 @@ class Schema(Mapping[str, VT], Generic[VT]):
 
         for field in self.__fields__:
             if isinstance(field, PayloadField):
-                payload_length = field.test_length(packet, length)
+                payload_length = field.test_length(packet, length)  # type: ignore[arg-type]
                 payload = data.read(payload_length)
 
                 self.__buffer__[field.name] = payload

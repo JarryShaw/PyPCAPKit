@@ -39,7 +39,7 @@ class Ethernet(Schema):
     #: Protocol (internet layer).
     type: 'Enum_EtherType' = EnumField(length=2, namespace=Enum_EtherType)
     #: Payload.
-    payload: 'bytes | Protocol | Schema' = PayloadField(callback=callback_payload)
+    payload: 'bytes' = PayloadField(callback=callback_payload)
 
     if TYPE_CHECKING:
         def __init__(self, dst: 'bytes', src: 'bytes', type: 'Enum_EtherType',
