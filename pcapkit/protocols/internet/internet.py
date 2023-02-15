@@ -14,7 +14,7 @@ from typing import TYPE_CHECKING, Generic, cast
 
 from pcapkit.const.reg.transtype import TransType as Enum_TransType
 from pcapkit.corekit.protochain import ProtoChain
-from pcapkit.protocols.protocol import PT, Protocol
+from pcapkit.protocols.protocol import PT, ST, Protocol
 from pcapkit.utilities.decorators import beholder
 
 if TYPE_CHECKING:
@@ -25,7 +25,7 @@ if TYPE_CHECKING:
 __all__ = ['Internet']
 
 
-class Internet(Protocol[PT], Generic[PT]):  # pylint: disable=abstract-method
+class Internet(Protocol[PT, ST], Generic[PT, ST]):  # pylint: disable=abstract-method
     """Abstract base class for internet layer protocol family.
 
     This class currently supports parsing of the following protocols, which are
