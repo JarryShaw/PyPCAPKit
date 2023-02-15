@@ -53,17 +53,22 @@ from pcapkit.const.l2tp.type import Type as Enum_Type
 from pcapkit.protocols.data.link.l2tp import L2TP as Data_L2TP
 from pcapkit.protocols.data.link.l2tp import Flags as Data_Flags
 from pcapkit.protocols.link.link import Link
+from pcapkit.protocols.schema.link.l2tp import L2TP as Schema_L2TP
 from pcapkit.utilities.exceptions import UnsupportedCall
 
 if TYPE_CHECKING:
-    from typing import Any, NoReturn, Optional
+    from enum import IntEnum as StdlibEnum
+    from typing import Any, Optional, Type, NoReturn
+    from aenum import IntEnum as AenumEnum
 
     from typing_extensions import Literal
+    from pcapkit.protocols.protocol import Protocol
+    from pcapkit.protocols.schema.schema import Schema
 
 __all__ = ['L2TP']
 
 
-class L2TP(Link[Data_L2TP]):
+class L2TP(Link[Data_L2TP, Schema_L2TP]):
     """This class implements Layer Two Tunnelling Protocol."""
 
     ##########################################################################
@@ -119,45 +124,56 @@ class L2TP(Link[Data_L2TP]):
         if length is None:
             length = len(self)
 
-        _flag = self._read_binary(1)
+        schema = self.__header__
+        _flag = schema.flags
 
         flags = Data_Flags(
-            type=Enum_Type(int(_flag[0])),
-            len=bool(int(_flag[1])),
-            seq=bool(int(_flag[4])),
-            offset=bool(int(_flag[6])),
-            prio=bool(int(_flag[7])),
+            type=Enum_Type(_flag['type']),
+            len=bool(_flag['len']),
+            seq=bool(_flag['seq']),
+            offset=bool(_flag['offset']),
+            prio=bool(_flag['prio']),
         )
 
-        _vers = self._read_fileng(1).hex()[1]
-        _hlen = self._read_unpack(2) if flags.len else None
-        _tnnl = self._read_unpack(2)
-        _sssn = self._read_unpack(2)
-        _nseq = self._read_unpack(2) if flags.seq else None
-        _nrec = self._read_unpack(2) if flags.seq else None
-        _size = self._read_unpack(2) if flags.offset else 0
-
+        _size = schema.offset if flags.offset else 0
         l2tp = Data_L2TP(
             flags=flags,
-            version=int(_vers, base=16),
-            length=_hlen,
-            tunnelid=_tnnl,
-            sessionid=_sssn,
-            ns=_nseq,
-            nr=_nrec,
-            offset=8*_size or None,
+            version=_flag['version'],
+            length=schema.length if flags.len else None,
+            tunnelid=schema.tunnel_id,
+            sessionid=schema.session_id,
+            ns=schema.ns if flags.seq else None,
+            nr=schema.nr if flags.seq else None,
+            offset=_size if flags.offset else None,
         )
 
-        hdr_len = _hlen or (6 + 2*(int(_flag[1]) + 2*int(_flag[4]) + int(_flag[6])))
+        length = schema.length if flags.len else length
+        hdr_len = 6 + 2 * (flags.len + 2 * flags.seq + flags.offset) + _size
+
         l2tp.__update__([
-            ('hdr_len', hdr_len + _size * 8),
+            ('hdr_len', hdr_len),
         ])
-        # if _size:
-        #     l2tp['padding'] = self._read_fileng(_size * 8)
+        if _size:
+            self._read_fileng(_size)
+            # l2tp['padding'] = self._read_fileng(_size)
 
-        return self._decode_next_layer(l2tp, length - l2tp.hdr_len)
+        return self._decode_next_layer(l2tp, length - hdr_len)
 
-    def make(self, **kwargs: 'Any') -> 'NoReturn':  # pylint: disable=unused-argument
+    def make(self,
+             version: 'Literal[2]' = 2,
+             type: 'Enum_Type | StdlibEnum | AenumEnum | str | int' = Enum_Type.Data,
+             type_default: 'Optional[int]' = None,
+             type_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
+             type_reversed: 'bool' = False,
+             priority: 'bool' = False,
+             length: 'Optional[int]' = None,
+             tunnel_id: 'int' = 0,
+             session_id: 'int' = 0,
+             ns: 'Optional[int]' = None,
+             nr: 'Optional[int]' = None,
+             offset: 'Optional[int]' = None,
+             payload: 'bytes | Protocol | Schema' = b'',
+             **kwargs: 'Any') -> 'Schema_L2TP':  # pylint: disable=unused-argument
         """Make (construct) packet data.
 
         Args:
@@ -167,7 +183,28 @@ class L2TP(Link[Data_L2TP]):
             bytes: Constructed packet data.
 
         """
-        raise NotImplementedError
+        padding = b'' if offset is None else bytes(offset)
+        type_ = self._make_index(type, type_default, namespace=type_namespace,  # type: ignore[call-overload]
+                                 reversed=type_reversed, pack=False)
+
+        return Schema_L2TP(
+            flags={
+                'type': type_,
+                'len': length is not None,
+                'seq': ns is not None and nr is not None,
+                'offset': offset is not None,
+                'prio': priority,
+                'version': version,
+            },
+            length=length,  # type: ignore[arg-type]
+            tunnel_id=tunnel_id,
+            session_id=session_id,
+            ns=ns,  # type: ignore[arg-type]
+            nr=nr,  # type: ignore[arg-type]
+            offset=offset,  # type: ignore[arg-type]
+            padding=padding,
+            payload=payload,
+        )
 
     ##########################################################################
     # Data models.

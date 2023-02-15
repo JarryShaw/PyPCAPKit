@@ -24,6 +24,7 @@ __all__ = [
     # Link Layer Protocols
     'ARP',
     'Ethernet',
+    'L2TP',
 
     # Internet Layer Protocols
 
