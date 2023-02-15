@@ -21,8 +21,11 @@ if TYPE_CHECKING:
     class TCIType(TypedDict):
         """Type of 802.1Q Customer VLAN Tag Type tag control information."""
 
+        #: Priority code point.
         pcp: int
+        #: Drop eligible indicator.
         dei: int
+        #: VLAN identifier.
         vid: int
 
 

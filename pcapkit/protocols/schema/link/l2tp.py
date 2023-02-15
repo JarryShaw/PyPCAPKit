@@ -22,11 +22,17 @@ if TYPE_CHECKING:
     class Flags(TypedDict):
         """Flags of L2TP packet."""
 
+        #: Type of L2TP packet.
         type: int
+        #: Length of L2TP packet.
         len: int
+        #: Sequence number of L2TP packet.
         seq: int
+        #: Offset size of L2TP packet.
         offset: int
+        #: Priority of L2TP packet.
         prio: int
+        #: Version of L2TP packet.
         version: Literal[2]
 
 
