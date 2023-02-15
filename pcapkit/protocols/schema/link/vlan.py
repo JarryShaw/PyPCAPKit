@@ -29,8 +29,11 @@ if TYPE_CHECKING:
 class TCI(Schema[int]):
     """Header schema for 802.1Q Customer VLAN Tag Type tag control information."""
 
+    #: Priority code point.
     pcp: 'Enum_PriorityLevel' = EnumField(length=1, bit_length=3, namespace=Enum_PriorityLevel)
+    #: Drop eligible indicator.
     dei: 'bool' = UInt8Field(bit_length=1)
+    #: VLAN identifier.
     vid: 'int' = UInt16Field(bit_length=12)
 
     if TYPE_CHECKING:
@@ -40,6 +43,7 @@ class TCI(Schema[int]):
 class VLAN(Schema):
     """Header schema for 802.1Q Customer VLAN Tag Type packet."""
 
+    #: Tag control information.
     tci: 'TCIType' = BitField(
         length=2,
         namespace={
@@ -48,7 +52,9 @@ class VLAN(Schema):
             'vid': (4, 12),
         },
     )
+    #: EtherType.
     type: 'Enum_EtherType' = EnumField(length=2, namespace=Enum_EtherType)
+    #: Payload.
     payload: 'bytes' = PayloadField()
 
     if TYPE_CHECKING:
