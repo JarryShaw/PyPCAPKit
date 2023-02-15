@@ -29,6 +29,7 @@ __all__ = [
     'VLAN', 'VLAN_TCI',
 
     # Internet Layer Protocols
+    'AH',
 
     # Transport Layer Protocols
 

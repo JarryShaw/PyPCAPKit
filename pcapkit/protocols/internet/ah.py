@@ -28,19 +28,23 @@ from pcapkit.const.reg.transtype import TransType as Enum_TransType
 from pcapkit.protocols.data.internet.ah import AH as Data_AH
 from pcapkit.protocols.internet.ipsec import IPsec
 from pcapkit.utilities.exceptions import ProtocolError, UnsupportedCall, VersionError
+from pcapkit.protocols.schema.internet.ah import AH as Schema_AH
 
 if TYPE_CHECKING:
-    from typing import IO, Any, NoReturn, Optional
+    from enum import IntEnum as StdlibEnum
+    from typing import IO, Any, NoReturn, Optional, Type
 
+    from aenum import IntEnum as AenumEnum
     from typing_extensions import Literal
 
     from pcapkit.corekit.protochain import ProtoChain
     from pcapkit.protocols.protocol import Protocol
+    from pcapkit.protocols.schema.schema import Schema
 
 __all__ = ['AH']
 
 
-class AH(IPsec[Data_AH]):
+class AH(IPsec[Data_AH, Schema_AH]):
     """This class implements Authentication Header."""
 
     ##########################################################################
@@ -131,53 +135,59 @@ class AH(IPsec[Data_AH]):
         """
         if length is None:
             length = len(self)
-
-        _next = self._read_protos(1)
-        _plen = self._read_unpack(1)
-        _resv = self._read_fileng(2)
-        _scpi = self._read_unpack(4)
-        _dsnf = self._read_unpack(4)
-
-        # ICV length & value
-        _tlen = _plen * 4 - 2
-        _vlen = _tlen - 12
-        _chkv = self._read_fileng(_vlen)
+        schema = self.__header__
 
         ah = Data_AH(
-            next=_next,
-            length=_tlen,
-            spi=_scpi,
-            seq=_dsnf,
-            icv=_chkv,
+            next=schema.next,
+            length=(schema.len + 2) * 4,
+            spi=schema.spi,
+            seq=schema.seq,
+            icv=schema.icv,
         )
-
-        if version == 6:
-            _plen = 8 - (_tlen % 8)
-        elif version == 4:
-            _plen = 4 - (_tlen % 4)
-        else:
-            raise VersionError(f'Unknown IP version {version}')
-
-        if _plen:   # explicit padding in need
-            padding = self._read_binary(_plen)
-            if int(padding, base=2) != 0:  # check padding (all zero)
-                raise ProtocolError(f'{self.alias}: invalid format')
 
         if extension:
             return ah
-        return self._decode_next_layer(ah, _next, length - ah.length)
+        return self._decode_next_layer(ah, schema.next, length - ah.length)
 
-    def make(self, **kwargs: 'Any') -> 'NoReturn':
+    def make(self,
+             next: 'Enum_TransType | StdlibEnum | AenumEnum | str | int' = Enum_TransType.UDP,
+             next_default: 'Optional[int]' = None,
+             next_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
+             next_reversed: 'bool' = False,
+             spi: 'int' = 0,
+             seq: 'int' = 0,
+             icv: 'bytes' = b'',
+             payload: 'bytes | Protocol | Schema' = b'',
+             **kwargs: 'Any') -> 'Schema_AH':
         """Make (construct) packet data.
 
         Args:
+            next: Next header type.
+            next_default: Default value of next header type.
+            next_namespace: Namespace of next header type.
+            next_reversed: If the namespace is reversed.
+            spi: Security Parameters Index.
+            seq: Sequence Number Field.
+            icv: Integrity Check Value-ICV.
+            payload: Payload of current instance.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
             Constructed packet data.
 
         """
-        raise NotImplementedError
+        next_value = self._make_index(next, next_default, namespace=next_namespace,  # type: ignore[call-overload]
+                                      reversed=next_reversed, pack=False)
+        length = (len(icv) + 12) // 4 - 2
+
+        return Schema_AH(
+            next=next_value,
+            len=length,
+            spi=spi,
+            seq=seq,
+            icv=icv,
+            payload=payload,
+        )
 
     @classmethod
     def id(cls) -> 'tuple[Literal["AH"]]':  # type: ignore[override]
