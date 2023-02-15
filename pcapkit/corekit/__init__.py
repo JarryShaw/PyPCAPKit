@@ -38,6 +38,7 @@ __all__ = [
     'BytesField',
     'StringField',
     'BitField',
+    'PaddingField',
 
     'ConditionalField', 'PayloadField',
 ]

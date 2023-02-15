@@ -12,6 +12,7 @@ __all__ = [
     '_TextField',
     'StringField',
     'BitField',
+    'PaddingField',
 ]
 
 if TYPE_CHECKING:
@@ -21,9 +22,7 @@ if TYPE_CHECKING:
 
     from pcapkit.corekit.fields.field import NoValueType
 
-    ConverterFunc = Callable[[int], Any]
-    ReverserFunc = Callable[[Any], int]
-    NamespaceEntry = tuple[int, Optional[int], Optional[ConverterFunc], Optional[ReverserFunc]]
+    NamespaceEntry = tuple[int, int]
 
 _T = TypeVar('_T', 'str', 'bytes', 'dict[str, Any]')
 
@@ -155,9 +154,7 @@ class BitField(_TextField[Dict[str, Any]]):
             an integer value and accept the current packet as its only argument.
         default: field default value, if any.
         namespace: field namespace (a dict mapping field name to a tuple of start index,
-            end index, converter function, which takes the flag value :obj:`int` as
-            its only argument, and reverser function, which takes the converted flag value
-            and returns the original :obj:`int` value).
+            and length of the subfield).
         callback: callback function to be called upon
             :meth:`self.__call__ <pcapkit.corekit.fields.field._Field.__call__>`.
 
@@ -183,12 +180,9 @@ class BitField(_TextField[Dict[str, Any]]):
 
         """
         buffer = bytearray(self.length * 8)
-        for name, (start, end, _, reverser) in self._namespace.items():
-            end = end or start
-            if reverser is None:
-                buffer[start:end] = f'{value[name]:0{end - start}b}'.encode()
-            else:
-                buffer[start:end] = f'{reverser(value[name]):0{end - start}b}'.encode()
+        for name, (start, len) in self._namespace.items():
+            end = start + len
+            buffer[start:end] = f'{value[name]:0{end - start}b}'.encode()
         return int(b''.join(map(lambda x: b'1' if x else b'0', buffer)), 2).to_bytes(self.length, 'big')
 
     def post_process(self, value: 'bytes', packet: 'dict[str, Any]') -> 'dict[str, Any]':  # pylint: disable=unused-argument
@@ -204,9 +198,20 @@ class BitField(_TextField[Dict[str, Any]]):
         """
         buffer = {}
         binary = ''.join(f'{byte:08b}' for byte in value)
-        for name, (start, end, converter, _) in self._namespace.items():
-            if converter is None:
-                buffer[name] = int(binary[start:end], 2)
-            else:
-                buffer[name] = converter(int(binary[start:end], 2))
+        for name, (start, len) in self._namespace.items():
+            end = start + len
+            buffer[name] = int(binary[start:end], 2)
         return buffer
+
+
+class PaddingField(BytesField):
+    """Bytes value for protocol fields.
+
+    Args:
+        length: field size (in bytes); if a callable is given, it should return
+            an integer value and accept the current packet as its only argument.
+        default: field default value, if any.
+        callback: callback function to be called upon
+            :meth:`self.__call__ <pcapkit.corekit.fields.field._Field.__call__>`.
+
+    """

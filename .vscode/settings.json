@@ -345,5 +345,8 @@
     ],
     "esbonio.sphinx.confDir": "${workspaceFolder}/doc/sphinx/source",
     "C_Cpp.errorSquiggles": "Enabled",
-    "restructuredtext.preview.name": "sphinx"
+    "restructuredtext.preview.name": "sphinx",
+    "esbonio.sphinx.forceFullBuild": false,
+    "esbonio.sphinx.numJobs": 0,
+    "restructuredtext.trace": "off"
 }

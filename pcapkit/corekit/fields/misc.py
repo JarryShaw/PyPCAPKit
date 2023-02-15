@@ -16,7 +16,7 @@ if TYPE_CHECKING:
     from pcapkit.protocols.protocol import Protocol
     from pcapkit.protocols.schema.schema import Schema
 
-_TC = TypeVar('_TC', bound='Field')
+_TC = TypeVar('_TC')
 _TP = TypeVar('_TP', bound='Protocol')
 
 

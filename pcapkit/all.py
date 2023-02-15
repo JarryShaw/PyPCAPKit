@@ -52,10 +52,11 @@ __all__ = [
     'Info',                                                 # Info Class
     'ProtoChain',                                           # ProtoChain
     'VersionInfo',                                          # Version
-    'NumberField', 'Int32Field', 'UInt32Field', 'Int16Field',   # numeric protocol fields
-    'UInt16Field', 'Int64Field', 'UInt64Field', 'Int8Field',
-    'UInt8Field', 'EnumField',
+    'NumberField', 'Int32Field', 'UInt32Field',             # numeric protocol fields
+    'Int16Field', 'UInt16Field', 'Int64Field', 'UInt64Field',
+    'Int8Field', 'UInt8Field', 'EnumField',
     'BytesField', 'StringField', 'BitField',                # text protocol fields
+    'PaddingField',
     'ConditionalField', 'PayloadField',                     # misc protocol fields
 
     # pcapkit.dumpkit
