@@ -19,7 +19,7 @@ if TYPE_CHECKING:
     from pcapkit.protocols.protocol import Protocol
 
 
-    class Flags(TypedDict):
+    class FlagsType(TypedDict):
         """Flags of L2TP packet."""
 
         #: Type of L2TP packet.
@@ -40,7 +40,7 @@ class L2TP(Schema):
     """Header schema for L2TP packet."""
 
     #: Flags and version of L2TP packet.
-    flags: 'Flags' = BitField(length=2, namespace={
+    flags: 'FlagsType' = BitField(length=2, namespace={
         'type': (0, 1),
         'len': (1, 1),
         'seq': (4, 1),
@@ -81,7 +81,7 @@ class L2TP(Schema):
     payload: 'bytes' = PayloadField()
 
     if TYPE_CHECKING:
-        def __init__(self, flags: 'Flags', length: 'Optional[int]', tunnel_id: 'int',
+        def __init__(self, flags: 'FlagsType', length: 'Optional[int]', tunnel_id: 'int',
                      session_id: 'int', ns: 'Optional[int]', nr: 'Optional[int]',
                      offset: 'Optional[int]', padding: 'bytes',
                      payload: 'bytes | Protocol | Schema') -> 'None': ...

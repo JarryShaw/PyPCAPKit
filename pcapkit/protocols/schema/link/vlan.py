@@ -11,7 +11,7 @@ from pcapkit.corekit.fields.numbers import EnumField, UInt8Field, UInt16Field
 from pcapkit.corekit.fields.strings import BitField
 from pcapkit.protocols.schema.schema import Schema
 
-__all__ = ['VLAN']
+__all__ = ['VLAN', 'TCI']
 
 if TYPE_CHECKING:
     from typing_extensions import TypedDict

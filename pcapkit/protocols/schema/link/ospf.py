@@ -11,7 +11,7 @@ from pcapkit.corekit.fields.numbers import EnumField, UInt8Field, UInt16Field, U
 from pcapkit.corekit.fields.strings import BytesField, PaddingField
 from pcapkit.protocols.schema.schema import Schema
 
-__all__ = ['OSPF']
+__all__ = ['OSPF', 'CrytographicAuthentication']
 
 if TYPE_CHECKING:
     from pcapkit.protocols.protocol import Protocol
