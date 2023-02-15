@@ -39,6 +39,7 @@ class NumberField(Field[int], Generic[_T]):
         default: field default value, if any.
         signed: whether the field is signed.
         byteorder: field byte order.
+        bit_length: field bit length.
         callback: callback function to be called upon
             :meth:`self.__call__ <pcapkit.corekit.fields.field._Field.__call__>`.
 
@@ -48,15 +49,26 @@ class NumberField(Field[int], Generic[_T]):
     __template__ = None  # type: Optional[str]
     __signed__ = None  # type: Optional[bool]
 
+    @property
+    def bit_length(self) -> 'int':
+        """Field bit length."""
+        return self._bit_length
+
     def __init__(self, length: 'Optional[int | Callable[[dict[str, Any]], int]]' = None,
                  default: 'int | NoValueType' = NoValue, signed: 'bool' = False,
                  byteorder: 'Literal["little", "big"]' = 'big',
+                 bit_length: 'Optional[int]' = None,
                  callback: 'Callable[[NumberField[_T], dict[str, Any]], None]' = lambda *_: None) -> 'None':
         if length is None:
             if self.__length__ is None:
                 raise IntError(f'Field has no length.')
             length = self.__length__
         super().__init__(length, default, callback)  # type: ignore[arg-type]
+
+        if bit_length is None:
+            bit_length = self._length * 8
+        self._bit_length = bit_length
+        self._bit_mask = (1 << bit_length) - 1
 
         self._signed = signed if self.__signed__ is None else self.__signed__
         self._byteorder = byteorder
@@ -114,6 +126,7 @@ class NumberField(Field[int], Generic[_T]):
             Processed field value.
 
         """
+        value = value & self._bit_mask
         if not self._need_process:
             return value
         return value.to_bytes(
@@ -132,10 +145,10 @@ class NumberField(Field[int], Generic[_T]):
 
         """
         if not self._need_process:
-            return cast('int', value)
+            return cast('int', value) & self._bit_mask
         return int.from_bytes(
             cast('bytes', value), self._byteorder, signed=self._signed
-        )
+        ) & self._bit_mask
 
 
 class Int32Field(NumberField):
@@ -146,6 +159,7 @@ class Int32Field(NumberField):
         default: field default value, if any.
         signed: whether the field is signed.
         byteorder: field byte order.
+        bit_length: field bit length.
         callback: callback function to be called upon
             :meth:`self.__call__ <pcapkit.corekit.fields.field._Field.__call__>`.
 
@@ -164,6 +178,7 @@ class UInt32Field(NumberField):
         default: field default value, if any.
         signed: whether the field is signed.
         byteorder: field byte order.
+        bit_length: field bit length.
         callback: callback function to be called upon
             :meth:`self.__call__ <pcapkit.corekit.fields.field._Field.__call__>`.
 
@@ -182,6 +197,7 @@ class Int16Field(NumberField):
         default: field default value, if any.
         signed: whether the field is signed.
         byteorder: field byte order.
+        bit_length: field bit length.
         callback: callback function to be called upon
             :meth:`self.__call__ <pcapkit.corekit.fields.field._Field.__call__>`.
 
@@ -200,6 +216,7 @@ class UInt16Field(NumberField):
         default: field default value, if any.
         signed: whether the field is signed.
         byteorder: field byte order.
+        bit_length: field bit length.
         callback: callback function to be called upon
             :meth:`self.__call__ <pcapkit.corekit.fields.field._Field.__call__>`.
 
@@ -218,6 +235,7 @@ class Int64Field(NumberField):
         default: field default value, if any.
         signed: whether the field is signed.
         byteorder: field byte order.
+        bit_length: field bit length.
         callback: callback function to be called upon
             :meth:`self.__call__ <pcapkit.corekit.fields.field._Field.__call__>`.
 
@@ -236,6 +254,7 @@ class UInt64Field(NumberField):
         default: field default value, if any.
         signed: whether the field is signed.
         byteorder: field byte order.
+        bit_length: field bit length.
         callback: callback function to be called upon
             :meth:`self.__call__ <pcapkit.corekit.fields.field._Field.__call__>`.
 
@@ -254,6 +273,7 @@ class Int8Field(NumberField):
         default: field default value, if any.
         signed: whether the field is signed.
         byteorder: field byte order.
+        bit_length: field bit length.
         callback: callback function to be called upon
             :meth:`self.__call__ <pcapkit.corekit.fields.field._Field.__call__>`.
 
@@ -272,6 +292,7 @@ class UInt8Field(NumberField):
         default: field default value, if any.
         signed: whether the field is signed.
         byteorder: field byte order.
+        bit_length: field bit length.
         callback: callback function to be called upon
             :meth:`self.__call__ <pcapkit.corekit.fields.field._Field.__call__>`.
 
@@ -291,18 +312,20 @@ class EnumField(NumberField[enum.IntEnum | aenum.IntEnum]):
         default: field default value, if any.
         signed: whether the field is signed.
         byteorder: field byte order.
+        bit_length: field bit length.
         namespace: field namespace (a :class:`enum.IntEnum` class).
         callback: callback function to be called upon
             :meth:`self.__call__ <pcapkit.corekit.fields.field._Field.__call__>`.
 
     """
 
-    def __init__(self, length: 'Optional[int | Callable[[dict[str, Any]], int]]' = None,
+    def __init__(self, length: 'int | Callable[[dict[str, Any]], int]',
                  default: 'StdlibEnum | AenumEnum | NoValueType' = NoValue, signed: 'bool' = False,
                  byteorder: 'Literal["little", "big"]' = 'big',
+                 bit_length: 'Optional[int]' = None,
                  namespace: 'Optional[Type[StdlibEnum] | Type[AenumEnum]]' = None,
                  callback: 'Callable[[EnumField, dict[str, Any]], None]' = lambda *_: None) -> 'None':
-        super().__init__(length, default, signed, byteorder, callback)  # type: ignore[arg-type]
+        super().__init__(length, default, signed, byteorder, bit_length, callback)  # type: ignore[arg-type]
 
         self._namespace = namespace
 
