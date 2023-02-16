@@ -4,10 +4,10 @@
 import collections.abc
 import io
 import itertools
-from typing import TYPE_CHECKING, Generic, TypeVar
+from typing import TYPE_CHECKING, Generic, TypeVar, cast
 
 from pcapkit.corekit.fields.field import NoValue, _Field
-from pcapkit.corekit.fields.misc import ConditionalField, PayloadField
+from pcapkit.corekit.fields.misc import ConditionalField, ListField, PayloadField
 from pcapkit.corekit.fields.strings import PaddingField
 from pcapkit.utilities.compat import Mapping
 from pcapkit.utilities.exceptions import NoDefaultValue, ProtocolUnbound
@@ -313,14 +313,34 @@ class Schema(Mapping[str, VT], Generic[VT]):
                     raise ProtocolUnbound(f'unsupported type {type(data)}')
                 continue
 
-            if isinstance(field, ConditionalField):
-                if not field.test(packet):
-                    continue
-                field = field.field
+            if isinstance(field, ListField):
+                data = getattr(self, field.name, None)
+                if data is None:
+                    self.__buffer__[field.name] = b''
+                elif isinstance(data, bytes):
+                    self.__buffer__[field.name] = data
+                elif isinstance(data, list):
+                    temp_list = []  # type: list[bytes]
+                    for item in data:
+                        if isinstance(item, bytes):
+                            temp_list.append(item)
+                        elif isinstance(item, Schema):
+                            temp_list.append(item.pack())
+                        else:
+                            raise ProtocolUnbound(f'unsupported type {type(item)}')
+                    self.__buffer__[field.name] = b''.join(temp_list)
+                else:
+                    raise ProtocolUnbound(f'unsupported type {type(data)}')
+                continue
 
             if isinstance(field, PaddingField):
                 self.__buffer__[field.name] = bytes(field.length)
                 continue
+
+            if isinstance(field, ConditionalField):
+                if not field.test(packet):
+                    continue
+                field = field.field
 
             value = getattr(self, field.name)
             try:
@@ -353,18 +373,24 @@ class Schema(Mapping[str, VT], Generic[VT]):
                 length = data.seek(0, io.SEEK_END) - current
                 data.seek(current)
 
-        packet = self.__dict__.copy()
-        packet['__length__'] = length
+        packet = {
+            '__length__': length,
+        }  # type: dict[str, Any]
 
         for field in self.__fields__:
             field = field(packet)
 
-            if isinstance(field, PayloadField):
-                payload_length = field.test_length(packet, length)  # type: ignore[arg-type]
+            if isinstance(field, (PayloadField, ListField)):
+                payload_length = field.length or cast('int', packet['__length__'])
                 payload = data.read(payload_length)
 
                 self.__buffer__[field.name] = payload
                 setattr(self, field.name, payload)
+                packet[field.name] = payload
+                continue
+
+            if isinstance(field, PaddingField):
+                data.read(field.length)
                 continue
 
             if isinstance(field, ConditionalField):
@@ -372,17 +398,14 @@ class Schema(Mapping[str, VT], Generic[VT]):
                     continue
                 field = field.field
 
-            if isinstance(field, PaddingField):
-                data.read(field.length)
-                continue
-
             byte = data.read(field.length)
             self.__buffer__[field.name] = byte
 
             value = field.unpack(byte, packet)
             setattr(self, field.name, value)
 
-            length -= field.length
+            packet[field.name] = value
+            packet['__length__'] -= field.length
 
         self.__updated__ = False
         return self
