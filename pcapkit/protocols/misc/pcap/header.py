@@ -231,11 +231,11 @@ class Header(Protocol[Data_Header, Schema_Header]):
     ##########################################################################
 
     @overload
-    def __post_init__(self, file: 'IO[bytes]', length: 'Optional[int]' = ..., **kwargs: 'Any') -> 'None': ...
+    def __post_init__(self, file: 'IO[bytes] | bytes', length: 'Optional[int]' = ..., **kwargs: 'Any') -> 'None': ...
     @overload
     def __post_init__(self, **kwargs: 'Any') -> 'None': ...  # pylint: disable=arguments-differ
 
-    def __post_init__(self, file: 'Optional[IO[bytes]]' = None,
+    def __post_init__(self, file: 'Optional[IO[bytes] | bytes]' = None,
                       length: 'Optional[int]' = None, **kwargs: 'Any') -> 'None':
         """Post initialisation hook.
 
@@ -251,7 +251,7 @@ class Header(Protocol[Data_Header, Schema_Header]):
         if file is None:
             _data = self.pack(**kwargs)
         else:
-            _data = file.read(operator.length_hint(self))
+            _data = file if isinstance(file, bytes) else file.read(operator.length_hint(self))
 
         #: bytes: Raw packet data.
         self._data = _data

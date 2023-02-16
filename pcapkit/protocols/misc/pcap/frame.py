@@ -241,13 +241,13 @@ class Frame(Protocol[Data_Frame, Schema_Frame]):
     ##########################################################################
 
     @overload  # type: ignore[override]
-    def __post_init__(self, file: 'IO[bytes]', length: 'Optional[int]' = ..., *,  # pylint: disable=arguments-differ
+    def __post_init__(self, file: 'IO[bytes] | bytes', length: 'Optional[int]' = ..., *,  # pylint: disable=arguments-differ
                       num: 'int', header: 'Data_Header', **kwargs: 'Any') -> 'None': ...
     @overload
     def __post_init__(self, *, num: 'int', header: 'Data_Header',  # pylint: disable=arguments-differ
                       **kwargs: 'Any') -> 'None': ...
 
-    def __post_init__(self, file: 'Optional[IO[bytes]]' = None, length: 'Optional[int]' = None, *,  # pylint: disable=arguments-differ
+    def __post_init__(self, file: 'Optional[IO[bytes] | bytes]' = None, length: 'Optional[int]' = None, *,  # pylint: disable=arguments-differ
                       num: 'int', header: 'Data_Header', **kwargs: 'Any') -> 'None':
         """Initialisation.
 
@@ -281,7 +281,7 @@ class Frame(Protocol[Data_Frame, Schema_Frame]):
         else:
             _read = True
             #: io.BytesIO: Source packet stream.
-            self._file = file
+            self._file = io.BytesIO(file) if isinstance(file, bytes) else file
 
         #: pcapkit.corekit.infoclass.Info: Parsed packet data.
         self._info = self.unpack(length, _read=_read, **kwargs)

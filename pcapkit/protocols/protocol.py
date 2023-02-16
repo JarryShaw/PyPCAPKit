@@ -394,11 +394,11 @@ class Protocol(Generic[PT, ST], metaclass=abc.ABCMeta):
         return self
 
     @overload
-    def __init__(self, file: 'IO[bytes]', length: 'Optional[int]' = ..., **kwargs: 'Any') -> 'None': ...
+    def __init__(self, file: 'IO[bytes] | bytes', length: 'Optional[int]' = ..., **kwargs: 'Any') -> 'None': ...
     @overload
     def __init__(self, **kwargs: 'Any') -> 'None': ...
 
-    def __init__(self, file: 'Optional[IO[bytes]]' = None, length: 'Optional[int]' = None, **kwargs: 'Any') -> 'None':
+    def __init__(self, file: 'Optional[IO[bytes] | bytes]' = None, length: 'Optional[int]' = None, **kwargs: 'Any') -> 'None':
         """Initialisation.
 
         Args:
@@ -426,11 +426,11 @@ class Protocol(Generic[PT, ST], metaclass=abc.ABCMeta):
         self.__post_init__(file, length, **kwargs)  # type: ignore[arg-type]
 
     @overload
-    def __post_init__(self, file: 'IO[bytes]', length: 'Optional[int]' = ..., **kwargs: 'Any') -> 'None': ...
+    def __post_init__(self, file: 'IO[bytes] | bytes', length: 'Optional[int]' = ..., **kwargs: 'Any') -> 'None': ...
     @overload
     def __post_init__(self, **kwargs: 'Any') -> 'None': ...
 
-    def __post_init__(self, file: 'Optional[IO[bytes]]' = None,
+    def __post_init__(self, file: 'Optional[IO[bytes] | bytes]' = None,
                       length: 'Optional[int]' = None, **kwargs: 'Any') -> 'None':
         """Post initialisation hook.
 
@@ -447,7 +447,7 @@ class Protocol(Generic[PT, ST], metaclass=abc.ABCMeta):
         if file is None:
             _data = self.pack(**kwargs)
         else:
-            _data = file.read(length)  # type: ignore[arg-type]
+            _data = file if isinstance(file, bytes) else file.read(length)  # type: ignore[arg-type]
 
         #: bytes: Raw packet data.
         self._data = _data
@@ -965,7 +965,8 @@ class Protocol(Generic[PT, ST], metaclass=abc.ABCMeta):
             module, name = self.__proto__[proto]
             protocol = cast('Type[Protocol]', getattr(importlib.import_module(module), name))
 
-        next_ = protocol(self._file, length, alias=proto,
+        file_ = getattr(self.__header__, 'payload', self._file)
+        next_ = protocol(file_, length, alias=proto,
                          layer=self._exlayer, protocol=self._exproto)  # type: ignore[abstract]
         return next_
 

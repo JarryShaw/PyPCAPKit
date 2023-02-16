@@ -89,11 +89,11 @@ class NoPayload(Protocol[Data_NoPayload, Schema_NoPayload]):
     ##########################################################################
 
     @overload
-    def __post_init__(self, file: 'IO[bytes]', length: 'Optional[int]' = ..., **kwargs: 'Any') -> 'None': ...
+    def __post_init__(self, file: 'IO[bytes] | bytes', length: 'Optional[int]' = ..., **kwargs: 'Any') -> 'None': ...
     @overload
     def __post_init__(self, **kwargs: 'Any') -> 'None': ...  # pylint: disable=arguments-differ
 
-    def __post_init__(self, file: 'Optional[IO[bytes]]' = None,  # pylint: disable=unused-argument
+    def __post_init__(self, file: 'Optional[IO[bytes] | bytes]' = None,  # pylint: disable=unused-argument
                       length: 'Optional[int]' = None, **kwargs: 'Any') -> 'None':
         """Post initialisation hook.
 

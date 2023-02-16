@@ -102,11 +102,11 @@ class Raw(Protocol[Data_Raw, Schema_Raw]):
     ##########################################################################
 
     @overload
-    def __post_init__(self, file: 'IO[bytes]', length: 'Optional[int]' = ..., **kwargs: 'Any') -> 'None': ...
+    def __post_init__(self, file: 'IO[bytes] | bytes', length: 'Optional[int]' = ..., **kwargs: 'Any') -> 'None': ...
     @overload
     def __post_init__(self, **kwargs: 'Any') -> 'None': ...  # pylint: disable=arguments-differ
 
-    def __post_init__(self, file: 'Optional[IO[bytes]]' = None,
+    def __post_init__(self, file: 'Optional[IO[bytes] | bytes]' = None,
                       length: 'Optional[int]' = None, **kwargs: 'Any') -> 'None':
         """Post initialisation hook.
 
@@ -127,7 +127,7 @@ class Raw(Protocol[Data_Raw, Schema_Raw]):
         if file is None:
             _data = self.pack(**kwargs)
         else:
-            _data = file.read(length)  # type: ignore[arg-type]
+            _data = file if isinstance(file, bytes) else file.read(length)  # type: ignore[arg-type]
 
         #: bytes: Raw packet data.
         self._data = _data
