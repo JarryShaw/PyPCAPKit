@@ -161,7 +161,7 @@ class OSPF(Link[Data_OSPF, Schema_OSPF]):
              auth_type_default: 'Optional[int]' = None,
              auth_type_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
              auth_type_reversed: 'bool' = False,
-             auth_data: 'bytes | Schema_CrytographicAuthentication' = b'\x00\x00\x00\x00\x00\x00\x00\x00',
+             auth_data: 'bytes | Schema_CrytographicAuthentication | Data_CrytographicAuthentication' = b'\x00\x00\x00\x00\x00\x00\x00\x00',
              payload: 'bytes | Protocol | Schema' = b'',
              **kwargs: 'Any') -> 'Schema_OSPF':
         """Make (construct) packet data.
@@ -193,19 +193,11 @@ class OSPF(Link[Data_OSPF, Schema_OSPF]):
                                       reversed=auth_type_reversed, pack=False)
 
         if auth_type_ == Enum_Authentication.Cryptographic_authentication:
-            if isinstance(auth_data, Schema_CrytographicAuthentication):
-                data = auth_data.pack()
-            elif isinstance(auth_data, bytes):
-                data = auth_data
-            else:
-                raise ProtocolError(f'OSPF: invalid type for auth_data: {auth_data!r}')
+            data = self._make_encrypt_auth(auth_data)
         else:
             if not isinstance(auth_data, bytes):
-                raise ProtocolError(f'OSPF: invalid type for auth_data: {auth_data!r}')
+                raise ProtocolError(f'OSPF: invalid type for authentication data: {auth_data!r}')
             data = auth_data
-
-        if len(data) != 8:
-            raise ProtocolError(f'OSPF: invalid length for auth_data: {auth_data!r}')
 
         return Schema_OSPF(
             version=version,
@@ -301,3 +293,26 @@ class OSPF(Link[Data_OSPF, Schema_OSPF]):
             seq=schema.seq,
         )
         return auth
+
+    def _make_encrypt_auth(self,
+                           auth_data: 'bytes | Schema_CrytographicAuthentication | Data_CrytographicAuthentication'  # pylint: disable=line-too-long
+                           ) -> 'bytes | Schema_CrytographicAuthentication':
+        """Make Authentication field when Cryptographic Authentication is employed.
+
+        Args:
+            auth_type: Authentication type.
+            auth_data: Authentication data.
+
+        Returns:
+            Authentication bytes.
+
+        """
+        if isinstance(auth_data, (Schema_CrytographicAuthentication, bytes)):
+            return auth_data
+        if isinstance(auth_data, Data_CrytographicAuthentication):
+            return Schema_CrytographicAuthentication(
+                key_id=auth_data.key_id,
+                len=auth_data.len,
+                seq=auth_data.seq,
+            )
+        raise ProtocolError(f'OSPF: invalid type for auth_data: {auth_data!r}')
