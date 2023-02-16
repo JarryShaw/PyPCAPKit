@@ -18,7 +18,6 @@ if TYPE_CHECKING:
 
     from pcapkit.protocols.protocol import Protocol
 
-
     class FlagsType(TypedDict):
         """Flags of L2TP packet."""
 
