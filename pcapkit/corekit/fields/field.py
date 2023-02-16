@@ -14,6 +14,8 @@ __all__ = ['Field']
 if TYPE_CHECKING:
     from typing import Any, Callable, Optional
 
+    from pcapkit.protocols.schema.schema import Schema
+
 _T = TypeVar('_T')
 
 
@@ -59,9 +61,9 @@ class _Field(Generic[_T], metaclass=abc.ABCMeta):
         self._default = NoValue
 
     @property
-    @abc.abstractmethod
     def template(self) -> 'str':
         """Field template."""
+        return '0s'
 
     @property
     def length(self) -> 'int':
@@ -131,7 +133,7 @@ class _Field(Generic[_T], metaclass=abc.ABCMeta):
         """
         return cast('_T', value)
 
-    def unpack(self, buffer: 'bytes', packet: 'dict[str, Any]') -> '_T':
+    def unpack(self, buffer: 'bytes | Schema', packet: 'dict[str, Any]') -> '_T':
         """Unpack field value from :obj:`bytes`.
 
         Args:
@@ -142,7 +144,9 @@ class _Field(Generic[_T], metaclass=abc.ABCMeta):
             Unpacked field value.
 
         """
-        value = struct.unpack(self.template, buffer[:self.length])[0]
+        if not isinstance(buffer, bytes):
+            buffer = buffer.pack()
+        value = struct.unpack(self.template, buffer[:self.length].rjust(self.length, b'\x00'))[0]
         return self.post_process(value, packet)
 
 
@@ -180,7 +184,7 @@ class Field(_Field[_T], Generic[_T]):
 
         self._length_callback = None
         if not isinstance(length, int):
-            self._length_callback, length = length, 1
+            self._length_callback, length = length, 0
         self._length = length
 
     def __call__(self, packet: 'dict[str, Any]') -> 'Field':

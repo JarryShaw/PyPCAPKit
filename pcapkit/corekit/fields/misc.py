@@ -18,6 +18,7 @@ if TYPE_CHECKING:
 
 _TC = TypeVar('_TC')
 _TP = TypeVar('_TP', bound='Protocol')
+_TL = TypeVar('_TL', 'Schema', 'bytes')
 
 
 class ConditionalField(_Field[_TC]):
@@ -133,7 +134,7 @@ class ConditionalField(_Field[_TC]):
         """
         return self._field.post_process(value, packet)
 
-    def unpack(self, buffer: 'bytes', packet: 'dict[str, Any]') -> '_TC':
+    def unpack(self, buffer: 'bytes | Schema', packet: 'dict[str, Any]') -> '_TC':
         """Unpack field value from :obj:`bytes`.
 
         Args:
@@ -165,6 +166,8 @@ class PayloadField(_Field[_TP]):
     """Payload value for protocol fields.
 
     Args:
+        length: field size (in bytes); if a callable is given, it should return
+            an integer value and accept the current packet as its only argument.
         default: field default value.
         protocol: payload protocol.
         callback: callback function to be called upon
@@ -207,13 +210,11 @@ class PayloadField(_Field[_TP]):
             protocol = cast('Type[_TP]', __proto__.get(protocol, Raw))
         self._protocol = protocol
 
-    def __init__(self, name: 'str' = 'payload',
+    def __init__(self, length: 'int | Callable[[dict[str, Any]], Optional[int]]' = lambda _: None,
                  default: '_TP | NoValueType | bytes' = NoValue,
                  protocol: 'Optional[Type[_TP] | str]' = None,
-                 length_hint: 'Callable[[dict[str, Any]], Optional[int]]' = lambda _: None,
                  callback: 'Callable[[PayloadField[_TP], dict[str, Any]], None]' = lambda *_: None) -> 'None':
-        self._name = name
-        self._length_hint = length_hint
+        self._name = '<payload>'
         self._callback = callback
 
         if protocol is None:
@@ -235,8 +236,18 @@ class PayloadField(_Field[_TP]):
             default = cast('_TP', Raw(packet=default))
         self._default = default
 
-        self._length = 0
+        self._length_callback = None
+        if not isinstance(length, int):
+            self._length_callback, length = length, 0
+        self._length = length
         self._template = '0s'
+
+    def __call__(self, packet: 'dict[str, Any]') -> 'PayloadField':
+        """Update field attributes."""
+        self._callback(self, packet)
+        if self._length_callback is not None:
+            self._length = self._length_callback(packet)  # type: ignore[assignment]
+        return self
 
     def pack(self, value: 'Optional[_TP | Schema | bytes]', packet: 'dict[str, Any]') -> 'bytes':
         """Pack field value into :obj:`bytes`.
@@ -262,52 +273,100 @@ class PayloadField(_Field[_TP]):
             return value.pack()
         return value.data  # type: ignore[union-attr]
 
-    def unpack(self, buffer: 'bytes | IO[bytes]',
-               packet: 'dict[str, Any]', *,
-               length: 'Optional[int]' = None) -> '_TP':
+    def unpack(self, buffer: 'bytes | IO[bytes]', packet: 'dict[str, Any]') -> '_TP':  # type: ignore[override]
         """Unpack field value from :obj:`bytes`.
 
         Args:
             buffer: field buffer.
             packet: packet data.
-            length: field length.
 
         Returns:
             Unpacked field value.
 
         """
+        length = self.length
         if isinstance(buffer, bytes):
-            if length is None:
-                length = self.test_length(packet, len(buffer))
-
             file = io.BytesIO(buffer)  # type: IO[bytes]
         else:
-            if length is None:
-                current = buffer.tell()
-                default_length = buffer.seek(0, io.SEEK_END) - current
-                buffer.seek(current)
-
-                length = self.test_length(packet, default_length)
             file = buffer
-
         return self._protocol(file, length)  # type: ignore[abstract]
 
-    def test_length(self, packet: 'dict[str, Any]', default: 'int') -> 'int':
-        """Get field length hint.
 
-        Arguments:
+class ListField(_Field[list[_TL]]):
+    """Field list for protocol fields.
+
+    Args:
+        length: field size (in bytes); if a callable is given, it should return
+            an integer value and accept the current packet as its only argument.
+        default: field default value.
+        field: field type.
+        callback: callback function to be called upon
+            :meth:`self.__call__ <pcapkit.corekit.fields.field._Field.__call__>`.
+
+    This field is used to represent a list of fields, as in the case of lists of
+    options and/or parameters in a protocol.
+
+    """
+
+    @property
+    def optional(self) -> 'bool':
+        """Field is optional."""
+        return True
+
+    def __init__(self, length: 'int | Callable[[dict[str, Any]], Optional[int]]' = lambda _: None,
+                 callback: 'Callable[[ListField, dict[str, Any]], None]' = lambda *_: None) -> 'None':
+        self._name = '<list>'
+        self._callback = callback
+
+        self._length_callback = None
+        if not isinstance(length, int):
+            self._length_callback, length = length, -1
+        self._length = length
+        self._template = '0s'
+
+    def __call__(self, packet: 'dict[str, Any]') -> 'ListField':
+        """Update field attributes."""
+        self._callback(self, packet)
+        if self._length_callback is not None:
+            self._length = self._length_callback(packet)  # type: ignore[assignment]
+        return self
+
+    def pack(self, value: 'Optional[list[_TL]]', packet: 'dict[str, Any]') -> 'bytes':
+        """Pack field value into :obj:`bytes`.
+
+        Args:
+            value: field value.
             packet: packet data.
-            default: default field length.
 
         Returns:
-            Field length hint.
+            Packed field value.
 
         """
-        value = self._length_hint(packet)
         if value is None:
-            value = default
+            return b''
 
-        self._length = value
-        self._template = f'{value}s'
+        temp = []  # type: list[bytes]
+        for item in value:
+            if isinstance(item, bytes):
+                temp.append(item)
+            else:
+                temp.append(item.pack())
+        return b''.join(temp)
 
-        return value
+    def unpack(self, buffer: 'bytes | IO[bytes]', packet: 'dict[str, Any]') -> 'bytes':  # type: ignore[override]
+        """Unpack field value from :obj:`bytes`.
+
+        Args:
+            buffer: field buffer.
+            packet: packet data.
+
+        Returns:
+            Unpacked field value.
+
+        """
+        length = self.length
+        if isinstance(buffer, bytes):
+            file = io.BytesIO(buffer)  # type: IO[bytes]
+        else:
+            file = buffer
+        return file.read(length)
