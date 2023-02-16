@@ -27,8 +27,8 @@ from typing import TYPE_CHECKING, overload
 from pcapkit.const.reg.transtype import TransType as Enum_TransType
 from pcapkit.protocols.data.internet.ah import AH as Data_AH
 from pcapkit.protocols.internet.ipsec import IPsec
-from pcapkit.utilities.exceptions import ProtocolError, UnsupportedCall, VersionError
 from pcapkit.protocols.schema.internet.ah import AH as Schema_AH
+from pcapkit.utilities.exceptions import ProtocolError, UnsupportedCall, VersionError
 
 if TYPE_CHECKING:
     from enum import IntEnum as StdlibEnum
@@ -204,13 +204,13 @@ class AH(IPsec[Data_AH, Schema_AH]):
     ##########################################################################
 
     @overload
-    def __post_init__(self, file: 'IO[bytes]', length: 'Optional[int]' = ..., *,  # pylint: disable=arguments-differ
+    def __post_init__(self, file: 'IO[bytes] | bytes', length: 'Optional[int]' = ..., *,  # pylint: disable=arguments-differ
                       version: 'Literal[4, 6]' = ..., extension: 'bool' = ...,
                       **kwargs: 'Any') -> 'None': ...
     @overload
     def __post_init__(self, **kwargs: 'Any') -> 'None': ...  # pylint: disable=arguments-differ
 
-    def __post_init__(self, file: 'Optional[IO[bytes]]' = None, length: 'Optional[int]' = None, *,  # pylint: disable=arguments-differ
+    def __post_init__(self, file: 'Optional[IO[bytes] | bytes]' = None, length: 'Optional[int]' = None, *,  # pylint: disable=arguments-differ
                       version: 'Literal[4, 6]' = 4, extension: 'bool' = False,
                       **kwargs: 'Any') -> 'None':
         """Post initialisation hook.
