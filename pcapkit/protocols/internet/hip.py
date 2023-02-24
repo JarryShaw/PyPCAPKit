@@ -30,6 +30,7 @@ Octets      Bits        Name                    Description
 """
 import datetime
 import ipaddress
+import math
 import struct
 from typing import TYPE_CHECKING, cast, overload
 
@@ -58,7 +59,7 @@ from pcapkit.protocols.data.internet.hip import ACKParameter as Data_ACKParamete
 from pcapkit.protocols.data.internet.hip import CertParameter as Data_CertParameter
 from pcapkit.protocols.data.internet.hip import Control as Data_Control
 from pcapkit.protocols.data.internet.hip import \
-    DeffieHellmanParameter as Data_DeffieHellmanParameter
+    DiffieHellmanParameter as Data_DiffieHellmanParameter
 from pcapkit.protocols.data.internet.hip import DHGroupListParameter as Data_DHGroupListParameter
 from pcapkit.protocols.data.internet.hip import \
     EchoRequestSignedParameter as Data_EchoRequestSignedParameter
@@ -126,7 +127,7 @@ from pcapkit.protocols.schema.internet.hip import ACKParameter as Schema_ACKPara
 from pcapkit.protocols.schema.internet.hip import CertParameter as Schema_CertParameter
 from pcapkit.protocols.schema.internet.hip import Control as Schema_Control
 from pcapkit.protocols.schema.internet.hip import \
-    DeffieHellmanParameter as Schema_DeffieHellmanParameter
+    DiffieHellmanParameter as Schema_DiffieHellmanParameter
 from pcapkit.protocols.schema.internet.hip import DHGroupListParameter as Schema_DHGroupListParameter
 from pcapkit.protocols.schema.internet.hip import \
     EchoRequestSignedParameter as Schema_EchoRequestSignedParameter
@@ -151,7 +152,8 @@ from pcapkit.protocols.schema.internet.hip import HIPTransformParameter as Schem
 from pcapkit.protocols.schema.internet.hip import \
     HIPTransportModeParameter as Schema_HIPTransportModeParameter
 from pcapkit.protocols.schema.internet.hip import HITSuiteListParameter as Schema_HITSuiteParameter
-from pcapkit.protocols.schema.internet.hip import HostIdentity as Schema_HostIdentity
+from pcapkit.protocols.schema.internet.hip import ECDSACurveHostIdentity as Schema_ECDSACurveHostIdentity
+from pcapkit.protocols.schema.internet.hip import ECDSALowCurveHostIdentity as Schema_ECDSALowCurveHostIdentity
 from pcapkit.protocols.schema.internet.hip import HostIDParameter as Schema_HostIDParameter
 from pcapkit.protocols.schema.internet.hip import Lifetime as Schema_Lifetime
 from pcapkit.protocols.schema.internet.hip import Locator as Schema_Locator
@@ -821,7 +823,7 @@ class HIP(Internet[Data_HIP, Schema_HIP]):
             ProtocolError: If locator data is malformed.
 
         """
-        def _read_locator(locator: 'Schema_Locator') -> 'Data_LocatorData | IPv4Address':
+        def _read_locator(locator: 'Schema_Locator') -> 'Data_LocatorData | IPv6Address':
             """Parse locator data.
 
             Args:
@@ -838,14 +840,14 @@ class HIP(Internet[Data_HIP, Schema_HIP]):
 
             """
             kind = locator.type
-            size = locator.len * 4
+            size = 8 + locator.len * 4
             data = cast('bytes', locator.value)
 
-            if kind == 0 and size == 16:
-                value = cast('IPv4Address', ipaddress.ip_address(data))
+            if kind == 0 and locator.len == 4:
+                value = cast('IPv6Address', ipaddress.ip_address(data))
                 locator.value = value
                 return value
-            if kind == 1 and size == 20:
+            if kind == 1 and locator.len == 5:
                 locator.value = Schema_LocatorData.unpack(data, size)
                 return Data_LocatorData(
                     spi=locator.value.spi,
@@ -995,13 +997,14 @@ class HIP(Internet[Data_HIP, Schema_HIP]):
         if (clen - 4) % 2 != 0:
             raise ProtocolError(f'HIPv{version}: [ParamNo {code}] invalid format')
 
-        _rlen = (clen - 4) * 4  # Length (clen) = 4 + RHASH_len / 4
+        schema = Schema_SolutionParameter.unpack(data, length)  # type: Schema_SolutionParameter
+        self.__header__.param.append(schema)
 
-        _numk = self._read_unpack(1)
-        _time = self._read_unpack(1)
-        _opak = self._read_fileng(2)
-        _rand = self._read_unpack(_rlen // 8)
-        _solv = self._read_unpack(_rlen // 8)
+        _numk = schema.index
+        _time = schema.lifetime
+        _opak = schema.opaque
+        _rand = schema.random
+        _solt = schema.solution  # Length (clen) = 4 + RHASH_len / 4
 
         solution = Data_SolutionParameter(
             type=code,
@@ -1011,13 +1014,8 @@ class HIP(Internet[Data_HIP, Schema_HIP]):
             lifetime=datetime.timedelta(seconds=2 ** (_time - 32)),
             opaque=_opak,
             random=_rand,
-            solution=_solv,
+            solution=_solt,
         )
-
-        _plen = length - clen
-        if _plen:
-            self._read_fileng(_plen)
-
         return solution
 
     def _read_param_seq(self, code: 'Enum_Parameter', cbit: 'bool', clen: 'int', *,
@@ -1056,7 +1054,10 @@ class HIP(Internet[Data_HIP, Schema_HIP]):
         if clen != 4:
             raise ProtocolError(f'HIPv{version}: [ParamNo {code}] invalid format')
 
-        _upid = self._read_unpack(4)
+        schema = Schema_SEQParameter.unpack(data, length)  # type: Schema_SEQParameter
+        self.__header__.param.append(schema)
+
+        _upid = schema.update_id
 
         seq = Data_SEQParameter(
             type=code,
@@ -1064,7 +1065,6 @@ class HIP(Internet[Data_HIP, Schema_HIP]):
             length=length,
             id=_upid,
         )
-
         return seq
 
     def _read_param_ack(self, code: 'Enum_Parameter', cbit: 'bool', clen: 'int', *,
@@ -1105,17 +1105,15 @@ class HIP(Internet[Data_HIP, Schema_HIP]):
         if clen % 4 != 0:
             raise ProtocolError(f'HIPv{version}: [ParamNo {code}] invalid format')
 
-        _upid = []  # type: list[int]
-        for _ in range(clen // 4):
-            _upid.append(self._read_unpack(4))
+        schema = Schema_ACKParameter.unpack(data, length)  # type: Schema_ACKParameter
+        self.__header__.param.append(schema)
 
         ack = Data_ACKParameter(
             type=code,
             critical=cbit,
             length=length,
-            update_id=tuple(_upid),
+            update_id=tuple(schema.update_id),
         )
-
         return ack
 
     def _read_param_dh_group_list(self, code: 'Enum_Parameter', cbit: 'bool', clen: 'int', *,  # pylint: disable=unused-argument
@@ -1150,26 +1148,20 @@ class HIP(Internet[Data_HIP, Schema_HIP]):
             Parsed parameter data.
 
         """
-        _dhid = []  # type: list[Enum_Group]
-        for _ in range(clen):
-            _dhid.append(Enum_Group.get(self._read_unpack(1)))
+        schema = Schema_DHGroupListParameter.unpack(data, length)  # type: Schema_DHGroupListParameter
+        self.__header__.param.append(schema)
 
         dh_group_list = Data_DHGroupListParameter(
             type=code,
             critical=cbit,
             length=length,
-            group_id=tuple(_dhid),
+            group_id=tuple(schema.groups),
         )
-
-        _plen = length - clen
-        if _plen:
-            self._read_fileng(_plen)
-
         return dh_group_list
 
     def _read_param_diffie_hellman(self, code: 'Enum_Parameter', cbit: 'bool', clen: 'int', *,  # pylint: disable=unused-argument
                                    data: 'bytes', length: 'int', version: 'int',  # pylint: disable=unused-argument
-                                   options: 'Parameter') -> 'Data_DeffieHellmanParameter':  # pylint: disable=unused-argument
+                                   options: 'Parameter') -> 'Data_DiffieHellmanParameter':  # pylint: disable=unused-argument
         """Read HIP ``DIFFIE_HELLMAN`` parameter.
 
         Structure of HIP ``DIFFIE_HELLMAN`` parameter [:rfc:`7401`]:
@@ -1201,23 +1193,17 @@ class HIP(Internet[Data_HIP, Schema_HIP]):
             Parsed parameter data.
 
         """
-        _gpid = self._read_unpack(1)
-        _vlen = self._read_unpack(2)
-        _pval = self._read_fileng(_vlen)
+        schema = Schema_DiffieHellmanParameter.unpack(data, length)  # type: Schema_DiffieHellmanParameter
+        self.__header__.param.append(schema)
 
-        diffie_hellman = Data_DeffieHellmanParameter(
+        diffie_hellman = Data_DiffieHellmanParameter(
             type=code,
             critical=cbit,
             length=length,
-            group_id=Enum_Group.get(_gpid),
-            pub_len=_vlen,
-            pub_val=_pval,
+            group_id=schema.group,
+            pub_len=schema.pub_len,
+            pub_val=schema.pub_val,
         )
-
-        _plen = length - clen
-        if _plen:
-            self._read_fileng(_plen)
-
         return diffie_hellman
 
     def _read_param_hip_transform(self, code: 'Enum_Parameter', cbit: 'bool', clen: 'int', *,
@@ -1260,21 +1246,15 @@ class HIP(Internet[Data_HIP, Schema_HIP]):
         if clen % 2 != 0:
             raise ProtocolError(f'HIPv{version}: [ParamNo {code}] invalid format')
 
-        _stid = []  # type: list[Enum_Suite]
-        for _ in range(clen // 2):
-            _stid.append(Enum_Suite.get(self._read_unpack(2)))
+        schema = Schema_HIPTransformParameter.unpack(data, length)  # type: Schema_HIPTransformParameter
+        self.__header__.param.append(schema)
 
         hip_transform = Data_HIPTransformParameter(
             type=code,
             critical=cbit,
             length=length,
-            suite_id=tuple(_stid),
+            suite_id=tuple(schema.suites),
         )
-
-        _plen = length - clen
-        if _plen:
-            self._read_fileng(_plen)
-
         return hip_transform
 
     def _read_param_hip_cipher(self, code: 'Enum_Parameter', cbit: 'bool', clen: 'int', *,  # pylint: disable=unused-argument
@@ -1315,26 +1295,21 @@ class HIP(Internet[Data_HIP, Schema_HIP]):
         if clen % 2 != 0:
             raise ProtocolError(f'HIPv{version}: [ParamNo {code}] invalid format')
 
-        _cpid = []  # type: list[Enum_Cipher]
-        for index, _ in enumerate(range(clen // 2)):
-            # NOTE: The sender of a HIP_CIPHER parameter MUST make sure that there are no
-            # more than six (6) Cipher IDs in one HIP_CIPHER parameter. [:rfc:`7401#section-5.2.8`]
-            if index > 5:
-                warn(f'HIPv{version}: [ParamNo {code}] invalid format', ProtocolWarning)
-                # raise ProtocolError(f'HIPv{version}: [ParamNo {code}] invalid format')
-            _cpid.append(Enum_Cipher.get(self._read_unpack(2)))
+        schema = Schema_HIPCipherParameter.unpack(data, length)  # type: Schema_HIPCipherParameter
+        self.__header__.param.append(schema)
+
+        # NOTE: The sender of a HIP_CIPHER parameter MUST make sure that there are no
+        # more than six (6) Cipher IDs in one HIP_CIPHER parameter. [:rfc:`7401#section-5.2.8`]
+        if len(schema.ciphers) > 5:
+            warn(f'HIPv{version}: [ParamNo {code}] invalid format', ProtocolWarning)
+            # raise ProtocolError(f'HIPv{version}: [ParamNo {code}] invalid format')
 
         hip_cipher = Data_HIPCipherParameter(
             type=code,
             critical=cbit,
             length=length,
-            cipher_id=tuple(_cpid),
+            cipher_id=tuple(schema.ciphers),
         )
-
-        _plen = length - clen
-        if _plen:
-            self._read_fileng(_plen)
-
         return hip_cipher
 
     def _read_param_nat_traversal_mode(self, code: 'Enum_Parameter', cbit: 'bool', clen: 'int', *,  # pylint: disable=unused-argument
@@ -1377,22 +1352,15 @@ class HIP(Internet[Data_HIP, Schema_HIP]):
         if clen % 2 != 0:
             raise ProtocolError(f'HIPv{version}: [ParamNo {code}] invalid format')
 
-        _resv = self._read_fileng(2)
-        _mdid = []  # type: list[Enum_NATTraversal]
-        for _ in range((clen - 2) // 2):
-            _mdid.append(Enum_NATTraversal.get(self._read_unpack(2)))
+        schema = Schema_NATTraversalModeParameter.unpack(data, length)  # type: Schema_NATTraversalModeParameter
+        self.__header__.param.append(schema)
 
         nat_traversal_mode = Data_NATTraversalModeParameter(
             type=code,
             critical=cbit,
             length=length,
-            mode_id=tuple(_mdid),
+            mode_id=tuple(schema.modes),
         )
-
-        _plen = length - clen
-        if _plen:
-            self._read_fileng(_plen)
-
         return nat_traversal_mode
 
     def _read_param_transaction_pacing(self, code: 'Enum_Parameter', cbit: 'bool', clen: 'int', *,
@@ -1431,15 +1399,15 @@ class HIP(Internet[Data_HIP, Schema_HIP]):
         if clen != 4:
             raise ProtocolError(f'HIPv{version}: [ParamNo {code}] invalid format')
 
-        _data = self._read_unpack(4)
+        schema = Schema_TransactionPacingParameter.unpack(data, length)  # type: Schema_TransactionPacingParameter
+        self.__header__.param.append(schema)
 
         transaction_pacing = Data_TransactionPacingParameter(
             type=code,
             critical=cbit,
             length=length,
-            min_ta=_data,
+            min_ta=schema.min_ta,
         )
-
         return transaction_pacing
 
     def _read_param_encrypted(self, code: 'Enum_Parameter', cbit: 'bool', clen: 'int', *,  # pylint: disable=unused-argument
@@ -1481,20 +1449,44 @@ class HIP(Internet[Data_HIP, Schema_HIP]):
             Parsed parameter data.
 
         """
-        _resv = self._read_fileng(4)
-        _data = self._read_fileng(clen-4)
+        cipher_list = cast('list[Data_HIPCipherParameter]',
+                           options.getlist(Enum_Parameter.HIP_CIPHER))  # type: ignore[arg-type]
+        if cipher_list:
+            warn(f'HIPv{version}: [ParamNo {code}] missing HIP_CIPHER parameter', ProtocolWarning)
+            # raise ProtocolError(f'HIPv{version}: [ParamNo {code}] invalid format')
+
+            cipher_id = Enum_Cipher(0xffff)
+        else:
+            cipher_ids = []  # type: list[Enum_Cipher]
+            for cipher in cipher_list:
+                cipher_ids.extend(cipher.cipher_id)
+
+            encrypted_list = cast('list[Data_EncryptedParameter]',
+                                options.getlist(Enum_Parameter.ENCRYPTED))  # type: ignore[arg-type]
+            encrypted_index = len(encrypted_list)
+
+            if encrypted_index >= len(cipher_ids):
+                warn(f'HIPv{version}: [ParamNo {code}] too many ENCRYPTED parameters', ProtocolWarning)
+                #raise ProtocolError(f'HIPv{version}: [ParamNo {code}] invalid format')
+
+                cipher_id = Enum_Cipher(0xfffe)
+            else:
+                cipher_id = cipher_ids[encrypted_index]
+
+        schema = Schema_EncryptedParameter.unpack(data, length, packet={
+            '__cipher__': cipher_id,
+        })  # type: Schema_EncryptedParameter
+        schema.cipher = cipher_id
+        self.__header__.param.append(schema)
 
         encrypted = Data_EncryptedParameter(
             type=code,
             critical=cbit,
             length=length,
-            raw=_data,
+            cipher=cipher_id,
+            iv=schema.iv,
+            data=schema.data,
         )
-
-        _plen = length - clen
-        if _plen:
-            self._read_fileng(_plen)
-
         return encrypted
 
     def _read_param_host_id(self, code: 'Enum_Parameter', cbit: 'bool', clen: 'int', *,  # pylint: disable=unused-argument
@@ -1533,72 +1525,39 @@ class HIP(Internet[Data_HIP, Schema_HIP]):
             Parsed parameter data.
 
         """
-        def _read_host_identity(length: 'int', code: 'int') -> 'tuple[Enum_HIAlgorithm, Data_HostIdentity | bytes]':  # pylint: disable=line-too-long
-            """Read host identity.
+        schema = Schema_HostIDParameter.unpack(data, length)  # type: Schema_HostIDParameter
+        self.__header__.param.append(schema)
 
-            Args:
-                length: length of host identity
-                code: host identity type
-
-            Returns:
-                Parsed host identity data.
-
-            """
-            if TYPE_CHECKING:
-                host_id: 'Data_HostIdentity | bytes'
-
-            algorithm = Enum_HIAlgorithm.get(code)
-            if algorithm == Enum_HIAlgorithm.ECDSA:
-                host_id = Data_HostIdentity(
-                    curve=Enum_ECDSACurve.get(self._read_unpack(2)),
-                    pubkey=self._read_fileng(length-2),
-                )
-            elif algorithm == Enum_HIAlgorithm.ECDSA_LOW:
-                host_id = Data_HostIdentity(
-                    curve=Enum_ECDSALowCurve.get(self._read_unpack(2)),
-                    pubkey=self._read_fileng(length-2),
-                )
-            else:
-                host_id = self._read_fileng(length)
-            return algorithm, host_id
-
-        def _read_domain_identifier(di_data: 'str') -> 'tuple[Enum_DITypes, int, bytes]':
-            """Read domain identifier.
-
-            Args:
-                di_data: bit string of DI information byte
-
-            Returns:
-                A :data:`tuple` of DI type enumeration, DI content length and DI data.
-
-            """
-            di_type = Enum_DITypes.get(int(di_data[:4], base=2))
-            di_len = int(di_data[4:], base=2)
-            domain_id = self._read_fileng(di_len)
-            return di_type, di_len, domain_id
-
-        _hlen = self._read_unpack(2)
-        _didt = self._read_binary(2)
-        _algo = self._read_unpack(2)
-        _hidf = _read_host_identity(_hlen, _algo)
-        _didf = _read_domain_identifier(_didt)
+        if schema.algorithm == Enum_HIAlgorithm.ECDSA:
+            schema.hi = Schema_ECDSACurveHostIdentity.unpack(
+                cast('bytes', schema.hi), schema.hi_len,
+            )
+            hi = Data_HostIdentity(
+                curve=schema.hi.curve,
+                pubkey=schema.hi.pub_key,
+            )
+        elif schema.algorithm == Enum_HIAlgorithm.ECDSA_LOW:
+            schema.hi = Schema_ECDSALowCurveHostIdentity.unpack(
+                cast('bytes', schema.hi), schema.hi_len,
+            )
+            hi = Data_HostIdentity(
+                curve=schema.hi.curve,
+                pubkey=schema.hi.pub_key,
+            )
+        else:
+            hi = cast('bytes', schema.hi)  # type: ignore[assignment]
 
         host_id = Data_HostIDParameter(
             type=code,
             critical=cbit,
             length=length,
-            hi_len=_hlen,
-            di_type=_didf[0],
-            di_len=_didf[1],
-            algorithm=_hidf[0],
-            hi=_hidf[1],
-            di=_didf[2],
+            hi_len=schema.hi_len,
+            di_type=schema.di_data['type'],
+            di_len=schema.di_data['len'],
+            algorithm=schema.algorithm,
+            hi=hi,
+            di=schema.di,
         )
-
-        _plen = length - clen
-        if _plen:
-            self._read_fileng(_plen)
-
         return host_id
 
     def _read_param_hit_suite_list(self, code: 'Enum_Parameter', cbit: 'bool', clen: 'int', *,  # pylint: disable=unused-argument
@@ -3420,7 +3379,7 @@ class HIP(Internet[Data_HIP, Schema_HIP]):
         """
         return Schema_UnassignedParameter(
             type=code,
-            len=param.length,
+            len=len(param.contents),
             value=param.contents,
         )
 
@@ -3437,12 +3396,9 @@ class HIP(Internet[Data_HIP, Schema_HIP]):
             HIP parameter schema.
 
         """
-        if param.length != 12:
-            raise ProtocolError(f'HIPv{version}: [ParamNo {code}] invalid format')
-
         return Schema_ESPInfoParameter(
             type=code,
-            len=param.length,
+            len=12,
             index=param.index,
             old_spi=param.old_spi,
             new_spi=param.new_spi,
@@ -3461,14 +3417,12 @@ class HIP(Internet[Data_HIP, Schema_HIP]):
             HIP parameter schema.
 
         """
-        if param.length != 12:
-            raise ProtocolError(f'HIPv{version}: [ParamNo {code}] invalid format')
         if code == Enum_Parameter.R1_Counter and version != 1:
             raise ProtocolError(f'HIPv{version}: [ParamNo {code}] invalid parameter')
 
         return Schema_R1CounterParameter(
             type=code,
-            len=param.length,
+            len=12,
             counter=param.counter,
         )
 
@@ -3496,7 +3450,7 @@ class HIP(Internet[Data_HIP, Schema_HIP]):
 
             """
             value = locator.locator
-            if isinstance(value, ipaddress.IPv4Address):
+            if isinstance(value, ipaddress.IPv6Address):
                 data = value.packed  # type: bytes | Schema_LocatorData
             elif isinstance(value, Data_LocatorData):
                 data = Schema_LocatorData(
@@ -3509,7 +3463,7 @@ class HIP(Internet[Data_HIP, Schema_HIP]):
             return Schema_Locator(
                 traffic=locator.traffic,
                 type=locator.type,
-                len=locator.length,
+                len=locator.length // 4,
                 flags={
                     'preferred': locator.preferred,
                 },
@@ -3519,7 +3473,7 @@ class HIP(Internet[Data_HIP, Schema_HIP]):
 
         return Schema_LocatorSetParameter(
             type=code,
-            len=param.length,
+            len=sum(locator.length for locator in param.locator_set),
             locators=[_make_locator(locator) for locator in param.locator_set],
         )
 
@@ -3538,9 +3492,230 @@ class HIP(Internet[Data_HIP, Schema_HIP]):
         """
         return Schema_PuzzleParameter(
             type=code,
-            len=param.length,
+            len=4 + math.ceil(param.random.bit_length() / 8),
             index=param.index,
-            lifetime=int(param.lifetime.total_seconds()),
+            lifetime=math.floor(math.log2(param.lifetime.total_seconds()) + 32),
             opaque=param.opaque,
             random=param.random,
+        )
+
+    def _make_param_solution(self, code: 'Enum_Parameter', param: 'Data_SolutionParameter', *,  # pylint: disable=unused-argument
+                             version: 'int') -> 'Schema_SolutionParameter':
+        """Make HIP ``SOLUTION`` parameter.
+
+        Args:
+            code: parameter code
+            param: parameter data
+            version: HIP protocol version
+
+        Returns:
+            HIP parameter schema.
+
+        """
+        return Schema_SolutionParameter(
+            type=code,
+            len=4 + math.ceil(max(param.random.bit_length(), param.solution.bit_length()) / 4),
+            index=param.index,
+            lifetime=math.floor(math.log2(param.lifetime.total_seconds()) + 32),
+            opaque=param.opaque,
+            random=param.random,
+            solution=param.solution,
+        )
+
+    def _make_param_seq(self, code: 'Enum_Parameter', param: 'Data_SEQParameter', *,  # pylint: disable=unused-argument
+                        version: 'int') -> 'Schema_SEQParameter':
+        """Make HIP ``SEQ`` parameter.
+
+        Args:
+            code: parameter code
+            param: parameter data
+            version: HIP protocol version
+
+        Returns:
+            HIP parameter schema.
+
+        """
+        return Schema_SEQParameter(
+            type=code,
+            len=4,
+            update_id=param.id,
+        )
+
+    def _make_param_ack(self, code: 'Enum_Parameter', param: 'Data_ACKParameter', *,  # pylint: disable=unused-argument
+                        version: 'int') -> 'Schema_ACKParameter':
+        """Make HIP ``ACK`` parameter.
+
+        Args:
+            code: parameter code
+            param: parameter data
+            version: HIP protocol version
+
+        Returns:
+            HIP parameter schema.
+
+        """
+        return Schema_ACKParameter(
+            type=code,
+            len=4 * len(param.update_id),
+            update_id=cast('list[int]', param.update_id),
+        )
+
+    def _make_param_dh_group_list(self, code: 'Enum_Parameter', param: 'Data_DHGroupListParameter', *,  # pylint: disable=unused-argument
+                                  version: 'int') -> 'Schema_DHGroupListParameter':
+        """Make HIP ``DH_GROUP_LIST`` parameter.
+
+        Args:
+            code: parameter code
+            param: parameter data
+            version: HIP protocol version
+
+        Returns:
+            HIP parameter schema.
+
+        """
+        return Schema_DHGroupListParameter(
+            type=code,
+            len=len(param.group_id),
+            groups=cast('list[Enum_Group]', param.group_id),
+        )
+
+    def _make_param_diffie_hellman(self, code: 'Enum_Parameter', param: 'Data_DiffieHellmanParameter', *,  # pylint: disable=unused-argument
+                                   version: 'int') -> 'Schema_DiffieHellmanParameter':
+        """Make HIP ``DIFFIE_HELLMAN`` parameter.
+
+        Args:
+            code: parameter code
+            param: parameter data
+            version: HIP protocol version
+
+        Returns:
+            HIP parameter schema.
+
+        """
+        return Schema_DiffieHellmanParameter(
+            type=code,
+            len=3 + param.pub_len,
+            group=param.group_id,
+            pub_len=param.pub_len,
+            pub_val=param.pub_val,
+        )
+
+    def _make_param_hip_transform(self, code: 'Enum_Parameter', param: 'Data_HIPTransformParameter', *,  # pylint: disable=unused-argument
+                                  version: 'int') -> 'Schema_HIPTransformParameter':
+        """Make HIP ``HIP_TRANSFORM`` parameter.
+
+        Args:
+            code: parameter code
+            param: parameter data
+            version: HIP protocol version
+
+        Returns:
+            HIP parameter schema.
+
+        """
+        return Schema_HIPTransformParameter(
+            type=code,
+            len=2 * len(param.suite_id),
+            suites=cast('list[Enum_Suite]', param.suite_id),
+        )
+
+    def _make_param_hip_cipher(self, code: 'Enum_Parameter', param: 'Data_HIPCipherParameter', *,  # pylint: disable=unused-argument
+                               version: 'int') -> 'Schema_HIPCipherParameter':
+        """Make HIP ``HIP_CIPHER`` parameter.
+
+        Args:
+            code: parameter code
+            param: parameter data
+            version: HIP protocol version
+
+        Returns:
+            HIP parameter schema.
+
+        """
+        return Schema_HIPCipherParameter(
+            type=code,
+            len=2 * len(param.cipher_id),
+            ciphers=cast('list[Enum_Cipher]', param.cipher_id),
+        )
+
+    def _make_param_nat_traversal_mode(self, code: 'Enum_Parameter', param: 'Data_NATTraversalModeParameter', *,  # pylint: disable=unused-argument
+                                       version: 'int') -> 'Schema_NATTraversalModeParameter':
+        """Make HIP ``NAT_TRAVERSAL_MODE`` parameter.
+
+        Args:
+            code: parameter code
+            param: parameter data
+            version: HIP protocol version
+
+        Returns:
+            HIP parameter schema.
+
+        """
+        return Schema_NATTraversalModeParameter(
+            type=code,
+            len=2 + 2 * len(param.mode_id),
+            modes=cast('list[Enum_NATTraversal]', param.mode_id),
+        )
+
+    def _make_param_encrypted(self, code: 'Enum_Parameter', param: 'Data_EncryptedParameter', *,  # pylint: disable=unused-argument
+                              version: 'int') -> 'Schema_EncryptedParameter':
+        """Make HIP ``ENCRYPTED`` parameter.
+
+        Args:
+            code: parameter code
+            param: parameter data
+            version: HIP protocol version
+
+        Returns:
+            HIP parameter schema.
+
+        """
+        return Schema_EncryptedParameter(
+            type=code,
+            len=4 + len(param.iv or b'') + len(param.data),
+            cipher=param.cipher,
+            iv=param.iv,
+            data=param.data,
+        )
+
+    def _make_param_host_id(self, code: 'Enum_Parameter', param: 'Data_HostIDParameter', *,  # pylint: disable=unused-argument
+                            version: 'int') -> 'Schema_HostIDParameter':
+        """Make HIP ``HOST_ID`` parameter.
+
+        Args:
+            code: parameter code
+            param: parameter data
+            version: HIP protocol version
+
+        Returns:
+            HIP parameter schema.
+
+        """
+        if isinstance(param.hi, Data_HostIdentity):
+            if isinstance(param.hi.curve, Enum_ECDSACurve):
+                hi = Schema_ECDSACurveHostIdentity(
+                    curve=param.hi.curve,
+                    pub_key=param.hi.pubkey,
+                )  # type: Schema_ECDSACurveHostIdentity | Schema_ECDSALowCurveHostIdentity | bytes
+            elif isinstance(param.hi.curve, Enum_ECDSALowCurve):
+                hi = Schema_ECDSALowCurveHostIdentity(
+                    curve=param.hi.curve,
+                    pub_key=param.hi.pubkey,
+                )
+            else:
+                raise ProtocolError(f'[HIPv{version}] invalid ECDSA curve: {param.hi.curve!r}')
+        else:
+            hi = param.hi
+
+        return Schema_HostIDParameter(
+            type=code,
+            len=6 + param.hi_len + param.di_len,
+            hi_len=param.hi_len,
+            di_data={
+                'type': param.di_type,
+                'len': param.di_len,
+            },
+            algorithm=param.algorithm,
+            hi=hi,
+            di=param.di,
         )

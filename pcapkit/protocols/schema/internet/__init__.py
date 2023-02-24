@@ -10,7 +10,7 @@ from pcapkit.protocols.schema.internet.hip import AckDataParameter as HIP_AckDat
 from pcapkit.protocols.schema.internet.hip import ACKParameter as HIP_ACKParameter
 from pcapkit.protocols.schema.internet.hip import CertParameter as HIP_CertParameter
 from pcapkit.protocols.schema.internet.hip import Control as HIP_Control
-from pcapkit.protocols.schema.internet.hip import DeffieHellmanParameter as HIP_DeffieHellmanParameter
+from pcapkit.protocols.schema.internet.hip import DiffieHellmanParameter as HIP_DiffieHellmanParameter
 from pcapkit.protocols.schema.internet.hip import DHGroupListParameter as HIP_DHGroupListParameter
 from pcapkit.protocols.schema.internet.hip import \
     EchoRequestSignedParameter as HIP_EchoRequestSignedParameter
@@ -21,6 +21,8 @@ from pcapkit.protocols.schema.internet.hip import \
 from pcapkit.protocols.schema.internet.hip import \
     EchoResponseUnsignedParameter as HIP_EchoResponseUnsignedParameter
 from pcapkit.protocols.schema.internet.hip import EncryptedParameter as HIP_EncryptedParameter
+from pcapkit.protocols.schema.internet.hip import ECDSACurveHostIdentity as HIP_ECDSACurveHostIdentity
+from pcapkit.protocols.schema.internet.hip import ECDSALowCurveHostIdentity as HIP_ECDSALowCurveHostIdentity
 from pcapkit.protocols.schema.internet.hip import ESPInfoParameter as HIP_ESPInfoParameter
 from pcapkit.protocols.schema.internet.hip import ESPTransformParameter as HIP_ESPTransformParameter
 from pcapkit.protocols.schema.internet.hip import Flags as HIP_Flags
@@ -34,7 +36,6 @@ from pcapkit.protocols.schema.internet.hip import HIPTransformParameter as HIP_H
 from pcapkit.protocols.schema.internet.hip import \
     HIPTransportModeParameter as HIP_HIPTransportModeParameter
 from pcapkit.protocols.schema.internet.hip import HITSuiteListParameter as HIP_HITSuiteListParameter
-from pcapkit.protocols.schema.internet.hip import HostIdentity as HIP_HostIdentity
 from pcapkit.protocols.schema.internet.hip import HostIDParameter as HIP_HostIDParameter
 from pcapkit.protocols.schema.internet.hip import Lifetime as HIP_Lifetime
 from pcapkit.protocols.schema.internet.hip import Locator as HIP_Locator
@@ -74,11 +75,12 @@ __all__ = [
 
     # Host Identity Protocol
     'HIP',
-    'HIP_LocatorData', 'HIP_Locator', 'HIP_HostIdentity', 'HIP_Lifetime', 'HIP_Flags',
+    'HIP_LocatorData', 'HIP_Locator', 'HIP_ECDSACurveHostIdentity', 'HIP_ECDSALowCurveHostIdentity',
+    'HIP_Lifetime', 'HIP_Flags',
     'HIP_UnassignedParameter', 'HIP_ESPInfoParameter', 'HIP_R1CounterParameter',
     'HIP_LocatorSetParameter', 'HIP_PuzzleParameter', 'HIP_SolutionParameter',
     'HIP_SEQParameter', 'HIP_ACKParameter', 'HIP_DHGroupListParameter',
-    'HIP_DeffieHellmanParameter', 'HIP_HIPTransformParameter', 'HIP_HIPCipherParameter',
+    'HIP_DiffieHellmanParameter', 'HIP_HIPTransformParameter', 'HIP_HIPCipherParameter',
     'HIP_NATTraversalModeParameter', 'HIP_TransactionPacingParameter', 'HIP_EncryptedParameter',
     'HIP_HostIDParameter', 'HIP_HITSuiteListParameter', 'HIP_CertParameter',
     'HIP_NotificationParameter', 'HIP_EchoRequestSignedParameter', 'HIP_RegInfoParameter',

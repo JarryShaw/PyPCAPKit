@@ -256,7 +256,7 @@ Data Structures
 
    .. autoattribute:: group_id
 
-.. autoclass:: pcapkit.protocols.data.internet.hip.DeffieHellmanParameter(type, critical, length, group_id, pub_len, pub_val)
+.. autoclass:: pcapkit.protocols.data.internet.hip.DiffieHellmanParameter(type, critical, length, group_id, pub_len, pub_val)
    :no-members:
    :show-inheritance:
 

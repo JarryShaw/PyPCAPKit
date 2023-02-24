@@ -10,7 +10,7 @@ from pcapkit.protocols.data.internet.hip import AckDataParameter as HIP_AckDataP
 from pcapkit.protocols.data.internet.hip import ACKParameter as HIP_ACKParameter
 from pcapkit.protocols.data.internet.hip import CertParameter as HIP_CertParameter
 from pcapkit.protocols.data.internet.hip import Control as HIP_Control
-from pcapkit.protocols.data.internet.hip import DeffieHellmanParameter as HIP_DeffieHellmanParameter
+from pcapkit.protocols.data.internet.hip import DiffieHellmanParameter as HIP_DiffieHellmanParameter
 from pcapkit.protocols.data.internet.hip import DHGroupListParameter as HIP_DHGroupListParameter
 from pcapkit.protocols.data.internet.hip import \
     EchoRequestSignedParameter as HIP_EchoRequestSignedParameter
@@ -175,7 +175,7 @@ __all__ = [
     'HIP_UnassignedParameter', 'HIP_ESPInfoParameter', 'HIP_R1CounterParameter',
     'HIP_LocatorSetParameter', 'HIP_PuzzleParameter', 'HIP_SolutionParameter',
     'HIP_SEQParameter', 'HIP_ACKParameter', 'HIP_DHGroupListParameter',
-    'HIP_DeffieHellmanParameter', 'HIP_HIPTransformParameter', 'HIP_HIPCipherParameter',
+    'HIP_DiffieHellmanParameter', 'HIP_HIPTransformParameter', 'HIP_HIPCipherParameter',
     'HIP_NATTraversalModeParameter', 'HIP_TransactionPacingParameter', 'HIP_EncryptedParameter',
     'HIP_HostIDParameter', 'HIP_HITSuiteListParameter', 'HIP_CertParameter',
     'HIP_NotificationParameter', 'HIP_EchoRequestSignedParameter', 'HIP_RegInfoParameter',

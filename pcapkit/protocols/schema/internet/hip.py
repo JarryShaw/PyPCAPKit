@@ -6,11 +6,19 @@ from typing import TYPE_CHECKING
 
 from pcapkit.const.hip.parameter import Parameter as Enum_Parameter
 from pcapkit.const.reg.transtype import TransType as Enum_TransType
-from pcapkit.corekit.fields.misc import ListField, PayloadField
+from pcapkit.corekit.fields.misc import ListField, PayloadField, ConditionalField
 from pcapkit.corekit.fields.numbers import (EnumField, NumberField, UInt8Field, UInt16Field,
                                             UInt32Field)
 from pcapkit.corekit.fields.strings import BitField, BytesField, PaddingField
 from pcapkit.protocols.schema.schema import Schema
+from pcapkit.const.hip.group import Group as Enum_Group
+from pcapkit.const.hip.suite import Suite as Enum_Suite
+from pcapkit.const.hip.cipher import Cipher as Enum_Cipher
+from pcapkit.const.hip.nat_traversal import NATTraversal as Enum_NATTraversal
+from pcapkit.const.hip.di import DITypes as Enum_DITypes
+from pcapkit.const.hip.hi_algorithm import HIAlgorithm as Enum_HIAlgorithm
+from pcapkit.const.hip.ecdsa_curve import ECDSACurve as Enum_ECDSACurve
+from pcapkit.const.hip.ecdsa_low_curve import ECDSALowCurve as Enum_ECDSALowCurve
 
 __all__ = [
     'HIP',
@@ -18,14 +26,14 @@ __all__ = [
     'LocatorData', 'Locator',
 
     'LocatorData', 'Locator',
-    'HostIdentity',
+    'ECDSACurveHostIdentity', 'ECDSALowCurveHostIdentity',
     'Lifetime',
     'Flags',
 
     'UnassignedParameter', 'ESPInfoParameter', 'R1CounterParameter',
     'LocatorSetParameter', 'PuzzleParameter', 'SolutionParameter',
     'SEQParameter', 'ACKParameter', 'DHGroupListParameter',
-    'DeffieHellmanParameter', 'HIPTransformParameter', 'HIPCipherParameter',
+    'DiffieHellmanParameter', 'HIPTransformParameter', 'HIPCipherParameter',
     'NATTraversalModeParameter', 'TransactionPacingParameter', 'EncryptedParameter',
     'HostIDParameter', 'HITSuiteListParameter', 'CertParameter',
     'NotificationParameter', 'EchoRequestSignedParameter', 'RegInfoParameter',
@@ -41,8 +49,9 @@ __all__ = [
 ]
 
 if TYPE_CHECKING:
+    from typing import Optional
     from typing_extensions import Literal, TypedDict
-    from ipaddress import IPv4Address
+    from ipaddress import IPv6Address
 
     from pcapkit.protocols.protocol import Protocol
 
@@ -73,6 +82,14 @@ if TYPE_CHECKING:
 
         #: Preferred flag.
         preferred: bool
+
+    class DIData(TypedDict):
+        """DI type data."""
+
+        #: DI type.
+        type: Enum_DITypes
+        #: DI length.
+        len: int
 
 
 class HIP(Schema):
@@ -207,7 +224,7 @@ class Locator(Schema):
     )
     lifetime: 'int' = UInt32Field()
     #: Locator value.
-    value: 'IPv4Address | LocatorData' = BytesField(length=lambda pkt: pkt['len'] * 4)
+    value: 'IPv6Address | LocatorData' = BytesField(length=lambda pkt: pkt['len'] * 4)
 
     if TYPE_CHECKING:
         def __init__(self, traffic: 'int', type: 'int', len: 'int', flags: 'LocatorFlags',
@@ -220,7 +237,7 @@ class LocatorData(Schema):
     #: SPI.
     spi: 'int' = UInt32Field()
     #: Locator.
-    ip: 'bytes' = BytesField(length=16)
+    ip: 'bytes' = BytesField(length=4)
 
     if TYPE_CHECKING:
         def __init__(self, spi: 'int', ip: 'bytes') -> 'None': ...
@@ -243,3 +260,219 @@ class PuzzleParameter(Parameter):
     if TYPE_CHECKING:
         def __init__(self, type: 'Enum_Parameter', len: 'int', index: 'int', lifetime: 'int',
                      opaque: 'bytes', random: 'int') -> 'None': ...
+
+
+class SolutionParameter(Parameter):
+    """Header schema for HIP solution parameters."""
+
+    #: Numeric index.
+    index: 'int' = UInt8Field()
+    #: Lifetime.
+    lifetime: 'int' = UInt8Field()
+    #: Opaque data.
+    opaque: 'bytes' = BytesField(length=2)
+    #: Random data.
+    random: 'int' = NumberField(length=lambda pkt: (pkt['len'] - 4) // 2, signed=False)
+    #: Solution.
+    solution: 'int' = NumberField(length=lambda pkt: (pkt['len'] - 4) // 2, signed=False)
+    #: Padding.
+    padding: 'bytes' = PaddingField(length=lambda pkt: (8 - (pkt['len'] % 8)) % 8)
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_Parameter', len: 'int', index: 'int', lifetime: 'int',
+                     opaque: 'bytes', random: 'int', solution: 'int') -> 'None': ...
+
+
+class SEQParameter(Parameter):
+    """Header schema for HIP SEQ parameters."""
+
+    #: Update ID.
+    update_id: 'int' = UInt32Field()
+    #: Padding.
+    padding: 'bytes' = PaddingField(length=lambda pkt: (8 - (pkt['len'] % 8)) % 8)
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_Parameter', len: 'int', update_id: 'int') -> 'None': ...
+
+
+class ACKParameter(Parameter):
+    """Header schema for HIP ACK parameters."""
+
+    #: Update ID.
+    update_id: 'list[int]' = ListField(
+        length=lambda pkt: pkt['len'],
+        item_type=UInt32Field(),
+    )
+    #: Padding.
+    padding: 'bytes' = PaddingField(length=lambda pkt: (8 - (pkt['len'] % 8)) % 8)
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_Parameter', len: 'int', update_id: 'bytes | list[int]') -> 'None': ...
+
+
+class DHGroupListParameter(Parameter):
+    """Header schema for HIP DH group list parameters."""
+
+    #: List of DH groups.
+    groups: 'list[Enum_Group]' = ListField(
+        length=lambda pkt: pkt['len'],
+        item_type=EnumField(length=1, namespace=Enum_Group),
+    )
+    #: Padding.
+    padding: 'bytes' = PaddingField(length=lambda pkt: (8 - (pkt['len'] % 8)) % 8)
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_Parameter', len: 'int', groups: 'list[Enum_Group]') -> 'None': ...
+
+
+class DiffieHellmanParameter(Parameter):
+    """Header schema for HIP Diffie-Hellman parameters."""
+
+    #: Diffie-Hellman group.
+    group: 'Enum_Group' = EnumField(length=1, namespace=Enum_Group)
+    #: Public value length.
+    pub_len: 'int' = UInt16Field()
+    #: Diffie-Hellman value.
+    pub_val: 'int' = NumberField(length=lambda pkt: pkt['pub_len'], signed=False)
+    #: Padding.
+    padding: 'bytes' = PaddingField(length=lambda pkt: (8 - (pkt['len'] % 8)) % 8)
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_Parameter', len: 'int', group: 'Enum_Group', pub_len: 'int',
+                     pub_val: 'int') -> 'None': ...
+
+
+class HIPTransformParameter(Parameter):
+    """Header schema for HIP transform parameters."""
+
+    #: Suite IDs.
+    suites: 'list[Enum_Suite]' = ListField(
+        length=lambda pkt: pkt['len'],
+        item_type=EnumField(length=2, namespace=Enum_Suite),
+    )
+    #: Padding.
+    padding: 'bytes' = PaddingField(length=lambda pkt: (8 - (pkt['len'] % 8)) % 8)
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_Parameter', len: 'int', suites: 'list[Enum_Suite]') -> 'None': ...
+
+
+class HIPCipherParameter(Parameter):
+    """Header schema for HIP cipher parameters."""
+
+    #: Cipher IDs.
+    ciphers: 'list[Enum_Cipher]' = ListField(
+        length=lambda pkt: pkt['len'],
+        item_type=EnumField(length=2, namespace=Enum_Cipher),
+    )
+    #: Padding.
+    padding: 'bytes' = PaddingField(length=lambda pkt: (8 - (pkt['len'] % 8)) % 8)
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_Parameter', len: 'int', ciphers: 'list[Enum_Cipher]') -> 'None': ...
+
+
+class NATTraversalModeParameter(Parameter):
+    """Header schema for HIP NAT traversal mode parameters."""
+
+    #: Reserved.
+    reserved: 'bytes' = PaddingField(length=2)
+    #: NAT traversal modes.
+    modes: 'list[Enum_NATTraversal]' = ListField(
+        length=lambda pkt: pkt['len'] - 2,
+        item_type=EnumField(length=1, namespace=Enum_NATTraversal),
+    )
+    #: Padding.
+    padding: 'bytes' = PaddingField(length=lambda pkt: (8 - (pkt['len'] % 8)) % 8)
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_Parameter', len: 'int', modes: 'list[Enum_NATTraversal]') -> 'None': ...
+
+
+class TransactionPacingParameter(Parameter):
+    """Header schema for HIP transaction pacing parameters."""
+
+    #: Transaction pacing.
+    min_ta: 'int' = UInt32Field()
+    #: Padding.
+    padding: 'bytes' = PaddingField(length=lambda pkt: (8 - (pkt['len'] % 8)) % 8)
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_Parameter', len: 'int', min_ta: 'int') -> 'None': ...
+
+
+class EncryptedParameter(Parameter):
+    """Header schema for HIP encrypted parameters."""
+
+    #: Reserved.
+    reserved: 'bytes' = PaddingField(length=4)
+    #: Initialization vector.
+    iv: 'bytes' = ConditionalField(
+        BytesField(length=16),
+        lambda pkt: pkt['__cipher__'] in (Enum_Cipher.AES_128_CBC, Enum_Cipher.AES_256_CBC),
+    )
+    #: Data.
+    data: 'bytes' = BytesField(
+        length=lambda pkt: pkt['len'] - (16 if pkt['iv'] else 0),
+    )
+    #: Padding.
+    padding: 'bytes' = PaddingField(length=lambda pkt: (8 - (pkt['len'] % 8)) % 8)
+
+    if TYPE_CHECKING:
+        #: Cipher ID.
+        cipher: 'Enum_Cipher'
+
+        def __init__(self, type: 'Enum_Parameter', len: 'int', cipher: 'Enum_Cipher',
+                     iv: 'Optional[bytes]', data: 'bytes') -> 'None': ...
+
+
+class HostIDParameter(Parameter):
+    """Header schema for HIP host ID parameters."""
+
+    #: Host ID length.
+    hi_len: 'int' = UInt16Field()
+    #: Domain ID type and length.
+    di_data: 'DIData' = BitField(
+        length=4,
+        namespace={
+            'type': (0, 4),
+            'len': (4, 12),
+        },
+    )
+    #: Algorithm type.
+    algorithm: 'Enum_HIAlgorithm' = EnumField(length=2, namespace=Enum_HIAlgorithm)
+    #: Host ID.
+    hi: 'bytes | ECDSACurveHostIdentity | ECDSALowCurveHostIdentity' = BytesField(length=lambda pkt: pkt['hi_len'])
+    #: Domain ID.
+    di: 'bytes' = BytesField(length=lambda pkt: pkt['di_data']['len'])
+    #: Padding.
+    padding: 'bytes' = PaddingField(length=lambda pkt: (8 - (pkt['len'] % 8)) % 8)
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_Parameter', len: 'int', hi_len: 'int', di_data: 'DIData',
+                     algorithm: 'Enum_HIAlgorithm', hi: 'bytes | ECDSACurveHostIdentity | ECDSALowCurveHostIdentity',
+                     di: 'bytes') -> 'None': ...
+
+
+class ECDSACurveHostIdentity(Schema):
+    """Host identity schema with ECDSA curve."""
+
+    #: Algorithm curve type.
+    curve: 'Enum_ECDSACurve' = EnumField(length=2, namespace=Enum_ECDSACurve)
+    #: Public key.
+    pub_key: 'bytes' = BytesField(length=lambda pkt: pkt['__length__'] - 2)
+
+    if TYPE_CHECKING:
+        def __init__(self, curve: 'Enum_ECDSACurve', pub_key: 'bytes') -> 'None': ...
+
+
+class ECDSALowCurveHostIdentity(Schema):
+    """Host identity schema with ECDSA low curve."""
+
+    #: Algorithm curve type.
+    curve: 'Enum_ECDSALowCurve' = EnumField(length=2, namespace=Enum_ECDSALowCurve)
+    #: Public key.
+    pub_key: 'bytes' = BytesField(length=lambda pkt: pkt['__length__'] - 2)
+
+    if TYPE_CHECKING:
+        def __init__(self, curve: 'Enum_ECDSALowCurve', pub_key: 'bytes') -> 'None': ...
