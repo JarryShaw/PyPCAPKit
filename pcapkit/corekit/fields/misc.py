@@ -5,7 +5,7 @@ import io
 from typing import TYPE_CHECKING, TypeVar, cast
 
 from pcapkit.corekit.fields.field import NoValue, _Field
-from pcapkit.utilities.exceptions import NoDefaultValue
+from pcapkit.utilities.exceptions import NoDefaultValue, FieldValueError
 
 __all__ = ['ConditionalField', 'PayloadField']
 
@@ -18,7 +18,7 @@ if TYPE_CHECKING:
 
 _TC = TypeVar('_TC')
 _TP = TypeVar('_TP', bound='Protocol')
-_TL = TypeVar('_TL', 'Schema', 'bytes')
+_TL = TypeVar('_TL', 'Schema', '_Field', 'bytes')
 
 
 class ConditionalField(_Field[_TC]):
@@ -298,7 +298,7 @@ class ListField(_Field[list[_TL]]):
     Args:
         length: field size (in bytes); if a callable is given, it should return
             an integer value and accept the current packet as its only argument.
-        default: field default value.
+        item_type: field type of the contained items.
         field: field type.
         callback: callback function to be called upon
             :meth:`self.__call__ <pcapkit.corekit.fields.field._Field.__call__>`.
@@ -314,9 +314,11 @@ class ListField(_Field[list[_TL]]):
         return True
 
     def __init__(self, length: 'int | Callable[[dict[str, Any]], Optional[int]]' = lambda _: None,
+                 item_type: 'Optional[Field]' = None,
                  callback: 'Callable[[ListField, dict[str, Any]], None]' = lambda *_: None) -> 'None':
         self._name = '<list>'
         self._callback = callback
+        self._item_type = item_type
 
         self._length_callback = None
         if not isinstance(length, int):
@@ -345,15 +347,21 @@ class ListField(_Field[list[_TL]]):
         if value is None:
             return b''
 
+        from pcapkit.protocols.schema.schema import Schema  # pylint: disable=import-outside-top-level
+
         temp = []  # type: list[bytes]
         for item in value:
             if isinstance(item, bytes):
                 temp.append(item)
-            else:
+            elif isinstance(item, Schema):
                 temp.append(item.pack())
+            elif self._item_type is not None:
+                temp.append(self._item_type.pack(item, packet))
+            else:
+                raise FieldValueError(f'Field {self.name} has invalid value.')
         return b''.join(temp)
 
-    def unpack(self, buffer: 'bytes | IO[bytes]', packet: 'dict[str, Any]') -> 'bytes':  # type: ignore[override]
+    def unpack(self, buffer: 'bytes | IO[bytes]', packet: 'dict[str, Any]') -> 'bytes | list[_TL]':  # type: ignore[override]
         """Unpack field value from :obj:`bytes`.
 
         Args:
@@ -369,4 +377,13 @@ class ListField(_Field[list[_TL]]):
             file = io.BytesIO(buffer)  # type: IO[bytes]
         else:
             file = buffer
+
+        if self._item_type is not None:
+            field = self._item_type(packet)
+
+            temp = []  # type: list[_TL]
+            for _ in range(length // field.length):
+                buffer = file.read(field.length)
+                temp.append(field.unpack(buffer, packet))
+            return temp
         return file.read(length)
