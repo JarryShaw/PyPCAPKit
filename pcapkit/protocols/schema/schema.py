@@ -40,7 +40,7 @@ class Schema(Mapping[str, VT], Generic[VT]):
         #: List of fields.
         __fields__: 'list[_Field]'
         #: Mapping of field names to packed values.
-        __buffer__: 'dict[str, bytes | NoValueType]'
+        __buffer__: 'dict[str, bytes]'
         #: Flag for whether the schema is recently updated.
         __updated__: 'bool'
 
@@ -134,14 +134,14 @@ class Schema(Mapping[str, VT], Generic[VT]):
 
         # NOTE: We only create the attributes for the instance itself,
         # to avoid creating shared attributes for the class.
-        self.__buffer__ = {field.name: NoValue for field in self.__fields__}
-        self.__updated__ = False
+        self.__buffer__ = {field.name: b'' for field in self.__fields__}
+        self.__updated__ = True
 
         return self
 
     def __post_init__(self) -> 'None':
         for field in self.__fields__:
-            if self.__dict__[field.name] is NoValue:
+            if self.__dict__[field.name] in (NoValue, None):
                 self.__dict__[field.name] = field.default
         self.pack()
 
@@ -215,11 +215,7 @@ class Schema(Mapping[str, VT], Generic[VT]):
 
         buffer = []  # type: list[bytes]
         for field in self.__fields__:
-            value = self.__dict__[field.name]
-            if value is NoValue:
-                value = field.default
-                if value is NoValue:
-                    value = bytes(field.length)
+            value = self.__buffer__[field.name]
             buffer.append(value)
         return b''.join(buffer)
 
@@ -339,14 +335,15 @@ class Schema(Mapping[str, VT], Generic[VT]):
 
             if isinstance(field, ConditionalField):
                 if not field.test(packet):
+                    self.__buffer__[field.name] = b''
                     continue
                 field = field.field
 
             value = getattr(self, field.name)
             try:
-                temp = field.pack(value, self.__dict__)  # type: bytes | NoValueType
+                temp = field.pack(value, self.__dict__)
             except NoDefaultValue:
-                temp = NoValue
+                temp = bytes(field.length)
             self.__buffer__[field.name] = temp
 
         self.__updated__ = False
@@ -354,7 +351,8 @@ class Schema(Mapping[str, VT], Generic[VT]):
 
     @classmethod
     def unpack(cls: 'Type[Self]', data: 'bytes | IO[bytes]',  # type: ignore[valid-type]
-               length: 'Optional[int]' = None) -> 'Self':  # type: ignore[valid-type]
+               length: 'Optional[int]' = None,
+               packet: 'Optional[dict[str, Any]]' = None) -> 'Self':  # type: ignore[valid-type]
         """Unpack :obj:`bytes` into :class:`Schema`.
 
         Args:
@@ -373,9 +371,9 @@ class Schema(Mapping[str, VT], Generic[VT]):
                 length = data.seek(0, io.SEEK_END) - current
                 data.seek(current)
 
-        packet = {
-            '__length__': length,
-        }  # type: dict[str, Any]
+        if packet is None:
+            packet = {}
+        packet['__length__'] = length
 
         for field in self.__fields__:
             field = field(packet)
@@ -395,6 +393,9 @@ class Schema(Mapping[str, VT], Generic[VT]):
 
             if isinstance(field, ConditionalField):
                 if not field.test(packet):
+                    self.__buffer__[field.name] = b''
+                    setattr(self, field.name, None)
+                    packet[field.name] = NoValue
                     continue
                 field = field.field
 
