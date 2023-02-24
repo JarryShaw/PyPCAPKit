@@ -33,7 +33,7 @@ __all__ = [
     'DictError', 'ListError', 'TupleError', 'IterableError',        # TypeError
     'IOObjError', 'ProtocolUnbound', 'CallableError',               # TypeError
     'InfoError', 'IPError', 'EnumError', 'ComparisonError',         # TypeError
-    'RegistryError',                                                # TypeError
+    'RegistryError', 'FieldError',                                  # TypeError
     'FormatError', 'UnsupportedCall',                               # AttributeError
     'FileError',                                                    # IOError
     'FileExists',                                                   # FileExistsError
@@ -41,6 +41,7 @@ __all__ = [
     'ProtocolNotFound',                                             # IndexError
     'VersionError', 'IndexNotFound', 'ProtocolError',               # ValueError
     'EndianError', 'KeyExists', 'NoDefaultValue',                   # ValueError
+    'FieldValueError',                                              # ValueError
     'ProtocolNotImplemented', 'VendorNotImplemented',               # NotImplementedError
     'StructError',                                                  # struct.error
     'MissingKeyError', 'FragmentError', 'PacketError',              # KeyError
@@ -193,6 +194,10 @@ class RegistryError(BaseError, TypeError):
     """The argument(s) must be *registry* type."""
 
 
+class FieldError(BaseError, TypeError):
+    """The argument(s) must be *field* type."""
+
+
 ##############################################################################
 # AttributeError session.
 ##############################################################################
@@ -272,6 +277,10 @@ class KeyExists(BaseError, ValueError):
 
 class NoDefaultValue(BaseError, ValueError):
     """No default value."""
+
+
+class FieldValueError(BaseError, ValueError):
+    """Invalid field value."""
 
 
 ##############################################################################
