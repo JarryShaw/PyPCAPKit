@@ -14,6 +14,8 @@ __all__ = ['Field']
 if TYPE_CHECKING:
     from typing import Any, Callable, Optional
 
+    from typing_extensions import Literal
+
     from pcapkit.protocols.schema.schema import Schema
 
 _T = TypeVar('_T')
@@ -22,6 +24,10 @@ _T = TypeVar('_T')
 @final
 class NoValueType:
     """Default value for fields."""
+
+    def __bool__(self) -> 'Literal[False]':
+        """Return :obj:`False`."""
+        return False
 
 
 #: Default value for :attr:`_Field.default`.
