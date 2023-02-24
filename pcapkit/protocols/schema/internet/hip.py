@@ -4,21 +4,21 @@
 
 from typing import TYPE_CHECKING
 
+from pcapkit.const.hip.cipher import Cipher as Enum_Cipher
+from pcapkit.const.hip.di import DITypes as Enum_DITypes
+from pcapkit.const.hip.ecdsa_curve import ECDSACurve as Enum_ECDSACurve
+from pcapkit.const.hip.ecdsa_low_curve import ECDSALowCurve as Enum_ECDSALowCurve
+from pcapkit.const.hip.group import Group as Enum_Group
+from pcapkit.const.hip.hi_algorithm import HIAlgorithm as Enum_HIAlgorithm
+from pcapkit.const.hip.nat_traversal import NATTraversal as Enum_NATTraversal
 from pcapkit.const.hip.parameter import Parameter as Enum_Parameter
+from pcapkit.const.hip.suite import Suite as Enum_Suite
 from pcapkit.const.reg.transtype import TransType as Enum_TransType
-from pcapkit.corekit.fields.misc import ListField, PayloadField, ConditionalField
+from pcapkit.corekit.fields.misc import ConditionalField, ListField, PayloadField
 from pcapkit.corekit.fields.numbers import (EnumField, NumberField, UInt8Field, UInt16Field,
                                             UInt32Field)
 from pcapkit.corekit.fields.strings import BitField, BytesField, PaddingField
 from pcapkit.protocols.schema.schema import Schema
-from pcapkit.const.hip.group import Group as Enum_Group
-from pcapkit.const.hip.suite import Suite as Enum_Suite
-from pcapkit.const.hip.cipher import Cipher as Enum_Cipher
-from pcapkit.const.hip.nat_traversal import NATTraversal as Enum_NATTraversal
-from pcapkit.const.hip.di import DITypes as Enum_DITypes
-from pcapkit.const.hip.hi_algorithm import HIAlgorithm as Enum_HIAlgorithm
-from pcapkit.const.hip.ecdsa_curve import ECDSACurve as Enum_ECDSACurve
-from pcapkit.const.hip.ecdsa_low_curve import ECDSALowCurve as Enum_ECDSALowCurve
 
 __all__ = [
     'HIP',
@@ -49,9 +49,10 @@ __all__ = [
 ]
 
 if TYPE_CHECKING:
-    from typing import Optional
-    from typing_extensions import Literal, TypedDict
     from ipaddress import IPv6Address
+    from typing import Optional
+
+    from typing_extensions import Literal, TypedDict
 
     from pcapkit.protocols.protocol import Protocol
 

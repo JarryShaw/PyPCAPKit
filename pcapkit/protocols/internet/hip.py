@@ -58,9 +58,9 @@ from pcapkit.protocols.data.internet.hip import AckDataParameter as Data_AckData
 from pcapkit.protocols.data.internet.hip import ACKParameter as Data_ACKParameter
 from pcapkit.protocols.data.internet.hip import CertParameter as Data_CertParameter
 from pcapkit.protocols.data.internet.hip import Control as Data_Control
+from pcapkit.protocols.data.internet.hip import DHGroupListParameter as Data_DHGroupListParameter
 from pcapkit.protocols.data.internet.hip import \
     DiffieHellmanParameter as Data_DiffieHellmanParameter
-from pcapkit.protocols.data.internet.hip import DHGroupListParameter as Data_DHGroupListParameter
 from pcapkit.protocols.data.internet.hip import \
     EchoRequestSignedParameter as Data_EchoRequestSignedParameter
 from pcapkit.protocols.data.internet.hip import \
@@ -127,8 +127,13 @@ from pcapkit.protocols.schema.internet.hip import ACKParameter as Schema_ACKPara
 from pcapkit.protocols.schema.internet.hip import CertParameter as Schema_CertParameter
 from pcapkit.protocols.schema.internet.hip import Control as Schema_Control
 from pcapkit.protocols.schema.internet.hip import \
+    DHGroupListParameter as Schema_DHGroupListParameter
+from pcapkit.protocols.schema.internet.hip import \
     DiffieHellmanParameter as Schema_DiffieHellmanParameter
-from pcapkit.protocols.schema.internet.hip import DHGroupListParameter as Schema_DHGroupListParameter
+from pcapkit.protocols.schema.internet.hip import \
+    ECDSACurveHostIdentity as Schema_ECDSACurveHostIdentity
+from pcapkit.protocols.schema.internet.hip import \
+    ECDSALowCurveHostIdentity as Schema_ECDSALowCurveHostIdentity
 from pcapkit.protocols.schema.internet.hip import \
     EchoRequestSignedParameter as Schema_EchoRequestSignedParameter
 from pcapkit.protocols.schema.internet.hip import \
@@ -139,7 +144,8 @@ from pcapkit.protocols.schema.internet.hip import \
     EchoResponseUnsignedParameter as Schema_EchoResponseUnsignedParameter
 from pcapkit.protocols.schema.internet.hip import EncryptedParameter as Schema_EncryptedParameter
 from pcapkit.protocols.schema.internet.hip import ESPInfoParameter as Schema_ESPInfoParameter
-from pcapkit.protocols.schema.internet.hip import ESPTransformParameter as Schema_ESPTransformParameter
+from pcapkit.protocols.schema.internet.hip import \
+    ESPTransformParameter as Schema_ESPTransformParameter
 from pcapkit.protocols.schema.internet.hip import Flags as Schema_Flags
 from pcapkit.protocols.schema.internet.hip import FromParameter as Schema_FromParameter
 from pcapkit.protocols.schema.internet.hip import HIPCipherParameter as Schema_HIPCipherParameter
@@ -147,13 +153,13 @@ from pcapkit.protocols.schema.internet.hip import HIPMAC2Parameter as Schema_HIP
 from pcapkit.protocols.schema.internet.hip import HIPMACParameter as Schema_HIPMACParameter
 from pcapkit.protocols.schema.internet.hip import \
     HIPSignature2Parameter as Schema_HIPSignature2Parameter
-from pcapkit.protocols.schema.internet.hip import HIPSignatureParameter as Schema_HIPSignatureParameter
-from pcapkit.protocols.schema.internet.hip import HIPTransformParameter as Schema_HIPTransformParameter
+from pcapkit.protocols.schema.internet.hip import \
+    HIPSignatureParameter as Schema_HIPSignatureParameter
+from pcapkit.protocols.schema.internet.hip import \
+    HIPTransformParameter as Schema_HIPTransformParameter
 from pcapkit.protocols.schema.internet.hip import \
     HIPTransportModeParameter as Schema_HIPTransportModeParameter
 from pcapkit.protocols.schema.internet.hip import HITSuiteListParameter as Schema_HITSuiteParameter
-from pcapkit.protocols.schema.internet.hip import ECDSACurveHostIdentity as Schema_ECDSACurveHostIdentity
-from pcapkit.protocols.schema.internet.hip import ECDSALowCurveHostIdentity as Schema_ECDSALowCurveHostIdentity
 from pcapkit.protocols.schema.internet.hip import HostIDParameter as Schema_HostIDParameter
 from pcapkit.protocols.schema.internet.hip import Lifetime as Schema_Lifetime
 from pcapkit.protocols.schema.internet.hip import Locator as Schema_Locator
@@ -161,7 +167,8 @@ from pcapkit.protocols.schema.internet.hip import LocatorData as Schema_LocatorD
 from pcapkit.protocols.schema.internet.hip import LocatorSetParameter as Schema_LocatorSetParameter
 from pcapkit.protocols.schema.internet.hip import \
     NATTraversalModeParameter as Schema_NATTraversalModeParameter
-from pcapkit.protocols.schema.internet.hip import NotificationParameter as Schema_NotificationParameter
+from pcapkit.protocols.schema.internet.hip import \
+    NotificationParameter as Schema_NotificationParameter
 from pcapkit.protocols.schema.internet.hip import OverlayIDParameter as Schema_OverlayIDParameter
 from pcapkit.protocols.schema.internet.hip import OverlayTTLParameter as Schema_OverlayTTLParameter
 from pcapkit.protocols.schema.internet.hip import PayloadMICParameter as Schema_PayloadMICParameter
@@ -171,7 +178,8 @@ from pcapkit.protocols.schema.internet.hip import RegFailedParameter as Schema_R
 from pcapkit.protocols.schema.internet.hip import RegFromParameter as Schema_RegFromParameter
 from pcapkit.protocols.schema.internet.hip import RegInfoParameter as Schema_RegInfoParameter
 from pcapkit.protocols.schema.internet.hip import RegRequestParameter as Schema_RegRequestParameter
-from pcapkit.protocols.schema.internet.hip import RegResponseParameter as Schema_RegResponseParameter
+from pcapkit.protocols.schema.internet.hip import \
+    RegResponseParameter as Schema_RegResponseParameter
 from pcapkit.protocols.schema.internet.hip import RelayFromParameter as Schema_RelayFromParameter
 from pcapkit.protocols.schema.internet.hip import RelayHMACParameter as Schema_RelayHMACParameter
 from pcapkit.protocols.schema.internet.hip import RelayToParameter as Schema_RelayToParameter

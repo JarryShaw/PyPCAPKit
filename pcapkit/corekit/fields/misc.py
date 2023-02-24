@@ -5,7 +5,7 @@ import io
 from typing import TYPE_CHECKING, TypeVar, cast
 
 from pcapkit.corekit.fields.field import NoValue, _Field
-from pcapkit.utilities.exceptions import NoDefaultValue, FieldValueError
+from pcapkit.utilities.exceptions import FieldValueError, NoDefaultValue
 
 __all__ = ['ConditionalField', 'PayloadField']
 
@@ -347,7 +347,8 @@ class ListField(_Field[list[_TL]]):
         if value is None:
             return b''
 
-        from pcapkit.protocols.schema.schema import Schema  # pylint: disable=import-outside-top-level
+        from pcapkit.protocols.schema.schema import \
+            Schema  # pylint: disable=import-outside-top-level
 
         temp = []  # type: list[bytes]
         for item in value:
