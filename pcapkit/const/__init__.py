@@ -36,7 +36,7 @@ __all__ = [
     'HIP_Certificate', 'HIP_Cipher', 'HIP_DITypes', 'HIP_ECDSACurve', 'HIP_ECDSALowCurve',
     'HIP_ESPTransformSuite', 'HIP_Group', 'HIP_HIAlgorithm', 'HIP_HITSuite', 'HIP_NATTraversal',
     'HIP_NotifyMessage', 'HIP_Packet', 'HIP_Parameter', 'HIP_Registration', 'HIP_RegistrationFailure',
-    'HIP_Suite', 'HIP_Transport',
+    'HIP_Suite', 'HIP_Transport', 'HIP_EdDSACurve',
     # HTTP
     'HTTP_ErrorCode', 'HTTP_Frame', 'HTTP_Setting',
     # IPv4

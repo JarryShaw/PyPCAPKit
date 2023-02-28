@@ -68,6 +68,7 @@
         "EAPOL",
         "ECDSA",
         "echore",
+        "eddsa",
         "edep",
         "elen",
         "emojize",
