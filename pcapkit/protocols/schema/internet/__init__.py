@@ -10,8 +10,13 @@ from pcapkit.protocols.schema.internet.hip import AckDataParameter as HIP_AckDat
 from pcapkit.protocols.schema.internet.hip import ACKParameter as HIP_ACKParameter
 from pcapkit.protocols.schema.internet.hip import CertParameter as HIP_CertParameter
 from pcapkit.protocols.schema.internet.hip import Control as HIP_Control
-from pcapkit.protocols.schema.internet.hip import DiffieHellmanParameter as HIP_DiffieHellmanParameter
 from pcapkit.protocols.schema.internet.hip import DHGroupListParameter as HIP_DHGroupListParameter
+from pcapkit.protocols.schema.internet.hip import \
+    DiffieHellmanParameter as HIP_DiffieHellmanParameter
+from pcapkit.protocols.schema.internet.hip import \
+    ECDSACurveHostIdentity as HIP_ECDSACurveHostIdentity
+from pcapkit.protocols.schema.internet.hip import \
+    ECDSALowCurveHostIdentity as HIP_ECDSALowCurveHostIdentity
 from pcapkit.protocols.schema.internet.hip import \
     EchoRequestSignedParameter as HIP_EchoRequestSignedParameter
 from pcapkit.protocols.schema.internet.hip import \
@@ -20,9 +25,9 @@ from pcapkit.protocols.schema.internet.hip import \
     EchoResponseSignedParameter as HIP_EchoResponseSignedParameter
 from pcapkit.protocols.schema.internet.hip import \
     EchoResponseUnsignedParameter as HIP_EchoResponseUnsignedParameter
+from pcapkit.protocols.schema.internet.hip import \
+    EdDSACurveHostIdentity as HIP_EdDSACurveHostIdentity
 from pcapkit.protocols.schema.internet.hip import EncryptedParameter as HIP_EncryptedParameter
-from pcapkit.protocols.schema.internet.hip import ECDSACurveHostIdentity as HIP_ECDSACurveHostIdentity
-from pcapkit.protocols.schema.internet.hip import ECDSALowCurveHostIdentity as HIP_ECDSALowCurveHostIdentity
 from pcapkit.protocols.schema.internet.hip import ESPInfoParameter as HIP_ESPInfoParameter
 from pcapkit.protocols.schema.internet.hip import ESPTransformParameter as HIP_ESPTransformParameter
 from pcapkit.protocols.schema.internet.hip import Flags as HIP_Flags
@@ -30,7 +35,8 @@ from pcapkit.protocols.schema.internet.hip import FromParameter as HIP_FromParam
 from pcapkit.protocols.schema.internet.hip import HIPCipherParameter as HIP_HIPCipherParameter
 from pcapkit.protocols.schema.internet.hip import HIPMAC2Parameter as HIP_HIPMAC2Parameter
 from pcapkit.protocols.schema.internet.hip import HIPMACParameter as HIP_HIPMACParameter
-from pcapkit.protocols.schema.internet.hip import HIPSignature2Parameter as HIP_HIPSignature2Parameter
+from pcapkit.protocols.schema.internet.hip import \
+    HIPSignature2Parameter as HIP_HIPSignature2Parameter
 from pcapkit.protocols.schema.internet.hip import HIPSignatureParameter as HIP_HIPSignatureParameter
 from pcapkit.protocols.schema.internet.hip import HIPTransformParameter as HIP_HIPTransformParameter
 from pcapkit.protocols.schema.internet.hip import \
@@ -62,7 +68,8 @@ from pcapkit.protocols.schema.internet.hip import RVSHMACParameter as HIP_RVSHMA
 from pcapkit.protocols.schema.internet.hip import SeqDataParameter as HIP_SeqDataParameter
 from pcapkit.protocols.schema.internet.hip import SEQParameter as HIP_SEQParameter
 from pcapkit.protocols.schema.internet.hip import SolutionParameter as HIP_SolutionParameter
-from pcapkit.protocols.schema.internet.hip import TransactionIDParameter as HIP_TransactionIDParameter
+from pcapkit.protocols.schema.internet.hip import \
+    TransactionIDParameter as HIP_TransactionIDParameter
 from pcapkit.protocols.schema.internet.hip import \
     TransactionPacingParameter as HIP_TransactionPacingParameter
 from pcapkit.protocols.schema.internet.hip import \
@@ -76,7 +83,7 @@ __all__ = [
     # Host Identity Protocol
     'HIP',
     'HIP_LocatorData', 'HIP_Locator', 'HIP_ECDSACurveHostIdentity', 'HIP_ECDSALowCurveHostIdentity',
-    'HIP_Lifetime', 'HIP_Flags',
+    'HIP_EdDSACurveHostIdentity', 'HIP_Lifetime', 'HIP_Flags',
     'HIP_UnassignedParameter', 'HIP_ESPInfoParameter', 'HIP_R1CounterParameter',
     'HIP_LocatorSetParameter', 'HIP_PuzzleParameter', 'HIP_SolutionParameter',
     'HIP_SEQParameter', 'HIP_ACKParameter', 'HIP_DHGroupListParameter',

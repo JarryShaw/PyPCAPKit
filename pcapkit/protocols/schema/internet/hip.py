@@ -4,15 +4,22 @@
 
 from typing import TYPE_CHECKING
 
+from pcapkit.const.hip.certificate import Certificate as Enum_Certificate
 from pcapkit.const.hip.cipher import Cipher as Enum_Cipher
 from pcapkit.const.hip.di import DITypes as Enum_DITypes
 from pcapkit.const.hip.ecdsa_curve import ECDSACurve as Enum_ECDSACurve
 from pcapkit.const.hip.ecdsa_low_curve import ECDSALowCurve as Enum_ECDSALowCurve
+from pcapkit.const.hip.eddsa_curve import EdDSACurve as Enum_EdDSACurve
 from pcapkit.const.hip.group import Group as Enum_Group
 from pcapkit.const.hip.hi_algorithm import HIAlgorithm as Enum_HIAlgorithm
+from pcapkit.const.hip.hit_suite import HITSuite as Enum_HITSuite
 from pcapkit.const.hip.nat_traversal import NATTraversal as Enum_NATTraversal
+from pcapkit.const.hip.notify_message import NotifyMessage as Enum_NotifyMessage
 from pcapkit.const.hip.parameter import Parameter as Enum_Parameter
+from pcapkit.const.hip.registration import Registration as Enum_Registration
+from pcapkit.const.hip.registration_failure import RegistrationFailure as Enum_RegistrationFailure
 from pcapkit.const.hip.suite import Suite as Enum_Suite
+from pcapkit.const.hip.transport import Transport as Enum_Transport
 from pcapkit.const.reg.transtype import TransType as Enum_TransType
 from pcapkit.corekit.fields.misc import ConditionalField, ListField, PayloadField
 from pcapkit.corekit.fields.numbers import (EnumField, NumberField, UInt8Field, UInt16Field,
@@ -26,7 +33,7 @@ __all__ = [
     'LocatorData', 'Locator',
 
     'LocatorData', 'Locator',
-    'ECDSACurveHostIdentity', 'ECDSALowCurveHostIdentity',
+    'ECDSACurveHostIdentity', 'ECDSALowCurveHostIdentity', 'EdDSACurveHostIdentity',
     'Lifetime',
     'Flags',
 
@@ -163,7 +170,7 @@ class UnassignedParameter(Parameter):
 
 
 class ESPInfoParameter(Parameter):
-    """Header schema for HIP ESP information parameters."""
+    """Header schema for HIP ``ESP_INFO`` parameters."""
 
     #: Reserved.
     reserved: 'bytes' = PaddingField(length=2)
@@ -182,7 +189,7 @@ class ESPInfoParameter(Parameter):
 
 
 class R1CounterParameter(Parameter):
-    """Header schema for HIP R1 counter parameters."""
+    """Header schema for HIP ``R1_COUNTER`` parameters."""
 
     #: Reserved.
     reserved: 'bytes' = PaddingField(length=4)
@@ -196,7 +203,7 @@ class R1CounterParameter(Parameter):
 
 
 class LocatorSetParameter(Parameter):
-    """Header schema for HIP locator set parameters."""
+    """Header schema for HIP ``LOCATOR_SET`` parameters."""
 
     #: List of locators.
     locators: 'list[Locator]' = ListField(length=lambda pkt: pkt['len'])
@@ -245,7 +252,7 @@ class LocatorData(Schema):
 
 
 class PuzzleParameter(Parameter):
-    """Header schema for HIP puzzle parameters."""
+    """Header schema for HIP ``PUZZLE`` parameters."""
 
     #: Numeric index.
     index: 'int' = UInt8Field()
@@ -264,7 +271,7 @@ class PuzzleParameter(Parameter):
 
 
 class SolutionParameter(Parameter):
-    """Header schema for HIP solution parameters."""
+    """Header schema for HIP ``SOLUTION`` parameters."""
 
     #: Numeric index.
     index: 'int' = UInt8Field()
@@ -285,7 +292,7 @@ class SolutionParameter(Parameter):
 
 
 class SEQParameter(Parameter):
-    """Header schema for HIP SEQ parameters."""
+    """Header schema for HIP ``SEQ`` parameters."""
 
     #: Update ID.
     update_id: 'int' = UInt32Field()
@@ -297,7 +304,7 @@ class SEQParameter(Parameter):
 
 
 class ACKParameter(Parameter):
-    """Header schema for HIP ACK parameters."""
+    """Header schema for HIP ``ACK`` parameters."""
 
     #: Update ID.
     update_id: 'list[int]' = ListField(
@@ -312,7 +319,7 @@ class ACKParameter(Parameter):
 
 
 class DHGroupListParameter(Parameter):
-    """Header schema for HIP DH group list parameters."""
+    """Header schema for HIP ``DH_GROUP_LIST`` parameters."""
 
     #: List of DH groups.
     groups: 'list[Enum_Group]' = ListField(
@@ -327,7 +334,7 @@ class DHGroupListParameter(Parameter):
 
 
 class DiffieHellmanParameter(Parameter):
-    """Header schema for HIP Diffie-Hellman parameters."""
+    """Header schema for HIP ``DIFFIE_HELLMAN`` parameters."""
 
     #: Diffie-Hellman group.
     group: 'Enum_Group' = EnumField(length=1, namespace=Enum_Group)
@@ -344,7 +351,7 @@ class DiffieHellmanParameter(Parameter):
 
 
 class HIPTransformParameter(Parameter):
-    """Header schema for HIP transform parameters."""
+    """Header schema for HIP ``TRANSFORM`` parameters."""
 
     #: Suite IDs.
     suites: 'list[Enum_Suite]' = ListField(
@@ -359,7 +366,7 @@ class HIPTransformParameter(Parameter):
 
 
 class HIPCipherParameter(Parameter):
-    """Header schema for HIP cipher parameters."""
+    """Header schema for HIP ``CIPHER`` parameters."""
 
     #: Cipher IDs.
     ciphers: 'list[Enum_Cipher]' = ListField(
@@ -374,7 +381,7 @@ class HIPCipherParameter(Parameter):
 
 
 class NATTraversalModeParameter(Parameter):
-    """Header schema for HIP NAT traversal mode parameters."""
+    """Header schema for HIP ``NAT_TRAVERSAL_MODE`` parameters."""
 
     #: Reserved.
     reserved: 'bytes' = PaddingField(length=2)
@@ -391,7 +398,7 @@ class NATTraversalModeParameter(Parameter):
 
 
 class TransactionPacingParameter(Parameter):
-    """Header schema for HIP transaction pacing parameters."""
+    """Header schema for HIP ``TRANSACTION_PACING`` parameters."""
 
     #: Transaction pacing.
     min_ta: 'int' = UInt32Field()
@@ -403,7 +410,7 @@ class TransactionPacingParameter(Parameter):
 
 
 class EncryptedParameter(Parameter):
-    """Header schema for HIP encrypted parameters."""
+    """Header schema for HIP ``ENCRYPTED`` parameters."""
 
     #: Reserved.
     reserved: 'bytes' = PaddingField(length=4)
@@ -428,7 +435,7 @@ class EncryptedParameter(Parameter):
 
 
 class HostIDParameter(Parameter):
-    """Header schema for HIP host ID parameters."""
+    """Header schema for HIP ``HOST_ID`` parameters."""
 
     #: Host ID length.
     hi_len: 'int' = UInt16Field()
@@ -443,7 +450,7 @@ class HostIDParameter(Parameter):
     #: Algorithm type.
     algorithm: 'Enum_HIAlgorithm' = EnumField(length=2, namespace=Enum_HIAlgorithm)
     #: Host ID.
-    hi: 'bytes | ECDSACurveHostIdentity | ECDSALowCurveHostIdentity' = BytesField(length=lambda pkt: pkt['hi_len'])
+    hi: 'bytes | ECDSACurveHostIdentity | ECDSALowCurveHostIdentity | EdDSACurveHostIdentity' = BytesField(length=lambda pkt: pkt['hi_len'])
     #: Domain ID.
     di: 'bytes' = BytesField(length=lambda pkt: pkt['di_data']['len'])
     #: Padding.
@@ -451,7 +458,7 @@ class HostIDParameter(Parameter):
 
     if TYPE_CHECKING:
         def __init__(self, type: 'Enum_Parameter', len: 'int', hi_len: 'int', di_data: 'DIData',
-                     algorithm: 'Enum_HIAlgorithm', hi: 'bytes | ECDSACurveHostIdentity | ECDSALowCurveHostIdentity',
+                     algorithm: 'Enum_HIAlgorithm', hi: 'bytes | ECDSACurveHostIdentity | ECDSALowCurveHostIdentity | EdDSACurveHostIdentity',
                      di: 'bytes') -> 'None': ...
 
 
@@ -468,7 +475,7 @@ class ECDSACurveHostIdentity(Schema):
 
 
 class ECDSALowCurveHostIdentity(Schema):
-    """Host identity schema with ECDSA low curve."""
+    """Host identity schema with ECDSA_LOW curve."""
 
     #: Algorithm curve type.
     curve: 'Enum_ECDSALowCurve' = EnumField(length=2, namespace=Enum_ECDSALowCurve)
@@ -477,3 +484,193 @@ class ECDSALowCurveHostIdentity(Schema):
 
     if TYPE_CHECKING:
         def __init__(self, curve: 'Enum_ECDSALowCurve', pub_key: 'bytes') -> 'None': ...
+
+
+class EdDSACurveHostIdentity(Schema):
+    """Host identity schema with EdDSA curve."""
+
+    #: Algorithm curve type.
+    curve: 'Enum_EdDSACurve' = EnumField(length=2, namespace=Enum_EdDSACurve)
+    #: Public key.
+    pub_key: 'bytes' = BytesField(length=lambda pkt: pkt['__length__'] - 2)
+
+    if TYPE_CHECKING:
+        def __init__(self, curve: 'Enum_EdDSACurve', pub_key: 'bytes') -> 'None': ...
+
+
+class HITSuiteListParameter(Parameter):
+    """Header schema for HIP ``HIT_SUITE_LIST`` parameters."""
+
+    #: HIT suite IDs.
+    suites: 'list[Enum_HITSuite]' = ListField(
+        length=lambda pkt: pkt['len'],
+        item_type=EnumField(length=1, namespace=Enum_HITSuite),
+    )
+    #: Padding.
+    padding: 'bytes' = PaddingField(length=lambda pkt: (8 - (pkt['len'] % 8)) % 8)
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_Parameter', len: 'int', suites: 'list[Enum_HITSuite]') -> 'None': ...
+
+
+class CertParameter(Parameter):
+    """Header schema for HIP ``CERT`` parameters."""
+
+    #: Certificate group.
+    cert_group: 'Enum_Group' = EnumField(length=1, namespace=Enum_Group)
+    #: Certificate count.
+    cert_count: 'int' = UInt8Field()
+    #: Certificate ID.
+    cert_id: 'int' = UInt8Field()
+    #: Certificate type.
+    cert_type: 'Enum_Certificate' = EnumField(length=1, namespace=Enum_Certificate)
+    #: Certificate data.
+    cert: 'bytes' = BytesField(length=lambda pkt: pkt['len'] - 4)
+    #: Padding.
+    padding: 'bytes' = PaddingField(length=lambda pkt: (8 - (pkt['len'] % 8)) % 8)
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_Parameter', len: 'int', cert_group: 'Enum_Group', cert_count: 'int',
+                     cert_id: 'int', cert_type: 'Enum_Certificate', cert: 'bytes') -> 'None': ...
+
+
+class NotificationParameter(Parameter):
+    """Header schema for HIP ``NOTIFICATION`` parameters."""
+
+    #: Reserved.
+    reserved: 'bytes' = PaddingField(length=2)
+    #: Notify message type.
+    msg_type: 'Enum_NotifyMessage' = EnumField(length=2, namespace=Enum_NotifyMessage)
+    #: Notification data.
+    msg: 'bytes' = BytesField(length=lambda pkt: pkt['len'] - 4)
+    #: Padding.
+    padding: 'bytes' = PaddingField(length=lambda pkt: (8 - (pkt['len'] % 8)) % 8)
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_Parameter', len: 'int', msg_type: 'Enum_NotifyMessage', msg: 'bytes') -> 'None': ...
+
+
+class EchoRequestSignedParameter(Parameter):
+    """Header schema for HIP ``ECHO_REQUEST_SIGNED`` parameters."""
+
+    #: Opaque data.
+    opaque: 'bytes' = BytesField(length=lambda pkt: pkt['len'])
+    #: Padding.
+    padding: 'bytes' = PaddingField(length=lambda pkt: (8 - (pkt['len'] % 8)) % 8)
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_Parameter', len: 'int', opaque: 'bytes') -> 'None': ...
+
+
+class RegInfoParameter(Parameter):
+    """Header schema for HIP ``REG_INFO`` parameters."""
+
+    #: Minimum lifetime.
+    min_lifetime: 'int' = UInt8Field()
+    #: Maximum lifetime.
+    max_lifetime: 'int' = UInt8Field()
+    #: Registration types.
+    reg_info: 'list[Enum_Registration]' = ListField(
+        length=lambda pkt: pkt['len'] - 2,
+        item_type=EnumField(length=1, namespace=Enum_Registration),
+    )
+    #: Padding.
+    padding: 'bytes' = PaddingField(length=lambda pkt: (8 - (pkt['len'] % 8)) % 8)
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_Parameter', len: 'int', min_lifetime: 'int', max_lifetime: 'int',
+                     reg_info: 'list[Enum_Registration]') -> 'None': ...
+
+
+class RegRequestParameter(Parameter):
+    """Header schema for HIP ``REG_REQUEST`` parameters."""
+
+    #: Lifetime.
+    lifetime: 'int' = UInt8Field()
+    #: Registration types.
+    reg_request: 'list[Enum_Registration]' = ListField(
+        length=lambda pkt: pkt['len'] - 1,
+        item_type=EnumField(length=1, namespace=Enum_Registration),
+    )
+    #: Padding.
+    padding: 'bytes' = PaddingField(length=lambda pkt: (8 - (pkt['len'] % 8)) % 8)
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_Parameter', len: 'int', lifetime: 'int', reg_request: 'list[Enum_Registration]') -> 'None': ...
+
+
+class RegResponseParameter(Parameter):
+    """Header schema for HIP ``REG_RESPONSE`` parameters."""
+
+    #: Lifetime.
+    lifetime: 'int' = UInt8Field()
+    #: Registration types.
+    reg_response: 'list[Enum_Registration]' = ListField(
+        length=lambda pkt: pkt['len'] - 1,
+        item_type=EnumField(length=1, namespace=Enum_Registration),
+    )
+    #: Padding.
+    padding: 'bytes' = PaddingField(length=lambda pkt: (8 - (pkt['len'] % 8)) % 8)
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_Parameter', len: 'int', lifetime: 'int', reg_response: 'list[Enum_Registration]') -> 'None': ...
+
+
+class RegFailedParameter(Parameter):
+    """Header schema for HIP ``REG_FAILED`` parameters."""
+
+    #: Lifetime.
+    lifetime: 'int' = UInt8Field()
+    #: Registration types.
+    reg_failed: 'list[Enum_RegistrationFailure]' = ListField(
+        length=lambda pkt: pkt['len'] - 1,
+        item_type=EnumField(length=1, namespace=Enum_RegistrationFailure),
+    )
+    #: Padding.
+    padding: 'bytes' = PaddingField(length=lambda pkt: (8 - (pkt['len'] % 8)) % 8)
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_Parameter', len: 'int', lifetime: 'int', reg_failed: 'list[Enum_RegistrationFailure]') -> 'None': ...
+
+
+class RegFromParameter(Parameter):
+    """Header schema for HIP ``REG_FROM`` parameters."""
+
+    #: Port.
+    port: 'int' = UInt16Field()
+    #: Protocol.
+    protocol: 'Enum_TransType' = EnumField(length=1, namespace=Enum_TransType)
+    #: Reserved.
+    reserved: 'bytes' = PaddingField(length=1)
+    #: Address.
+    address: 'IPv6Address' = BytesField(length=16)
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_Parameter', len: 'int', port: 'int', protocol: 'Enum_TransType', address: 'bytes') -> 'None': ...
+
+
+class EchoResponseSignedParameter(Parameter):
+    """Header schema for HIP ``ECHO_RESPONSE_SIGNED`` parameters."""
+
+    #: Opaque data.
+    opaque: 'bytes' = BytesField(length=lambda pkt: pkt['len'])
+    #: Padding.
+    padding: 'bytes' = PaddingField(length=lambda pkt: (8 - (pkt['len'] % 8)) % 8)
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_Parameter', len: 'int', opaque: 'bytes') -> 'None': ...
+
+
+class TransportFormatListParameter(Parameter):
+    """Header schema for HIP ``TRANSPORT_FORMAT_LIST`` parameters."""
+
+    #: Transport formats.
+    formats: 'list[Enum_Parameter]' = ListField(
+        length=lambda pkt: pkt['len'] - 2,
+        item_type=EnumField(length=1, namespace=Enum_Parameter),
+    )
+    #: Padding.
+    padding: 'bytes' = PaddingField(length=lambda pkt: (8 - (pkt['len'] % 8)) % 8)
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_Parameter', len: 'int', formats: 'list[Enum_Parameter]') -> 'None': ...
