@@ -189,15 +189,18 @@ from pcapkit.protocols.schema.internet.hip import UnassignedParameter as Schema_
 from pcapkit.protocols.schema.internet.hip import ViaRVSParameter as Schema_ViaRVSParameter
 from pcapkit.utilities.exceptions import ProtocolError, UnsupportedCall
 from pcapkit.utilities.warnings import ProtocolWarning, warn
+from pcapkit.protocols.schema.schema import Schema
+from pcapkit.protocols.data.data import Data
 
 if TYPE_CHECKING:
+    from datetime import timedelta
     from enum import IntEnum as StdlibEnum
     from ipaddress import IPv6Address
     from typing import IO, Any, Callable, NoReturn, Optional, Type
 
     from aenum import IntEnum as AenumEnum
-    from mypy_extensions import NamedArg
-    from typing_extensions import Literal
+    from mypy_extensions import NamedArg, DefaultArg, KwArg
+    from typing_extensions import Literal, TypedDict, NotRequired
 
     from pcapkit.const.hip.esp_transform_suite import ESPTransformSuite as Enum_ESPTransformSuite
     from pcapkit.const.hip.group import Group as Enum_Group
@@ -211,14 +214,29 @@ if TYPE_CHECKING:
     from pcapkit.protocols.data.internet.hip import Parameter as Data_Parameter
     from pcapkit.protocols.protocol import Protocol
     from pcapkit.protocols.schema.internet.hip import Parameter as Schema_Parameter
-    from pcapkit.protocols.schema.schema import Schema
 
     Parameter = OrderedMultiDict[Enum_Parameter, Data_Parameter]
     ParameterParser = Callable[[Enum_Parameter, bool, int, NamedArg(bytes, 'data'),
                                 NamedArg(int, 'length'), NamedArg(int, 'version'),
                                 NamedArg(Parameter, 'options')], Data_Parameter]
-    ParameterConstructor = Callable[['HIP', Enum_Parameter, Data_Parameter,
-                                     NamedArg(int, 'version')], Schema_Parameter]
+    ParameterConstructor = Callable[['HIP', Enum_Parameter, DefaultArg(Optional[Data_Parameter]),
+                                     NamedArg(int, 'version'), KwArg(Any)], Schema_Parameter]
+
+    class Locator(TypedDict):
+        """Locator dictionary type."""
+
+        #: Traffic type.
+        traffic: int
+        #: Locator type.
+        type: int
+        #: Preferred flag.
+        preferred: bool
+        #: Lifetime.
+        lifetime: timedelta | int
+        #: IP address.
+        ip: IPv6Address | bytes | int | str
+        #: SPI.
+        spi: NotRequired[int]
 
 __all__ = ['HIP']
 
@@ -482,7 +500,7 @@ class HIP(Internet[Data_HIP, Schema_HIP]):
              controls_anonymous: 'bool' = False,
              shit: 'int' = 0,
              rhit: 'int' = 0,
-             parameters: 'Optional[list[Schema_Parameter | bytes] | Parameter]' = None,  # pylint: disable=line-too-long
+             parameters: 'Optional[list[Schema_Parameter | tuple[Enum_Parameter, dict[str, Any]] | bytes] | Parameter]' = None,  # pylint: disable=line-too-long
              payload: 'bytes | Protocol | Schema' = b'',
              **kwargs: 'Any') -> 'Schema_HIP':
         """Make (construct) packet data.
@@ -3183,7 +3201,7 @@ class HIP(Internet[Data_HIP, Schema_HIP]):
         )
         return relay_hmac
 
-    def _make_hip_param(self, parameters: 'list[Schema_Parameter | bytes] | Parameter', *,
+    def _make_hip_param(self, parameters: 'list[Schema_Parameter | tuple[Enum_Parameter, dict[str, Any]] | bytes] | Parameter', *,
                         version: 'int') -> 'tuple[list[Schema_Parameter | bytes], int]':
         """Make HIP parameter.
 
@@ -3197,72 +3215,103 @@ class HIP(Internet[Data_HIP, Schema_HIP]):
         """
         total_length = 0
         if isinstance(parameters, list):
+            parameters_list = []  # type: list[Schema_Parameter | bytes]
             for schema in parameters:
                 if isinstance(schema, bytes):
+                    parameters_list.append(schema)
                     total_length += len(schema)
-                else:
-                    total_length += len(schema.pack())
-            return parameters, total_length
+                elif isinstance(schema, Schema):
+                    schema_packed = schema.pack()
 
-        parameters_list = []  # type: list[Schema_Parameter]
+                    parameters_list.append(schema_packed)
+                    total_length += len(schema_packed)
+                else:
+                    code, args = cast('tuple[Enum_Parameter, dict[str, Any]]', schema)
+                    meth_name = f'_make_param_{code.name.lower()}'
+                    meth = cast('ParameterConstructor',
+                                getattr(self, meth_name, self._make_param_unassigned))
+                    data = meth(self, code, version=version, **args)  # type: Schema_Parameter
+
+                    parameters_list.append(data)
+                    total_length += len(data.pack())
+            return parameters_list, total_length
+
+        parameters_list = []
         for code, param in parameters.items(multi=True):
             meth_name = f'_make_param_{code.name.lower()}'
             meth = cast('ParameterConstructor',
                         getattr(self, meth_name, self._make_param_unassigned))
-            data = meth(self, code, param, version=version)  # type: Schema_Parameter
+            data = meth(self, code, param, version=version)
 
             parameters_list.append(data)
             total_length += len(data.pack())
-        return parameters_list, total_length  # type: ignore[return-value]
+        return parameters_list, total_length
 
-    def _make_param_unassigned(self, code: 'Enum_Parameter', param: 'Data_UnassignedParameter', *,  # pylint: disable=unused-argument
-                               version: 'int') -> 'Schema_UnassignedParameter':
+    def _make_param_unassigned(self, code: 'Enum_Parameter', param: 'Optional[Data_UnassignedParameter]' = None, *,  # pylint: disable=unused-argument
+                               version: 'int', contents: 'bytes' = b'', **kwargs: 'Any') -> 'Schema_UnassignedParameter':
         """Make HIP unassigned parameter.
 
         Args:
             code: parameter code
             param: parameter data
             version: HIP protocol version
+            contents: parameter contents
+            **kwargs: arbitrary keyword arguments
 
         Returns:
             HIP parameter schema.
 
         """
+        if param is not None:
+            contents = param.contents
+
         return Schema_UnassignedParameter(
             type=code,
-            len=len(param.contents),
-            value=param.contents,
+            len=len(contents),
+            value=contents,
         )
 
-    def _make_param_esp_info(self, code: 'Enum_Parameter', param: 'Data_ESPInfoParameter', *,  # pylint: disable=unused-argument
-                             version: 'int') -> 'Schema_ESPInfoParameter':
+    def _make_param_esp_info(self, code: 'Enum_Parameter', param: 'Optional[Data_ESPInfoParameter]' = None, *,  # pylint: disable=unused-argument
+                             version: 'int', index: 'int' = 0, old_spi: 'int' = 0, new_spi: 'int' = 0,
+                             **kwargs: 'Any') -> 'Schema_ESPInfoParameter':
         """Make HIP ``ESP_INFO`` parameter.
 
         Args:
             code: parameter code
             param: parameter data
             version: HIP protocol version
+            index: KEYMAT index
+            old_spi: old SPI
+            new_spi: new SPI
+            **kwargs: arbitrary keyword arguments
 
         Returns:
             HIP parameter schema.
 
         """
+        if param is not None:
+            index = param.index
+            old_spi = param.old_spi
+            new_spi = param.new_spi
+
         return Schema_ESPInfoParameter(
             type=code,
             len=12,
-            index=param.index,
-            old_spi=param.old_spi,
-            new_spi=param.new_spi,
+            index=index,
+            old_spi=old_spi,
+            new_spi=new_spi,
         )
 
-    def _make_param_r1_counter(self, code: 'Enum_Parameter', param: 'Data_R1CounterParameter', *, # pylint: disable=unused-argument
-                               version: 'int') -> 'Schema_R1CounterParameter':
+    def _make_param_r1_counter(self, code: 'Enum_Parameter', param: 'Optional[Data_R1CounterParameter]' = None, *, # pylint: disable=unused-argument
+                               version: 'int', counter: 'int' = 0, **kwargs: 'Any') -> 'Schema_R1CounterParameter':
         """Make HIP ``R1_COUNTER`` parameter.
 
         Args:
             code: parameter code
             param: parameter data
             version: HIP protocol version
+            counter: R1 generation counter
+            **kwargs: arbitrary keyword arguments
 
         Returns:
             HIP parameter schema.
@@ -3271,148 +3320,238 @@ class HIP(Internet[Data_HIP, Schema_HIP]):
         if code == Enum_Parameter.R1_Counter and version != 1:
             raise ProtocolError(f'HIPv{version}: [ParamNo {code}] invalid parameter')
 
+        if param is not None:
+            counter = param.counter
+
         return Schema_R1CounterParameter(
             type=code,
             len=12,
-            counter=param.counter,
+            counter=counter,
         )
 
-    def _make_param_locator_set(self, code: 'Enum_Parameter', param: 'Data_LocatorSetParameter', *,  # pylint: disable=unused-argument
-                                version: 'int') -> 'Schema_LocatorSetParameter':
+    def _make_param_locator_set(self, code: 'Enum_Parameter', param: 'Optional[Data_LocatorSetParameter]' = None, *,  # pylint: disable=unused-argument
+                                version: 'int', locator_set: 'Optional[list[Data_Locator | Locator]]' = None,
+                                **kwargs: 'Any') -> 'Schema_LocatorSetParameter':
         """Make HIP ``LOCATOR_SET`` parameter.
 
         Args:
             code: parameter code
             param: parameter data
             version: HIP protocol version
+            locator_set: locators data
+            **kwargs: arbitrary keyword arguments
 
         Returns:
             HIP parameter schema.
 
         """
-        def _make_locator(locator: 'Data_Locator') -> 'Schema_Locator':
+        def _make_locator(locator: 'Optional[Data_Locator]' = None, *,
+                          traffic: 'int' = 0, type: 'int' = 0,
+                          preferred: 'bool' = False, lifetime: 'timedelta | int' = 0,
+                          ip: 'IPv6Address | bytes | int | str' = '::',
+                          spi: 'Optional[int]' = None, **kwargs: 'Any') -> 'Schema_Locator':
             """Make locator data.
 
             Args:
                 locator: locator data
+                traffic: traffic type
+                type: locator type
+                preferred: preferred flag
+                lifetime: lifetime
+                ip: IP address
+                spi: SPI
+                **kwargs: arbitrary keyword arguments
 
             Returns:
                 HIP locator schema.
 
             """
-            value = locator.locator
-            if isinstance(value, ipaddress.IPv6Address):
-                data = value.packed  # type: bytes | Schema_LocatorData
-            elif isinstance(value, Data_LocatorData):
-                data = Schema_LocatorData(
-                    spi=value.spi,
-                    ip=value.ip.packed,
-                )
+            if locator is not None:
+                value = locator.locator
+                if isinstance(value, ipaddress.IPv6Address):
+                    data = value.packed  # type: bytes | Schema_LocatorData
+                elif isinstance(value, Data_LocatorData):
+                    data = Schema_LocatorData(
+                        spi=value.spi,
+                        ip=value.ip.packed,
+                    )
+                else:
+                    raise ProtocolError(f'HIPv{version}: [ParamNo {code}] invalid format')
+
+                traffic = locator.traffic
+                type = locator.type
+                length = locator.length // 4
+                preferred = locator.preferred
+                lifetime = math.floor(locator.lifetime.total_seconds())
             else:
-                raise ProtocolError(f'HIPv{version}: [ParamNo {code}] invalid format')
+                if spi is None:
+                    length = 4
+                    data = ipaddress.IPv6Address(ip).packed
+                else:
+                    length = 5
+                    data = Schema_LocatorData(
+                        spi=spi,
+                        ip=ipaddress.IPv6Address(ip).packed,
+                    )
+
+                if isinstance(lifetime, timedelta):
+                    lifetime = math.floor(lifetime.total_seconds())
 
             return Schema_Locator(
-                traffic=locator.traffic,
-                type=locator.type,
-                len=locator.length // 4,
+                traffic=traffic,
+                type=type,
+                len=length,
                 flags={
-                    'preferred': locator.preferred,
+                    'preferred': preferred,
                 },
-                lifetime=int(locator.lifetime.total_seconds()),
+                lifetime=lifetime,
                 value=data,
             )
 
+        if param is not None:
+            locators = [_make_locator(locator) for locator in param.locator_set]
+        else:
+            if locator_set is None:
+                locator_set = []
+            locators = [_make_locator(**locator) for locator in locator_set]
+
         return Schema_LocatorSetParameter(
             type=code,
-            len=sum(locator.length for locator in param.locator_set),
-            locators=[_make_locator(locator) for locator in param.locator_set],
+            len=sum(locator['len'] for locator in locators),
+            locators=locators,
         )
 
-    def _make_param_puzzle(self, code: 'Enum_Parameter', param: 'Data_PuzzleParameter', *,  # pylint: disable=unused-argument
-                           version: 'int') -> 'Schema_PuzzleParameter':
+    def _make_param_puzzle(self, code: 'Enum_Parameter', param: 'Optional[Data_PuzzleParameter]' = None, *,  # pylint: disable=unused-argument
+                           version: 'int', index: 'int' = 0, lifetime: 'timedelta | int' = 0,
+                           opaque: 'bytes' = b'', random: 'int' = 0, **kwargs: 'Any') -> 'Schema_PuzzleParameter':
         """Make HIP ``PUZZLE`` parameter.
 
         Args:
             code: parameter code
             param: parameter data
             version: HIP protocol version
+            index: #K index
+            lifetime: lifetime
+            opaque: opaque data
+            random: random #I value
+            **kwargs: arbitrary keyword arguments
 
         Returns:
             HIP parameter schema.
 
         """
+        if param is not None:
+            index = param.index
+            lifetime = math.floor(math.log2(param.lifetime.total_seconds()) + 32)
+            opaque = param.opaque
+            random = param.random
+        else:
+            lifetime = math.floor(math.log2(
+                lifetime if isinstance(lifetime, int) else lifetime.total_seconds()
+            ) + 32)
+
         return Schema_PuzzleParameter(
             type=code,
-            len=4 + math.ceil(param.random.bit_length() / 8),
-            index=param.index,
-            lifetime=math.floor(math.log2(param.lifetime.total_seconds()) + 32),
-            opaque=param.opaque,
-            random=param.random,
+            len=4 + math.ceil(random.bit_length() / 8),
+            index=index,
+            lifetime=lifetime,
+            opaque=opaque,
+            random=random,
         )
 
-    def _make_param_solution(self, code: 'Enum_Parameter', param: 'Data_SolutionParameter', *,  # pylint: disable=unused-argument
-                             version: 'int') -> 'Schema_SolutionParameter':
+    def _make_param_solution(self, code: 'Enum_Parameter', param: 'Optional[Data_SolutionParameter]' = None, *,  # pylint: disable=unused-argument
+                             version: 'int', index: 'int' = 0, lifetime: 'timedelta | int' = 0,
+                             opaque: 'bytes' = b'', random: 'int' = 0, solution: 'int' = 0,
+                             **kwargs: 'Any') -> 'Schema_SolutionParameter':
         """Make HIP ``SOLUTION`` parameter.
 
         Args:
             code: parameter code
             param: parameter data
             version: HIP protocol version
+            index: #K index
+            lifetime: lifetime
+            opaque: opaque data
+            random: random #I value
+            solution: solution #J value
 
         Returns:
             HIP parameter schema.
 
         """
+        if param is not None:
+            index = param.index
+            lifetime = math.floor(math.log2(param.lifetime.total_seconds()) + 32)
+            opaque = param.opaque
+            random = param.random
+            solution = param.solution
+        else:
+            lifetime = math.floor(math.log2(
+                lifetime if isinstance(lifetime, int) else lifetime.total_seconds()
+            ) + 32)
+
         return Schema_SolutionParameter(
             type=code,
-            len=4 + math.ceil(max(param.random.bit_length(), param.solution.bit_length()) / 4),
-            index=param.index,
-            lifetime=math.floor(math.log2(param.lifetime.total_seconds()) + 32),
-            opaque=param.opaque,
-            random=param.random,
-            solution=param.solution,
+            len=4 + math.ceil(max(random.bit_length(), solution.bit_length()) / 4),
+            index=index,
+            lifetime=lifetime,
+            opaque=opaque,
+            random=random,
+            solution=solution,
         )
 
-    def _make_param_seq(self, code: 'Enum_Parameter', param: 'Data_SEQParameter', *,  # pylint: disable=unused-argument
-                        version: 'int') -> 'Schema_SEQParameter':
+    def _make_param_seq(self, code: 'Enum_Parameter', param: 'Optional[Data_SEQParameter]' = None, *,  # pylint: disable=unused-argument
+                        version: 'int', update_id: 'int' = 0, **kwargs: 'Any') -> 'Schema_SEQParameter':
         """Make HIP ``SEQ`` parameter.
 
         Args:
             code: parameter code
             param: parameter data
             version: HIP protocol version
+            update_id: update ID
 
         Returns:
             HIP parameter schema.
 
         """
+        if param is not None:
+            update_id = param.id
+
         return Schema_SEQParameter(
             type=code,
             len=4,
-            update_id=param.id,
+            update_id=update_id,
         )
 
-    def _make_param_ack(self, code: 'Enum_Parameter', param: 'Data_ACKParameter', *,  # pylint: disable=unused-argument
-                        version: 'int') -> 'Schema_ACKParameter':
+    def _make_param_ack(self, code: 'Enum_Parameter', param: 'Optional[Data_ACKParameter]' = None, *,  # pylint: disable=unused-argument
+                        version: 'int', update_id: 'Optional[list[int]]' = None, **kwargs: 'Any') -> 'Schema_ACKParameter':
         """Make HIP ``ACK`` parameter.
 
         Args:
             code: parameter code
             param: parameter data
             version: HIP protocol version
+            update_id: list of update ID
 
         Returns:
             HIP parameter schema.
 
         """
+        if param is not None:
+            id_list = cast('list[int]', param.update_id)
+        else:
+            if update_id is None:
+                update_id = []
+            id_list = update_id
+
         return Schema_ACKParameter(
             type=code,
-            len=4 * len(param.update_id),
-            update_id=cast('list[int]', param.update_id),
+            len=4 * len(id_list),
+            update_id=id_list,
         )
 
-    def _make_param_dh_group_list(self, code: 'Enum_Parameter', param: 'Data_DHGroupListParameter', *,  # pylint: disable=unused-argument
-                                  version: 'int') -> 'Schema_DHGroupListParameter':
+    def _make_param_dh_group_list(self, code: 'Enum_Parameter', param: 'Optional[Data_DHGroupListParameter]' = None, *,  # pylint: disable=unused-argument
+                                  version: 'int', **kwargs: 'Any') -> 'Schema_DHGroupListParameter':
         """Make HIP ``DH_GROUP_LIST`` parameter.
 
         Args:
@@ -3430,8 +3569,8 @@ class HIP(Internet[Data_HIP, Schema_HIP]):
             groups=cast('list[Enum_Group]', param.group_id),
         )
 
-    def _make_param_diffie_hellman(self, code: 'Enum_Parameter', param: 'Data_DiffieHellmanParameter', *,  # pylint: disable=unused-argument
-                                   version: 'int') -> 'Schema_DiffieHellmanParameter':
+    def _make_param_diffie_hellman(self, code: 'Enum_Parameter', param: 'Optional[Data_DiffieHellmanParameter]' = None, *,  # pylint: disable=unused-argument
+                                   version: 'int', **kwargs: 'Any') -> 'Schema_DiffieHellmanParameter':
         """Make HIP ``DIFFIE_HELLMAN`` parameter.
 
         Args:
@@ -3451,8 +3590,8 @@ class HIP(Internet[Data_HIP, Schema_HIP]):
             pub_val=param.pub_val,
         )
 
-    def _make_param_hip_transform(self, code: 'Enum_Parameter', param: 'Data_HIPTransformParameter', *,  # pylint: disable=unused-argument
-                                  version: 'int') -> 'Schema_HIPTransformParameter':
+    def _make_param_hip_transform(self, code: 'Enum_Parameter', param: 'Optional[Data_HIPTransformParameter]' = None, *,  # pylint: disable=unused-argument
+                                  version: 'int', **kwargs: 'Any') -> 'Schema_HIPTransformParameter':
         """Make HIP ``HIP_TRANSFORM`` parameter.
 
         Args:
@@ -3470,8 +3609,8 @@ class HIP(Internet[Data_HIP, Schema_HIP]):
             suites=cast('list[Enum_Suite]', param.suite_id),
         )
 
-    def _make_param_hip_cipher(self, code: 'Enum_Parameter', param: 'Data_HIPCipherParameter', *,  # pylint: disable=unused-argument
-                               version: 'int') -> 'Schema_HIPCipherParameter':
+    def _make_param_hip_cipher(self, code: 'Enum_Parameter', param: 'Optional[Data_HIPCipherParameter]' = None, *,  # pylint: disable=unused-argument
+                               version: 'int', **kwargs: 'Any') -> 'Schema_HIPCipherParameter':
         """Make HIP ``HIP_CIPHER`` parameter.
 
         Args:
@@ -3489,8 +3628,8 @@ class HIP(Internet[Data_HIP, Schema_HIP]):
             ciphers=cast('list[Enum_Cipher]', param.cipher_id),
         )
 
-    def _make_param_nat_traversal_mode(self, code: 'Enum_Parameter', param: 'Data_NATTraversalModeParameter', *,  # pylint: disable=unused-argument
-                                       version: 'int') -> 'Schema_NATTraversalModeParameter':
+    def _make_param_nat_traversal_mode(self, code: 'Enum_Parameter', param: 'Optional[Data_NATTraversalModeParameter]' = None, *,  # pylint: disable=unused-argument
+                                       version: 'int', **kwargs: 'Any') -> 'Schema_NATTraversalModeParameter':
         """Make HIP ``NAT_TRAVERSAL_MODE`` parameter.
 
         Args:
@@ -3508,8 +3647,8 @@ class HIP(Internet[Data_HIP, Schema_HIP]):
             modes=cast('list[Enum_NATTraversal]', param.mode_id),
         )
 
-    def _make_param_encrypted(self, code: 'Enum_Parameter', param: 'Data_EncryptedParameter', *,  # pylint: disable=unused-argument
-                              version: 'int') -> 'Schema_EncryptedParameter':
+    def _make_param_encrypted(self, code: 'Enum_Parameter', param: 'Optional[Data_EncryptedParameter]' = None, *,  # pylint: disable=unused-argument
+                              version: 'int', **kwargs: 'Any') -> 'Schema_EncryptedParameter':
         """Make HIP ``ENCRYPTED`` parameter.
 
         Args:
@@ -3529,8 +3668,8 @@ class HIP(Internet[Data_HIP, Schema_HIP]):
             data=param.data,
         )
 
-    def _make_param_host_id(self, code: 'Enum_Parameter', param: 'Data_HostIDParameter', *,  # pylint: disable=unused-argument
-                            version: 'int') -> 'Schema_HostIDParameter':
+    def _make_param_host_id(self, code: 'Enum_Parameter', param: 'Optional[Data_HostIDParameter]' = None, *,  # pylint: disable=unused-argument
+                            version: 'int', **kwargs: 'Any') -> 'Schema_HostIDParameter':
         """Make HIP ``HOST_ID`` parameter.
 
         Args:
@@ -3576,8 +3715,8 @@ class HIP(Internet[Data_HIP, Schema_HIP]):
             di=param.di,
         )
 
-    def _make_param_hit_suite_list(self, code: 'Enum_Parameter', param: 'Data_HITSuiteListParameter', *,  # pylint: disable=unused-argument
-                                   version: 'int') -> 'Schema_HITSuiteListParameter':
+    def _make_param_hit_suite_list(self, code: 'Enum_Parameter', param: 'Optional[Data_HITSuiteListParameter]' = None, *,  # pylint: disable=unused-argument
+                                   version: 'int', **kwargs: 'Any') -> 'Schema_HITSuiteListParameter':
         """Make HIP ``HIT_SUITE_LIST`` parameter.
 
         Args:
@@ -3595,8 +3734,8 @@ class HIP(Internet[Data_HIP, Schema_HIP]):
             suites=cast('list[Enum_Suite]', param.suite_id),
         )
 
-    def _make_param_cert(self, code: 'Enum_Parameter', param: 'Data_CertParameter', *,  # pylint: disable=unused-argument
-                         version: 'int') -> 'Schema_CertParameter':
+    def _make_param_cert(self, code: 'Enum_Parameter', param: 'Optional[Data_CertParameter]' = None, *,  # pylint: disable=unused-argument
+                         version: 'int', **kwargs: 'Any') -> 'Schema_CertParameter':
         """Make HIP ``CERT`` parameter.
 
         Args:
@@ -3618,8 +3757,8 @@ class HIP(Internet[Data_HIP, Schema_HIP]):
             cert=param.cert,
         )
 
-    def _make_param_notification(self, code: 'Enum_Parameter', param: 'Data_NotificationParameter', *,  # pylint: disable=unused-argument
-                                 version: 'int') -> 'Schema_NotificationParameter':
+    def _make_param_notification(self, code: 'Enum_Parameter', param: 'Optional[Data_NotificationParameter]' = None, *,  # pylint: disable=unused-argument
+                                 version: 'int', **kwargs: 'Any') -> 'Schema_NotificationParameter':
         """Make HIP ``NOTIFICATION`` parameter.
 
         Args:
@@ -3638,8 +3777,8 @@ class HIP(Internet[Data_HIP, Schema_HIP]):
             msg=param.msg,
         )
 
-    def _make_param_echo_request_signed(self, code: 'Enum_Parameter', param: 'Data_EchoRequestSignedParameter', *,  # pylint: disable=unused-argument
-                                        version: 'int') -> 'Schema_EchoRequestSignedParameter':
+    def _make_param_echo_request_signed(self, code: 'Enum_Parameter', param: 'Optional[Data_EchoRequestSignedParameter]' = None, *,  # pylint: disable=unused-argument
+                                        version: 'int', **kwargs: 'Any') -> 'Schema_EchoRequestSignedParameter':
         """Make HIP ``ECHO_REQUEST_SIGNED`` parameter.
 
         Args:
@@ -3657,8 +3796,8 @@ class HIP(Internet[Data_HIP, Schema_HIP]):
             opaque=param.opaque,
         )
 
-    def _make_param_reg_info(self, code: 'Enum_Parameter', param: 'Data_RegInfoParameter', *,  # pylint: disable=unused-argument
-                             version: 'int') -> 'Schema_RegInfoParameter':
+    def _make_param_reg_info(self, code: 'Enum_Parameter', param: 'Optional[Data_RegInfoParameter]' = None, *,  # pylint: disable=unused-argument
+                             version: 'int', **kwargs: 'Any') -> 'Schema_RegInfoParameter':
         """Make HIP ``REG_INFO`` parameter.
 
         Args:
@@ -3678,8 +3817,8 @@ class HIP(Internet[Data_HIP, Schema_HIP]):
             reg_info=cast('list[Enum_Registration]', param.reg_type),
         )
 
-    def _make_param_reg_request(self, code: 'Enum_Parameter', param: 'Data_RegRequestParameter', *,  # pylint: disable=unused-argument
-                                version: 'int') -> 'Schema_RegRequestParameter':
+    def _make_param_reg_request(self, code: 'Enum_Parameter', param: 'Optional[Data_RegRequestParameter]' = None, *,  # pylint: disable=unused-argument
+                                version: 'int', **kwargs: 'Any') -> 'Schema_RegRequestParameter':
         """Make HIP ``REG_REQUEST`` parameter.
 
         Args:
@@ -3698,8 +3837,8 @@ class HIP(Internet[Data_HIP, Schema_HIP]):
             reg_request=cast('list[Enum_Registration]', param.reg_type),
         )
 
-    def _make_param_reg_response(self, code: 'Enum_Parameter', param: 'Data_RegResponseParameter', *,  # pylint: disable=unused-argument
-                                 version: 'int') -> 'Schema_RegResponseParameter':
+    def _make_param_reg_response(self, code: 'Enum_Parameter', param: 'Optional[Data_RegResponseParameter]' = None, *,  # pylint: disable=unused-argument
+                                 version: 'int', **kwargs: 'Any') -> 'Schema_RegResponseParameter':
         """Make HIP ``REG_RESPONSE`` parameter.
 
         Args:
@@ -3718,8 +3857,8 @@ class HIP(Internet[Data_HIP, Schema_HIP]):
             reg_response=cast('list[Enum_Registration]', param.reg_type),
         )
 
-    def _make_param_reg_failed(self, code: 'Enum_Parameter', param: 'Data_RegFailedParameter', *,  # pylint: disable=unused-argument
-                               version: 'int') -> 'Schema_RegFailedParameter':
+    def _make_param_reg_failed(self, code: 'Enum_Parameter', param: 'Optional[Data_RegFailedParameter]' = None, *,  # pylint: disable=unused-argument
+                               version: 'int', **kwargs: 'Any') -> 'Schema_RegFailedParameter':
         """Make HIP ``REG_FAILED`` parameter.
 
         Args:
@@ -3738,8 +3877,8 @@ class HIP(Internet[Data_HIP, Schema_HIP]):
             reg_failed=cast('list[Enum_RegistrationFailure]', param.reg_type),
         )
 
-    def _make_param_reg_from(self, code: 'Enum_Parameter', param: 'Data_RegFromParameter', *,  # pylint: disable=unused-argument
-                             version: 'int') -> 'Schema_RegFromParameter':
+    def _make_param_reg_from(self, code: 'Enum_Parameter', param: 'Optional[Data_RegFromParameter]' = None, *,  # pylint: disable=unused-argument
+                             version: 'int', **kwargs: 'Any') -> 'Schema_RegFromParameter':
         """Make HIP ``REG_FROM`` parameter.
 
         Args:
@@ -3759,8 +3898,8 @@ class HIP(Internet[Data_HIP, Schema_HIP]):
             address=param.address.packed,
         )
 
-    def _make_param_echo_response_signed(self, code: 'Enum_Parameter', param: 'Data_EchoResponseSignedParameter', *,  # pylint: disable=unused-argument
-                                         version: 'int') -> 'Schema_EchoResponseSignedParameter':
+    def _make_param_echo_response_signed(self, code: 'Enum_Parameter', param: 'Optional[Data_EchoResponseSignedParameter]' = None, *,  # pylint: disable=unused-argument
+                                         version: 'int', **kwargs: 'Any') -> 'Schema_EchoResponseSignedParameter':
         """Make HIP ``ECHO_RESPONSE_SIGNED`` parameter.
 
         Args:
@@ -3778,8 +3917,8 @@ class HIP(Internet[Data_HIP, Schema_HIP]):
             opaque=param.opaque,
         )
 
-    def _make_param_transport_format_list(self, code: 'Enum_Parameter', param: 'Data_TransportFormatListParameter', *,  # pylint: disable=unused-argument
-                                          version: 'int') -> 'Schema_TransportFormatListParameter':
+    def _make_param_transport_format_list(self, code: 'Enum_Parameter', param: 'Optional[Data_TransportFormatListParameter]' = None, *,  # pylint: disable=unused-argument
+                                          version: 'int', **kwargs: 'Any') -> 'Schema_TransportFormatListParameter':
         """Make HIP ``TRANSPORT_FORMAT_LIST`` parameter.
 
         Args:
@@ -3797,8 +3936,8 @@ class HIP(Internet[Data_HIP, Schema_HIP]):
             formats=cast('list[Enum_Parameter]', param.tf_type),
         )
 
-    def _make_param_esp_transform(self, code: 'Enum_Parameter', param: 'Data_ESPTransformParameter', *,  # pylint: disable=unused-argument
-                                       version: 'int') -> 'Schema_ESPTransformParameter':
+    def _make_param_esp_transform(self, code: 'Enum_Parameter', param: 'Optional[Data_ESPTransformParameter]' = None, *,  # pylint: disable=unused-argument
+                                       version: 'int', **kwargs: 'Any') -> 'Schema_ESPTransformParameter':
         """Make HIP ``ESP_TRANSFORM`` parameter.
 
         Args:
@@ -3816,8 +3955,8 @@ class HIP(Internet[Data_HIP, Schema_HIP]):
             suites=cast('list[Enum_ESPTransformSuite]', param.suite_id),
         )
 
-    def _make_param_seq_data(self, code: 'Enum_Parameter', param: 'Data_SeqDataParameter', *,  # pylint: disable=unused-argument
-                             version: 'int') -> 'Schema_SeqDataParameter':
+    def _make_param_seq_data(self, code: 'Enum_Parameter', param: 'Optional[Data_SeqDataParameter]' = None, *,  # pylint: disable=unused-argument
+                             version: 'int', **kwargs: 'Any') -> 'Schema_SeqDataParameter':
         """Make HIP ``SEQ_DATA`` parameter.
 
         Args:
@@ -3835,8 +3974,8 @@ class HIP(Internet[Data_HIP, Schema_HIP]):
             seq=param.seq,
         )
 
-    def _make_param_ack_data(self, code: 'Enum_Parameter', param: 'Data_AckDataParameter', *,  # pylint: disable=unused-argument
-                             version: 'int') -> 'Schema_AckDataParameter':
+    def _make_param_ack_data(self, code: 'Enum_Parameter', param: 'Optional[Data_AckDataParameter]' = None, *,  # pylint: disable=unused-argument
+                             version: 'int', **kwargs: 'Any') -> 'Schema_AckDataParameter':
         """Make HIP ``ACK_DATA`` parameter.
 
         Args:
@@ -3854,8 +3993,8 @@ class HIP(Internet[Data_HIP, Schema_HIP]):
             ack=cast('list[int]', param.ack),
         )
 
-    def _make_param_payload_mic(self, code: 'Enum_Parameter', param: 'Data_PayloadMICParameter', *,  # pylint: disable=unused-argument
-                                version: 'int') -> 'Schema_PayloadMICParameter':
+    def _make_param_payload_mic(self, code: 'Enum_Parameter', param: 'Optional[Data_PayloadMICParameter]' = None, *,  # pylint: disable=unused-argument
+                                version: 'int', **kwargs: 'Any') -> 'Schema_PayloadMICParameter':
         """Make HIP ``PAYLOAD_MIC`` parameter.
 
         Args:
@@ -3875,8 +4014,8 @@ class HIP(Internet[Data_HIP, Schema_HIP]):
             mic=param.mic,
         )
 
-    def _make_param_transaction_id(self, code: 'Enum_Parameter', param: 'Data_TransactionIDParameter', *,  # pylint: disable=unused-argument
-                                   version: 'int') -> 'Schema_TransactionIDParameter':
+    def _make_param_transaction_id(self, code: 'Enum_Parameter', param: 'Optional[Data_TransactionIDParameter]' = None, *,  # pylint: disable=unused-argument
+                                   version: 'int', **kwargs: 'Any') -> 'Schema_TransactionIDParameter':
         """Make HIP ``TRANSACTION_ID`` parameter.
 
         Args:
@@ -3894,8 +4033,8 @@ class HIP(Internet[Data_HIP, Schema_HIP]):
             id=param.id,
         )
 
-    def _make_param_overlay_id(self, code: 'Enum_Parameter', param: 'Data_OverlayIDParameter', *,  # pylint: disable=unused-argument
-                               version: 'int') -> 'Schema_OverlayIDParameter':
+    def _make_param_overlay_id(self, code: 'Enum_Parameter', param: 'Optional[Data_OverlayIDParameter]' = None, *,  # pylint: disable=unused-argument
+                               version: 'int', **kwargs: 'Any') -> 'Schema_OverlayIDParameter':
         """Make HIP ``OVERLAY_ID`` parameter.
 
         Args:
@@ -3913,8 +4052,8 @@ class HIP(Internet[Data_HIP, Schema_HIP]):
             id=param.id,
         )
 
-    def _make_param_route_dst(self, code: 'Enum_Parameter', param: 'Data_RouteDstParameter', *,  # pylint: disable=unused-argument
-                              version: 'int') -> 'Schema_RouteDstParameter':
+    def _make_param_route_dst(self, code: 'Enum_Parameter', param: 'Optional[Data_RouteDstParameter]' = None, *,  # pylint: disable=unused-argument
+                              version: 'int', **kwargs: 'Any') -> 'Schema_RouteDstParameter':
         """Make HIP ``ROUTE_DST`` parameter.
 
         Args:
@@ -3936,8 +4075,8 @@ class HIP(Internet[Data_HIP, Schema_HIP]):
             hit=[hit.packed for hit in param.hit],
         )
 
-    def _make_param_hip_transport_mode(self, code: 'Enum_Parameter', param: 'Data_HIPTransportModeParameter', *,  # pylint: disable=unused-argument
-                                       version: 'int') -> 'Schema_HIPTransportModeParameter':
+    def _make_param_hip_transport_mode(self, code: 'Enum_Parameter', param: 'Optional[Data_HIPTransportModeParameter]' = None, *,  # pylint: disable=unused-argument
+                                       version: 'int', **kwargs: 'Any') -> 'Schema_HIPTransportModeParameter':
         """Make HIP ``HIP_TRANSPORT_MODE`` parameter.
 
         Args:
@@ -3956,8 +4095,8 @@ class HIP(Internet[Data_HIP, Schema_HIP]):
             mode=cast('list[Enum_Transport]', param.mode_id),
         )
 
-    def _make_param_hip_mac(self, code: 'Enum_Parameter', param: 'Data_HIPMACParameter', *,  # pylint: disable=unused-argument
-                            version: 'int') -> 'Schema_HIPMACParameter':
+    def _make_param_hip_mac(self, code: 'Enum_Parameter', param: 'Optional[Data_HIPMACParameter]' = None, *,  # pylint: disable=unused-argument
+                            version: 'int', **kwargs: 'Any') -> 'Schema_HIPMACParameter':
         """Make HIP ``HIP_MAC`` parameter.
 
         Args:
@@ -3975,8 +4114,8 @@ class HIP(Internet[Data_HIP, Schema_HIP]):
             hmac=param.hmac,
         )
 
-    def _make_param_hip_mac_2(self, code: 'Enum_Parameter', param: 'Data_HIPMAC2Parameter', *,  # pylint: disable=unused-argument
-                              version: 'int') -> 'Schema_HIPMAC2Parameter':
+    def _make_param_hip_mac_2(self, code: 'Enum_Parameter', param: 'Optional[Data_HIPMAC2Parameter]' = None, *,  # pylint: disable=unused-argument
+                              version: 'int', **kwargs: 'Any') -> 'Schema_HIPMAC2Parameter':
         """Make HIP ``HIP_MAC_2`` parameter.
 
         Args:
@@ -3994,8 +4133,8 @@ class HIP(Internet[Data_HIP, Schema_HIP]):
             hmac=param.hmac,
         )
 
-    def _make_param_hip_signature_2(self, code: 'Enum_Parameter', param: 'Data_HIPSignature2Parameter', *,  # pylint: disable=unused-argument
-                                    version: 'int') -> 'Schema_HIPSignature2Parameter':
+    def _make_param_hip_signature_2(self, code: 'Enum_Parameter', param: 'Optional[Data_HIPSignature2Parameter]' = None, *,  # pylint: disable=unused-argument
+                                    version: 'int', **kwargs: 'Any') -> 'Schema_HIPSignature2Parameter':
         """Make HIP ``HIP_SIGNATURE_2`` parameter.
 
         Args:
@@ -4014,8 +4153,8 @@ class HIP(Internet[Data_HIP, Schema_HIP]):
             signature=param.signature,
         )
 
-    def _make_param_hip_signature(self, code: 'Enum_Parameter', param: 'Data_HIPSignatureParameter', *,  # pylint: disable=unused-argument
-                                  version: 'int') -> 'Schema_HIPSignatureParameter':
+    def _make_param_hip_signature(self, code: 'Enum_Parameter', param: 'Optional[Data_HIPSignatureParameter]' = None, *,  # pylint: disable=unused-argument
+                                  version: 'int', **kwargs: 'Any') -> 'Schema_HIPSignatureParameter':
         """Make HIP ``HIP_SIGNATURE`` parameter.
 
         Args:
@@ -4034,8 +4173,8 @@ class HIP(Internet[Data_HIP, Schema_HIP]):
             signature=param.signature,
         )
 
-    def _make_param_echo_request_unsigned(self, code: 'Enum_Parameter', param: 'Data_EchoRequestUnsignedParameter', *,  # pylint: disable=unused-argument
-                                          version: 'int') -> 'Schema_EchoRequestUnsignedParameter':
+    def _make_param_echo_request_unsigned(self, code: 'Enum_Parameter', param: 'Optional[Data_EchoRequestUnsignedParameter]' = None, *,  # pylint: disable=unused-argument
+                                          version: 'int', **kwargs: 'Any') -> 'Schema_EchoRequestUnsignedParameter':
         """Make HIP ``ECHO_REQUEST_UNSIGNED`` parameter.
 
         Args:
@@ -4053,8 +4192,8 @@ class HIP(Internet[Data_HIP, Schema_HIP]):
             opaque=param.opaque,
         )
 
-    def _make_param_echo_response_unsigned(self, code: 'Enum_Parameter', param: 'Data_EchoRequestUnsignedParameter', *,  # pylint: disable=unused-argument
-                                           version: 'int') -> 'Schema_EchoRequestUnsignedParameter':
+    def _make_param_echo_response_unsigned(self, code: 'Enum_Parameter', param: 'Optional[Data_EchoRequestUnsignedParameter]' = None, *,  # pylint: disable=unused-argument
+                                           version: 'int', **kwargs: 'Any') -> 'Schema_EchoRequestUnsignedParameter':
         """Make HIP ``ECHO_RESPONSE_UNSIGNED`` parameter.
 
         Args:
@@ -4072,8 +4211,8 @@ class HIP(Internet[Data_HIP, Schema_HIP]):
             opaque=param.opaque,
         )
 
-    def _make_param_relay_from(self, code: 'Enum_Parameter', param: 'Data_RelayFromParameter', *,  # pylint: disable=unused-argument
-                               version: 'int') -> 'Schema_RelayFromParameter':
+    def _make_param_relay_from(self, code: 'Enum_Parameter', param: 'Optional[Data_RelayFromParameter]' = None, *,  # pylint: disable=unused-argument
+                               version: 'int', **kwargs: 'Any') -> 'Schema_RelayFromParameter':
         """Make HIP ``RELAY_FROM`` parameter.
 
         Args:
@@ -4093,8 +4232,8 @@ class HIP(Internet[Data_HIP, Schema_HIP]):
             address=param.address.packed,
         )
 
-    def _make_param_relay_to(self, code: 'Enum_Parameter', param: 'Data_RelayToParameter', *,  # pylint: disable=unused-argument
-                             version: 'int') -> 'Schema_RelayToParameter':
+    def _make_param_relay_to(self, code: 'Enum_Parameter', param: 'Optional[Data_RelayToParameter]' = None, *,  # pylint: disable=unused-argument
+                             version: 'int', **kwargs: 'Any') -> 'Schema_RelayToParameter':
         """Make HIP ``RELAY_TO`` parameter.
 
         Args:
@@ -4114,8 +4253,8 @@ class HIP(Internet[Data_HIP, Schema_HIP]):
             address=param.address.packed,
         )
 
-    def _make_param_overlay_ttl(self, code: 'Enum_Parameter', param: 'Data_OverlayTTLParameter', *,  # pylint: disable=unused-argument
-                                version: 'int') -> 'Schema_OverlayTTLParameter':
+    def _make_param_overlay_ttl(self, code: 'Enum_Parameter', param: 'Optional[Data_OverlayTTLParameter]' = None, *,  # pylint: disable=unused-argument
+                                version: 'int', **kwargs: 'Any') -> 'Schema_OverlayTTLParameter':
         """Make HIP ``OVERLAY_TTL`` parameter.
 
         Args:
@@ -4133,8 +4272,8 @@ class HIP(Internet[Data_HIP, Schema_HIP]):
             ttl=math.floor(param.ttl.total_seconds()),
         )
 
-    def _make_param_route_via(self, code: 'Enum_Parameter', param: 'Data_RouteViaParameter', *,  # pylint: disable=unused-argument
-                              version: 'int') -> 'Schema_RouteViaParameter':
+    def _make_param_route_via(self, code: 'Enum_Parameter', param: 'Optional[Data_RouteViaParameter]' = None, *,  # pylint: disable=unused-argument
+                              version: 'int', **kwargs: 'Any') -> 'Schema_RouteViaParameter':
         """Make HIP ``ROUTE_VIA`` parameter.
 
         Args:
@@ -4156,8 +4295,8 @@ class HIP(Internet[Data_HIP, Schema_HIP]):
             hit=[hit.packed for hit in param.hit],
         )
 
-    def _make_param_from(self, code: 'Enum_Parameter', param: 'Data_FromParameter', *,  # pylint: disable=unused-argument
-                             version: 'int') -> 'Schema_FromParameter':
+    def _make_param_from(self, code: 'Enum_Parameter', param: 'Optional[Data_FromParameter]' = None, *,  # pylint: disable=unused-argument
+                             version: 'int', **kwargs: 'Any') -> 'Schema_FromParameter':
         """Make HIP ``FROM`` parameter.
 
         Args:
@@ -4175,8 +4314,8 @@ class HIP(Internet[Data_HIP, Schema_HIP]):
             address=param.address.packed,
         )
 
-    def _make_param_rvs_hmac(self, code: 'Enum_Parameter', param: 'Data_RVSHMACParameter', *,  # pylint: disable=unused-argument
-                             version: 'int') -> 'Schema_RVSHMACParameter':
+    def _make_param_rvs_hmac(self, code: 'Enum_Parameter', param: 'Optional[Data_RVSHMACParameter]' = None, *,  # pylint: disable=unused-argument
+                             version: 'int', **kwargs: 'Any') -> 'Schema_RVSHMACParameter':
         """Make HIP ``RVS_HMAC`` parameter.
 
         Args:
@@ -4194,8 +4333,8 @@ class HIP(Internet[Data_HIP, Schema_HIP]):
             hmac=param.hmac,
         )
 
-    def _make_param_via_rvs(self, code: 'Enum_Parameter', param: 'Data_ViaRVSParameter', *,  # pylint: disable=unused-argument
-                            version: 'int') -> 'Schema_ViaRVSParameter':
+    def _make_param_via_rvs(self, code: 'Enum_Parameter', param: 'Optional[Data_ViaRVSParameter]' = None, *,  # pylint: disable=unused-argument
+                            version: 'int', **kwargs: 'Any') -> 'Schema_ViaRVSParameter':
         """Make HIP ``VIA_RVS`` parameter.
 
         Args:
@@ -4213,8 +4352,8 @@ class HIP(Internet[Data_HIP, Schema_HIP]):
             address=[address.packed for address in param.address],
         )
 
-    def _make_param_relay_hmac(self, code: 'Enum_Parameter', param: 'Data_RelayHMACParameter', *,  # pylint: disable=unused-argument
-                               version: 'int') -> 'Schema_RelayHMACParameter':
+    def _make_param_relay_hmac(self, code: 'Enum_Parameter', param: 'Optional[Data_RelayHMACParameter]' = None, *,  # pylint: disable=unused-argument
+                               version: 'int', **kwargs: 'Any') -> 'Schema_RelayHMACParameter':
         """Make HIP ``RELAY_HMAC`` parameter.
 
         Args:

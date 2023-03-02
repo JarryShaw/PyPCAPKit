@@ -256,7 +256,7 @@ class LocatorData(Schema):
     ip: 'IPv6Address' = IPv6Field()
 
     if TYPE_CHECKING:
-        def __init__(self, spi: 'int', ip: 'IPv6Address | int | bytes') -> 'None': ...
+        def __init__(self, spi: 'int', ip: 'IPv6Address | int | bytes | str') -> 'None': ...
 
 
 class PuzzleParameter(Parameter):
@@ -654,7 +654,7 @@ class RegFromParameter(Parameter):
     address: 'IPv6Address' = IPv6Field()
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_Parameter', len: 'int', port: 'int', protocol: 'Enum_TransType', address: 'IPv6Address | bytes | int') -> 'None': ...
+        def __init__(self, type: 'Enum_Parameter', len: 'int', port: 'int', protocol: 'Enum_TransType', address: 'IPv6Address | bytes | int | str') -> 'None': ...
 
 
 class EchoResponseSignedParameter(Parameter):
@@ -789,7 +789,7 @@ class RouteDstParameter(Parameter):
     padding: 'bytes' = PaddingField(length=lambda pkt: (8 - (pkt['len'] % 8)) % 8)
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_Parameter', len: 'int', flags: 'RouteFlags', hit: 'list[int | bytes | IPv6Address]') -> 'None': ...
+        def __init__(self, type: 'Enum_Parameter', len: 'int', flags: 'RouteFlags', hit: 'list[str | int | bytes | IPv6Address]') -> 'None': ...
 
 
 class HIPTransportModeParameter(Parameter):
@@ -898,7 +898,7 @@ class RelayFromParameter(Parameter):
     address: 'IPv6Address' = IPv6Field()
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_Parameter', len: 'int', port: 'int', protocol: 'Enum_TransType', address: 'bytes | int | IPv6Address') -> 'None': ...
+        def __init__(self, type: 'Enum_Parameter', len: 'int', port: 'int', protocol: 'Enum_TransType', address: 'str | bytes | int | IPv6Address') -> 'None': ...
 
 
 class RelayToParameter(Parameter):
@@ -914,7 +914,7 @@ class RelayToParameter(Parameter):
     address: 'IPv6Address' = IPv6Field()
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_Parameter', len: 'int', port: 'int', protocol: 'Enum_TransType', address: 'bytes | int | IPv6Address') -> 'None': ...
+        def __init__(self, type: 'Enum_Parameter', len: 'int', port: 'int', protocol: 'Enum_TransType', address: 'str | bytes | int | IPv6Address') -> 'None': ...
 
 
 class OverlayTTLParameter(Parameter):
@@ -950,7 +950,7 @@ class RouteViaParameter(Parameter):
     padding: 'bytes' = PaddingField(length=lambda pkt: (8 - (pkt['len'] % 8)) % 8)
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_Parameter', len: 'int', flags: 'RouteFlags', hit: 'list[bytes | int | IPv6Address]') -> 'None': ...
+        def __init__(self, type: 'Enum_Parameter', len: 'int', flags: 'RouteFlags', hit: 'list[str | bytes | int | IPv6Address]') -> 'None': ...
 
 
 class FromParameter(Parameter):
@@ -962,7 +962,7 @@ class FromParameter(Parameter):
     padding: 'bytes' = PaddingField(length=lambda pkt: (8 - (pkt['len'] % 8)) % 8)
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_Parameter', len: 'int', address: 'bytes | int | IPv6Address') -> 'None': ...
+        def __init__(self, type: 'Enum_Parameter', len: 'int', address: 'str | bytes | int | IPv6Address') -> 'None': ...
 
 
 class RVSHMACParameter(Parameter):
@@ -989,7 +989,7 @@ class ViaRVSParameter(Parameter):
     padding: 'bytes' = PaddingField(length=lambda pkt: (8 - (pkt['len'] % 8)) % 8)
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_Parameter', len: 'int', address: 'list[bytes | int | IPv6Address]') -> 'None': ...
+        def __init__(self, type: 'Enum_Parameter', len: 'int', address: 'list[str | bytes | int | IPv6Address]') -> 'None': ...
 
 
 class RelayHMACParameter(Parameter):
