@@ -2454,17 +2454,17 @@ class HIP(Internet[Data_HIP, Schema_HIP]):
 
         .. code-block:: text
 
-             0                   1                   2                   3
-             0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
-            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-            |             Type              |             Length            |
-            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-            |             Port              |           Mode ID #1          |
-            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-            |          Mode ID #2           |           Mode ID #3          |
-            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-            |          Mode ID #n           |             Padding           |
-            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+            0                   1                   2                   3
+            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |             Type              |             Length            |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |             Port              |           Mode ID #1          |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |          Mode ID #2           |           Mode ID #3          |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |          Mode ID #n           |             Padding           |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
             code: parameter code
@@ -2485,25 +2485,16 @@ class HIP(Internet[Data_HIP, Schema_HIP]):
         if clen % 2 != 0:
             raise ProtocolError(f'HIPv{version}: [ParamNo {code}] invalid format')
 
-        _port = self._read_unpack(2)
-
-        _mdid = []  # type: list[Enum_Transport]
-        for _ in range((clen - 2) // 2):
-            _code = self._read_unpack(2)
-            _mdid.append(Enum_Transport.get(_code))
+        schema = Schema_HIPTransportModeParameter.unpack(data, length)  # type: Schema_HIPTransportModeParameter
+        self.__header__.param.append(schema)
 
         hip_transport_mode = Data_HIPTransportModeParameter(
             type=code,
             critical=cbit,
             length=length,
-            port=_port,
-            mode_id=tuple(_mdid),
+            port=schema.port,
+            mode_id=tuple(schema.mode),
         )
-
-        _plen = length - clen
-        if _plen:
-            self._read_fileng(_plen)
-
         return hip_transport_mode
 
     def _read_param_hip_mac(self, code: 'Enum_Parameter', cbit: 'bool', clen: 'int', *,  # pylint: disable=unused-argument
@@ -2540,19 +2531,15 @@ class HIP(Internet[Data_HIP, Schema_HIP]):
             Parsed parameter data.
 
         """
-        _hmac = self._read_fileng(clen)
+        schema = Schema_HIPMACParameter.unpack(data, length)  # type: Schema_HIPMACParameter
+        self.__header__.param.append(schema)
 
         hip_mac = Data_HIPMACParameter(
             type=code,
             critical=cbit,
             length=length,
-            hmac=_hmac,
+            hmac=schema.hmac,
         )
-
-        _plen = length - clen
-        if _plen:
-            self._read_fileng(_plen)
-
         return hip_mac
 
     def _read_param_hip_mac_2(self, code: 'Enum_Parameter', cbit: 'bool', clen: 'int', *,  # pylint: disable=unused-argument
@@ -2564,17 +2551,17 @@ class HIP(Internet[Data_HIP, Schema_HIP]):
 
         .. code-block:: text
 
-             0                   1                   2                   3
-             0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
-            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-            |             Type              |             Length            |
-            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-            |                                                               |
-            |                             HMAC                              |
-            /                                                               /
-            /                               +-------------------------------+
-            |                               |            Padding            |
-            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+            0                   1                   2                   3
+            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |             Type              |             Length            |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |                                                               |
+           |                             HMAC                              |
+           /                                                               /
+           /                               +-------------------------------+
+           |                               |            Padding            |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
             code: parameter code
@@ -2589,19 +2576,15 @@ class HIP(Internet[Data_HIP, Schema_HIP]):
             Parsed parameter data.
 
         """
-        _hmac = self._read_fileng(clen)
+        schema = Schema_HIPMAC2Parameter.unpack(data, length)  # type: Schema_HIPMAC2Parameter
+        self.__header__.param.append(schema)
 
         hip_mac_2 = Data_HIPMAC2Parameter(
             type=code,
             critical=cbit,
             length=length,
-            hmac=_hmac,
+            hmac=schema.hmac,
         )
-
-        _plen = length - clen
-        if _plen:
-            self._read_fileng(_plen)
-
         return hip_mac_2
 
     def _read_param_hip_signature_2(self, code: 'Enum_Parameter', cbit: 'bool', clen: 'int', *,  # pylint: disable=unused-argument
@@ -2613,15 +2596,15 @@ class HIP(Internet[Data_HIP, Schema_HIP]):
 
         .. code-block:: text
 
-             0                   1                   2                   3
-             0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
-            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-            |             Type              |             Length            |
-            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-            |    SIG alg                    |            Signature          /
-            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-            /                               |             Padding           |
-            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+            0                   1                   2                   3
+            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |             Type              |             Length            |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |    SIG alg                    |            Signature          /
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           /                               |             Padding           |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
             code: parameter code
@@ -2636,21 +2619,16 @@ class HIP(Internet[Data_HIP, Schema_HIP]):
             Parsed parameter data.
 
         """
-        _algo = self._read_unpack(2)
-        _sign = self._read_fileng(clen-2)
+        schema = Schema_HIPSignature2Parameter.unpack(data, length)  # type: Schema_HIPSignature2Parameter
+        self.__header__.param.append(schema)
 
         hip_signature_2 = Data_HIPSignature2Parameter(
             type=code,
             critical=cbit,
             length=length,
-            algorithm=Enum_HIAlgorithm.get(_algo),
-            signature=_sign,
+            algorithm=schema.algorithm,
+            signature=schema.signature,
         )
-
-        _plen = length - clen
-        if _plen:
-            self._read_fileng(_plen)
-
         return hip_signature_2
 
     def _read_param_hip_signature(self, code: 'Enum_Parameter', cbit: 'bool', clen: 'int', *,  # pylint: disable=unused-argument
@@ -2662,15 +2640,15 @@ class HIP(Internet[Data_HIP, Schema_HIP]):
 
         .. code-block:: text
 
-             0                   1                   2                   3
-             0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
-            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-            |             Type              |             Length            |
-            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-            |    SIG alg                    |            Signature          /
-            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-            /                               |             Padding           |
-            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+            0                   1                   2                   3
+            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |             Type              |             Length            |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |    SIG alg                    |            Signature          /
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           /                               |             Padding           |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
             code: parameter code
@@ -2685,21 +2663,16 @@ class HIP(Internet[Data_HIP, Schema_HIP]):
             Parsed parameter data.
 
         """
-        _algo = self._read_unpack(2)
-        _sign = self._read_fileng(clen-2)
+        schema = Schema_HIPSignatureParameter.unpack(data, length)  # type: Schema_HIPSignatureParameter
+        self.__header__.param.append(schema)
 
         hip_signature = Data_HIPSignatureParameter(
             type=code,
             critical=cbit,
             length=length,
-            algorithm=Enum_HIAlgorithm.get(_algo),
-            signature=_sign,
+            algorithm=schema.algorithm,
+            signature=schema.signature,
         )
-
-        _plen = length - clen
-        if _plen:
-            self._read_fileng(_plen)
-
         return hip_signature
 
     def _read_param_echo_request_unsigned(self, code: 'Enum_Parameter', cbit: 'bool', clen: 'int', *,  # pylint: disable=unused-argument
@@ -2711,13 +2684,13 @@ class HIP(Internet[Data_HIP, Schema_HIP]):
 
         .. code-block:: text
 
-             0                   1                   2                   3
-             0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
-            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-            |             Type              |             Length            |
-            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-            |                 Opaque data (variable length)                 |
-            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+            0                   1                   2                   3
+            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |             Type              |             Length            |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |                 Opaque data (variable length)                 |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
             code: parameter code
@@ -2732,19 +2705,15 @@ class HIP(Internet[Data_HIP, Schema_HIP]):
             Parsed parameter data.
 
         """
-        _data = self._read_fileng(clen)
+        schema = Schema_EchoRequestUnsignedParameter.unpack(data, length)  # type: Schema_EchoRequestUnsignedParameter
+        self.__header__.param.append(schema)
 
         echo_request_unsigned = Data_EchoRequestUnsignedParameter(
             type=code,
             critical=cbit,
             length=length,
-            opaque=_data,
+            opaque=schema.opaque,
         )
-
-        _plen = length - clen
-        if _plen:
-            self._read_fileng(_plen)
-
         return echo_request_unsigned
 
     def _read_param_echo_response_unsigned(self, code: 'Enum_Parameter', cbit: 'bool', clen: 'int', *,  # pylint: disable=unused-argument
@@ -2756,13 +2725,13 @@ class HIP(Internet[Data_HIP, Schema_HIP]):
 
         .. code-block:: text
 
-             0                   1                   2                   3
-             0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
-            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-            |             Type              |             Length            |
-            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-            |                 Opaque data (variable length)                 |
-            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+            0                   1                   2                   3
+            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |             Type              |             Length            |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |                 Opaque data (variable length)                 |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
             code: parameter code
@@ -2777,19 +2746,15 @@ class HIP(Internet[Data_HIP, Schema_HIP]):
             Parsed parameter data.
 
         """
-        _data = self._read_fileng(clen)
+        schema = Schema_EchoResponseUnsignedParameter.unpack(data, length)  # type: Schema_EchoResponseUnsignedParameter
+        self.__header__.param.append(schema)
 
         echo_response_unsigned = Data_EchoResponseUnsignedParameter(
             type=code,
             critical=cbit,
             length=length,
-            opaque=_data,
+            opaque=schema.opaque,
         )
-
-        _plen = length - clen
-        if _plen:
-            self._read_fileng(_plen)
-
         return echo_response_unsigned
 
     def _read_param_relay_from(self, code: 'Enum_Parameter', cbit: 'bool', clen: 'int', *,  # pylint: disable=unused-argument
@@ -2801,18 +2766,18 @@ class HIP(Internet[Data_HIP, Schema_HIP]):
 
         .. code-block:: text
 
-             0                   1                   2                   3
-             0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
-            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-            |             Type              |             Length            |
-            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-            |             Port              |    Protocol   |     Reserved  |
-            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-            |                                                               |
-            |                            Address                            |
-            |                                                               |
-            |                                                               |
-            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+            0                   1                   2                   3
+            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |             Type              |             Length            |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |             Port              |    Protocol   |     Reserved  |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |                                                               |
+           |                            Address                            |
+           |                                                               |
+           |                                                               |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
             code: parameter code
@@ -2833,20 +2798,20 @@ class HIP(Internet[Data_HIP, Schema_HIP]):
         if clen != 20:
             raise ProtocolError(f'HIPv{version}: [ParamNo {code}] invalid format')
 
-        _port = self._read_unpack(2)
-        _ptcl = self._read_protos(1)
-        _resv = self._read_fileng(1)
-        _addr = self._read_fileng(16)
+        schema = Schema_RelayFromParameter.unpack(data, length)  # type: Schema_RelayFromParameter
+        self.__header__.param.append(schema)
+
+        address = ipaddress.ip_address(schema.address)
+        schema.address = address  # type: ignore[assignment]
 
         relay_from = Data_RelayFromParameter(
             type=code,
             critical=cbit,
             length=length,
-            port=_port,
-            protocol=_ptcl,
-            address=ipaddress.ip_address(_addr),  # type: ignore[arg-type]
+            port=schema.port,
+            protocol=schema.protocol,
+            address=address,  # type: ignore[arg-type]
         )
-
         return relay_from
 
     def _read_param_relay_to(self, code: 'Enum_Parameter', cbit: 'bool', clen: 'int', *,  # pylint: disable=unused-argument
@@ -2890,20 +2855,20 @@ class HIP(Internet[Data_HIP, Schema_HIP]):
         if clen != 20:
             raise ProtocolError(f'HIPv{version}: [ParamNo {code}] invalid format')
 
-        _port = self._read_unpack(2)
-        _ptcl = self._read_protos(1)
-        _resv = self._read_fileng(1)
-        _addr = self._read_fileng(16)
+        schema = Schema_RelayToParameter.unpack(data, length)  # type: Schema_RelayToParameter
+        self.__header__.param.append(schema)
+
+        address = ipaddress.ip_address(schema.address)
+        schema.address = address  # type: ignore[assignment]
 
         relay_to = Data_RelayToParameter(
             type=code,
             critical=cbit,
             length=length,
-            port=_port,
-            protocol=_ptcl,
-            address=ipaddress.ip_address(_addr),  # type: ignore[arg-type]
+            port=schema.port,
+            protocol=schema.protocol,
+            address=address,  # type: ignore[arg-type]
         )
-
         return relay_to
 
     def _read_param_overlay_ttl(self, code: 'Enum_Parameter', cbit: 'bool', clen: 'int', *,  # pylint: disable=unused-argument
@@ -2915,13 +2880,13 @@ class HIP(Internet[Data_HIP, Schema_HIP]):
 
         .. code-block:: text
 
-             0                   1                   2                   3
-             0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
-            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-            |             Type              |             Length            |
-            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-            |             TTL               |            Reserved           |
-            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+            0                   1                   2                   3
+            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |             Type              |             Length            |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |             TTL               |            Reserved           |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
             code: parameter code
@@ -2942,15 +2907,15 @@ class HIP(Internet[Data_HIP, Schema_HIP]):
         if clen != 4:
             raise ProtocolError(f'HIPv{version}: [ParamNo {code}] invalid format')
 
-        _ttln = self._read_unpack(2)
+        schema = Schema_OverlayTTLParameter.unpack(data, length)  # type: Schema_OverlayTTLParameter
+        self.__header__.param.append(schema)
 
         overlay_ttl = Data_OverlayTTLParameter(
             type=code,
             critical=cbit,
             length=length,
-            ttl=datetime.timedelta(seconds=_ttln),
+            ttl=datetime.timedelta(seconds=schema.ttl),
         )
-
         return overlay_ttl
 
     def _read_param_route_via(self, code: 'Enum_Parameter', cbit: 'bool', clen: 'int', *,  # pylint: disable=unused-argument
@@ -2962,26 +2927,26 @@ class HIP(Internet[Data_HIP, Schema_HIP]):
 
         .. code-block:: text
 
-             0                   1                   2                   3
-             0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
-            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-            |             Type              |             Length            |
-            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-            |             Flags             |            Reserved           |
-            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-            |                                                               |
-            |                            HIT #1                             |
-            |                                                               |
-            |                                                               |
-            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-            .                               .                               .
-            .                               .                               .
-            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-            |                                                               |
-            |                            HIT #n                             |
-            |                                                               |
-            |                                                               |
-            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+            0                   1                   2                   3
+            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |             Type              |             Length            |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |             Flags             |            Reserved           |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |                                                               |
+           |                            HIT #1                             |
+           |                                                               |
+           |                                                               |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           .                               .                               .
+           .                               .                               .
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |                                                               |
+           |                            HIT #n                             |
+           |                                                               |
+           |                                                               |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
             code: parameter code
@@ -3972,4 +3937,201 @@ class HIP(Internet[Data_HIP, Schema_HIP]):
                 'must_follow': int(param.flags.must_follow),
             },
             hit=[hit.packed for hit in param.hit],
+        )
+
+    def _make_param_hip_transport_mode(self, code: 'Enum_Parameter', param: 'Data_HIPTransportModeParameter', *,  # pylint: disable=unused-argument
+                                       version: 'int') -> 'Schema_HIPTransportModeParameter':
+        """Make HIP ``HIP_TRANSPORT_MODE`` parameter.
+
+        Args:
+            code: parameter code
+            param: parameter data
+            version: HIP protocol version
+
+        Returns:
+            HIP parameter schema.
+
+        """
+        return Schema_HIPTransportModeParameter(
+            type=code,
+            len=2 + 2 * len(param.mode_id),
+            port=param.port,
+            mode=cast('list[Enum_Transport]', param.mode_id),
+        )
+
+    def _make_param_hip_mac(self, code: 'Enum_Parameter', param: 'Data_HIPMACParameter', *,  # pylint: disable=unused-argument
+                            version: 'int') -> 'Schema_HIPMACParameter':
+        """Make HIP ``HIP_MAC`` parameter.
+
+        Args:
+            code: parameter code
+            param: parameter data
+            version: HIP protocol version
+
+        Returns:
+            HIP parameter schema.
+
+        """
+        return Schema_HIPMACParameter(
+            type=code,
+            len=len(param.hmac),
+            hmac=param.hmac,
+        )
+
+    def _make_param_hip_mac_2(self, code: 'Enum_Parameter', param: 'Data_HIPMAC2Parameter', *,  # pylint: disable=unused-argument
+                              version: 'int') -> 'Schema_HIPMAC2Parameter':
+        """Make HIP ``HIP_MAC_2`` parameter.
+
+        Args:
+            code: parameter code
+            param: parameter data
+            version: HIP protocol version
+
+        Returns:
+            HIP parameter schema.
+
+        """
+        return Schema_HIPMAC2Parameter(
+            type=code,
+            len=len(param.hmac),
+            hmac=param.hmac,
+        )
+
+    def _make_param_hip_signature_2(self, code: 'Enum_Parameter', param: 'Data_HIPSignature2Parameter', *,  # pylint: disable=unused-argument
+                                    version: 'int') -> 'Schema_HIPSignature2Parameter':
+        """Make HIP ``HIP_SIGNATURE_2`` parameter.
+
+        Args:
+            code: parameter code
+            param: parameter data
+            version: HIP protocol version
+
+        Returns:
+            HIP parameter schema.
+
+        """
+        return Schema_HIPSignature2Parameter(
+            type=code,
+            len=2 + len(param.signature),
+            algorithm=param.algorithm,
+            signature=param.signature,
+        )
+
+    def _make_param_hip_signature(self, code: 'Enum_Parameter', param: 'Data_HIPSignatureParameter', *,  # pylint: disable=unused-argument
+                                  version: 'int') -> 'Schema_HIPSignatureParameter':
+        """Make HIP ``HIP_SIGNATURE`` parameter.
+
+        Args:
+            code: parameter code
+            param: parameter data
+            version: HIP protocol version
+
+        Returns:
+            HIP parameter schema.
+
+        """
+        return Schema_HIPSignatureParameter(
+            type=code,
+            len=2 + len(param.signature),
+            algorithm=param.algorithm,
+            signature=param.signature,
+        )
+
+    def _make_param_echo_request_unsigned(self, code: 'Enum_Parameter', param: 'Data_EchoRequestUnsignedParameter', *,  # pylint: disable=unused-argument
+                                          version: 'int') -> 'Schema_EchoRequestUnsignedParameter':
+        """Make HIP ``ECHO_REQUEST_UNSIGNED`` parameter.
+
+        Args:
+            code: parameter code
+            param: parameter data
+            version: HIP protocol version
+
+        Returns:
+            HIP parameter schema.
+
+        """
+        return Schema_EchoRequestUnsignedParameter(
+            type=code,
+            len=len(param.opaque),
+            opaque=param.opaque,
+        )
+
+    def _make_param_echo_response_unsigned(self, code: 'Enum_Parameter', param: 'Data_EchoRequestUnsignedParameter', *,  # pylint: disable=unused-argument
+                                           version: 'int') -> 'Schema_EchoRequestUnsignedParameter':
+        """Make HIP ``ECHO_RESPONSE_UNSIGNED`` parameter.
+
+        Args:
+            code: parameter code
+            param: parameter data
+            version: HIP protocol version
+
+        Returns:
+            HIP parameter schema.
+
+        """
+        return Schema_EchoRequestUnsignedParameter(
+            type=code,
+            len=len(param.opaque),
+            opaque=param.opaque,
+        )
+
+    def _make_param_relay_from(self, code: 'Enum_Parameter', param: 'Data_RelayFromParameter', *,  # pylint: disable=unused-argument
+                               version: 'int') -> 'Schema_RelayFromParameter':
+        """Make HIP ``RELAY_FROM`` parameter.
+
+        Args:
+            code: parameter code
+            param: parameter data
+            version: HIP protocol version
+
+        Returns:
+            HIP parameter schema.
+
+        """
+        return Schema_RelayFromParameter(
+            type=code,
+            len=20,
+            port=param.port,
+            protocol=param.protocol,
+            address=param.address.packed,
+        )
+
+    def _make_param_relay_to(self, code: 'Enum_Parameter', param: 'Data_RelayToParameter', *,  # pylint: disable=unused-argument
+                             version: 'int') -> 'Schema_RelayToParameter':
+        """Make HIP ``RELAY_TO`` parameter.
+
+        Args:
+            code: parameter code
+            param: parameter data
+            version: HIP protocol version
+
+        Returns:
+            HIP parameter schema.
+
+        """
+        return Schema_RelayToParameter(
+            type=code,
+            len=20,
+            port=param.port,
+            protocol=param.protocol,
+            address=param.address.packed,
+        )
+
+    def _make_param_overlay_ttl(self, code: 'Enum_Parameter', param: 'Data_OverlayTTLParameter', *,  # pylint: disable=unused-argument
+                                version: 'int') -> 'Schema_OverlayTTLParameter':
+        """Make HIP ``OVERLAY_TTL`` parameter.
+
+        Args:
+            code: parameter code
+            param: parameter data
+            version: HIP protocol version
+
+        Returns:
+            HIP parameter schema.
+
+        """
+        return Schema_OverlayTTLParameter(
+            type=code,
+            len=4,
+            ttl=math.floor(param.ttl.total_seconds()),
         )

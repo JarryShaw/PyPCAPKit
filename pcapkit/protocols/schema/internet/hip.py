@@ -100,7 +100,7 @@ if TYPE_CHECKING:
         #: DI length.
         len: int
 
-    class RouteDstFlags(TypedDict):
+    class RouteFlags(TypedDict):
         """Route destination flags."""
 
         #: Symmetric flag.
@@ -775,7 +775,7 @@ class RouteDstParameter(Parameter):
     """Header schema for HIP ``ROUTE_DST`` parameters."""
 
     #: Flags.
-    flags: 'RouteDstFlags' = BitField(
+    flags: 'RouteFlags' = BitField(
         length=2,
         namespace={
             'symmetric': (0, 1),
@@ -793,4 +793,143 @@ class RouteDstParameter(Parameter):
     padding: 'bytes' = PaddingField(length=lambda pkt: (8 - (pkt['len'] % 8)) % 8)
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_Parameter', len: 'int', flags: 'RouteDstFlags', hit: 'list[bytes]') -> 'None': ...
+        def __init__(self, type: 'Enum_Parameter', len: 'int', flags: 'RouteFlags', hit: 'list[bytes]') -> 'None': ...
+
+
+class HIPTransportModeParameter(Parameter):
+    """Header schema for HIP ``HIP_TRANSPORT_MODE`` parameters."""
+
+    #: Port.
+    port: 'int' = UInt16Field()
+    #: Mode IDs.
+    mode: 'list[Enum_Transport]' = ListField(
+        length=lambda pkt: pkt['len'] - 2,
+        item_type=EnumField(length=2, namespace=Enum_Transport),
+    )
+    #: Padding.
+    padding: 'bytes' = PaddingField(length=lambda pkt: (8 - (pkt['len'] % 8)) % 8)
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_Parameter', len: 'int', port: 'int', mode: 'list[Enum_Transport]') -> 'None': ...
+
+
+class HIPMACParameter(Parameter):
+    """Header schema for HIP ``HIP_MAC`` parameters."""
+
+    #: HMAC value.
+    hmac: 'bytes' = BytesField(length=lambda pkt: pkt['len'])
+    #: Padding.
+    padding: 'bytes' = PaddingField(length=lambda pkt: (8 - (pkt['len'] % 8)) % 8)
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_Parameter', len: 'int', hmac: 'bytes') -> 'None': ...
+
+
+class HIPMAC2Parameter(Parameter):
+    """Header schema for HIP ``HIP_MAC_2`` parameters."""
+
+    #: HMAC value.
+    hmac: 'bytes' = BytesField(length=lambda pkt: pkt['len'])
+    #: Padding.
+    padding: 'bytes' = PaddingField(length=lambda pkt: (8 - (pkt['len'] % 8)) % 8)
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_Parameter', len: 'int', hmac: 'bytes') -> 'None': ...
+
+
+class HIPSignature2Parameter(Parameter):
+    """Header schema for HIP ``HIP_SIGNATURE_2`` parameters."""
+
+    #: Signature algorithm.
+    algorithm: 'Enum_HIAlgorithm' = EnumField(length=2, namespace=Enum_HIAlgorithm)
+    #: Signature value.
+    signature: 'bytes' = BytesField(length=lambda pkt: pkt['len'] - 2)
+    #: Padding.
+    padding: 'bytes' = PaddingField(length=lambda pkt: (8 - (pkt['len'] % 8)) % 8)
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_Parameter', len: 'int', algorithm: 'Enum_HIAlgorithm', signature: 'bytes') -> 'None': ...
+
+
+class HIPSignatureParameter(Parameter):
+    """Header schema for HIP ``HIP_SIGNATURE`` parameters."""
+
+    #: Signature algorithm.
+    algorithm: 'Enum_HIAlgorithm' = EnumField(length=2, namespace=Enum_HIAlgorithm)
+    #: Signature value.
+    signature: 'bytes' = BytesField(length=lambda pkt: pkt['len'] - 2)
+    #: Padding.
+    padding: 'bytes' = PaddingField(length=lambda pkt: (8 - (pkt['len'] % 8)) % 8)
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_Parameter', len: 'int', algorithm: 'Enum_HIAlgorithm', signature: 'bytes') -> 'None': ...
+
+
+class EchoRequestUnsignedParameter(Parameter):
+    """Header schema for HIP ``ECHO_REQUEST_UNSIGNED`` parameters."""
+
+    #: Opaque data.
+    opaque: 'bytes' = BytesField(length=lambda pkt: pkt['len'])
+    #: Padding.
+    padding: 'bytes' = PaddingField(length=lambda pkt: (8 - (pkt['len'] % 8)) % 8)
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_Parameter', len: 'int', opaque: 'bytes') -> 'None': ...
+
+
+class EchoResponseUnsignedParameter(Parameter):
+    """Header schema for HIP ``ECHO_RESPONSE_UNSIGNED`` parameters."""
+
+    #: Opaque data.
+    opaque: 'bytes' = BytesField(length=lambda pkt: pkt['len'])
+    #: Padding.
+    padding: 'bytes' = PaddingField(length=lambda pkt: (8 - (pkt['len'] % 8)) % 8)
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_Parameter', len: 'int', opaque: 'bytes') -> 'None': ...
+
+
+class RelayFromParameter(Parameter):
+    """Header schema for HIP ``RELAY_FROM`` parameters."""
+
+    #: Port.
+    port: 'int' = UInt16Field()
+    #: Protocol.
+    protocol: 'Enum_TransType' = EnumField(length=1, namespace=Enum_TransType)
+    #: Reserved.
+    reserved: 'bytes' = PaddingField(length=1)
+    #: Address.
+    address: 'IPv6Address' = BytesField(length=16)
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_Parameter', len: 'int', port: 'int', protocol: 'Enum_TransType', address: 'bytes') -> 'None': ...
+
+
+class RelayToParameter(Parameter):
+    """Header schema for HIP ``RELAY_TO`` parameters."""
+
+    #: Port.
+    port: 'int' = UInt16Field()
+    #: Protocol.
+    protocol: 'Enum_TransType' = EnumField(length=1, namespace=Enum_TransType)
+    #: Reserved.
+    reserved: 'bytes' = PaddingField(length=1)
+    #: Address.
+    address: 'IPv6Address' = BytesField(length=16)
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_Parameter', len: 'int', port: 'int', protocol: 'Enum_TransType', address: 'bytes') -> 'None': ...
+
+
+class OverlayTTLParameter(Parameter):
+    """Header schema for HIP ``OVERLAY_TTL`` parameters."""
+
+    #: TTL value.
+    ttl: 'int' = UInt16Field()
+    #: Reserved.
+    reserved: 'bytes' = PaddingField(length=2)
+    #: Padding.
+    padding: 'bytes' = PaddingField(length=lambda pkt: (8 - (pkt['len'] % 8)) % 8)
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_Parameter', len: 'int', ttl: 'int') -> 'None': ...
