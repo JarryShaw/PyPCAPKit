@@ -10,6 +10,7 @@ from pcapkit.const.hip.di import DITypes as Enum_DITypes
 from pcapkit.const.hip.ecdsa_curve import ECDSACurve as Enum_ECDSACurve
 from pcapkit.const.hip.ecdsa_low_curve import ECDSALowCurve as Enum_ECDSALowCurve
 from pcapkit.const.hip.eddsa_curve import EdDSACurve as Enum_EdDSACurve
+from pcapkit.const.hip.esp_transform_suite import ESPTransformSuite as Enum_ESPTransformSuite
 from pcapkit.const.hip.group import Group as Enum_Group
 from pcapkit.const.hip.hi_algorithm import HIAlgorithm as Enum_HIAlgorithm
 from pcapkit.const.hip.hit_suite import HITSuite as Enum_HITSuite
@@ -98,6 +99,14 @@ if TYPE_CHECKING:
         type: Enum_DITypes
         #: DI length.
         len: int
+
+    class RouteDstFlags(TypedDict):
+        """Route destination flags."""
+
+        #: Symmetric flag.
+        symmetric: int
+        #: Must-follow flag.
+        must_follow: int
 
 
 class HIP(Schema):
@@ -674,3 +683,114 @@ class TransportFormatListParameter(Parameter):
 
     if TYPE_CHECKING:
         def __init__(self, type: 'Enum_Parameter', len: 'int', formats: 'list[Enum_Parameter]') -> 'None': ...
+
+
+class ESPTransformParameter(Parameter):
+    """Header schema for HIP ``ESP_TRANSFORM`` parameters."""
+
+    #: Reserved.
+    reserved: 'bytes' = PaddingField(length=2)
+    #: Suite IDs.
+    suites: 'list[Enum_ESPTransformSuite]' = ListField(
+        length=lambda pkt: pkt['len'] - 2,
+        item_type=EnumField(length=1, namespace=Enum_ESPTransformSuite),
+    )
+    #: Padding.
+    padding: 'bytes' = PaddingField(length=lambda pkt: (8 - (pkt['len'] % 8)) % 8)
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_Parameter', len: 'int', suites: 'list[Enum_ESPTransformSuite]') -> 'None': ...
+
+
+class SeqDataParameter(Parameter):
+    """Header schema for HIP ``SEQ_DATA`` parameters."""
+
+    #: Sequence number.
+    seq: 'int' = UInt32Field()
+    #: Padding.
+    padding: 'bytes' = PaddingField(length=lambda pkt: (8 - (pkt['len'] % 8)) % 8)
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_Parameter', len: 'int', seq: 'int') -> 'None': ...
+
+
+class AckDataParameter(Parameter):
+    """Header schema for HIP ``ACK_DATA`` parameters."""
+
+    #: Acked sequence number.
+    ack: 'list[int]' = ListField(
+        length=lambda pkt: pkt['len'],
+        item_type=UInt32Field(),
+    )
+    #: Padding.
+    padding: 'bytes' = PaddingField(length=lambda pkt: (8 - (pkt['len'] % 8)) % 8)
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_Parameter', len: 'int', ack: 'list[int]') -> 'None': ...
+
+
+class PayloadMICParameter(Parameter):
+    """Header schema for HIP ``PAYLOAD_MIC`` parameters."""
+
+    #: Next header.
+    next: 'Enum_TransType' = EnumField(length=1, namespace=Enum_TransType)
+    #: Reversed.
+    reserved: 'bytes' = PaddingField(length=3)
+    #: Payload data.
+    payload: 'bytes' = BytesField(length=4)
+    #: MIC value.
+    mic: 'bytes' = BytesField(length=lambda pkt: pkt['len'] - 8)
+    #: Padding.
+    padding: 'bytes' = PaddingField(length=lambda pkt: (8 - (pkt['len'] % 8)) % 8)
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_Parameter', len: 'int', next: 'Enum_TransType', payload: 'bytes', mic: 'bytes') -> 'None': ...
+
+
+class TransactionIDParameter(Parameter):
+    """Header schema for HIP ``TRANSACTION_ID`` parameters."""
+
+    #: Transaction ID.
+    id: 'int' = NumberField(length=lambda pkt: pkt['len'], signed=False)
+    #: Padding.
+    padding: 'bytes' = PaddingField(length=lambda pkt: (8 - (pkt['len'] % 8)) % 8)
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_Parameter', len: 'int', id: 'int') -> 'None': ...
+
+
+class OverlayIDParameter(Parameter):
+    """Header schema for HIP ``OVERLAY_ID`` parameters."""
+
+    #: Overlay ID.
+    id: 'int' = NumberField(length=lambda pkt: pkt['len'], signed=False)
+    #: Padding.
+    padding: 'bytes' = PaddingField(length=lambda pkt: (8 - (pkt['len'] % 8)) % 8)
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_Parameter', len: 'int', id: 'int') -> 'None': ...
+
+
+class RouteDstParameter(Parameter):
+    """Header schema for HIP ``ROUTE_DST`` parameters."""
+
+    #: Flags.
+    flags: 'RouteDstFlags' = BitField(
+        length=2,
+        namespace={
+            'symmetric': (0, 1),
+            'must_follow': (1, 1),
+        },
+    )
+    #: Reserved.
+    reserved: 'bytes' = PaddingField(length=2)
+    #: HIT addresses.
+    hit: 'list[IPv6Address]' = ListField(
+        length=lambda pkt: pkt['len'] - 4,
+        item_type=BytesField(length=16),
+    )
+    #: Padding.
+    padding: 'bytes' = PaddingField(length=lambda pkt: (8 - (pkt['len'] % 8)) % 8)
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_Parameter', len: 'int', flags: 'RouteDstFlags', hit: 'list[bytes]') -> 'None': ...
