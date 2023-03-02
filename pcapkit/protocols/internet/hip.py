@@ -3248,7 +3248,9 @@ class HIP(Internet[Data_HIP, Schema_HIP]):
         return parameters_list, total_length
 
     def _make_param_unassigned(self, code: 'Enum_Parameter', param: 'Optional[Data_UnassignedParameter]' = None, *,  # pylint: disable=unused-argument
-                               version: 'int', contents: 'bytes' = b'', **kwargs: 'Any') -> 'Schema_UnassignedParameter':
+                               version: 'int',
+                               contents: 'bytes' = b'',
+                               **kwargs: 'Any') -> 'Schema_UnassignedParameter':
         """Make HIP unassigned parameter.
 
         Args:
@@ -3272,7 +3274,10 @@ class HIP(Internet[Data_HIP, Schema_HIP]):
         )
 
     def _make_param_esp_info(self, code: 'Enum_Parameter', param: 'Optional[Data_ESPInfoParameter]' = None, *,  # pylint: disable=unused-argument
-                             version: 'int', index: 'int' = 0, old_spi: 'int' = 0, new_spi: 'int' = 0,
+                             version: 'int',
+                             index: 'int' = 0,
+                             old_spi: 'int' = 0,
+                             new_spi: 'int' = 0,
                              **kwargs: 'Any') -> 'Schema_ESPInfoParameter':
         """Make HIP ``ESP_INFO`` parameter.
 
@@ -3303,7 +3308,9 @@ class HIP(Internet[Data_HIP, Schema_HIP]):
         )
 
     def _make_param_r1_counter(self, code: 'Enum_Parameter', param: 'Optional[Data_R1CounterParameter]' = None, *, # pylint: disable=unused-argument
-                               version: 'int', counter: 'int' = 0, **kwargs: 'Any') -> 'Schema_R1CounterParameter':
+                               version: 'int',
+                               counter: 'int' = 0,
+                               **kwargs: 'Any') -> 'Schema_R1CounterParameter':
         """Make HIP ``R1_COUNTER`` parameter.
 
         Args:
@@ -3330,7 +3337,8 @@ class HIP(Internet[Data_HIP, Schema_HIP]):
         )
 
     def _make_param_locator_set(self, code: 'Enum_Parameter', param: 'Optional[Data_LocatorSetParameter]' = None, *,  # pylint: disable=unused-argument
-                                version: 'int', locator_set: 'Optional[list[Data_Locator | Locator]]' = None,
+                                version: 'int',
+                                locator_set: 'Optional[list[Data_Locator | Locator]]' = None,
                                 **kwargs: 'Any') -> 'Schema_LocatorSetParameter':
         """Make HIP ``LOCATOR_SET`` parameter.
 
@@ -3346,10 +3354,13 @@ class HIP(Internet[Data_HIP, Schema_HIP]):
 
         """
         def _make_locator(locator: 'Optional[Data_Locator]' = None, *,
-                          traffic: 'int' = 0, type: 'int' = 0,
-                          preferred: 'bool' = False, lifetime: 'timedelta | int' = 0,
+                          traffic: 'int' = 0,
+                          type: 'int' = 0,
+                          preferred: 'bool' = False,
+                          lifetime: 'timedelta | int' = 0,
                           ip: 'IPv6Address | bytes | int | str' = '::',
-                          spi: 'Optional[int]' = None, **kwargs: 'Any') -> 'Schema_Locator':
+                          spi: 'Optional[int]' = None,
+                          **kwargs: 'Any') -> 'Schema_Locator':
             """Make locator data.
 
             Args:
@@ -3422,8 +3433,12 @@ class HIP(Internet[Data_HIP, Schema_HIP]):
         )
 
     def _make_param_puzzle(self, code: 'Enum_Parameter', param: 'Optional[Data_PuzzleParameter]' = None, *,  # pylint: disable=unused-argument
-                           version: 'int', index: 'int' = 0, lifetime: 'timedelta | int' = 0,
-                           opaque: 'bytes' = b'', random: 'int' = 0, **kwargs: 'Any') -> 'Schema_PuzzleParameter':
+                           version: 'int',
+                           index: 'int' = 0,
+                           lifetime: 'timedelta | int' = 0,
+                           opaque: 'bytes' = b'',
+                           random: 'int' = 0,
+                           **kwargs: 'Any') -> 'Schema_PuzzleParameter':
         """Make HIP ``PUZZLE`` parameter.
 
         Args:
@@ -3460,8 +3475,12 @@ class HIP(Internet[Data_HIP, Schema_HIP]):
         )
 
     def _make_param_solution(self, code: 'Enum_Parameter', param: 'Optional[Data_SolutionParameter]' = None, *,  # pylint: disable=unused-argument
-                             version: 'int', index: 'int' = 0, lifetime: 'timedelta | int' = 0,
-                             opaque: 'bytes' = b'', random: 'int' = 0, solution: 'int' = 0,
+                             version: 'int',
+                             index: 'int' = 0,
+                             lifetime: 'timedelta | int' = 0,
+                             opaque: 'bytes' = b'',
+                             random: 'int' = 0,
+                             solution: 'int' = 0,
                              **kwargs: 'Any') -> 'Schema_SolutionParameter':
         """Make HIP ``SOLUTION`` parameter.
 
@@ -3501,7 +3520,9 @@ class HIP(Internet[Data_HIP, Schema_HIP]):
         )
 
     def _make_param_seq(self, code: 'Enum_Parameter', param: 'Optional[Data_SEQParameter]' = None, *,  # pylint: disable=unused-argument
-                        version: 'int', update_id: 'int' = 0, **kwargs: 'Any') -> 'Schema_SEQParameter':
+                        version: 'int',
+                        update_id: 'int' = 0,
+                        **kwargs: 'Any') -> 'Schema_SEQParameter':
         """Make HIP ``SEQ`` parameter.
 
         Args:
@@ -3524,7 +3545,9 @@ class HIP(Internet[Data_HIP, Schema_HIP]):
         )
 
     def _make_param_ack(self, code: 'Enum_Parameter', param: 'Optional[Data_ACKParameter]' = None, *,  # pylint: disable=unused-argument
-                        version: 'int', update_id: 'Optional[list[int]]' = None, **kwargs: 'Any') -> 'Schema_ACKParameter':
+                        version: 'int',
+                        update_id: 'Optional[list[int]]' = None,
+                        **kwargs: 'Any') -> 'Schema_ACKParameter':
         """Make HIP ``ACK`` parameter.
 
         Args:
@@ -3551,43 +3574,84 @@ class HIP(Internet[Data_HIP, Schema_HIP]):
         )
 
     def _make_param_dh_group_list(self, code: 'Enum_Parameter', param: 'Optional[Data_DHGroupListParameter]' = None, *,  # pylint: disable=unused-argument
-                                  version: 'int', **kwargs: 'Any') -> 'Schema_DHGroupListParameter':
+                                  version: 'int',
+                                  groups: 'Optional[list[Enum_Group | StdlibEnum | AenumEnum | str | int]]' = None,
+                                  group_default: 'Optional[int]' = None,
+                                  group_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
+                                  group_reversed: 'bool' = False,
+                                  **kwargs: 'Any') -> 'Schema_DHGroupListParameter':
         """Make HIP ``DH_GROUP_LIST`` parameter.
 
         Args:
             code: parameter code
             param: parameter data
             version: HIP protocol version
+            groups: list of group ID
+            group_default: default group ID
+            group_namespace: group ID namespace
+            group_reversed: reverse group ID namespace
+            **kwargs: arbitrary keyword arguments
 
         Returns:
             HIP parameter schema.
 
         """
+        if param is not None:
+            group_id = cast('list[Enum_Group]', param.group_id)
+        else:
+            if groups is None:
+                groups = []
+
+            group_id = []
+            for group in groups:
+                group_id.append(self._make_index(group, group_default, namespace=group_namespace,  # type: ignore[call-overload]
+                                                 reversed=group_reversed, pack=False))
+
         return Schema_DHGroupListParameter(
             type=code,
-            len=len(param.group_id),
-            groups=cast('list[Enum_Group]', param.group_id),
+            len=len(group_id),
+            groups=group_id,
         )
 
     def _make_param_diffie_hellman(self, code: 'Enum_Parameter', param: 'Optional[Data_DiffieHellmanParameter]' = None, *,  # pylint: disable=unused-argument
-                                   version: 'int', **kwargs: 'Any') -> 'Schema_DiffieHellmanParameter':
+                                   version: 'int',
+                                   group: 'Enum_Group | StdlibEnum | AenumEnum | str | int' = Enum_Group.Reserved_0,
+                                   group_default: 'Optional[int]' = None,
+                                   group_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
+                                   group_reversed: 'bool' = False,
+                                   pub_val: 'int' = 0,
+                                   **kwargs: 'Any') -> 'Schema_DiffieHellmanParameter':
         """Make HIP ``DIFFIE_HELLMAN`` parameter.
 
         Args:
             code: parameter code
             param: parameter data
             version: HIP protocol version
+            group: group ID
+            group_default: default group ID
+            group_namespace: group ID namespace
+            group_reversed: reverse group ID namespace
+            pub_val: public value
 
         Returns:
             HIP parameter schema.
 
         """
+        if param is not None:
+            group_id = param.group_id
+            pub_len = param.pub_len
+            pub_val = param.pub_val
+        else:
+            group_id = self._make_index(group, group_default, namespace=group_namespace,  # type: ignore[call-overload]
+                                     reversed=group_reversed, pack=False)
+            pub_len = math.ceil(pub_val.bit_length() / 8)
+
         return Schema_DiffieHellmanParameter(
             type=code,
-            len=3 + param.pub_len,
-            group=param.group_id,
-            pub_len=param.pub_len,
-            pub_val=param.pub_val,
+            len=3 + pub_len,
+            group=group_id,
+            pub_len=pub_len,
+            pub_val=pub_val,
         )
 
     def _make_param_hip_transform(self, code: 'Enum_Parameter', param: 'Optional[Data_HIPTransformParameter]' = None, *,  # pylint: disable=unused-argument
