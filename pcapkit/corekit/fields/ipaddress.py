@@ -6,7 +6,6 @@ import ipaddress
 from typing import TYPE_CHECKING, TypeVar
 
 from pcapkit.corekit.fields.field import Field, NoValue
-from pcapkit.utilities.exceptions import FieldValueError
 
 __all__ = [
     'IPv4Field',
@@ -40,7 +39,7 @@ class _IPField(Field[_T]):
     def version(self) -> 'int':
         """IP version number."""
 
-    def pre_process(self, value: '_T | bytes | int', packet: 'dict[str, Any]') -> 'bytes':
+    def pre_process(self, value: '_T | bytes | int | str', packet: 'dict[str, Any]') -> 'bytes':
         """Process field value before packing.
 
         Args:
@@ -53,11 +52,7 @@ class _IPField(Field[_T]):
         """
         if isinstance(value, (ipaddress.IPv4Address, ipaddress.IPv6Address)):
             return value.packed
-        if isinstance(value, int):
-            return ipaddress.ip_address(value).packed
-        if isinstance(value, bytes):
-            return value
-        raise FieldValueError(f'invalid IP address value: {value!r}')
+        return ipaddress.ip_address(value).packed
 
     def post_process(self, value: 'bytes', packet: 'dict[str, Any]') -> '_T':
         """Process field value after parsing (unpacking).
