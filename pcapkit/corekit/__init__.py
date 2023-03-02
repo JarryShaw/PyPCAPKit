@@ -41,4 +41,6 @@ __all__ = [
     'PaddingField',
 
     'ConditionalField', 'PayloadField',
+
+    'IPv4Field', 'IPv6Field',
 ]

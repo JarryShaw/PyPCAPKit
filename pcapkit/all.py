@@ -58,6 +58,7 @@ __all__ = [
     'BytesField', 'StringField', 'BitField',                # text protocol fields
     'PaddingField',
     'ConditionalField', 'PayloadField',                     # misc protocol fields
+    'IPv4Field', 'IPv6Field',                               # IP address protocol fields
 
     # pcapkit.dumpkit
     'PCAPIO',                                               # PCAP Dumper
