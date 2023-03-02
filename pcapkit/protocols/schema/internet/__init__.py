@@ -9,7 +9,6 @@ from pcapkit.protocols.schema.internet.hip import HIP
 from pcapkit.protocols.schema.internet.hip import AckDataParameter as HIP_AckDataParameter
 from pcapkit.protocols.schema.internet.hip import ACKParameter as HIP_ACKParameter
 from pcapkit.protocols.schema.internet.hip import CertParameter as HIP_CertParameter
-from pcapkit.protocols.schema.internet.hip import Control as HIP_Control
 from pcapkit.protocols.schema.internet.hip import DHGroupListParameter as HIP_DHGroupListParameter
 from pcapkit.protocols.schema.internet.hip import \
     DiffieHellmanParameter as HIP_DiffieHellmanParameter
@@ -30,7 +29,6 @@ from pcapkit.protocols.schema.internet.hip import \
 from pcapkit.protocols.schema.internet.hip import EncryptedParameter as HIP_EncryptedParameter
 from pcapkit.protocols.schema.internet.hip import ESPInfoParameter as HIP_ESPInfoParameter
 from pcapkit.protocols.schema.internet.hip import ESPTransformParameter as HIP_ESPTransformParameter
-from pcapkit.protocols.schema.internet.hip import Flags as HIP_Flags
 from pcapkit.protocols.schema.internet.hip import FromParameter as HIP_FromParameter
 from pcapkit.protocols.schema.internet.hip import HIPCipherParameter as HIP_HIPCipherParameter
 from pcapkit.protocols.schema.internet.hip import HIPMAC2Parameter as HIP_HIPMAC2Parameter
@@ -43,7 +41,6 @@ from pcapkit.protocols.schema.internet.hip import \
     HIPTransportModeParameter as HIP_HIPTransportModeParameter
 from pcapkit.protocols.schema.internet.hip import HITSuiteListParameter as HIP_HITSuiteListParameter
 from pcapkit.protocols.schema.internet.hip import HostIDParameter as HIP_HostIDParameter
-from pcapkit.protocols.schema.internet.hip import Lifetime as HIP_Lifetime
 from pcapkit.protocols.schema.internet.hip import Locator as HIP_Locator
 from pcapkit.protocols.schema.internet.hip import LocatorData as HIP_LocatorData
 from pcapkit.protocols.schema.internet.hip import LocatorSetParameter as HIP_LocatorSetParameter
@@ -83,7 +80,7 @@ __all__ = [
     # Host Identity Protocol
     'HIP',
     'HIP_LocatorData', 'HIP_Locator', 'HIP_ECDSACurveHostIdentity', 'HIP_ECDSALowCurveHostIdentity',
-    'HIP_EdDSACurveHostIdentity', 'HIP_Lifetime', 'HIP_Flags',
+    'HIP_EdDSACurveHostIdentity',
     'HIP_UnassignedParameter', 'HIP_ESPInfoParameter', 'HIP_R1CounterParameter',
     'HIP_LocatorSetParameter', 'HIP_PuzzleParameter', 'HIP_SolutionParameter',
     'HIP_SEQParameter', 'HIP_ACKParameter', 'HIP_DHGroupListParameter',

@@ -35,8 +35,6 @@ __all__ = [
 
     'LocatorData', 'Locator',
     'ECDSACurveHostIdentity', 'ECDSALowCurveHostIdentity', 'EdDSACurveHostIdentity',
-    'Lifetime',
-    'Flags',
 
     'UnassignedParameter', 'ESPInfoParameter', 'R1CounterParameter',
     'LocatorSetParameter', 'PuzzleParameter', 'SolutionParameter',
@@ -775,13 +773,10 @@ class RouteDstParameter(Parameter):
     """Header schema for HIP ``ROUTE_DST`` parameters."""
 
     #: Flags.
-    flags: 'RouteFlags' = BitField(
-        length=2,
-        namespace={
+    flags: 'RouteFlags' = BitField(length=2, namespace={
             'symmetric': (0, 1),
             'must_follow': (1, 1),
-        },
-    )
+    })
     #: Reserved.
     reserved: 'bytes' = PaddingField(length=2)
     #: HIT addresses.
@@ -933,3 +928,76 @@ class OverlayTTLParameter(Parameter):
 
     if TYPE_CHECKING:
         def __init__(self, type: 'Enum_Parameter', len: 'int', ttl: 'int') -> 'None': ...
+
+
+class RouteViaParameter(Parameter):
+    """Header schema for HIP ``ROUTE_VIA`` parameters."""
+
+    #: Flags.
+    flags: 'RouteFlags' = BitField(length=2, namespace={
+        'symmetric': (0, 1),
+        'must_follow': (1, 1),
+    })
+    #: Reserved.
+    reserved: 'bytes' = PaddingField(length=2)
+    #: HIT addresses.
+    hit: 'list[IPv6Address]' = ListField(
+        length=lambda pkt: pkt['len'] - 4,
+        item_type=BytesField(length=16),
+    )
+    #: Padding.
+    padding: 'bytes' = PaddingField(length=lambda pkt: (8 - (pkt['len'] % 8)) % 8)
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_Parameter', len: 'int', flags: 'RouteFlags', hit: 'list[bytes]') -> 'None': ...
+
+
+class FromParameter(Parameter):
+    """Header schema for HIP ``FROM`` parameters."""
+
+    #: Address.
+    address: 'IPv6Address' = BytesField(length=16)
+    #: Padding.
+    padding: 'bytes' = PaddingField(length=lambda pkt: (8 - (pkt['len'] % 8)) % 8)
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_Parameter', len: 'int', address: 'bytes') -> 'None': ...
+
+
+class RVSHMACParameter(Parameter):
+    """Header schema for HIP ``RVS_HMAC`` parameters."""
+
+    #: HMAC value.
+    hmac: 'bytes' = BytesField(length=lambda pkt: pkt['len'])
+    #: Padding.
+    padding: 'bytes' = PaddingField(length=lambda pkt: (8 - (pkt['len'] % 8)) % 8)
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_Parameter', len: 'int', hmac: 'bytes') -> 'None': ...
+
+
+class ViaRVSParameter(Parameter):
+    """Header schema for HIP ``VIA_RVS`` parameters."""
+
+    #: Address.
+    address: 'list[IPv6Address]' = ListField(
+        length=lambda pkt: pkt['len'],
+        item_type=BytesField(length=16),
+    )
+    #: Padding.
+    padding: 'bytes' = PaddingField(length=lambda pkt: (8 - (pkt['len'] % 8)) % 8)
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_Parameter', len: 'int', address: 'list[bytes]') -> 'None': ...
+
+
+class RelayHMACParameter(Parameter):
+    """Header schema for HIP ``RELAY_HMAC`` parameters."""
+
+    #: HMAC value.
+    hmac: 'bytes' = BytesField(length=lambda pkt: pkt['len'])
+    #: Padding.
+    padding: 'bytes' = PaddingField(length=lambda pkt: (8 - (pkt['len'] % 8)) % 8)
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_Parameter', len: 'int', hmac: 'bytes') -> 'None': ...

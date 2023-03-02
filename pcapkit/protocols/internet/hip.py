@@ -34,24 +34,13 @@ import math
 import struct
 from typing import TYPE_CHECKING, cast, overload
 
-from pcapkit.const.hip.certificate import Certificate as Enum_Certificate
 from pcapkit.const.hip.cipher import Cipher as Enum_Cipher
-from pcapkit.const.hip.di import DITypes as Enum_DITypes
 from pcapkit.const.hip.ecdsa_curve import ECDSACurve as Enum_ECDSACurve
 from pcapkit.const.hip.ecdsa_low_curve import ECDSALowCurve as Enum_ECDSALowCurve
 from pcapkit.const.hip.eddsa_curve import EdDSACurve as Enum_EdDSACurve
-from pcapkit.const.hip.esp_transform_suite import ESPTransformSuite as Enum_ESPTransformSuite
-from pcapkit.const.hip.group import Group as Enum_Group
 from pcapkit.const.hip.hi_algorithm import HIAlgorithm as Enum_HIAlgorithm
-from pcapkit.const.hip.hit_suite import HITSuite as Enum_HITSuite
-from pcapkit.const.hip.nat_traversal import NATTraversal as Enum_NATTraversal
-from pcapkit.const.hip.notify_message import NotifyMessage as Enum_NotifyMessage
 from pcapkit.const.hip.packet import Packet as Enum_Packet
 from pcapkit.const.hip.parameter import Parameter as Enum_Parameter
-from pcapkit.const.hip.registration import Registration as Enum_Registration
-from pcapkit.const.hip.registration_failure import RegistrationFailure as Enum_RegistrationFailure
-from pcapkit.const.hip.suite import Suite as Enum_Suite
-from pcapkit.const.hip.transport import Transport as Enum_Transport
 from pcapkit.const.reg.transtype import TransType as Enum_TransType
 from pcapkit.corekit.multidict import OrderedMultiDict
 from pcapkit.protocols.data.internet.hip import HIP as Data_HIP
@@ -126,7 +115,6 @@ from pcapkit.protocols.schema.internet.hip import HIP as Schema_HIP
 from pcapkit.protocols.schema.internet.hip import AckDataParameter as Schema_AckDataParameter
 from pcapkit.protocols.schema.internet.hip import ACKParameter as Schema_ACKParameter
 from pcapkit.protocols.schema.internet.hip import CertParameter as Schema_CertParameter
-from pcapkit.protocols.schema.internet.hip import Control as Schema_Control
 from pcapkit.protocols.schema.internet.hip import \
     DHGroupListParameter as Schema_DHGroupListParameter
 from pcapkit.protocols.schema.internet.hip import \
@@ -149,7 +137,6 @@ from pcapkit.protocols.schema.internet.hip import EncryptedParameter as Schema_E
 from pcapkit.protocols.schema.internet.hip import ESPInfoParameter as Schema_ESPInfoParameter
 from pcapkit.protocols.schema.internet.hip import \
     ESPTransformParameter as Schema_ESPTransformParameter
-from pcapkit.protocols.schema.internet.hip import Flags as Schema_Flags
 from pcapkit.protocols.schema.internet.hip import FromParameter as Schema_FromParameter
 from pcapkit.protocols.schema.internet.hip import HIPCipherParameter as Schema_HIPCipherParameter
 from pcapkit.protocols.schema.internet.hip import HIPMAC2Parameter as Schema_HIPMAC2Parameter
@@ -165,7 +152,6 @@ from pcapkit.protocols.schema.internet.hip import \
 from pcapkit.protocols.schema.internet.hip import \
     HITSuiteListParameter as Schema_HITSuiteListParameter
 from pcapkit.protocols.schema.internet.hip import HostIDParameter as Schema_HostIDParameter
-from pcapkit.protocols.schema.internet.hip import Lifetime as Schema_Lifetime
 from pcapkit.protocols.schema.internet.hip import Locator as Schema_Locator
 from pcapkit.protocols.schema.internet.hip import LocatorData as Schema_LocatorData
 from pcapkit.protocols.schema.internet.hip import LocatorSetParameter as Schema_LocatorSetParameter
@@ -206,13 +192,21 @@ from pcapkit.utilities.warnings import ProtocolWarning, warn
 
 if TYPE_CHECKING:
     from enum import IntEnum as StdlibEnum
-    from ipaddress import IPv4Address, IPv6Address
+    from ipaddress import IPv6Address
     from typing import IO, Any, Callable, NoReturn, Optional, Type
 
     from aenum import IntEnum as AenumEnum
     from mypy_extensions import NamedArg
     from typing_extensions import Literal
 
+    from pcapkit.const.hip.esp_transform_suite import ESPTransformSuite as Enum_ESPTransformSuite
+    from pcapkit.const.hip.group import Group as Enum_Group
+    from pcapkit.const.hip.nat_traversal import NATTraversal as Enum_NATTraversal
+    from pcapkit.const.hip.registration import Registration as Enum_Registration
+    from pcapkit.const.hip.registration_failure import \
+        RegistrationFailure as Enum_RegistrationFailure
+    from pcapkit.const.hip.suite import Suite as Enum_Suite
+    from pcapkit.const.hip.transport import Transport as Enum_Transport
     from pcapkit.corekit.protochain import ProtoChain
     from pcapkit.protocols.data.internet.hip import Parameter as Data_Parameter
     from pcapkit.protocols.protocol import Protocol
@@ -2967,24 +2961,24 @@ class HIP(Internet[Data_HIP, Schema_HIP]):
         if (clen - 4) % 16 != 0:
             raise ProtocolError(f'HIPv{version}: [ParamNo {code}] invalid format')
 
-        _flag = self._read_binary(2)
-        _resv = self._read_fileng(2)
+        schema = Schema_RouteViaParameter.unpack(data, length)  # type: Schema_RouteViaParameter
+        self.__header__.param.append(schema)
 
-        _addr = []  # type: list[IPv6Address]
-        for _ in range((clen - 4) // 16):
-            _addr.append(ipaddress.ip_address(self._read_fileng(16)))  # type: ignore[arg-type]
+        hits = []  # type: list[IPv6Address]
+        for hit in schema.hit:
+            hits.append(ipaddress.ip_address(hit))  # type: ignore[arg-type]
+        schema.hit = hits
 
         route_via = Data_RouteViaParameter(
             type=code,
             critical=cbit,
             length=length,
             flags=Data_Flags(
-                symmetric=bool(int(_flag[0], base=2)),
-                must_follow=bool(int(_flag[1], base=2)),
+                symmetric=bool(schema.flags['symmetric']),
+                must_follow=bool(schema.flags['must_follow']),
             ),
-            hit=tuple(_addr),
+            hit=tuple(hits),
         )
-
         return route_via
 
     def _read_param_from(self, code: 'Enum_Parameter', cbit: 'bool', clen: 'int', *,  # pylint: disable=unused-argument
@@ -2996,16 +2990,16 @@ class HIP(Internet[Data_HIP, Schema_HIP]):
 
         .. code-block:: text
 
-             0                   1                   2                   3
-             0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
-            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-            |             Type              |             Length            |
-            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-            |                                                               |
-            |                             Address                           |
-            |                                                               |
-            |                                                               |
-            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+            0                   1                   2                   3
+            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |             Type              |             Length            |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |                                                               |
+           |                             Address                           |
+           |                                                               |
+           |                                                               |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
             code: parameter code
@@ -3026,15 +3020,18 @@ class HIP(Internet[Data_HIP, Schema_HIP]):
         if clen != 16:
             raise ProtocolError(f'HIPv{version}: [ParamNo {code}] invalid format')
 
-        _addr = self._read_fileng(16)
+        schema = Schema_FromParameter.unpack(data, length)  # type: Schema_FromParameter
+        self.__header__.param.append(schema)
+
+        address = ipaddress.ip_address(schema.address)
+        schema.address = address  # type: ignore[assignment]
 
         from_ = Data_FromParameter(
             type=code,
             critical=cbit,
             length=length,
-            address=ipaddress.ip_address(_addr),  # type: ignore[arg-type]
+            address=address,  # type: ignore[arg-type]
         )
-
         return from_
 
     def _read_param_rvs_hmac(self, code: 'Enum_Parameter', cbit: 'bool', clen: 'int', *,  # pylint: disable=unused-argument
@@ -3046,15 +3043,15 @@ class HIP(Internet[Data_HIP, Schema_HIP]):
 
         .. code-block:: text
 
-             0                   1                   2                   3
-             0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
-            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-            |                                                               |
-            |                             HMAC                              |
-            /                                                               /
-            /                               +-------------------------------+
-            |                               |            Padding            |
-            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+            0                   1                   2                   3
+            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |                                                               |
+           |                             HMAC                              |
+           /                                                               /
+           /                               +-------------------------------+
+           |                               |            Padding            |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
             code: parameter code
@@ -3069,19 +3066,15 @@ class HIP(Internet[Data_HIP, Schema_HIP]):
             Parsed parameter data.
 
         """
-        _hmac = self._read_fileng(clen)
+        schema = Schema_RVSHMACParameter.unpack(data, length)  # type: Schema_RVSHMACParameter
+        self.__header__.param.append(schema)
 
         rvs_hmac = Data_RVSHMACParameter(
             type=code,
             critical=cbit,
             length=length,
-            hmac=_hmac,
+            hmac=schema.hmac,
         )
-
-        _plen = length - clen
-        if _plen:
-            self._read_fileng(_plen)
-
         return rvs_hmac
 
     def _read_param_via_rvs(self, code: 'Enum_Parameter', cbit: 'bool', clen: 'int', *,  # pylint: disable=unused-argument
@@ -3093,24 +3086,24 @@ class HIP(Internet[Data_HIP, Schema_HIP]):
 
         .. code-block:: text
 
-             0                   1                   2                   3
-             0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
-            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-            |             Type              |             Length            |
-            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-            |                                                               |
-            |                            Address                            |
-            |                                                               |
-            |                                                               |
-            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-            .                               .                               .
-            .                               .                               .
-            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-            |                                                               |
-            |                            Address                            |
-            |                                                               |
-            |                                                               |
-            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+            0                   1                   2                   3
+            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |             Type              |             Length            |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |                                                               |
+           |                            Address                            |
+           |                                                               |
+           |                                                               |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           .                               .                               .
+           .                               .                               .
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |                                                               |
+           |                            Address                            |
+           |                                                               |
+           |                                                               |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
             code: parameter code
@@ -3131,17 +3124,20 @@ class HIP(Internet[Data_HIP, Schema_HIP]):
         if clen % 16 != 0:
             raise ProtocolError(f'HIPv{version}: [ParamNo {code}] invalid format')
 
-        _addr = []  # type: list[IPv6Address]
-        for _ in range(clen // 16):
-            _addr.append(ipaddress.ip_address(self._read_fileng(16)))  # type: ignore[arg-type]
+        schema = Schema_ViaRVSParameter.unpack(data, length)  # type: Schema_ViaRVSParameter
+        self.__header__.param.append(schema)
+
+        address = []  # type: list[IPv6Address]
+        for addr in schema.address:
+            address.append(ipaddress.ip_address(addr))  # type: ignore[arg-type]
+        schema.address = address
 
         via_rvs = Data_ViaRVSParameter(
             type=code,
             critical=cbit,
             length=length,
-            address=tuple(_addr),
+            address=tuple(address),
         )
-
         return via_rvs
 
     def _read_param_relay_hmac(self, code: 'Enum_Parameter', cbit: 'bool', clen: 'int', *,  # pylint: disable=unused-argument
@@ -3153,15 +3149,15 @@ class HIP(Internet[Data_HIP, Schema_HIP]):
 
         .. code-block::
 
-             0                   1                   2                   3
-             0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
-            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-            |                                                               |
-            |                             HMAC                              |
-            /                                                               /
-            /                               +-------------------------------+
-            |                               |            Padding            |
-            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+            0                   1                   2                   3
+            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |                                                               |
+           |                             HMAC                              |
+           /                                                               /
+           /                               +-------------------------------+
+           |                               |            Padding            |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
             code: parameter code
@@ -3176,19 +3172,15 @@ class HIP(Internet[Data_HIP, Schema_HIP]):
             Parsed parameter data.
 
         """
-        _hmac = self._read_fileng(clen)
+        schema = Schema_RelayHMACParameter.unpack(data, length)  # type: Schema_RelayHMACParameter
+        self.__header__.param.append(schema)
 
         relay_hmac = Data_RelayHMACParameter(
             type=code,
             critical=cbit,
             length=length,
-            hmac=_hmac,
+            hmac=schema.hmac,
         )
-
-        _plen = length - clen
-        if _plen:
-            self._read_fileng(_plen)
-
         return relay_hmac
 
     def _make_hip_param(self, parameters: 'list[Schema_Parameter | bytes] | Parameter', *,
@@ -3555,9 +3547,14 @@ class HIP(Internet[Data_HIP, Schema_HIP]):
                 hi = Schema_ECDSACurveHostIdentity(
                     curve=param.hi.curve,
                     pub_key=param.hi.pubkey,
-                )  # type: Schema_ECDSACurveHostIdentity | Schema_ECDSALowCurveHostIdentity | bytes
+                )  # type: Schema_ECDSACurveHostIdentity | Schema_ECDSALowCurveHostIdentity | Schema_EdDSACurveHostIdentity | bytes
             elif isinstance(param.hi.curve, Enum_ECDSALowCurve):
                 hi = Schema_ECDSALowCurveHostIdentity(
+                    curve=param.hi.curve,
+                    pub_key=param.hi.pubkey,
+                )
+            elif isinstance(param.hi.curve, Enum_EdDSACurve):
+                hi = Schema_EdDSACurveHostIdentity(
                     curve=param.hi.curve,
                     pub_key=param.hi.pubkey,
                 )
@@ -4134,4 +4131,103 @@ class HIP(Internet[Data_HIP, Schema_HIP]):
             type=code,
             len=4,
             ttl=math.floor(param.ttl.total_seconds()),
+        )
+
+    def _make_param_route_via(self, code: 'Enum_Parameter', param: 'Data_RouteViaParameter', *,  # pylint: disable=unused-argument
+                              version: 'int') -> 'Schema_RouteViaParameter':
+        """Make HIP ``ROUTE_VIA`` parameter.
+
+        Args:
+            code: parameter code
+            param: parameter data
+            version: HIP protocol version
+
+        Returns:
+            HIP parameter schema.
+
+        """
+        return Schema_RouteViaParameter(
+            type=code,
+            len=4 + 16 * len(param.hit),
+            flags={
+                'symmetric': int(param.flags.symmetric),
+                'must_follow': int(param.flags.must_follow),
+            },
+            hit=[hit.packed for hit in param.hit],
+        )
+
+    def _make_param_from(self, code: 'Enum_Parameter', param: 'Data_FromParameter', *,  # pylint: disable=unused-argument
+                             version: 'int') -> 'Schema_FromParameter':
+        """Make HIP ``FROM`` parameter.
+
+        Args:
+            code: parameter code
+            param: parameter data
+            version: HIP protocol version
+
+        Returns:
+            HIP parameter schema.
+
+        """
+        return Schema_FromParameter(
+            type=code,
+            len=16,
+            address=param.address.packed,
+        )
+
+    def _make_param_rvs_hmac(self, code: 'Enum_Parameter', param: 'Data_RVSHMACParameter', *,  # pylint: disable=unused-argument
+                             version: 'int') -> 'Schema_RVSHMACParameter':
+        """Make HIP ``RVS_HMAC`` parameter.
+
+        Args:
+            code: parameter code
+            param: parameter data
+            version: HIP protocol version
+
+        Returns:
+            HIP parameter schema.
+
+        """
+        return Schema_RVSHMACParameter(
+            type=code,
+            len=len(param.hmac),
+            hmac=param.hmac,
+        )
+
+    def _make_param_via_rvs(self, code: 'Enum_Parameter', param: 'Data_ViaRVSParameter', *,  # pylint: disable=unused-argument
+                            version: 'int') -> 'Schema_ViaRVSParameter':
+        """Make HIP ``VIA_RVS`` parameter.
+
+        Args:
+            code: parameter code
+            param: parameter data
+            version: HIP protocol version
+
+        Returns:
+            HIP parameter schema.
+
+        """
+        return Schema_ViaRVSParameter(
+            type=code,
+            len=16 * len(param.address),
+            address=[address.packed for address in param.address],
+        )
+
+    def _make_param_relay_hmac(self, code: 'Enum_Parameter', param: 'Data_RelayHMACParameter', *,  # pylint: disable=unused-argument
+                               version: 'int') -> 'Schema_RelayHMACParameter':
+        """Make HIP ``RELAY_HMAC`` parameter.
+
+        Args:
+            code: parameter code
+            param: parameter data
+            version: HIP protocol version
+
+        Returns:
+            HIP parameter schema.
+
+        """
+        return Schema_RelayHMACParameter(
+            type=code,
+            len=len(param.hmac),
+            hmac=param.hmac,
         )
