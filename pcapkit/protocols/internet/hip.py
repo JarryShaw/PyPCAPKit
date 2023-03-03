@@ -34,15 +34,16 @@ import math
 import struct
 from typing import TYPE_CHECKING, cast, overload
 
-from pcapkit.const.hip.notify_message import NotifyMessage as Enum_NotifyMessage
 from pcapkit.const.hip.certificate import Certificate as Enum_Certificate
-from pcapkit.const.hip.di import DITypes as Enum_DITypes
 from pcapkit.const.hip.cipher import Cipher as Enum_Cipher
+from pcapkit.const.hip.di import DITypes as Enum_DITypes
 from pcapkit.const.hip.ecdsa_curve import ECDSACurve as Enum_ECDSACurve
 from pcapkit.const.hip.ecdsa_low_curve import ECDSALowCurve as Enum_ECDSALowCurve
 from pcapkit.const.hip.eddsa_curve import EdDSACurve as Enum_EdDSACurve
 from pcapkit.const.hip.group import Group as Enum_Group
 from pcapkit.const.hip.hi_algorithm import HIAlgorithm as Enum_HIAlgorithm
+from pcapkit.const.hip.hit_suite import HITSuite as Enum_HITSuite
+from pcapkit.const.hip.notify_message import NotifyMessage as Enum_NotifyMessage
 from pcapkit.const.hip.packet import Packet as Enum_Packet
 from pcapkit.const.hip.parameter import Parameter as Enum_Parameter
 from pcapkit.const.reg.transtype import TransType as Enum_TransType
@@ -195,7 +196,6 @@ from pcapkit.protocols.schema.internet.hip import ViaRVSParameter as Schema_ViaR
 from pcapkit.protocols.schema.schema import Schema
 from pcapkit.utilities.exceptions import ProtocolError, UnsupportedCall
 from pcapkit.utilities.warnings import ProtocolWarning, warn
-from pcapkit.const.hip.hit_suite import HITSuite as Enum_HITSuite
 
 if TYPE_CHECKING:
     from datetime import timedelta
