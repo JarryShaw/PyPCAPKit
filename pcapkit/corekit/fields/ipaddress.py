@@ -14,7 +14,7 @@ __all__ = [
 
 if TYPE_CHECKING:
     from ipaddress import IPv4Address, IPv6Address
-    from typing import Callable, Any
+    from typing import Any, Callable
 
     from typing_extensions import Literal
 
