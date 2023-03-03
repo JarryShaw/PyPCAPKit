@@ -4,7 +4,6 @@
 
 from typing import TYPE_CHECKING
 
-from pcapkit.corekit.fields.ipaddress import IPv6Field
 from pcapkit.const.hip.certificate import Certificate as Enum_Certificate
 from pcapkit.const.hip.cipher import Cipher as Enum_Cipher
 from pcapkit.const.hip.di import DITypes as Enum_DITypes
@@ -23,6 +22,7 @@ from pcapkit.const.hip.registration_failure import RegistrationFailure as Enum_R
 from pcapkit.const.hip.suite import Suite as Enum_Suite
 from pcapkit.const.hip.transport import Transport as Enum_Transport
 from pcapkit.const.reg.transtype import TransType as Enum_TransType
+from pcapkit.corekit.fields.ipaddress import IPv6Field
 from pcapkit.corekit.fields.misc import ConditionalField, ListField, PayloadField
 from pcapkit.corekit.fields.numbers import (EnumField, NumberField, UInt8Field, UInt16Field,
                                             UInt32Field)
@@ -32,9 +32,7 @@ from pcapkit.protocols.schema.schema import Schema
 __all__ = [
     'HIP',
 
-    'LocatorData', 'Locator',
-
-    'LocatorData', 'Locator',
+    'LocatorData', 'Locator', 'HostIdentity',
     'ECDSACurveHostIdentity', 'ECDSALowCurveHostIdentity', 'EdDSACurveHostIdentity',
 
     'UnassignedParameter', 'ESPInfoParameter', 'R1CounterParameter',
@@ -429,7 +427,7 @@ class EncryptedParameter(Parameter):
     )
     #: Data.
     data: 'bytes' = BytesField(
-        length=lambda pkt: pkt['len'] - (16 if pkt['iv'] else 0),
+        length=lambda pkt: pkt['len'] - (16 if pkt.get('iv') else 0),
     )
     #: Padding.
     padding: 'bytes' = PaddingField(length=lambda pkt: (8 - (pkt['len'] % 8)) % 8)
@@ -458,7 +456,7 @@ class HostIDParameter(Parameter):
     #: Algorithm type.
     algorithm: 'Enum_HIAlgorithm' = EnumField(length=2, namespace=Enum_HIAlgorithm)
     #: Host ID.
-    hi: 'bytes | ECDSACurveHostIdentity | ECDSALowCurveHostIdentity | EdDSACurveHostIdentity' = BytesField(length=lambda pkt: pkt['hi_len'])
+    hi: 'bytes | HostIdentity' = BytesField(length=lambda pkt: pkt['hi_len'])
     #: Domain ID.
     di: 'bytes' = BytesField(length=lambda pkt: pkt['di_data']['len'])
     #: Padding.
@@ -466,11 +464,15 @@ class HostIDParameter(Parameter):
 
     if TYPE_CHECKING:
         def __init__(self, type: 'Enum_Parameter', len: 'int', hi_len: 'int', di_data: 'DIData',
-                     algorithm: 'Enum_HIAlgorithm', hi: 'bytes | ECDSACurveHostIdentity | ECDSALowCurveHostIdentity | EdDSACurveHostIdentity',
+                     algorithm: 'Enum_HIAlgorithm', hi: 'bytes | HostIdentity',
                      di: 'bytes') -> 'None': ...
 
 
-class ECDSACurveHostIdentity(Schema):
+class HostIdentity(Schema):
+    """Host identity schema."""
+
+
+class ECDSACurveHostIdentity(HostIdentity):
     """Host identity schema with ECDSA curve."""
 
     #: Algorithm curve type.
@@ -482,7 +484,7 @@ class ECDSACurveHostIdentity(Schema):
         def __init__(self, curve: 'Enum_ECDSACurve', pub_key: 'bytes') -> 'None': ...
 
 
-class ECDSALowCurveHostIdentity(Schema):
+class ECDSALowCurveHostIdentity(HostIdentity):
     """Host identity schema with ECDSA_LOW curve."""
 
     #: Algorithm curve type.
@@ -494,7 +496,7 @@ class ECDSALowCurveHostIdentity(Schema):
         def __init__(self, curve: 'Enum_ECDSALowCurve', pub_key: 'bytes') -> 'None': ...
 
 
-class EdDSACurveHostIdentity(Schema):
+class EdDSACurveHostIdentity(HostIdentity):
     """Host identity schema with EdDSA curve."""
 
     #: Algorithm curve type.

@@ -40,6 +40,7 @@ from pcapkit.protocols.schema.internet.hip import HIPTransformParameter as HIP_H
 from pcapkit.protocols.schema.internet.hip import \
     HIPTransportModeParameter as HIP_HIPTransportModeParameter
 from pcapkit.protocols.schema.internet.hip import HITSuiteListParameter as HIP_HITSuiteListParameter
+from pcapkit.protocols.schema.internet.hip import HostIdentity as HIP_HostIdentity
 from pcapkit.protocols.schema.internet.hip import HostIDParameter as HIP_HostIDParameter
 from pcapkit.protocols.schema.internet.hip import Locator as HIP_Locator
 from pcapkit.protocols.schema.internet.hip import LocatorData as HIP_LocatorData
@@ -80,7 +81,7 @@ __all__ = [
     # Host Identity Protocol
     'HIP',
     'HIP_LocatorData', 'HIP_Locator', 'HIP_ECDSACurveHostIdentity', 'HIP_ECDSALowCurveHostIdentity',
-    'HIP_EdDSACurveHostIdentity',
+    'HIP_EdDSACurveHostIdentity', 'HIP_HostIdentity',
     'HIP_UnassignedParameter', 'HIP_ESPInfoParameter', 'HIP_R1CounterParameter',
     'HIP_LocatorSetParameter', 'HIP_PuzzleParameter', 'HIP_SolutionParameter',
     'HIP_SEQParameter', 'HIP_ACKParameter', 'HIP_DHGroupListParameter',
