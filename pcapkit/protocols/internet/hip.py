@@ -4677,7 +4677,7 @@ class HIP(Internet[Data_HIP, Schema_HIP]):
         """
         if param is not None:
             port = param.port
-            mode_id = cast('list[Enum_Transport]', param.mode)
+            mode_id = cast('list[Enum_Transport]', param.mode_id)
         else:
             if modes is None:
                 modes = []
@@ -4747,66 +4747,113 @@ class HIP(Internet[Data_HIP, Schema_HIP]):
         )
 
     def _make_param_hip_signature_2(self, code: 'Enum_Parameter', param: 'Optional[Data_HIPSignature2Parameter]' = None, *,  # pylint: disable=unused-argument
-                                    version: 'int', **kwargs: 'Any') -> 'Schema_HIPSignature2Parameter':
+                                    version: 'int',
+                                    algorithm: 'Enum_HIAlgorithm | StdlibEnum | AenumEnum | str | int' = Enum_HIAlgorithm.NULL_ENCRYPT,
+                                    algorithm_default: 'Optional[int]' = None,
+                                    algorithm_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
+                                    algorithm_reversed: 'bool' = False,
+                                    signature: 'bytes' = b'',
+                                    **kwargs: 'Any') -> 'Schema_HIPSignature2Parameter':
         """Make HIP ``HIP_SIGNATURE_2`` parameter.
 
         Args:
             code: parameter code
             param: parameter data
             version: HIP protocol version
+            algorithm: signature algorithm
+            algorithm_default: default signature algorithm
+            algorithm_namespace: signature algorithm namespace
+            algorithm_reversed: reverse signature algorithm namespace
+            signature: signature value
+            **kwargs: arbitrary keyword arguments
 
         Returns:
             HIP parameter schema.
 
         """
+        if param is not None:
+            algo = param.algorithm
+            signature = param.signature
+        else:
+            algo = self._make_index(algorithm, algorithm_default, namespace=algorithm_namespace,  # type: ignore[call-overload]
+                                    reversed=algorithm_reversed, pack=False)
+
         return Schema_HIPSignature2Parameter(
             type=code,
-            len=2 + len(param.signature),
-            algorithm=param.algorithm,
-            signature=param.signature,
+            len=2 + len(signature),
+            algorithm=algo,
+            signature=signature,
         )
 
     def _make_param_hip_signature(self, code: 'Enum_Parameter', param: 'Optional[Data_HIPSignatureParameter]' = None, *,  # pylint: disable=unused-argument
-                                  version: 'int', **kwargs: 'Any') -> 'Schema_HIPSignatureParameter':
+                                  version: 'int',
+                                  algorithm: 'Enum_HIAlgorithm | StdlibEnum | AenumEnum | str | int' = Enum_HIAlgorithm.NULL_ENCRYPT,
+                                  algorithm_default: 'Optional[int]' = None,
+                                  algorithm_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
+                                  algorithm_reversed: 'bool' = False,
+                                  signature: 'bytes' = b'',
+                                  **kwargs: 'Any') -> 'Schema_HIPSignatureParameter':
         """Make HIP ``HIP_SIGNATURE`` parameter.
 
         Args:
             code: parameter code
             param: parameter data
             version: HIP protocol version
+            algorithm: signature algorithm
+            algorithm_default: default signature algorithm
+            algorithm_namespace: signature algorithm namespace
+            algorithm_reversed: reverse signature algorithm namespace
+            signature: signature value
+            **kwargs: arbitrary keyword arguments
 
         Returns:
             HIP parameter schema.
 
         """
+        if param is not None:
+            algo = param.algorithm
+            signature = param.signature
+        else:
+            algo = self._make_index(algorithm, algorithm_default, namespace=algorithm_namespace,  # type: ignore[call-overload]
+                                    reversed=algorithm_reversed, pack=False)
+
         return Schema_HIPSignatureParameter(
             type=code,
-            len=2 + len(param.signature),
-            algorithm=param.algorithm,
-            signature=param.signature,
+            len=2 + len(signature),
+            algorithm=algo,
+            signature=signature,
         )
 
     def _make_param_echo_request_unsigned(self, code: 'Enum_Parameter', param: 'Optional[Data_EchoRequestUnsignedParameter]' = None, *,  # pylint: disable=unused-argument
-                                          version: 'int', **kwargs: 'Any') -> 'Schema_EchoRequestUnsignedParameter':
+                                          version: 'int',
+                                          opaque: 'bytes' = b'',
+                                          **kwargs: 'Any') -> 'Schema_EchoRequestUnsignedParameter':
         """Make HIP ``ECHO_REQUEST_UNSIGNED`` parameter.
 
         Args:
             code: parameter code
             param: parameter data
             version: HIP protocol version
+            opaque: opaque data
+            **kwargs: arbitrary keyword arguments
 
         Returns:
             HIP parameter schema.
 
         """
+        if param is not None:
+            opaque = param.opaque
+
         return Schema_EchoRequestUnsignedParameter(
             type=code,
-            len=len(param.opaque),
-            opaque=param.opaque,
+            len=len(opaque),
+            opaque=opaque,
         )
 
     def _make_param_echo_response_unsigned(self, code: 'Enum_Parameter', param: 'Optional[Data_EchoRequestUnsignedParameter]' = None, *,  # pylint: disable=unused-argument
-                                           version: 'int', **kwargs: 'Any') -> 'Schema_EchoRequestUnsignedParameter':
+                                           version: 'int',
+                                           opaque: 'bytes' = b'',
+                                           **kwargs: 'Any') -> 'Schema_EchoRequestUnsignedParameter':
         """Make HIP ``ECHO_RESPONSE_UNSIGNED`` parameter.
 
         Args:
@@ -4818,168 +4865,267 @@ class HIP(Internet[Data_HIP, Schema_HIP]):
             HIP parameter schema.
 
         """
+        if param is not None:
+            opaque = param.opaque
+
         return Schema_EchoRequestUnsignedParameter(
             type=code,
-            len=len(param.opaque),
-            opaque=param.opaque,
+            len=len(opaque),
+            opaque=opaque,
         )
 
     def _make_param_relay_from(self, code: 'Enum_Parameter', param: 'Optional[Data_RelayFromParameter]' = None, *,  # pylint: disable=unused-argument
-                               version: 'int', **kwargs: 'Any') -> 'Schema_RelayFromParameter':
+                               version: 'int',
+                               port: 'int' = 0,
+                               protocol: 'Enum_TransType | StdlibEnum | AenumEnum | str | int' = Enum_TransType.UDP,
+                               protocol_default: 'Optional[int]' = None,
+                               protocol_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
+                               protocol_reversed: 'bool' = False,
+                               address: 'IPv6Address | str | int | bytes' = '::',
+                               **kwargs: 'Any') -> 'Schema_RelayFromParameter':
         """Make HIP ``RELAY_FROM`` parameter.
 
         Args:
             code: parameter code
             param: parameter data
             version: HIP protocol version
+            port: port number
+            protocol: transport protocol
+            protocol_default: default transport protocol
+            protocol_namespace: transport protocol namespace
+            protocol_reversed: reverse transport protocol namespace
+            address: relay address
 
         Returns:
             HIP parameter schema.
 
         """
+        if param is not None:
+            port = param.port
+            proto = param.protocol
+            address = param.address
+        else:
+            proto = self._make_index(protocol, protocol_default, namespace=protocol_namespace,  # type: ignore[call-overload]
+                                     reversed=protocol_reversed, pack=False)
+
         return Schema_RelayFromParameter(
             type=code,
             len=20,
-            port=param.port,
-            protocol=param.protocol,
-            address=param.address.packed,
+            port=port,
+            protocol=proto,
+            address=address,
         )
 
     def _make_param_relay_to(self, code: 'Enum_Parameter', param: 'Optional[Data_RelayToParameter]' = None, *,  # pylint: disable=unused-argument
-                             version: 'int', **kwargs: 'Any') -> 'Schema_RelayToParameter':
+                             version: 'int',
+                             port: 'int' = 0,
+                             protocol: 'Enum_TransType | StdlibEnum | AenumEnum | str | int' = Enum_TransType.UDP,
+                             protocol_default: 'Optional[int]' = None,
+                             protocol_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
+                             protocol_reversed: 'bool' = False,
+                             address: 'IPv6Address | str | int | bytes' = '::',
+                             **kwargs: 'Any') -> 'Schema_RelayToParameter':
         """Make HIP ``RELAY_TO`` parameter.
 
         Args:
             code: parameter code
             param: parameter data
             version: HIP protocol version
+            port: port number
+            protocol: transport protocol
+            protocol_default: default transport protocol
+            protocol_namespace: transport protocol namespace
+            protocol_reversed: reverse transport protocol namespace
+            address: relay address
+            **kwargs: arbitrary keyword arguments
 
         Returns:
             HIP parameter schema.
 
         """
+        if param is not None:
+            port = param.port
+            proto = param.protocol
+            address = param.address
+        else:
+            proto = self._make_index(protocol, protocol_default, namespace=protocol_namespace,  # type: ignore[call-overload]
+                                     reversed=protocol_reversed, pack=False)
+
         return Schema_RelayToParameter(
             type=code,
             len=20,
-            port=param.port,
-            protocol=param.protocol,
-            address=param.address.packed,
+            port=port,
+            protocol=proto,
+            address=address,
         )
 
     def _make_param_overlay_ttl(self, code: 'Enum_Parameter', param: 'Optional[Data_OverlayTTLParameter]' = None, *,  # pylint: disable=unused-argument
-                                version: 'int', **kwargs: 'Any') -> 'Schema_OverlayTTLParameter':
+                                version: 'int',
+                                ttl: 'int | timedelta' = 0,
+                                **kwargs: 'Any') -> 'Schema_OverlayTTLParameter':
         """Make HIP ``OVERLAY_TTL`` parameter.
 
         Args:
             code: parameter code
             param: parameter data
             version: HIP protocol version
+            ttl: overlay time-to-live (TTL) value
+            **kwargs: arbitrary keyword arguments
 
         Returns:
             HIP parameter schema.
 
         """
+        if param is not None:
+            ttl_val = math.floor(param.ttl.total_seconds())
+        else:
+            ttl_val = ttl if isinstance(ttl, int) else math.floor(ttl.total_seconds())
+
         return Schema_OverlayTTLParameter(
             type=code,
             len=4,
-            ttl=math.floor(param.ttl.total_seconds()),
+            ttl=ttl_val,
         )
 
     def _make_param_route_via(self, code: 'Enum_Parameter', param: 'Optional[Data_RouteViaParameter]' = None, *,  # pylint: disable=unused-argument
-                              version: 'int', **kwargs: 'Any') -> 'Schema_RouteViaParameter':
+                              version: 'int',
+                              symmetric: 'bool' = False,
+                              must_follow: 'bool' = False,
+                              hit: 'Optional[list[IPv6Address | bytes | str | int]]' = None,
+                              **kwargs: 'Any') -> 'Schema_RouteViaParameter':
         """Make HIP ``ROUTE_VIA`` parameter.
 
         Args:
             code: parameter code
             param: parameter data
             version: HIP protocol version
+            symmetric: symmetric flag
+            must_follow: must-follow flag
+            hit: list of HITs
 
         Returns:
             HIP parameter schema.
 
         """
+        if param is not None:
+            symmetric = param.flags.symmetric
+            must_follow = param.flags.must_follow
+            hit_list = cast('list[IPv6Address | bytes | str | int]', param.hit)
+        else:
+            hit_list = hit if hit is not None else []
+
         return Schema_RouteViaParameter(
             type=code,
-            len=4 + 16 * len(param.hit),
+            len=4 + 16 * len(hit_list),
             flags={
-                'symmetric': int(param.flags.symmetric),
-                'must_follow': int(param.flags.must_follow),
+                'symmetric': int(symmetric),
+                'must_follow': int(must_follow),
             },
-            hit=[hit.packed for hit in param.hit],
+            hit=hit_list,
         )
 
     def _make_param_from(self, code: 'Enum_Parameter', param: 'Optional[Data_FromParameter]' = None, *,  # pylint: disable=unused-argument
-                             version: 'int', **kwargs: 'Any') -> 'Schema_FromParameter':
+                         version: 'int',
+                         address: 'IPv6Address | str | int | bytes' = '::',
+                         **kwargs: 'Any') -> 'Schema_FromParameter':
         """Make HIP ``FROM`` parameter.
 
         Args:
             code: parameter code
             param: parameter data
             version: HIP protocol version
+            address: relay address
+            **kwargs: arbitrary keyword arguments
 
         Returns:
             HIP parameter schema.
 
         """
+        if param is not None:
+            address = param.address
+
         return Schema_FromParameter(
             type=code,
             len=16,
-            address=param.address.packed,
+            address=address,
         )
 
     def _make_param_rvs_hmac(self, code: 'Enum_Parameter', param: 'Optional[Data_RVSHMACParameter]' = None, *,  # pylint: disable=unused-argument
-                             version: 'int', **kwargs: 'Any') -> 'Schema_RVSHMACParameter':
+                             version: 'int',
+                             hmac: 'bytes' = b'',
+                             **kwargs: 'Any') -> 'Schema_RVSHMACParameter':
         """Make HIP ``RVS_HMAC`` parameter.
 
         Args:
             code: parameter code
             param: parameter data
             version: HIP protocol version
+            hmac: HMAC value
+            **kwargs: arbitrary keyword arguments
 
         Returns:
             HIP parameter schema.
 
         """
+        if param is not None:
+            hmac = param.hmac
+
         return Schema_RVSHMACParameter(
             type=code,
-            len=len(param.hmac),
-            hmac=param.hmac,
+            len=len(hmac),
+            hmac=hmac,
         )
 
     def _make_param_via_rvs(self, code: 'Enum_Parameter', param: 'Optional[Data_ViaRVSParameter]' = None, *,  # pylint: disable=unused-argument
-                            version: 'int', **kwargs: 'Any') -> 'Schema_ViaRVSParameter':
+                            version: 'int',
+                            address: 'Optional[list[IPv6Address | bytes | str | int]]' = None,
+                            **kwargs: 'Any') -> 'Schema_ViaRVSParameter':
         """Make HIP ``VIA_RVS`` parameter.
 
         Args:
             code: parameter code
             param: parameter data
             version: HIP protocol version
+            address: list of relay addresses
+            **kwargs: arbitrary keyword arguments
 
         Returns:
             HIP parameter schema.
 
         """
+        if param is not None:
+            addr_list = cast('list[IPv6Address | bytes | str | int]', param.address)
+        else:
+            addr_list = address if address is not None else []
+
         return Schema_ViaRVSParameter(
             type=code,
-            len=16 * len(param.address),
-            address=[address.packed for address in param.address],
+            len=16 * len(addr_list),
+            address=addr_list,
         )
 
     def _make_param_relay_hmac(self, code: 'Enum_Parameter', param: 'Optional[Data_RelayHMACParameter]' = None, *,  # pylint: disable=unused-argument
-                               version: 'int', **kwargs: 'Any') -> 'Schema_RelayHMACParameter':
+                               version: 'int',
+                               hmac: 'bytes' = b'',
+                               **kwargs: 'Any') -> 'Schema_RelayHMACParameter':
         """Make HIP ``RELAY_HMAC`` parameter.
 
         Args:
             code: parameter code
             param: parameter data
             version: HIP protocol version
+            hmac: HMAC value
+            **kwargs: arbitrary keyword arguments
 
         Returns:
             HIP parameter schema.
 
         """
+        if param is not None:
+            hmac = param.hmac
+
         return Schema_RelayHMACParameter(
             type=code,
-            len=len(param.hmac),
-            hmac=param.hmac,
+            len=len(hmac),
+            hmac=hmac,
         )
