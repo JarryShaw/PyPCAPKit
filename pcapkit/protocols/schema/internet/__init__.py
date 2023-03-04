@@ -74,6 +74,32 @@ from pcapkit.protocols.schema.internet.hip import \
     TransportFormatListParameter as HIP_TransportFormatListParameter
 from pcapkit.protocols.schema.internet.hip import UnassignedParameter as HIP_UnassignedParameter
 
+# Hop-by-Hop Options
+from pcapkit.protocols.schema.internet.hopopt import HOPOPT
+from pcapkit.protocols.schema.internet.hopopt import CALIPSOOption as HOPOPT_CALIPSOOption
+from pcapkit.protocols.schema.internet.hopopt import DFFFlags as HOPOPT_DFFFlags
+from pcapkit.protocols.schema.internet.hopopt import HomeAddressOption as HOPOPT_HomeAddressOption
+from pcapkit.protocols.schema.internet.hopopt import ILNPOption as HOPOPT_ILNPOption
+from pcapkit.protocols.schema.internet.hopopt import IPDFFOption as HOPOPT_IPDFFOption
+from pcapkit.protocols.schema.internet.hopopt import JumboPayloadOption as HOPOPT_JumboPayloadOption
+from pcapkit.protocols.schema.internet.hopopt import \
+    LineIdentificationOption as HOPOPT_LineIdentificationOption
+from pcapkit.protocols.schema.internet.hopopt import MPLFlags as HOPOPT_MPLFlags
+from pcapkit.protocols.schema.internet.hopopt import MPLOption as HOPOPT_MPLOption
+from pcapkit.protocols.schema.internet.hopopt import PadOption as HOPOPT_PadOption
+from pcapkit.protocols.schema.internet.hopopt import PDMOption as HOPOPT_PDMOption
+from pcapkit.protocols.schema.internet.hopopt import QuickStartOption as HOPOPT_QuickStartOption
+from pcapkit.protocols.schema.internet.hopopt import RouterAlertOption as HOPOPT_RouterAlertOption
+from pcapkit.protocols.schema.internet.hopopt import RPLFlags as HOPOPT_RPLFlags
+from pcapkit.protocols.schema.internet.hopopt import RPLOption as HOPOPT_RPLOption
+from pcapkit.protocols.schema.internet.hopopt import \
+    SMFHashBasedDPDOption as HOPOPT_SMFHashBasedDPDOption
+from pcapkit.protocols.schema.internet.hopopt import \
+    SMFIdentificationBasedDPDOption as HOPOPT_SMFIdentificationBasedDPDOption
+from pcapkit.protocols.schema.internet.hopopt import \
+    TunnelEncapsulationLimitOption as HOPOPT_TunnelEncapsulationLimitOption
+from pcapkit.protocols.schema.internet.hopopt import UnassignedOption as HOPOPT_UnassignedOption
+
 __all__ = [
     # Authentication Header
     'AH',
@@ -99,4 +125,13 @@ __all__ = [
     'HIP_RelayToParameter', 'HIP_RouteViaParameter', 'HIP_FromParameter',
     'HIP_RVSHMACParameter', 'HIP_RelayHMACParameter',
 
+    # Hop-by-Hop Options
+    'HOPOPT',
+    'HOPOPT_RPLFlags', 'HOPOPT_MPLFlags', 'HOPOPT_DFFFlags',
+    'HOPOPT_UnassignedOption', 'HOPOPT_PadOption', 'HOPOPT_TunnelEncapsulationLimitOption',
+    'HOPOPT_RouterAlertOption', 'HOPOPT_CALIPSOOption', 'HOPOPT_SMFIdentificationBasedDPDOption',
+    'HOPOPT_SMFHashBasedDPDOption', 'HOPOPT_PDMOption', 'HOPOPT_QuickStartOption',
+    'HOPOPT_RPLOption', 'HOPOPT_MPLOption', 'HOPOPT_ILNPOption',
+    'HOPOPT_LineIdentificationOption', 'HOPOPT_JumboPayloadOption', 'HOPOPT_HomeAddressOption',
+    'HOPOPT_IPDFFOption',
 ]

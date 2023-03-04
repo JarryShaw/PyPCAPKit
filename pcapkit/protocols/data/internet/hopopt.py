@@ -10,6 +10,7 @@ if TYPE_CHECKING:
     from ipaddress import IPv4Address, IPv6Address
     from typing import Optional
 
+    from pcapkit.const.ipv6.option_action import OptionAction
     from pcapkit.const.ipv6.option import Option as Enum_Option
     from pcapkit.const.ipv6.qs_function import QSFunction
     from pcapkit.const.ipv6.router_alert import RouterAlert
@@ -39,7 +40,7 @@ class Option(Data):
     #: Option type.
     type: 'Enum_Option'
     #: Unknown option cation.
-    action: 'int'
+    action: 'OptionAction'
     #: Change flag.
     change: 'bool'
     #: Content length.
@@ -111,7 +112,7 @@ class CALIPSOOption(Option):
 
     if TYPE_CHECKING:
         #: Compartment bitmap.
-        cmpt_bitmap: 'tuple[int, ...]'
+        cmpt_bitmap: 'bytes'
 
         def __init__(self, type: 'Enum_Option', action: 'int', change: 'bool', length: 'int', domain: 'int', cmpt_len: 'int', level: 'int', checksum: 'bytes') -> 'None': ...  # pylint: disable=super-init-not-called,unused-argument,redefined-builtin,multiple-statements,line-too-long
 

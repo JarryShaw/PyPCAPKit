@@ -22,7 +22,8 @@ Octets      Bits        Name                    Description
 import collections
 import datetime
 import ipaddress
-from typing import TYPE_CHECKING, overload
+import struct
+from typing import TYPE_CHECKING, overload, cast
 
 from pcapkit.const.ipv6.option import Option as Enum_Option
 from pcapkit.const.ipv6.qs_function import QSFunction as Enum_QSFunction
@@ -58,24 +59,57 @@ from pcapkit.protocols.data.internet.hopopt import \
 from pcapkit.protocols.data.internet.hopopt import UnassignedOption as Data_UnassignedOption
 from pcapkit.protocols.internet.internet import Internet
 from pcapkit.utilities.exceptions import ProtocolError, UnsupportedCall
+from pcapkit.protocols.schema.internet.hopopt import HOPOPT as Schema_HOPOPT
+from pcapkit.protocols.schema.schema import Schema
+from pcapkit.const.ipv6.option_action import OptionAction as Enum_OptionAction
+from pcapkit.protocols.schema.internet.hopopt import HOPOPT as Schema_HOPOPT
+from pcapkit.protocols.schema.internet.hopopt import CALIPSOOption as Schema_CALIPSOOption
+from pcapkit.protocols.schema.internet.hopopt import DFFFlags as Schema_DFFFlags
+from pcapkit.protocols.schema.internet.hopopt import HomeAddressOption as Schema_HomeAddressOption
+from pcapkit.protocols.schema.internet.hopopt import ILNPOption as Schema_ILNPOption
+from pcapkit.protocols.schema.internet.hopopt import IPDFFOption as Schema_IPDFFOption
+from pcapkit.protocols.schema.internet.hopopt import JumboPayloadOption as Schema_JumboPayloadOption
+from pcapkit.protocols.schema.internet.hopopt import \
+    LineIdentificationOption as Schema_LineIdentificationOption
+from pcapkit.protocols.schema.internet.hopopt import MPLFlags as Schema_MPLFlags
+from pcapkit.protocols.schema.internet.hopopt import MPLOption as Schema_MPLOption
+from pcapkit.protocols.schema.internet.hopopt import PadOption as Schema_PadOption
+from pcapkit.protocols.schema.internet.hopopt import PDMOption as Schema_PDMOption
+from pcapkit.protocols.schema.internet.hopopt import QuickStartOption as Schema_QuickStartOption
+from pcapkit.protocols.schema.internet.hopopt import RouterAlertOption as Schema_RouterAlertOption
+from pcapkit.protocols.schema.internet.hopopt import RPLFlags as Schema_RPLFlags
+from pcapkit.protocols.schema.internet.hopopt import RPLOption as Schema_RPLOption
+from pcapkit.protocols.schema.internet.hopopt import \
+    SMFHashBasedDPDOption as Schema_SMFHashBasedDPDOption
+from pcapkit.protocols.schema.internet.hopopt import \
+    SMFIdentificationBasedDPDOption as Schema_SMFIdentificationBasedDPDOption
+from pcapkit.protocols.schema.internet.hopopt import \
+    TunnelEncapsulationLimitOption as Schema_TunnelEncapsulationLimitOption
+from pcapkit.protocols.schema.internet.hopopt import UnassignedOption as Schema_UnassignedOption
 
 if TYPE_CHECKING:
-    from typing import IO, Any, Callable, DefaultDict, NoReturn, Optional
+    from enum import IntEnum as StdlibEnum
+    from typing import IO, Any, Callable, DefaultDict, NoReturn, Optional, Type
 
-    from mypy_extensions import NamedArg
+    from aenum import IntEnum as AenumEnum
+    from mypy_extensions import NamedArg, DefaultArg, KwArg
     from typing_extensions import Literal
 
     from pcapkit.corekit.protochain import ProtoChain
     from pcapkit.protocols.data.internet.hopopt import Option as Data_Option
     from pcapkit.protocols.protocol import Protocol
+    from pcapkit.protocols.schema.internet.hopopt import Option as Schema_Option
 
     Option = OrderedMultiDict[Enum_Option, Data_Option]
-    OptionParser = Callable[['HOPOPT', Enum_Option, int, bool, NamedArg(Option, 'options')], Data_Option]
+    OptionParser = Callable[['HOPOPT', Enum_Option, int, bool, int, NamedArg(bytes, 'data'),
+                             NamedArg(int, 'length'), NamedArg(Option, 'options')], Data_Option]
+    OptionConstructor = Callable[['HOPOPT', Enum_Option,
+                                  DefaultArg(Optional[Data_Option]), KwArg(Any)], Schema_Option]
 
 __all__ = ['HOPOPT']
 
 
-class HOPOPT(Internet[Data_HOPOPT]):
+class HOPOPT(Internet[Data_HOPOPT, Schema_HOPOPT]):
     """This class implements IPv6 Hop-by-Hop Options.
 
     This class currently supports parsing of the following IPv6 Hop-by-Hop
@@ -148,7 +182,7 @@ class HOPOPT(Internet[Data_HOPOPT]):
             Enum_Option.Home_Address:               'home',     # [RFC 6275]
             Enum_Option.IP_DFF:                     'ip_dff',   # [RFC 6971]
         },
-    )  # type: DefaultDict[int, str | OptionParser]
+    )  # type: DefaultDict[Enum_Option | int, str | tuple[OptionParser, OptionConstructor]]
 
     ##########################################################################
     # Properties.
@@ -233,35 +267,59 @@ class HOPOPT(Internet[Data_HOPOPT]):
         """
         if length is None:
             length = len(self)
-
-        _next = self._read_protos(1)
-        _hlen = self._read_unpack(1)
-        # _opts = self._read_fileng(_hlen*8+6)
+        schema = self.__schema__
 
         hopopt = Data_HOPOPT(
-            next=_next,
-            length=(_hlen + 1) * 8,
-            options=self._read_hopopt_options(_hlen * 8 + 6),
+            next=schema.next,
+            length=(schema.len + 1) * 8,
+            options=self._read_hopopt_options(schema.len * 8 + 6),
         )
 
         if extension:
             return hopopt
-        return self._decode_next_layer(hopopt, _next, length - hopopt.length)
+        return self._decode_next_layer(hopopt, schema.next, length - hopopt.length)
 
-    def make(self, **kwargs: 'Any') -> 'NoReturn':
+    def make(self,
+             next: 'Enum_TransType | StdlibEnum | AenumEnum | str | int' = Enum_TransType.UDP,
+             next_default: 'Optional[int]' = None,
+             next_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
+             next_reversed: 'bool' = False,
+             options: 'Optional[list[Schema_Option | tuple[Enum_Option, dict[str, Any]] | bytes] | Option]' = None,  # pylint: disable=line-too-long
+             payload: 'bytes | Protocol | Schema' = b'',
+             **kwargs: 'Any') -> 'Schema_HOPOPT':
         """Make (construct) packet data.
 
         Args:
+            next: Next header type.
+            next_default: Default value of next header type.
+            next_namespace: Namespace of next header type.
+            next_reversed: If the namespace of next header type is reversed.
+            option: Hop-by-Hop Options.
+            payload: Payload of current protocol.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
             Constructed packet data.
 
         """
-        raise NotImplementedError
+        next_value = self._make_index(next, next_default, namespace=next_namespace,  # type: ignore[call-overload]
+                                      reversed=next_reversed, pack=False)
+
+        if options is not None:
+            options_value, total_length = self._make_hopopt_options(options)
+            length = (total_length - 6) // 8
+        else:
+            options_value, length = [], 0
+
+        return Schema_HOPOPT(
+            next=next_value,
+            len=length,
+            options=options_value,
+            payload=payload,
+        )
 
     @classmethod
-    def register_option(cls, code: 'Enum_Option', meth: 'str | OptionParser') -> 'None':
+    def register_option(cls, code: 'Enum_Option', meth: 'str | tuple[OptionParser, OptionConstructor]') -> 'None':
         """Register an option parser.
 
         Args:
@@ -276,13 +334,13 @@ class HOPOPT(Internet[Data_HOPOPT]):
     ##########################################################################
 
     @overload
-    def __post_init__(self, file: 'IO[bytes]', length: 'Optional[int]' = ..., *,  # pylint: disable=arguments-differ
+    def __post_init__(self, file: 'IO[bytes] | bytes', length: 'Optional[int]' = ..., *,  # pylint: disable=arguments-differ
                       extension: 'bool' = ..., **kwargs: 'Any') -> 'None': ...
 
     @overload
     def __post_init__(self, **kwargs: 'Any') -> 'None': ...  # pylint: disable=arguments-differ
 
-    def __post_init__(self, file: 'Optional[IO[bytes]]' = None, length: 'Optional[int]' = None, *,  # pylint: disable=arguments-differ
+    def __post_init__(self, file: 'Optional[IO[bytes] | bytes]' = None, length: 'Optional[int]' = None, *,  # pylint: disable=arguments-differ
                       extension: 'bool' = False, **kwargs: 'Any') -> 'None':
         """Post initialisation hook.
 
@@ -349,30 +407,42 @@ class HOPOPT(Internet[Data_HOPOPT]):
             ProtocolError: If the threshold is **NOT** matching.
 
         """
+        payload = cast('bytes', self.__header__.options)
+        self.__header__.options = []
+
         counter = 0                   # length of read options
         options = OrderedMultiDict()  # type: Option
 
         while counter < length:
-            # break when eol triggered
-            code = self._read_unpack(1)
-            if not code:
+            cbuf = payload[counter:counter + 1]
+            if not cbuf:  # break when eol triggered
                 break
 
             # get option type
+            code = int(cbuf, base=2)
             kind = Enum_Option.get(code)
-            acts, cflg = self._read_opt_type(code)
+            acts = Enum_OptionAction.get(code >> 6)
+            cflg = bool(code & 0b00100000)
+
+            # get option length
+            if kind == Enum_Option.Pad1:
+                clen, olen = 0, 1
+            else:
+                cbuf = payload[counter + 1:counter + 2]
+                clen = struct.unpack('!B', cbuf)[0]  # length of option data
+                olen = clen + 2                      # total length
 
             # extract option data
-            name = self.__option__[kind]  # type: str | OptionParser
+            name = self.__option__[kind]  # type: str | tuple[OptionParser, OptionConstructor]
             if isinstance(name, str):
-                meth_name = f'_read_opt_{kind.name.lower()}'
-                meth = getattr(
-                    self, meth_name,
-                    self._read_opt_none
-                )  # type: Callable[[Enum_Option, int, bool, NamedArg(Option, 'options')], Data_Option]
-                data = meth(kind, acts, cflg, options=options)
+                meth_name = f'_read_opt_{name}'
+                meth = cast('OptionParser',
+                            getattr(self, meth_name, self._read_opt_none))
             else:
-                data = name(self, kind, acts, cflg, options=options)
+                meth = name[0]
+            data = meth(self, kind, acts, cflg, clen,
+                        data=payload[counter:counter + olen],
+                        length=olen, options=options)
 
             # record option data
             counter += data.length
@@ -384,8 +454,8 @@ class HOPOPT(Internet[Data_HOPOPT]):
 
         return options
 
-    def _read_opt_none(self, code: 'Enum_Option', acts: 'int', cflg: 'bool', *,
-                       options: 'Option') -> 'Data_UnassignedOption':  # pylint: disable=unused-argument
+    def _read_opt_none(self, code: 'Enum_Option', acts: 'Enum_OptionAction', cflg: 'bool', clen: 'int', *,
+                       data: 'bytes', length: 'int', option: 'Option') -> 'Data_UnassignedOption':  # pylint: disable=unused-argument
         """Read HOPOPT unassigned options.
 
         Structure of HOPOPT unassigned options [:rfc:`8200`]:
@@ -400,27 +470,29 @@ class HOPOPT(Internet[Data_HOPOPT]):
             code: option type value
             acts: unknown option action value
             cflg: change flag value
-            options: extracted HOPOPT options
+            clen: option data length
+            data: option payload data (incl. type, length, content)
+            length: option length (incl. type, length, content)
+            option: extracted HOPOPT options
 
         Returns:
             Parsed option data.
 
         """
-        _size = self._read_unpack(1)
-        _data = self._read_fileng(_size)
+        schema = Schema_UnassignedOption.unpack(data, length)  # type: Schema_UnassignedOption
+        self.__header__.options.append(schema)
 
         opt = Data_UnassignedOption(
             type=code,
             action=acts,
             change=cflg,
-            length=_size + 2,
-            data=_data,
+            length=schema.len + 2,
+            data=schema.data,
         )
-
         return opt
 
-    def _read_opt_pad(self, code: 'Enum_Option', acts: 'int', cflg: 'bool', *,
-                      options: 'Option') -> 'Data_PadOption':  # pylint: disable=unused-argument
+    def _read_opt_pad(self, code: 'Enum_Option', acts: 'Enum_OptionAction', cflg: 'bool', clen: 'int', *,
+                      data: 'bytes', length: 'int', option: 'Option') -> 'Data_PadOption':  # pylint: disable=unused-argument
         """Read HOPOPT padding options.
 
         Structure of HOPOPT padding options [:rfc:`8200`]:
@@ -445,7 +517,10 @@ class HOPOPT(Internet[Data_HOPOPT]):
             code: option type value
             acts: unknown option action value
             cflg: change flag value
-            options: extracted HOPOPT options
+            clen: option data length
+            data: option payload data (incl. type, length, content)
+            length: option length (incl. type, length, content)
+            option: extracted HOPOPT options
 
         Returns:
             Parsed option data.
@@ -454,13 +529,20 @@ class HOPOPT(Internet[Data_HOPOPT]):
             ProtocolError: If ``code`` is **NOT** ``0`` or ``1``.
 
         """
+        if code not in (Enum_Option.Pad1, Enum_Option.PadN):
+            raise ProtocolError(f'{self.alias}: [OptNo {code}] invalid format')
+        if code == Enum_Option.Pad1 and clen != 0:
+            raise ProtocolError(f'{self.alias}: [OptNo {code}] invalid format')
+        if code == Enum_Option.PadN and clen == 0:
+            raise ProtocolError(f'{self.alias}: [OptNo {code}] invalid format')
+
+        schema = Schema_PadOption.unpack(data)  # type: Schema_PadOption
+        self.__header__.options.append(schema)
+
         if code == Enum_Option.Pad1:
             _size = 1
-        elif code == Enum_Option.PadN:
-            _size = self._read_unpack(1) + 2
-            _padn = self._read_fileng(_size)
         else:
-            raise ProtocolError(f'{self.alias}: [OptNo {code}] invalid format')
+            _size = schema.len + 2
 
         opt = Data_PadOption(
             type=code,
@@ -468,28 +550,30 @@ class HOPOPT(Internet[Data_HOPOPT]):
             change=cflg,
             length=_size,
         )
-
         return opt
 
-    def _read_opt_tun(self, code: 'Enum_Option', acts: 'int', cflg: 'bool', *,
-                      options: 'Option') -> 'Data_TunnelEncapsulationLimitOption':  # pylint: disable=unused-argument
+    def _read_opt_tun(self, code: 'Enum_Option', acts: 'Enum_OptionAction', cflg: 'bool', clen: 'int', *,
+                      data: 'bytes', length: 'int', option: 'Option') -> 'Data_TunnelEncapsulationLimitOption':  # pylint: disable=unused-argument
         """Read HOPOPT Tunnel Encapsulation Limit option.
 
         Structure of HOPOPT Tunnel Encapsulation Limit option [:rfc:`2473`]:
 
         .. code-block:: text
 
-           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-           |  Next Header  |Hdr Ext Len = 0| Opt Type = 4  |Opt Data Len=1 |
-           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-           | Tun Encap Lim |PadN Opt Type=1|Opt Data Len=1 |       0       |
-           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+              Option Type     Opt Data Len   Opt Data Len
+            0 1 2 3 4 5 6 7
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |0 0 0 0 0 1 0 0|       1       | Tun Encap Lim |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
             code: option type value
             acts: unknown option action value
             cflg: change flag value
-            options: extracted HOPOPT options
+            clen: option data length
+            data: option payload data (incl. type, length, content)
+            length: option length (incl. type, length, content)
+            option: extracted HOPOPT options
 
         Returns:
             Parsed option data.
@@ -498,23 +582,23 @@ class HOPOPT(Internet[Data_HOPOPT]):
             ProtocolError: If ``hopopt.tun.length`` is **NOT** ``1``.
 
         """
-        _size = self._read_unpack(1)
-        if _size != 1:
+        if clen != 1:
             raise ProtocolError(f'{self.alias}: [OptNo {code}] invalid format')
-        _limt = self._read_unpack(1)
+
+        schema = Schema_TunnelEncapsulationLimitOption.unpack(data)  # type: Schema_TunnelEncapsulationLimitOption
+        self.__header__.options.append(schema)
 
         opt = Data_TunnelEncapsulationLimitOption(
             type=code,
             action=acts,
             change=cflg,
-            length=_size + 2,
-            limit=_limt,
+            length=schema.len + 2,
+            limit=schema.limit,
         )
-
         return opt
 
-    def _read_opt_ra(self, code: 'Enum_Option', acts: 'int', cflg: 'bool', *,
-                     options: 'Option') -> 'Data_RouterAlertOption':  # pylint: disable=unused-argument
+    def _read_opt_ra(self, code: 'Enum_Option', acts: 'Enum_OptionAction', cflg: 'bool', clen: 'int', *,
+                     data: 'bytes', length: 'int', option: 'Option') -> 'Data_RouterAlertOption':  # pylint: disable=unused-argument
         """Read HOPOPT Router Alert option.
 
         Structure of HOPOPT Router Alert option [:rfc:`2711`]:
@@ -529,7 +613,10 @@ class HOPOPT(Internet[Data_HOPOPT]):
             code: option type value
             acts: unknown option action value
             cflg: change flag value
-            options: extracted HOPOPT options
+            clen: option data length
+            data: option payload data (incl. type, length, content)
+            length: option length (incl. type, length, content)
+            option: extracted HOPOPT options
 
         Returns:
             Parsed option data.
@@ -541,21 +628,21 @@ class HOPOPT(Internet[Data_HOPOPT]):
         _size = self._read_unpack(1)
         if _size != 2:
             raise ProtocolError(f'{self.alias}: [OptNo {code}] invalid format')
-        _rval = self._read_unpack(2)
 
-        _enum = Enum_RouterAlert.get(_rval)
+        schema = Schema_RouterAlertOption.unpack(data, length)  # type: Schema_RouterAlertOption
+        self.__header__.options.append(schema)
+
         opt = Data_RouterAlertOption(
             type=code,
             action=acts,
             change=cflg,
-            length=_size + 2,
-            value=_enum,
+            length=schema.len + 2,
+            value=schema.alert,
         )
-
         return opt
 
-    def _read_opt_calipso(self, code: 'Enum_Option', acts: 'int', cflg: 'bool', *,
-                          options: 'Option') -> 'Data_CALIPSOOption':  # pylint: disable=unused-argument
+    def _read_opt_calipso(self, code: 'Enum_Option', acts: 'Enum_OptionAction', cflg: 'bool', clen: 'int', *,
+                          data: 'bytes', length: 'int', option: 'Option') -> 'Data_CALIPSOOption':  # pylint: disable=unused-argument
         """Read HOPOPT Common Architecture Label IPv6 Security Option (CALIPSO) option.
 
         Structure of HOPOPT CALIPSO option [:rfc:`5570`]:
@@ -576,7 +663,10 @@ class HOPOPT(Internet[Data_HOPOPT]):
             code: option type value
             acts: unknown option action value
             cflg: change flag value
-            options: extracted HOPOPT options
+            clen: option data length
+            data: option payload data (incl. type, length, content)
+            length: option length (incl. type, length, content)
+            option: extracted HOPOPT options
 
         Returns:
             Parsed option data.
@@ -585,44 +675,34 @@ class HOPOPT(Internet[Data_HOPOPT]):
             ProtocolError: If the option is malformed.
 
         """
-        _size = self._read_unpack(1)
-        if _size < 8 and _size % 8 != 0:
+        if clen < 8 and clen % 8 != 0:
             raise ProtocolError(f'{self.alias}: [OptNo {code}] invalid format')
-        _cmpt = self._read_unpack(4)
-        _clen = self._read_unpack(1)
-        if _clen % 2 != 0:
+
+        schema = Schema_CALIPSOOption.unpack(data, length)  # type: Schema_CALIPSOOption
+        self.__header__.options.append(schema)
+
+        if schema.cmpt_len % 2 != 0:
             raise ProtocolError(f'{self.alias}: [OptNo {code}] invalid format')
-        _sens = self._read_unpack(1)
-        _csum = self._read_fileng(2)
 
         opt = Data_CALIPSOOption(
             type=code,
             action=acts,
             change=cflg,
-            length=_size + 2,
-            domain=_cmpt,
-            cmpt_len=_clen * 4,
-            level=_sens,
-            checksum=_csum,
+            length=schema.len + 2,
+            domain=schema.domain,
+            cmpt_len=schema.cmpt_len * 4,
+            level=schema.level,
+            checksum=schema.checksum,
         )
 
-        if _clen:
-            _bmap = []  # type: list[int]
-            for _ in range(_clen // 2):
-                _bmap.append(self._read_unpack(8))
-
+        if schema.cmpt_len > 0:
             opt.__update__([
-                ('cmpt_bitmap', tuple(_bmap)),
+                ('cmpt_bitmap', tuple(schema.bitmap)),
             ])
-
-        _plen = _size - _clen * 4 - 8
-        if _plen:
-            self._read_fileng(_plen)
-
         return opt
 
-    def _read_opt_smf_dpd(self, code: 'Enum_Option', acts: 'int', cflg: 'bool', *,
-                          options: 'Option') -> 'Data_SMFIdentificationBasedDPDOption | Data_SMFHashBasedDPDOption':  # pylint: disable=unused-argument,line-too-long
+    def _read_opt_smf_dpd(self, code: 'Enum_Option', acts: 'Enum_OptionAction', cflg: 'bool', clen: 'int', *,
+                          data: 'bytes', length: 'int', option: 'Option') -> 'Data_SMFIdentificationBasedDPDOption | Data_SMFHashBasedDPDOption':  # pylint: disable=unused-argument,line-too-long
         """Read HOPOPT Simplified Multicast Forwarding Duplicate Packet Detection (``SMF_DPD``) option.
 
         Structure of HOPOPT ``SMF_DPD`` option [:rfc:`6621`]:
@@ -657,7 +737,10 @@ class HOPOPT(Internet[Data_HOPOPT]):
             code: option type value
             acts: unknown option action value
             cflg: change flag value
-            options: extracted HOPOPT options
+            clen: option data length
+            data: option payload data (incl. type, length, content)
+            length: option length (incl. type, length, content)
+            option: extracted HOPOPT options
 
         Returns:
             Parsed option data.
@@ -758,8 +841,8 @@ class HOPOPT(Internet[Data_HOPOPT]):
 
         return opt
 
-    def _read_opt_pdm(self, code: 'Enum_Option', acts: 'int', cflg: 'bool', *,
-                      options: 'Option') -> 'Data_PDMOption':  # pylint: disable=unused-argument
+    def _read_opt_pdm(self, code: 'Enum_Option', acts: 'Enum_OptionAction', cflg: 'bool', clen: 'int', *,
+                      data: 'bytes', length: 'int', option: 'Option') -> 'Data_PDMOption':  # pylint: disable=unused-argument
         """Read HOPOPT Performance and Diagnostic Metrics (PDM) option.
 
         Structure of HOPOPT PDM option [:rfc:`8250`]:
@@ -780,7 +863,10 @@ class HOPOPT(Internet[Data_HOPOPT]):
             code: option type value
             acts: unknown option action value
             cflg: change flag value
-            options: extracted HOPOPT options
+            clen: option data length
+            data: option payload data (incl. type, length, content)
+            length: option length (incl. type, length, content)
+            option: extracted HOPOPT options
 
         Returns:
             Parsed option data.
@@ -814,8 +900,8 @@ class HOPOPT(Internet[Data_HOPOPT]):
 
         return opt
 
-    def _read_opt_qs(self, code: 'Enum_Option', acts: 'int', cflg: 'bool', *,
-                     options: 'Option') -> 'Data_QuickStartOption':  # pylint: disable=unused-argument  # pylint: disable=unused-argument
+    def _read_opt_qs(self, code: 'Enum_Option', acts: 'Enum_OptionAction', cflg: 'bool', clen: 'int', *,
+                     data: 'bytes', length: 'int', option: 'Option') -> 'Data_QuickStartOption':  # pylint: disable=unused-argument  # pylint: disable=unused-argument
         """Read HOPOPT Quick Start option.
 
         Structure of HOPOPT Quick-Start option [:rfc:`4782`]:
@@ -850,7 +936,10 @@ class HOPOPT(Internet[Data_HOPOPT]):
             code: option type value
             acts: unknown option action value
             cflg: change flag value
-            options: extracted HOPOPT options
+            clen: option data length
+            data: option payload data (incl. type, length, content)
+            length: option length (incl. type, length, content)
+            option: extracted HOPOPT options
 
         Returns:
             Parsed option data.
@@ -887,8 +976,8 @@ class HOPOPT(Internet[Data_HOPOPT]):
 
         return data
 
-    def _read_opt_rpl(self, code: 'Enum_Option', acts: 'int', cflg: 'bool', *,
-                      options: 'Option') -> 'Data_RPLOption':  # pylint: disable=unused-argument
+    def _read_opt_rpl(self, code: 'Enum_Option', acts: 'Enum_OptionAction', cflg: 'bool', clen: 'int', *,
+                      data: 'bytes', length: 'int', option: 'Option') -> 'Data_RPLOption':  # pylint: disable=unused-argument
         """Read HOPOPT Routing Protocol for Low-Power and Lossy Networks (RPL) option.
 
         Structure of HOPOPT RPL option [:rfc:`6553`]:
@@ -909,7 +998,10 @@ class HOPOPT(Internet[Data_HOPOPT]):
             code: option type value
             acts: unknown option action value
             cflg: change flag value
-            options: extracted HOPOPT options
+            clen: option data length
+            data: option payload data (incl. type, length, content)
+            length: option length (incl. type, length, content)
+            option: extracted HOPOPT options
 
         Returns:
             Parsed option data.
@@ -941,8 +1033,8 @@ class HOPOPT(Internet[Data_HOPOPT]):
 
         return opt
 
-    def _read_opt_mpl(self, code: 'Enum_Option', acts: 'int', cflg: 'bool', *,
-                      options: 'Option') -> 'Data_MPLOption':  # pylint: disable=unused-argument
+    def _read_opt_mpl(self, code: 'Enum_Option', acts: 'Enum_OptionAction', cflg: 'bool', clen: 'int', *,
+                      data: 'bytes', length: 'int', option: 'Option') -> 'Data_MPLOption':  # pylint: disable=unused-argument
         """Read HOPOPT Multicast Protocol for Low-Power and Lossy Networks (MPL) option.
 
         Structure of HOPOPT MPL option [:rfc:`7731`]:
@@ -961,7 +1053,10 @@ class HOPOPT(Internet[Data_HOPOPT]):
             code: option type value
             acts: unknown option action value
             cflg: change flag value
-            options: extracted HOPOPT options
+            clen: option data length
+            data: option payload data (incl. type, length, content)
+            length: option length (incl. type, length, content)
+            option: extracted HOPOPT options
 
         Returns:
             Parsed option data.
@@ -1020,8 +1115,8 @@ class HOPOPT(Internet[Data_HOPOPT]):
 
         return opt
 
-    def _read_opt_ilnp(self, code: 'Enum_Option', acts: 'int', cflg: 'bool', *,
-                       options: 'Option') -> 'Data_ILNPOption':  # pylint: disable=unused-argument
+    def _read_opt_ilnp(self, code: 'Enum_Option', acts: 'Enum_OptionAction', cflg: 'bool', clen: 'int', *,
+                       data: 'bytes', length: 'int', option: 'Option') -> 'Data_ILNPOption':  # pylint: disable=unused-argument
         """Read HOPOPT Identifier-Locator Network Protocol (ILNP) Nonce option.
 
         Structure of HOPOPT ILNP Nonce option [:rfc:`6744`]:
@@ -1040,7 +1135,10 @@ class HOPOPT(Internet[Data_HOPOPT]):
             code: option type value
             acts: unknown option action value
             cflg: change flag value
-            options: extracted HOPOPT options
+            clen: option data length
+            data: option payload data (incl. type, length, content)
+            length: option length (incl. type, length, content)
+            option: extracted HOPOPT options
 
         Returns:
             Parsed option data.
@@ -1059,8 +1157,8 @@ class HOPOPT(Internet[Data_HOPOPT]):
 
         return opt
 
-    def _read_opt_lio(self, code: 'Enum_Option', acts: 'int', cflg: 'bool', *,
-                      options: 'Option') -> 'Data_LineIdentificationOption':  # pylint: disable=unused-argument
+    def _read_opt_lio(self, code: 'Enum_Option', acts: 'Enum_OptionAction', cflg: 'bool', clen: 'int', *,
+                      data: 'bytes', length: 'int', option: 'Option') -> 'Data_LineIdentificationOption':  # pylint: disable=unused-argument
         """Read HOPOPT Line-Identification option.
 
         Structure of HOPOPT Line-Identification option [:rfc:`6788`]:
@@ -1079,7 +1177,10 @@ class HOPOPT(Internet[Data_HOPOPT]):
             code: option type value
             acts: unknown option action value
             cflg: change flag value
-            options: extracted HOPOPT options
+            clen: option data length
+            data: option payload data (incl. type, length, content)
+            length: option length (incl. type, length, content)
+            option: extracted HOPOPT options
 
         Returns:
             Parsed option data.
@@ -1104,8 +1205,8 @@ class HOPOPT(Internet[Data_HOPOPT]):
 
         return opt
 
-    def _read_opt_jumbo(self, code: 'Enum_Option', acts: 'int', cflg: 'bool', *,
-                        options: 'Option') -> 'Data_JumboPayloadOption':  # pylint: disable=unused-argument
+    def _read_opt_jumbo(self, code: 'Enum_Option', acts: 'Enum_OptionAction', cflg: 'bool', clen: 'int', *,
+                        data: 'bytes', length: 'int', option: 'Option') -> 'Data_JumboPayloadOption':  # pylint: disable=unused-argument
         """Read HOPOPT Jumbo Payload option.
 
         Structure of HOPOPT Jumbo Payload option [:rfc:`2675`]:
@@ -1122,7 +1223,10 @@ class HOPOPT(Internet[Data_HOPOPT]):
             code: option type value
             acts: unknown option action value
             cflg: change flag value
-            options: extracted HOPOPT options
+            clen: option data length
+            data: option payload data (incl. type, length, content)
+            length: option length (incl. type, length, content)
+            option: extracted HOPOPT options
 
         Returns:
             Parsed option data.
@@ -1146,8 +1250,8 @@ class HOPOPT(Internet[Data_HOPOPT]):
 
         return opt
 
-    def _read_opt_home(self, code: 'Enum_Option', acts: 'int', cflg: 'bool', *,
-                       options: 'Option') -> 'Data_HomeAddressOption':  # pylint: disable=unused-argument
+    def _read_opt_home(self, code: 'Enum_Option', acts: 'Enum_OptionAction', cflg: 'bool', clen: 'int', *,
+                       data: 'bytes', length: 'int', option: 'Option') -> 'Data_HomeAddressOption':  # pylint: disable=unused-argument
         """Read HOPOPT Home Address option.
 
         Structure of HOPOPT Home Address option [:rfc:`6275`]:
@@ -1172,7 +1276,10 @@ class HOPOPT(Internet[Data_HOPOPT]):
             code: option type value
             acts: unknown option action value
             cflg: change flag value
-            options: extracted HOPOPT options
+            clen: option data length
+            data: option payload data (incl. type, length, content)
+            length: option length (incl. type, length, content)
+            option: extracted HOPOPT options
 
         Returns:
             Parsed option data.
@@ -1196,8 +1303,8 @@ class HOPOPT(Internet[Data_HOPOPT]):
 
         return opt
 
-    def _read_opt_ip_dff(self, code: 'Enum_Option', acts: 'int', cflg: 'bool', *,
-                         options: 'Option') -> 'Data_IPDFFOption':  # pylint: disable=unused-argument
+    def _read_opt_ip_dff(self, code: 'Enum_Option', acts: 'Enum_OptionAction', cflg: 'bool', clen: 'int', *,
+                         data: 'bytes', length: 'int', option: 'Option') -> 'Data_IPDFFOption':  # pylint: disable=unused-argument
         """Read HOPOPT Depth-First Forwarding (``IP_DFF``) option.
 
         Structure of HOPOPT ``IP_DFF`` option [:rfc:`6971`]:
@@ -1216,7 +1323,10 @@ class HOPOPT(Internet[Data_HOPOPT]):
             code: option type value
             acts: unknown option action value
             cflg: change flag value
-            options: extracted HOPOPT options
+            clen: option data length
+            data: option payload data (incl. type, length, content)
+            length: option length (incl. type, length, content)
+            option: extracted HOPOPT options
 
         Returns:
             Parsed option data.
@@ -1245,3 +1355,203 @@ class HOPOPT(Internet[Data_HOPOPT]):
         )
 
         return opt
+
+    def _make_hopopt_options(self, options: 'list[Schema_Option | tuple[Enum_Option, dict[str, Any]] | bytes] | Option') -> 'tuple[list[Schema_Option | bytes], int]':
+        """Make options for HOPOPT.
+
+        Args:
+            option: HOPOPT options
+
+        Returns:
+            Tuple of options and total length of options.
+
+        """
+        total_length = 0
+        if isinstance(options, list):
+            options_list = []  # type: list[Schema_Option | bytes]
+            for schema in options:
+                if isinstance(schema, bytes):
+                    options_list.append(schema)
+                    total_length += len(schema)
+                elif isinstance(schema, Schema):
+                    opt_packed = schema.pack()
+
+                    options_list.append(opt_packed)
+                    total_length += len(opt_packed)
+                else:
+                    code, args = cast('tuple[Enum_Option, dict[str, Any]]', schema)
+                    name = self.__option__[code]  # type: str | tuple[OptionParser, OptionConstructor]
+                    if isinstance(name, str):
+                        meth_name = f'_make_opt_{name}'
+                        meth = cast('OptionConstructor',
+                                    getattr(self, meth_name, self._make_opt_none))
+                    else:
+                        meth = name[1]
+
+                    data = meth(self, code, **args)
+                    data_packed = data.pack()
+
+                    options_list.append(data)
+                    total_length += len(data_packed)
+            return options_list, total_length
+
+        options_list = []
+        for code, opt in options.items(multi=True):
+            name = self.__option__[code]
+            if isinstance(name, str):
+                meth_name = f'_make_opt_{name}'
+                meth = cast('OptionConstructor',
+                            getattr(self, meth_name, self._make_opt_none))
+            else:
+                meth = name[1]
+
+            data = meth(self, code, opt)
+            data_packed = data.pack()
+
+            options_list.append(data)
+            total_length += len(data_packed)
+        return options_list, total_length
+
+    def _make_opt_none(self, code: 'Enum_Option', opt: 'Optional[Data_UnassignedOption]' = None, *,
+                       data: 'bytes' = b'',
+                       **kwargs: 'Any') -> 'Schema_UnassignedOption':
+        """Make HOPOPT unassigned option.
+
+        Args:
+            code: option type value
+            opt: option data
+            data: option payload in :obj:`bytes`
+            **kwargs: arbitrary keyword arguments
+
+        Returns:
+            Constructured option schema.
+
+        """
+        if opt is not None:
+            data = opt.data
+
+        return Schema_UnassignedOption(
+            type=code,
+            len=len(data),
+            data=data,
+        )
+
+    def _make_opt_pad(self, code: 'Enum_Option', opt: 'Optional[Data_PadOption]' = None, *,
+                      length: 'int' = 0,
+                      **kwargs: 'Any') -> 'Schema_PadOption':
+        """Make HOPOPT pad option.
+
+        Args:
+            code: option type value
+            opt: option data
+            length: padding length
+            **kwargs: arbitrary keyword arguments
+
+        Returns:
+            Constructured option schema.
+
+        """
+        if code == Enum_Option.Pad1 and length != 0:
+            raise ProtocolError(f'{self.alias}: [OptNo {code}] invalid format')
+        if code == Enum_Option.PadN and length == 0:
+            raise ProtocolError(f'{self.alias}: [OptNo {code}] invalid format')
+
+        return Schema_PadOption(
+            type=code,
+            len=length,
+        )
+
+    def _make_opt_tun(self, code: 'Enum_Option', opt: 'Optional[Data_TunnelEncapsulationLimitOption]' = None, *,
+                      limit: 'int' = 0,
+                      **kwargs: 'Any') -> 'Schema_TunnelEncapsulationLimitOption':
+        """Make HOPOPT tunnel encapsulation limit option.
+
+        Args:
+            code: option type value
+            opt: option data
+            limit: tunnel encapsulation limit
+            **kwargs: arbitrary keyword arguments
+
+        Returns:
+            Constructured option schema.
+
+        """
+        if opt is not None:
+            limit = opt.limit
+
+        return Schema_TunnelEncapsulationLimitOption(
+            type=code,
+            len=1,
+            limit=limit,
+        )
+
+    def _make_opt_ra(self, code: 'Enum_Option', opt: 'Optional[Data_RouterAlertOption]' = None, *,
+                     alert: 'Enum_RouterAlert | StdlibEnum | AenumEnum | str | int' = Enum_RouterAlert.Datagram_contains_a_Multicast_Listener_Discovery_message,  # pylint: disable=line-too-long
+                     alert_default: 'Optional[int]' = None,
+                     alert_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
+                     alert_reversed: 'bool' = False,
+                     **kwargs: 'Any') -> 'Schema_RouterAlertOption':
+        """Make HOPOPT router alert option.
+
+        Args:
+            code: option type value
+            opt: option data
+            alert: router alert value
+            alert_default: default value of router alert
+            alert_namespace: namespace of router alert
+            alert_reversed: reversed flag of router alert
+            **kwargs: arbitrary keyword arguments
+
+        Returns:
+            Constructured option schema.
+
+        """
+        if opt is not None:
+            value = opt.value
+        else:
+            value = self._make_index(alert, alert_default, namespace=alert_namespace,  # type: ignore[call-overload]
+                                     reversed=alert_reversed, pack=False)
+
+        return Schema_RouterAlertOption(
+            type=code,
+            len=2,
+            alert=value,
+        )
+
+    def _make_opt_calipso(self, code: 'Enum_Option', opt: 'Optional[Data_CALIPSOOption]' = None, *,
+                          domain: 'int' = 0,
+                          level: 'int' = 0,
+                          checksum: 'bytes' = b'\x00\x00',
+                          bitmap: 'Optional[bytes]' = None,
+                          **kwargs: 'Any') -> 'Schema_CALIPSOOption':
+        """Make HOPOPT calipso option.
+
+        Args:
+            code: option type value
+            opt: option data
+            domain: CALIPSO domain of interpretation
+            level: sensitivity level
+            checksum: checksum of the option
+            bitmap: compartment bitmap
+            **kwargs: arbitrary keyword arguments
+
+        Returns:
+            Constructured option schema.
+
+        """
+        if opt is not None:
+            domain = opt.domain
+            cmpt_len = len(opt.cmpt_bitmap) if hasattr(opt, 'cmpt_bitmap') else 0
+            level = opt.level
+            checksum = opt.checksum
+            bitmap = opt.cmpt_bitmap if hasattr(opt, 'cmpt_bitmap') else None
+
+        return Schema_CALIPSOOption(
+            type=code,
+            len=8 + cmpt_len,
+            domain=domain,
+            cmpt_len=cmpt_len,
+            level=level,
+            checksum=checksum,
+            bitmap=bitmap,
+        )
