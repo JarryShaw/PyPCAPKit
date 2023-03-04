@@ -220,7 +220,7 @@ if TYPE_CHECKING:
     from pcapkit.protocols.schema.internet.hip import Parameter as Schema_Parameter
 
     Parameter = OrderedMultiDict[Enum_Parameter, Data_Parameter]
-    ParameterParser = Callable[[Enum_Parameter, bool, int, NamedArg(bytes, 'data'),
+    ParameterParser = Callable[['HIP', Enum_Parameter, bool, int, NamedArg(bytes, 'data'),
                                 NamedArg(int, 'length'), NamedArg(int, 'version'),
                                 NamedArg(Parameter, 'options')], Data_Parameter]
     ParameterConstructor = Callable[['HIP', Enum_Parameter, DefaultArg(Optional[Data_Parameter]),
@@ -525,7 +525,7 @@ class HIP(Internet[Data_HIP, Schema_HIP]):
             parameters_value, total_length = self._make_hip_param(parameters, version=version)
             length = total_length // 8 + 4
         else:
-            parameters_value, total_length = [], 0
+            parameters_value, length = [], 0
 
         return Schema_HIP(
             next=next_value,
@@ -636,9 +636,10 @@ class HIP(Internet[Data_HIP, Schema_HIP]):
             # extract parameter
             dscp = Enum_Parameter.get(code)
             meth_name = f'_read_param_{dscp.name.lower()}'
-            meth = getattr(self, meth_name, self._read_param_unassigned)  # type: ParameterParser
-            data = meth(self, code, cbit, clen, data=payload[counter:counter + plen],  # type: ignore[arg-type]
-                        length=plen, version=version, options=options)  # type: ignore[misc]
+            meth = cast('ParameterParser',
+                        getattr(self, meth_name, self._read_param_unassigned))
+            data = meth(self, dscp, cbit, clen, data=payload[counter:counter + plen],
+                        length=plen, version=version, options=options)
 
             # record parameter data
             counter += plen
@@ -675,7 +676,7 @@ class HIP(Internet[Data_HIP, Schema_HIP]):
             cbit: critical bit
             clen: length of contents
             data: parameter payload data (incl. type, length, content and padding, if any)
-            length: remaining packet length
+            length: parameter data length
             version: HIP protocol version
             options: parsed HIP parameters
 
@@ -720,7 +721,7 @@ class HIP(Internet[Data_HIP, Schema_HIP]):
             cbit: critical bit
             clen: length of contents
             data: parameter payload data (incl. type, length, content and padding, if any)
-            length: remaining packet length
+            length: parameter data length
             version: HIP protocol version
             options: parsed HIP parameters
 
@@ -772,7 +773,7 @@ class HIP(Internet[Data_HIP, Schema_HIP]):
             cbit: critical bit
             clen: length of contents
             data: parameter payload data (incl. type, length, content and padding, if any)
-            length: remaining packet length
+            length: parameter data length
             version: HIP protocol version
             options: parsed HIP parameters
 
@@ -840,7 +841,7 @@ class HIP(Internet[Data_HIP, Schema_HIP]):
             cbit: critical bit
             clen: length of contents
             data: parameter payload data (incl. type, length, content and padding, if any)
-            length: remaining packet length
+            length: parameter data length
             version: HIP protocol version
             options: parsed HIP parameters
 
@@ -948,7 +949,7 @@ class HIP(Internet[Data_HIP, Schema_HIP]):
             cbit: critical bit
             clen: length of contents
             data: parameter payload data (incl. type, length, content and padding, if any)
-            length: remaining packet length
+            length: parameter data length
             version: HIP protocol version
             options: parsed HIP parameters
 
@@ -1009,7 +1010,7 @@ class HIP(Internet[Data_HIP, Schema_HIP]):
             cbit: critical bit
             clen: length of contents
             data: parameter payload data (incl. type, length, content and padding, if any)
-            length: remaining packet length
+            length: parameter data length
             version: HIP protocol version
             options: parsed HIP parameters
 
@@ -1068,7 +1069,7 @@ class HIP(Internet[Data_HIP, Schema_HIP]):
             cbit: critical bit
             clen: length of contents
             data: parameter payload data (incl. type, length, content and padding, if any)
-            length: remaining packet length
+            length: parameter data length
             version: HIP protocol version
             options: parsed HIP parameters
 
@@ -1119,7 +1120,7 @@ class HIP(Internet[Data_HIP, Schema_HIP]):
             cbit: critical bit
             clen: length of contents
             data: parameter payload data (incl. type, length, content and padding, if any)
-            length: remaining packet length
+            length: parameter data length
             version: HIP protocol version
             options: parsed HIP parameters
 
@@ -1168,7 +1169,7 @@ class HIP(Internet[Data_HIP, Schema_HIP]):
             cbit: critical bit
             clen: length of contents
             data: parameter payload data (incl. type, length, content and padding, if any)
-            length: remaining packet length
+            length: parameter data length
             version: HIP protocol version
             options: parsed HIP parameters
 
@@ -1213,7 +1214,7 @@ class HIP(Internet[Data_HIP, Schema_HIP]):
             cbit: critical bit
             clen: length of contents
             data: parameter payload data (incl. type, length, content and padding, if any)
-            length: remaining packet length
+            length: parameter data length
             version: HIP protocol version
             options: parsed HIP parameters
 
@@ -1258,7 +1259,7 @@ class HIP(Internet[Data_HIP, Schema_HIP]):
             cbit: critical bit
             clen: length of contents
             data: parameter payload data (incl. type, length, content and padding, if any)
-            length: remaining packet length
+            length: parameter data length
             version: HIP protocol version
             options: parsed HIP parameters
 
@@ -1309,7 +1310,7 @@ class HIP(Internet[Data_HIP, Schema_HIP]):
             cbit: critical bit
             clen: length of contents
             data: parameter payload data (incl. type, length, content and padding, if any)
-            length: remaining packet length
+            length: parameter data length
             version: HIP protocol version
             options: parsed HIP parameters
 
@@ -1366,7 +1367,7 @@ class HIP(Internet[Data_HIP, Schema_HIP]):
             cbit: critical bit
             clen: length of contents
             data: parameter payload data (incl. type, length, content and padding, if any)
-            length: remaining packet length
+            length: parameter data length
             version: HIP protocol version
             options: parsed HIP parameters
 
@@ -1413,7 +1414,7 @@ class HIP(Internet[Data_HIP, Schema_HIP]):
             cbit: critical bit
             clen: length of contents
             data: parameter payload data (incl. type, length, content and padding, if any)
-            length: remaining packet length
+            length: parameter data length
             version: HIP protocol version
             options: parsed HIP parameters
 
@@ -1469,7 +1470,7 @@ class HIP(Internet[Data_HIP, Schema_HIP]):
             cbit: critical bit
             clen: length of contents
             data: parameter payload data (incl. type, length, content and padding, if any)
-            length: remaining packet length
+            length: parameter data length
             version: HIP protocol version
             options: parsed HIP parameters
 
@@ -1545,7 +1546,7 @@ class HIP(Internet[Data_HIP, Schema_HIP]):
             cbit: critical bit
             clen: length of contents
             data: parameter payload data (incl. type, length, content and padding, if any)
-            length: remaining packet length
+            length: parameter data length
             version: HIP protocol version
             options: parsed HIP parameters
 
@@ -1620,7 +1621,7 @@ class HIP(Internet[Data_HIP, Schema_HIP]):
             cbit: critical bit
             clen: length of contents
             data: parameter payload data (incl. type, length, content and padding, if any)
-            length: remaining packet length
+            length: parameter data length
             version: HIP protocol version
             options: parsed HIP parameters
 
@@ -1665,7 +1666,7 @@ class HIP(Internet[Data_HIP, Schema_HIP]):
             cbit: critical bit
             clen: length of contents
             data: parameter payload data (incl. type, length, content and padding, if any)
-            length: remaining packet length
+            length: parameter data length
             version: HIP protocol version
             options: parsed HIP parameters
 
@@ -1715,7 +1716,7 @@ class HIP(Internet[Data_HIP, Schema_HIP]):
             cbit: critical bit
             clen: length of contents
             data: parameter payload data (incl. type, length, content and padding, if any)
-            length: remaining packet length
+            length: parameter data length
             version: HIP protocol version
             options: parsed HIP parameters
 
@@ -1757,7 +1758,7 @@ class HIP(Internet[Data_HIP, Schema_HIP]):
             cbit: critical bit
             clen: length of contents
             data: parameter payload data (incl. type, length, content and padding, if any)
-            length: remaining packet length
+            length: parameter data length
             version: HIP protocol version
             options: parsed HIP parameters
 
@@ -1802,7 +1803,7 @@ class HIP(Internet[Data_HIP, Schema_HIP]):
             cbit: critical bit
             clen: length of contents
             data: parameter payload data (incl. type, length, content and padding, if any)
-            length: remaining packet length
+            length: parameter data length
             version: HIP protocol version
             options: parsed HIP parameters
 
@@ -1851,7 +1852,7 @@ class HIP(Internet[Data_HIP, Schema_HIP]):
             cbit: critical bit
             clen: length of contents
             data: parameter payload data (incl. type, length, content and padding, if any)
-            length: remaining packet length
+            length: parameter data length
             version: HIP protocol version
             options: parsed HIP parameters
 
@@ -1897,7 +1898,7 @@ class HIP(Internet[Data_HIP, Schema_HIP]):
             cbit: critical bit
             clen: length of contents
             data: parameter payload data (incl. type, length, content and padding, if any)
-            length: remaining packet length
+            length: parameter data length
             version: HIP protocol version
             options: parsed HIP parameters
 
@@ -1943,7 +1944,7 @@ class HIP(Internet[Data_HIP, Schema_HIP]):
             cbit: critical bit
             clen: length of contents
             data: parameter payload data (incl. type, length, content and padding, if any)
-            length: remaining packet length
+            length: parameter data length
             version: HIP protocol version
             options: parsed HIP parameters
 
@@ -1990,7 +1991,7 @@ class HIP(Internet[Data_HIP, Schema_HIP]):
             cbit: critical bit
             clen: length of contents
             data: parameter payload data (incl. type, length, content and padding, if any)
-            length: remaining packet length
+            length: parameter data length
             version: HIP protocol version
             options: parsed HIP parameters
 
@@ -2042,7 +2043,7 @@ class HIP(Internet[Data_HIP, Schema_HIP]):
             cbit: critical bit
             clen: length of contents
             data: parameter payload data (incl. type, length, content and padding, if any)
-            length: remaining packet length
+            length: parameter data length
             version: HIP protocol version
             options: parsed HIP parameters
 
@@ -2085,7 +2086,7 @@ class HIP(Internet[Data_HIP, Schema_HIP]):
             cbit: critical bit
             clen: length of contents
             data: parameter payload data (incl. type, length, content and padding, if any)
-            length: remaining packet length
+            length: parameter data length
             version: HIP protocol version
             options: parsed HIP parameters
 
@@ -2136,7 +2137,7 @@ class HIP(Internet[Data_HIP, Schema_HIP]):
             cbit: critical bit
             clen: length of contents
             data: parameter payload data (incl. type, length, content and padding, if any)
-            length: remaining packet length
+            length: parameter data length
             version: HIP protocol version
             options: parsed HIP parameters
 
@@ -2183,7 +2184,7 @@ class HIP(Internet[Data_HIP, Schema_HIP]):
             cbit: critical bit
             clen: length of contents
             data: parameter payload data (incl. type, length, content and padding, if any)
-            length: remaining packet length
+            length: parameter data length
             version: HIP protocol version
             options: parsed HIP parameters
 
@@ -2231,7 +2232,7 @@ class HIP(Internet[Data_HIP, Schema_HIP]):
             cbit: critical bit
             clen: length of contents
             data: parameter payload data (incl. type, length, content and padding, if any)
-            length: remaining packet length
+            length: parameter data length
             version: HIP protocol version
             options: parsed HIP parameters
 
@@ -2285,7 +2286,7 @@ class HIP(Internet[Data_HIP, Schema_HIP]):
             cbit: critical bit
             clen: length of contents
             data: parameter payload data (incl. type, length, content and padding, if any)
-            length: remaining packet length
+            length: parameter data length
             version: HIP protocol version
             options: parsed HIP parameters
 
@@ -2330,7 +2331,7 @@ class HIP(Internet[Data_HIP, Schema_HIP]):
             cbit: critical bit
             clen: length of contents
             data: parameter payload data (incl. type, length, content and padding, if any)
-            length: remaining packet length
+            length: parameter data length
             version: HIP protocol version
             options: parsed HIP parameters
 
@@ -2373,7 +2374,7 @@ class HIP(Internet[Data_HIP, Schema_HIP]):
             cbit: critical bit
             clen: length of contents
             data: parameter payload data (incl. type, length, content and padding, if any)
-            length: remaining packet length
+            length: parameter data length
             version: HIP protocol version
             options: parsed HIP parameters
 
@@ -2427,7 +2428,7 @@ class HIP(Internet[Data_HIP, Schema_HIP]):
             cbit: critical bit
             clen: length of contents
             data: parameter payload data (incl. type, length, content and padding, if any)
-            length: remaining packet length
+            length: parameter data length
             version: HIP protocol version
             options: parsed HIP parameters
 
@@ -2487,7 +2488,7 @@ class HIP(Internet[Data_HIP, Schema_HIP]):
             cbit: critical bit
             clen: length of contents
             data: parameter payload data (incl. type, length, content and padding, if any)
-            length: remaining packet length
+            length: parameter data length
             version: HIP protocol version
             options: parsed HIP parameters
 
@@ -2539,7 +2540,7 @@ class HIP(Internet[Data_HIP, Schema_HIP]):
             cbit: critical bit
             clen: length of contents
             data: parameter payload data (incl. type, length, content and padding, if any)
-            length: remaining packet length
+            length: parameter data length
             version: HIP protocol version
             options: parsed HIP parameters
 
@@ -2584,7 +2585,7 @@ class HIP(Internet[Data_HIP, Schema_HIP]):
             cbit: critical bit
             clen: length of contents
             data: parameter payload data (incl. type, length, content and padding, if any)
-            length: remaining packet length
+            length: parameter data length
             version: HIP protocol version
             options: parsed HIP parameters
 
@@ -2627,7 +2628,7 @@ class HIP(Internet[Data_HIP, Schema_HIP]):
             cbit: critical bit
             clen: length of contents
             data: parameter payload data (incl. type, length, content and padding, if any)
-            length: remaining packet length
+            length: parameter data length
             version: HIP protocol version
             options: parsed HIP parameters
 
@@ -2671,7 +2672,7 @@ class HIP(Internet[Data_HIP, Schema_HIP]):
             cbit: critical bit
             clen: length of contents
             data: parameter payload data (incl. type, length, content and padding, if any)
-            length: remaining packet length
+            length: parameter data length
             version: HIP protocol version
             options: parsed HIP parameters
 
@@ -2713,7 +2714,7 @@ class HIP(Internet[Data_HIP, Schema_HIP]):
             cbit: critical bit
             clen: length of contents
             data: parameter payload data (incl. type, length, content and padding, if any)
-            length: remaining packet length
+            length: parameter data length
             version: HIP protocol version
             options: parsed HIP parameters
 
@@ -2754,7 +2755,7 @@ class HIP(Internet[Data_HIP, Schema_HIP]):
             cbit: critical bit
             clen: length of contents
             data: parameter payload data (incl. type, length, content and padding, if any)
-            length: remaining packet length
+            length: parameter data length
             version: HIP protocol version
             options: parsed HIP parameters
 
@@ -2800,7 +2801,7 @@ class HIP(Internet[Data_HIP, Schema_HIP]):
             cbit: critical bit
             clen: length of contents
             data: parameter payload data (incl. type, length, content and padding, if any)
-            length: remaining packet length
+            length: parameter data length
             version: HIP protocol version
             options: parsed HIP parameters
 
@@ -2857,7 +2858,7 @@ class HIP(Internet[Data_HIP, Schema_HIP]):
             cbit: critical bit
             clen: length of contents
             data: parameter payload data (incl. type, length, content and padding, if any)
-            length: remaining packet length
+            length: parameter data length
             version: HIP protocol version
             options: parsed HIP parameters
 
@@ -2909,7 +2910,7 @@ class HIP(Internet[Data_HIP, Schema_HIP]):
             cbit: critical bit
             clen: length of contents
             data: parameter payload data (incl. type, length, content and padding, if any)
-            length: remaining packet length
+            length: parameter data length
             version: HIP protocol version
             options: parsed HIP parameters
 
@@ -2969,7 +2970,7 @@ class HIP(Internet[Data_HIP, Schema_HIP]):
             cbit: critical bit
             clen: length of contents
             data: parameter payload data (incl. type, length, content and padding, if any)
-            length: remaining packet length
+            length: parameter data length
             version: HIP protocol version
             options: parsed HIP parameters
 
@@ -3028,7 +3029,7 @@ class HIP(Internet[Data_HIP, Schema_HIP]):
             cbit: critical bit
             clen: length of contents
             data: parameter payload data (incl. type, length, content and padding, if any)
-            length: remaining packet length
+            length: parameter data length
             version: HIP protocol version
             options: parsed HIP parameters
 
@@ -3080,7 +3081,7 @@ class HIP(Internet[Data_HIP, Schema_HIP]):
             cbit: critical bit
             clen: length of contents
             data: parameter payload data (incl. type, length, content and padding, if any)
-            length: remaining packet length
+            length: parameter data length
             version: HIP protocol version
             options: parsed HIP parameters
 
@@ -3132,7 +3133,7 @@ class HIP(Internet[Data_HIP, Schema_HIP]):
             cbit: critical bit
             clen: length of contents
             data: parameter payload data (incl. type, length, content and padding, if any)
-            length: remaining packet length
+            length: parameter data length
             version: HIP protocol version
             options: parsed HIP parameters
 
@@ -3186,7 +3187,7 @@ class HIP(Internet[Data_HIP, Schema_HIP]):
             cbit: critical bit
             clen: length of contents
             data: parameter payload data (incl. type, length, content and padding, if any)
-            length: remaining packet length
+            length: parameter data length
             version: HIP protocol version
             options: parsed HIP parameters
 
@@ -3214,7 +3215,7 @@ class HIP(Internet[Data_HIP, Schema_HIP]):
             version: HIP protocol version
 
         Returns:
-            HIP parameters.
+            HIP parameters and total length.
 
         """
         total_length = 0
@@ -3234,10 +3235,12 @@ class HIP(Internet[Data_HIP, Schema_HIP]):
                     meth_name = f'_make_param_{code.name.lower()}'
                     meth = cast('ParameterConstructor',
                                 getattr(self, meth_name, self._make_param_unassigned))
+
                     data = meth(self, code, version=version, **args)  # type: Schema_Parameter
+                    data_packed = data.pack()
 
                     parameters_list.append(data)
-                    total_length += len(data.pack())
+                    total_length += len(data_packed)
             return parameters_list, total_length
 
         parameters_list = []
@@ -3245,10 +3248,12 @@ class HIP(Internet[Data_HIP, Schema_HIP]):
             meth_name = f'_make_param_{code.name.lower()}'
             meth = cast('ParameterConstructor',
                         getattr(self, meth_name, self._make_param_unassigned))
+
             data = meth(self, code, param, version=version)
+            data_packed = data.pack()
 
             parameters_list.append(data)
-            total_length += len(data.pack())
+            total_length += len(data_packed)
         return parameters_list, total_length
 
     def _make_param_unassigned(self, code: 'Enum_Parameter', param: 'Optional[Data_UnassignedParameter]' = None, *,  # pylint: disable=unused-argument
