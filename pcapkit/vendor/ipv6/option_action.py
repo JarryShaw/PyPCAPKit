@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
-"""QS Functions
-==================
+"""Option Actions
+====================
 
-This module contains the vendor crawler for **QS Functions**,
-which is automatically generating :class:`pcapkit.const.ipv6.qs_function.QSFunction`.
+This module contains the vendor crawler for **Option Actions**,
+which is automatically generating :class:`pcapkit.const.ipv6.option_action.OptionAction`.
 
 """
 
@@ -16,26 +16,38 @@ from pcapkit.vendor.default import Vendor
 if TYPE_CHECKING:
     from collections import Counter
 
-__all__ = ['QSFunction']
+__all__ = ['OptionAction']
 
-#: QS function registry.
+#: Unknown option action [:rfc:`8200#section-4.2`].
 DATA = {
-    0: 'Quick-Start Request',
-    8: 'Report of Approved Rate',
+    # skip over this option and continue processing the header.
+    0b00: 'skip',
+    # discard the packet.
+    0b01: 'discard',
+    # discard the packet and, regardless of whether or not the
+    # packet's Destination Address was a multicast address, send an
+    # ICMP Parameter Problem, Code 2, message to the packet's
+    # Source Address, pointing to the unrecognized Option Type.
+    0b10: 'discard_icmp_any',
+    # discard the packet and, only if the packet's Destination
+    # Address was not a multicast address, send an ICMP Parameter
+    # Problem, Code 2, message to the packet's Source Address,
+    # pointing to the unrecognized Option Type.
+    0b11: 'discard_icmp_unicast',
 }  # type: dict[int, str]
 
 
-class QSFunction(Vendor):
-    """QS Functions"""
+class OptionAction(Vendor):
+    """Option Actions"""
 
     #: Value limit checker.
-    FLAG = 'isinstance(value, int) and 0 <= value <= 8'
+    FLAG = 'isinstance(value, int) and 0 <= value <= 3'
 
     def request(self) -> 'dict[int, str]':  # type: ignore[override] # pylint: disable=arguments-differ
         """Fetch registry data.
 
         Returns:
-            Registry data (:data:`~pcapkit.vendor.ipv6.qs_function.DATA`).
+            Registry data (:data:`~pcapkit.vendor.ipv6.option_action.DATA`).
 
         """
         return DATA
@@ -74,4 +86,4 @@ class QSFunction(Vendor):
 
 
 if __name__ == '__main__':
-    sys.exit(QSFunction())  # type: ignore[arg-type]
+    sys.exit(OptionAction())  # type: ignore[arg-type]

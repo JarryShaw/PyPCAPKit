@@ -13,6 +13,8 @@ crawlers include:
      - IPv6 Extension Header Types [*]_
    * - :class:`IPv6_Option <pcapkit.vendor.ipv6.option.Option>`
      - Destination Options and Hop-by-Hop Options [*]_
+   * - :class:`IPv6_OptionAction <pcapkit.vendor.ipv6.option_action.OptionAction>`
+     - Option Actions [*]_
    * - :class:`IPv6_QSFunction <pcapkit.vendor.ipv6.qs_function.QSFunction>`
      - IPv6 QS Functions
    * - :class:`IPv6_RouterAlert <pcapkit.vendor.ipv6.router_alert.RouterAlert>`
@@ -28,6 +30,7 @@ crawlers include:
 
 .. [*] https://www.iana.org/assignments/ipv6-parameters/ipv6-parameters.xhtml#extension-header
 .. [*] https://www.iana.org/assignments/ipv6-parameters/ipv6-parameters.xhtml#ipv6-parameters-2
+.. [*] https://www.rfc-editor.org/rfc/rfc8200#section-4.2
 .. [*] https://www.iana.org/assignments/ipv6-routeralert-values/ipv6-routeralert-values.xhtml#ipv6-routeralert-values-1
 .. [*] https://www.iana.org/assignments/ipv6-parameters/ipv6-parameters.xhtml#ipv6-parameters-3
 .. [*] https://www.iana.org/assignments/ipv6-parameters/ipv6-parameters.xhtml#taggerId-types
@@ -36,6 +39,7 @@ crawlers include:
 
 from pcapkit.vendor.ipv6.extension_header import ExtensionHeader as IPv6_ExtensionHeader
 from pcapkit.vendor.ipv6.option import Option as IPv6_Option
+from pcapkit.vendor.ipv6.option_action import OptionAction as IPv6_OptionAction
 from pcapkit.vendor.ipv6.qs_function import QSFunction as IPv6_QSFunction
 from pcapkit.vendor.ipv6.router_alert import RouterAlert as IPv6_RouterAlert
 from pcapkit.vendor.ipv6.routing import Routing as IPv6_Routing
@@ -44,4 +48,4 @@ from pcapkit.vendor.ipv6.smf_dpd_mode import SMFDPDMode as IPv6_SMFDPDMode
 from pcapkit.vendor.ipv6.tagger_id import TaggerID as IPv6_TaggerID
 
 __all__ = ['IPv6_ExtensionHeader', 'IPv6_Option', 'IPv6_QSFunction', 'IPv6_RouterAlert', 'IPv6_Routing',
-           'IPv6_SeedID', 'IPv6_SMFDPDMode', 'IPv6_TaggerID']
+           'IPv6_SeedID', 'IPv6_SMFDPDMode', 'IPv6_TaggerID', 'IPv6_OptionAction']
