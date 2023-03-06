@@ -88,7 +88,8 @@ from pcapkit.protocols.schema.internet.hopopt import MPLFlags as HOPOPT_MPLFlags
 from pcapkit.protocols.schema.internet.hopopt import MPLOption as HOPOPT_MPLOption
 from pcapkit.protocols.schema.internet.hopopt import PadOption as HOPOPT_PadOption
 from pcapkit.protocols.schema.internet.hopopt import PDMOption as HOPOPT_PDMOption
-from pcapkit.protocols.schema.internet.hopopt import QuickStartOption as HOPOPT_QuickStartOption
+from pcapkit.protocols.schema.internet.hopopt import QuickStartReportOption as HOPOPT_QuickStartReportOption
+from pcapkit.protocols.schema.internet.hopopt import QuickStartRequestOption as HOPOPT_QuickStartRequestOption
 from pcapkit.protocols.schema.internet.hopopt import RouterAlertOption as HOPOPT_RouterAlertOption
 from pcapkit.protocols.schema.internet.hopopt import RPLFlags as HOPOPT_RPLFlags
 from pcapkit.protocols.schema.internet.hopopt import RPLOption as HOPOPT_RPLOption
@@ -130,8 +131,8 @@ __all__ = [
     'HOPOPT_RPLFlags', 'HOPOPT_MPLFlags', 'HOPOPT_DFFFlags',
     'HOPOPT_UnassignedOption', 'HOPOPT_PadOption', 'HOPOPT_TunnelEncapsulationLimitOption',
     'HOPOPT_RouterAlertOption', 'HOPOPT_CALIPSOOption', 'HOPOPT_SMFIdentificationBasedDPDOption',
-    'HOPOPT_SMFHashBasedDPDOption', 'HOPOPT_PDMOption', 'HOPOPT_QuickStartOption',
-    'HOPOPT_RPLOption', 'HOPOPT_MPLOption', 'HOPOPT_ILNPOption',
+    'HOPOPT_SMFHashBasedDPDOption', 'HOPOPT_PDMOption', 'HOPOPT_QuickStartRequestOption',
+    'HOPOPT_QuickStartReportOption', 'HOPOPT_RPLOption', 'HOPOPT_MPLOption', 'HOPOPT_ILNPOption',
     'HOPOPT_LineIdentificationOption', 'HOPOPT_JumboPayloadOption', 'HOPOPT_HomeAddressOption',
     'HOPOPT_IPDFFOption',
 ]

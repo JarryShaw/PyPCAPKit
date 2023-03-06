@@ -23,6 +23,7 @@ import collections
 import datetime
 import ipaddress
 import struct
+import math
 from typing import TYPE_CHECKING, overload, cast
 
 from pcapkit.const.ipv6.option import Option as Enum_Option
@@ -46,7 +47,8 @@ from pcapkit.protocols.data.internet.hopopt import MPLFlags as Data_MPLFlags
 from pcapkit.protocols.data.internet.hopopt import MPLOption as Data_MPLOption
 from pcapkit.protocols.data.internet.hopopt import PadOption as Data_PadOption
 from pcapkit.protocols.data.internet.hopopt import PDMOption as Data_PDMOption
-from pcapkit.protocols.data.internet.hopopt import QuickStartOption as Data_QuickStartOption
+from pcapkit.protocols.data.internet.hopopt import QuickStartRequestOption as Data_QuickStartRequestOption
+from pcapkit.protocols.data.internet.hopopt import QuickStartReportOption as Data_QuickStartReportOption
 from pcapkit.protocols.data.internet.hopopt import RouterAlertOption as Data_RouterAlertOption
 from pcapkit.protocols.data.internet.hopopt import RPLFlags as Data_RPLFlags
 from pcapkit.protocols.data.internet.hopopt import RPLOption as Data_RPLOption
@@ -75,7 +77,8 @@ from pcapkit.protocols.schema.internet.hopopt import MPLFlags as Schema_MPLFlags
 from pcapkit.protocols.schema.internet.hopopt import MPLOption as Schema_MPLOption
 from pcapkit.protocols.schema.internet.hopopt import PadOption as Schema_PadOption
 from pcapkit.protocols.schema.internet.hopopt import PDMOption as Schema_PDMOption
-from pcapkit.protocols.schema.internet.hopopt import QuickStartOption as Schema_QuickStartOption
+from pcapkit.protocols.schema.internet.hopopt import QuickStartRequestOption as Schema_QuickStartRequestOption
+from pcapkit.protocols.schema.internet.hopopt import QuickStartReportOption as Schema_QuickStartReportOption
 from pcapkit.protocols.schema.internet.hopopt import RouterAlertOption as Schema_RouterAlertOption
 from pcapkit.protocols.schema.internet.hopopt import RPLFlags as Schema_RPLFlags
 from pcapkit.protocols.schema.internet.hopopt import RPLOption as Schema_RPLOption
@@ -86,10 +89,13 @@ from pcapkit.protocols.schema.internet.hopopt import \
 from pcapkit.protocols.schema.internet.hopopt import \
     TunnelEncapsulationLimitOption as Schema_TunnelEncapsulationLimitOption
 from pcapkit.protocols.schema.internet.hopopt import UnassignedOption as Schema_UnassignedOption
+from pcapkit.utilities.warnings import warn, ProtocolWarning
 
 if TYPE_CHECKING:
+    from datetime import timedelta
     from enum import IntEnum as StdlibEnum
     from typing import IO, Any, Callable, DefaultDict, NoReturn, Optional, Type
+    from ipaddress import IPv4Address, IPv6Address
 
     from aenum import IntEnum as AenumEnum
     from mypy_extensions import NamedArg, DefaultArg, KwArg
@@ -99,6 +105,10 @@ if TYPE_CHECKING:
     from pcapkit.protocols.data.internet.hopopt import Option as Data_Option
     from pcapkit.protocols.protocol import Protocol
     from pcapkit.protocols.schema.internet.hopopt import Option as Schema_Option
+    from pcapkit.protocols.schema.internet.hopopt import QuickStartOption as Schema_QuickStartOption
+    from pcapkit.protocols.schema.internet.hopopt import SMFDPDOption as Schema_SMFDPDOption
+    from pcapkit.protocols.data.internet.hopopt import QuickStartOption as Data_QuickStartOption
+    from pcapkit.protocols.data.internet.hopopt import SMFDPDOption as Data_SMFDPDOption
 
     Option = OrderedMultiDict[Enum_Option, Data_Option]
     OptionParser = Callable[['HOPOPT', Enum_Option, int, bool, int, NamedArg(bytes, 'data'),
@@ -702,7 +712,7 @@ class HOPOPT(Internet[Data_HOPOPT, Schema_HOPOPT]):
         return opt
 
     def _read_opt_smf_dpd(self, code: 'Enum_Option', acts: 'Enum_OptionAction', cflg: 'bool', clen: 'int', *,
-                          data: 'bytes', length: 'int', option: 'Option') -> 'Data_SMFIdentificationBasedDPDOption | Data_SMFHashBasedDPDOption':  # pylint: disable=unused-argument,line-too-long
+                          data: 'bytes', length: 'int', option: 'Option') -> 'Data_SMFDPDOption':  # pylint: disable=unused-argument,line-too-long
         """Read HOPOPT Simplified Multicast Forwarding Duplicate Packet Detection (``SMF_DPD``) option.
 
         Structure of HOPOPT ``SMF_DPD`` option [:rfc:`6621`]:
@@ -749,96 +759,91 @@ class HOPOPT(Internet[Data_HOPOPT, Schema_HOPOPT]):
             ProtocolError: If the option is malformed.
 
         """
-        _size = self._read_unpack(1)
-        _tidd = self._read_binary(1)
+        mode = Enum_SMFDPDMode.get((data[2] & 0x80) >> 7)
+        if mode == Enum_SMFDPDMode.I_DPD:  # I-DPD mode
+            schema = Schema_SMFIdentificationBasedDPDOption.unpack(data, length)  # type: Schema_SMFIdentificationBasedDPDOption  # pylint: disable=line-too-long
+            self.__header__.options.append(schema)
 
-        if _tidd[0] == '0':
-            _mode = Enum_SMFDPDMode.I_DPD
-            _tidt = Enum_TaggerID.get(_tidd[1:4])
-            _tidl = int(_tidd[4:], base=2)
+            tid_type = Enum_TaggerID.get(schema.info['type'])
+            tid_len = schema.info['len']
 
-            if _tidt == Enum_TaggerID.NULL:
-                if _tidl != 0:
-                    raise ProtocolError(f'{self.alias}: [OptNo {code}] invalid format')
-                _iden = self._read_unpack(_size-1)
+            if tid_type == Enum_TaggerID.NULL:
+                if tid_len != 0:
+                    raise ProtocolError(f'{self.alias}: [OptNo {code}] invalid TaggedID length: {tid_len}')
 
                 opt = Data_SMFIdentificationBasedDPDOption(
                     type=code,
                     action=acts,
                     change=cflg,
-                    length=_size + 2,
-                    dpd_type=_mode,  # type: ignore[arg-type]
-                    tid_type=_tidt,
-                    tid_len=_tidl,
+                    length=schema.len + 2,
+                    dpd_type=mode,
+                    tid_type=tid_type,
+                    tid_len=tid_len,
                     tid=None,
-                    id=_iden,
-                )
-            elif _tidt == Enum_TaggerID.IPv4:
-                if _tidl != 3:
-                    raise ProtocolError(f'{self.alias}: [OptNo {code}] invalid format')
-                _tidf = self._read_fileng(4)
-                _iden = self._read_unpack(_size-4)
+                    id=schema.id,
+                )  # type: Data_SMFDPDOption
+            elif tid_type == Enum_TaggerID.IPv4:
+                if tid_len != 3:
+                    raise ProtocolError(f'{self.alias}: [OptNo {code}] invalid TaggedID length: {tid_len}')
+
+                tid = cast('IPv4Address', ipaddress.ip_address(schema.tid))
+                schema.tid = tid
 
                 opt = Data_SMFIdentificationBasedDPDOption(
                     type=code,
                     action=acts,
                     change=cflg,
-                    length=_size + 2,
-                    dpd_type=_mode,  # type: ignore[arg-type]
-                    tid_type=_tidt,
-                    tid_len=_tidl,
-                    tid=ipaddress.ip_address(_tidf),
-                    id=_iden,
+                    length=schema.len + 2,
+                    dpd_type=mode,
+                    tid_type=tid_type,
+                    tid_len=tid_len,
+                    tid=tid,
+                    id=schema.id,
                 )
-            elif _tidt == Enum_TaggerID.IPv6:
-                if _tidl != 15:
-                    raise ProtocolError(f'{self.alias}: [OptNo {code}] invalid format')
-                _tidf = self._read_fileng(15)
-                _iden = self._read_unpack(_size-15)
+            elif tid_type == Enum_TaggerID.IPv6:
+                if tid_len != 15:
+                    raise ProtocolError(f'{self.alias}: [OptNo {code}] invalid TaggedID length: {tid_len}')
+
+                tid = cast('IPv6Address', ipaddress.ip_address(schema.tid))  # type: ignore[assignment]
+                schema.tid = tid
 
                 opt = Data_SMFIdentificationBasedDPDOption(
                     type=code,
                     action=acts,
                     change=cflg,
-                    length=_size + 2,
-                    dpd_type=_mode,  # type: ignore[arg-type]
-                    tid_type=_tidt,
-                    tid_len=_tidl,
-                    tid=ipaddress.ip_address(_tidf),
-                    id=_iden,
+                    length=schema.len + 2,
+                    dpd_type=mode,
+                    tid_type=tid_type,
+                    tid_len=tid_len,
+                    tid=tid,
+                    id=schema.id,
                 )
             else:
-                _tidf = self._read_unpack(_tidl+1)  # type: ignore[assignment]
-                _iden = self._read_unpack(_size-_tidl-2)
-
                 opt = Data_SMFIdentificationBasedDPDOption(
                     type=code,
                     action=acts,
                     change=cflg,
-                    length=_size + 2,
-                    dpd_type=_mode,  # type: ignore[arg-type]
-                    tid_type=_tidt,
-                    tid_len=_tidl,
-                    tid=_tidf,  # type: ignore[arg-type]
-                    id=_iden,
+                    length=schema.len + 2,
+                    dpd_type=mode,
+                    tid_type=tid_type,
+                    tid_len=tid_len,
+                    tid=schema.tid,
+                    id=schema.id,
                 )
-        elif _tidd[0] == '1':
-            _mode = Enum_SMFDPDMode.H_DPD
-            _tidt = Enum_TaggerID.get(_tidd[1:4])
-            _data = self._read_fileng(_size-1)
+        elif mode == Enum_SMFDPDMode.H_DPD:  # H-DPD mode
+            h_schema = Schema_SMFHashBasedDPDOption.unpack(data, length)  # type: Schema_SMFHashBasedDPDOption  # pylint: disable=line-too-long
+            self.__header__.options.append(h_schema)
 
-            opt = Data_SMFHashBasedDPDOption(  # type: ignore[assignment]
+            opt = Data_SMFHashBasedDPDOption(
                 type=code,
                 action=acts,
                 change=cflg,
-                length=_size + 2,
-                dpd_type=_mode,  # type: ignore[arg-type]
-                tid_type=_tidt,
-                hav=int(_tidd[1:], base=2).to_bytes(length=1, byteorder='little') + _data,
+                length=h_schema.len + 2,
+                dpd_type=mode,
+                hav=h_schema.hav,
             )
         else:
-            raise ProtocolError(f'{self.alias}: [OptNo {code}] invalid format')
-
+            raise ProtocolError(f'{self.alias}: [OptNo {code}] invalid DPD mode: {mode}')
         return opt
 
     def _read_opt_pdm(self, code: 'Enum_Option', acts: 'Enum_OptionAction', cflg: 'bool', clen: 'int', *,
@@ -875,29 +880,24 @@ class HOPOPT(Internet[Data_HOPOPT, Schema_HOPOPT]):
             ProtocolError: If ``hopopt.pdm.length`` is **NOT** ``10``.
 
         """
-        _size = self._read_unpack(1)
-        if _size != 10:
+        if clen != 10:
             raise ProtocolError(f'{self.alias}: [OptNo {code}] invalid format')
-        _stlr = self._read_unpack(1)
-        _stls = self._read_unpack(1)
-        _psnt = self._read_unpack(2)
-        _psnl = self._read_unpack(2)
-        _dtlr = self._read_unpack(2)
-        _dtls = self._read_unpack(2)
+
+        schema = Schema_PDMOption.unpack(data, length)  # type: Schema_PDMOption
+        self.__header__.options.append(schema)
 
         opt = Data_PDMOption(
             type=code,
             action=acts,
             change=cflg,
-            length=_size + 2,
-            scaledtlr=datetime.timedelta(seconds=_stlr),
-            scaledtls=datetime.timedelta(seconds=_stls),
-            psntp=_psnt,
-            psnlr=_psnl,
-            deltatlr=datetime.timedelta(seconds=_dtlr),
-            deltatls=datetime.timedelta(seconds=_dtls),
+            length=schema.len + 2,
+            scaledtlr=schema.scaledtlr,
+            scaledtls=schema.scaledtls,
+            psntp=schema.psntp,
+            psnlr=schema.psnlr,
+            deltatlr=schema.deltatlr << schema.scaledtlr,
+            deltatls=schema.deltatls << schema.scaledtls,
         )
-
         return opt
 
     def _read_opt_qs(self, code: 'Enum_Option', acts: 'Enum_OptionAction', cflg: 'bool', clen: 'int', *,
@@ -948,33 +948,40 @@ class HOPOPT(Internet[Data_HOPOPT, Schema_HOPOPT]):
             ProtocolError: If the option is malformed.
 
         """
-        _size = self._read_unpack(1)
-        if _size != 6:
+        if clen != 6:
             raise ProtocolError(f'{self.alias}: [OptNo {code}] invalid format')
 
-        _fcrr = self._read_binary(1)
-        _func = int(_fcrr[:4], base=2)
-        _rate = int(_fcrr[4:], base=2)
-        _ttlv = self._read_unpack(1)
-        _nonr = self._read_binary(4)
-        _qsnn = int(_nonr[:30], base=2)
+        func = Enum_QSFunction.get((data[2] & 0xF0) >> 4)
+        if func == Enum_QSFunction.Quick_Start_Request:
+            schema_req = Schema_QuickStartRequestOption.unpack(data, length)  # type: Schema_QuickStartRequestOption
+            self.__header__.options.append(schema_req)
 
-        _qsfn = Enum_QSFunction.get(_func)
-        if _qsfn not in (Enum_QSFunction.Quick_Start_Request, Enum_QSFunction.Report_of_Approved_Rate):
-            raise ProtocolError(f'{self.alias}: [OptNo {code}] invalid format')
+            opt = Data_QuickStartRequestOption(
+                type=code,
+                action=acts,
+                change=cflg,
+                length=schema_req.len + 2,
+                func=func,
+                rate=40000 * (2 ** schema_req.flags['rate']) / 1000,
+                ttl=datetime.timedelta(seconds=schema_req.ttl),
+                nounce=schema_req.nounce,
+            )  # type: Data_QuickStartOption
+        elif func == Enum_QSFunction.Report_of_Approved_Rate:
+            schema_rep = Schema_QuickStartReportOption.unpack(data, length)  # type: Schema_QuickStartReportOption
+            self.__header__.options.append(schema_rep)
 
-        data = Data_QuickStartOption(
-            type=code,
-            action=acts,
-            change=cflg,
-            length=_size + 2,
-            func=_qsfn,
-            rate=40000 * (2 ** _rate) / 1000,
-            ttl=None if _func != Enum_QSFunction.Quick_Start_Request else datetime.timedelta(seconds=_ttlv),
-            nounce=_qsnn,
-        )
-
-        return data
+            opt = Data_QuickStartReportOption(
+                type=code,
+                action=acts,
+                change=cflg,
+                length=schema_rep.len + 2,
+                func=func,
+                rate=40000 * (2 ** schema_rep.flags['rate']) / 1000,
+                nounce=schema_rep.nounce,
+            )
+        else:
+            raise ProtocolError(f'{self.alias}: [OptNo {code}] unknown QS function: {func}')
+        return opt
 
     def _read_opt_rpl(self, code: 'Enum_Option', acts: 'Enum_OptionAction', cflg: 'bool', clen: 'int', *,
                       data: 'bytes', length: 'int', option: 'Option') -> 'Data_RPLOption':  # pylint: disable=unused-argument
@@ -1555,3 +1562,202 @@ class HOPOPT(Internet[Data_HOPOPT, Schema_HOPOPT]):
             checksum=checksum,
             bitmap=bitmap,
         )
+
+    def _make_opt_smf_dpd(self, code: 'Enum_Option', opt: 'Optional[Data_SMFDPDOption]' = None, *,
+                          mode: 'Enum_SMFDPDMode | StdlibEnum | AenumEnum | str | int' = Enum_SMFDPDMode.I_DPD,
+                          mode_default: 'Optional[int]' = None,
+                          mode_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
+                          mode_reversed: 'bool' = False,
+                          tid: 'Optional[bytes | IPv4Address | IPv6Address]' = None,
+                          id: 'bytes' = b'',
+                          hav: 'bytes' = b'',
+                          **kwargs: 'Any') -> 'Schema_SMFDPDOption':
+        """Make HOPOPT SMF DPD option.
+
+        Args:
+            code: option type value
+            opt: option data
+            mode: DPD mode
+            mode_default: default value of DPD mode
+            mode_namespace: namespace of DPD mode
+            mode_reversed: reversed flag of DPD mode
+            tid: Tagger ID
+            id: identifier
+            hav: hash assist value (HAV)
+            **kwargs: arbitrary keyword arguments
+
+        Returns:
+            Constructured option schema.
+
+        """
+        dpd_type = self._make_index(mode, mode_default, namespace=mode_namespace,  # type: ignore[call-overload]
+                                    reversed=mode_reversed, pack=False)
+
+        if dpd_type == Enum_SMFDPDMode.I_DPD:
+            if tid is None:
+                schema = Schema_SMFIdentificationBasedDPDOption(
+                    type=code,
+                    len=1 + len(id),
+                    info={
+                        'mode': 0,
+                        'type': Enum_TaggerID.NULL,
+                        'len': 0,
+                    },
+                    tid=None,
+                    id=id,
+                )  # type: Schema_SMFDPDOption
+            elif isinstance(tid, bytes):
+                tid_len = len(tid)
+                if tid_len == 0:
+                    tid_type = Enum_TaggerID.NULL
+                else:
+                    try:
+                        tid_ip_ver = ipaddress.ip_address(tid).version
+                        if tid_ip_ver == 4:
+                            tid_type = Enum_TaggerID.IPv4
+                        elif tid_ip_ver == 6:
+                            tid_type = Enum_TaggerID.IPv6
+                        else:
+                            tid_type = Enum_TaggerID.DEFAULT  # type: ignore[unreachable]
+                    except ValueError:
+                        tid_type = Enum_TaggerID.DEFAULT
+
+                schema = Schema_SMFIdentificationBasedDPDOption(
+                    type=code,
+                    len=1 + tid_len + len(id),
+                    info={
+                        'mode': 0,
+                        'type': tid_type,
+                        'len': tid_len - 1,
+                    },
+                    tid=tid,
+                    id=id,
+                )
+            else:
+                tid_ver = tid.version
+                if tid_ver == 4:
+                    tid_type = Enum_TaggerID.IPv4
+                    tid_len = 4
+                elif tid_ver == 6:
+                    tid_type = Enum_TaggerID.IPv6
+                    tid_len = 16
+                else:
+                    raise ProtocolError(f'{self.alias}: [OptNo {code}] invalid TaggerID version: {tid_ver}')
+
+                schema = Schema_SMFIdentificationBasedDPDOption(
+                    type=code,
+                    len=1 + tid_len + len(id),
+                    info={
+                        'mode': 0,
+                        'type': tid_type,
+                        'len': tid_len - 1,
+                    },
+                    tid=tid.packed,
+                    id=id,
+                )
+        elif dpd_type == Enum_SMFDPDMode.H_DPD:
+            hav_ba = bytearray(hav)
+            hav_ba[0] = hav[0] | 0x80
+
+            schema = Schema_SMFHashBasedDPDOption(
+                type=code,
+                len=len(hav),
+                hav=bytes(hav_ba),
+            )
+        else:
+            raise ProtocolError(f'{self.alias}: [OptNo {code}] invalid DPD type: {dpd_type}')
+        return schema
+
+    def _make_opt_pdm(self, code: 'Enum_Option', opt: 'Optional[Data_PDMOption]' = None, *,
+                      psntp: 'int' = 0,
+                      psnlr: 'int' = 0,
+                      deltatlr: 'int' = 0,
+                      deltatls: 'int' = 0,
+                      **kwargs: 'Any') -> 'Schema_PDMOption':
+        """Make HOPOPT PDM option.
+
+        Args:
+            code: option type value
+            opt: option data
+            psntp: packet sequence number (PSN) this packet
+            psnlr: packet sequence number (PSN) last received
+            deltatlr: delta time last received (in attoseconds)
+            deltatls: delta time last sent (in attoseconds)
+            **kwargs: arbitrary keyword arguments
+
+        Returns:
+            Constructured option schema.
+
+        """
+        dtlr_bl = deltatlr.bit_length()
+        scale_dtlr = dtlr_bl - 16 if dtlr_bl > 16 else 0
+        if scale_dtlr > 255:
+            warn(f'{self.alias}: [OptNo {code}] too large delta time last received: {deltatlr} (scaled: {scale_dtlr})',
+                 ProtocolWarning)
+
+        dtls_bl = deltatls.bit_length()
+        scale_dtls = dtls_bl - 16 if dtls_bl > 16 else 0
+        if scale_dtls > 255:
+            warn(f'{self.alias}: [OptNo {code}] too large delta time last sent: {deltatls} (scaled: {scale_dtls})',
+                 ProtocolWarning)
+
+        return Schema_PDMOption(
+            type=code,
+            len=10,
+            scaledtlr=scale_dtlr,
+            scaledtls=scale_dtls,
+            psntp=psntp,
+            psnlr=psnlr,
+            deltatlr=deltatlr >> scale_dtlr,
+            deltatls=deltatls >> scale_dtls,
+        )
+
+    def _make_opt_qs(self, code: 'Enum_Option', opt: 'Optional[Data_QuickStartOption]' = None, *,
+                     func: 'Enum_QSFunction | StdlibEnum | AenumEnum | str | int' = Enum_QSFunction.Quick_Start_Request,
+                     func_default: 'Optional[int]' = None,
+                     func_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,   # pylint: disable=line-too-long
+                     func_reversed: 'bool' = False,
+                     rate: 'int' = 0,
+                     ttl: 'timedelta | int' = 0,
+                     nounce: 'bytes' = b'\x00\x00\x00\x00',
+                     **kwargs: 'Any') -> 'Schema_QuickStartOption':
+        """Make HOPOPT QS option.
+
+        Args:
+            code: option type value
+            opt: option data
+
+            **kwargs: arbitrary keyword arguments
+
+        Returns:
+            Constructured option schema.
+
+        """
+        func_enum = self._make_index(func, func_default, namespace=func_namespace,  # type: ignore[call-overload]
+                                     reversed=func_reversed, pack=False)
+        rate_val = math.floor(math.log2(rate * 1000 / 40000))
+
+        if func_enum == Enum_QSFunction.Quick_Start_Request:
+            ttl_value = ttl if isinstance(ttl, int) else math.floor(ttl.total_seconds())
+
+            return Schema_QuickStartRequestOption(
+                type=code,
+                len=6,
+                flags={
+                    'func': func_enum,
+                    'rate': rate_val,
+                },
+                ttl=ttl_value,
+                nounce=nounce,
+            )
+        if func_enum == Enum_QSFunction.Report_of_Approved_Rate:
+            return Schema_QuickStartReportOption(
+                type=code,
+                len=2,
+                flags={
+                    'func': func_enum,
+                    'rate': rate_val,
+                },
+                nounce=nounce,
+            )
+        raise ProtocolError(f'{self.alias}: [OptNo {code}] invalid QS function: {func_enum}')

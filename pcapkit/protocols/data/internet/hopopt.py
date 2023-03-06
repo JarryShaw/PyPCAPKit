@@ -25,10 +25,11 @@ __all__ = [
 
     'RPLFlags', 'MPLFlags', 'DFFFlags',
 
+    'SMFDPDOption', 'QuickStartOption',
     'UnassignedOption', 'PadOption', 'TunnelEncapsulationLimitOption',
     'RouterAlertOption', 'CALIPSOOption', 'SMFIdentificationBasedDPDOption',
-    'SMFHashBasedDPDOption', 'PDMOption', 'QuickStartOption',
-    'RPLOption', 'MPLOption', 'ILNPOption',
+    'SMFHashBasedDPDOption', 'PDMOption', 'QuickStartRequestOption',
+    'QuickStartReportOption', 'RPLOption', 'MPLOption', 'ILNPOption',
     'LineIdentificationOption', 'JumboPayloadOption', 'HomeAddressOption',
     'IPDFFOption',
 ]
@@ -122,22 +123,23 @@ class SMFDPDOption(Option):
 
     #: DPD type.
     dpd_type: 'SMFDPDMode'
-    #: TaggerID type.
-    tid_type: 'TaggerID'
+
 
 
 class SMFIdentificationBasedDPDOption(SMFDPDOption):
     """Data model for HOPOPT **I-DPD** (Identification-Based DPD) option."""
 
+    #: TaggerID type.
+    tid_type: 'TaggerID'
     #: TaggerID length.
     tid_len: 'int'
     #: TaggerID.
-    tid: 'Optional[int | IPv4Address | IPv6Address]'
+    tid: 'Optional[bytes | IPv4Address | IPv6Address]'
     #: Identifier.
-    id: 'int'
+    id: 'bytes'
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_Option', action: 'int', change: 'bool', length: 'int', dpd_type: 'SMFDPDMode', tid_type: 'TaggerID', tid_len: 'int', tid: 'Optional[int | IPv4Address | IPv6Address]', id: 'int') -> 'None': ...  # pylint: disable=super-init-not-called,unused-argument,redefined-builtin,multiple-statements,line-too-long
+        def __init__(self, type: 'Enum_Option', action: 'int', change: 'bool', length: 'int', dpd_type: 'SMFDPDMode', tid_type: 'TaggerID', tid_len: 'int', tid: 'Optional[bytes | IPv4Address | IPv6Address]', id: 'bytes') -> 'None': ...  # pylint: disable=super-init-not-called,unused-argument,redefined-builtin,multiple-statements,line-too-long
 
 
 class SMFHashBasedDPDOption(SMFDPDOption):
@@ -147,27 +149,27 @@ class SMFHashBasedDPDOption(SMFDPDOption):
     hav: 'bytes'
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_Option', action: 'int', change: 'bool', length: 'int', dpd_type: 'SMFDPDMode', tid_type: 'TaggerID', hav: 'bytes') -> 'None': ...  # pylint: disable=super-init-not-called,unused-argument,redefined-builtin,multiple-statements,line-too-long
+        def __init__(self, type: 'Enum_Option', action: 'int', change: 'bool', length: 'int', dpd_type: 'SMFDPDMode', hav: 'bytes') -> 'None': ...  # pylint: disable=super-init-not-called,unused-argument,redefined-builtin,multiple-statements,line-too-long
 
 
 class PDMOption(Option):
     """Data model for HOPOPT Performance Diagnostic Metrics (PDM) option."""
 
     #: Scale delta time last received.
-    scaledtlr: 'timedelta'
+    scaledtlr: 'int'
     #: Scale delta time last sent.
-    scaledtls: 'timedelta'
+    scaledtls: 'int'
     #: Packet sequence number this packet.
     psntp: 'int'
     #: Packet sequence number last received.
     psnlr: 'int'
-    #: Delta time last received.
-    deltatlr: 'timedelta'
-    #: Delta time last sent.
-    deltatls: 'timedelta'
+    #: Delta time last received (in attoseconds).
+    deltatlr: 'int'
+    #: Delta time last sent (in attoseconds).
+    deltatls: 'int'
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_Option', action: 'int', change: 'bool', length: 'int', scaledtlr: 'timedelta', scaledtls: 'timedelta', psntp: 'int', psnlr: 'int', deltatlr: 'timedelta', deltatls: 'timedelta') -> 'None': ...  # pylint: disable=super-init-not-called,unused-argument,redefined-builtin,multiple-statements,line-too-long
+        def __init__(self, type: 'Enum_Option', action: 'int', change: 'bool', length: 'int', scaledtlr: 'int', scaledtls: 'int', psntp: 'int', psnlr: 'int', deltatlr: 'int', deltatls: 'int') -> 'None': ...  # pylint: disable=super-init-not-called,unused-argument,redefined-builtin,multiple-statements,line-too-long
 
 
 class QuickStartOption(Option):
@@ -177,13 +179,29 @@ class QuickStartOption(Option):
     func: 'QSFunction'
     #: Rate request/report.
     rate: 'int'
+
+
+class QuickStartRequestOption(QuickStartOption):
+    """Data model for HOPOPT Quick Start request option."""
+
     #: TTL.
-    ttl: 'Optional[timedelta]'
+    ttl: 'timedelta'
     #: Nounce.
-    nounce: 'int'
+    nounce: 'bytes'
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_Option', action: 'int', change: 'bool', length: 'int', func: 'QSFunction', rate: 'int', ttl: 'Optional[timedelta]', nounce: 'int') -> 'None': ...  # pylint: disable=super-init-not-called,unused-argument,redefined-builtin,multiple-statements,line-too-long
+        def __init__(self, type: 'Enum_Option', action: 'int', change: 'bool', length: 'int', func: 'QSFunction', rate: 'int', ttl: 'timedelta',
+                     nounce: 'bytes') -> 'None': ...  # pylint: disable=super-init-not-called,unused-argument,redefined-builtin,multiple-statements,line-too-long
+
+
+class QuickStartReportOption(QuickStartOption):
+    """Data model for HOPOPT Quick Start report of approved rate option."""
+
+    #: Nounce.
+    nounce: 'bytes'
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_Option', action: 'int', change: 'bool', length: 'int', func: 'QSFunction', rate: 'int', nounce: 'bytes') -> 'None': ...
 
 
 class RPLFlags(Data):
