@@ -889,7 +889,7 @@ class IPv6_Opts(Internet[Data_IPv6_Opts]):
             func=_qsfn,
             rate=40000 * (2 ** _rate) / 1000,
             ttl=None if _func != Enum_QSFunction.Quick_Start_Request else datetime.timedelta(seconds=_ttlv),
-            nounce=_qsnn,
+            nonce=_qsnn,
         )
 
         return data
@@ -1061,7 +1061,7 @@ class IPv6_Opts(Internet[Data_IPv6_Opts]):
             action=acts,
             change=cflg,
             length=_size + 2,
-            nounce=_nval,
+            nonce=_nval,
         )
 
         return opt

@@ -271,23 +271,23 @@ class QuickStartRequestOption(QuickStartOption):
 
     #: QS time-to-live (TTL).
     ttl: 'int' = UInt8Field()
-    #: QS nounce.
-    nounce: 'bytes' = BytesField(length=4)
+    #: QS nonce.
+    nonce: 'bytes' = BytesField(length=4)
 
     if TYPE_CHECKING:
         def __init__(self, type: 'Enum_Option', len: 'int', flags: 'QuickStartFlags',
-                     ttl: 'int', nounce: 'bytes') -> 'None': ...
+                     ttl: 'int', nonce: 'bytes') -> 'None': ...
 
 
 class QuickStartReportOption(QuickStartOption):
     """Header schema for HOPOPT quick start report of approved rate options."""
 
-    #: QS nounce.
-    nounce: 'bytes' = BytesField(length=4)
+    #: QS nonce.
+    nonce: 'bytes' = BytesField(length=4)
 
     if TYPE_CHECKING:
         def __init__(self, type: 'Enum_Option', len: 'int', flags: 'QuickStartFlags',
-                     nounce: 'bytes') -> 'None': ...
+                     nonce: 'bytes') -> 'None': ...
 
 
 class RPLOption(Option):

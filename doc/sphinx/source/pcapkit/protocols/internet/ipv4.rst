@@ -306,7 +306,7 @@ Data Structures
 
    .. autoattribute:: alert
 
-.. autoclass:: pcapkit.protocols.data.internet.ipv4.QSOption(code, length, type, func, rate, ttl, nounce)
+.. autoclass:: pcapkit.protocols.data.internet.ipv4.QSOption(code, length, type, func, rate, ttl, nonce)
    :no-members:
    :show-inheritance:
 
@@ -316,7 +316,7 @@ Data Structures
    .. autoattribute:: func
    .. autoattribute:: rate
    .. autoattribute:: ttl
-   .. autoattribute:: nounce
+   .. autoattribute:: nonce
 
 .. raw:: html
 

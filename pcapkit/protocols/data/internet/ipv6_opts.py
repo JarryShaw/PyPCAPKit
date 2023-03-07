@@ -178,11 +178,11 @@ class QuickStartOption(Option):
     rate: 'int'
     #: TTL.
     ttl: 'Optional[timedelta]'
-    #: Nounce.
-    nounce: 'int'
+    #: Nonce.
+    nonce: 'int'
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_Option', action: 'int', change: 'bool', length: 'int', func: 'QSFunction', rate: 'int', ttl: 'Optional[timedelta]', nounce: 'int') -> 'None': ...  # pylint: disable=super-init-not-called,unused-argument,redefined-builtin,multiple-statements,line-too-long
+        def __init__(self, type: 'Enum_Option', action: 'int', change: 'bool', length: 'int', func: 'QSFunction', rate: 'int', ttl: 'Optional[timedelta]', nonce: 'int') -> 'None': ...  # pylint: disable=super-init-not-called,unused-argument,redefined-builtin,multiple-statements,line-too-long
 
 
 class RPLFlags(Data):
@@ -245,10 +245,10 @@ class ILNPOption(Option):
     """Data model for IPv6-Opts Identifier-Locator Network Protocol (ILNP) Nonce option."""
 
     #: Nonce value.
-    nounce: 'bytes'
+    nonce: 'bytes'
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_Option', action: 'int', change: 'bool', length: 'int', nounce: 'bytes') -> 'None': ...  # pylint: disable=super-init-not-called,unused-argument,redefined-builtin,multiple-statements,line-too-long
+        def __init__(self, type: 'Enum_Option', action: 'int', change: 'bool', length: 'int', nonce: 'bytes') -> 'None': ...  # pylint: disable=super-init-not-called,unused-argument,redefined-builtin,multiple-statements,line-too-long
 
 
 class LineIdentificationOption(Option):

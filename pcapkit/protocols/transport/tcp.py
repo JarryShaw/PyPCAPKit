@@ -1135,7 +1135,7 @@ class TCP(Transport[Data_TCP]):
             length=size,
             req_rate=int(rvrr[4:], base=2),
             ttl_diff=ttld,
-            nounce=int(noun[:-2], base=2),
+            nonce=int(noun[:-2], base=2),
         )
 
         return data
@@ -1424,7 +1424,7 @@ class TCP(Transport[Data_TCP]):
             backup=bool(int(bits[3])),
             addr_id=adid,
             token=rtkn,
-            nounce=srno,
+            nonce=srno,
         )
 
         return data
@@ -1477,7 +1477,7 @@ class TCP(Transport[Data_TCP]):
             backup=bool(int(bits[3])),
             addr_id=adid,
             hmac=hmac,
-            nounce=srno,
+            nonce=srno,
         )
 
         return data

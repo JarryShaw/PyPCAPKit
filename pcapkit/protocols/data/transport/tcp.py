@@ -284,11 +284,11 @@ class QuickStartResponse(Option):
     req_rate: 'int'
     #: TTL difference.
     ttl_diff: 'int'
-    #: QS nounce.
-    nounce: 'int'
+    #: QS nonce.
+    nonce: 'int'
 
     if TYPE_CHECKING:
-        def __init__(self, kind: 'OptionNumber', length: 'int', req_rate: 'int', ttl_diff: 'int', nounce: 'int') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
+        def __init__(self, kind: 'OptionNumber', length: 'int', req_rate: 'int', ttl_diff: 'int', nonce: 'int') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
 class UserTimeout(Option):
@@ -388,10 +388,10 @@ class MPTCPJoinSYN(MPTCPJoin):
     #: Receiver's token.
     token: 'bytes'
     #: Sendder's random number.
-    nounce: 'int'
+    nonce: 'int'
 
     if TYPE_CHECKING:
-        def __init__(self, kind: 'OptionNumber', length: 'int', subtype: 'MPTCPOption', connection: 'Literal["SYN"]', backup: 'bool', addr_id: 'int', token: 'bytes', nounce: 'int') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
+        def __init__(self, kind: 'OptionNumber', length: 'int', subtype: 'MPTCPOption', connection: 'Literal["SYN"]', backup: 'bool', addr_id: 'int', token: 'bytes', nonce: 'int') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
 class MPTCPJoinSYNACK(MPTCPJoin):
@@ -406,10 +406,10 @@ class MPTCPJoinSYNACK(MPTCPJoin):
     #: Sender's truncated HMAC.
     hmac: 'bytes'
     #: Sendder's random number.
-    nounce: 'int'
+    nonce: 'int'
 
     if TYPE_CHECKING:
-        def __init__(self, kind: 'OptionNumber', length: 'int', subtype: 'MPTCPOption', connection: 'Literal["SYN/ACK"]', backup: 'bool', addr_id: 'int', hmac: 'bytes', nounce: 'int') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
+        def __init__(self, kind: 'OptionNumber', length: 'int', subtype: 'MPTCPOption', connection: 'Literal["SYN/ACK"]', backup: 'bool', addr_id: 'int', hmac: 'bytes', nonce: 'int') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
 class MPTCPJoinACK(MPTCPJoin):

@@ -964,7 +964,7 @@ class HOPOPT(Internet[Data_HOPOPT, Schema_HOPOPT]):
                 func=func,
                 rate=40000 * (2 ** schema_req.flags['rate']) / 1000,
                 ttl=datetime.timedelta(seconds=schema_req.ttl),
-                nounce=schema_req.nounce,
+                nonce=schema_req.nonce,
             )  # type: Data_QuickStartOption
         elif func == Enum_QSFunction.Report_of_Approved_Rate:
             schema_rep = Schema_QuickStartReportOption.unpack(data, length)  # type: Schema_QuickStartReportOption
@@ -977,7 +977,7 @@ class HOPOPT(Internet[Data_HOPOPT, Schema_HOPOPT]):
                 length=schema_rep.len + 2,
                 func=func,
                 rate=40000 * (2 ** schema_rep.flags['rate']) / 1000,
-                nounce=schema_rep.nounce,
+                nonce=schema_rep.nonce,
             )
         else:
             raise ProtocolError(f'{self.alias}: [OptNo {code}] unknown QS function: {func}')
@@ -1144,7 +1144,7 @@ class HOPOPT(Internet[Data_HOPOPT, Schema_HOPOPT]):
             action=acts,
             change=cflg,
             length=_size + 2,
-            nounce=_nval,
+            nonce=_nval,
         )
 
         return opt
@@ -1704,7 +1704,7 @@ class HOPOPT(Internet[Data_HOPOPT, Schema_HOPOPT]):
                      func_reversed: 'bool' = False,
                      rate: 'int' = 0,
                      ttl: 'timedelta | int' = 0,
-                     nounce: 'bytes' = b'\x00\x00\x00\x00',
+                     nonce: 'bytes' = b'\x00\x00\x00\x00',
                      **kwargs: 'Any') -> 'Schema_QuickStartOption':
         """Make HOPOPT QS option.
 
@@ -1733,7 +1733,7 @@ class HOPOPT(Internet[Data_HOPOPT, Schema_HOPOPT]):
                     'rate': rate_val,
                 },
                 ttl=ttl_value,
-                nounce=nounce,
+                nonce=nonce,
             )
         if func_enum == Enum_QSFunction.Report_of_Approved_Rate:
             return Schema_QuickStartReportOption(
@@ -1743,7 +1743,7 @@ class HOPOPT(Internet[Data_HOPOPT, Schema_HOPOPT]):
                     'func': func_enum,
                     'rate': rate_val,
                 },
-                nounce=nounce,
+                nonce=nonce,
             )
         raise ProtocolError(f'{self.alias}: [OptNo {code}] invalid QS function: {func_enum}')
 
