@@ -333,7 +333,7 @@ class HOPOPT(Internet[Data_HOPOPT, Schema_HOPOPT]):
 
         if options is not None:
             options_value, total_length = self._make_hopopt_options(options)
-            length = (total_length - 6) // 8
+            length = math.ceil((total_length - 6) / 8)
         else:
             options_value, length = [], 0
 
@@ -1371,15 +1371,24 @@ class HOPOPT(Internet[Data_HOPOPT, Schema_HOPOPT]):
             options_list = []  # type: list[Schema_Option | bytes]
             for schema in options:
                 if isinstance(schema, bytes):
-                    options_list.append(schema)
-                    total_length += len(schema)
-                elif isinstance(schema, Schema):
-                    opt_packed = schema.pack()
+                    code = Enum_Option.get(schema[0])
+                    if code in (Enum_Option.Pad1, Enum_Option.PadN):  # ignore padding options by default
+                        continue
 
-                    options_list.append(opt_packed)
-                    total_length += len(opt_packed)
+                    opt = schema  # type: bytes | Schema_Option
+                    opt_len = len(schema)
+                elif isinstance(schema, Schema):
+                    code = schema.type
+                    if code in (Enum_Option.Pad1, Enum_Option.PadN):  # ignore padding options by default
+                        continue
+
+                    opt = schema
+                    opt_len = len(schema.pack())
                 else:
                     code, args = cast('tuple[Enum_Option, dict[str, Any]]', schema)
+                    if code in (Enum_Option.Pad1, Enum_Option.PadN):  # ignore padding options by default
+                        continue
+
                     name = self.__option__[code]  # type: str | tuple[OptionParser, OptionConstructor]
                     if isinstance(name, str):
                         meth_name = f'_make_opt_{name}'
@@ -1388,15 +1397,32 @@ class HOPOPT(Internet[Data_HOPOPT, Schema_HOPOPT]):
                     else:
                         meth = name[1]
 
-                    data = meth(self, code, **args)
-                    data_packed = data.pack()
+                    opt = meth(self, code, **args)
+                    opt_len = len(opt.pack())
 
-                    options_list.append(data)
-                    total_length += len(data_packed)
+                options_list.append(opt)
+                total_length += opt_len
+
+                # force alignment to 8 octets
+                if opt_len % 8:
+                    pad_len = 8 - (opt_len % 8)
+                    if pad_len in (1, 2):
+                        pad_opt = self._make_opt_pad(Enum_Option.Pad1, length=0)  # type: ignore[arg-type]
+                    else:
+                        pad_opt = self._make_opt_pad(Enum_Option.PadN, length=pad_len)  # type: ignore[arg-type]
+
+                    options_list.append(pad_opt)
+                    if pad_len == 2:  # need 2 Pad1 options
+                        options_list.append(pad_opt)
+                    total_length += pad_len
             return options_list, total_length
 
         options_list = []
-        for code, opt in options.items(multi=True):
+        for code, option in options.items(multi=True):
+            # ignore padding options by default
+            if code in (Enum_Option.Pad1, Enum_Option.PadN):
+                continue
+
             name = self.__option__[code]
             if isinstance(name, str):
                 meth_name = f'_make_opt_{name}'
@@ -1405,11 +1431,24 @@ class HOPOPT(Internet[Data_HOPOPT, Schema_HOPOPT]):
             else:
                 meth = name[1]
 
-            data = meth(self, code, opt)
-            data_packed = data.pack()
+            opt = meth(self, code, option)
+            opt_len = len(opt.pack())
 
-            options_list.append(data)
-            total_length += len(data_packed)
+            options_list.append(opt)
+            total_length += opt_len
+
+            # force alignment to 8 octets
+            if opt_len % 8:
+                pad_len = 8 - (opt_len % 8)
+                if pad_len in (1, 2):
+                    pad_opt = self._make_opt_pad(Enum_Option.Pad1, length=0)  # type: ignore[arg-type]
+                else:
+                    pad_opt = self._make_opt_pad(Enum_Option.PadN, length=pad_len)  # type: ignore[arg-type]
+
+                options_list.append(pad_opt)
+                if pad_len == 2:  # need 2 Pad1 options
+                    options_list.append(pad_opt)
+                total_length += pad_len
         return options_list, total_length
 
     def _make_opt_none(self, code: 'Enum_Option', opt: 'Optional[Data_UnassignedOption]' = None, *,
@@ -1452,9 +1491,13 @@ class HOPOPT(Internet[Data_HOPOPT, Schema_HOPOPT]):
 
         """
         if code == Enum_Option.Pad1 and length != 0:
-            raise ProtocolError(f'{self.alias}: [OptNo {code}] invalid format')
+            #raise ProtocolError(f'{self.alias}: [OptNo {code}] invalid format')
+            warn(f'{self.alias}: [OptNo {code}] invalid format', ProtocolWarning)
+            code = Enum_Option.PadN  # type: ignore[assignment]
         if code == Enum_Option.PadN and length == 0:
-            raise ProtocolError(f'{self.alias}: [OptNo {code}] invalid format')
+            #raise ProtocolError(f'{self.alias}: [OptNo {code}] invalid format')
+            warn(f'{self.alias}: [OptNo {code}] invalid format', ProtocolWarning)
+            code = Enum_Option.Pad1  # type: ignore[assignment]
 
         return Schema_PadOption(
             type=code,
