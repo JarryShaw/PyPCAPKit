@@ -22,11 +22,12 @@ Octets      Bits        Name                    Description
 import collections
 import datetime
 import ipaddress
-import struct
 import math
-from typing import TYPE_CHECKING, overload, cast
+import struct
+from typing import TYPE_CHECKING, cast, overload
 
 from pcapkit.const.ipv6.option import Option as Enum_Option
+from pcapkit.const.ipv6.option_action import OptionAction as Enum_OptionAction
 from pcapkit.const.ipv6.qs_function import QSFunction as Enum_QSFunction
 from pcapkit.const.ipv6.router_alert import RouterAlert as Enum_RouterAlert
 from pcapkit.const.ipv6.seed_id import SeedID as Enum_SeedID
@@ -47,8 +48,10 @@ from pcapkit.protocols.data.internet.hopopt import MPLFlags as Data_MPLFlags
 from pcapkit.protocols.data.internet.hopopt import MPLOption as Data_MPLOption
 from pcapkit.protocols.data.internet.hopopt import PadOption as Data_PadOption
 from pcapkit.protocols.data.internet.hopopt import PDMOption as Data_PDMOption
-from pcapkit.protocols.data.internet.hopopt import QuickStartRequestOption as Data_QuickStartRequestOption
-from pcapkit.protocols.data.internet.hopopt import QuickStartReportOption as Data_QuickStartReportOption
+from pcapkit.protocols.data.internet.hopopt import \
+    QuickStartReportOption as Data_QuickStartReportOption
+from pcapkit.protocols.data.internet.hopopt import \
+    QuickStartRequestOption as Data_QuickStartRequestOption
 from pcapkit.protocols.data.internet.hopopt import RouterAlertOption as Data_RouterAlertOption
 from pcapkit.protocols.data.internet.hopopt import RPLFlags as Data_RPLFlags
 from pcapkit.protocols.data.internet.hopopt import RPLOption as Data_RPLOption
@@ -60,10 +63,6 @@ from pcapkit.protocols.data.internet.hopopt import \
     TunnelEncapsulationLimitOption as Data_TunnelEncapsulationLimitOption
 from pcapkit.protocols.data.internet.hopopt import UnassignedOption as Data_UnassignedOption
 from pcapkit.protocols.internet.internet import Internet
-from pcapkit.utilities.exceptions import ProtocolError, UnsupportedCall
-from pcapkit.protocols.schema.internet.hopopt import HOPOPT as Schema_HOPOPT
-from pcapkit.protocols.schema.schema import Schema
-from pcapkit.const.ipv6.option_action import OptionAction as Enum_OptionAction
 from pcapkit.protocols.schema.internet.hopopt import HOPOPT as Schema_HOPOPT
 from pcapkit.protocols.schema.internet.hopopt import CALIPSOOption as Schema_CALIPSOOption
 from pcapkit.protocols.schema.internet.hopopt import HomeAddressOption as Schema_HomeAddressOption
@@ -75,8 +74,10 @@ from pcapkit.protocols.schema.internet.hopopt import \
 from pcapkit.protocols.schema.internet.hopopt import MPLOption as Schema_MPLOption
 from pcapkit.protocols.schema.internet.hopopt import PadOption as Schema_PadOption
 from pcapkit.protocols.schema.internet.hopopt import PDMOption as Schema_PDMOption
-from pcapkit.protocols.schema.internet.hopopt import QuickStartRequestOption as Schema_QuickStartRequestOption
-from pcapkit.protocols.schema.internet.hopopt import QuickStartReportOption as Schema_QuickStartReportOption
+from pcapkit.protocols.schema.internet.hopopt import \
+    QuickStartReportOption as Schema_QuickStartReportOption
+from pcapkit.protocols.schema.internet.hopopt import \
+    QuickStartRequestOption as Schema_QuickStartRequestOption
 from pcapkit.protocols.schema.internet.hopopt import RouterAlertOption as Schema_RouterAlertOption
 from pcapkit.protocols.schema.internet.hopopt import RPLOption as Schema_RPLOption
 from pcapkit.protocols.schema.internet.hopopt import \
@@ -86,26 +87,28 @@ from pcapkit.protocols.schema.internet.hopopt import \
 from pcapkit.protocols.schema.internet.hopopt import \
     TunnelEncapsulationLimitOption as Schema_TunnelEncapsulationLimitOption
 from pcapkit.protocols.schema.internet.hopopt import UnassignedOption as Schema_UnassignedOption
-from pcapkit.utilities.warnings import warn, ProtocolWarning
+from pcapkit.protocols.schema.schema import Schema
+from pcapkit.utilities.exceptions import ProtocolError, UnsupportedCall
+from pcapkit.utilities.warnings import ProtocolWarning, warn
 
 if TYPE_CHECKING:
     from datetime import timedelta
     from enum import IntEnum as StdlibEnum
-    from typing import IO, Any, Callable, DefaultDict, NoReturn, Optional, Type
     from ipaddress import IPv4Address, IPv6Address
+    from typing import IO, Any, Callable, DefaultDict, NoReturn, Optional, Type
 
     from aenum import IntEnum as AenumEnum
-    from mypy_extensions import NamedArg, DefaultArg, KwArg
+    from mypy_extensions import DefaultArg, KwArg, NamedArg
     from typing_extensions import Literal
 
     from pcapkit.corekit.protochain import ProtoChain
     from pcapkit.protocols.data.internet.hopopt import Option as Data_Option
+    from pcapkit.protocols.data.internet.hopopt import QuickStartOption as Data_QuickStartOption
+    from pcapkit.protocols.data.internet.hopopt import SMFDPDOption as Data_SMFDPDOption
     from pcapkit.protocols.protocol import Protocol
     from pcapkit.protocols.schema.internet.hopopt import Option as Schema_Option
     from pcapkit.protocols.schema.internet.hopopt import QuickStartOption as Schema_QuickStartOption
     from pcapkit.protocols.schema.internet.hopopt import SMFDPDOption as Schema_SMFDPDOption
-    from pcapkit.protocols.data.internet.hopopt import QuickStartOption as Data_QuickStartOption
-    from pcapkit.protocols.data.internet.hopopt import SMFDPDOption as Data_SMFDPDOption
 
     Option = OrderedMultiDict[Enum_Option, Data_Option]
     OptionParser = Callable[['HOPOPT', Enum_Option, int, bool, int, NamedArg(bytes, 'data'),

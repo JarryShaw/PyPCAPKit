@@ -10,8 +10,8 @@ if TYPE_CHECKING:
     from ipaddress import IPv4Address, IPv6Address
     from typing import Optional
 
-    from pcapkit.const.ipv6.option_action import OptionAction
     from pcapkit.const.ipv6.option import Option as Enum_Option
+    from pcapkit.const.ipv6.option_action import OptionAction
     from pcapkit.const.ipv6.qs_function import QSFunction
     from pcapkit.const.ipv6.router_alert import RouterAlert
     from pcapkit.const.ipv6.seed_id import SeedID

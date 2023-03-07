@@ -4,15 +4,15 @@
 
 from typing import TYPE_CHECKING
 
-from pcapkit.protocols.schema.schema import Schema
+from pcapkit.const.ipv6.option import Option as Enum_Option
+from pcapkit.const.ipv6.router_alert import RouterAlert as Enum_RouterAlert
 from pcapkit.const.reg.transtype import TransType as Enum_TransType
 from pcapkit.corekit.fields.ipaddress import IPv6Field
 from pcapkit.corekit.fields.misc import ConditionalField, ListField, PayloadField
 from pcapkit.corekit.fields.numbers import (EnumField, NumberField, UInt8Field, UInt16Field,
                                             UInt32Field)
 from pcapkit.corekit.fields.strings import BitField, BytesField, PaddingField
-from pcapkit.const.ipv6.option import Option as Enum_Option
-from pcapkit.const.ipv6.router_alert import RouterAlert as Enum_RouterAlert
+from pcapkit.protocols.schema.schema import Schema
 from pcapkit.utilities.exceptions import FieldValueError
 
 __all__ = [
@@ -28,8 +28,8 @@ __all__ = [
 ]
 
 if TYPE_CHECKING:
-    from typing import Optional, Any
     from ipaddress import IPv4Address, IPv6Address
+    from typing import Any, Optional
 
     from typing_extensions import TypedDict
 
