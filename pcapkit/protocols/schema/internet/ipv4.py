@@ -4,6 +4,7 @@
 
 from typing import TYPE_CHECKING
 
+from pcapkit.const.ipv4.option_number import OptionNumber as Enum_OptionNumber
 from pcapkit.const.ipv6.option import Option as Enum_Option
 from pcapkit.const.ipv6.router_alert import RouterAlert as Enum_RouterAlert
 from pcapkit.const.reg.transtype import TransType as Enum_TransType
@@ -114,3 +115,35 @@ class IPv4(Schema):
 
 class Option(Schema):
     """Header schema for IPv4 options."""
+
+    #: Option type.
+    type: 'Enum_OptionNumber' = EnumField(length=1, namespace=Enum_OptionNumber)
+    #: Option length.
+    length: 'int' = ConditionalField(
+        UInt8Field(),
+        lambda pkt: pkt['type'] not in (Enum_OptionNumber.EOOL, Enum_OptionNumber.NOP),
+    )
+
+
+class UnassignedOption(Option):
+    """Header schema for IPv4 unassigned options."""
+
+    #: Option data.
+    data: 'bytes' = BytesField(length=lambda pkt: pkt['length'] - 2)
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_OptionNumber', length: 'int', data: 'bytes') -> 'None': ...
+
+
+class EOOLOption(Option):
+    """Header schema for IPv4 end of option list (``EOOL``) option."""
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_OptionNumber', length: 'int') -> 'None': ...
+
+
+class NOPOption(Option):
+    """Header schema for IPv4 no operation (``NOP``) option."""
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_OptionNumber', length: 'int') -> 'None': ...

@@ -36,6 +36,7 @@ import datetime
 import ipaddress
 from typing import TYPE_CHECKING, cast
 import math
+import struct
 
 from pcapkit.const.ipv4.classification_level import ClassificationLevel as Enum_ClassificationLevel
 from pcapkit.const.ipv4.option_class import OptionClass as Enum_OptionClass
@@ -110,7 +111,8 @@ if TYPE_CHECKING:
     from pcapkit.protocols.protocol import Protocol
 
     Option = OrderedMultiDict[Enum_OptionNumber, Data_Option]
-    OptionParser = Callable[['IPv4', Enum_OptionNumber, NamedArg(Option, 'options')], Data_Option]
+    OptionParser = Callable[['IPv4', Enum_OptionNumber, NamedArg(bytes, 'data'), NamedArg(int, 'length'),
+                             NamedArg(Option, 'options')], Data_Option]
     OptionConstructor = Callable[['IPv4', Enum_OptionNumber, DefaultArg(Optional[Data_Option]),
                                   KwArg(Any)], Schema_Option]
 
@@ -467,11 +469,9 @@ class IPv4(IP[Data_IPv4, Schema_IPv4]):
             flag), option class, and option number.
 
         """
-        bin_ = bin(code)[2:].zfill(8)
-
-        oflg = bool(int(bin_[0], base=2))
-        ocls = Enum_OptionClass.get(int(bin_[1:3], base=2))
-        onum = int(bin_[3:], base=2)
+        oflg = bool(code >> 7)
+        ocls = Enum_OptionClass.get((code >> 5) & 0b11)
+        onum = code & 0b11111
 
         return Data_OptionType.from_dict({
             'change': oflg,
@@ -492,23 +492,35 @@ class IPv4(IP[Data_IPv4, Schema_IPv4]):
             ProtocolError: If the threshold is **NOT** matching.
 
         """
+        payload = cast('bytes', self.__header__.options)
+        self.__header__.options = []
+
         counter = 0                   # length of read option list
         options = OrderedMultiDict()  # type: Option
 
         while counter < length:
             # break when eol triggerred
-            code = self._read_unpack(1)
-            if not code:
+            cbuf = payload[counter:counter + 1]
+            if not cbuf:
                 break
 
-            # get options type
+            # get option type
+            code = int(cbuf, base=2)
             kind = Enum_OptionNumber.get(code)
+
+            # get option length
+            if code in (Enum_OptionNumber.NOP, Enum_OptionNumber.EOOL):
+                clen = 1
+            else:
+                cbuf = payload[counter + 1:counter + 2]
+                clen = struct.unpack('!B', cbuf)[0]
 
             # extract option data
             meth_name = f'_read_opt_{kind.name.lower()}'
             meth = cast('OptionParser',
                         getattr(self, meth_name, self._read_opt_unassigned))
-            data = meth(self, kind, options=options)
+            data = meth(self, kind, data=payload[counter:counter + clen],
+                        length=clen, options=options)
 
             # record option data
             counter += data.length
@@ -524,7 +536,8 @@ class IPv4(IP[Data_IPv4, Schema_IPv4]):
 
         return options
 
-    def _read_opt_unassigned(self, kind: 'Enum_OptionNumber', *, options: 'Option') -> 'Data_UnassignedOption':  # pylint: disable=unused-argument
+    def _read_opt_unassigned(self, kind: 'Enum_OptionNumber', *, data: 'bytes',
+                             length: 'int', options: 'Option') -> 'Data_UnassignedOption':  # pylint: disable=unused-argument
         """Read IPv4 unassigned options.
 
         Structure of IPv4 unassigned options [:rfc:`791`]:
@@ -539,6 +552,8 @@ class IPv4(IP[Data_IPv4, Schema_IPv4]):
 
         Arguments:
             kind: option type code
+            data: option payload
+            length: option payload length
             options: extracted IPv4 options
 
         Returns:
@@ -548,20 +563,22 @@ class IPv4(IP[Data_IPv4, Schema_IPv4]):
             ProtocolError: If ``size`` is **LESS THAN** ``3``.
 
         """
-        size = self._read_unpack(1)
-        if size < 3:
+        if length < 3:
             raise ProtocolError(f'{self.alias}: [OptNo {kind}] invalid format')
 
-        data = Data_UnassignedOption(
+        schema = Schema_UnassignedOption.unpack(data, length)  # type: Schema_UnassignedOption
+        self.__header__.options.append(schema)
+
+        opt = Data_UnassignedOption(
             code=kind,
             type=self._read_ipv4_opt_type(kind),
-            length=size,
-            data=self._read_fileng(size),
+            length=schema.length,
+            data=schema.data,
         )
+        return opt
 
-        return data
-
-    def _read_opt_eool(self, kind: 'Enum_OptionNumber', *, options: 'Option') -> 'Data_EOOLOption':  # pylint: disable=unused-argument
+    def _read_opt_eool(self, kind: 'Enum_OptionNumber', *, data: 'bytes',
+                       length: 'int', options: 'Option') -> 'Data_EOOLOption':  # pylint: disable=unused-argument
         """Read IPv4 End of Option List (``EOOL``) option.
 
         Structure of IPv4 End of Option List (``EOOL``) option [:rfc:`719`]:
@@ -575,21 +592,26 @@ class IPv4(IP[Data_IPv4, Schema_IPv4]):
 
         Arguments:
             kind: option type code
+            data: option payload
+            length: option payload length
             options: extracted IPv4 options
 
         Returns:
             Parsed option data.
 
         """
-        data = Data_EOOLOption(
+        schema = Schema_EOOLOption.unpack(data, length)  # type: Schema_EOOLOption
+        self.__header__.options.append(schema)
+
+        opt = Data_EOOLOption(
             code=kind,
             type=self._read_ipv4_opt_type(kind),
             length=1,
         )
+        return opt
 
-        return data
-
-    def _read_opt_nop(self, kind: 'Enum_OptionNumber', *, options: 'Option') -> 'Data_NOPOption':  # pylint: disable=unused-argument
+    def _read_opt_nop(self, kind: 'Enum_OptionNumber', *, data: 'bytes',
+                      length: 'int', options: 'Option') -> 'Data_NOPOption':  # pylint: disable=unused-argument
         """Read IPv4 No Operation (``NOP``) option.
 
         Structure of IPv4 No Operation (``NOP``) option [:rfc:`719`]:
@@ -603,21 +625,26 @@ class IPv4(IP[Data_IPv4, Schema_IPv4]):
 
         Arguments:
             kind: option type code
+            data: option payload
+            length: option payload length
             options: extracted IPv4 options
 
         Returns:
             Parsed option data.
 
         """
-        data = Data_NOPOption(
+        schema = Schema_NOPOption.unpack(data, length)  # type: Schema_NOPOption
+        self.__header__.options.append(schema)
+
+        opt = Data_NOPOption(
             code=kind,
             type=self._read_ipv4_opt_type(kind),
             length=1,
         )
+        return opt
 
-        return data
-
-    def _read_opt_sec(self, kind: 'Enum_OptionNumber', *, options: 'Option') -> 'Data_SECOption':  # pylint: disable=unused-argument
+    def _read_opt_sec(self, kind: 'Enum_OptionNumber', *, data: 'bytes',
+                      length: 'int', options: 'Option') -> 'Data_SECOption':  # pylint: disable=unused-argument
         """Read IPv4 Security (``SEC``) option.
 
         Structure of IPv4 Security (``SEC``) option [:rfc:`1108`]:
@@ -634,6 +661,8 @@ class IPv4(IP[Data_IPv4, Schema_IPv4]):
 
         Arguments:
             kind: option type code
+            data: option payload
+            length: option payload length
             options: extracted IPv4 options
 
         Returns:
@@ -663,7 +692,7 @@ class IPv4(IP[Data_IPv4, Schema_IPv4]):
         else:
             _data = None  # type: ignore[assignment]
 
-        data = Data_SECOption(
+        opt = Data_SECOption(
             code=kind,
             type=self._read_ipv4_opt_type(kind),
             length=size,
@@ -671,9 +700,10 @@ class IPv4(IP[Data_IPv4, Schema_IPv4]):
             flags=_data,
         )
 
-        return data
+        return opt
 
-    def _read_opt_lsr(self, kind: 'Enum_OptionNumber', *, options: 'Option') -> 'Data_LSROption':  # pylint: disable=unused-argument
+    def _read_opt_lsr(self, kind: 'Enum_OptionNumber', *, data: 'bytes',
+                      length: 'int', options: 'Option') -> 'Data_LSROption':  # pylint: disable=unused-argument
         """Read IPv4 Loose Source Route (``LSR``) option.
 
         Structure of IPv4 Loose Source Route (``LSR``) option [:rfc:`791`]:
@@ -686,6 +716,8 @@ class IPv4(IP[Data_IPv4, Schema_IPv4]):
 
         Arguments:
             kind: option type code
+            data: option payload
+            length: option payload length
             options: extracted IPv4 options
 
         Returns:
@@ -710,7 +742,7 @@ class IPv4(IP[Data_IPv4, Schema_IPv4]):
             counter += 4
             address.append(self._read_ipv4_addr())
 
-        data = Data_LSROption(
+        opt = Data_LSROption(
             code=kind,
             type=self._read_ipv4_opt_type(kind),
             length=size,
@@ -718,9 +750,10 @@ class IPv4(IP[Data_IPv4, Schema_IPv4]):
             route=tuple(address) or None,
         )
 
-        return data
+        return opt
 
-    def _read_opt_ts(self, kind: 'Enum_OptionNumber', *, options: 'Option') -> 'Data_TSOption':  # pylint: disable=unused-argument
+    def _read_opt_ts(self, kind: 'Enum_OptionNumber', *, data: 'bytes',
+                     length: 'int', options: 'Option') -> 'Data_TSOption':  # pylint: disable=unused-argument
         """Read IPv4 Time Stamp (``TS``) option.
 
         Structure of IPv4 Time Stamp (``TS``) option [:rfc:`791`]:
@@ -740,6 +773,8 @@ class IPv4(IP[Data_IPv4, Schema_IPv4]):
 
         Arguments:
             kind: option type code
+            data: option payload
+            length: option payload length
             options: extracted IPv4 options
 
         Returns:
@@ -790,7 +825,7 @@ class IPv4(IP[Data_IPv4, Schema_IPv4]):
         else:
             timestamp = self._read_fileng(size - 4) or None  # type: ignore[assignment]
 
-        data = Data_TSOption(
+        opt = Data_TSOption(
             code=kind,
             type=self._read_ipv4_opt_type(kind),
             length=size,
@@ -800,9 +835,10 @@ class IPv4(IP[Data_IPv4, Schema_IPv4]):
             timestamp=timestamp,
         )
 
-        return data
+        return opt
 
-    def _read_opt_esec(self, kind: 'Enum_OptionNumber', *, options: 'Option') -> 'Data_ESECOption':  # pylint: disable=unused-argument
+    def _read_opt_esec(self, kind: 'Enum_OptionNumber', *, data: 'bytes',
+                       length: 'int', options: 'Option') -> 'Data_ESECOption':  # pylint: disable=unused-argument
         """Read IPv4 Extended Security (``ESEC``) option.
 
         Structure of IPv4 Extended Security (``ESEC``) option [:rfc:`1108`]:
@@ -818,6 +854,8 @@ class IPv4(IP[Data_IPv4, Schema_IPv4]):
 
         Arguments:
             kind: option type code
+            data: option payload
+            length: option payload length
             options: extracted IPv4 options
 
         Returns:
@@ -847,7 +885,7 @@ class IPv4(IP[Data_IPv4, Schema_IPv4]):
         else:
             _data = None  # type: ignore[assignment]
 
-        data = Data_ESECOption(
+        opt = Data_ESECOption(
             code=kind,
             type=self._read_ipv4_opt_type(kind),
             length=size,
@@ -855,9 +893,10 @@ class IPv4(IP[Data_IPv4, Schema_IPv4]):
             flags=_data,
         )
 
-        return data
+        return opt
 
-    def _read_opt_rr(self, kind: 'Enum_OptionNumber', *, options: 'Option') -> 'Data_RROption':  # pylint: disable=unused-argument
+    def _read_opt_rr(self, kind: 'Enum_OptionNumber', *, data: 'bytes',
+                     length: 'int', options: 'Option') -> 'Data_RROption':  # pylint: disable=unused-argument
         """Read IPv4 Record Route (``RR``) option.
 
         Structure of IPv4 Record Route (``RR``) option [:rfc:`791`]:
@@ -871,6 +910,8 @@ class IPv4(IP[Data_IPv4, Schema_IPv4]):
 
         Arguments:
             kind: option type code
+            data: option payload
+            length: option payload length
             options: extracted IPv4 options
 
         Returns:
@@ -895,7 +936,7 @@ class IPv4(IP[Data_IPv4, Schema_IPv4]):
             counter += 4
             address.append(self._read_ipv4_addr())
 
-        data = Data_RROption(
+        opt = Data_RROption(
             code=kind,
             type=self._read_ipv4_opt_type(kind),
             length=size,
@@ -903,9 +944,10 @@ class IPv4(IP[Data_IPv4, Schema_IPv4]):
             route=tuple(address) or None,
         )
 
-        return data
+        return opt
 
-    def _read_opt_sid(self, kind: 'Enum_OptionNumber', *, options: 'Option') -> 'Data_SIDOption':  # pylint: disable=unused-argument
+    def _read_opt_sid(self, kind: 'Enum_OptionNumber', *, data: 'bytes',
+                      length: 'int', options: 'Option') -> 'Data_SIDOption':  # pylint: disable=unused-argument
         """Read IPv4 Stream ID (``SID``) option.
 
         Structure of IPv4 Stream ID (``SID``) option [:rfc:`791`][:rfc:`6814`]:
@@ -919,6 +961,8 @@ class IPv4(IP[Data_IPv4, Schema_IPv4]):
 
         Arguments:
             kind: option type code
+            data: option payload
+            length: option payload length
             options: extracted IPv4 options
 
         Returns:
@@ -932,16 +976,17 @@ class IPv4(IP[Data_IPv4, Schema_IPv4]):
         if size != 4:
             raise ProtocolError(f'{self.alias}: [OptNo {kind}] invalid format')
 
-        data = Data_SIDOption(
+        opt = Data_SIDOption(
             code=kind,
             type=self._read_ipv4_opt_type(kind),
             length=size,
             sid=self._read_unpack(size),
         )
 
-        return data
+        return opt
 
-    def _read_opt_ssr(self, kind: 'Enum_OptionNumber', *, options: 'Option') -> 'Data_SSROption':  # pylint: disable=unused-argument
+    def _read_opt_ssr(self, kind: 'Enum_OptionNumber', *, data: 'bytes',
+                      length: 'int', options: 'Option') -> 'Data_SSROption':  # pylint: disable=unused-argument
         """Read IPv4 Strict Source Route (``SSR``) option.
 
         Structure of IPv4 Strict Source Route (``SSR``) option [:rfc:`791`]:
@@ -955,6 +1000,8 @@ class IPv4(IP[Data_IPv4, Schema_IPv4]):
 
         Arguments:
             kind: option type code
+            data: option payload
+            length: option payload length
             options: extracted IPv4 options
 
         Returns:
@@ -979,7 +1026,7 @@ class IPv4(IP[Data_IPv4, Schema_IPv4]):
             counter += 4
             address.append(self._read_ipv4_addr())
 
-        data = Data_SSROption(
+        opt = Data_SSROption(
             code=kind,
             type=self._read_ipv4_opt_type(kind),
             length=size,
@@ -987,9 +1034,10 @@ class IPv4(IP[Data_IPv4, Schema_IPv4]):
             route=tuple(address) or None,
         )
 
-        return data
+        return opt
 
-    def _read_opt_mtup(self, kind: 'Enum_OptionNumber', *, options: 'Option') -> 'Data_MTUPOption':  # pylint: disable=unused-argument
+    def _read_opt_mtup(self, kind: 'Enum_OptionNumber', *, data: 'bytes',
+                       length: 'int', options: 'Option') -> 'Data_MTUPOption':  # pylint: disable=unused-argument
         """Read IPv4 MTU Probe (``MTUP``) option.
 
         Structure of IPv4 MTU Probe (``MTUP``) option [:rfc:`1063`][:rfc:`1191`]:
@@ -1002,6 +1050,8 @@ class IPv4(IP[Data_IPv4, Schema_IPv4]):
 
         Arguments:
             kind: option type code
+            data: option payload
+            length: option payload length
             options: extracted IPv4 options
 
         Returns:
@@ -1015,16 +1065,17 @@ class IPv4(IP[Data_IPv4, Schema_IPv4]):
         if size != 4:
             raise ProtocolError(f'{self.alias}: [OptNo {kind}] invalid format')
 
-        data = Data_MTUPOption(
+        opt = Data_MTUPOption(
             code=kind,
             type=self._read_ipv4_opt_type(kind),
             length=size,
             mtu=self._read_unpack(size),
         )
 
-        return data
+        return opt
 
-    def _read_opt_mtur(self, kind: 'Enum_OptionNumber', *, options: 'Option') -> 'Data_MTUROption':  # pylint: disable=unused-argument
+    def _read_opt_mtur(self, kind: 'Enum_OptionNumber', *, data: 'bytes',
+                       length: 'int', options: 'Option') -> 'Data_MTUROption':  # pylint: disable=unused-argument
         """Read IPv4 MTU Reply (``MTUR``) option.
 
         Structure of IPv4 MTU Reply (``MTUR``) option [:rfc:`1063`][:rfc:`1191`]:
@@ -1037,6 +1088,8 @@ class IPv4(IP[Data_IPv4, Schema_IPv4]):
 
         Arguments:
             kind: option type code
+            data: option payload
+            length: option payload length
             options: extracted IPv4 options
 
         Returns:
@@ -1050,16 +1103,17 @@ class IPv4(IP[Data_IPv4, Schema_IPv4]):
         if size != 4:
             raise ProtocolError(f'{self.alias}: [OptNo {kind}] invalid format')
 
-        data = Data_MTUROption(
+        opt = Data_MTUROption(
             code=kind,
             type=self._read_ipv4_opt_type(kind),
             length=size,
             mtu=self._read_unpack(size),
         )
 
-        return data
+        return opt
 
-    def _read_opt_tr(self, kind: 'Enum_OptionNumber', *, options: 'Option') -> 'Data_TROption':  # pylint: disable=unused-argument
+    def _read_opt_tr(self, kind: 'Enum_OptionNumber', *, data: 'bytes',
+                     length: 'int', options: 'Option') -> 'Data_TROption':  # pylint: disable=unused-argument
         """Read IPv4 Traceroute (``TR``) option.
 
         Structure of IPv4 Traceroute (``TR``) option [:rfc:`1393`][:rfc:`6814`]:
@@ -1077,6 +1131,8 @@ class IPv4(IP[Data_IPv4, Schema_IPv4]):
 
         Arguments:
             kind: option type code
+            data: option payload
+            length: option payload length
             options: extracted IPv4 options
 
         Returns:
@@ -1095,7 +1151,7 @@ class IPv4(IP[Data_IPv4, Schema_IPv4]):
         _rhcn = self._read_unpack(2)
         _ipad = self._read_ipv4_addr()
 
-        data = Data_TROption.from_dict({
+        opt = Data_TROption.from_dict({
             'code': kind,
             'type': self._read_ipv4_opt_type(kind),
             'length': size,
@@ -1105,9 +1161,10 @@ class IPv4(IP[Data_IPv4, Schema_IPv4]):
             'originator': _ipad,
         })
 
-        return data
+        return opt
 
-    def _read_opt_rtralt(self, kind: 'Enum_OptionNumber', *, options: 'Option') -> 'Data_RTRALTOption':  # pylint: disable=unused-argument
+    def _read_opt_rtralt(self, kind: 'Enum_OptionNumber', *, data: 'bytes',
+                         length: 'int', options: 'Option') -> 'Data_RTRALTOption':  # pylint: disable=unused-argument
         """Read IPv4 Router Alert (``RTRALT``) option.
 
         Structure of IPv4 Router Alert (``RTRALT``) option [:rfc:`2113`]:
@@ -1120,6 +1177,8 @@ class IPv4(IP[Data_IPv4, Schema_IPv4]):
 
         Arguments:
             kind: option type code
+            data: option payload
+            length: option payload length
             options: extracted IPv4 options
 
         Returns:
@@ -1135,16 +1194,17 @@ class IPv4(IP[Data_IPv4, Schema_IPv4]):
 
         _code = self._read_unpack(2)
 
-        data = Data_RTRALTOption(
+        opt = Data_RTRALTOption(
             code=kind,
             type=self._read_ipv4_opt_type(kind),
             length=size,
             alert=Enum_RouterAlert.get(_code),
         )
 
-        return data
+        return opt
 
-    def _read_opt_qs(self, kind: 'Enum_OptionNumber', *, options: 'Option') -> 'Data_QSOption':  # pylint: disable=unused-argument
+    def _read_opt_qs(self, kind: 'Enum_OptionNumber', *, data: 'bytes',
+                     length: 'int', options: 'Option') -> 'Data_QSOption':  # pylint: disable=unused-argument
         """Read IPv4 Quick Start (``QS``) option.
 
         Structure of IPv4 Quick Start (``QS``) option [:rfc:`4782`]:
@@ -1177,6 +1237,8 @@ class IPv4(IP[Data_IPv4, Schema_IPv4]):
 
         Arguments:
             kind: option type code
+            data: option payload
+            length: option payload length
             options: extracted IPv4 options
 
         Returns:
@@ -1201,7 +1263,7 @@ class IPv4(IP[Data_IPv4, Schema_IPv4]):
         if _qsfn not in (Enum_QSFunction.Quick_Start_Request, Enum_QSFunction.Report_of_Approved_Rate):
             raise ProtocolError(f'{self.alias}: [OptNo {kind}] invalid format')
 
-        data = Data_QSOption(
+        opt = Data_QSOption(
             code=kind,
             type=self._read_ipv4_opt_type(kind),
             length=size,
@@ -1211,7 +1273,7 @@ class IPv4(IP[Data_IPv4, Schema_IPv4]):
             nonce=_qsnn,
         )
 
-        return data
+        return opt
 
     def _make_ipv4_options(self, options: 'list[Schema_Option | tuple[Enum_OptionNumber, dict[str, Any]] | bytes] | Option') -> 'tuple[list[Schema_Option | bytes], int]':
         """Make options for IPv4.
@@ -1240,7 +1302,7 @@ class IPv4(IP[Data_IPv4, Schema_IPv4]):
                         continue
 
                     data = schema
-                    data_len = len(data.pack())
+                    data_len = len(schema.pack())
                 else:
                     code, args = cast('tuple[Enum_OptionNumber, dict[str, Any]]', schema)
                     if code in (Enum_OptionNumber.NOP, Enum_OptionNumber.EOOL):  # ignore padding options by default
@@ -1291,3 +1353,63 @@ class IPv4(IP[Data_IPv4, Schema_IPv4]):
                     options_list.append(pad_opt)
                 total_length += pad_len
         return options_list, total_length
+
+    def _make_opt_unassigned(self, kind: 'Enum_OptionNumber', option: 'Optional[Data_UnassignedOption]' = None, *,
+                             data: 'bytes',
+                             **kwargs: 'Any') -> 'Schema_Option':
+        """Make IPv4 unassigned options.
+
+        Args:
+            kind: option type code
+            option: option data
+            data: option payload
+            **kwargs: arbitrary keyword arguments
+
+        Returns:
+            IPv4 option schema.
+
+        """
+        if option is not None:
+            data = option.data
+
+        return Schema_UnassignedOption(
+            type=kind,
+            length=len(data),
+            data=data,
+        )
+
+    def _make_opt_eool(self, kind: 'Enum_OptionNumber', option: 'Optional[Data_EOOLOption]' = None,
+                       **kwargs: 'Any') -> 'Schema_EOOLOption':
+        """Make IPv4 End of Option List (``EOOL``) option.
+
+        Args:
+            kind: option type code
+            option: option data
+            **kwargs: arbitrary keyword arguments
+
+        Returns:
+            IPv4 option schema.
+
+        """
+        return Schema_EOOLOption(
+            type=kind,
+            length=1,
+        )
+
+    def _make_opt_nop(self, kind: 'Enum_OptionNumber', option: 'Optional[Data_NOPOption]' = None,
+                      **kwargs: 'Any') -> 'Schema_NOPOption':
+        """Make IPv4 No Operation (``NOP``) option.
+
+        Args:
+            kind: option type code
+            option: option data
+            **kwargs: arbitrary keyword arguments
+
+        Returns:
+            IPv4 option schema.
+
+        """
+        return Schema_NOPOption(
+            type=kind,
+            length=1,
+        )
