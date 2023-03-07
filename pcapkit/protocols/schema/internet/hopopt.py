@@ -13,12 +13,10 @@ from pcapkit.corekit.fields.numbers import (EnumField, NumberField, UInt8Field, 
 from pcapkit.corekit.fields.strings import BitField, BytesField, PaddingField
 from pcapkit.const.ipv6.option import Option as Enum_Option
 from pcapkit.const.ipv6.router_alert import RouterAlert as Enum_RouterAlert
-from pcapkit.utilities.exceptions import FieldError
+from pcapkit.utilities.exceptions import FieldValueError
 
 __all__ = [
     'HOPOPT',
-
-    'RPLFlags', 'MPLFlags', 'DFFFlags',
 
     'SMFDPDOption', 'QuickStartOption',
     'UnassignedOption', 'PadOption', 'TunnelEncapsulationLimitOption',
@@ -79,6 +77,16 @@ if TYPE_CHECKING:
         #: conforms to this specification.
         drop: int
 
+    class DFFFlags(TypedDict):
+        """``IP_DFF`` flags."""
+
+        #: Version.
+        ver: int
+        #: Duplicate flag.
+        dup: int
+        #: Retune flag.
+        ret: int
+
 
 def mpl_opt_seed_id_len(pkt: 'dict[str, Any]') -> 'int':
     """Return MPL Seed-ID length.
@@ -99,7 +107,7 @@ def mpl_opt_seed_id_len(pkt: 'dict[str, Any]') -> 'int':
         return 8
     if s_type == 3:
         return 16
-    raise FieldError(f'HOPOPT: invalid MPL Seed-ID type: {s_type}')
+    raise FieldValueError(f'HOPOPT: invalid MPL Seed-ID type: {s_type}')
 
 
 class HOPOPT(Schema):
@@ -333,3 +341,61 @@ class MPLOption(Option):
     if TYPE_CHECKING:
         def __init__(self, type: 'Enum_Option', len: 'int', flags: 'MPLFlags', seq: 'int',
                      seed: 'Optional[int]') -> 'None': ...
+
+
+class ILNPOption(Option):
+    """Header schema for HOPOPT identifier-locator network protocol (ILNP) options."""
+
+    #: Nonce value.
+    nonce: 'bytes' = BytesField(length=lambda pkt: pkt['len'])
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_Option', len: 'int', nonce: 'bytes') -> 'None': ...
+
+
+class LineIdentificationOption(Option):
+    """Header schema for HOPOPT line-identification options."""
+
+    #: Line ID length.
+    id_len: 'int' = UInt8Field()
+    #: Line ID.
+    id: 'bytes' = BytesField(length=lambda pkt: pkt['id_len'])
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_Option', len: 'int', id_len: 'int', id: 'bytes') -> 'None': ...
+
+
+class JumboPayloadOption(Option):
+    """Header schema for HOPOPT jumbo payload options."""
+
+    #: Jumbo payload length.
+    jumbo_len: 'int' = UInt32Field()
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_Option', len: 'int', jumbo_len: 'int') -> 'None': ...
+
+
+class HomeAddressOption(Option):
+    """Header schema for HOPOPT home address options."""
+
+    #: Home address.
+    addr: 'IPv6Address' = IPv6Field()
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_Option', len: 'int', addr: 'IPv6Address | int | str | bytes') -> 'None': ...
+
+
+class IPDFFOption(Option):
+    """Header schema for HOPOPT depth-first forwarding (``IP_DFF``) options."""
+
+    #: Flags.
+    flags: 'DFFFlags' = BitField(length=1, namespace={
+        'ver': (0, 2),
+        'dup': (2, 1),
+        'ret': (3, 1),
+    })
+    #: Sequence number.
+    seq: 'int' = UInt16Field()
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_Option', len: 'int', flags: 'DFFFlags', seq: 'int') -> 'None': ...

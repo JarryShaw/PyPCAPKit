@@ -77,21 +77,18 @@ from pcapkit.protocols.schema.internet.hip import UnassignedParameter as HIP_Una
 # Hop-by-Hop Options
 from pcapkit.protocols.schema.internet.hopopt import HOPOPT
 from pcapkit.protocols.schema.internet.hopopt import CALIPSOOption as HOPOPT_CALIPSOOption
-from pcapkit.protocols.schema.internet.hopopt import DFFFlags as HOPOPT_DFFFlags
 from pcapkit.protocols.schema.internet.hopopt import HomeAddressOption as HOPOPT_HomeAddressOption
 from pcapkit.protocols.schema.internet.hopopt import ILNPOption as HOPOPT_ILNPOption
 from pcapkit.protocols.schema.internet.hopopt import IPDFFOption as HOPOPT_IPDFFOption
 from pcapkit.protocols.schema.internet.hopopt import JumboPayloadOption as HOPOPT_JumboPayloadOption
 from pcapkit.protocols.schema.internet.hopopt import \
     LineIdentificationOption as HOPOPT_LineIdentificationOption
-from pcapkit.protocols.schema.internet.hopopt import MPLFlags as HOPOPT_MPLFlags
 from pcapkit.protocols.schema.internet.hopopt import MPLOption as HOPOPT_MPLOption
 from pcapkit.protocols.schema.internet.hopopt import PadOption as HOPOPT_PadOption
 from pcapkit.protocols.schema.internet.hopopt import PDMOption as HOPOPT_PDMOption
 from pcapkit.protocols.schema.internet.hopopt import QuickStartReportOption as HOPOPT_QuickStartReportOption
 from pcapkit.protocols.schema.internet.hopopt import QuickStartRequestOption as HOPOPT_QuickStartRequestOption
 from pcapkit.protocols.schema.internet.hopopt import RouterAlertOption as HOPOPT_RouterAlertOption
-from pcapkit.protocols.schema.internet.hopopt import RPLFlags as HOPOPT_RPLFlags
 from pcapkit.protocols.schema.internet.hopopt import RPLOption as HOPOPT_RPLOption
 from pcapkit.protocols.schema.internet.hopopt import \
     SMFHashBasedDPDOption as HOPOPT_SMFHashBasedDPDOption
@@ -128,7 +125,6 @@ __all__ = [
 
     # Hop-by-Hop Options
     'HOPOPT',
-    'HOPOPT_RPLFlags', 'HOPOPT_MPLFlags', 'HOPOPT_DFFFlags',
     'HOPOPT_UnassignedOption', 'HOPOPT_PadOption', 'HOPOPT_TunnelEncapsulationLimitOption',
     'HOPOPT_RouterAlertOption', 'HOPOPT_CALIPSOOption', 'HOPOPT_SMFIdentificationBasedDPDOption',
     'HOPOPT_SMFHashBasedDPDOption', 'HOPOPT_PDMOption', 'HOPOPT_QuickStartRequestOption',

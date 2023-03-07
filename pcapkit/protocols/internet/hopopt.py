@@ -66,21 +66,18 @@ from pcapkit.protocols.schema.schema import Schema
 from pcapkit.const.ipv6.option_action import OptionAction as Enum_OptionAction
 from pcapkit.protocols.schema.internet.hopopt import HOPOPT as Schema_HOPOPT
 from pcapkit.protocols.schema.internet.hopopt import CALIPSOOption as Schema_CALIPSOOption
-from pcapkit.protocols.schema.internet.hopopt import DFFFlags as Schema_DFFFlags
 from pcapkit.protocols.schema.internet.hopopt import HomeAddressOption as Schema_HomeAddressOption
 from pcapkit.protocols.schema.internet.hopopt import ILNPOption as Schema_ILNPOption
 from pcapkit.protocols.schema.internet.hopopt import IPDFFOption as Schema_IPDFFOption
 from pcapkit.protocols.schema.internet.hopopt import JumboPayloadOption as Schema_JumboPayloadOption
 from pcapkit.protocols.schema.internet.hopopt import \
     LineIdentificationOption as Schema_LineIdentificationOption
-from pcapkit.protocols.schema.internet.hopopt import MPLFlags as Schema_MPLFlags
 from pcapkit.protocols.schema.internet.hopopt import MPLOption as Schema_MPLOption
 from pcapkit.protocols.schema.internet.hopopt import PadOption as Schema_PadOption
 from pcapkit.protocols.schema.internet.hopopt import PDMOption as Schema_PDMOption
 from pcapkit.protocols.schema.internet.hopopt import QuickStartRequestOption as Schema_QuickStartRequestOption
 from pcapkit.protocols.schema.internet.hopopt import QuickStartReportOption as Schema_QuickStartReportOption
 from pcapkit.protocols.schema.internet.hopopt import RouterAlertOption as Schema_RouterAlertOption
-from pcapkit.protocols.schema.internet.hopopt import RPLFlags as Schema_RPLFlags
 from pcapkit.protocols.schema.internet.hopopt import RPLOption as Schema_RPLOption
 from pcapkit.protocols.schema.internet.hopopt import \
     SMFHashBasedDPDOption as Schema_SMFHashBasedDPDOption
@@ -1136,17 +1133,16 @@ class HOPOPT(Internet[Data_HOPOPT, Schema_HOPOPT]):
             Parsed option data.
 
         """
-        _size = self._read_unpack(1)
-        _nval = self._read_fileng(_size)
+        schema = Schema_ILNPOption.unpack(data, length)  # type: Schema_ILNPOption
+        self.__header__.options.append(schema)
 
         opt = Data_ILNPOption(
             type=code,
             action=acts,
             change=cflg,
-            length=_size + 2,
-            nonce=_nval,
+            length=schema.len + 2,
+            nonce=schema.nonce,
         )
-
         return opt
 
     def _read_opt_lio(self, code: 'Enum_Option', acts: 'Enum_OptionAction', cflg: 'bool', clen: 'int', *,
@@ -1178,23 +1174,17 @@ class HOPOPT(Internet[Data_HOPOPT, Schema_HOPOPT]):
             Parsed option data.
 
         """
-        _size = self._read_unpack(1)
-        _llen = self._read_unpack(1)
-        _line = self._read_unpack(_llen)
+        schema = Schema_LineIdentificationOption.unpack(data, length)  # type: Schema_LineIdentificationOption
+        self.__header__.options.append(schema)
 
         opt = Data_LineIdentificationOption(
             type=code,
             action=acts,
             change=cflg,
-            length=_size + 2,
-            line_id_len=_llen,
-            line_id=_line,
+            length=schema.len + 2,
+            line_id_len=schema.id_len,
+            line_id=schema.id,
         )
-
-        _plen = _size - _llen
-        if _plen:
-            self._read_fileng(_plen)
-
         return opt
 
     def _read_opt_jumbo(self, code: 'Enum_Option', acts: 'Enum_OptionAction', cflg: 'bool', clen: 'int', *,
@@ -1227,19 +1217,19 @@ class HOPOPT(Internet[Data_HOPOPT, Schema_HOPOPT]):
             ProtocolError: If ``hopopt.jumbo.length`` is **NOT** ``4``.
 
         """
-        _size = self._read_unpack(1)
-        if _size != 4:
+        if clen != 4:
             raise ProtocolError(f'{self.alias}: [OptNo {code}] invalid format')
-        _jlen = self._read_unpack(4)
+
+        schema = Schema_JumboPayloadOption.unpack(data, length)  # type: Schema_JumboPayloadOption
+        self.__header__.options.append(schema)
 
         opt = Data_JumboPayloadOption(
             type=code,
             action=acts,
             change=cflg,
-            length=_size + 2,
-            payload_len=_jlen,
+            length=schema.len + 2,
+            jumbo_len=schema.jumbo_len,
         )
-
         return opt
 
     def _read_opt_home(self, code: 'Enum_Option', acts: 'Enum_OptionAction', cflg: 'bool', clen: 'int', *,
@@ -1280,19 +1270,19 @@ class HOPOPT(Internet[Data_HOPOPT, Schema_HOPOPT]):
             ProtocolError: If ``hopopt.jumbo.length`` is **NOT** ``16``.
 
         """
-        _size = self._read_unpack(1)
-        if _size != 16:
+        if clen != 16:
             raise ProtocolError(f'{self.alias}: [OptNo {code}] invalid format')
-        _addr = self._read_fileng(16)
+
+        schema = Schema_HomeAddressOption.unpack(data, length)  # type: Schema_HomeAddressOption
+        self.__header__.options.append(schema)
 
         opt = Data_HomeAddressOption(
             type=code,
             action=acts,
             change=cflg,
-            length=_size + 2,
-            address=ipaddress.ip_address(_addr),  # type: ignore[arg-type]
+            length=schema.len + 2,
+            address=schema.addr,
         )
-
         return opt
 
     def _read_opt_ip_dff(self, code: 'Enum_Option', acts: 'Enum_OptionAction', cflg: 'bool', clen: 'int', *,
@@ -1327,25 +1317,24 @@ class HOPOPT(Internet[Data_HOPOPT, Schema_HOPOPT]):
             ProtocolError: If ``hopopt.ip_dff.length`` is **NOT** ``2``.
 
         """
-        _size = self._read_unpack(1)
-        if _size != 2:
+        if clen != 2:
             raise ProtocolError(f'{self.alias}: [OptNo {code}] invalid format')
-        _verf = self._read_binary(1)
-        _seqn = self._read_unpack(2)
+
+        schema = Schema_IPDFFOption.unpack(data, length)  # type: Schema_IPDFFOption
+        self.__header__.options.append(schema)
 
         opt = Data_IPDFFOption(
             type=code,
             action=acts,
             change=cflg,
-            length=_size + 2,
-            version=int(_verf[:2], base=2),
+            length=schema.len + 2,
+            version=schema.flags['ver'],
             flags=Data_DFFFlags(
-                dup=bool(int(_verf[2], base=2)),
-                ret=bool(int(_verf[3], base=2)),
+                dup=bool(schema.flags['dup']),
+                ret=bool(schema.flags['ret']),
             ),
-            seq=_seqn,
+            seq=schema.seq,
         )
-
         return opt
 
     def _make_hopopt_options(self, options: 'list[Schema_Option | tuple[Enum_Option, dict[str, Any]] | bytes] | Option') -> 'tuple[list[Schema_Option | bytes], int]':
@@ -1830,4 +1819,121 @@ class HOPOPT(Internet[Data_HOPOPT, Schema_HOPOPT]):
             },
             seq=seq,
             seed=seed,
+        )
+
+    def _make_opt_ilnp(self, code: 'Enum_Option', opt: 'Optional[Data_ILNPOption]' = None, *,
+                       nonce: 'bytes' = b'',
+                       **kwargs: 'Any') -> 'Schema_ILNPOption':
+        """Make HOPOPT ILNP option.
+
+        Args:
+            code: option type value
+            opt: option data
+            nonce: ILNP nonce value
+            **kwargs: arbitrary keyword arguments
+
+        Returns:
+            Constructured option schema.
+
+        """
+        return Schema_ILNPOption(
+            type=code,
+            len=len(nonce),
+            nonce=nonce,
+        )
+
+    def _make_opt_lio(self, code: 'Enum_Option', opt: 'Optional[Data_LineIdentificationOption]' = None, *,
+                      id: 'bytes' = b'',
+                      **kwargs: 'Any') -> 'Schema_LineIdentificationOption':
+        """Make HOPOPT LIO option.
+
+        Args:
+            code: option type value
+            opt: option data
+            id: line ID value
+            **kwargs: arbitrary keyword arguments
+
+        Returns:
+            Constructured option schema.
+
+        """
+        return Schema_LineIdentificationOption(
+            type=code,
+            len=len(id) + 1,
+            id_len=len(id),
+            id=id,
+        )
+
+    def _make_opt_jumbo(self, code: 'Enum_Option', opt: 'Optional[Data_JumboPayloadOption]' = None, *,
+                        len: 'int' = 0,
+                        **kwargs: 'Any') -> 'Schema_JumboPayloadOption':
+        """Make HOPOPT Jumbo Payload option.
+
+        Args:
+            code: option type value
+            opt: option data
+            len: jumbo payload length
+            **kwargs: arbitrary keyword arguments
+
+        Returns:
+            Constructured option schema.
+
+        """
+        return Schema_JumboPayloadOption(
+            type=code,
+            len=4,
+            jumbo_len=len,
+        )
+
+    def _make_opt_home(self, code: 'Enum_Option', opt: 'Optional[Data_HomeAddressOption]' = None, *,
+                       addr: 'IPv6Address | str | bytes | int' = '::',
+                       **kwargs: 'Any') -> 'Schema_HomeAddressOption':
+        """Make HOPOPT Home Address option.
+
+        Args:
+            code: option type value
+            opt: option data
+            addr: home address value
+            **kwargs: arbitrary keyword arguments
+
+        Returns:
+            Constructured option schema.
+
+        """
+        return Schema_HomeAddressOption(
+            type=code,
+            len=16,
+            addr=addr,
+        )
+
+    def _make_opt_ip_dff(self, code: 'Enum_Option', opt: 'Optional[Data_IPDFFOption]' = None, *,
+                         version: 'int' = 0,
+                         dup: 'bool' = False,
+                         ret: 'bool' = False,
+                         seq: 'int' = 0,
+                         **kwargs: 'Any') -> 'Schema_IPDFFOption':
+        """Make HOPOPT IP DFF option.
+
+        Args:
+            code: option type value
+            opt: option data
+            version: DFF version
+            dup: duplicate packet flag
+            ret: return packet flag
+            seq: DFF sequence number
+            **kwargs: arbitrary keyword arguments
+
+        Returns:
+            Constructured option schema.
+
+        """
+        return Schema_IPDFFOption(
+            type=code,
+            len=2,
+            flags={
+                'ver': version,
+                'dup': dup,
+                'ret': ret,
+            },
+            seq=seq,
         )

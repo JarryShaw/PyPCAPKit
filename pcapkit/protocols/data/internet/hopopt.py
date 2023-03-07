@@ -276,20 +276,21 @@ class LineIdentificationOption(Option):
     #: Line ID length.
     line_id_len: 'int'
     #: Line ID.
-    line_id: 'int'
+    line_id: 'bytes'
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_Option', action: 'int', change: 'bool', length: 'int', line_id_len: 'int', line_id: 'int') -> 'None': ...  # pylint: disable=super-init-not-called,unused-argument,redefined-builtin,multiple-statements,line-too-long
+        def __init__(self, type: 'Enum_Option', action: 'int', change: 'bool', length: 'int', line_id_len: 'int', line_id: 'bytes') -> 'None': ...  # pylint: disable=super-init-not-called,unused-argument,redefined-builtin,multiple-statements,line-too-long
 
 
 class JumboPayloadOption(Option):
     """Data model for Jumbo Payload option."""
 
     #: Jumbo payload length.
-    payload_len: 'int'
+    jumbo_len: 'int'
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_Option', action: 'int', change: 'bool', length: 'int', payload_len: 'int') -> 'None': ...  # pylint: disable=super-init-not-called,unused-argument,redefined-builtin,multiple-statements,line-too-long
+        def __init__(self, type: 'Enum_Option', action: 'int', change: 'bool', length: 'int',
+                     jumbo_len: 'int') -> 'None': ...  # pylint: disable=super-init-not-called,unused-argument,redefined-builtin,multiple-statements,line-too-long
 
 
 class HomeAddressOption(Option):
