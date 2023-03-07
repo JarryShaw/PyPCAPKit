@@ -220,7 +220,7 @@ class Schema(Mapping[str, VT], Generic[VT]):
         return b''.join(buffer)
 
     def __len__(self) -> 'int':
-        return len(self.__dict__)
+        return len(self.__bytes__())
 
     def __iter__(self) -> 'Iterator[str]':
         for key in self.__dict__:
