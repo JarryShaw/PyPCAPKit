@@ -131,36 +131,52 @@ class HOPOPT(Internet[Data_HOPOPT, Schema_HOPOPT]):
 
        * - Option Code
          - Option Parser
+         - Option Constructor
        * - :attr:`~pcapkit.const.ipv6.option.Option.Pad1`
          - :meth:`~pcapkit.protocols.internet.hopopt.HOPOPT._read_opt_pad`
+         - :meth:`~pcapkit.protocols.internet.hopopt.HOPOPT._make_opt_pad`
        * - :attr:`~pcapkit.const.ipv6.option.Option.PadN`
          - :meth:`~pcapkit.protocols.internet.hopopt.HOPOPT._read_opt_pad`
+         - :meth:`~pcapkit.protocols.internet.hopopt.HOPOPT._make_opt_pad`
        * - :attr:`~pcapkit.const.ipv6.option.Option.Tunnel_Encapsulation_Limit`
          - :meth:`~pcapkit.protocols.internet.hopopt.HOPOPT._read_opt_tun`
+         - :meth:`~pcapkit.protocols.internet.hopopt.HOPOPT._make_opt_tun`
        * - :attr:`~pcapkit.const.ipv6.option.Option.Router_Alert`
          - :meth:`~pcapkit.protocols.internet.hopopt.HOPOPT._read_opt_ra`
+         - :meth:`~pcapkit.protocols.internet.hopopt.HOPOPT._make_opt_ra`
        * - :attr:`~pcapkit.const.ipv6.option.Option.CALIPSO`
          - :meth:`~pcapkit.protocols.internet.hopopt.HOPOPT._read_opt_calipso`
+         - :meth:`~pcapkit.protocols.internet.hopopt.HOPOPT._make_opt_calipso`
        * - :attr:`~pcapkit.const.ipv6.option.Option.SMF_DPD`
          - :meth:`~pcapkit.protocols.internet.hopopt.HOPOPT._read_opt_smf_dpd`
+         - :meth:`~pcapkit.protocols.internet.hopopt.HOPOPT._make_opt_smf_dpd`
        * - :attr:`~pcapkit.const.ipv6.option.Option.PDM`
          - :meth:`~pcapkit.protocols.internet.hopopt.HOPOPT._read_opt_pdm`
+         - :meth:`~pcapkit.protocols.internet.hopopt.HOPOPT._make_opt_pdm`
        * - :attr:`~pcapkit.const.ipv6.option.Option.Quick_Start`
          - :meth:`~pcapkit.protocols.internet.hopopt.HOPOPT._read_opt_qs`
+         - :meth:`~pcapkit.protocols.internet.hopopt.HOPOPT._make_opt_qs`
        * - :attr:`~pcapkit.const.ipv6.option.Option.RPL_Option_0x63`
          - :meth:`~pcapkit.protocols.internet.hopopt.HOPOPT._read_opt_rpl`
+         - :meth:`~pcapkit.protocols.internet.hopopt.HOPOPT._make_opt_rpl`
        * - :attr:`~pcapkit.const.ipv6.option.Option.MPL_Option`
          - :meth:`~pcapkit.protocols.internet.hopopt.HOPOPT._read_opt_mpl`
+         - :meth:`~pcapkit.protocols.internet.hopopt.HOPOPT._make_opt_mpl`
        * - :attr:`~pcapkit.const.ipv6.option.Option.ILNP_Nonce`
          - :meth:`~pcapkit.protocols.internet.hopopt.HOPOPT._read_opt_ilnp`
+         - :meth:`~pcapkit.protocols.internet.hopopt.HOPOPT._make_opt_ilnp`
        * - :attr:`~pcapkit.const.ipv6.option.Option.Line_Identification_Option`
          - :meth:`~pcapkit.protocols.internet.hopopt.HOPOPT._read_opt_lio`
+         - :meth:`~pcapkit.protocols.internet.hopopt.HOPOPT._make_opt_lio`
        * - :attr:`~pcapkit.const.ipv6.option.Option.Jumbo_Payload`
          - :meth:`~pcapkit.protocols.internet.hopopt.HOPOPT._read_opt_jumbo`
+         - :meth:`~pcapkit.protocols.internet.hopopt.HOPOPT._make_opt_jumbo`
        * - :attr:`~pcapkit.const.ipv6.option.Option.Home_Address`
          - :meth:`~pcapkit.protocols.internet.hopopt.HOPOPT._read_opt_home`
+         - :meth:`~pcapkit.protocols.internet.hopopt.HOPOPT._make_opt_home`
        * - :attr:`~pcapkit.const.ipv6.option.Option.IP_DFF`
          - :meth:`~pcapkit.protocols.internet.hopopt.HOPOPT._read_opt_ip_dff`
+         - :meth:`~pcapkit.protocols.internet.hopopt.HOPOPT._make_opt_ip_dff`
 
     """
 
