@@ -34,7 +34,8 @@ Octets      Bits        Name                    Description
 """
 import datetime
 import ipaddress
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
+import math
 
 from pcapkit.const.ipv4.classification_level import ClassificationLevel as Enum_ClassificationLevel
 from pcapkit.const.ipv4.option_class import OptionClass as Enum_OptionClass
@@ -71,24 +72,52 @@ from pcapkit.protocols.data.internet.ipv4 import TSOption as Data_TSOption
 from pcapkit.protocols.data.internet.ipv4 import UnassignedOption as Data_UnassignedOption
 from pcapkit.protocols.internet.ip import IP
 from pcapkit.utilities.exceptions import ProtocolError
+from pcapkit.protocols.schema.internet.ipv4 import EOOLOption as Schema_EOOLOption
+from pcapkit.protocols.schema.internet.ipv4 import ESECOption as Schema_ESECOption
+from pcapkit.protocols.schema.internet.ipv4 import Flags as Schema_Flags
+from pcapkit.protocols.schema.internet.ipv4 import IPv4 as Schema_IPv4
+from pcapkit.protocols.schema.internet.ipv4 import LSROption as Schema_LSROption
+from pcapkit.protocols.schema.internet.ipv4 import MTUPOption as Schema_MTUPOption
+from pcapkit.protocols.schema.internet.ipv4 import MTUROption as Schema_MTUROption
+from pcapkit.protocols.schema.internet.ipv4 import NOPOption as Schema_NOPOption
+from pcapkit.protocols.schema.internet.ipv4 import OptionType as Schema_OptionType
+from pcapkit.protocols.schema.internet.ipv4 import QSOption as Schema_QSOption
+from pcapkit.protocols.schema.internet.ipv4 import RROption as Schema_RROption
+from pcapkit.protocols.schema.internet.ipv4 import RTRALTOption as Schema_RTRALTOption
+from pcapkit.protocols.schema.internet.ipv4 import SECOption as Schema_SECOption
+from pcapkit.protocols.schema.internet.ipv4 import SIDOption as Schema_SIDOption
+from pcapkit.protocols.schema.internet.ipv4 import SSROption as Schema_SSROption
+from pcapkit.protocols.schema.internet.ipv4 import ToSField as Schema_ToSField
+from pcapkit.protocols.schema.internet.ipv4 import TROption as Schema_TROption
+from pcapkit.protocols.schema.internet.ipv4 import TSOption as Schema_TSOption
+from pcapkit.protocols.schema.internet.ipv4 import UnassignedOption as Schema_UnassignedOption
+from pcapkit.protocols.schema.schema import Schema
 
 if TYPE_CHECKING:
     from datetime import datetime as dt_type
     from ipaddress import IPv4Address
-    from typing import Any, Callable, NoReturn, Optional
+    from typing import Any, Callable, Type, Optional
 
-    from mypy_extensions import NamedArg
+    from enum import IntEnum as StdlibEnum
+    from aenum import IntEnum as AenumEnum
+
+    from mypy_extensions import NamedArg, DefaultArg, KwArg
     from typing_extensions import Literal
 
     from pcapkit.protocols.data.internet.ipv4 import Option as Data_Option
+    from datetime import timedelta
+    from pcapkit.protocols.schema.internet.ipv4 import Option as Schema_Option
+    from pcapkit.protocols.protocol import Protocol
 
     Option = OrderedMultiDict[Enum_OptionNumber, Data_Option]
-    OptionParser = Callable[[Enum_OptionNumber, NamedArg(Option, 'options')], Data_Option]
+    OptionParser = Callable[['IPv4', Enum_OptionNumber, NamedArg(Option, 'options')], Data_Option]
+    OptionConstructor = Callable[['IPv4', Enum_OptionNumber, DefaultArg(Optional[Data_Option]),
+                                  KwArg(Any)], Schema_Option]
 
 __all__ = ['IPv4']
 
 
-class IPv4(IP[Data_IPv4]):
+class IPv4(IP[Data_IPv4, Schema_IPv4]):
     """This class implements Internet Protocol version 4.
 
     This class currently supports parsing of the following IPv4 options,
@@ -100,34 +129,49 @@ class IPv4(IP[Data_IPv4]):
 
        * - Option Code
          - Option Parser
+         - Option Constructor
        * - :attr:`~pcapkit.const.ipv4.option_number.OptionNumber.EOOL`
          - :meth:`~pcapkit.protocols.internet.ipv4.IPv4._read_opt_eool`
+         - :meth:`~pcapkit.protocols.internet.ipv4.IPv4._make_opt_eool`
        * - :attr:`~pcapkit.const.ipv4.option_number.OptionNumber.NOP`
          - :meth:`~pcapkit.protocols.internet.ipv4.IPv4._read_opt_nop`
+         - :meth:`~pcapkit.protocols.internet.ipv4.IPv4._make_opt_nop`
        * - :attr:`~pcapkit.const.ipv4.option_number.OptionNumber.SEC`
          - :meth:`~pcapkit.protocols.internet.ipv4.IPv4._read_opt_sec`
+         - :meth:`~pcapkit.protocols.internet.ipv4.IPv4._make_opt_sec`
        * - :attr:`~pcapkit.const.ipv4.option_number.OptionNumber.LSR`
          - :meth:`~pcapkit.protocols.internet.ipv4.IPv4._read_opt_lsr`
+         - :meth:`~pcapkit.protocols.internet.ipv4.IPv4._make_opt_lsr`
        * - :attr:`~pcapkit.const.ipv4.option_number.OptionNumber.TS`
          - :meth:`~pcapkit.protocols.internet.ipv4.IPv4._read_opt_ts`
+         - :meth:`~pcapkit.protocols.internet.ipv4.IPv4._make_opt_ts`
        * - :attr:`~pcapkit.const.ipv4.option_number.OptionNumber.ESEC`
          - :meth:`~pcapkit.protocols.internet.ipv4.IPv4._read_opt_esec`
+         - :meth:`~pcapkit.protocols.internet.ipv4.IPv4._make_opt_esec`
        * - :attr:`~pcapkit.const.ipv4.option_number.OptionNumber.RR`
          - :meth:`~pcapkit.protocols.internet.ipv4.IPv4._read_opt_rr`
+         - :meth:`~pcapkit.protocols.internet.ipv4.IPv4._make_opt_rr`
        * - :attr:`~pcapkit.const.ipv4.option_number.OptionNumber.SID`
          - :meth:`~pcapkit.protocols.internet.ipv4.IPv4._read_opt_sid`
+         - :meth:`~pcapkit.protocols.internet.ipv4.IPv4._make_opt_sid`
        * - :attr:`~pcapkit.const.ipv4.option_number.OptionNumber.SSR`
          - :meth:`~pcapkit.protocols.internet.ipv4.IPv4._read_opt_ssr`
+         - :meth:`~pcapkit.protocols.internet.ipv4.IPv4._make_opt_ssr`
        * - :attr:`~pcapkit.const.ipv4.option_number.OptionNumber.MTUP`
          - :meth:`~pcapkit.protocols.internet.ipv4.IPv4._read_opt_mtup`
+         - :meth:`~pcapkit.protocols.internet.ipv4.IPv4._make_opt_mtup`
        * - :attr:`~pcapkit.const.ipv4.option_number.OptionNumber.MTUR`
          - :meth:`~pcapkit.protocols.internet.ipv4.IPv4._read_opt_mtur`
+         - :meth:`~pcapkit.protocols.internet.ipv4.IPv4._make_opt_mtur`
        * - :attr:`~pcapkit.const.ipv4.option_number.OptionNumber.TR`
          - :meth:`~pcapkit.protocols.internet.ipv4.IPv4._read_opt_tr`
+         - :meth:`~pcapkit.protocols.internet.ipv4.IPv4._make_opt_tr`
        * - :attr:`~pcapkit.const.ipv4.option_number.OptionNumber.RTRALT`
          - :meth:`~pcapkit.protocols.internet.ipv4.IPv4._read_opt_rtralt`
+         - :meth:`~pcapkit.protocols.internet.ipv4.IPv4._make_opt_rtralt`
        * - :attr:`~pcapkit.const.ipv4.option_number.OptionNumber.QS`
          - :meth:`~pcapkit.protocols.internet.ipv4.IPv4._read_opt_qs`
+         - :meth:`~pcapkit.protocols.internet.ipv4.IPv4._make_opt_qs`
 
     """
 
@@ -199,44 +243,33 @@ class IPv4(IP[Data_IPv4]):
         """
         if length is None:
             length = len(self)
+        schema = self.__header__
 
-        _vihl = self._read_fileng(1).hex()
-        _dscp = self._read_binary(1)
-        _tlen = self._read_unpack(2)
-        _iden = self._read_unpack(2)
-        _frag = self._read_binary(2)
-        _ttol = self._read_unpack(1)
-        _prot = self._read_protos(1)
-        _csum = self._read_fileng(2)
-        _srca = self._read_ipv4_addr()
-        _dsta = self._read_ipv4_addr()
-
-        _vers = int(_vihl[0], base=16)
-        if _vers != 4:
-            raise ProtocolError(f'[IPv4] invalid version: {_vers}')
+        if schema.vihl['version'] != 4:
+            raise ProtocolError(f"[IPv4] invalid version: {schema.vihl['version']}")
 
         ipv4 = Data_IPv4(
-            version=_vers,  # type: ignore[arg-type]
-            hdr_len=int(_vihl[1], base=16) * 4,
+            version=schema.vihl['version'],  # type: ignore[arg-type]
+            hdr_len=schema.vihl['ihl'] * 4,
             tos=Data_ToSField.from_dict({
-                'pre': Enum_ToSPrecedence.get(int(_dscp[:3], base=2)),
-                'del': Enum_ToSDelay.get(int(_dscp[3], base=2)),
-                'thr': Enum_ToSThroughput.get(int(_dscp[4], base=2)),
-                'rel': Enum_ToSReliability.get(int(_dscp[5], base=2)),
-                'ecn': Enum_ToSECN.get(int(_dscp[6:], base=2)),
+                'pre': Enum_ToSPrecedence.get(schema.tos['pre']),
+                'del': Enum_ToSDelay.get(schema.tos['del']),
+                'thr': Enum_ToSThroughput.get(schema.tos['thr']),
+                'rel': Enum_ToSReliability.get(schema.tos['rel']),
+                'ecn': Enum_ToSECN.get(schema.tos['ecn']),
             }),
-            len=_tlen,
-            id=_iden,
+            len=schema.length,
+            id=schema.id,
             flags=Data_Flags(
-                df=bool(int(_frag[1])),
-                mf=bool(int(_frag[2])),
+                df=bool(schema.flags['df']),
+                mf=bool(schema.flags['mf']),
             ),
-            offset=int(_frag[3:], base=2) * 8,
-            ttl=datetime.timedelta(seconds=_ttol),
-            protocol=_prot,
-            checksum=_csum,
-            src=_srca,
-            dst=_dsta,
+            offset=int(schema.flags['offset']) * 8,
+            ttl=datetime.timedelta(seconds=schema.ttl),
+            protocol=schema.proto,
+            checksum=schema.chksum,
+            src=schema.src,
+            dst=schema.dst,
         )
 
         _optl = ipv4.hdr_len - 20
@@ -245,19 +278,137 @@ class IPv4(IP[Data_IPv4]):
                 ('options', self._read_ipv4_options(_optl)),
             ])
 
-        return self._decode_next_layer(ipv4, _prot, ipv4.len - ipv4.hdr_len)
+        return self._decode_next_layer(ipv4, ipv4.protocol, ipv4.len - ipv4.hdr_len)
 
-    def make(self, **kwargs: 'Any') -> 'NoReturn':
+    def make(self,
+             tos_pre: 'Enum_ToSPrecedence | StdlibEnum | AenumEnum | int | str' = Enum_ToSPrecedence.Routine,
+             tos_pre_default: 'Optional[int]' = None,
+             tos_pre_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
+             tos_pre_reversed: 'bool' = False,
+             tos_del: 'Enum_ToSDelay | StdlibEnum | AenumEnum | int | str' = Enum_ToSDelay.NORMAL,
+             tos_del_default: 'Optional[int]' = None,
+             tos_del_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
+             tos_del_reversed: 'bool' = False,
+             tos_thr: 'Enum_ToSThroughput | StdlibEnum | AenumEnum | int | str' = Enum_ToSThroughput.NORMAL,
+             tos_thr_default: 'Optional[int]' = None,
+             tos_thr_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
+             tos_thr_reversed: 'bool' = False,
+             tos_rel: 'Enum_ToSReliability | StdlibEnum | AenumEnum | int | str' = Enum_ToSReliability.NORMAL,
+             tos_rel_default: 'Optional[int]' = None,
+             tos_rel_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
+             tos_rel_reversed: 'bool' = False,
+             tos_ecn: 'Enum_ToSECN | StdlibEnum | AenumEnum | int | str' = Enum_ToSECN.Not_ECT,
+             tos_ecn_default: 'Optional[int]' = None,
+             tos_ecn_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
+             tos_ecn_reversed: 'bool' = False,
+             id: 'int' = 0,
+             df: 'bool' = False,
+             mf: 'bool' = False,
+             offset: 'int' = 0,
+             ttl: 'timedelta | int' = 0,
+             protocol: 'Enum_TransType | StdlibEnum | AenumEnum | int | str' = Enum_TransType.UDP,
+             protocol_default: 'Optional[int]' = None,
+             protocol_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
+             protocol_reversed: 'bool' = False,
+             checksum: 'bytes' = b'\x00\x00',
+             src: 'IPv4Address | str | int | bytes' = '0.0.0.0',  # nosec: B104
+             dst: 'IPv4Address | str | int | bytes' = '255.255.255.255',
+             options: 'Optional[list[Schema_Option | tuple[Enum_OptionNumber, dict[str, Any]] | bytes] | Option]' = None,  # pylint: disable=line-too-long
+             payload: 'bytes | Protocol | Schema' = b'',
+             **kwargs: 'Any') -> 'Schema_IPv4':
         """Make (construct) packet data.
 
         Args:
+            tos_pre: Precedence of the packet.
+            tos_pre_default: Default value of ``tos_pre``.
+            tos_pre_namespace: Namespace of ``tos_pre``.
+            tos_pre_reversed: If the namespace of ``tos_pre`` is reversed.
+            tos_del: Delay of the packet.
+            tos_del_default: Default value of ``tos_del``.
+            tos_del_namespace: Namespace of ``tos_del``.
+            tos_del_reversed: If the namespace of ``tos_del`` is reversed.
+            tos_thr: Throughput of the packet.
+            tos_thr_default: Default value of ``tos_thr``.
+            tos_thr_namespace: Namespace of ``tos_thr``.
+            tos_thr_reversed: If the namespace of ``tos_thr`` is reversed.
+            tos_rel: Reliability of the packet.
+            tos_rel_default: Default value of ``tos_rel``.
+            tos_rel_namespace: Namespace of ``tos_rel``.
+            tos_rel_reversed: If the namespace of ``tos_rel`` is reversed.
+            tos_ecn: ECN of the packet.
+            tos_ecn_default: Default value of ``tos_ecn``.
+            tos_ecn_namespace: Namespace of ``tos_ecn``.
+            tos_ecn_reversed: If the namespace of ``tos_ecn`` is reversed.
+            id: Identification of the packet.
+            df: Don't fragment flag.
+            mf: More fragments flag.
+            offset: Fragment offset.
+            ttl: Time to live of the packet.
+            protocol: Payload protocol of the packet.
+            protocol_default: Default value of ``protocol``.
+            protocol_namespace: Namespace of ``protocol``.
+            protocol_reversed: If the namespace of ``protocol`` is reversed.
+            checksum: Checksum of the packet.
+            src: Source address of the packet.
+            dst: Destination address of the packet.
+            options: Options of the packet.
+            payload: Payload of the packet.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
             Constructed packet data.
 
         """
-        raise NotImplementedError
+        tos_pre_val = self._make_index(tos_pre, tos_pre_default, namespace=tos_pre_namespace,  # type: ignore[call-overload]
+                                       reversed=tos_pre_reversed, pack=False)
+        tos_del_val = self._make_index(tos_del, tos_del_default, namespace=tos_del_namespace,  # type: ignore[call-overload]
+                                       reversed=tos_del_reversed, pack=False)
+        tos_thr_val = self._make_index(tos_thr, tos_thr_default, namespace=tos_thr_namespace,  # type: ignore[call-overload]
+                                       reversed=tos_thr_reversed, pack=False)
+        tos_rel_val = self._make_index(tos_rel, tos_rel_default, namespace=tos_rel_namespace,  # type: ignore[call-overload]
+                                       reversed=tos_rel_reversed, pack=False)
+        tos_ecn_val = self._make_index(tos_ecn, tos_ecn_default, namespace=tos_ecn_namespace,  # type: ignore[call-overload]
+                                       reversed=tos_ecn_reversed, pack=False)
+
+        proto = self._make_index(protocol, protocol_default, namespace=protocol_namespace,  # type: ignore[call-overload]
+                                 reversed=protocol_reversed, pack=False)
+        ttl_val = ttl if isinstance(ttl, int) else math.ceil(ttl.total_seconds())
+
+        if options is not None:
+            options_value, total_length = self._make_ipv4_options(options)
+        else:
+            options_value, total_length = [], 0
+
+        ihl = 5 + math.ceil(total_length / 4)
+        len = ihl * 4 + len(payload)
+
+        return Schema_IPv4(
+            vihl={
+                'version': 4,
+                'ihl': ihl,
+            },
+            tos={
+                'pre': tos_pre_val,
+                'del': tos_del_val,
+                'thr': tos_thr_val,
+                'rel': tos_rel_val,
+                'ecn': tos_ecn_val,
+            },
+            length=len,
+            id=id,
+            flags={
+                'df': df,
+                'mf': mf,
+                'offset': offset,
+            },
+            ttl=ttl_val,
+            proto=proto,
+            chksum=checksum,
+            src=src,
+            dst=dst,
+            options=options_value,
+            payload=payload,
+        )
 
     @classmethod
     def id(cls) -> 'tuple[Literal["IPv4"]]':  # type: ignore[override]
@@ -355,8 +506,9 @@ class IPv4(IP[Data_IPv4]):
 
             # extract option data
             meth_name = f'_read_opt_{kind.name.lower()}'
-            meth = getattr(self, meth_name, self._read_opt_unassigned)  # type: OptionParser
-            data = meth(self, kind, options=options)  # type: ignore[arg-type,misc]
+            meth = cast('OptionParser',
+                        getattr(self, meth_name, self._read_opt_unassigned))
+            data = meth(self, kind, options=options)
 
             # record option data
             counter += data.length
@@ -1060,3 +1212,82 @@ class IPv4(IP[Data_IPv4]):
         )
 
         return data
+
+    def _make_ipv4_options(self, options: 'list[Schema_Option | tuple[Enum_OptionNumber, dict[str, Any]] | bytes] | Option') -> 'tuple[list[Schema_Option | bytes], int]':
+        """Make options for IPv4.
+
+        Args:
+            option: IPv4 options
+
+        Returns:
+            Tuple of options and total length of options.
+
+        """
+        total_length = 0
+        if isinstance(options, list):
+            options_list = []  # type: list[Schema_Option | bytes]
+            for schema in options:
+                if isinstance(schema, bytes):
+                    code = Enum_OptionNumber.get(schema[0])
+                    if code in (Enum_OptionNumber.NOP, Enum_OptionNumber.EOOL):  # ignore padding options by default
+                        continue
+
+                    data = schema  # type: Schema_Option | bytes
+                    data_len = len(data)
+                elif isinstance(schema, Schema):
+                    code = schema.type
+                    if code in (Enum_OptionNumber.NOP, Enum_OptionNumber.EOOL):  # ignore padding options by default
+                        continue
+
+                    data = schema
+                    data_len = len(data.pack())
+                else:
+                    code, args = cast('tuple[Enum_OptionNumber, dict[str, Any]]', schema)
+                    if code in (Enum_OptionNumber.NOP, Enum_OptionNumber.EOOL):  # ignore padding options by default
+                        continue
+
+                    name = f'_make_opt_{code.name.lower()}'
+                    meth = cast('OptionConstructor',
+                                getattr(self, name, self._make_opt_unassigned))
+
+                    data = meth(self, code, **args)
+                    data_len = len(data.pack())
+
+                options_list.append(data)
+                total_length += data_len
+
+                # force alignment to 32-bit boundary
+                if data_len % 4:
+                    data_len = 4 - (data_len % 4)
+                    pad_opt = self._make_opt_nop(code)
+
+                    for _ in range(data_len):
+                        options_list.append(pad_opt)
+                    total_length += data_len
+            return options_list, total_length
+
+        options_list = []
+        for code, option in options.items(multi=True):
+            # ignore padding options by default
+            if code in (Enum_OptionNumber.NOP, Enum_OptionNumber.EOOL):
+                continue
+
+            name = f'_make_opt_{code.name.lower()}'
+            meth = cast('OptionConstructor',
+                        getattr(self, name, self._make_opt_unassigned))
+
+            data = meth(self, code, option)
+            data_len = len(data.pack())
+
+            options_list.append(data)
+            total_length += data_len
+
+            # force alignment to 32-bit boundary
+            if data_len % 4:
+                pad_len = 4 - (data_len % 4)
+                pad_opt = self._make_opt_nop(code)
+
+                for _ in range(pad_len):
+                    options_list.append(pad_opt)
+                total_length += pad_len
+        return options_list, total_length
