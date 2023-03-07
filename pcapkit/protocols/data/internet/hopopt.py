@@ -237,11 +237,11 @@ class MPLFlags(Data):
 
     #: Max flag.
     max: 'bool'
-    #: Verification flag.
-    verification: 'bool'
+    #: Non-conformation flag.
+    drop: 'bool'
 
     if TYPE_CHECKING:
-        def __init__(self, max: 'bool', verification: 'bool') -> 'None': ...  # pylint: disable=super-init-not-called,unused-argument,redefined-builtin,multiple-statements,line-too-long
+        def __init__(self, max: 'bool', drop: 'bool') -> 'None': ...  # pylint: disable=super-init-not-called,unused-argument,redefined-builtin,multiple-statements,line-too-long
 
 
 class MPLOption(Option):

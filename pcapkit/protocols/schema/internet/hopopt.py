@@ -13,6 +13,7 @@ from pcapkit.corekit.fields.numbers import (EnumField, NumberField, UInt8Field, 
 from pcapkit.corekit.fields.strings import BitField, BytesField, PaddingField
 from pcapkit.const.ipv6.option import Option as Enum_Option
 from pcapkit.const.ipv6.router_alert import RouterAlert as Enum_RouterAlert
+from pcapkit.utilities.exceptions import FieldError
 
 __all__ = [
     'HOPOPT',
@@ -29,7 +30,7 @@ __all__ = [
 ]
 
 if TYPE_CHECKING:
-    from typing import Optional
+    from typing import Optional, Any
     from ipaddress import IPv4Address, IPv6Address
 
     from typing_extensions import TypedDict
@@ -53,6 +54,52 @@ if TYPE_CHECKING:
         func: int
         #: Rate request/report.
         rate: int
+
+    class RPLFlags(TypedDict):
+        """RPL flags."""
+
+        #: Down flag.
+        down: int
+        #: Rank error flag.
+        rank_err: int
+        #: Forwarding error flag.
+        fwd_err: int
+
+    class MPLFlags(TypedDict):
+        """MPL flags."""
+
+        #: Seed-ID type. Identifies the length of the
+        #: Seed-ID.
+        type: int
+        #: Max flag. ``1`` indicates that the value in the
+        #: sequence field is known to be the largest sequence
+        #: number that was received from the MPL Seed.
+        max: int
+        #: Verification flag. ``0`` indicates that the MPL Option
+        #: conforms to this specification.
+        drop: int
+
+
+def mpl_opt_seed_id_len(pkt: 'dict[str, Any]') -> 'int':
+    """Return MPL Seed-ID length.
+
+    Args:
+        pkt: MPL option unpacked schema.
+
+    Returns:
+        MPL Seed-ID length.
+
+    """
+    s_type = pkt['flags']['type']
+    if s_type == 0:
+        return 0
+    if s_type == 1:
+        return 2
+    if s_type == 2:
+        return 8
+    if s_type == 3:
+        return 16
+    raise FieldError(f'HOPOPT: invalid MPL Seed-ID type: {s_type}')
 
 
 class HOPOPT(Schema):
@@ -241,3 +288,48 @@ class QuickStartReportOption(QuickStartOption):
     if TYPE_CHECKING:
         def __init__(self, type: 'Enum_Option', len: 'int', flags: 'QuickStartFlags',
                      nounce: 'bytes') -> 'None': ...
+
+
+class RPLOption(Option):
+    """Header schema for HOPOPT routing protocol for low-power and lossy networks (RPL) options."""
+
+    #: Flags.
+    flags: 'RPLFlags' = BitField(length=1, namespace={
+        'down': (0, 1),
+        'rank_err': (1, 1),
+        'fwd_err': (2, 1),
+    })
+    #: RPL instance ID.
+    id: 'int' = UInt8Field()
+    #: Sender rank.
+    rank: 'int' = UInt16Field()
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_Option', len: 'int', flags: 'RPLFlags', id: 'int',
+                     rank: 'int') -> 'None': ...
+
+
+class MPLOption(Option):
+    """Header schema for HOPOPT multicast protocol for low-power and lossy networks (MPL) options."""
+
+    #: Flags.
+    flags: 'MPLFlags' = BitField(length=1, namespace={
+        'type': (0, 2),
+        'max': (2, 1),
+        'drop': (3, 1),
+    })
+    #: MPL sequence number.
+    seq: 'int' = UInt8Field()
+    #: MPL Seed-ID.
+    seed: 'int' = ConditionalField(
+        NumberField(length=mpl_opt_seed_id_len, signed=False),
+        lambda pkt: pkt['flags']['type'] != 0,
+    )
+    #: Reserved data (padding).
+    pad: 'bytes' = PaddingField(length=lambda pkt: pkt['len'] - 2 - (
+        0 if pkt['flags']['type'] == 0 else mpl_opt_seed_id_len(pkt)
+    ))
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_Option', len: 'int', flags: 'MPLFlags', seq: 'int',
+                     seed: 'Optional[int]') -> 'None': ...

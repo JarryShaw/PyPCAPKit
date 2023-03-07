@@ -1017,27 +1017,25 @@ class HOPOPT(Internet[Data_HOPOPT, Schema_HOPOPT]):
             ProtocolError: If ``hopopt.rpl.length`` is **NOT** ``4``.
 
         """
-        _size = self._read_unpack(1)
-        if _size != 4:
+        if clen != 4:
             raise ProtocolError(f'{self.alias}: [OptNo {code}] invalid format')
-        _flag = self._read_binary(1)
-        _rpld = self._read_unpack(1)
-        _rank = self._read_unpack(2)
+
+        schema = Schema_RPLOption.unpack(data, length)  # type: Schema_RPLOption
+        self.__header__.options.append(schema)
 
         opt = Data_RPLOption(
             type=code,
             action=acts,
             change=cflg,
-            length=_size + 2,
+            length=schema.len + 2,
             flags=Data_RPLFlags(
-                down=bool(int(_flag[0], base=2)),
-                rank_err=bool(int(_flag[1], base=2)),
-                fwd_err=bool(int(_flag[2], base=2)),
+                down=bool(schema.flags['down']),
+                rank_err=bool(schema.flags['rank_err']),
+                fwd_err=bool(schema.flags['fwd_err']),
             ),
-            id=_rpld,
-            rank=_rank,
+            id=schema.id,
+            rank=schema.rank,
         )
-
         return opt
 
     def _read_opt_mpl(self, code: 'Enum_Option', acts: 'Enum_OptionAction', cflg: 'bool', clen: 'int', *,
@@ -1072,54 +1070,41 @@ class HOPOPT(Internet[Data_HOPOPT, Schema_HOPOPT]):
             ProtocolError: If the option is malformed.
 
         """
-        _size = self._read_unpack(1)
-        if _size < 2:
+        if clen < 2:
             raise ProtocolError(f'{self.alias}: [OptNo {code}] invalid format')
-        _smvr = self._read_binary(1)
-        _seqn = self._read_unpack(1)
 
-        _kind = Enum_SeedID.get(int(_smvr[:2], base=2))
-        if _kind == _kind.IPV6_SOURCE_ADDRESS:
-            if _size != 2:
-                raise ProtocolError(f'{self.alias}: [OptNo {code}] invalid format')
-            _seed = None
-            _slen = 0
-        elif _kind == _kind.SEEDID_16_BIT_UNSIGNED_INTEGER:
-            if _size != 4:
-                raise ProtocolError(f'{self.alias}: [OptNo {code}] invalid format')
-            _seed = self._read_unpack(2)
-            _slen = 2
-        elif _kind == _kind.SEEDID_64_BIT_UNSIGNED_INTEGER:
-            if _size != 10:
-                raise ProtocolError(f'{self.alias}: [OptNo {code}] invalid format')
-            _seed = self._read_unpack(8)
-            _slen = 8
-        elif _kind == _kind.SEEDID_128_BIT_UNSIGNED_INTEGER:
-            if _size != 18:
-                raise ProtocolError(f'{self.alias}: [OptNo {code}] invalid format')
-            _seed = self._read_unpack(16)
-            _slen = 16
+        kind = Enum_SeedID.get(data[2] >> 6)
+        if kind == kind.IPV6_SOURCE_ADDRESS:
+            if clen != 2:
+                raise ProtocolError(f'{self.alias}: [OptNo {code}] invalid seed-id length: {clen - 2}')
+        elif kind == kind.SEEDID_16_BIT_UNSIGNED_INTEGER:
+            if clen != 4:
+                raise ProtocolError(f'{self.alias}: [OptNo {code}] invalid seed-id length: {clen - 2}')
+        elif kind == kind.SEEDID_64_BIT_UNSIGNED_INTEGER:
+            if clen != 10:
+                raise ProtocolError(f'{self.alias}: [OptNo {code}] invalid seed-id length: {clen - 2}')
+        elif kind == kind.SEEDID_128_BIT_UNSIGNED_INTEGER:
+            if clen != 18:
+                raise ProtocolError(f'{self.alias}: [OptNo {code}] invalid seed-id length: {clen - 2}')
         else:
-            raise ProtocolError(f'{self.alias}: [OptNo {code}] invalid format')
+            raise ProtocolError(f'{self.alias}: [OptNo {code}] invalid seed-id type: {kind}')
+
+        schema = Schema_MPLOption.unpack(data, length)  # type: Schema_MPLOption
+        self.__header__.options.append(schema)
 
         opt = Data_MPLOption(
             type=code,
             action=acts,
             change=cflg,
-            length=_size + 2,
-            seed_type=_kind,
+            length=schema.len + 2,
+            seed_type=kind,
             flags=Data_MPLFlags(
-                max=bool(int(_smvr[2], base=2)),
-                verification=bool(int(_smvr[3], base=2)),
+                max=bool(schema.flags['max']),
+                drop=bool(schema.flags['drop']),
             ),
-            seq=_seqn,
-            seed_id=_seed,
+            seq=schema.seq,
+            seed_id=schema.seed if kind != kind.IPV6_SOURCE_ADDRESS else None,
         )
-
-        _plen = _size - _slen
-        if _plen:
-            self._read_fileng(_plen)
-
         return opt
 
     def _read_opt_ilnp(self, code: 'Enum_Option', acts: 'Enum_OptionAction', cflg: 'bool', clen: 'int', *,
@@ -1761,3 +1746,88 @@ class HOPOPT(Internet[Data_HOPOPT, Schema_HOPOPT]):
                 nounce=nounce,
             )
         raise ProtocolError(f'{self.alias}: [OptNo {code}] invalid QS function: {func_enum}')
+
+    def _make_opt_rpl(self, code: 'Enum_Option', opt: 'Optional[Data_RPLOption]' = None, *,
+                      down: 'bool' = False,
+                      rank_err: 'bool' = False,
+                      fwd_err: 'bool' = False,
+                      id: 'int' = 0,
+                      rank: 'int' = 0,
+                      **kwargs: 'Any') -> 'Schema_RPLOption':
+        """Make HOPOPT RPL option.
+
+        Args:
+            code: option type value
+            opt: option data
+            down: down flag
+            rank_err: rank error flag
+            fwd_err: forwarding error flag
+            id: RPL instance ID
+            rank: sender rank
+            **kwargs: arbitrary keyword arguments
+
+        Returns:
+            Constructured option schema.
+
+        """
+        return Schema_RPLOption(
+            type=code,
+            len=4,
+            flags={
+                'down': down,
+                'rank_err': rank_err,
+                'fwd_err': fwd_err,
+            },
+            id=id,
+            rank=rank,
+        )
+
+    def _make_opt_mpl(self, code: 'Enum_Option', opt: 'Optional[Data_MPLOption]' = None, *,
+                      max: 'bool' = False,
+                      drop: 'bool' = False,
+                      seq: 'int' = 0,
+                      seed: 'Optional[int]' = None,
+                      **kwargs: 'Any') -> 'Schema_MPLOption':
+        """Make HOPOPT MPL option.
+
+        Args:
+            code: option type value
+            opt: option data
+            max: maximum sequence number flag
+            drop: drop packet flag
+            seq: MPL sequence number
+            seed: MPL seed ID
+            **kwargs: arbitrary keyword arguments
+
+        Returns:
+            Constructured option schema.
+
+        """
+        if seed is None:
+            kind = Enum_SeedID.IPV6_SOURCE_ADDRESS
+            clen = 2
+        else:
+            seed_bl = seed.bit_length()
+            if seed_bl <= 16:
+                kind = Enum_SeedID.SEEDID_16_BIT_UNSIGNED_INTEGER
+                clen = 4
+            elif seed_bl <= 64:
+                kind = Enum_SeedID.SEEDID_64_BIT_UNSIGNED_INTEGER
+                clen = 10
+            elif seed_bl <= 128:
+                kind = Enum_SeedID.SEEDID_128_BIT_UNSIGNED_INTEGER
+                clen = 18
+            else:
+                raise ProtocolError(f'{self.alias}: [OptNo {code}] too large MPL seed ID: {seed}')
+
+        return Schema_MPLOption(
+            type=code,
+            len=clen,
+            flags={
+                'type': kind,
+                'max': max,
+                'drop': drop,
+            },
+            seq=seq,
+            seed=seed,
+        )
