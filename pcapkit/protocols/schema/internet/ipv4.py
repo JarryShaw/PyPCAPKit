@@ -15,6 +15,7 @@ from pcapkit.corekit.fields.numbers import (EnumField, NumberField, UInt8Field, 
 from pcapkit.corekit.fields.strings import BitField, BytesField, PaddingField
 from pcapkit.protocols.schema.schema import Schema
 from pcapkit.utilities.exceptions import FieldValueError
+from pcapkit.const.ipv4.classification_level import ClassificationLevel as Enum_ClassificationLevel
 
 __all__ = [
     'IPv4',
@@ -147,3 +148,35 @@ class NOPOption(Option):
 
     if TYPE_CHECKING:
         def __init__(self, type: 'Enum_OptionNumber', length: 'int') -> 'None': ...
+
+
+class SECOption(Option):
+    """Header schema for IPv4 security (``SEC``) option."""
+
+    #: Classification level.
+    level: 'Enum_ClassificationLevel' = EnumField(length=1, namespace=Enum_ClassificationLevel)
+    #: Protection authority flags.
+    data: 'bytes' = ConditionalField(
+        BytesField(length=lambda pkt: pkt['length'] - 3),
+        lambda pkt: pkt['length'] > 3,
+    )
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_OptionNumber', length: 'int', level: 'int', data: 'Optional[bytes]') -> 'None': ...
+
+
+class LSROption(Option):
+    """Header schema for IPv4 loose source route (``LSR``) option."""
+
+    #: Pointer.
+    pointer: 'int' = UInt8Field()
+    #: Route.
+    route: 'list[IPv4Address]' = ListField(
+        length=lambda pkt: pkt['pointer'] - 4,
+        item_type=IPv4Field(),
+    )
+    #: Padding.
+    padding: 'bytes' = PaddingField(lambda pkt: pkt['length'] - pkt['pointer'] + 1)
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_OptionNumber', length: 'int', pointer: 'int', route: 'list[IPv4Address | str | bytes | int]') -> 'None': ...

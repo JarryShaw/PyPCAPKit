@@ -93,6 +93,7 @@ from pcapkit.protocols.schema.internet.ipv4 import TROption as Schema_TROption
 from pcapkit.protocols.schema.internet.ipv4 import TSOption as Schema_TSOption
 from pcapkit.protocols.schema.internet.ipv4 import UnassignedOption as Schema_UnassignedOption
 from pcapkit.protocols.schema.schema import Schema
+from pcapkit.utilities.warnings import warn, ProtocolWarning
 
 if TYPE_CHECKING:
     from datetime import datetime as dt_type
@@ -560,7 +561,7 @@ class IPv4(IP[Data_IPv4, Schema_IPv4]):
             Parsed option data.
 
         Raises:
-            ProtocolError: If ``size`` is **LESS THAN** ``3``.
+            ProtocolError: If ``length`` is **LESS THAN** ``3``.
 
         """
         if length < 3:
@@ -669,35 +670,40 @@ class IPv4(IP[Data_IPv4, Schema_IPv4]):
             Parsed option data.
 
         Raises:
-            ProtocolError: If ``size`` is **LESS THAN** ``3``.
+            ProtocolError: If ``length`` is **LESS THAN** ``3``.
 
         """
-        size = self._read_unpack(1)
-        if size < 3:
+        if length < 3:
             raise ProtocolError(f'{self.alias}: [OptNo {kind}] invalid format')
 
-        _clvl = self._read_unpack(1)
+        schema = Schema_SECOption.unpack(data, length)  # type: Schema_SECOption
+        self.__header__.options.append(schema)
 
-        if size > 3:
-            _data = OrderedMultiDict()  # type: OrderedMultiDict[Enum_ProtectionAuthority, bool]
-            for counter in range(3, size):
-                _flag = self._read_binary(1)
-                if (counter < size - 1 and int(_flag[7], base=2) != 1) \
-                        or (counter == size - 1 and int(_flag[7], base=2) != 0):
-                    raise ProtocolError(f'{self.alias}: [OptNo {kind}] invalid format')
+        if schema.length > 3:
+            flags = []  # type: list[Enum_ProtectionAuthority]
+            for base, byte in enumerate(schema.data):
+                for bit in range(7):
+                    authority = Enum_ProtectionAuthority.get(base * 8 + bit)
+                    if byte & (0x80 >> bit):
+                        if 'Unassigned' in authority.name:
+                            warn(f'{self.alias}: [OptNo {kind}] invalid format: unknown protection authority: {authority}', ProtocolWarning)
+                        flags.append(authority)
 
-                for (index, bit) in enumerate(_flag):
-                    _auth = Enum_ProtectionAuthority.get(index)
-                    _data.add(_auth, bool(int(bit, base=2)))
+                if byte & 0x01 == 1 and base < schema.length - 4:
+                    #raise ProtocolError(f'{self.alias}: [OptNo {kind}] invalid format: remaining data')
+                    warn(f'{self.alias}: [OptNo {kind}] invalid format: remaining data', ProtocolWarning)
+
+            if schema.data[-1] & 0x01 == 0:
+                warn(f'{self.alias}: [OptNo {kind}] invalid format: field termination indicator not set', ProtocolWarning)
         else:
-            _data = None  # type: ignore[assignment]
+            flags = []
 
         opt = Data_SECOption(
             code=kind,
             type=self._read_ipv4_opt_type(kind),
-            length=size,
-            level=Enum_ClassificationLevel.get(_clvl),
-            flags=_data,
+            length=schema.length,
+            level=schema.level,
+            flags=tuple(flags),
         )
 
         return opt
@@ -727,29 +733,22 @@ class IPv4(IP[Data_IPv4, Schema_IPv4]):
             ProtocolError: If option is malformed.
 
         """
-        size = self._read_unpack(1)
-        if size < 3 or (size - 3) % 4 != 0:
+        if length < 3 or (length - 3) % 4 != 0:
             raise ProtocolError(f'{self.alias}: [OptNo {kind}] invalid format')
 
-        _rptr = self._read_unpack(1)
-        if _rptr < 4:
-            raise ProtocolError(f'{self.alias}: [OptNo {kind}] invalid format')
+        schema = Schema_LSROption.unpack(data, length)  # type: Schema_LSROption
+        self.__header__.options.append(schema)
 
-        counter = 4
-        address = []  # type: list[IPv4Address]
-        endpoint = min(_rptr, size)
-        while counter < endpoint:
-            counter += 4
-            address.append(self._read_ipv4_addr())
+        if schema.pointer < 4:
+            raise ProtocolError(f'{self.alias}: [OptNo {kind}] invalid format: pointer too small: {schema.pointer}')
 
         opt = Data_LSROption(
             code=kind,
             type=self._read_ipv4_opt_type(kind),
-            length=size,
-            pointer=_rptr,
-            route=tuple(address) or None,
+            length=schema.length,
+            pointer=schema.pointer,
+            route=tuple(schema.route),
         )
-
         return opt
 
     def _read_opt_ts(self, kind: 'Enum_OptionNumber', *, data: 'bytes',
@@ -862,7 +861,7 @@ class IPv4(IP[Data_IPv4, Schema_IPv4]):
             Parsed option data.
 
         Raises:
-            ProtocolError: If ``size`` is **LESS THAN** ``3``.
+            ProtocolError: If ``length`` is **LESS THAN** ``3``.
 
         """
         size = self._read_unpack(1)
@@ -969,7 +968,7 @@ class IPv4(IP[Data_IPv4, Schema_IPv4]):
             Parsed option data.
 
         Raises:
-            ProtocolError: If ``size`` is **NOT** ``4``.
+            ProtocolError: If ``length`` is **NOT** ``4``.
 
         """
         size = self._read_unpack(1)
@@ -1058,7 +1057,7 @@ class IPv4(IP[Data_IPv4, Schema_IPv4]):
             Parsed option data.
 
         Raises:
-            ProtocolError: If ``size`` is **NOT** ``4``.
+            ProtocolError: If ``length`` is **NOT** ``4``.
 
         """
         size = self._read_unpack(1)
@@ -1096,7 +1095,7 @@ class IPv4(IP[Data_IPv4, Schema_IPv4]):
             Parsed option data.
 
         Raises:
-            ProtocolError: If ``size`` is **NOT** ``4``.
+            ProtocolError: If ``length`` is **NOT** ``4``.
 
         """
         size = self._read_unpack(1)
@@ -1139,7 +1138,7 @@ class IPv4(IP[Data_IPv4, Schema_IPv4]):
             Parsed option data.
 
         Raises:
-            ProtocolError: If ``size`` is **NOT** ``12``.
+            ProtocolError: If ``length`` is **NOT** ``12``.
 
         """
         size = self._read_unpack(1)
@@ -1185,7 +1184,7 @@ class IPv4(IP[Data_IPv4, Schema_IPv4]):
             Parsed option data.
 
         Raises:
-            ProtocolError: If ``size`` is **NOT** ``4``.
+            ProtocolError: If ``length`` is **NOT** ``4``.
 
         """
         size = self._read_unpack(1)
@@ -1412,4 +1411,83 @@ class IPv4(IP[Data_IPv4, Schema_IPv4]):
         return Schema_NOPOption(
             type=kind,
             length=1,
+        )
+
+    def _make_opt_sec(self, kind: 'Enum_OptionNumber', option: 'Optional[Data_SECOption]' = None, *,
+                      level: 'Enum_ClassificationLevel | StdlibEnum | AenumEnum | int | str' = Enum_ClassificationLevel.Unclassified,
+                      level_default: 'Optional[int]' = None,
+                      level_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
+                      level_reversed: 'bool' = False,
+                      authorities: 'Optional[list[Enum_ProtectionAuthority]]' = None,
+                      **kwargs: 'Any') -> 'Schema_SECOption':
+        """Make IPv4 Security (``SEC``) option.
+
+        Args:
+            kind: option type code
+            option: option data
+            sec: security option
+            **kwargs: arbitrary keyword arguments
+
+        Returns:
+            IPv4 option schema.
+
+        """
+        if option is not None:
+            level_val = self._make_index(level, level_default, namespace=level_namespace,  # type: ignore[call-overload]
+                                         reversed=level_reversed, pack=False)
+            authorities = cast('list[Enum_ProtectionAuthority]', option.flags)
+        else:
+            authorities = [] if authorities is None else authorities
+
+        if authorities:
+            max_auth = max(authorities)
+            int_len = math.ceil(max_auth / 8)
+
+            data_list = [b'0' for _ in range(int_len * 8)]
+            for auth in authorities:
+                data_list[auth] = b'1'
+            data = int(b''.join(data_list), base=2).to_bytes(int_len, 'big', signed=False)
+        else:
+            data = b''
+
+        return Schema_SECOption(
+            type=kind,
+            length=3 + len(data),
+            level=level_val,
+            data=data,
+        )
+
+    def _make_opt_lsr(self, kind: 'Enum_OptionNumber', option: 'Optional[Data_LSROption]' = None, *,
+                      length: 'int' = 0,
+                      route: 'Optional[list[IPv4Address | str | bytes | int]]' = None,
+                      **kwargs: 'Any') -> 'Schema_LSROption':
+        """Make IPv4 Loose Source and Record Route (``LSR``) option.
+
+        Args:
+            kind: option type code
+            option: option data
+            length: maximum length of the option
+            route: list of IPv4 addresses as recorded routes
+            **kwargs: arbitrary keyword arguments
+
+        Returns:
+            IPv4 option schema.
+
+        """
+        if option is not None:
+            route = cast('list[IPv4Address | str | bytes | int]', option.route)
+            pointer = option.pointer
+            length = option.length
+        else:
+            route = [] if route is None else route
+            length = math.ceil((length - 3) / 4) * 4
+            pointer = 4 + len(route) * 4
+
+        max_len = max(3 + len(route) * 4, length)
+
+        return Schema_LSROption(
+            type=kind,
+            length=max_len,
+            pointer=pointer,
+            route=route,
         )

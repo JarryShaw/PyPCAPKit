@@ -179,10 +179,10 @@ class SECOption(Option):
     #: Classification level.
     level: 'ClassificationLevel'
     #: Protection authority flags.
-    flags: 'Optional[OrderedMultiDict[ProtectionAuthority, bool]]'
+    flags: 'tuple[ProtectionAuthority, ...]'
 
     if TYPE_CHECKING:
-        def __init__(self, code: 'OptionNumber', length: 'int', type: 'OptionType', level: 'ClassificationLevel', flags: 'Optional[OrderedMultiDict[ProtectionAuthority, bool]]') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
+        def __init__(self, code: 'OptionNumber', length: 'int', type: 'OptionType', level: 'ClassificationLevel', flags: 'tuple[ProtectionAuthority, ...]') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
 class LSROption(Option):
@@ -191,10 +191,10 @@ class LSROption(Option):
     #: Pointer.
     pointer: 'int'
     #: Route.
-    route: 'Optional[tuple[IPv4Address, ...]]'
+    route: 'tuple[IPv4Address, ...]'
 
     if TYPE_CHECKING:
-        def __init__(self, code: 'OptionNumber', length: 'int', type: 'OptionType', pointer: 'int', route: 'Optional[tuple[IPv4Address, ...]]') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
+        def __init__(self, code: 'OptionNumber', length: 'int', type: 'OptionType', pointer: 'int', route: 'tuple[IPv4Address, ...]') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
 class TSOption(Option):
