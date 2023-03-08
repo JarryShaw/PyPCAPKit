@@ -35,7 +35,7 @@ class ProtectionAuthority(Vendor):
     """Protection Authority Bit Assignments"""
 
     #: Value limit checker.
-    FLAG = 'isinstance(value, int) and 0 <= value <= 7'
+    FLAG = 'isinstance(value, int) and value >= 0'
 
     def request(self) -> 'dict[int, str]':  # type: ignore[override] # pylint: disable=arguments-differ
         """Fetch registry data.

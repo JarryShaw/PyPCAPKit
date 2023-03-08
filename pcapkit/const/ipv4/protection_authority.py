@@ -55,7 +55,7 @@ class ProtectionAuthority(IntEnum):
             value: Value to get enum item.
 
         """
-        if not (isinstance(value, int) and 0 <= value <= 7):
+        if not (isinstance(value, int) and value >= 0):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))
         extend_enum(cls, 'Unassigned_%d' % value, value)
         return cls(value)
