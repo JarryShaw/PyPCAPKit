@@ -33,10 +33,12 @@ __all__ = [
 if TYPE_CHECKING:
     from ipaddress import IPv4Address, IPv6Address
     from typing import Any, Optional
+    from datetime import datetime
 
     from typing_extensions import TypedDict
 
     from pcapkit.protocols.protocol import Protocol
+    from pcapkit.corekit.multidict import OrderedMultiDict
 
     class VerIHLField(TypedDict):
         """Version and header length field."""
@@ -64,6 +66,14 @@ if TYPE_CHECKING:
         mf: int
         #: Fragment offset.
         offset: int
+
+    class TSFlags(TypedDict):
+        """Timestamp flags field."""
+
+        #: Timestamp overflow flag.
+        oflw: int
+        #: Timestamp type flag.
+        flag: int
 
 
 class IPv4(Schema):
@@ -175,8 +185,36 @@ class LSROption(Option):
         length=lambda pkt: pkt['pointer'] - 4,
         item_type=IPv4Field(),
     )
-    #: Padding.
-    padding: 'bytes' = PaddingField(lambda pkt: pkt['length'] - pkt['pointer'] + 1)
+    #: Remaining data buffer0.
+    remainder: 'bytes' = PaddingField(
+        length=lambda pkt: pkt['length'] - pkt['pointer'] + 1,
+        default=bytes(36),  # a reasonable default
+    )
 
     if TYPE_CHECKING:
         def __init__(self, type: 'Enum_OptionNumber', length: 'int', pointer: 'int', route: 'list[IPv4Address | str | bytes | int]') -> 'None': ...
+
+
+class TSOption(Option):
+    """Header schema for IPv4 timestamp (``TS``) option."""
+
+    #: Pointer.
+    pointer: 'int' = UInt8Field()
+    #: Overflow and flags.
+    flags: 'TSFlags' = BitField(length=1, namespace={
+        'oflw': (0, 4),
+        'flag': (4, 4),
+    })
+    #: Timestamps and internet addresses.
+    data: 'list[int] | OrderedMultiDict[IPv4Address, int]' = ListField(
+        length=lambda pkt: pkt['pointer'] - 5 if pkt['flags']['flag'] != 3 else pkt['length'] - 4,
+        item_type=UInt32Field(),
+    )
+    #: Remaining data buffer.
+    remainder: 'bytes' = PaddingField(
+        length=lambda pkt: pkt['length'] - pkt['pointer'] + 1 if pkt['flags']['flag'] != 3 else 0,
+        default=bytes(36),  # 36 is the maximum length of the option data field for timestamps
+    )
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_OptionNumber', length: 'int', pointer: 'int', flags: 'TSFlags', data: 'list[int]') -> 'None': ...

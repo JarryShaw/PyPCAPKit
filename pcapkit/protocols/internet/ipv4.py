@@ -97,6 +97,7 @@ from pcapkit.utilities.warnings import warn, ProtocolWarning
 
 if TYPE_CHECKING:
     from datetime import datetime as dt_type
+    from datetime import timedelta
     from ipaddress import IPv4Address
     from typing import Any, Callable, Type, Optional
 
@@ -314,8 +315,8 @@ class IPv4(IP[Data_IPv4, Schema_IPv4]):
              protocol_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
              protocol_reversed: 'bool' = False,
              checksum: 'bytes' = b'\x00\x00',
-             src: 'IPv4Address | str | int | bytes' = '0.0.0.0',  # nosec: B104
-             dst: 'IPv4Address | str | int | bytes' = '255.255.255.255',
+             src: 'IPv4Address | str | int | bytes' = '127.0.0.1',
+             dst: 'IPv4Address | str | int | bytes' = '0.0.0.0',  # nosec: B104
              options: 'Optional[list[Schema_Option | tuple[Enum_OptionNumber, dict[str, Any]] | bytes] | Option]' = None,  # pylint: disable=line-too-long
              payload: 'bytes | Protocol | Schema' = b'',
              **kwargs: 'Any') -> 'Schema_IPv4':
@@ -783,57 +784,81 @@ class IPv4(IP[Data_IPv4, Schema_IPv4]):
             ProtocolError: If the option is malformed.
 
         """
-        size = self._read_unpack(1)
-        if size > 40 or size < 4:
+        if length > 40 or length < 4:
             raise ProtocolError(f'{self.alias}: [OptNo {kind}] invalid format')
 
-        _tptr = self._read_unpack(1)
-        _oflg = self._read_binary(1)
-        _oflw = int(_oflg[:4], base=2)
-        _tflg = int(_oflg[4:], base=2)
+        schema = Schema_TSOption.unpack(data, length)  # type: Schema_TSOption
+        self.__header__.options.append(schema)
 
-        if _tptr < 5:
-            raise ProtocolError(f'{self.alias}: [OptNo {kind}] invalid format')
+        if schema.pointer < 5:
+            raise ProtocolError(f'{self.alias}: [OptNo {kind}] invalid format: pointer too small: {schema.pointer}')
 
-        _flag = Enum_TSFlag.get(_tflg)
+        ts_flag = Enum_TSFlag.get(schema.flags['flag'])
+        if ts_flag == Enum_TSFlag.Timestamp_Only:
+            ts_data = cast('list[int]', schema.data)
+            schema.data = []
+            ts_list = []  # type: list[int | timedelta]
 
-        endpoint = min(_tptr, size)
-        if _flag == Enum_TSFlag.Timestamp_Only:
-            if (size - 4) % 4 != 0:
-                raise ProtocolError(f'{self.alias}: [OptNo {kind}] invalid format')
-            counter = 5
+            for ts in ts_data:
+                schema.data.append(ts)
 
-            _tsls = []  # type: list[dt_type]
-            while counter < endpoint:
-                counter += 4
-                time = self._read_unpack(4, lilendian=True)
-                _tsls.append(datetime.datetime.fromtimestamp(time))
-            timestamp = tuple(_tsls) or None
-        elif _flag in (Enum_TSFlag.IP_with_Timestamp, Enum_TSFlag.Prespecified_IP_with_Timestamp):
-            if (size - 4) % 8 != 0:
-                raise ProtocolError(f'{self.alias}: [OptNo {kind}] invalid format')
+                if ts >> 31:
+                    warn(f'{self.alias}: [OptNo {kind}] invalid format: timestamp error: {ts_val}', ProtocolWarning)
+                    ts_val = ts & 0x7FFFFFFF  # type: int | timedelta
+                else:
+                    ts_val = datetime.timedelta(milliseconds=ts)
+                ts_list.append(ts_val)
+            timestamp = tuple(ts_list)  # type: tuple[int | timedelta, ...] | OrderedMultiDict[IPv4Address, int | timedelta]
+        elif ts_flag == Enum_TSFlag.IP_with_Timestamp:
+            ts_data = cast('list[int]', schema.data)
+            schema.data = OrderedMultiDict()
+            timestamp = OrderedMultiDict()
 
-            counter = 5
-            _tsdt = OrderedMultiDict()  # type: OrderedMultiDict[IPv4Address, dt_type]
-            while counter < endpoint:
-                counter += 8
-                ip = self._read_ipv4_addr()
-                time = self._read_unpack(4, lilendian=True)
-                _tsdt.add(ip, datetime.datetime.fromtimestamp(time))
-            timestamp = _tsdt or None  # type: ignore[assignment]
+            for ip, ts in zip(ts_data[::2], ts_data[1::2]):
+                ip_val = cast('IPv4Address', ipaddress.ip_address(ip))
+                schema.data.add(ip_val, ts)
+
+                if ts >> 31:
+                    warn(f'{self.alias}: [OptNo {kind}] invalid format: timestamp error: {ts_val}', ProtocolWarning)
+                    ts_val = ts & 0x7FFFFFFF
+                else:
+                    ts_val = datetime.timedelta(milliseconds=ts)
+                timestamp.add(ip_val, ts_val)
+        elif ts_flag == Enum_TSFlag.Prespecified_IP_with_Timestamp:
+            ts_data = cast('list[int]', schema.data)
+            schema.data = OrderedMultiDict()
+            timestamp = OrderedMultiDict()
+
+            for ip, ts in zip(ts_data[::2], ts_data[1::2]):
+                ip_val = cast('IPv4Address', ipaddress.ip_address(ip))
+                schema.data.add(ip_val, ts)
+
+                if ts >> 31:
+                    warn(f'{self.alias}: [OptNo {kind}] invalid format: timestamp error: {ts_val}', ProtocolWarning)
+                    ts_val = ts & 0x7FFFFFFF
+                else:
+                    ts_val = datetime.timedelta(milliseconds=ts)
+                timestamp.add(ip_val, ts_val)
+
+            # extract also the prespecified IP addresses
+            # but set the timestamp to 0
+            pad = schema.remainder
+            for index in range(0, len(pad), 8):
+                buf_ip = pad[index:index + 4]
+                schema.data.add(ipaddress.ip_address(buf_ip), 0)  # type: ignore[arg-type]
         else:
-            timestamp = self._read_fileng(size - 4) or None  # type: ignore[assignment]
+            warn(f'{self.alias}: [OptNo {kind}] invalid format: unknown timestmap flag: {ts_flag}', ProtocolWarning)
+            timestamp = tuple(schema.data)
 
         opt = Data_TSOption(
             code=kind,
             type=self._read_ipv4_opt_type(kind),
-            length=size,
-            pointer=_tptr,
-            overflow=_oflw,
-            flag=_flag,
+            length=schema.length,
+            pointer=schema.pointer,
+            overflow=schema.flags['oflw'],
+            flag=ts_flag,
             timestamp=timestamp,
         )
-
         return opt
 
     def _read_opt_esec(self, kind: 'Enum_OptionNumber', *, data: 'bytes',
@@ -1458,7 +1483,7 @@ class IPv4(IP[Data_IPv4, Schema_IPv4]):
         )
 
     def _make_opt_lsr(self, kind: 'Enum_OptionNumber', option: 'Optional[Data_LSROption]' = None, *,
-                      length: 'int' = 0,
+                      length: 'int' = 0xff,
                       route: 'Optional[list[IPv4Address | str | bytes | int]]' = None,
                       **kwargs: 'Any') -> 'Schema_LSROption':
         """Make IPv4 Loose Source and Record Route (``LSR``) option.
@@ -1480,14 +1505,96 @@ class IPv4(IP[Data_IPv4, Schema_IPv4]):
             length = option.length
         else:
             route = [] if route is None else route
-            length = math.ceil((length - 3) / 4) * 4
+            length = 3 + math.ceil((length - 3) / 4) * 4
             pointer = 4 + len(route) * 4
-
-        max_len = max(3 + len(route) * 4, length)
 
         return Schema_LSROption(
             type=kind,
-            length=max_len,
+            length=length,
             pointer=pointer,
             route=route,
+        )
+
+    def _make_opt_ts(self, kind: 'Enum_OptionNumber', option: 'Optional[Data_TSOption]' = None, *,
+                     length: 'int' = 40,
+                     overflow: 'int' = 0,
+                     timestamp: 'Optional[list[int | timedelta] | dict[IPv4Address, int | timedelta]]' = None,
+                     **kwargs: 'Any') -> 'Schema_TSOption':
+        """Make IPv4 Timestamp (``TS``) option.
+
+        Args:
+            kind: option type code
+            option: option data
+            length: maximum length of the option
+            timestamp: list of timestamps
+            **kwargs: arbitrary keyword arguments
+
+        Returns:
+            IPv4 option schema.
+
+        """
+        if option is not None:
+            ts_list = []  # type: list[int]
+            if isinstance(option.timestamp, tuple):
+                for ts in option.timestamp:
+                    if not isinstance(ts, int):
+                        ts = math.floor(ts.total_seconds() * 1000)
+
+                    if ts.bit_length() > 31:
+                        warn(f'{self.alias}: [OptNo {kind}] timestamp value is too large: {ts}', ProtocolWarning)
+                        ts = ts | 0x80000000
+                    ts_list.append(ts)
+            else:
+                for ip, ts in option.timestamp.items(True):
+                    ts_list.append(int(ip))
+                    if not isinstance(ts, int):
+                        ts = math.floor(ts.total_seconds() * 1000)
+
+                    if ts.bit_length() > 31:
+                        warn(f'{self.alias}: [OptNo {kind}] timestamp value is too large: {ts}', ProtocolWarning)
+                        ts = ts | 0x80000000
+                    ts_list.append(ts)
+
+            length = option.length
+            pointer = option.pointer
+            overflow = option.overflow
+            flag = option.flag
+        else:
+            ts_list = []
+            if isinstance(timestamp, list):
+                for ts in timestamp:
+                    if not isinstance(ts, int):
+                        ts = math.floor(ts.total_seconds() * 1000)
+
+                    if ts.bit_length() > 31:
+                        warn(f'{self.alias}: [OptNo {kind}] timestamp value is too large: {ts}', ProtocolWarning)
+                        ts = ts | 0x80000000
+                    ts_list.append(ts)
+                flag = Enum_TSFlag.Timestamp_Only  # type: ignore[assignment]
+            elif isinstance(timestamp, dict):
+                flag = Enum_TSFlag.IP_with_Timestamp  # type: ignore[assignment]
+                for ip, ts in timestamp.items():
+                    ts_list.append(int(ip))
+                    if not isinstance(ts, int):
+                        ts = math.floor(ts.total_seconds() * 1000)
+                    if ts == 0:
+                        flag = Enum_TSFlag.Prespecified_IP_with_Timestamp  # type: ignore[assignment]
+
+                    if ts.bit_length() > 31:
+                        warn(f'{self.alias}: [OptNo {kind}] timestamp value is too large: {ts}', ProtocolWarning)
+                        ts = ts | 0x80000000
+                    ts_list.append(ts)
+
+            length = math.ceil(length / 4) * 4
+            pointer = 5 + len(ts_list) * 4
+
+        return Schema_TSOption(
+            type=kind,
+            length=length,
+            pointer=pointer,
+            flags={
+                'oflw': overflow,
+                'flag': flag,
+            },
+            data=ts_list,
         )

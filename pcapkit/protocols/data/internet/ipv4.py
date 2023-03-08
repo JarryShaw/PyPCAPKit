@@ -207,10 +207,10 @@ class TSOption(Option):
     #: Flag.
     flag: 'TSFlag'
     #: Timestamp data.
-    timestamp: 'Optional[bytes | tuple[dt_type, ...] | OrderedMultiDict[IPv4Address, dt_type]]'
+    timestamp: 'tuple[timedelta | int, ...] | OrderedMultiDict[IPv4Address, timedelta | int]'
 
     if TYPE_CHECKING:
-        def __init__(self, code: 'OptionNumber', length: 'int', type: 'OptionType', pointer: 'int', overflow: 'int', flag: 'TSFlag', timestamp: 'Optional[bytes | tuple[dt_type, ...] | OrderedMultiDict[IPv4Address, dt_type]]') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
+        def __init__(self, code: 'OptionNumber', length: 'int', type: 'OptionType', pointer: 'int', overflow: 'int', flag: 'TSFlag', timestamp: 'tuple[timedelta | int, ...] | OrderedMultiDict[IPv4Address, timedelta | int]') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
 class ESECOption(Option):
