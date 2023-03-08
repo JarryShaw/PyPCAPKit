@@ -388,7 +388,13 @@ class Schema(Mapping[str, VT], Generic[VT]):
                 continue
 
             if isinstance(field, PaddingField):
-                data.read(field.length)
+                byte = data.read(field.length)
+                self.__buffer__[field.name] = byte
+
+                packet[field.name] = byte
+                packet['__length__'] -= field.length
+
+                setattr(self, field.name, byte)
                 continue
 
             if isinstance(field, ConditionalField):
