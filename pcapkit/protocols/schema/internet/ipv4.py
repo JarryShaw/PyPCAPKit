@@ -10,11 +10,9 @@ from pcapkit.const.ipv4.router_alert import RouterAlert as Enum_RouterAlert
 from pcapkit.const.reg.transtype import TransType as Enum_TransType
 from pcapkit.corekit.fields.ipaddress import IPv4Field
 from pcapkit.corekit.fields.misc import ConditionalField, ListField, PayloadField
-from pcapkit.corekit.fields.numbers import (EnumField, NumberField, UInt8Field, UInt16Field,
-                                            UInt32Field)
+from pcapkit.corekit.fields.numbers import EnumField, UInt8Field, UInt16Field, UInt32Field
 from pcapkit.corekit.fields.strings import BitField, BytesField, PaddingField
 from pcapkit.protocols.schema.schema import Schema
-from pcapkit.utilities.exceptions import FieldValueError
 
 __all__ = [
     'IPv4',
@@ -31,9 +29,8 @@ __all__ = [
 ]
 
 if TYPE_CHECKING:
-    from datetime import datetime
-    from ipaddress import IPv4Address, IPv6Address
-    from typing import Any, Optional
+    from ipaddress import IPv4Address
+    from typing import Optional
 
     from typing_extensions import TypedDict
 

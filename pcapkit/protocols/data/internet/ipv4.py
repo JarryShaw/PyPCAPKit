@@ -8,7 +8,6 @@ from pcapkit.const.ipv4.tos_del import ToSDelay
 from pcapkit.protocols.data.data import Data
 
 if TYPE_CHECKING:
-    from datetime import datetime as dt_type
     from datetime import timedelta
     from ipaddress import IPv4Address
     from typing import Any, Optional
