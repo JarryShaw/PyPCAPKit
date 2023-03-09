@@ -972,13 +972,14 @@ class HOPOPT(Internet[Data_HOPOPT, Schema_HOPOPT]):
             schema_req = Schema_QuickStartRequestOption.unpack(data, length)  # type: Schema_QuickStartRequestOption
             self.__header__.options.append(schema_req)
 
+            rate = schema_req.flags['rate']
             opt = Data_QuickStartRequestOption(
                 type=code,
                 action=acts,
                 change=cflg,
                 length=schema_req.len + 2,
                 func=func,
-                rate=40000 * (2 ** schema_req.flags['rate']) / 1000,
+                rate=40000 * (2 ** rate) / 1000 if rate > 0 else 0,
                 ttl=datetime.timedelta(seconds=schema_req.ttl),
                 nonce=schema_req.nonce,
             )  # type: Data_QuickStartOption
@@ -986,13 +987,14 @@ class HOPOPT(Internet[Data_HOPOPT, Schema_HOPOPT]):
             schema_rep = Schema_QuickStartReportOption.unpack(data, length)  # type: Schema_QuickStartReportOption
             self.__header__.options.append(schema_rep)
 
+            rate = schema_rep.flags['rate']
             opt = Data_QuickStartReportOption(
                 type=code,
                 action=acts,
                 change=cflg,
                 length=schema_rep.len + 2,
                 func=func,
-                rate=40000 * (2 ** schema_rep.flags['rate']) / 1000,
+                rate=40000 * (2 ** rate) / 1000 if rate > 0 else 0,
                 nonce=schema_rep.nonce,
             )
         else:
@@ -1762,7 +1764,13 @@ class HOPOPT(Internet[Data_HOPOPT, Schema_HOPOPT]):
         Args:
             code: option type value
             opt: option data
-
+            func: QS function type
+            func_default: default value for QS function type
+            func_namespace: namespace for QS function type
+            func_reversed: reversed flag for QS function type
+            rate: rate (in kbps)
+            ttl: time to live (in seconds)
+            nonce: nonce value
             **kwargs: arbitrary keyword arguments
 
         Returns:
@@ -1771,7 +1779,7 @@ class HOPOPT(Internet[Data_HOPOPT, Schema_HOPOPT]):
         """
         func_enum = self._make_index(func, func_default, namespace=func_namespace,  # type: ignore[call-overload]
                                      reversed=func_reversed, pack=False)
-        rate_val = math.floor(math.log2(rate * 1000 / 40000))
+        rate_val = math.floor(math.log2(rate * 1000 / 40000)) if rate > 0 else 0
 
         if func_enum == Enum_QSFunction.Quick_Start_Request:
             ttl_value = ttl if isinstance(ttl, int) else math.floor(ttl.total_seconds())
@@ -1789,7 +1797,7 @@ class HOPOPT(Internet[Data_HOPOPT, Schema_HOPOPT]):
         if func_enum == Enum_QSFunction.Report_of_Approved_Rate:
             return Schema_QuickStartReportOption(
                 type=code,
-                len=2,
+                len=6,
                 flags={
                     'func': func_enum,
                     'rate': rate_val,
