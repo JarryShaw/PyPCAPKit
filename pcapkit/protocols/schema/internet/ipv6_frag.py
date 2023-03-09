@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # mypy: disable-error-code=assignment
-"""header schema for IPv6 fragmentation header"""
+"""header schema for IPv6 Fragment Header"""
 
 from typing import TYPE_CHECKING
 
@@ -27,7 +27,7 @@ if TYPE_CHECKING:
 
 
 class IPv6_Frag(Schema):
-    """Header schema for IPv6 Fragmentation packet."""
+    """Header schema for IPv6-Frag packet."""
 
     #: Next header.
     next: 'Enum_TransType' = EnumField(length=1, namespace=Enum_TransType)

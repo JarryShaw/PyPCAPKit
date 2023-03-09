@@ -358,7 +358,7 @@ class IPv6_Opts(Internet[Data_IPv6_Opts, Schema_IPv6_Opts]):
 
         Args:
             code: IPv6-Opts option code.
-            meth: Method name or callable to parse the option.
+            meth: Method name or callable to parse and/or construct the option.
 
         """
         cls.__option__[code] = meth
