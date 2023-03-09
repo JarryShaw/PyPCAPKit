@@ -184,11 +184,12 @@ class HOPOPT(Internet[Data_HOPOPT, Schema_HOPOPT]):
     # Defaults.
     ##########################################################################
 
-    #: DefaultDict[Enum_Option, str | OptionParser]: Option code to method
-    #: mapping, c.f. :meth:`_read_hopopt_options`. Method names are expected
-    #: to be referred to the class by ``_read_opt_${name}``, and if such name
-    #: not found, the value should then be a method that can parse the option
-    #: by itself.
+    #: DefaultDict[Enum_Option, str | tuple[OptionParser, OptionConstructor]]:
+    #: Option code to method mapping, c.f. :meth:`_read_hopopt_options` and/or
+    #: :meth:`_make_hopopt_options`. Method names are expected to be referred
+    #: to the class by ``_read_opt_${name}`` and/or ``_make_opt_${name}, and
+    #: if such name not found, the value should then be a method that can parse
+    #: the option by itself.
     __option__ = collections.defaultdict(
         lambda: 'none',
         {
