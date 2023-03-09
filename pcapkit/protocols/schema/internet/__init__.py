@@ -86,8 +86,10 @@ from pcapkit.protocols.schema.internet.hopopt import \
 from pcapkit.protocols.schema.internet.hopopt import MPLOption as HOPOPT_MPLOption
 from pcapkit.protocols.schema.internet.hopopt import PadOption as HOPOPT_PadOption
 from pcapkit.protocols.schema.internet.hopopt import PDMOption as HOPOPT_PDMOption
-from pcapkit.protocols.schema.internet.hopopt import QuickStartReportOption as HOPOPT_QuickStartReportOption
-from pcapkit.protocols.schema.internet.hopopt import QuickStartRequestOption as HOPOPT_QuickStartRequestOption
+from pcapkit.protocols.schema.internet.hopopt import \
+    QuickStartReportOption as HOPOPT_QuickStartReportOption
+from pcapkit.protocols.schema.internet.hopopt import \
+    QuickStartRequestOption as HOPOPT_QuickStartRequestOption
 from pcapkit.protocols.schema.internet.hopopt import RouterAlertOption as HOPOPT_RouterAlertOption
 from pcapkit.protocols.schema.internet.hopopt import RPLOption as HOPOPT_RPLOption
 from pcapkit.protocols.schema.internet.hopopt import \
@@ -99,17 +101,19 @@ from pcapkit.protocols.schema.internet.hopopt import \
 from pcapkit.protocols.schema.internet.hopopt import UnassignedOption as HOPOPT_UnassignedOption
 
 # Internet Protocol version 4
-from pcapkit.protocols.schema.internet.ipv4 import IPv4
 from pcapkit.protocols.schema.internet.ipv4 import EOOLOption as IPv4_EOOLOption
 from pcapkit.protocols.schema.internet.ipv4 import ESECOption as IPv4_ESECOption
 from pcapkit.protocols.schema.internet.ipv4 import Flags as IPv4_Flags
+from pcapkit.protocols.schema.internet.ipv4 import IPv4
 from pcapkit.protocols.schema.internet.ipv4 import LSROption as IPv4_LSROption
 from pcapkit.protocols.schema.internet.ipv4 import MTUPOption as IPv4_MTUPOption
 from pcapkit.protocols.schema.internet.ipv4 import MTUROption as IPv4_MTUROption
 from pcapkit.protocols.schema.internet.ipv4 import NOPOption as IPv4_NOPOption
 from pcapkit.protocols.schema.internet.ipv4 import QSOption as IPv4_QSOption
-from pcapkit.protocols.schema.internet.ipv4 import QuickStartReportOption as IPv4_QuickStartReportOption
-from pcapkit.protocols.schema.internet.ipv4 import QuickStartRequestOption as IPv4_QuickStartRequestOption
+from pcapkit.protocols.schema.internet.ipv4 import \
+    QuickStartReportOption as IPv4_QuickStartReportOption
+from pcapkit.protocols.schema.internet.ipv4 import \
+    QuickStartRequestOption as IPv4_QuickStartRequestOption
 from pcapkit.protocols.schema.internet.ipv4 import RROption as IPv4_RROption
 from pcapkit.protocols.schema.internet.ipv4 import RTRALTOption as IPv4_RTRALTOption
 from pcapkit.protocols.schema.internet.ipv4 import SECOption as IPv4_SECOption

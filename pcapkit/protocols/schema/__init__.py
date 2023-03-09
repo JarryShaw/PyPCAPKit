@@ -49,6 +49,15 @@ __all__ = [
     'HIP_EchoRequestUnsignedParameter', 'HIP_EchoResponseUnsignedParameter', 'HIP_RelayFromParameter',
     'HIP_RelayToParameter', 'HIP_RouteViaParameter', 'HIP_FromParameter',
     'HIP_RVSHMACParameter', 'HIP_RelayHMACParameter',
+    'IPv4',
+    'IPv4_ToSField', 'IPv4_Flags',
+    'IPv4_OptionType',
+    'IPv4_UnassignedOption', 'IPv4_EOOLOption', 'IPv4_NOPOption',
+    'IPv4_SECOption', 'IPv4_LSROption', 'IPv4_TSOption',
+    'IPv4_ESECOption', 'IPv4_RROption', 'IPv4_SIDOption',
+    'IPv4_SSROption', 'IPv4_MTUPOption', 'IPv4_MTUROption',
+    'IPv4_TROption', 'IPv4_RTRALTOption', 'IPv4_QSOption',
+    'IPv4_QuickStartRequestOption', 'IPv4_QuickStartReportOption',
 
     # Transport Layer Protocols
 
