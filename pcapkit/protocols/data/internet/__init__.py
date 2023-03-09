@@ -106,6 +106,8 @@ from pcapkit.protocols.data.internet.ipv4 import MTUROption as IPv4_MTUROption
 from pcapkit.protocols.data.internet.ipv4 import NOPOption as IPv4_NOPOption
 from pcapkit.protocols.data.internet.ipv4 import OptionType as IPv4_OptionType
 from pcapkit.protocols.data.internet.ipv4 import QSOption as IPv4_QSOption
+from pcapkit.protocols.data.internet.ipv4 import QuickStartReportOption as IPv4_QuickStartReportOption
+from pcapkit.protocols.data.internet.ipv4 import QuickStartRequestOption as IPv4_QuickStartRequestOption
 from pcapkit.protocols.data.internet.ipv4 import RROption as IPv4_RROption
 from pcapkit.protocols.data.internet.ipv4 import RTRALTOption as IPv4_RTRALTOption
 from pcapkit.protocols.data.internet.ipv4 import SECOption as IPv4_SECOption
@@ -209,6 +211,7 @@ __all__ = [
     'IPv4_ESECOption', 'IPv4_RROption', 'IPv4_SIDOption',
     'IPv4_SSROption', 'IPv4_MTUPOption', 'IPv4_MTUROption',
     'IPv4_TROption', 'IPv4_RTRALTOption', 'IPv4_QSOption',
+    'IPv4_QuickStartRequestOption', 'IPv4_QuickStartReportOption',
 
     # IPv6 Fragment Header
     'IPv6_Frag',

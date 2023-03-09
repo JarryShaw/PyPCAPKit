@@ -39,6 +39,7 @@ __all__ = [
     'ESECOption', 'RROption', 'SIDOption',
     'SSROption', 'MTUPOption', 'MTUROption',
     'TROption', 'RTRALTOption', 'QSOption',
+    'QuickStartRequestOption', 'QuickStartReportOption',
 ]
 
 
@@ -216,13 +217,13 @@ class TSOption(Option):
 class ESECOption(Option):
     """Data model for IPv4 Extended Security (``ESEC``) option."""
 
-    #: Classification level.
-    level: 'ClassificationLevel'
-    #: Protection authority flags.
-    flags: 'Optional[OrderedMultiDict[ProtectionAuthority, bool]]'
+    #: Additional security information format code.
+    format: 'int'
+    #: Additional security information.
+    info: 'bytes'
 
     if TYPE_CHECKING:
-        def __init__(self, code: 'OptionNumber', length: 'int', type: 'OptionType', level: 'ClassificationLevel', flags: 'Optional[OrderedMultiDict[ProtectionAuthority, bool]]') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
+        def __init__(self, code: 'OptionNumber', length: 'int', type: 'OptionType', format: 'int', info: 'bytes') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
 class RROption(Option):
@@ -323,10 +324,25 @@ class QSOption(Option):
     func: 'QSFunction'
     #: Rate request/report.
     rate: 'int'
+
+
+class QuickStartRequestOption(QSOption):
+    """Data model for IPv4 Quick Start request option."""
+
     #: TTL.
-    ttl: 'Optional[timedelta]'
+    ttl: 'timedelta'
     #: Nonce.
-    nonce: 'int'
+    nonce: 'bytes'
 
     if TYPE_CHECKING:
-        def __init__(self, code: 'OptionNumber', length: 'int', type: 'OptionType', func: 'QSFunction', rate: 'int', ttl: 'Optional[timedelta]', nonce: 'int') -> 'None': ...  # pylint: disable=super-init-not-called,unused-argument,redefined-builtin,multiple-statements,line-too-long
+         def __init__(self, code: 'OptionNumber', length: 'int', type: 'OptionType', func: 'QSFunction', rate: 'int', ttl: 'timedelta', nonce: 'bytes') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
+
+
+class QuickStartReportOption(QSOption):
+    """Data model for IPv4 Quick Start report of approved rate option."""
+
+    #: Nonce.
+    nonce: 'bytes'
+
+    if TYPE_CHECKING:
+        def __init__(self, code: 'OptionNumber', length: 'int', type: 'OptionType', func: 'QSFunction', rate: 'int', nonce: 'bytes') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin

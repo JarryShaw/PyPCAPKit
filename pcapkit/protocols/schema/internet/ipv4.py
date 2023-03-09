@@ -4,9 +4,9 @@
 
 from typing import TYPE_CHECKING
 
+from pcapkit.const.ipv4.classification_level import ClassificationLevel as Enum_ClassificationLevel
 from pcapkit.const.ipv4.option_number import OptionNumber as Enum_OptionNumber
-from pcapkit.const.ipv6.option import Option as Enum_Option
-from pcapkit.const.ipv6.router_alert import RouterAlert as Enum_RouterAlert
+from pcapkit.const.ipv4.router_alert import RouterAlert as Enum_RouterAlert
 from pcapkit.const.reg.transtype import TransType as Enum_TransType
 from pcapkit.corekit.fields.ipaddress import IPv4Field
 from pcapkit.corekit.fields.misc import ConditionalField, ListField, PayloadField
@@ -15,7 +15,6 @@ from pcapkit.corekit.fields.numbers import (EnumField, NumberField, UInt8Field, 
 from pcapkit.corekit.fields.strings import BitField, BytesField, PaddingField
 from pcapkit.protocols.schema.schema import Schema
 from pcapkit.utilities.exceptions import FieldValueError
-from pcapkit.const.ipv4.classification_level import ClassificationLevel as Enum_ClassificationLevel
 
 __all__ = [
     'IPv4',
@@ -28,17 +27,18 @@ __all__ = [
     'ESECOption', 'RROption', 'SIDOption',
     'SSROption', 'MTUPOption', 'MTUROption',
     'TROption', 'RTRALTOption', 'QSOption',
+    'QuickStartRequestOption', 'QuickStartReportOption',
 ]
 
 if TYPE_CHECKING:
+    from datetime import datetime
     from ipaddress import IPv4Address, IPv6Address
     from typing import Any, Optional
-    from datetime import datetime
 
     from typing_extensions import TypedDict
 
-    from pcapkit.protocols.protocol import Protocol
     from pcapkit.corekit.multidict import OrderedMultiDict
+    from pcapkit.protocols.protocol import Protocol
 
     class VerIHLField(TypedDict):
         """Version and header length field."""
@@ -74,6 +74,14 @@ if TYPE_CHECKING:
         oflw: int
         #: Timestamp type flag.
         flag: int
+
+    class QuickStartFlags(TypedDict):
+        """Quick-Start flags."""
+
+        #: QS function.
+        func: int
+        #: Rate request/report.
+        rate: int
 
 
 class IPv4(Schema):
@@ -218,3 +226,148 @@ class TSOption(Option):
 
     if TYPE_CHECKING:
         def __init__(self, type: 'Enum_OptionNumber', length: 'int', pointer: 'int', flags: 'TSFlags', data: 'list[int]') -> 'None': ...
+
+
+class ESECOption(Option):
+    """Header schema for IPv4 extended security (``ESEC``) option."""
+
+    #: Additional security information format code.
+    format: 'int' = UInt8Field()
+    #: Additional security information.
+    info: 'bytes' = ConditionalField(
+        BytesField(length=lambda pkt: pkt['length'] - 3),
+        lambda pkt: pkt['length'] > 3,
+    )
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_OptionNumber', length: 'int', format: 'int', info: 'Optional[bytes]') -> 'None': ...
+
+
+class RROption(Option):
+    """Header schema for IPv4 record route (``RR``) option."""
+
+    #: Pointer.
+    pointer: 'int' = UInt8Field()
+    #: Route.
+    route: 'list[IPv4Address]' = ListField(
+        length=lambda pkt: pkt['pointer'] - 4,
+        item_type=IPv4Field(),
+    )
+    #: Remaining data buffer0.
+    remainder: 'bytes' = PaddingField(
+        length=lambda pkt: pkt['length'] - pkt['pointer'] + 1,
+        default=bytes(36),  # a reasonable default
+    )
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_OptionNumber', length: 'int', pointer: 'int', route: 'list[IPv4Address | str | bytes | int]') -> 'None': ...
+
+
+class SIDOption(Option):
+    """Header schema for IPv4 stream identifier (``SID``) option."""
+
+    #: Stream identifier.
+    sid: 'int' = UInt32Field()
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_OptionNumber', length: 'int', sid: 'int') -> 'None': ...
+
+
+class SSROption(Option):
+    """Header schema for IPv4 strict source route (``SSR``) option."""
+
+    #: Pointer.
+    pointer: 'int' = UInt8Field()
+    #: Route.
+    route: 'list[IPv4Address]' = ListField(
+        length=lambda pkt: pkt['pointer'] - 4,
+        item_type=IPv4Field(),
+    )
+    #: Remaining data buffer0.
+    remainder: 'bytes' = PaddingField(
+        length=lambda pkt: pkt['length'] - pkt['pointer'] + 1,
+        default=bytes(36),  # a reasonable default
+    )
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_OptionNumber', length: 'int', pointer: 'int', route: 'list[IPv4Address | str | bytes | int]') -> 'None': ...
+
+
+class MTUPOption(Option):
+    """Header schema for IPv4 MTU probe (``MTUP``) option."""
+
+    #: MTU.
+    mtu: 'int' = UInt16Field()
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_OptionNumber', length: 'int', mtu: 'int') -> 'None': ...
+
+
+class MTUROption(Option):
+    """Header schema for IPv4 MTU reply (``MTUR``) option."""
+
+    #: MTU.
+    mtu: 'int' = UInt16Field()
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_OptionNumber', length: 'int', mtu: 'int') -> 'None': ...
+
+
+class TROption(Option):
+    """Header schema for IPv4 traceroute (``TR``) option."""
+
+    #: ID number.
+    id: 'int' = UInt16Field()
+    #: Outbound hop count.
+    out: 'int' = UInt16Field()
+    #: Return hop count.
+    ret: 'int' = UInt16Field()
+    #: Originator IP address.
+    origin: 'IPv4Address' = IPv4Field()
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_OptionNumber', length: 'int', id: 'int', out: 'int', ret: 'int', origin: 'IPv4Address | str | bytes | int') -> 'None': ...
+
+
+class RTRALTOption(Option):
+    """Header schema for IPv4 router alert (``RTRALT``) option."""
+
+    #: Router alert value.
+    alert: 'Enum_RouterAlert' = EnumField(length=2, namespace=Enum_RouterAlert)
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_OptionNumber', length: 'int', alert: 'Enum_RouterAlert') -> 'None': ...
+
+
+class QSOption(Option):
+    """Header schema for IPV4 quick start (``QS``) options."""
+
+    #: Flags.
+    flags: 'QuickStartFlags' = BitField(length=1, namespace={
+        'func': (0, 4),
+        'rate': (4, 4),
+    })
+
+
+class QuickStartRequestOption(QSOption):
+    """Header schema for IPV4 quick start request options."""
+
+    #: QS time-to-live (TTL).
+    ttl: 'int' = UInt8Field()
+    #: QS nonce.
+    nonce: 'bytes' = BytesField(length=4)
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_OptionNumber', length: 'int', flags: 'QuickStartFlags',
+                     ttl: 'int', nonce: 'bytes') -> 'None': ...
+
+
+class QuickStartReportOption(QSOption):
+    """Header schema for IPV4 quick start report of approved rate options."""
+
+    #: QS nonce.
+    nonce: 'bytes' = BytesField(length=4)
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_OptionNumber', length: 'int', flags: 'QuickStartFlags',
+                     nonce: 'bytes') -> 'None': ...
