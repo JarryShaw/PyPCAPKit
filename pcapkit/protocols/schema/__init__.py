@@ -58,6 +58,7 @@ __all__ = [
     'IPv4_SSROption', 'IPv4_MTUPOption', 'IPv4_MTUROption',
     'IPv4_TROption', 'IPv4_RTRALTOption', 'IPv4_QSOption',
     'IPv4_QuickStartRequestOption', 'IPv4_QuickStartReportOption',
+    'IPv6_Frag',
 
     # Transport Layer Protocols
 
