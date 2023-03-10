@@ -510,6 +510,21 @@ class HIP(Internet[Data_HIP, Schema_HIP]):
         """Make (construct) packet data.
 
         Args:
+            next: Next header type.
+            next_default: Default value for next header type.
+            next_namespace: Namespace for next header type.
+            next_reversed: If the next header type is reversed.
+            packet: HIP packet type.
+            packet_default: Default value for HIP packet type.
+            packet_namespace: Namespace for HIP packet type.
+            packet_reversed: If the HIP packet type is reversed.
+            version: HIP version.
+            checksum: Checksum.
+            controls_anonymous: If the sender is anonymous.
+            shit: Sender's host identity tag (HIT).
+            rhit: Receiver's host identity tag (HIT).
+            parameters: HIP parameters.
+            payload: Payload.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
