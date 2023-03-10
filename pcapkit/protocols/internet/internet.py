@@ -159,7 +159,7 @@ class Internet(Protocol[PT, ST], Generic[PT, ST]):  # pylint: disable=abstract-m
             Current protocol with next layer extracted.
 
         """
-        next_ = self._import_next_layer(proto, length, version=version)  # type: ignore[misc,call-arg,arg-type]
+        next_ = cast('Protocol', self._import_next_layer(proto, length, version=version))  # type: ignore[misc,call-arg,arg-type,redundant-cast]
         info, chain = next_.info, next_.protochain
 
         # make next layer protocol name
@@ -167,7 +167,11 @@ class Internet(Protocol[PT, ST], Generic[PT, ST]):  # pylint: disable=abstract-m
         # proto = next_.__class__.__name__
 
         # write info and protocol chain into dict
-        dict_.__update__([(layer, info)])
+        dict_.__update__({
+            layer: info,
+            '__next_type__': type(next_),
+            '__next_name__': layer,
+        })
         self._next = next_  # pylint: disable=attribute-defined-outside-init
         if ipv6_exthdr is not None:
             if chain is not None:

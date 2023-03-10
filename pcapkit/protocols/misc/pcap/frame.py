@@ -25,7 +25,7 @@ import decimal
 import io
 import sys
 import time
-from typing import TYPE_CHECKING, overload
+from typing import TYPE_CHECKING, overload, cast
 
 from pcapkit.const.reg.linktype import LinkType as Enum_LinkType
 from pcapkit.protocols.data.misc.pcap.frame import Frame as Data_Frame
@@ -200,11 +200,15 @@ class Frame(Protocol[Data_Frame, Schema_Frame]):
 
         return self._decode_next_layer(frame, self._ghdr.network, frame.len)
 
-    def make(self, *, timestamp: 'Optional[float | Decimal]' = None,  # pylint: disable=arguments-differ
-             ts_sec: 'Optional[int]' = None, ts_usec: 'Optional[int]' = None,
-             incl_len: 'Optional[int]' = None, orig_len: 'Optional[int]' = None,
+    def make(self,
+             timestamp: 'Optional[float | Decimal]' = None,
+             ts_sec: 'Optional[int]' = None,
+             ts_usec: 'Optional[int]' = None,
+             incl_len: 'Optional[int]' = None,
+             orig_len: 'Optional[int]' = None,
              packet: 'bytes | Protocol | Schema' = b'',
-             nanosecond: 'bool' = False, **kwargs: 'Any') -> 'Schema_Frame':
+             nanosecond: 'bool' = False,
+             **kwargs: 'Any') -> 'Schema_Frame':
         """Make frame packet data.
 
         Args:
@@ -357,7 +361,7 @@ class Frame(Protocol[Data_Frame, Schema_Frame]):
             Current protocol with packet extracted.
 
         """
-        next_ = self._import_next_layer(proto, length)  # type: ignore[misc,call-arg]
+        next_ = cast('Protocol', self._import_next_layer(proto, length))  # type: ignore[misc,call-arg,redundant-cast]
         info, chain = next_.info, next_.protochain
 
         # make next layer protocol name
@@ -365,10 +369,12 @@ class Frame(Protocol[Data_Frame, Schema_Frame]):
         # proto = next_.__class__.__name__
 
         # write info and protocol chain into dict
-        dict_.__update__([
-            (layer, info),
-            ('protocols', chain.chain),
-        ])
+        dict_.__update__({
+            layer: info,
+            'protocols': chain.chain,
+            '__next_type__': type(next_),
+            '__next_name__': layer,
+        })
         self._next = next_  # pylint: disable=attribute-defined-outside-init
         self._protos = chain  # pylint: disable=attribute-defined-outside-init
         return dict_

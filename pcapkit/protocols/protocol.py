@@ -929,7 +929,7 @@ class Protocol(Generic[PT, ST], metaclass=abc.ABCMeta):
             Current protocol with next layer extracted.
 
         """
-        next_ = self._import_next_layer(proto, length)  # type: ignore[call-arg,misc]
+        next_ = cast('Protocol', self._import_next_layer(proto, length))  # type: ignore[misc,call-arg,redundant-cast]
         info, chain = next_.info, next_.protochain
 
         # make next layer protocol name
@@ -937,7 +937,11 @@ class Protocol(Generic[PT, ST], metaclass=abc.ABCMeta):
         # proto = next_.__class__.__name__
 
         # write info and protocol chain into dict
-        dict_.__update__([(layer, info)])
+        dict_.__update__({
+            layer: info,
+            '__next_type__': type(next_),
+            '__next_name__': layer,
+        })
         self._next = next_  # pylint: disable=attribute-defined-outside-init
         self._protos = ProtoChain(self.__class__, self.alias, basis=chain)  # pylint: disable=attribute-defined-outside-init
         return dict_

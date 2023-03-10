@@ -175,15 +175,21 @@ class Header(Protocol[Data_Header, Schema_Header]):
 
         return header
 
-    def make(self, *, byteorder: 'Literal["big", "little"]' = sys.byteorder,  # pylint: disable=arguments-differ
-             lilendian: 'Optional[bool]' = None, bigendian: 'Optional[bool]' = None,
-             nanosecond: bool = False, version: 'tuple[int, int] | VersionInfo' = (2, 4),
-             version_major: 'Optional[int]' = None, version_minor: 'Optional[int]' = None,
-             thiszone: int = 0, sigfigs: int = 0, snaplen: int = 0x40_000,
+    def make(self,
+             byteorder: 'Literal["big", "little"]' = sys.byteorder,
+             lilendian: 'Optional[bool]' = None,
+             bigendian: 'Optional[bool]' = None,
+             nanosecond: bool = False,
+             version: 'tuple[int, int] | VersionInfo' = (2, 4),
+             version_major: 'Optional[int]' = None,
+             version_minor: 'Optional[int]' = None,
+             thiszone: int = 0, sigfigs: int = 0,
+             snaplen: int = 0x40_000,
              network: 'Enum_LinkType | StdlibEnum | AenumEnum | str | int' = Enum_LinkType.NULL,
              network_default: 'Optional[int]' = None,
              network_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,
-             network_reversed: bool = False, **kwargs: 'Any') -> 'Schema_Header':
+             network_reversed: bool = False,
+             **kwargs: 'Any') -> 'Schema_Header':
         """Make (construct) packet data.
 
         Args:

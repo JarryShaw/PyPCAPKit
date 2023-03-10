@@ -82,11 +82,13 @@ class Raw(Protocol[Data_Raw, Schema_Raw]):
 
         return raw
 
-    def make(self, **kwargs: 'Any') -> 'Schema_Raw':
+    def make(self,
+             packet: 'bytes' = b'',
+             **kwargs: 'Any') -> 'Schema_Raw':
         """Make raw packet data.
 
         Args:
-            packet (bytes): Raw packet data.
+            packet: Raw packet data.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
@@ -94,7 +96,7 @@ class Raw(Protocol[Data_Raw, Schema_Raw]):
 
         """
         return Schema_Raw(
-            packet=kwargs.get('packet', b'')
+            packet=packet
         )
 
     ##########################################################################
