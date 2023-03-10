@@ -25,7 +25,7 @@ import decimal
 import io
 import sys
 import time
-from typing import TYPE_CHECKING, overload, cast
+from typing import TYPE_CHECKING, cast, overload
 
 from pcapkit.const.reg.linktype import LinkType as Enum_LinkType
 from pcapkit.protocols.data.misc.pcap.frame import Frame as Data_Frame
