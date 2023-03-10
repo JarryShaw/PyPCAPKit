@@ -35,12 +35,12 @@ from pcapkit.const.ipv6.smf_dpd_mode import SMFDPDMode as Enum_SMFDPDMode
 from pcapkit.const.ipv6.tagger_id import TaggerID as Enum_TaggerID
 from pcapkit.const.reg.transtype import TransType as Enum_TransType
 from pcapkit.corekit.multidict import OrderedMultiDict
-from pcapkit.protocols.data.internet.ipv6_opts import IPv6_Opts as Data_IPv6_Opts
 from pcapkit.protocols.data.internet.ipv6_opts import CALIPSOOption as Data_CALIPSOOption
 from pcapkit.protocols.data.internet.ipv6_opts import DFFFlags as Data_DFFFlags
 from pcapkit.protocols.data.internet.ipv6_opts import HomeAddressOption as Data_HomeAddressOption
 from pcapkit.protocols.data.internet.ipv6_opts import ILNPOption as Data_ILNPOption
 from pcapkit.protocols.data.internet.ipv6_opts import IPDFFOption as Data_IPDFFOption
+from pcapkit.protocols.data.internet.ipv6_opts import IPv6_Opts as Data_IPv6_Opts
 from pcapkit.protocols.data.internet.ipv6_opts import JumboPayloadOption as Data_JumboPayloadOption
 from pcapkit.protocols.data.internet.ipv6_opts import \
     LineIdentificationOption as Data_LineIdentificationOption
@@ -63,12 +63,14 @@ from pcapkit.protocols.data.internet.ipv6_opts import \
     TunnelEncapsulationLimitOption as Data_TunnelEncapsulationLimitOption
 from pcapkit.protocols.data.internet.ipv6_opts import UnassignedOption as Data_UnassignedOption
 from pcapkit.protocols.internet.internet import Internet
-from pcapkit.protocols.schema.internet.ipv6_opts import IPv6_Opts as Schema_IPv6_Opts
 from pcapkit.protocols.schema.internet.ipv6_opts import CALIPSOOption as Schema_CALIPSOOption
-from pcapkit.protocols.schema.internet.ipv6_opts import HomeAddressOption as Schema_HomeAddressOption
+from pcapkit.protocols.schema.internet.ipv6_opts import \
+    HomeAddressOption as Schema_HomeAddressOption
 from pcapkit.protocols.schema.internet.ipv6_opts import ILNPOption as Schema_ILNPOption
 from pcapkit.protocols.schema.internet.ipv6_opts import IPDFFOption as Schema_IPDFFOption
-from pcapkit.protocols.schema.internet.ipv6_opts import JumboPayloadOption as Schema_JumboPayloadOption
+from pcapkit.protocols.schema.internet.ipv6_opts import IPv6_Opts as Schema_IPv6_Opts
+from pcapkit.protocols.schema.internet.ipv6_opts import \
+    JumboPayloadOption as Schema_JumboPayloadOption
 from pcapkit.protocols.schema.internet.ipv6_opts import \
     LineIdentificationOption as Schema_LineIdentificationOption
 from pcapkit.protocols.schema.internet.ipv6_opts import MPLOption as Schema_MPLOption
@@ -78,7 +80,8 @@ from pcapkit.protocols.schema.internet.ipv6_opts import \
     QuickStartReportOption as Schema_QuickStartReportOption
 from pcapkit.protocols.schema.internet.ipv6_opts import \
     QuickStartRequestOption as Schema_QuickStartRequestOption
-from pcapkit.protocols.schema.internet.ipv6_opts import RouterAlertOption as Schema_RouterAlertOption
+from pcapkit.protocols.schema.internet.ipv6_opts import \
+    RouterAlertOption as Schema_RouterAlertOption
 from pcapkit.protocols.schema.internet.ipv6_opts import RPLOption as Schema_RPLOption
 from pcapkit.protocols.schema.internet.ipv6_opts import \
     SMFHashBasedDPDOption as Schema_SMFHashBasedDPDOption
@@ -107,7 +110,8 @@ if TYPE_CHECKING:
     from pcapkit.protocols.data.internet.ipv6_opts import SMFDPDOption as Data_SMFDPDOption
     from pcapkit.protocols.protocol import Protocol
     from pcapkit.protocols.schema.internet.ipv6_opts import Option as Schema_Option
-    from pcapkit.protocols.schema.internet.ipv6_opts import QuickStartOption as Schema_QuickStartOption
+    from pcapkit.protocols.schema.internet.ipv6_opts import \
+        QuickStartOption as Schema_QuickStartOption
     from pcapkit.protocols.schema.internet.ipv6_opts import SMFDPDOption as Schema_SMFDPDOption
 
     Option = OrderedMultiDict[Enum_Option, Data_Option]

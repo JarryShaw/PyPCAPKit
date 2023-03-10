@@ -59,6 +59,8 @@ __all__ = [
     'IPv4_TROption', 'IPv4_RTRALTOption', 'IPv4_QSOption',
     'IPv4_QuickStartRequestOption', 'IPv4_QuickStartReportOption',
     'IPv6_Frag',
+    'IPv6_Route',
+    'IPv6_Route_UnknownType', 'IPv6_Route_SourceRoute', 'IPv6_Route_Type2', 'IPv6_Route_RPL',
 
     # Transport Layer Protocols
 

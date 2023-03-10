@@ -160,7 +160,6 @@ from pcapkit.protocols.data.internet.ipv6_opts import UnassignedOption as IPv6_O
 # IPv6 Routing Header
 from pcapkit.protocols.data.internet.ipv6_route import RPL as IPv6_Route_RPL
 from pcapkit.protocols.data.internet.ipv6_route import IPv6_Route
-from pcapkit.protocols.data.internet.ipv6_route import RoutingType as IPv6_Route_RoutingType
 from pcapkit.protocols.data.internet.ipv6_route import SourceRoute as IPv6_Route_SourceRoute
 from pcapkit.protocols.data.internet.ipv6_route import Type2 as IPv6_Route_Type2
 from pcapkit.protocols.data.internet.ipv6_route import UnknownType as IPv6_Route_UnknownType
@@ -232,7 +231,6 @@ __all__ = [
 
     # IPv6 Routing Header
     'IPv6_Route',
-    'IPv6_Route_RoutingType',
     'IPv6_Route_UnknownType', 'IPv6_Route_SourceRoute', 'IPv6_Route_Type2', 'IPv6_Route_RPL',
 
     # Internet Protocol version 6

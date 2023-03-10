@@ -14,22 +14,12 @@ if TYPE_CHECKING:
 __all__ = [
     'IPv6_Route',
 
-    'RoutingType',
     'UnknownType', 'SourceRoute', 'Type2', 'RPL',
 ]
 
 
 class IPv6_Route(Data):
-    """Data model for IPv6-Route protocol.
-
-    .. seealso::
-
-       The type-specific routing data is stored directly in the top-level
-       :class:`~pcapkit.protocols.data.internet.ipv6_route.IPv6_Route` object.
-       Please refer to the :class:`~pcapkit.protocols.data.internet.ipv6_route.RoutingType`
-       subclasses for the details.
-
-    """
+    """Data model for IPv6-Route protocol."""
 
     #: Next header.
     next: 'TransType'
@@ -40,45 +30,41 @@ class IPv6_Route(Data):
     #: Segments left.
     seg_left: 'int'
 
-    if TYPE_CHECKING:
-        def __init__(self, next: 'TransType', length: 'int', type: 'Routing', seg_left: 'int'): ...  # pylint: disable=unused-argument,multiple-statements,super-init-not-called,redefined-builtin,line-too-long
 
-
-class RoutingType(Data):
-    """Data model for Routing Type."""
-
-
-class UnknownType(RoutingType):
+class UnknownType(IPv6_Route):
     """Data model for IPv6-Route unknown type."""
 
     #: Data.
     data: 'bytes'
 
     if TYPE_CHECKING:
-        def __init__(self, data: 'bytes') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,super-init-not-called,redefined-builtin,line-too-long
+        def __init__(self, next: 'TransType', length: 'int', type: 'Routing', seg_left: 'int',
+                     data: 'bytes') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,super-init-not-called,redefined-builtin,line-too-long
 
 
-class SourceRoute(RoutingType):
+class SourceRoute(IPv6_Route):
     """Data model for IPv6-Route Source Route data type."""
 
     #: Source addresses.
     ip: 'tuple[IPv6Address, ...]'
 
     if TYPE_CHECKING:
-        def __init__(self, ip: 'tuple[IPv6Address, ...]') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,super-init-not-called,redefined-builtin,line-too-long
+        def __init__(self, next: 'TransType', length: 'int', type: 'Routing', seg_left: 'int',
+                     ip: 'tuple[IPv6Address, ...]') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,super-init-not-called,redefined-builtin,line-too-long
 
 
-class Type2(RoutingType):
+class Type2(IPv6_Route):
     """Data model for IPv6-Route Type 2 data type."""
 
     #: Address.
     ip: 'IPv6Address'
 
     if TYPE_CHECKING:
-        def __init__(self, ip: 'IPv6Address') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,super-init-not-called,redefined-builtin,line-too-long
+        def __init__(self, next: 'TransType', length: 'int', type: 'Routing', seg_left: 'int',
+                     ip: 'IPv6Address') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,super-init-not-called,redefined-builtin,line-too-long
 
 
-class RPL(RoutingType):
+class RPL(IPv6_Route):
     """Data model for RPL Source data type."""
 
     #: CmprI.
@@ -87,8 +73,9 @@ class RPL(RoutingType):
     cmpr_e: 'int'
     #: Pad.
     pad: 'int'
-    #: IPv6 addresses.
-    ip: 'tuple[IPv6Address, ...]'
+    #: Addresses.
+    ip: 'tuple[IPv6Address | bytes, ...]'
 
     if TYPE_CHECKING:
-        def __init__(self, cmpr_i: 'int', cmpr_e: 'int', pad: 'int', ip: 'tuple[IPv6Address, ...]') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,super-init-not-called,redefined-builtin,line-too-long
+        def __init__(self, next: 'TransType', length: 'int', type: 'Routing', seg_left: 'int',
+                     cmpr_i: 'int', cmpr_e: 'int', pad: 'int', ip: 'tuple[IPv6Address | bytes, ...]') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,super-init-not-called,redefined-builtin,line-too-long

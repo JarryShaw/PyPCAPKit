@@ -126,6 +126,13 @@ from pcapkit.protocols.schema.internet.ipv4 import UnassignedOption as IPv4_Unas
 # IPv6 Fragment Header
 from pcapkit.protocols.schema.internet.ipv6_frag import IPv6_Frag
 
+# IPv6 Routing Header
+from pcapkit.protocols.schema.internet.ipv6_route import RPL as IPv6_Route_RPL
+from pcapkit.protocols.schema.internet.ipv6_route import IPv6_Route
+from pcapkit.protocols.schema.internet.ipv6_route import SourceRoute as IPv6_Route_SourceRoute
+from pcapkit.protocols.schema.internet.ipv6_route import Type2 as IPv6_Route_Type2
+from pcapkit.protocols.schema.internet.ipv6_route import UnknownType as IPv6_Route_UnknownType
+
 __all__ = [
     # Authentication Header
     'AH',
@@ -173,4 +180,8 @@ __all__ = [
 
     # IPv6 Fragment Header
     'IPv6_Frag',
+
+    # IPv6 Routing Header
+    'IPv6_Route',
+    'IPv6_Route_UnknownType', 'IPv6_Route_SourceRoute', 'IPv6_Route_Type2', 'IPv6_Route_RPL',
 ]
