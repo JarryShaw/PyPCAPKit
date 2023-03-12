@@ -30,14 +30,14 @@ from pcapkit.const.mh.packet import Packet as Enum_Packet
 from pcapkit.const.reg.transtype import TransType as Enum_TransType
 from pcapkit.protocols.data.internet.mh import MH as Data_MH
 from pcapkit.protocols.internet.internet import Internet
-from pcapkit.utilities.exceptions import UnsupportedCall
 from pcapkit.protocols.schema.internet.mh import MH as Schema_MH
+from pcapkit.utilities.exceptions import UnsupportedCall
 
 if TYPE_CHECKING:
-    from typing import IO, Any, NoReturn, Optional, Type
     from enum import IntEnum as StdlibEnum
-    from aenum import IntEnum as AenumEnum
+    from typing import IO, Any, NoReturn, Optional, Type
 
+    from aenum import IntEnum as AenumEnum
     from typing_extensions import Literal
 
     from pcapkit.corekit.protochain import ProtoChain

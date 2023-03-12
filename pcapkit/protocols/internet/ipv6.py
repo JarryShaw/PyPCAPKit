@@ -36,13 +36,11 @@ from pcapkit.protocols.internet.ip import IP
 from pcapkit.protocols.schema.internet.ipv6 import IPv6 as Schema_IPv6
 
 if TYPE_CHECKING:
-    from ipaddress import IPv6Address
-    from typing import Any, NoReturn, Optional
     from enum import IntEnum as StdlibEnum
+    from ipaddress import IPv6Address
     from typing import IO, Any, NoReturn, Optional, Type
 
     from aenum import IntEnum as AenumEnum
-
     from typing_extensions import Literal
 
     from pcapkit.protocols.protocol import Protocol

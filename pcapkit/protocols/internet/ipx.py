@@ -34,13 +34,14 @@ from pcapkit.protocols.internet.internet import Internet
 from pcapkit.protocols.schema.internet.ipx import IPX as Schema_IPX
 
 if TYPE_CHECKING:
-    from typing import Any, Optional, Type
     from enum import IntEnum as StdlibEnum
+    from typing import Any, Optional, Type
+
     from aenum import IntEnum as AenumEnum
+    from typing_extensions import Literal
+
     from pcapkit.protocols.protocol import Protocol
     from pcapkit.protocols.schema.schema import Schema
-
-    from typing_extensions import Literal
 
 __all__ = ['IPX']
 
