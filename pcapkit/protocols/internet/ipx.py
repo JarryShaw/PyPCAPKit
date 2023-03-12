@@ -31,16 +31,21 @@ from pcapkit.const.reg.transtype import TransType as Enum_TransType
 from pcapkit.protocols.data.internet.ipx import IPX as Data_IPX
 from pcapkit.protocols.data.internet.ipx import Address as Data_Address
 from pcapkit.protocols.internet.internet import Internet
+from pcapkit.protocols.schema.internet.ipx import IPX as Schema_IPX
 
 if TYPE_CHECKING:
-    from typing import Any, NoReturn, Optional
+    from typing import Any, Optional, Type
+    from enum import IntEnum as StdlibEnum
+    from aenum import IntEnum as AenumEnum
+    from pcapkit.protocols.protocol import Protocol
+    from pcapkit.protocols.schema.schema import Schema
 
     from typing_extensions import Literal
 
 __all__ = ['IPX']
 
 
-class IPX(Internet[Data_IPX]):
+class IPX(Internet[Data_IPX, Schema_IPX]):
     """This class implements Internetwork Packet Exchange."""
 
     ##########################################################################
@@ -89,26 +94,30 @@ class IPX(Internet[Data_IPX]):
         """
         if length is None:
             length = len(self)
-
-        _csum = self._read_fileng(2)
-        _tlen = self._read_unpack(2)
-        _ctrl = self._read_unpack(1)
-        _type = self._read_unpack(1)
-        _dsta = self._read_ipx_address()
-        _srca = self._read_ipx_address()
+        schema = self.__header__
 
         ipx = Data_IPX(
-            chksum=_csum,
-            len=_tlen,
-            count=_ctrl,
-            type=Enum_Packet.get(_type),
-            dst=_dsta,
-            src=_srca,
+            chksum=schema.chksum,
+            len=schema.len,
+            count=schema.count,
+            type=schema.type,
+            dst=self._read_ipx_address(schema.dst),
+            src=self._read_ipx_address(schema.src),
         )
 
         return self._decode_next_layer(ipx, ipx.type, ipx.len - 30)
 
-    def make(self, **kwargs: 'Any') -> 'NoReturn':
+    def make(self,
+             chksum: 'bytes' = b'\x00\x00',
+             count: 'int' = 0,
+             type: 'Enum_Packet | StdlibEnum | AenumEnum | str | int' = Enum_Packet.Unknown,
+             type_default: 'Optional[int]' = None,
+             type_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
+             type_reversed: 'bool' = False,
+             dst: 'bytes' = b'\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00',
+             src: 'bytes' = b'\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00',
+             payload: 'bytes | Protocol | Schema' = b'',
+             **kwargs: 'Any') -> 'Schema_IPX':
         """Make (construct) packet data.
 
         Args:
@@ -118,7 +127,18 @@ class IPX(Internet[Data_IPX]):
             bytes: Constructed packet data.
 
         """
-        raise NotImplementedError
+        type_val = self._make_index(type, type_default, namespace=type_namespace,  # type: ignore[call-overload]
+                                    reversed=type_reversed, pack=False)
+
+        return Schema_IPX(
+            chksum=chksum,
+            len=30 + len(payload),
+            count=count,
+            type=type_val,
+            dst=dst,
+            src=src,
+            payload=payload,
+        )
 
     ##########################################################################
     # Data models.
@@ -144,34 +164,34 @@ class IPX(Internet[Data_IPX]):
     # Utilities.
     ##########################################################################
 
-    def _read_ipx_address(self) -> 'Data_Address':
+    def _read_ipx_address(self, addr: 'bytes') -> 'Data_Address':
         """Read IPX address field.
+
+        Args:
+            addr: IPX address data.
 
         Returns:
             Parsed IPX address field.
 
         """
         # Address Number
-        _byte = self._read_fileng(4)
-        _ntwk = ':'.join(textwrap.wrap(_byte.hex(), 2))
+        _ntwk = ':'.join(textwrap.wrap(addr[:4].hex(), 2))
 
         # Node Number (MAC)
-        _byte = self._read_fileng(6)
-        _node = ':'.join(textwrap.wrap(_byte.hex(), 2))
-        _maca = '-'.join(textwrap.wrap(_byte.hex(), 2))
+        _node = ':'.join(textwrap.wrap(addr[4:10].hex(), 2))
+        _maca = '-'.join(textwrap.wrap(addr[4:10].hex(), 2))
 
         # Socket Number
-        _sock = self._read_fileng(2)
+        _sock = addr[10:12]
 
         # Whole Address
-        _list = [_ntwk, _node, _sock.hex()]
+        _list = [_ntwk, _node, ':'.join(textwrap.wrap(_sock.hex(), 2))]
         _addr = ':'.join(_list)
 
-        addr = Data_Address(
+        ipx_addr = Data_Address(
             network=_ntwk,
             node=_maca,
-            socket=Enum_Socket.get(int(_sock.hex(), base=16)),
+            socket=Enum_Socket.get(int.from_bytes(_sock, 'big', signed=False)),
             addr=_addr,
         )
-
-        return addr
+        return ipx_addr

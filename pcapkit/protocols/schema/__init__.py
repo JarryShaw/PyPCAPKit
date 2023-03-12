@@ -62,6 +62,7 @@ __all__ = [
     'IPv6_Route',
     'IPv6_Route_UnknownType', 'IPv6_Route_SourceRoute', 'IPv6_Route_Type2', 'IPv6_Route_RPL',
     'IPv6',
+    'IPX',
 
     # Transport Layer Protocols
 

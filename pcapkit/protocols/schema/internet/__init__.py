@@ -136,6 +136,9 @@ from pcapkit.protocols.schema.internet.ipv6_route import UnknownType as IPv6_Rou
 # Internet Protocol version 6
 from pcapkit.protocols.schema.internet.ipv6 import IPv6
 
+# Internetwork Packet Exchange
+from pcapkit.protocols.schema.internet.ipx import IPX
+
 __all__ = [
     # Authentication Header
     'AH',
@@ -190,4 +193,7 @@ __all__ = [
 
     # IPv6
     'IPv6',
+
+    # IPX
+    'IPX',
 ]
