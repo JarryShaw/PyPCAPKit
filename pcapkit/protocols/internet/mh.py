@@ -23,6 +23,7 @@ Octets      Bits        Name                    Description
 """
 # TODO: Implements extractor for message data of all MH types.
 
+import math
 from typing import TYPE_CHECKING, overload
 
 from pcapkit.const.mh.packet import Packet as Enum_Packet
@@ -30,19 +31,23 @@ from pcapkit.const.reg.transtype import TransType as Enum_TransType
 from pcapkit.protocols.data.internet.mh import MH as Data_MH
 from pcapkit.protocols.internet.internet import Internet
 from pcapkit.utilities.exceptions import UnsupportedCall
+from pcapkit.protocols.schema.internet.mh import MH as Schema_MH
 
 if TYPE_CHECKING:
-    from typing import IO, Any, NoReturn, Optional
+    from typing import IO, Any, NoReturn, Optional, Type
+    from enum import IntEnum as StdlibEnum
+    from aenum import IntEnum as AenumEnum
 
     from typing_extensions import Literal
 
     from pcapkit.corekit.protochain import ProtoChain
     from pcapkit.protocols.protocol import Protocol
+    from pcapkit.protocols.schema.schema import Schema
 
 __all__ = ['MH']
 
 
-class MH(Internet[Data_MH]):
+class MH(Internet[Data_MH, Schema_MH]):
     """This class implements Mobility Header."""
 
     ##########################################################################
@@ -131,27 +136,33 @@ class MH(Internet[Data_MH]):
         """
         if length is None:
             length = len(self)
-
-        _next = self._read_protos(1)
-        _hlen = self._read_unpack(1)
-        _type = self._read_unpack(1)
-        _temp = self._read_fileng(1)
-        _csum = self._read_fileng(2)
-        _data = self._read_fileng((_hlen+1)*8)
+        schema = self.__header__
 
         mh = Data_MH(
-            next=_next,
-            length=(_hlen + 1) * 8,
-            type=Enum_Packet.get(_type),
-            chksum=_csum,
-            data=_data,
+            next=schema.next,
+            length=(schema.length + 1) * 8,
+            type=schema.type,
+            chksum=schema.chksum,
+            data=schema.data,
         )
 
         if extension:
             return mh
-        return self._decode_next_layer(mh, _next, length - mh.length)
+        return self._decode_next_layer(mh, schema.next, length - mh.length)
 
-    def make(self, **kwargs: 'Any') -> 'NoReturn':
+    def make(self,
+             next: 'Enum_TransType | StdlibEnum | AenumEnum | str | int' = Enum_TransType.UDP,
+             next_default: 'Optional[int]' = None,
+             next_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
+             next_reversed: 'bool' = False,
+             type: 'Enum_Packet | StdlibEnum | AenumEnum | str | int' = Enum_Packet.Binding_Refresh_Request,
+             type_default: 'Optional[int]' = None,
+             type_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
+             type_reversed: 'bool' = False,
+             chksum: 'bytes' = b'',
+             data: 'bytes' = b'\x00\x00',  # minimum length
+             payload: 'Protocol | Schema | bytes' = b'',
+             **kwargs: 'Any') -> 'Schema_MH':
         """Make (construct) packet data.
 
         Args:
@@ -161,28 +172,38 @@ class MH(Internet[Data_MH]):
             Constructed packet data.
 
         """
-        raise NotImplementedError
+        next_val = self._make_index(next, next_default, namespace=next_namespace,  # type: ignore[call-overload]
+                                    reversed=next_reversed, pack=False)
+        type_val = self._make_index(type, type_default, namespace=type_namespace,  # type: ignore[call-overload]
+                                    reversed=type_reversed, pack=False)
+
+        return Schema_MH(
+            next=next_val,
+            length=math.ceil((len(data) + 6) / 8) - 1,
+            type=type_val,
+            chksum=chksum,
+            data=data,
+            payload=payload,
+        )
 
     ##########################################################################
     # Data models.
     ##########################################################################
 
     @overload
-    def __post_init__(self, file: 'IO[bytes]', length: 'Optional[int]' = ..., *,  # pylint: disable=arguments-differ
-                      version: 'Literal[4, 6]' = ..., extension: 'bool' = ...,
-                      **kwargs: 'Any') -> 'None': ...
+    def __post_init__(self, file: 'IO[bytes] | bytes', length: 'Optional[int]' = ..., *,  # pylint: disable=arguments-differ
+                      extension: 'bool' = ..., **kwargs: 'Any') -> 'None': ...
+
     @overload
     def __post_init__(self, **kwargs: 'Any') -> 'None': ...  # pylint: disable=arguments-differ
 
-    def __post_init__(self, file: 'Optional[IO[bytes]]' = None, length: 'Optional[int]' = None, *,  # pylint: disable=arguments-differ
-                      version: 'Literal[4, 6]' = 4, extension: 'bool' = False,  # pylint: disable=unused-argument
-                      **kwargs: 'Any') -> 'None':
+    def __post_init__(self, file: 'Optional[IO[bytes] | bytes]' = None, length: 'Optional[int]' = None, *,  # pylint: disable=arguments-differ
+                      extension: 'bool' = False, **kwargs: 'Any') -> 'None':
         """Post initialisation hook.
 
         Args:
             file: Source packet stream.
             length: Length of packet data.
-            version: IP protocol version.
             extension: If the protocol is used as an IPv6 extension header.
             **kwargs: Arbitrary keyword arguments.
 

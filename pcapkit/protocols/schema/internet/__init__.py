@@ -139,6 +139,9 @@ from pcapkit.protocols.schema.internet.ipv6 import IPv6
 # Internetwork Packet Exchange
 from pcapkit.protocols.schema.internet.ipx import IPX
 
+# Mobility Header
+from pcapkit.protocols.schema.internet.mh import MH
+
 __all__ = [
     # Authentication Header
     'AH',
@@ -196,4 +199,7 @@ __all__ = [
 
     # IPX
     'IPX',
+
+    # Mobility Header
+    'MH',
 ]
