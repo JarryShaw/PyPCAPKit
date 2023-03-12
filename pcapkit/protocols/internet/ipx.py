@@ -121,6 +121,15 @@ class IPX(Internet[Data_IPX, Schema_IPX]):
         """Make (construct) packet data.
 
         Args:
+            chksum: Checksum.
+            count: Transport Control (hop count).
+            type: Packet Type.
+            type_default: Default value for undefined packet type.
+            type_namespace: Namespace for packet type.
+            type_reversed: Reverse namespace for packet type.
+            dst: Destination Address.
+            src: Source Address.
+            payload: Payload data.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
