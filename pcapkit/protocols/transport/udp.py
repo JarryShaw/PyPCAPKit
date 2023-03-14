@@ -25,16 +25,20 @@ from typing import TYPE_CHECKING
 from pcapkit.const.reg.transtype import TransType as Enum_TransType
 from pcapkit.protocols.data.transport.udp import UDP as Data_UDP
 from pcapkit.protocols.transport.transport import Transport
+from pcapkit.protocols.schema.transport.udp import UDP as Schema_UDP
 
 if TYPE_CHECKING:
-    from typing import Any, NoReturn, Optional
+    from typing import Any, Optional
 
     from typing_extensions import Literal
+
+    from pcapkit.protocols.protocol import Protocol
+    from pcapkit.protocols.schema.schema import Schema
 
 __all__ = ['UDP']
 
 
-class UDP(Transport[Data_UDP]):
+class UDP(Transport[Data_UDP, Schema_UDP]):
     """This class implements User Datagram Protocol.
 
     This class currently supports parsing of the following protocols, which are
@@ -122,32 +126,45 @@ class UDP(Transport[Data_UDP]):
         """
         if length is None:
             length = len(self)
-
-        _srcp = self._read_unpack(2)
-        _dstp = self._read_unpack(2)
-        _tlen = self._read_unpack(2)
-        _csum = self._read_fileng(2)
+        schema = self.__header__
 
         udp = Data_UDP(
-            srcport=_srcp,
-            dstport=_dstp,
-            len=_tlen,
-            checksum=_csum,
+            srcport=schema.srcport,
+            dstport=schema.dstport,
+            len=schema.len,
+            checksum=schema.checksum,
         )
 
         return self._decode_next_layer(udp, (udp.srcport, udp.dstport), udp.len - 8)
 
-    def make(self, **kwargs: 'Any') -> 'NoReturn':
+    def make(self,  # type: ignore[override]
+             srcport: 'int',
+             dstport: 'int',
+             len: 'int',
+             checksum: 'bytes',
+             payload: 'bytes | Schema | Protocol',
+             **kwargs: 'Any') -> 'Schema_UDP':
         """Make (construct) packet data.
 
         Args:
+            srcport: Source port.
+            dstport: Destination port.
+            len: Length of packet data.
+            checksum: Checksum.
+            payload: Payload data.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
             Constructed packet data.
 
         """
-        raise NotImplementedError
+        return Schema_UDP(
+            srcport=srcport,
+            dstport=dstport,
+            len=len,
+            checksum=checksum,
+            payload=payload,
+        )
 
     ##########################################################################
     # Data models.
