@@ -23,6 +23,7 @@ Octets      Bits        Name                    Description
 """
 from typing import TYPE_CHECKING
 
+from pcapkit.const.reg.ethertype import EtherType as Enum_EtherType
 from pcapkit.const.vlan.priority_level import PriorityLevel as Enum_PriorityLevel
 from pcapkit.protocols.data.link.vlan import TCI as Data_TCI
 from pcapkit.protocols.data.link.vlan import VLAN as Data_VLAN
@@ -30,7 +31,6 @@ from pcapkit.protocols.link.link import Link
 from pcapkit.protocols.schema.link.vlan import TCI as Schema_TCI
 from pcapkit.protocols.schema.link.vlan import VLAN as Schema_VLAN
 from pcapkit.utilities.exceptions import UnsupportedCall
-from pcapkit.const.reg.ethertype import EtherType as Enum_EtherType
 
 if TYPE_CHECKING:
     from enum import IntEnum as StdlibEnum

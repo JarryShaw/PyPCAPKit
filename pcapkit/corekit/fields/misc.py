@@ -194,7 +194,8 @@ class PayloadField(_Field[_TP]):
     def protocol(self) -> 'Type[_TP]':
         """Payload protocol."""
         if self._protocol is None:
-            from pcapkit.protocols.misc.raw import Raw  # type: ignore[unreachable] # pylint: disable=import-outside-top-level
+            from pcapkit.protocols.misc.raw import \
+                Raw  # type: ignore[unreachable] # pylint: disable=import-outside-top-level
             return Raw
         return self._protocol
 

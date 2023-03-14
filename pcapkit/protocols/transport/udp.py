@@ -24,8 +24,8 @@ from typing import TYPE_CHECKING
 
 from pcapkit.const.reg.transtype import TransType as Enum_TransType
 from pcapkit.protocols.data.transport.udp import UDP as Data_UDP
-from pcapkit.protocols.transport.transport import Transport
 from pcapkit.protocols.schema.transport.udp import UDP as Schema_UDP
+from pcapkit.protocols.transport.transport import Transport
 
 if TYPE_CHECKING:
     from typing import Any, Optional
