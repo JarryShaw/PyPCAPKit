@@ -100,9 +100,11 @@ class BaseError(Exception):
             if DEVMODE:
                 logger.error('%s: %s', type(self).__name__, str(self), exc_info=self,
                              stack_info=True, stacklevel=-stacklevel())
-                # logger.error('%s: %s', type(self).__name__, str(self))
             else:
                 logger.error('%s: %s', type(self).__name__, str(self))
+
+            # logger.error('%s: %s', type(self).__name__, str(self), exc_info=self,
+            #              stack_info=True, stacklevel=-stacklevel())
 
         if not DEVMODE:
             sys.tracebacklimit = 0

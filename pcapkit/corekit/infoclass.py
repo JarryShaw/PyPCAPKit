@@ -63,9 +63,6 @@ class Info(Mapping[str, VT], Generic[VT]):
             **kwargs: Arbitrary keyword arguments.
 
         """
-        cls.__map__ = {}
-        cls.__map_reverse__ = {}
-
         temp = ['__map__', '__map_reverse__', '__builtin__']
         for obj in cls.mro():
             temp.extend(dir(obj))
@@ -126,6 +123,13 @@ class Info(Mapping[str, VT], Generic[VT]):
             cls.__init__.__qualname__ = f'{cls.__name__}.__init__'
 
         self = super().__new__(cls)
+
+        # NOTE: We define the ``__map__`` and ``__map_reverse__`` attributes
+        # here under ``self`` to avoid them being considered as class variables
+        # and thus being shared by all instances.
+        super().__setattr__(self, '__map__', {})
+        super().__setattr__(self, '__map_reverse__', {})
+
         return self
 
     def __update__(self, dict_: 'Optional[Mapping[str, VT] | Iterable[tuple[str, VT]]]' = None,

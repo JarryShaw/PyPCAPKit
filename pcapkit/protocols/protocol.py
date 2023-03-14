@@ -377,6 +377,9 @@ class Protocol(Generic[PT, ST], metaclass=abc.ABCMeta):
             schema = cast('ST', self.__schema__.from_dict(schema))
         self.__header__ = schema
 
+        # initialize protocol instance
+        self.__init__(length=len(schema))  # type: ignore[misc]
+
         return self
 
     ##########################################################################
@@ -456,7 +459,7 @@ class Protocol(Generic[PT, ST], metaclass=abc.ABCMeta):
         #: pcapkit.protocols.data.data.Data: Parsed packet data.
         self._info = self.unpack(length, **kwargs)
 
-    def __init_subclass__(cls, /, schema: 'Type[ST]' = Schema_NoPayload, **kwargs: 'Any') -> 'None':  # type: ignore[assignment]
+    def __init_subclass__(cls, /, schema: 'Type[ST]', **kwargs: 'Any') -> 'None':
         """Initialisation for subclasses.
 
         Args:
@@ -969,7 +972,7 @@ class Protocol(Generic[PT, ST], metaclass=abc.ABCMeta):
             module, name = self.__proto__[proto]
             protocol = cast('Type[Protocol]', getattr(importlib.import_module(module), name))
 
-        file_ = getattr(self.__header__, 'payload', self._file)
+        file_ = self.__header__.get_payload()
         next_ = protocol(file_, length, alias=proto,
                          layer=self._exlayer, protocol=self._exproto)  # type: ignore[abstract]
         return next_
