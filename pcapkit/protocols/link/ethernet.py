@@ -26,7 +26,7 @@ import sys
 import textwrap
 from typing import TYPE_CHECKING
 
-from pcapkit.const.reg.linktype import LinkType as Enum_LinkType
+from pcapkit.const.reg.ethertype import EtherType as Enum_EtherType
 from pcapkit.protocols.data.link.ethernet import Ethernet as Data_Ethernet
 from pcapkit.protocols.link.link import Link
 from pcapkit.protocols.schema.link.ethernet import Ethernet as Schema_Ethernet
@@ -39,7 +39,6 @@ if TYPE_CHECKING:
     from aenum import IntEnum as AenumEnum
     from typing_extensions import Literal
 
-    from pcapkit.const.reg.ethertype import EtherType as Enum_EtherType
     from pcapkit.protocols.protocol import Protocol
     from pcapkit.protocols.schema.schema import Schema
 

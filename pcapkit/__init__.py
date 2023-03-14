@@ -75,10 +75,10 @@ if DEVMODE:
     warnings.showwarning('development mode enabled', DevModeWarning,
                          filename=__file__, lineno=0,
                          line=f"PCAPKIT_DEVMODE={os.environ['PCAPKIT_DEVMODE']}")
-else:
-    ROOT = os.path.dirname(os.path.realpath(__file__))
-    tbtrim.set_trim_rule(lambda filename: ROOT in os.path.realpath(filename),
-                         exception=BaseError, strict=False)
+# else:
+#     ROOT = os.path.dirname(os.path.realpath(__file__))
+#     tbtrim.set_trim_rule(lambda filename: ROOT in os.path.realpath(filename),
+#                          exception=BaseError, strict=False)
 
 from pcapkit.foundation.registry import *
 from pcapkit.interface import *

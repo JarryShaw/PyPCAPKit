@@ -35,8 +35,8 @@ class _IPField(Field[_T]):
 
     """
 
-    @abc.abstractmethod
     @property
+    @abc.abstractmethod
     def version(self) -> 'int':
         """IP version number."""
 

@@ -30,6 +30,7 @@ from pcapkit.protocols.link.link import Link
 from pcapkit.protocols.schema.link.vlan import TCI as Schema_TCI
 from pcapkit.protocols.schema.link.vlan import VLAN as Schema_VLAN
 from pcapkit.utilities.exceptions import UnsupportedCall
+from pcapkit.const.reg.ethertype import EtherType as Enum_EtherType
 
 if TYPE_CHECKING:
     from enum import IntEnum as StdlibEnum
@@ -38,7 +39,6 @@ if TYPE_CHECKING:
     from aenum import IntEnum as AenumEnum
     from typing_extensions import Literal
 
-    from pcapkit.const.reg.ethertype import EtherType as Enum_EtherType
     from pcapkit.protocols.protocol import Protocol
     from pcapkit.protocols.schema.link.vlan import TCIType
     from pcapkit.protocols.schema.schema import Schema

@@ -50,7 +50,6 @@ __all__ = [
     'HIP_RelayToParameter', 'HIP_RouteViaParameter', 'HIP_FromParameter',
     'HIP_RVSHMACParameter', 'HIP_RelayHMACParameter',
     'IPv4',
-    'IPv4_ToSField', 'IPv4_Flags',
     'IPv4_OptionType',
     'IPv4_UnassignedOption', 'IPv4_EOOLOption', 'IPv4_NOPOption',
     'IPv4_SECOption', 'IPv4_LSROption', 'IPv4_TSOption',

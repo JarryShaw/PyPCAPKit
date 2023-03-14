@@ -5,8 +5,8 @@
 from typing import TYPE_CHECKING
 
 from pcapkit.corekit.fields.misc import PayloadField
-from pcapkit.corekit.fields.numbers import EnumField, UInt16Field, UInt32Field
-from pcapkit.corekit.fields.strings import BytesField, PaddingField
+from pcapkit.corekit.fields.numbers import UInt16Field
+from pcapkit.corekit.fields.strings import BytesField
 from pcapkit.protocols.schema.schema import Schema
 
 __all__ = ['UDP']

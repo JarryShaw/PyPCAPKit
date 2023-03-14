@@ -103,7 +103,6 @@ from pcapkit.protocols.schema.internet.hopopt import UnassignedOption as HOPOPT_
 # Internet Protocol version 4
 from pcapkit.protocols.schema.internet.ipv4 import EOOLOption as IPv4_EOOLOption
 from pcapkit.protocols.schema.internet.ipv4 import ESECOption as IPv4_ESECOption
-from pcapkit.protocols.schema.internet.ipv4 import Flags as IPv4_Flags
 from pcapkit.protocols.schema.internet.ipv4 import IPv4
 from pcapkit.protocols.schema.internet.ipv4 import LSROption as IPv4_LSROption
 from pcapkit.protocols.schema.internet.ipv4 import MTUPOption as IPv4_MTUPOption
@@ -178,8 +177,6 @@ __all__ = [
 
     # Internet Protocol version 4
     'IPv4',
-    'IPv4_ToSField', 'IPv4_Flags',
-    'IPv4_OptionType',
     'IPv4_UnassignedOption', 'IPv4_EOOLOption', 'IPv4_NOPOption',
     'IPv4_SECOption', 'IPv4_LSROption', 'IPv4_TSOption',
     'IPv4_ESECOption', 'IPv4_RROption', 'IPv4_SIDOption',

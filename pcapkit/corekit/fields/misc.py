@@ -193,6 +193,9 @@ class PayloadField(_Field[_TP]):
     @property
     def protocol(self) -> 'Type[_TP]':
         """Payload protocol."""
+        if self._protocol is None:
+            from pcapkit.protocols.misc.raw import Raw  # type: ignore[unreachable] # pylint: disable=import-outside-top-level
+            return Raw
         return self._protocol
 
     @protocol.setter
@@ -205,36 +208,17 @@ class PayloadField(_Field[_TP]):
         """
         if isinstance(protocol, str):
             from pcapkit.protocols import __proto__  # pylint: disable=import-outside-top-level
-            from pcapkit.protocols.misc.raw import Raw  # pylint: disable=import-outside-top-level
-
-            protocol = cast('Type[_TP]', __proto__.get(protocol, Raw))
+            protocol = cast('Type[_TP]', __proto__.get(protocol))
         self._protocol = protocol
 
     def __init__(self, length: 'int | Callable[[dict[str, Any]], Optional[int]]' = lambda _: None,
                  default: '_TP | NoValueType | bytes' = NoValue,
-                 protocol: 'Optional[Type[_TP] | str]' = None,
+                 protocol: 'Optional[Type[_TP]]' = None,
                  callback: 'Callable[[PayloadField[_TP], dict[str, Any]], None]' = lambda *_: None) -> 'None':
         self._name = '<payload>'
+        self._default = default  # type: ignore[assignment]
+        self._protocol = protocol  # type: ignore[assignment]
         self._callback = callback
-
-        if protocol is None:
-            from pcapkit.protocols.misc.raw import Raw  # pylint: disable=import-outside-top-level
-            protocol = cast('Type[_TP]', Raw)
-        elif isinstance(protocol, str):
-            from pcapkit.protocols import __proto__  # pylint: disable=import-outside-top-level
-            from pcapkit.protocols.misc.raw import Raw  # pylint: disable=import-outside-top-level
-
-            protocol = cast('Type[_TP]', __proto__.get(protocol, Raw))
-        self._protocol = protocol
-
-        if default is NoValue:
-            from pcapkit.protocols.misc.null import \
-                NoPayload  # pylint: disable=import-outside-top-level
-            default = cast('_TP', NoPayload())
-        elif isinstance(default, bytes):
-            from pcapkit.protocols.misc.raw import Raw  # pylint: disable=import-outside-top-level
-            default = cast('_TP', Raw(packet=default))
-        self._default = default
 
         self._length_callback = None
         if not isinstance(length, int):
@@ -284,12 +268,16 @@ class PayloadField(_Field[_TP]):
             Unpacked field value.
 
         """
-        length = self.length
+        if self._protocol is None:
+            if isinstance(buffer, bytes):  # type: ignore[unreachable]
+                return cast('_TP', buffer)
+            return cast('_TP', buffer.read())
+
         if isinstance(buffer, bytes):
             file = io.BytesIO(buffer)  # type: IO[bytes]
         else:
             file = buffer
-        return self._protocol(file, length)  # type: ignore[abstract]
+        return self._protocol(file, self.length)  # type: ignore[abstract]
 
 
 class ListField(_Field[list[_TL]]):

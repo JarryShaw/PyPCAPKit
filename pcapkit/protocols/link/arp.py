@@ -210,7 +210,7 @@ class ARP(Link[Data_ARP, Schema_ARP]):
              ptype_reversed: 'bool' = False,
              hlen: 'int' = 6,
              plen: 'int' = 4,
-             oper: 'Enum_Operation | StdlibEnum | AenumEnum | str | int' = Enum_Operation.Request,
+             oper: 'Enum_Operation | StdlibEnum | AenumEnum | str | int' = Enum_Operation.REQUEST,
              oper_default: 'Optional[int]' = None,
              oper_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
              oper_reversed: 'bool' = False,
