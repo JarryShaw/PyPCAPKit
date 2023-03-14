@@ -74,7 +74,7 @@ class ReturnCode(IntEnum):
     #: Service ready for new user.
     CODE_220 = 220
 
-    #: Service closing control connection.
+    #: Service closing control connection. Logged out if appropriate.
     CODE_221 = 221
 
     #: Data connection open; no transfer in progress.
@@ -93,22 +93,18 @@ class ReturnCode(IntEnum):
     #: Entering Extended Passive Mode (|||port|).
     CODE_229 = 229
 
-    #: User logged in, proceed. Logged out if appropriate.
+    #: User logged in, proceed.
     CODE_230 = 230
 
-    #: User logged out; service terminated.
-    CODE_231 = 231
-
-    #: Logout command noted, will complete when transfer done. Alternatively: User
-    #: logged in, authorized by security data exchange.
+    #: User logged in, authorized by security data exchange.
     CODE_232 = 232
 
-    #: Specifies that the server accepts the authentication mechanism specified by
-    #: the client, and no security data needs to be exchanged.
+    #: Server accepts the security  mechanism specified by the client; no security
+    #: data needs to be exchanged.
     CODE_234 = 234
 
-    #: Specifies that the server accepts the security data given by the client, and
-    #: no further security data needs to be exchanged.
+    #: Server accepts the security data given by the client; no further security
+    #: data needs to be exchanged.
     CODE_235 = 235
 
     #: Requested file action okay, completed.
@@ -123,13 +119,16 @@ class ReturnCode(IntEnum):
     #: Need account for login.
     CODE_332 = 332
 
-    #: Specifies that the server accepts the authentication mechanism specified by
-    #: the client, but some security data needs to be exchanged.
+    #: Server accepts the security mechanism specified by the client; some security
+    #: data needs to be exchanged.
     CODE_334 = 334
 
-    #: Specifies that the server accepts the security data given by the client, but
-    #: further security data needs to be exchanged.
+    #: Server accepts the security data given by the client; more security data
+    #: needs to be exchanged.
     CODE_335 = 335
+
+    #: Username okay, need password. Challenge is ". . . . ".
+    CODE_336 = 336
 
     #: Requested file action pending further information
     CODE_350 = 350
@@ -178,8 +177,20 @@ class ReturnCode(IntEnum):
     #: Need account for storing files.
     CODE_532 = 532
 
+    #: Command protection level denied for policy reasons.
+    CODE_533 = 533
+
     #: Request denied for policy reasons.
     CODE_534 = 534
+
+    #: Failed security check.
+    CODE_535 = 535
+
+    #: Data protection level not supported by security mechanism.
+    CODE_536 = 536
+
+    #: Command protection level not supported by security mechanism.
+    CODE_537 = 537
 
     #: Requested action not taken. File unavailable (e.g., file not found, no
     #: access).
