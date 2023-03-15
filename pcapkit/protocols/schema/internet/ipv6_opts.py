@@ -2,13 +2,14 @@
 # mypy: disable-error-code=assignment
 """header schema for IPv6 destination options"""
 
+import collections
 from typing import TYPE_CHECKING
 
 from pcapkit.const.ipv6.option import Option as Enum_Option
 from pcapkit.const.ipv6.router_alert import RouterAlert as Enum_RouterAlert
 from pcapkit.const.reg.transtype import TransType as Enum_TransType
 from pcapkit.corekit.fields.ipaddress import IPv6Field
-from pcapkit.corekit.fields.misc import ConditionalField, ListField, PayloadField
+from pcapkit.corekit.fields.misc import ConditionalField, OptionField, PayloadField
 from pcapkit.corekit.fields.numbers import (EnumField, NumberField, UInt8Field, UInt16Field,
                                             UInt32Field)
 from pcapkit.corekit.fields.strings import BitField, BytesField, PaddingField
@@ -108,24 +109,6 @@ def mpl_opt_seed_id_len(pkt: 'dict[str, Any]') -> 'int':
     if s_type == 3:
         return 16
     raise FieldValueError(f'IPv6_Opts: invalid MPL Seed-ID type: {s_type}')
-
-
-class IPv6_Opts(Schema):
-    """Header schema for IPv6-Opts packet."""
-
-    #: Next header.
-    next: 'Enum_TransType' = EnumField(length=1, namespace=Enum_TransType)
-    #: Header length.
-    len: 'int' = UInt8Field()
-    #: Options.
-    options: 'list[Option]' = ListField(length=lambda pkt: pkt['len'] * 8 + 6)
-    #: Payload.
-    payload: 'bytes' = PayloadField()
-
-    if TYPE_CHECKING:
-        def __init__(self, next: 'Enum_TransType', len: 'int',
-                     options: 'bytes | list[bytes | Option]',
-                     payload: 'bytes | Protocol | Schema') -> 'None': ...
 
 
 class Option(Schema):
@@ -399,3 +382,42 @@ class IPDFFOption(Option):
 
     if TYPE_CHECKING:
         def __init__(self, type: 'Enum_Option', len: 'int', flags: 'DFFFlags', seq: 'int') -> 'None': ...
+
+
+class IPv6_Opts(Schema):
+    """Header schema for IPv6-Opts packet."""
+
+    #: Next header.
+    next: 'Enum_TransType' = EnumField(length=1, namespace=Enum_TransType)
+    #: Header length.
+    len: 'int' = UInt8Field()
+    #: Options.
+    options: 'list[Option]' = OptionField(
+        length=lambda pkt: pkt['len'] * 8 + 6,
+        base_schema=Option,
+        type_name='type',
+        registry=collections.defaultdict(lambda: UnassignedOption, {
+            Enum_Option.Pad1: PadOption,
+            Enum_Option.PadN: PadOption,
+            Enum_Option.Tunnel_Encapsulation_Limit: TunnelEncapsulationLimitOption,
+            Enum_Option.Router_Alert: RouterAlertOption,
+            Enum_Option.CALIPSO: CALIPSOOption,
+            Enum_Option.SMF_DPD: SMFDPDOption,
+            Enum_Option.PDM: PDMOption,
+            Enum_Option.Quick_Start: QuickStartOption,
+            Enum_Option.RPL_Option_0x63: RPLOption,
+            Enum_Option.MPL_Option: MPLOption,
+            Enum_Option.ILNP_Nonce: ILNPOption,
+            Enum_Option.Line_Identification_Option: LineIdentificationOption,
+            Enum_Option.Jumbo_Payload: JumboPayloadOption,
+            Enum_Option.Home_Address: HomeAddressOption,
+            Enum_Option.IP_DFF: IPDFFOption,
+        })
+    )
+    #: Payload.
+    payload: 'bytes' = PayloadField()
+
+    if TYPE_CHECKING:
+        def __init__(self, next: 'Enum_TransType', len: 'int',
+                     options: 'bytes | list[bytes | Option]',
+                     payload: 'bytes | Protocol | Schema') -> 'None': ...

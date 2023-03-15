@@ -2,6 +2,7 @@
 # mypy: disable-error-code=assignment
 """header schema for Host Identity Protocol"""
 
+import collections
 from typing import TYPE_CHECKING
 
 from pcapkit.const.hip.certificate import Certificate as Enum_Certificate
@@ -23,7 +24,7 @@ from pcapkit.const.hip.suite import Suite as Enum_Suite
 from pcapkit.const.hip.transport import Transport as Enum_Transport
 from pcapkit.const.reg.transtype import TransType as Enum_TransType
 from pcapkit.corekit.fields.ipaddress import IPv6Field
-from pcapkit.corekit.fields.misc import ConditionalField, ListField, PayloadField
+from pcapkit.corekit.fields.misc import ConditionalField, ListField, OptionField, PayloadField
 from pcapkit.corekit.fields.numbers import (EnumField, NumberField, UInt8Field, UInt16Field,
                                             UInt32Field)
 from pcapkit.corekit.fields.strings import BitField, BytesField, PaddingField
@@ -104,54 +105,6 @@ if TYPE_CHECKING:
         symmetric: int
         #: Must-follow flag.
         must_follow: int
-
-
-class HIP(Schema):
-    """Header schema for HIP packet."""
-
-    #: Next header.
-    next: 'Enum_TransType' = EnumField(length=1, namespace=Enum_TransType)
-    #: Header length.
-    len: 'int' = UInt8Field()
-    #: Packet type.
-    pkt: 'PacketType' = BitField(
-        length=1,
-        namespace={
-            'bit_0': (0, 1),
-            'type': (1, 7),
-        },
-    )
-    #: HIP version.
-    ver: 'VersionType' = BitField(
-        length=1,
-        namespace={
-            'version': (0, 4),
-            'bit_1': (7, 1),
-        },
-    )
-    #: Checksum.
-    checksum: 'bytes' = BytesField(length=2)
-    #: HIP controls.
-    control: 'ControlsType' = BitField(
-        length=2,
-        namespace={
-            'anonymous': (15, 1),
-        },
-    )
-    #: Sender's host identity tag.
-    shit: 'int' = NumberField(length=16, signed=False)
-    #: Receiver's host identity tag.
-    rhit: 'int' = NumberField(length=16, signed=False)
-    #: HIP parameters.
-    param: 'list[Parameter]' = ListField(length=lambda pkt: (pkt['len'] - 4) * 8)
-    #: Payload.
-    payload: 'bytes' = PayloadField()
-
-    if TYPE_CHECKING:
-        def __init__(self, next: 'Enum_TransType', len: 'int', pkt: 'PacketType',
-                     ver: 'VersionType', checksum: 'bytes', control: 'ControlsType',
-                     shit: 'int', rhit: 'int', param: 'bytes | list[bytes | Parameter]',
-                     payload: 'bytes | Protocol | Schema') -> 'None': ...
 
 
 class Parameter(Schema):
@@ -1004,3 +957,104 @@ class RelayHMACParameter(Parameter):
 
     if TYPE_CHECKING:
         def __init__(self, type: 'Enum_Parameter', len: 'int', hmac: 'bytes') -> 'None': ...
+
+
+class HIP(Schema):
+    """Header schema for HIP packet."""
+
+    #: Next header.
+    next: 'Enum_TransType' = EnumField(length=1, namespace=Enum_TransType)
+    #: Header length.
+    len: 'int' = UInt8Field()
+    #: Packet type.
+    pkt: 'PacketType' = BitField(
+        length=1,
+        namespace={
+            'bit_0': (0, 1),
+            'type': (1, 7),
+        },
+    )
+    #: HIP version.
+    ver: 'VersionType' = BitField(
+        length=1,
+        namespace={
+            'version': (0, 4),
+            'bit_1': (7, 1),
+        },
+    )
+    #: Checksum.
+    checksum: 'bytes' = BytesField(length=2)
+    #: HIP controls.
+    control: 'ControlsType' = BitField(
+        length=2,
+        namespace={
+            'anonymous': (15, 1),
+        },
+    )
+    #: Sender's host identity tag.
+    shit: 'int' = NumberField(length=16, signed=False)
+    #: Receiver's host identity tag.
+    rhit: 'int' = NumberField(length=16, signed=False)
+    #: HIP parameters.
+    param: 'list[Parameter]' = OptionField(
+        length=lambda pkt: (pkt['len'] - 4) * 8,
+        base_schema=Parameter,
+        type_name='type',
+        registry=collections.defaultdict(lambda: UnassignedParameter, {
+            Enum_Parameter.ESP_INFO: ESPInfoParameter,
+            Enum_Parameter.R1_COUNTER: R1CounterParameter,
+            Enum_Parameter.LOCATOR_SET: LocatorSetParameter,
+            Enum_Parameter.PUZZLE: PuzzleParameter,
+            Enum_Parameter.SOLUTION: SolutionParameter,
+            Enum_Parameter.SEQ: SEQParameter,
+            Enum_Parameter.ACK: ACKParameter,
+            Enum_Parameter.DH_GROUP_LIST: DHGroupListParameter,
+            Enum_Parameter.DIFFIE_HELLMAN: DiffieHellmanParameter,
+            Enum_Parameter.HIP_TRANSFORM: HIPTransformParameter,
+            Enum_Parameter.HIP_CIPHER: HIPCipherParameter,
+            Enum_Parameter.NAT_TRAVERSAL_MODE: NATTraversalModeParameter,
+            Enum_Parameter.TRANSACTION_PACING: TransactionPacingParameter,
+            Enum_Parameter.ENCRYPTED: EncryptedParameter,
+            Enum_Parameter.HOST_ID: HostIDParameter,
+            Enum_Parameter.HIT_SUITE_LIST: HITSuiteListParameter,
+            Enum_Parameter.CERT: CertParameter,
+            Enum_Parameter.NOTIFICATION: NotificationParameter,
+            Enum_Parameter.ECHO_REQUEST_SIGNED: EchoRequestSignedParameter,
+            Enum_Parameter.REG_INFO: RegInfoParameter,
+            Enum_Parameter.REG_REQUEST: RegRequestParameter,
+            Enum_Parameter.REG_FAILED: RegFailedParameter,
+            Enum_Parameter.REG_FROM: RegFromParameter,
+            Enum_Parameter.ECHO_RESPONSE_SIGNED: EchoResponseSignedParameter,
+            Enum_Parameter.TRANSPORT_FORMAT_LIST: TransportFormatListParameter,
+            Enum_Parameter.ESP_TRANSFORM: ESPTransformParameter,
+            Enum_Parameter.SEQ_DATA: SeqDataParameter,
+            Enum_Parameter.ACK_DATA: AckDataParameter,
+            Enum_Parameter.PAYLOAD_MIC: PayloadMICParameter,
+            Enum_Parameter.TRANSACTION_ID: TransactionIDParameter,
+            Enum_Parameter.OVERLAY_ID: OverlayIDParameter,
+            Enum_Parameter.ROUTE_DST: RouteDstParameter,
+            Enum_Parameter.HIP_TRANSPORT_MODE: HIPTransportModeParameter,
+            Enum_Parameter.HIP_MAC: HIPMACParameter,
+            Enum_Parameter.HIP_MAC_2: HIPMAC2Parameter,
+            Enum_Parameter.HIP_SIGNATURE_2: HIPSignature2Parameter,
+            Enum_Parameter.HIP_SIGNATURE: HIPSignatureParameter,
+            Enum_Parameter.ECHO_REQUEST_UNSIGNED: EchoRequestUnsignedParameter,
+            Enum_Parameter.ECHO_RESPONSE_UNSIGNED: EchoResponseUnsignedParameter,
+            Enum_Parameter.RELAY_FROM: RelayFromParameter,
+            Enum_Parameter.RELAY_TO: RelayToParameter,
+            Enum_Parameter.OVERLAY_TTL: OverlayTTLParameter,
+            Enum_Parameter.ROUTE_VIA: RouteViaParameter,
+            Enum_Parameter.FROM: FromParameter,
+            Enum_Parameter.RVS_HMAC: RVSHMACParameter,
+            Enum_Parameter.VIA_RVS: ViaRVSParameter,
+            Enum_Parameter.RELAY_HMAC: RelayHMACParameter,
+        }),
+    )
+    #: Payload.
+    payload: 'bytes' = PayloadField()
+
+    if TYPE_CHECKING:
+        def __init__(self, next: 'Enum_TransType', len: 'int', pkt: 'PacketType',
+                     ver: 'VersionType', checksum: 'bytes', control: 'ControlsType',
+                     shit: 'int', rhit: 'int', param: 'bytes | list[bytes | Parameter]',
+                     payload: 'bytes | Protocol | Schema') -> 'None': ...

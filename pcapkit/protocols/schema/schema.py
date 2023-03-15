@@ -16,9 +16,7 @@ from pcapkit.utilities.warnings import UnknownFieldWarning, warn
 
 if TYPE_CHECKING:
     from collections import OrderedDict
-    from typing import IO, Any, Iterable, Iterator, Optional, Type
-
-    from typing_extensions import Self
+    from typing import IO, Any, Iterable, Iterator, Optional
 
 __all__ = ['Schema']
 
@@ -351,15 +349,7 @@ class Schema(Mapping[str, VT], Generic[VT]):
                 elif isinstance(data, bytes):
                     self.__buffer__[field.name] = data
                 elif isinstance(data, list):
-                    temp_list = []  # type: list[bytes]
-                    for item in data:
-                        if isinstance(item, bytes):
-                            temp_list.append(item)
-                        elif isinstance(item, Schema):
-                            temp_list.append(item.pack())
-                        else:
-                            raise ProtocolUnbound(f'unsupported type {type(item)}')
-                    self.__buffer__[field.name] = b''.join(temp_list)
+                    self.__buffer__[field.name] = field.pack(data, packet)
                 else:
                     raise ProtocolUnbound(f'unsupported type {type(data)}')
                 continue
@@ -385,9 +375,9 @@ class Schema(Mapping[str, VT], Generic[VT]):
         return self.__bytes__()
 
     @classmethod
-    def unpack(cls: 'Type[Self]', data: 'bytes | IO[bytes]',  # type: ignore[valid-type]
+    def unpack(cls, data: 'bytes | IO[bytes]',
                length: 'Optional[int]' = None,
-               packet: 'Optional[dict[str, Any]]' = None) -> 'Self':  # type: ignore[valid-type]
+               packet: 'Optional[dict[str, Any]]' = None) -> 'Schema':
         """Unpack :obj:`bytes` into :class:`Schema`.
 
         Args:
@@ -399,7 +389,7 @@ class Schema(Mapping[str, VT], Generic[VT]):
             Unpacked data as :class:`Schema`.
 
         """
-        self = cls.__new__(cls)  # type: ignore[call-overload]
+        self = cls.__new__(cls)
 
         if isinstance(data, bytes):
             length = len(data) if length is None else length
@@ -417,7 +407,7 @@ class Schema(Mapping[str, VT], Generic[VT]):
         for field in self.__fields__.values():
             field = field(packet)
 
-            if isinstance(field, (PayloadField, ListField)):
+            if isinstance(field, PayloadField):
                 payload_length = field.length or cast('int', packet['__length__'])
                 payload = data.read(payload_length)
 

@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """miscellaneous field class"""
 
+import collections
 import copy
 import io
 from typing import TYPE_CHECKING, TypeVar, cast
@@ -8,10 +9,17 @@ from typing import TYPE_CHECKING, TypeVar, cast
 from pcapkit.corekit.fields.field import NoValue, _Field
 from pcapkit.utilities.exceptions import FieldValueError, NoDefaultValue
 
-__all__ = ['ConditionalField', 'PayloadField']
+__all__ = [
+    'ConditionalField', 'PayloadField',
+    'ListField', 'OptionField',
+]
 
 if TYPE_CHECKING:
+    from collections import defaultdict
+    from enum import IntEnum as StdlibEnum
     from typing import IO, Any, Callable, Optional, Type
+
+    from aenum import IntEnum as AenumEnum
 
     from pcapkit.corekit.fields.field import Field, NoValueType
     from pcapkit.protocols.protocol import Protocol
@@ -303,12 +311,11 @@ class ListField(_Field[list[_TL]]):
         length: field size (in bytes); if a callable is given, it should return
             an integer value and accept the current packet as its only argument.
         item_type: field type of the contained items.
-        field: field type.
         callback: callback function to be called upon
             :meth:`self.__call__ <pcapkit.corekit.fields.field._Field.__call__>`.
 
     This field is used to represent a list of fields, as in the case of lists of
-    options and/or parameters in a protocol.
+    constrant-length-field items in a protocol.
 
     """
 
@@ -397,8 +404,102 @@ class ListField(_Field[list[_TL]]):
             field = self._item_type(packet)
 
             temp = []  # type: list[_TL]
-            for _ in range(length // field.length):
+            while length:
+                length -= field.length
+                if length < 0:
+                    raise FieldValueError(f'Field {self.name} has invalid length.')
+
                 buffer = file.read(field.length)
                 temp.append(field.unpack(buffer, packet))
             return temp
         return file.read(length)
+
+
+class OptionField(ListField):
+    """Field list for protocol options.
+
+    Args:
+        length: field size (in bytes); if a callable is given, it should return
+            an integer value and accept the current packet as its only argument.
+        base_schema: base schema for option fields.
+        type_name: name of the option type field.
+        registry: option registry, as in a mapping from option types (enumeration
+            values) to option schemas, with the default value being the unknown
+            option schema.
+        callback: callback function to be called upon
+            :meth:`self.__call__ <pcapkit.corekit.fields.field._Field.__call__>`.
+
+    This field is used to represent a list of fields, as in the case of lists of
+    options and/or parameters in a protocol.
+
+    """
+
+    @property
+    def base_schema(self) -> 'Type[Schema]':
+        """Base schema."""
+        return self._base_schema
+
+    @property
+    def type_name(self) -> 'str':
+        """Type name."""
+        return self._type_name
+
+    @property
+    def registry(self) -> 'dict[int, Type[Schema]]':
+        """Option registry."""
+        return self._registry
+
+    def __init__(self, length: 'int | Callable[[dict[str, Any]], Optional[int]]' = lambda _: None,
+                 base_schema: 'Optional[Type[Schema]]' = None,
+                 type_name: 'str' = 'type',
+                 registry: 'Optional[defaultdict[int | StdlibEnum | AenumEnum, Type[Schema]]]' = None,
+                 callback: 'Callable[[ListField, dict[str, Any]], None]' = lambda *_: None) -> 'None':
+        super().__init__(length, None, callback)
+        self._name = '<option>'
+
+        if base_schema is None:
+            raise FieldValueError('Field <option> has no base schema.')
+        self._base_schema = base_schema
+
+        if not hasattr(self._base_schema, type_name):
+            raise FieldValueError(f'Field <option> has no type field "{type_name}".')
+        self._type_name = type_name
+
+        if registry is None:
+            raise FieldValueError('Field <option> has no registry.')
+        self._registry = registry
+
+    def unpack(self, buffer: 'bytes | IO[bytes]', packet: 'dict[str, Any]') -> 'list[Schema]':  # type: ignore[override]
+        """Unpack field value from :obj:`bytes`.
+
+        Args:
+            buffer: field buffer.
+            packet: packet data.
+
+        Returns:
+            Unpacked field value.
+
+        """
+        length = self.length
+        if isinstance(buffer, bytes):
+            file = io.BytesIO(buffer)  # type: IO[bytes]
+        else:
+            file = buffer
+
+        temp = []  # type: list[Schema]
+        while length:
+            # unpack option type using base schema
+            meta = self._base_schema.unpack(file, length, packet)
+            code = cast('int', meta[self._type_name])
+            schema = self._registry[code]
+
+            # rewind to the beginning of the option
+            file.seek(-len(meta), io.SEEK_CUR)
+
+            # unpack option using option schema
+            data = schema.unpack(file, length, packet)
+            temp.append(data)
+
+            # update length
+            length -= len(data)
+        return temp
