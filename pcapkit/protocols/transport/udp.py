@@ -38,7 +38,8 @@ if TYPE_CHECKING:
 __all__ = ['UDP']
 
 
-class UDP(Transport[Data_UDP, Schema_UDP]):
+class UDP(Transport[Data_UDP, Schema_UDP],
+          schema=Schema_UDP, data=Data_UDP):
     """This class implements User Datagram Protocol.
 
     This class currently supports parsing of the following protocols, which are
@@ -137,19 +138,17 @@ class UDP(Transport[Data_UDP, Schema_UDP]):
 
         return self._decode_next_layer(udp, (udp.srcport, udp.dstport), udp.len - 8)
 
-    def make(self,  # type: ignore[override]
-             srcport: 'int',
-             dstport: 'int',
-             len: 'int',
-             checksum: 'bytes',
-             payload: 'bytes | Schema | Protocol',
+    def make(self,
+             srcport: 'int' = 0,
+             dstport: 'int' = 0,
+             checksum: 'bytes' = b'\x00\x00',
+             payload: 'bytes | Schema | Protocol' = b'',
              **kwargs: 'Any') -> 'Schema_UDP':
         """Make (construct) packet data.
 
         Args:
             srcport: Source port.
             dstport: Destination port.
-            len: Length of packet data.
             checksum: Checksum.
             payload: Payload data.
             **kwargs: Arbitrary keyword arguments.
@@ -161,7 +160,7 @@ class UDP(Transport[Data_UDP, Schema_UDP]):
         return Schema_UDP(
             srcport=srcport,
             dstport=dstport,
-            len=len,
+            len=8 + len(payload),
             checksum=checksum,
             payload=payload,
         )
@@ -185,3 +184,25 @@ class UDP(Transport[Data_UDP, Schema_UDP]):
 
         """
         return Enum_TransType.UDP  # type: ignore[return-value]
+
+    ##########################################################################
+    # Utilities.
+    ##########################################################################
+
+    @classmethod
+    def _make_data(cls, data: 'Data_UDP') -> 'dict[str, Any]':  # type: ignore[override]
+        """Create key-value pairs from ``data`` for protocol construction.
+
+        Args:
+            data: protocol data
+
+        Returns:
+            Key-value pairs for protocol construction.
+
+        """
+        return {
+            'srcport': data.srcport,
+            'dstport': data.dstport,
+            'checksum': data.checksum,
+            'payload': cls._make_payload(data),
+        }
