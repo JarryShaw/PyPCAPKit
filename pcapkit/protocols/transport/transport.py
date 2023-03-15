@@ -16,6 +16,7 @@ from typing import TYPE_CHECKING, Generic, cast
 from pcapkit.protocols.protocol import PT, ST, Protocol
 from pcapkit.utilities.exceptions import StructError, UnsupportedCall, stacklevel
 from pcapkit.utilities.logging import DEVMODE, logger
+from pcapkit.utilities.warnings import warn, RegistryWarning
 
 if TYPE_CHECKING:
     from typing import Any, Optional, Type
@@ -71,6 +72,8 @@ class Transport(Protocol[PT, ST], Generic[PT, ST]):  # pylint: disable=abstract-
         if cls is Transport:
             raise UnsupportedCall(f'{cls.__name__} is an abstract class')
 
+        if code in cls.__proto__:
+            warn(f'port {code} already registered, overwriting', RegistryWarning)
         cls.__proto__[code] = (module, class_)
 
     @classmethod
