@@ -16,7 +16,7 @@ from typing import TYPE_CHECKING, Generic, cast
 from pcapkit.protocols.protocol import PT, ST, Protocol
 from pcapkit.utilities.exceptions import StructError, UnsupportedCall, stacklevel
 from pcapkit.utilities.logging import DEVMODE, logger
-from pcapkit.utilities.warnings import warn, RegistryWarning
+from pcapkit.utilities.warnings import RegistryWarning, warn
 
 if TYPE_CHECKING:
     from typing import Any, Optional, Type
