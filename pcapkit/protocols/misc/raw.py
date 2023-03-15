@@ -26,7 +26,8 @@ if TYPE_CHECKING:
 __all__ = ['Raw']
 
 
-class Raw(Protocol[Data_Raw, Schema_Raw]):
+class Raw(Protocol[Data_Raw, Schema_Raw],
+          schema=Schema_Raw, data=Data_Raw):
     """This class implements universal unknown protocol."""
 
     ##########################################################################
@@ -157,3 +158,22 @@ class Raw(Protocol[Data_Raw, Schema_Raw]):
 
         """
         raise UnsupportedCall(f'{cls.__name__!r} object cannot be interpreted as an integer')
+
+    ##########################################################################
+    # Utilities.
+    ##########################################################################
+
+    @classmethod
+    def _make_data(cls, data: 'Data_Raw') -> 'dict[str, Any]':  # type: ignore[override]
+        """Create key-value pairs from ``data`` for protocol construction.
+
+        Args:
+            data: protocol data
+
+        Returns:
+            Key-value pairs for protocol construction.
+
+        """
+        return {
+            'packet': data.packet,
+        }

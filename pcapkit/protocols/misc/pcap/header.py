@@ -57,7 +57,8 @@ _MAGIC_NUM = {
 }
 
 
-class Header(Protocol[Data_Header, Schema_Header]):
+class Header(Protocol[Data_Header, Schema_Header],
+             schema=Schema_Header, data=Data_Header):
     """PCAP file global header extractor."""
 
     ##########################################################################
@@ -289,6 +290,27 @@ class Header(Protocol[Data_Header, Schema_Header]):
     ##########################################################################
     # Utilities.
     ##########################################################################
+
+    @classmethod
+    def _make_data(cls, data: 'Data_Header') -> 'dict[str, Any]':  # type: ignore[override]
+        """Create key-value pairs from ``data`` for protocol construction.
+
+        Args:
+            data: protocol data
+
+        Returns:
+            Key-value pairs for protocol construction.
+
+        """
+        return {
+            'magic_number': data.magic_number.data,
+            'version_major': data.version.major,
+            'version_minor': data.version.minor,
+            'thiszone': data.thiszone,
+            'sigfigs': data.sigfigs,
+            'snaplen': data.snaplen,
+            'network': data.network,
+        }
 
     def _read_protos(self, size: int) -> 'Enum_LinkType':
         """Read next layer protocol type.

@@ -13,6 +13,7 @@ from typing import TYPE_CHECKING, Generic
 
 from pcapkit.const.reg.ethertype import EtherType as Enum_EtherType
 from pcapkit.protocols.protocol import PT, ST, Protocol
+from pcapkit.utilities.warnings import RegistryWarning, warn
 
 if TYPE_CHECKING:
     from typing_extensions import Literal
@@ -67,7 +68,7 @@ class Link(Protocol[PT, ST], Generic[PT, ST]):  # pylint: disable=abstract-metho
             Enum_EtherType.Internet_Protocol_version_6:         ('pcapkit.protocols.internet.ipv6', 'IPv6'),
 
             # c.f., https://en.wikipedia.org/wiki/EtherType#Values
-            0x8137: ('pcapkit.protocols.internet.ipx',  'IPX'),
+            0x8137:                                             ('pcapkit.protocols.internet.ipx',  'IPX'),
         },
     )
 
@@ -86,7 +87,7 @@ class Link(Protocol[PT, ST], Generic[PT, ST]):  # pylint: disable=abstract-metho
     ##########################################################################
 
     @classmethod
-    def register(cls, code: 'Enum_EtherType', module: str, class_: str) -> 'None':
+    def register(cls, code: 'Enum_EtherType', module: str, class_: str) -> 'None':  # type: ignore[override]
         r"""Register a new protocol class.
 
         Notes:
@@ -99,6 +100,8 @@ class Link(Protocol[PT, ST], Generic[PT, ST]):  # pylint: disable=abstract-metho
             class\_: class name
 
         """
+        if code in cls.__proto__:
+            warn(f'protocol {code} already registered, overwriting', RegistryWarning)
         cls.__proto__[code] = (module, class_)
 
     ##########################################################################

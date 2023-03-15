@@ -6,6 +6,7 @@ from typing import TYPE_CHECKING
 
 from pcapkit.const.ospf.authentication import Authentication as Enum_Authentication
 from pcapkit.const.ospf.packet import Packet as Enum_Packet
+from pcapkit.corekit.fields.ipaddress import IPv4Field
 from pcapkit.corekit.fields.misc import PayloadField
 from pcapkit.corekit.fields.numbers import EnumField, UInt8Field, UInt16Field, UInt32Field
 from pcapkit.corekit.fields.strings import BytesField, PaddingField
@@ -14,6 +15,8 @@ from pcapkit.protocols.schema.schema import Schema
 __all__ = ['OSPF', 'CrytographicAuthentication']
 
 if TYPE_CHECKING:
+    from ipaddress import IPv4Address
+
     from pcapkit.protocols.protocol import Protocol
 
 
@@ -43,9 +46,9 @@ class OSPF(Schema):
     #: Length.
     length: 'int' = UInt16Field()
     #: Router ID.
-    router_id: 'bytes' = BytesField(length=4)
+    router_id: 'IPv4Address' = IPv4Field()
     #: Area ID.
-    area_id: 'bytes' = BytesField(length=4)
+    area_id: 'IPv4Address' = IPv4Field()
     #: Checksum.
     checksum: 'bytes' = BytesField(length=2)
     #: Authentication type.
@@ -56,7 +59,9 @@ class OSPF(Schema):
     payload: 'bytes' = PayloadField()
 
     if TYPE_CHECKING:
-        def __init__(self, version: 'int', type: 'Enum_Packet', length: 'int', router_id: 'bytes',
-                     area_id: 'bytes', checksum: 'bytes', auth_type: 'Enum_Authentication',
+        def __init__(self, version: 'int', type: 'Enum_Packet', length: 'int',
+                     router_id: 'IPv4Address | bytes | str | int',
+                     area_id: 'IPv4Address | bytes | str | int',
+                     checksum: 'bytes', auth_type: 'Enum_Authentication',
                      auth_data: 'bytes | CrytographicAuthentication',
                      payload: 'bytes | Protocol | Schema') -> 'None': ...

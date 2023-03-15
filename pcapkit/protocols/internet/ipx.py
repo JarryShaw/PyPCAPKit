@@ -46,7 +46,8 @@ if TYPE_CHECKING:
 __all__ = ['IPX']
 
 
-class IPX(Internet[Data_IPX, Schema_IPX]):
+class IPX(Internet[Data_IPX, Schema_IPX],
+          schema=Schema_IPX, data=Data_IPX):
     """This class implements Internetwork Packet Exchange."""
 
     ##########################################################################
@@ -173,6 +174,26 @@ class IPX(Internet[Data_IPX, Schema_IPX]):
     ##########################################################################
     # Utilities.
     ##########################################################################
+
+    @classmethod
+    def _make_data(cls, data: 'Data_IPX') -> 'dict[str, Any]':  # type: ignore[override]
+        """Create key-value pairs from ``data`` for protocol construction.
+
+        Args:
+            data: protocol data
+
+        Returns:
+            Key-value pairs for protocol construction.
+
+        """
+        return {
+            'chksum': data.chksum,
+            'count': data.count,
+            'type': data.type,
+            'dst': data.dst,
+            'src': data.src,
+            'payload': cls._make_payload(data),
+        }
 
     def _read_ipx_address(self, addr: 'bytes') -> 'Data_Address':
         """Read IPX address field.

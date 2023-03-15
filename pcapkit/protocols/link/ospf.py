@@ -63,7 +63,8 @@ __all__ = ['OSPF']
 PAT_MAC_ADDR = re.compile(rb'(?i)(?:[0-9a-f]{2}[:-]){5}[0-9a-f]{2}')
 
 
-class OSPF(Link[Data_OSPF, Schema_OSPF]):
+class OSPF(Link[Data_OSPF, Schema_OSPF],
+           schema=Schema_OSPF, data=Data_OSPF):
     """This class implements Open Shortest Path First."""
 
     ##########################################################################
@@ -131,8 +132,8 @@ class OSPF(Link[Data_OSPF, Schema_OSPF]):
             version=schema.version,
             type=schema.type,
             len=schema.length,
-            router_id=self._read_id_numbers(schema.router_id),
-            area_id=self._read_id_numbers(schema.area_id),
+            router_id=schema.router_id,
+            area_id=schema.area_id,
             chksum=schema.checksum,
             autype=schema.auth_type,
         )
@@ -203,8 +204,8 @@ class OSPF(Link[Data_OSPF, Schema_OSPF]):
             version=version,
             type=type_,
             length=24 + len(payload),
-            router_id=self._make_id_numbers(router_id),
-            area_id=self._make_id_numbers(area_id),
+            router_id=router_id,
+            area_id=area_id,
             checksum=checksum,
             auth_type=auth_type_,
             auth_data=data,
@@ -232,6 +233,28 @@ class OSPF(Link[Data_OSPF, Schema_OSPF]):
     ##########################################################################
     # Utilities.
     ##########################################################################
+
+    @classmethod
+    def _make_data(cls, data: 'Data_OSPF') -> 'dict[str, Any]':  # type: ignore[override]
+        """Create key-value pairs from ``data`` for protocol construction.
+
+        Args:
+            data: protocol data
+
+        Returns:
+            Key-value pairs for protocol construction.
+
+        """
+        return {
+            'version': data.version,
+            'type': data.type,
+            'router_id': data.router_id,
+            'area_id': data.area_id,
+            'checksum': data.chksum,
+            'auth_type': data.autype,
+            'auth_data': data.auth,
+            'payload': cls._make_payload(data)
+        }
 
     def _read_id_numbers(self, id: 'bytes') -> 'IPv4Address':
         """Read router and area IDs.

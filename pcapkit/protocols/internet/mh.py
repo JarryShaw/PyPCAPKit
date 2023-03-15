@@ -47,7 +47,8 @@ if TYPE_CHECKING:
 __all__ = ['MH']
 
 
-class MH(Internet[Data_MH, Schema_MH]):
+class MH(Internet[Data_MH, Schema_MH],
+         schema=Schema_MH, data=Data_MH):
     """This class implements Mobility Header."""
 
     ##########################################################################
@@ -232,3 +233,26 @@ class MH(Internet[Data_MH, Schema_MH]):
 
         """
         return Enum_TransType.Mobility_Header  # type: ignore[return-value]
+
+    ##########################################################################
+    # Utilities.
+    ##########################################################################
+
+    @classmethod
+    def _make_data(cls, data: 'Data_MH') -> 'dict[str, Any]':  # type: ignore[override]
+        """Create key-value pairs from ``data`` for protocol construction.
+
+        Args:
+            data: protocol data
+
+        Returns:
+            Key-value pairs for protocol construction.
+
+        """
+        return {
+            'next': data.next,
+            'type': data.type,
+            'chksum': data.chksum,
+            'data': data.data,
+            'payload': cls._make_payload(data),
+        }

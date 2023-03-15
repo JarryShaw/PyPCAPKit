@@ -98,7 +98,7 @@ from pcapkit.protocols.schema.internet.ipv4 import TSOption as Schema_TSOption
 from pcapkit.protocols.schema.internet.ipv4 import UnassignedOption as Schema_UnassignedOption
 from pcapkit.protocols.schema.schema import Schema
 from pcapkit.utilities.exceptions import ProtocolError
-from pcapkit.utilities.warnings import ProtocolWarning, warn
+from pcapkit.utilities.warnings import ProtocolWarning, RegistryWarning, warn
 
 if TYPE_CHECKING:
     from datetime import timedelta
@@ -123,7 +123,8 @@ if TYPE_CHECKING:
 __all__ = ['IPv4']
 
 
-class IPv4(IP[Data_IPv4, Schema_IPv4]):
+class IPv4(IP[Data_IPv4, Schema_IPv4],
+           schema=Schema_IPv4, data=Data_IPv4):
     """This class implements Internet Protocol version 4.
 
     This class currently supports parsing of the following IPv4 options,
@@ -426,6 +427,26 @@ class IPv4(IP[Data_IPv4, Schema_IPv4]):
         """
         return ('IPv4',)
 
+    @classmethod
+    def register_option(cls, code: 'Enum_OptionNumber', meth: 'str | tuple[OptionParser, OptionConstructor]') -> 'None':
+        """Register an option parser.
+
+        Args:
+            code: IPv4 option code.
+            meth: Method name or callable to parse and/or construct the option.
+
+        """
+        name = code.name.lower()
+        if hasattr(cls, f'_read_opt_{name}'):
+            warn(f'option {code} already registered, overwriting', RegistryWarning)
+
+        if isinstance(meth, str):
+            meth = (getattr(cls, f'_read_opt_{meth}', cls._read_opt_unassigned),
+                    getattr(cls, f'_make_opt_{meth}', cls._make_opt_unassigned))  # type: ignore[arg-type]
+
+        setattr(cls, f'_read_opt_{name}', meth[0])
+        setattr(cls, f'_make_opt_{name}', meth[1])
+
     ##########################################################################
     # Data models.
     ##########################################################################
@@ -449,6 +470,36 @@ class IPv4(IP[Data_IPv4, Schema_IPv4]):
     ##########################################################################
     # Utilities.
     ##########################################################################
+
+    @classmethod
+    def _make_data(cls, data: 'Data_IPv4') -> 'dict[str, Any]':  # type: ignore[override]
+        """Create key-value pairs from ``data`` for protocol construction.
+
+        Args:
+            data: protocol data
+
+        Returns:
+            Key-value pairs for protocol construction.
+
+        """
+        return {
+            'tos_pre': data.tos.pre,
+            'tos_del': data.tos['del'],
+            'tos_thr': data.tos.thr,
+            'tos_rel': data.tos.rel,
+            'tos_ecn': data.tos.ecn,
+            'id': data.id,
+            'df': data.flags.df,
+            'mf': data.flags.mf,
+            'offset': data.offset,
+            'ttl': data.ttl,
+            'protocol': data.protocol,
+            'checksum': data.checksum,
+            'src': data.src,
+            'dst': data.dst,
+            'options': data.options,
+            'payload': cls._make_payload(data),
+        }
 
     def _read_ipv4_addr(self) -> 'IPv4Address':
         """Read IP address.

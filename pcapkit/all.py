@@ -79,6 +79,7 @@ __all__ = [
     'register_port', 'register_tcp_port', 'register_udp_port',
     'register_output', 'register_extractor', 'register_traceflow',
     'register_hopopt', 'register_ipv6_opts', 'register_ipv6_route',
+    'register_ipv4', 'register_hip',
     'register_tcp', 'register_mptcp',
     'register_http',
 

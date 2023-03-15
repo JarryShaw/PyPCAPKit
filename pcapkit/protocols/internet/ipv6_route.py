@@ -40,6 +40,7 @@ from pcapkit.protocols.schema.internet.ipv6_route import Type2 as Schema_Type2
 from pcapkit.protocols.schema.internet.ipv6_route import UnknownType as Schema_UnknownType
 from pcapkit.protocols.schema.schema import Schema
 from pcapkit.utilities.exceptions import ProtocolError, UnsupportedCall
+from pcapkit.utilities.warnings import RegistryWarning, warn
 
 if TYPE_CHECKING:
     from enum import IntEnum as StdlibEnum
@@ -61,7 +62,8 @@ if TYPE_CHECKING:
 __all__ = ['IPv6_Route']
 
 
-class IPv6_Route(Internet[Data_IPv6_Route, Schema_IPv6_Route]):
+class IPv6_Route(Internet[Data_IPv6_Route, Schema_IPv6_Route],
+                 schema=Schema_IPv6_Route, data=Data_IPv6_Route):
     """This class implements Routing Header for IPv6.
 
     This class currently supports parsing of the following Routing Header for IPv6
@@ -284,6 +286,8 @@ class IPv6_Route(Internet[Data_IPv6_Route, Schema_IPv6_Route]):
             meth: Method name or callable to parse and/or construct the data.
 
         """
+        if code in cls.__routing__:
+            warn(f'routing {code} already registered, overwriting', RegistryWarning)
         cls.__routing__[code] = meth
 
     ##########################################################################
@@ -336,6 +340,25 @@ class IPv6_Route(Internet[Data_IPv6_Route, Schema_IPv6_Route]):
     ##########################################################################
     # Utilities.
     ##########################################################################
+
+    @classmethod
+    def _make_data(cls, data: 'Data_IPv6_Route') -> 'dict[str, Any]':  # type: ignore[override]
+        """Create key-value pairs from ``data`` for protocol construction.
+
+        Args:
+            data: protocol data
+
+        Returns:
+            Key-value pairs for protocol construction.
+
+        """
+        return {
+            'next': data.next,
+            'type': data.type,
+            'seg_left': data.seg_left,
+            'data': data,
+            'payload': cls._make_payload(data),
+        }
 
     def _read_data_type_none(self, type: 'Enum_Routing', length: 'int', data: 'bytes') -> 'Data_UnknownType':
         """Read IPv6-Route unknown type data.

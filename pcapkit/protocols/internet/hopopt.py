@@ -89,7 +89,7 @@ from pcapkit.protocols.schema.internet.hopopt import \
 from pcapkit.protocols.schema.internet.hopopt import UnassignedOption as Schema_UnassignedOption
 from pcapkit.protocols.schema.schema import Schema
 from pcapkit.utilities.exceptions import ProtocolError, UnsupportedCall
-from pcapkit.utilities.warnings import ProtocolWarning, warn
+from pcapkit.utilities.warnings import ProtocolWarning, RegistryWarning, warn
 
 if TYPE_CHECKING:
     from datetime import timedelta
@@ -119,7 +119,8 @@ if TYPE_CHECKING:
 __all__ = ['HOPOPT']
 
 
-class HOPOPT(Internet[Data_HOPOPT, Schema_HOPOPT]):
+class HOPOPT(Internet[Data_HOPOPT, Schema_HOPOPT],
+             schema=Schema_HOPOPT, data=Data_HOPOPT):
     """This class implements IPv6 Hop-by-Hop Options.
 
     This class currently supports parsing of the following IPv6 Hop-by-Hop
@@ -354,6 +355,8 @@ class HOPOPT(Internet[Data_HOPOPT, Schema_HOPOPT]):
             meth: Method name or callable to parse and/or construct the option.
 
         """
+        if code in cls.__option__:
+            warn(f'option {code} already registered, overwriting', RegistryWarning)
         cls.__option__[code] = meth
 
     ##########################################################################
@@ -406,6 +409,23 @@ class HOPOPT(Internet[Data_HOPOPT, Schema_HOPOPT]):
     ##########################################################################
     # Utilities.
     ##########################################################################
+
+    @classmethod
+    def _make_data(cls, data: 'Data_HOPOPT') -> 'dict[str, Any]':  # type: ignore[override]
+        """Create key-value pairs from ``data`` for protocol construction.
+
+        Args:
+            data: protocol data
+
+        Returns:
+            Key-value pairs for protocol construction.
+
+        """
+        return {
+            'next': data.next,
+            'options': data.options,
+            'payload': cls._make_payload(data),
+        }
 
     def _read_opt_type(self, kind: 'int') -> 'tuple[int, bool]':
         """Read option type field.

@@ -46,7 +46,8 @@ if TYPE_CHECKING:
 __all__ = ['VLAN']
 
 
-class VLAN(Link[Data_VLAN, Schema_VLAN]):
+class VLAN(Link[Data_VLAN, Schema_VLAN],
+           schema=Schema_VLAN, data=Data_VLAN):
     """This class implements 802.1Q Customer VLAN Tag Type."""
 
     ##########################################################################
@@ -182,3 +183,28 @@ class VLAN(Link[Data_VLAN, Schema_VLAN]):
 
         """
         raise UnsupportedCall(f'{cls.__name__!r} object cannot be interpreted as an integer')
+
+    ##########################################################################
+    # Utilities.
+    ##########################################################################
+
+    @classmethod
+    def _make_data(cls, data: 'Data_VLAN') -> 'dict[str, Any]':  # type: ignore[override]
+        """Create key-value pairs from ``data`` for protocol construction.
+
+        Args:
+            data: protocol data
+
+        Returns:
+            Key-value pairs for protocol construction.
+
+        """
+        return {
+            'tci': {
+                'pcp': data.tci.pcp,
+                'dei': data.tci.dei,
+                'vid': data.tci.vid,
+            },
+            'type': data.type,
+            'payload': cls._make_payload(data),
+        }

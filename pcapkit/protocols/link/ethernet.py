@@ -27,6 +27,7 @@ import textwrap
 from typing import TYPE_CHECKING
 
 from pcapkit.const.reg.ethertype import EtherType as Enum_EtherType
+from pcapkit.const.reg.linktype import LinkType as Enum_LinkType
 from pcapkit.protocols.data.link.ethernet import Ethernet as Data_Ethernet
 from pcapkit.protocols.link.link import Link
 from pcapkit.protocols.schema.link.ethernet import Ethernet as Schema_Ethernet
@@ -51,7 +52,8 @@ py38 = ((version_info := sys.version_info).major >= 3 and version_info.minor >= 
 PAT_MAC_ADDR = re.compile(rb'(?i)(?:[0-9a-f]{2}[:-]){5}[0-9a-f]{2}')
 
 
-class Ethernet(Link[Data_Ethernet, Schema_Ethernet]):
+class Ethernet(Link[Data_Ethernet, Schema_Ethernet],
+               schema=Schema_Ethernet, data=Data_Ethernet):
     """This class implements Ethernet Protocol."""
 
     ##########################################################################
@@ -190,6 +192,24 @@ class Ethernet(Link[Data_Ethernet, Schema_Ethernet]):
     ##########################################################################
     # Utilities.
     ##########################################################################
+
+    @classmethod
+    def _make_data(cls, data: 'Data_Ethernet') -> 'dict[str, Any]':  # type: ignore[override]
+        """Create key-value pairs from ``data`` for protocol construction.
+
+        Args:
+            data: protocol data
+
+        Returns:
+            Key-value pairs for protocol construction.
+
+        """
+        return {
+            'dst': data.dst,
+            'src': data.src,
+            'type': data.type,
+            'payload': cls._make_payload(data),
+        }
 
     def _read_mac_addr(self, addr: 'bytes') -> 'str':
         """Read MAC address.

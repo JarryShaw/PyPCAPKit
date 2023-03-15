@@ -69,7 +69,8 @@ if TYPE_CHECKING:
 __all__ = ['L2TP']
 
 
-class L2TP(Link[Data_L2TP, Schema_L2TP]):
+class L2TP(Link[Data_L2TP, Schema_L2TP],
+           schema=Schema_L2TP, data=Data_L2TP):
     """This class implements Layer Two Tunnelling Protocol."""
 
     ##########################################################################
@@ -232,3 +233,31 @@ class L2TP(Link[Data_L2TP, Schema_L2TP]):
 
         """
         raise UnsupportedCall(f'{cls.__name__!r} object cannot be interpreted as an integer')
+
+    ##########################################################################
+    # Utilities.
+    ##########################################################################
+
+    @classmethod
+    def _make_data(cls, data: 'Data_L2TP') -> 'dict[str, Any]':  # type: ignore[override]
+        """Create key-value pairs from ``data`` for protocol construction.
+
+        Args:
+            data: protocol data
+
+        Returns:
+            Key-value pairs for protocol construction.
+
+        """
+        return {
+            'type': data.flags.type,
+            'prio': data.flags.prio,
+            'version': data.version,
+            'length': data.length,
+            'tunnel_id': data.tunnelid,
+            'session_id': data.sessionid,
+            'ns': data.ns,
+            'nr': data.nr,
+            'offset': data.offset,
+            'payload': cls._make_payload(data),
+        }

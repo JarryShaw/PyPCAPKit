@@ -44,7 +44,8 @@ if TYPE_CHECKING:
 __all__ = ['AH']
 
 
-class AH(IPsec[Data_AH, Schema_AH]):
+class AH(IPsec[Data_AH, Schema_AH],
+         schema=Schema_AH, data=Data_AH):
     """This class implements Authentication Header."""
 
     ##########################################################################
@@ -247,3 +248,26 @@ class AH(IPsec[Data_AH, Schema_AH]):
 
         """
         return Enum_TransType.AH  # type: ignore[return-value]
+
+    ##########################################################################
+    # Utilities.
+    ##########################################################################
+
+    @classmethod
+    def _make_data(cls, data: 'Data_AH') -> 'dict[str, Any]':  # type: ignore[override]
+        """Create key-value pairs from ``data`` for protocol construction.
+
+        Args:
+            data: protocol data
+
+        Returns:
+            Key-value pairs for protocol construction.
+
+        """
+        return {
+            'next': data.next,
+            'spi': data.spi,
+            'seq': data.seq,
+            'icv': data.icv,
+            'payload': cls._make_payload(data),
+        }

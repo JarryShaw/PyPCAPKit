@@ -16,6 +16,7 @@ from pcapkit.const.reg.transtype import TransType as Enum_TransType
 from pcapkit.corekit.protochain import ProtoChain
 from pcapkit.protocols.protocol import PT, ST, Protocol
 from pcapkit.utilities.decorators import beholder
+from pcapkit.utilities.warnings import RegistryWarning, warn
 
 if TYPE_CHECKING:
     from typing import Optional, Type
@@ -110,7 +111,7 @@ class Internet(Protocol[PT, ST], Generic[PT, ST]):  # pylint: disable=abstract-m
     ##########################################################################
 
     @classmethod
-    def register(cls, code: 'Enum_TransType', module: str, class_: str) -> 'None':
+    def register(cls, code: 'Enum_TransType', module: str, class_: str) -> 'None':  # type: ignore[override]
         r"""Register a new protocol class.
 
         Notes:
@@ -123,6 +124,8 @@ class Internet(Protocol[PT, ST], Generic[PT, ST]):  # pylint: disable=abstract-m
             class\_: class name
 
         """
+        if code in cls.__proto__:
+            warn(f'protocol {code} already registered, overwriting', RegistryWarning)
         cls.__proto__[code] = (module, class_)
 
     ##########################################################################

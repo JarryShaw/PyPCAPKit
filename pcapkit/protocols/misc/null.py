@@ -25,7 +25,8 @@ if TYPE_CHECKING:
 __all__ = ['NoPayload']
 
 
-class NoPayload(Protocol[Data_NoPayload, Schema_NoPayload]):
+class NoPayload(Protocol[Data_NoPayload, Schema_NoPayload],
+                schema=Schema_NoPayload, data=Data_NoPayload):
     """This class implements no-payload protocol."""
 
     ##########################################################################

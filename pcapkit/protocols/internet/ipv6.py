@@ -49,7 +49,8 @@ if TYPE_CHECKING:
 __all__ = ['IPv6']
 
 
-class IPv6(IP[Data_IPv6, Schema_IPv6]):
+class IPv6(IP[Data_IPv6, Schema_IPv6],
+           schema=Schema_IPv6, data=Data_IPv6):
     """This class implements Internet Protocol version 6."""
 
     ##########################################################################
@@ -229,6 +230,27 @@ class IPv6(IP[Data_IPv6, Schema_IPv6]):
     ##########################################################################
     # Utilities.
     ##########################################################################
+
+    @classmethod
+    def _make_data(cls, data: 'Data_IPv6') -> 'dict[str, Any]':  # type: ignore[override]
+        """Create key-value pairs from ``data`` for protocol construction.
+
+        Args:
+            data: protocol data
+
+        Returns:
+            Key-value pairs for protocol construction.
+
+        """
+        return {
+            'traffic_class': data['class'],
+            'flow_label': data.label,
+            'next': data.next,
+            'hop_limit': data.limit,
+            'src': data.src,
+            'dst': data.dst,
+            'payload': cls._make_payload(data)
+        }
 
     def _read_ip_hextet(self) -> 'tuple[int, int, int]':
         """Read first four hextets of IPv6.

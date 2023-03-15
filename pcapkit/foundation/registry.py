@@ -15,8 +15,10 @@ from pcapkit.foundation.extraction import Extractor
 from pcapkit.foundation.traceflow import TraceFlow
 from pcapkit.protocols import __proto__ as protocol_registry
 from pcapkit.protocols.application.httpv2 import HTTP as HTTPv2
+from pcapkit.protocols.internet.hip import HIP
 from pcapkit.protocols.internet.hopopt import HOPOPT
 from pcapkit.protocols.internet.internet import Internet
+from pcapkit.protocols.internet.ipv4 import IPv4
 from pcapkit.protocols.internet.ipv6_opts import IPv6_Opts
 from pcapkit.protocols.internet.ipv6_route import IPv6_Route
 from pcapkit.protocols.link.link import Link
@@ -28,12 +30,14 @@ from pcapkit.utilities.exceptions import RegistryError
 from pcapkit.utilities.logging import logger
 
 if TYPE_CHECKING:
-    from typing import Callable, Type
+    from typing import Any, Callable, Optional, Type
 
-    from mypy_extensions import NamedArg
+    from mypy_extensions import DefaultArg, KwArg, NamedArg
     from typing_extensions import Literal
 
+    from pcapkit.const.hip.parameter import Parameter as HIP_Parameter
     from pcapkit.const.http.frame import Frame as HTTP_Frame
+    from pcapkit.const.ipv4.option_number import OptionNumber as IPv4_OptionNumber
     from pcapkit.const.ipv6.option import Option as IPv6_Option
     from pcapkit.const.ipv6.routing import Routing as IPv6_Routing
     from pcapkit.const.reg.ethertype import EtherType
@@ -43,29 +47,65 @@ if TYPE_CHECKING:
     from pcapkit.const.tcp.option import Option as TCP_Option
     from pcapkit.corekit.multidict import OrderedMultiDict
     from pcapkit.protocols.data.application.httpv2 import HTTP as Data_HTTPv2
+    from pcapkit.protocols.data.internet.hip import Parameter as Data_HIP_Parameter
     from pcapkit.protocols.data.internet.hopopt import Option as Data_HOPOPT_Option
+    from pcapkit.protocols.data.internet.ipv4 import Option as Data_IPv4_Option
     from pcapkit.protocols.data.internet.ipv6_opts import Option as Data_IPv6_Opts_Option
-    from pcapkit.protocols.data.internet.ipv6_route import \
-        RoutingType as Data_IPv6_Route_RoutingType
+    from pcapkit.protocols.data.internet.ipv6_route import IPv6_Route as Data_IPv6_Route
     from pcapkit.protocols.data.transport.tcp import MPTCP as Data_TCP_MPTCP
     from pcapkit.protocols.data.transport.tcp import Option as Data_TCP_Option
+    from pcapkit.protocols.schema.internet.hip import Parameter as Schema_HIP_Parameter
+    from pcapkit.protocols.schema.internet.hopopt import Option as Schema_HOPOPT_Option
+    from pcapkit.protocols.schema.internet.ipv4 import Option as Schema_IPv4_Option
+    from pcapkit.protocols.schema.internet.ipv6_opts import Option as Schema_IPv6_Opts_Option
+    from pcapkit.protocols.schema.internet.ipv6_route import \
+        RoutingType as Schema_IPv6_Route_RoutingType
 
     #from pcapkit.protocols.application.httpv2 import FrameParser as HTTP_FrameParser
     HTTP_FrameParser = Callable[[HTTPv2, HTTP_Frame, int, str, int], Data_HTTPv2]
+
+    #from pcapkit.protocols.internet.hip import ParameterParser as HIP_ParameterParser
+    HIP_ParameterParser = Callable[['HIP', HIP_Parameter, bool, int,
+                                    NamedArg(bytes, 'data'),
+                                    NamedArg(int, 'length'),
+                                    NamedArg(int, 'version'),
+                                    NamedArg(OrderedMultiDict[HIP_Parameter, Data_HIP_Parameter], 'options')], Data_HIP_Parameter]
+    HIP_ParameterConstructor = Callable[['HIP', HIP_Parameter,
+                                         DefaultArg(Optional[Data_HIP_Parameter]),
+                                         NamedArg(int, 'version'), KwArg(Any)], Schema_HIP_Parameter]
+
     #from pcapkit.protocols.internet.hopopt import OptionParser as HOPOPT_OptionParser
-    HOPOPT_OptionParser = Callable[[HOPOPT, IPv6_Option, int, bool,
-                                    NamedArg(OrderedMultiDict[IPv6_Option, Data_HOPOPT_Option], 'options')],
-                                   Data_HOPOPT_Option]
+    HOPOPT_OptionParser = Callable[['HOPOPT', IPv6_Option, int, bool, int,
+                                    NamedArg(bytes, 'data'),
+                                    NamedArg(int, 'length'),
+                                    NamedArg(OrderedMultiDict[IPv6_Option, Data_HOPOPT_Option], 'options')], Data_HOPOPT_Option]
+    HOPOPT_OptionConstructor = Callable[['HOPOPT', IPv6_Option,
+                                         DefaultArg(Optional[Data_HOPOPT_Option]), KwArg(Any)], Schema_HOPOPT_Option]
+
+    #from pcapkit.protocols.internet.ipv4 import OptionParser as IPv4_OptionParser
+    IPv4_OptionParser = Callable[['IPv4', IPv4_OptionNumber, NamedArg(bytes, 'data'), NamedArg(int, 'length'),
+                                  NamedArg(OrderedMultiDict[IPv4_OptionNumber, Data_IPv4_Option], 'options')], Data_IPv4_Option]
+    IPv4_OptionConstructor = Callable[['IPv4', IPv4_OptionNumber, DefaultArg(Optional[Data_IPv4_Option]),
+                                       KwArg(Any)], Schema_IPv4_Option]
+
     #from pcapkit.protocols.internet.ipv6_opts import OptionParser as IPv6_Opts_OptionParser
-    IPv6_Opts_OptionParser = Callable[[IPv6_Opts, IPv6_Option, int, bool,
-                                       NamedArg(OrderedMultiDict[IPv6_Option, Data_IPv6_Opts_Option], 'options')],
-                                      Data_IPv6_Opts_Option]
+    IPv6_Opts_OptionParser = Callable[['IPv6_Opts', IPv6_Option, int, bool, int,
+                                       NamedArg(bytes, 'data'),
+                                       NamedArg(int, 'length'),
+                                       NamedArg(OrderedMultiDict[IPv6_Option, Data_IPv6_Opts_Option], 'options')], Data_IPv6_Opts_Option]
+    IPv6_Opts_OptionConstructor = Callable[['IPv6_Opts', IPv6_Option,
+                                            DefaultArg(Optional[Data_IPv6_Opts_Option]), KwArg(Any)], Schema_IPv6_Opts_Option]
+
     #from pcapkit.protocols.internet.ipv6_route import TypeParser as IPv6_Route_TypeParser
-    IPv6_Route_TypeParser = Callable[[IPv6_Route, int], Data_IPv6_Route_RoutingType]
+    IPv6_Route_TypeParser = Callable[['IPv6_Route', IPv6_Routing, int, bytes], Data_IPv6_Route]
+    IPv6_Route_TypeConstructor = Callable[['IPv6_Route', IPv6_Routing, DefaultArg(Optional[Data_IPv6_Route]),
+                                           DefaultArg(Optional[Data_IPv6_Route]), KwArg(Any)], Schema_IPv6_Route_RoutingType]
+
     #from pcapkit.protocols.transport.tcp import MPOptionParser as TCP_MPOptionParser
     TCP_MPOptionParser = Callable[[TCP, TCP_MPTCPOption, int, str,
                                    NamedArg(OrderedMultiDict[TCP_Option, Data_TCP_Option], 'options')],
                                   Data_TCP_MPTCP]
+
     #from pcapkit.protocols.transport.tcp import OptionParser as TCP_OptionParser
     TCP_OptionParser = Callable[[TCP, TCP_Option,
                                  NamedArg(OrderedMultiDict[TCP_Option, Data_TCP_Option], 'options')],
@@ -81,6 +121,7 @@ __all__ = [
     'register_output', 'register_extractor', 'register_traceflow',
 
     'register_hopopt', 'register_ipv6_opts', 'register_ipv6_route',
+    'register_ipv4', 'register_hip',
     'register_tcp', 'register_mptcp',
     'register_http',
 ]
@@ -193,11 +234,35 @@ def register_http(code: 'HTTP_Frame', meth: 'str | HTTP_FrameParser') -> 'None':
 
 
 ###############################################################################
+# pcapkit.protocols.internet.hip.HIP
+###############################################################################
+
+
+def register_hip(code: 'HIP_Parameter', meth: 'str | tuple[HIP_ParameterParser, HIP_ParameterConstructor]') -> 'None':
+    """Register a parameter parser.
+
+    The function will register the given parameter parser to the
+    :data:`pcapkit.protocols.internet.hip.HIP` internal registry.
+
+    Args:
+        code: :class:`~pcapkit.protocols.internet.hip.HIP` parameter code as
+            in :class:`~pcapkit.const.hip.parameter.Parameter`.
+        meth: Method name or callable to parse and/or construct the parameter.
+
+    """
+    if isinstance(meth, str) and not hasattr(HIP, f'_read_param_{meth}'):
+        raise RegistryError('method must be a valid HIP parameter parser function')
+
+    HIP.register_parameter(code, meth)
+    logger.info('registered HIP parameter parser: %s', code.name)
+
+
+###############################################################################
 # pcapkit.protocols.internet.hopopt.HOPOPT.__option__
 ###############################################################################
 
 
-def register_hopopt(code: 'IPv6_Option', meth: 'str | HOPOPT_OptionParser') -> 'None':
+def register_hopopt(code: 'IPv6_Option', meth: 'str | tuple[HOPOPT_OptionParser, HOPOPT_OptionConstructor]') -> 'None':
     """Register an option parser.
 
     The function will register the given option parser to the
@@ -206,11 +271,11 @@ def register_hopopt(code: 'IPv6_Option', meth: 'str | HOPOPT_OptionParser') -> '
     Args:
         code: :class:`~pcapkit.protocols.internet.hopopt.HOPOPT` option code as
             in :class:`~pcapkit.const.ipv6.option.Option`.
-        meth: Method name or callable to parse the option.
+        meth: Method name or callable to parse and/or construct the option.
 
     """
     if isinstance(meth, str) and not hasattr(HOPOPT, f'_read_opt_{meth}'):
-        raise RegistryError('method must be a HOPOPT option parser function')
+        raise RegistryError('method must be a valid HOPOPT option parser function')
 
     HOPOPT.register_option(code, meth)
     logger.info('registered HOPOPT option parser: %s', code.name)
@@ -249,11 +314,35 @@ def register_transtype(code: 'TransType', module: str, class_: str) -> 'None':
 
 
 ###############################################################################
+# pcapkit.protocols.internet.internet.IPv4
+###############################################################################
+
+
+def register_ipv4(code: 'IPv4_OptionNumber', meth: 'str | tuple[IPv4_OptionParser, IPv4_OptionConstructor]') -> 'None':
+    """Register an option parser.
+
+    The function will register the given option parser to the
+    :data:`pcapkit.protocols.internet.internet.IPv4` internal registry.
+
+    Args:
+        code: :class:`IPv4 <pcapkit.protocols.internet.internet.IPv4>` option code as
+            in :class:`~pcapkit.const.ipv4.option_number.OptionNumber`.
+        meth: Method name or callable to parse and/or construct the option.
+
+    """
+    if isinstance(meth, str) and not hasattr(IPv4, f'_read_opt_{meth}'):
+        raise RegistryError('method must be a valid IPv4 option parser function')
+
+    IPv4.register_option(code, meth)
+    logger.info('registered IPv4 option parser: %s', code.name)
+
+
+###############################################################################
 # pcapkit.protocols.internet.ipv6_opts.IPv6_Opts.__option__
 ###############################################################################
 
 
-def register_ipv6_opts(code: 'IPv6_Option', meth: 'str | IPv6_Opts_OptionParser') -> 'None':
+def register_ipv6_opts(code: 'IPv6_Option', meth: 'str | tuple[IPv6_Opts_OptionParser, IPv6_Opts_OptionConstructor]') -> 'None':
     """Register an option parser.
 
     The function will register the given option parser to the
@@ -262,11 +351,11 @@ def register_ipv6_opts(code: 'IPv6_Option', meth: 'str | IPv6_Opts_OptionParser'
     Args:
         code: :class:`IPv6-Opts <pcapkit.protocols.internet.ipv6_opts.IPv6_Opts>`
             option code as in :class:`~pcapkit.const.ipv6.option.Option`.
-        meth: Method name or callable to parse the option.
+        meth: Method name or callable to parse and/or construct the option.
 
     """
     if isinstance(meth, str) and not hasattr(IPv6_Opts, f'_read_opt_{meth}'):
-        raise RegistryError('method must be a IPv6_Opts option parser function')
+        raise RegistryError('method must be a valid IPv6-Opts option parser function')
 
     IPv6_Opts.register_option(code, meth)
     logger.info('registered IPv6_Opts option parser: %s', code.name)
@@ -277,7 +366,7 @@ def register_ipv6_opts(code: 'IPv6_Option', meth: 'str | IPv6_Opts_OptionParser'
 ###############################################################################
 
 
-def register_ipv6_route(code: 'IPv6_Routing', meth: 'str | IPv6_Route_TypeParser') -> 'None':
+def register_ipv6_route(code: 'IPv6_Routing', meth: 'str | tuple[IPv6_Route_TypeParser, IPv6_Route_TypeConstructor]') -> 'None':
     r"""Register an routing data parser.
 
     The function will register the given routing data parser to the
@@ -286,11 +375,11 @@ def register_ipv6_route(code: 'IPv6_Routing', meth: 'str | IPv6_Route_TypeParser
     Args:
         code: :class:`IPv6-Route <pcapkit.protocols.internet.ipv6_route.IPv6_Route>`
             data type code as in :class:`~pcapkit.const.ipv6.routing.Routing`.
-        meth: Method name or callable to parse the data.
+        meth: Method name or callable to parse and/or construct the data.
 
     """
     if isinstance(meth, str) and not hasattr(IPv6_Route, f'_read_data_type_{meth}'):
-        raise RegistryError('method must be a IPv6_Route routing data parser function')
+        raise RegistryError('method must be a valid IPv6-Route routing data parser function')
 
     IPv6_Route.register_routing(code, meth)
     logger.info('registered IPv6_Route routing data parser: %s', code.name)

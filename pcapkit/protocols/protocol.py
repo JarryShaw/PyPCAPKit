@@ -29,13 +29,14 @@ import chardet
 from pcapkit.corekit.infoclass import Info
 from pcapkit.corekit.protochain import ProtoChain
 from pcapkit.protocols.data.data import Data
+from pcapkit.protocols.data.misc.raw import Raw as Data_Raw
 from pcapkit.protocols.data.protocol import Packet as Data_Packet
-from pcapkit.protocols.schema.misc.null import NoPayload as Schema_NoPayload
+from pcapkit.protocols.schema.misc.raw import Raw as Schema_Raw
 from pcapkit.protocols.schema.schema import Schema
 from pcapkit.utilities.compat import cached_property
 from pcapkit.utilities.decorators import beholder, seekset
-from pcapkit.utilities.exceptions import (ProtocolNotFound, ProtocolNotImplemented, StructError,
-                                          UnsupportedCall)
+from pcapkit.utilities.exceptions import (ProtocolNotFound, ProtocolNotImplemented, RegistryError,
+                                          StructError, UnsupportedCall)
 
 if TYPE_CHECKING:
     from enum import IntEnum as StdlibEnum
@@ -63,13 +64,15 @@ class Protocol(Generic[PT, ST], metaclass=abc.ABCMeta):
         _data: 'bytes'
         #: Source packet stream.
         _file: 'IO[bytes]'
-        #： Next layer protocol instance.
+        #: Next layer protocol instance.
         _next: 'Protocol'
         #: Protocol chain instance.
         _protos: 'ProtoChain'
 
         # Internal data storage for cached properties.
         __cached__: 'dict[str, Any]'
+        #: Protocol packet data definition.
+        __data__: 'Type[PT]'
         #: Protocol header schema definition.
         __schema__: 'Type[ST]'
         #: Protocol header schema instance.
@@ -275,7 +278,7 @@ class Protocol(Generic[PT, ST], metaclass=abc.ABCMeta):
             return byte.decode('unicode_escape', errors='replace')
 
     @staticmethod
-    def unquote(url: str, *, encoding : 'str' = 'utf-8',
+    def unquote(url: str, *, encoding: 'str' = 'utf-8',
                 errors: 'Literal["strict", "ignore", "replace"]' = 'replace') -> 'str':
         """Unquote URLs into readable format.
 
@@ -369,16 +372,65 @@ class Protocol(Generic[PT, ST], metaclass=abc.ABCMeta):
         return report
 
     @classmethod
-    def from_schema(cls, schema: 'ST | dict[str, Any]') -> 'Self':  # type: ignore[valid-type]
-        """Create protocol instance from schema."""
-        self = cls.__new__(cls)
+    def register(cls, code: 'int', module: 'str', class_: 'str') -> 'None':
+        r"""Register a new protocol class.
 
+        Notes:
+            The full qualified class name of the new protocol class
+            should be as ``{module}.{class_}``.
+
+        Arguments:
+            code: protocol code
+            module: module name
+            class\_: class name
+
+        """
+        protocol = getattr(importlib.import_module(module), class_)
+        if not issubclass(protocol, Protocol):
+            raise RegistryError('protocol must be a Protocol subclass')
+        cls.__proto__[code] = (module, class_)
+
+    @classmethod
+    def from_schema(cls, schema: 'ST | dict[str, Any]') -> 'Self':  # type: ignore[valid-type]
+        """Create protocol instance from schema.
+
+        Args:
+            schema: Protocol schema.
+
+        Returns:
+            Protocol instance.
+
+        """
         if not isinstance(schema, Schema):
-            schema = cast('ST', self.__schema__.from_dict(schema))
+            schema = cast('ST', cls.__schema__.from_dict(schema))
+
+        self = cls.__new__(cls)
         self.__header__ = schema
 
         # initialize protocol instance
         self.__init__(length=len(schema))  # type: ignore[misc]
+
+        return self
+
+    @classmethod
+    def from_data(cls, data: 'PT | dict[str, Any]') -> 'Self':  # type: ignore[valid-type]
+        """Create protocol instance from data.
+
+        Args:
+            data: Protocol data.
+
+        Returns:
+            Protocol instance.
+
+        """
+        if not isinstance(data, Data):
+            data = cast('PT', cls.__data__(**data))
+
+        self = cls.__new__(cls)
+        kwargs = self._make_data(data)
+
+        # initialize protocol instance
+        self.__init__(**kwargs)  # type: ignore[misc]
 
         return self
 
@@ -459,11 +511,13 @@ class Protocol(Generic[PT, ST], metaclass=abc.ABCMeta):
         #: pcapkit.protocols.data.data.Data: Parsed packet data.
         self._info = self.unpack(length, **kwargs)
 
-    def __init_subclass__(cls, /, schema: 'Type[ST]', **kwargs: 'Any') -> 'None':
+    def __init_subclass__(cls, /, schema: 'Type[ST]' = Schema_Raw,  # type: ignore[assignment]
+                          data: 'Type[PT]' = Data_Raw, **kwargs: 'Any') -> 'None':  # type: ignore[assignment]
         """Initialisation for subclasses.
 
         Args:
             schema: Schema class.
+            data: Data class.
             **kwargs: Arbitrary keyword arguments.
 
         This method is called when a subclass of :class:`Protocol` is defined.
@@ -473,6 +527,7 @@ class Protocol(Generic[PT, ST], metaclass=abc.ABCMeta):
         """
         super().__init_subclass__(**kwargs)
         cls.__schema__ = schema
+        cls.__data__ = data
 
     def __repr__(self) -> 'str':
         """Returns representation of parsed protocol data.
@@ -919,6 +974,44 @@ class Protocol(Generic[PT, ST], metaclass=abc.ABCMeta):
         if pack:
             return cls._make_pack(index, size=size, signed=signed, lilendian=lilendian)
         return index
+
+    @classmethod
+    def _make_data(cls, data: 'Data') -> 'dict[str, Any]':
+        """Create key-value pairs from ``data`` for protocol construction.
+
+        Args:
+            data: protocol data
+
+        Returns:
+            Key-value pairs for protocol construction.
+
+        """
+        return data.to_dict()
+
+    @classmethod
+    def _make_payload(cls, data: 'Data') -> 'Protocol':
+        """Create payload from ``data`` for protocol construction.
+
+        Args:
+            data: protocol data
+
+        Returns:
+            Payload for protocol construction.
+
+        """
+        proto = cast('Optional[Type[Protocol]]', data.get('__next_type__'))
+        if proto is None or not (isinstance(proto, type) and issubclass(proto, Protocol)):
+            from pcapkit.protocols.misc.null import \
+                NoPayload  # pylint: disable=import-outside-toplevel
+            return NoPayload()
+
+        name = cast('Optional[str]', data.get('__next_name__'))
+        if name is None:
+            from pcapkit.protocols.misc.null import \
+                NoPayload  # pylint: disable=import-outside-toplevel
+            return NoPayload()
+
+        return proto.from_data(data[name])
 
     def _decode_next_layer(self, dict_: 'PT', proto: 'int', length: 'Optional[int]' = None) -> 'PT':
         r"""Decode next layer protocol.

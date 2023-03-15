@@ -70,7 +70,8 @@ py38 = ((version_info := sys.version_info).major >= 3 and version_info.minor >= 
 PAT_MAC_ADDR = re.compile(rb'(?i)(?:[0-9a-f]{2}[:-]){5}[0-9a-f]{2}')
 
 
-class ARP(Link[Data_ARP, Schema_ARP]):
+class ARP(Link[Data_ARP, Schema_ARP],
+          schema=Schema_ARP, data=Data_ARP):
     """This class implements all protocols in ARP family.
 
     - Address Resolution Protocol (:class:`~pcapkit.protocols.link.arp.ARP`) [:rfc:`826`]
@@ -291,6 +292,30 @@ class ARP(Link[Data_ARP, Schema_ARP]):
     ##########################################################################
     # Utilities.
     ##########################################################################
+
+    @classmethod
+    def _make_data(cls, data: 'Data_ARP') -> 'dict[str, Any]':  # type: ignore[override]
+        """Create key-value pairs from ``data`` for protocol construction.
+
+        Args:
+            data: protocol data
+
+        Returns:
+            Key-value pairs for protocol construction.
+
+        """
+        return {
+            'htype': data.htype,
+            'ptype': data.ptype,
+            'hlen': data.hlen,
+            'plen': data.plen,
+            'oper': data.oper,
+            'sha': data.sha,
+            'spa': data.spa,
+            'tha': data.tha,
+            'tpa': data.tpa,
+            'payload': cls._make_payload(data),
+        }
 
     def _read_addr_resolve(self, addr: 'bytes', htype: 'int') -> 'str':
         """Resolve headware address according to protocol.

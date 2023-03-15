@@ -44,7 +44,8 @@ if TYPE_CHECKING:
 __all__ = ['IPv6_Frag']
 
 
-class IPv6_Frag(Internet[Data_IPv6_Frag, Schema_IPv6_Frag]):
+class IPv6_Frag(Internet[Data_IPv6_Frag, Schema_IPv6_Frag],
+                schema=Schema_IPv6_Frag, data=Data_IPv6_Frag):
     """This class implements Fragment Header for IPv6."""
 
     ##########################################################################
@@ -230,3 +231,26 @@ class IPv6_Frag(Internet[Data_IPv6_Frag, Schema_IPv6_Frag]):
 
         """
         return Enum_TransType.IPv6_Frag  # type: ignore[return-value]
+
+    ##########################################################################
+    # Utilities.
+    ##########################################################################
+
+    @classmethod
+    def _make_data(cls, data: 'Data_IPv6_Frag') -> 'dict[str, Any]':  # type: ignore[override]
+        """Create key-value pairs from ``data`` for protocol construction.
+
+        Args:
+            data: protocol data
+
+        Returns:
+            Key-value pairs for protocol construction.
+
+        """
+        return {
+            'next': data.next,
+            'offset': data.offset,
+            'mf': data.mf,
+            'id': data.id,
+            'payload': cls._make_payload(data),
+        }

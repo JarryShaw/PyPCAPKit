@@ -33,6 +33,7 @@ from pcapkit.protocols.data.misc.pcap.frame import FrameInfo as Data_FrameInfo
 from pcapkit.protocols.protocol import Protocol
 from pcapkit.protocols.schema.misc.pcap.frame import Frame as Schema_Frame
 from pcapkit.utilities.exceptions import UnsupportedCall
+from pcapkit.utilities.warnings import RegistryWarning, warn
 
 if TYPE_CHECKING:
     from decimal import Decimal
@@ -49,7 +50,8 @@ __all__ = ['Frame']
 py37 = ((version_info := sys.version_info).major >= 3 and version_info.minor >= 7)
 
 
-class Frame(Protocol[Data_Frame, Schema_Frame]):
+class Frame(Protocol[Data_Frame, Schema_Frame],
+            schema=Schema_Frame, data=Data_Frame):
     """Per packet frame header extractor.
 
     This class currently supports parsing of the following protocols, which are
@@ -111,7 +113,7 @@ class Frame(Protocol[Data_Frame, Schema_Frame]):
     ##########################################################################
 
     @classmethod
-    def register(cls, code: 'Enum_LinkType', module: 'str', class_: 'str') -> 'None':
+    def register(cls, code: 'Enum_LinkType', module: 'str', class_: 'str') -> 'None':  # type: ignore[override]
         r"""Register a new protocol class.
 
         Notes:
@@ -124,6 +126,8 @@ class Frame(Protocol[Data_Frame, Schema_Frame]):
             class\_: class name
 
         """
+        if code in cls.__proto__:
+            warn(f'protocol {code} already registered, overwriting', RegistryWarning)
         cls.__proto__[code] = (module, class_)
 
     def index(self, name: 'str | Protocol | Type[Protocol]') -> 'int':
@@ -317,6 +321,25 @@ class Frame(Protocol[Data_Frame, Schema_Frame]):
     ##########################################################################
     # Utilities.
     ##########################################################################
+
+    @classmethod
+    def _make_data(cls, data: 'Data_Frame') -> 'dict[str, Any]':  # type: ignore[override]
+        """Create key-value pairs from ``data`` for protocol construction.
+
+        Args:
+            data: protocol data
+
+        Returns:
+            Key-value pairs for protocol construction.
+
+        """
+        return {
+            'ts_src': data.frame_info.ts_sec,
+            'ts_usec': data.frame_info.ts_usec,
+            'incl_len': data.frame_info.incl_len,
+            'orig_len': data.frame_info.orig_len,
+            'packet': cls._make_payload(data),
+        }
 
     def _make_timestamp(self, timestamp: 'Optional[float | Decimal]' = None, ts_sec: 'Optional[int]' = None,
                         ts_usec: 'Optional[int]' = None, nanosecond: 'bool' = False) -> 'tuple[int, int]':

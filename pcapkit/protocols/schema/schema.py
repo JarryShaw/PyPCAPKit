@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """schema for protocol headers"""
 
+import collections
 import collections.abc
 import io
 import itertools
@@ -14,11 +15,10 @@ from pcapkit.utilities.exceptions import NoDefaultValue, ProtocolUnbound
 from pcapkit.utilities.warnings import UnknownFieldWarning, warn
 
 if TYPE_CHECKING:
+    from collections import OrderedDict
     from typing import IO, Any, Iterable, Iterator, Optional, Type
 
     from typing_extensions import Self
-
-    from pcapkit.corekit.fields.field import NoValueType
 
 __all__ = ['Schema']
 
@@ -37,12 +37,15 @@ class Schema(Mapping[str, VT], Generic[VT]):
         __map_reverse__: 'dict[str, str]'
         #: List of builtin methods.
         __builtin__: 'set[str]'
-        #: List of fields.
-        __fields__: 'list[_Field]'
+        #: Mapping of fields.
+        __fields__: 'OrderedDict[str, _Field]'
         #: Mapping of field names to packed values.
         __buffer__: 'dict[str, bytes]'
         #: Flag for whether the schema is recently updated.
         __updated__: 'bool'
+
+    #: Field name of the payload.
+    __payload__: 'str' = 'payload'
 
     def __new__(cls, *args: 'VT', **kwargs: 'VT') -> 'Schema':  # pylint: disable=unused-argument
         """Create a new instance.
@@ -56,11 +59,11 @@ class Schema(Mapping[str, VT], Generic[VT]):
             **kwargs: Arbitrary keyword arguments.
 
         """
-        cls.__map__ = {}
-        cls.__map_reverse__ = {}
+        cls_fields = []
 
         temp = ['__map__', '__map_reverse__', '__builtin__',
-                '__fields__', '__buffer__', '__updated__']
+                '__fields__', '__buffer__', '__updated__',
+                '__payload__']
         for obj in cls.mro():
             temp.extend(dir(obj))
         cls.__builtin__ = set(temp)
@@ -95,14 +98,15 @@ class Schema(Mapping[str, VT], Generic[VT]):
                 dict_.append(f'{key}={key}')
 
                 field.name = key
-                cls.__fields__.append(field)
+                cls_fields.append((key, field))
 
         # NOTE: We reverse the two lists such that the order of the
         # arguments is the same as the order of the type annotations, i.e.,
         # from the most base class to the most derived class.
         args_.reverse()
         dict_.reverse()
-        cls.__fields__.reverse()
+        cls_fields.reverse()
+        cls.__fields__ = collections.OrderedDict(cls_fields)
 
         # NOTE: We only generate typed ``__init__`` method if only the class
         # has type annotations from any of itself and its base classes.
@@ -132,17 +136,23 @@ class Schema(Mapping[str, VT], Generic[VT]):
 
         self = super().__new__(cls)
 
+        # NOTE: We define the ``__map__`` and ``__map_reverse__`` attributes
+        # here under ``self`` to avoid them being considered as class variables
+        # and thus being shared by all instances.
+        self.__map__ = {}
+        self.__map_reverse__ = {}
+
         # NOTE: We only create the attributes for the instance itself,
         # to avoid creating shared attributes for the class.
-        self.__buffer__ = {field.name: b'' for field in self.__fields__}
+        self.__buffer__ = {name: b'' for name in self.__fields__.keys()}
         self.__updated__ = True
 
         return self
 
     def __post_init__(self) -> 'None':
-        for field in self.__fields__:
-            if self.__dict__[field.name] in (NoValue, None):
-                self.__dict__[field.name] = field.default
+        for name, field in self.__fields__.items():
+            if self.__dict__[name] in (NoValue, None):
+                self.__dict__[name] = field.default
         self.pack()
 
     def __update__(self, dict_: 'Optional[Mapping[str, VT] | Iterable[tuple[str, VT]]]' = None,
@@ -214,8 +224,8 @@ class Schema(Mapping[str, VT], Generic[VT]):
             self.pack()
 
         buffer = []  # type: list[bytes]
-        for field in self.__fields__:
-            value = self.__buffer__[field.name]
+        for name in self.__fields__.keys():
+            value = self.__buffer__[name]
             buffer.append(value)
         return b''.join(buffer)
 
@@ -286,10 +296,35 @@ class Schema(Mapping[str, VT], Generic[VT]):
         """Convert :class:`Schema` into :obj:`bytes`."""
         return self.__bytes__()
 
+    def get_payload(self, name: 'Optional[str]' = None) -> 'bytes':
+        """Get payload of :class:`Schema`.
+
+        Args:
+            name: Name of the payload field.
+
+        Returns:
+            Payload of :class:`Schema` as :obj:`bytes`.
+
+        """
+        if name is None:
+            name = self.__payload__
+
+        field = self.__fields__.get(name)
+        if field is None:
+            raise ProtocolUnbound(f'unknown field: {name!r}')
+        if not isinstance(field, PayloadField):
+            raise ProtocolUnbound(f'not a payload field: {name!r}')
+        return self.__buffer__[name]
+
     def pack(self) -> 'bytes':
-        """Pack :class:`Schema` into :obj:`bytes`."""
+        """Pack :class:`Schema` into :obj:`bytes`.
+
+        Returns:
+            Packed :class:`Schema` as :obj:`bytes`.
+
+        """
         packet = self.__dict__
-        for field in self.__fields__:
+        for field in self.__fields__.values():
             field = field(packet)
 
             if isinstance(field, PayloadField):
@@ -358,6 +393,10 @@ class Schema(Mapping[str, VT], Generic[VT]):
         Args:
             data: Packed data.
             length: Length of data.
+            packet: Unpacked data.
+
+        Returns:
+            Unpacked data as :class:`Schema`.
 
         """
         self = cls.__new__(cls)  # type: ignore[call-overload]
@@ -375,7 +414,7 @@ class Schema(Mapping[str, VT], Generic[VT]):
             packet = {}
         packet['__length__'] = length
 
-        for field in self.__fields__:
+        for field in self.__fields__.values():
             field = field(packet)
 
             if isinstance(field, (PayloadField, ListField)):

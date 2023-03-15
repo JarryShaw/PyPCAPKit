@@ -195,7 +195,7 @@ from pcapkit.protocols.schema.internet.hip import UnassignedParameter as Schema_
 from pcapkit.protocols.schema.internet.hip import ViaRVSParameter as Schema_ViaRVSParameter
 from pcapkit.protocols.schema.schema import Schema
 from pcapkit.utilities.exceptions import ProtocolError, UnsupportedCall
-from pcapkit.utilities.warnings import ProtocolWarning, warn
+from pcapkit.utilities.warnings import ProtocolWarning, RegistryWarning, warn
 
 if TYPE_CHECKING:
     from datetime import timedelta
@@ -245,7 +245,8 @@ if TYPE_CHECKING:
 __all__ = ['HIP']
 
 
-class HIP(Internet[Data_HIP, Schema_HIP]):
+class HIP(Internet[Data_HIP, Schema_HIP],
+          schema=Schema_HIP, data=Data_HIP):
     """This class implements Host Identity Protocol.
 
     This class currently supports parsing of the following HIP parameters,
@@ -563,6 +564,26 @@ class HIP(Internet[Data_HIP, Schema_HIP]):
             payload=payload,
         )
 
+    @classmethod
+    def register_parameter(cls, code: 'Enum_Parameter', meth: 'str | tuple[ParameterParser, ParameterConstructor]') -> 'None':
+        """Register a parameter parser.
+
+        Args:
+            code: IPv4 option code.
+            meth: Method name or callable to parse and/or construct the option.
+
+        """
+        name = code.name.lower()
+        if hasattr(cls, f'_read_param_{name}'):
+            warn(f'parameter {code} already registered, overwriting', RegistryWarning)
+
+        if isinstance(meth, str):
+            meth = (getattr(cls, f'_read_param_{meth}', cls._read_param_unassigned),
+                    getattr(cls, f'_make_param_{meth}', cls._make_param_unassigned))  # type: ignore[arg-type]
+
+        setattr(cls, f'_read_param_{name}', meth[0])
+        setattr(cls, f'_make_param_{name}', meth[1])
+
     ##########################################################################
     # Data models.
     ##########################################################################
@@ -613,6 +634,29 @@ class HIP(Internet[Data_HIP, Schema_HIP]):
     ##########################################################################
     # Utilities.
     ##########################################################################
+
+    @classmethod
+    def _make_data(cls, data: 'Data_HIP') -> 'dict[str, Any]':  # type: ignore[override]
+        """Create key-value pairs from ``data`` for protocol construction.
+
+        Args:
+            data: protocol data
+
+        Returns:
+            Key-value pairs for protocol construction.
+
+        """
+        return {
+            'next': data.next,
+            'packet': data.type,
+            'version': data.version,
+            'checksum': data.chksum,
+            'controls_anonymous': data.control.anonymous,
+            'shit': data.shit,
+            'rhit': data.rhit,
+            'parameters': data.parameters,
+            'payload': cls._make_payload(data),
+        }
 
     def _read_hip_param(self, length: 'int', *, version: 'int') -> 'Parameter':  # pylint: disable=line-too-long
         """Read HIP parameters.
