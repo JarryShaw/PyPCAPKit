@@ -28,6 +28,8 @@ import chardet
 
 from pcapkit.corekit.infoclass import Info
 from pcapkit.corekit.protochain import ProtoChain
+from pcapkit.protocols import data as data_module
+from pcapkit.protocols import schema as schema_module
 from pcapkit.protocols.data.data import Data
 from pcapkit.protocols.data.misc.raw import Raw as Data_Raw
 from pcapkit.protocols.data.protocol import Packet as Data_Packet
@@ -511,8 +513,8 @@ class Protocol(Generic[PT, ST], metaclass=abc.ABCMeta):
         #: pcapkit.protocols.data.data.Data: Parsed packet data.
         self._info = self.unpack(length, **kwargs)
 
-    def __init_subclass__(cls, /, schema: 'Type[ST]' = Schema_Raw,  # type: ignore[assignment]
-                          data: 'Type[PT]' = Data_Raw, **kwargs: 'Any') -> 'None':  # type: ignore[assignment]
+    def __init_subclass__(cls, /, schema: 'Optional[Type[ST]]' = None,
+                          data: 'Optional[Type[PT]]' = None, **kwargs: 'Any') -> 'None':
         """Initialisation for subclasses.
 
         Args:
@@ -524,8 +526,22 @@ class Protocol(Generic[PT, ST], metaclass=abc.ABCMeta):
         It is used to set the :attr:`self.__schema__ <pcapkit.protocols.protocol.Protocol.__schema__>`
         attribute of the subclass.
 
+        Notes:
+            When ``schema`` and/or ``data`` is not specified, the method will first
+            try to find the corresponding class in the
+            :mod:`~pcapkit.protocols.schema` and :mod:`~pcapkit.protocols.data`
+            modules respectively. If the class is not found, the default
+            :class:`~pcapkit.protocols.schema.schema.Schema_Raw` and
+            :class:`~pcapkit.protocols.data.data.Data_Raw` classes will be used.
+
         """
         super().__init_subclass__(**kwargs)
+
+        if schema is None:
+            schema = cast('Type[ST]', getattr(schema_module, cls.__name__, Schema_Raw))
+        if data is None:
+            data = cast('Type[PT]', getattr(data_module, cls.__name__, Data_Raw))
+
         cls.__schema__ = schema
         cls.__data__ = data
 
