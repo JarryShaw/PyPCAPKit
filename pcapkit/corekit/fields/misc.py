@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """miscellaneous field class"""
 
+import copy
 import io
 from typing import TYPE_CHECKING, TypeVar, cast
 
@@ -88,10 +89,15 @@ class ConditionalField(_Field[_TC]):
         Arguments:
             packet: packet data.
 
+        Notes:
+            This method will return a new instance of :class:`ConditionalField`
+            instead of updating the current instance.
+
         """
-        if self._condition(packet):
-            self._field(packet)
-        return self
+        new_self = copy.copy(self)
+        if new_self._condition(packet):
+            new_self._field(packet)
+        return new_self
 
     def pre_process(self, value: '_TC', packet: 'dict[str, Any]') -> 'Any':  # pylint: disable=unused-argument
         """Process field value before construction (packing).
@@ -194,8 +200,7 @@ class PayloadField(_Field[_TP]):
     def protocol(self) -> 'Type[_TP]':
         """Payload protocol."""
         if self._protocol is None:
-            from pcapkit.protocols.misc.raw import \
-                Raw  # type: ignore[unreachable] # pylint: disable=import-outside-top-level
+            from pcapkit.protocols.misc.raw import Raw  # type: ignore[unreachable] # pylint: disable=import-outside-top-level # isort:skip
             return Raw
         return self._protocol
 
@@ -228,11 +233,21 @@ class PayloadField(_Field[_TP]):
         self._template = '0s'
 
     def __call__(self, packet: 'dict[str, Any]') -> 'PayloadField':
-        """Update field attributes."""
-        self._callback(self, packet)
-        if self._length_callback is not None:
-            self._length = self._length_callback(packet)  # type: ignore[assignment]
-        return self
+        """Update field attributes.
+
+        Args:
+            packet: packet data.
+
+        Notes:
+            This method will return a new instance of :class:`PayloadField`
+            instead of updating the current instance.
+
+        """
+        new_self = copy.copy(self)
+        new_self._callback(self, packet)
+        if new_self._length_callback is not None:
+            new_self._length = new_self._length_callback(packet)  # type: ignore[assignment]
+        return new_self
 
     def pack(self, value: 'Optional[_TP | Schema | bytes]', packet: 'dict[str, Any]') -> 'bytes':
         """Pack field value into :obj:`bytes`.
@@ -316,11 +331,21 @@ class ListField(_Field[list[_TL]]):
         self._template = '0s'
 
     def __call__(self, packet: 'dict[str, Any]') -> 'ListField':
-        """Update field attributes."""
-        self._callback(self, packet)
-        if self._length_callback is not None:
-            self._length = self._length_callback(packet)  # type: ignore[assignment]
-        return self
+        """Update field attributes.
+
+        Args:
+            packet: packet data.
+
+        Notes:
+            This method will return a new instance of :class:`ListField`
+            instead of updating the current instance.
+
+        """
+        new_self = copy.copy(self)
+        new_self._callback(self, packet)
+        if new_self._length_callback is not None:
+            new_self._length = new_self._length_callback(packet)  # type: ignore[assignment]
+        return new_self
 
     def pack(self, value: 'Optional[list[_TL]]', packet: 'dict[str, Any]') -> 'bytes':
         """Pack field value into :obj:`bytes`.

@@ -2,7 +2,7 @@
 """text field class"""
 
 import urllib.parse as urllib_parse
-from typing import TYPE_CHECKING, Any, Dict, Generic, TypeVar
+from typing import TYPE_CHECKING, Any, Dict, Generic, TypeVar, cast
 
 import chardet
 
@@ -49,11 +49,11 @@ class _TextField(Field[_T], Generic[_T]):
     def __call__(self, packet: 'dict[str, Any]') -> '_TextField':
         """Update field attributes."""
         old_length = self._length
-        super().__call__(packet)
+        new_self = cast('_TextField', super().__call__(packet))
 
-        if old_length != self._length:
-            self._template = f'{self._length}s'
-        return self
+        if old_length != new_self._length:
+            new_self._template = f'{new_self._length}s'
+        return new_self
 
 
 class BytesField(_TextField[bytes]):

@@ -2,6 +2,7 @@
 """base field class"""
 
 import abc
+import copy
 import struct
 from typing import TYPE_CHECKING, Generic, TypeVar, cast
 
@@ -194,8 +195,18 @@ class Field(_Field[_T], Generic[_T]):
         self._length = length
 
     def __call__(self, packet: 'dict[str, Any]') -> 'Field':
-        """Update field attributes."""
-        self._callback(self, packet)
-        if self._length_callback is not None:
-            self._length = self._length_callback(packet)
-        return self
+        """Update field attributes.
+
+        Args:
+            packet: packet data.
+
+        Notes:
+            This method will return a new instance of :class:`Field` instead of
+            updating the current instance.
+
+        """
+        new_self = copy.copy(self)
+        new_self._callback(self, packet)
+        if new_self._length_callback is not None:
+            new_self._length = new_self._length_callback(packet)
+        return new_self
