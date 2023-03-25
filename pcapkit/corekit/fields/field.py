@@ -70,7 +70,7 @@ class _Field(Generic[_T], metaclass=abc.ABCMeta):
     @property
     def template(self) -> 'str':
         """Field template."""
-        return '0s'
+        return '1024s'  # use a reasonable default
 
     @property
     def length(self) -> 'int':

@@ -7,7 +7,8 @@ from typing import TYPE_CHECKING
 from pcapkit.const.ipv6.routing import Routing as Enum_Routing
 from pcapkit.const.reg.transtype import TransType as Enum_TransType
 from pcapkit.corekit.fields.ipaddress import IPv6Field
-from pcapkit.corekit.fields.misc import ListField, PayloadField
+from pcapkit.corekit.fields.misc import PayloadField
+from pcapkit.corekit.fields.collections import ListField
 from pcapkit.corekit.fields.numbers import EnumField, UInt8Field
 from pcapkit.corekit.fields.strings import BitField, BytesField, PaddingField
 from pcapkit.protocols.schema.schema import Schema

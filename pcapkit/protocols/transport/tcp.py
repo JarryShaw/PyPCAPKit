@@ -47,7 +47,6 @@ from pcapkit.const.tcp.mp_tcp_option import MPTCPOption as Enum_MPTCPOption
 from pcapkit.const.tcp.option import Option as Enum_Option
 from pcapkit.corekit.multidict import OrderedMultiDict
 from pcapkit.protocols.data.transport.tcp import CC as Data_CC
-from pcapkit.protocols.data.transport.tcp import MPTCP as Data_MPTCP
 from pcapkit.protocols.data.transport.tcp import MPTCPDSS as Data_MPTCPDSS
 from pcapkit.protocols.data.transport.tcp import SACK as Data_SACK
 from pcapkit.protocols.data.transport.tcp import TCP as Data_TCP
@@ -87,27 +86,76 @@ from pcapkit.protocols.data.transport.tcp import Timestamp as Data_Timestamp
 from pcapkit.protocols.data.transport.tcp import UnassignedOption as Data_UnassignedOption
 from pcapkit.protocols.data.transport.tcp import UserTimeout as Data_UserTimeout
 from pcapkit.protocols.data.transport.tcp import WindowScale as Data_WindowScale
+from pcapkit.protocols.schema.transport.tcp import CC as Schema_CC
+from pcapkit.protocols.schema.transport.tcp import MPTCPDSS as Schema_MPTCPDSS
+from pcapkit.protocols.schema.transport.tcp import SACK as Schema_SACK
+from pcapkit.protocols.schema.transport.tcp import TCP as Schema_TCP
+from pcapkit.protocols.schema.transport.tcp import \
+    AlternateChecksumData as Schema_AlternateChecksumData
+from pcapkit.protocols.schema.transport.tcp import \
+    AlternateChecksumRequest as Schema_AlternateChecksumRequest
+from pcapkit.protocols.schema.transport.tcp import Authentication as Schema_Authentication
+from pcapkit.protocols.schema.transport.tcp import CCEcho as Schema_CCEcho
+from pcapkit.protocols.schema.transport.tcp import CCNew as Schema_CCNew
+from pcapkit.protocols.schema.transport.tcp import Echo as Schema_Echo
+from pcapkit.protocols.schema.transport.tcp import EchoReply as Schema_EchoReply
+from pcapkit.protocols.schema.transport.tcp import EndOfOptionList as Schema_EndOfOptionList
+from pcapkit.protocols.schema.transport.tcp import FastOpenCookie as Schema_FastOpenCookie
+from pcapkit.protocols.schema.transport.tcp import Flags as Schema_Flags
+from pcapkit.protocols.schema.transport.tcp import MaximumSegmentSize as Schema_MaximumSegmentSize
+from pcapkit.protocols.schema.transport.tcp import MD5Signature as Schema_MD5Signature
+from pcapkit.protocols.schema.transport.tcp import MPTCPAddAddress as Schema_MPTCPAddAddress
+from pcapkit.protocols.schema.transport.tcp import MPTCPCapable as Schema_MPTCPCapable
+from pcapkit.protocols.schema.transport.tcp import MPTCPCapableFlag as Schema_MPTCPCapableFlag
+from pcapkit.protocols.schema.transport.tcp import MPTCPDSSFlag as Schema_MPTCPDSSFlag
+from pcapkit.protocols.schema.transport.tcp import MPTCPFallback as Schema_MPTCPFallback
+from pcapkit.protocols.schema.transport.tcp import MPTCPFastclose as Schema_MPTCPFastclose
+from pcapkit.protocols.schema.transport.tcp import MPTCPJoinACK as Schema_MPTCPJoinACK
+from pcapkit.protocols.schema.transport.tcp import MPTCPJoinSYN as Schema_MPTCPJoinSYN
+from pcapkit.protocols.schema.transport.tcp import MPTCPJoinSYNACK as Schema_MPTCPJoinSYNACK
+from pcapkit.protocols.schema.transport.tcp import MPTCPPriority as Schema_MPTCPPriority
+from pcapkit.protocols.schema.transport.tcp import MPTCPRemoveAddress as Schema_MPTCPRemoveAddress
+from pcapkit.protocols.schema.transport.tcp import MPTCPUnknown as Schema_MPTCPUnknown
+from pcapkit.protocols.schema.transport.tcp import NoOperation as Schema_NoOperation
+from pcapkit.protocols.schema.transport.tcp import \
+    PartialOrderConnectionPermitted as Schema_PartialOrderConnectionPermitted
+from pcapkit.protocols.schema.transport.tcp import \
+    PartialOrderConnectionProfile as Schema_PartialOrderConnectionProfile
+from pcapkit.protocols.schema.transport.tcp import QuickStartResponse as Schema_QuickStartResponse
+from pcapkit.protocols.schema.transport.tcp import SACKPermitted as Schema_SACKPermitted
+from pcapkit.protocols.schema.transport.tcp import Timestamp as Schema_Timestamp
+from pcapkit.protocols.schema.transport.tcp import UnassignedOption as Schema_UnassignedOption
+from pcapkit.protocols.schema.transport.tcp import UserTimeout as Schema_UserTimeout
+from pcapkit.protocols.schema.transport.tcp import WindowScale as Schema_WindowScale
 from pcapkit.protocols.transport.transport import Transport
 from pcapkit.utilities.exceptions import ProtocolError
+from pcapkit.utilities.warnings import RegistryWarning, warn
 
 if TYPE_CHECKING:
     from typing import Any, Callable, DefaultDict, NoReturn, Optional
 
-    from mypy_extensions import NamedArg
+    from mypy_extensions import DefaultArg, KwArg, NamedArg
     from typing_extensions import Literal
 
+    from pcapkit.protocols.data.transport.tcp import MPTCP as Data_MPTCP
     from pcapkit.protocols.data.transport.tcp import MPTCPJoin as Data_MPTCPJoin
     from pcapkit.protocols.data.transport.tcp import Option as Data_Option
+    from pcapkit.protocols.schema.transport.tcp import MPTCP as Schema_MPTCP
+    from pcapkit.protocols.schema.transport.tcp import Option as Schema_Option
 
     Option = OrderedMultiDict[Enum_Option, Data_Option]
     OptionParser = Callable[['TCP', Enum_Option, NamedArg(Option, 'options')], Data_Option]
     MPOptionParser = Callable[['TCP', Enum_MPTCPOption, int, str, NamedArg(Option, 'options')], Data_MPTCP]
-
+    OptionConstructor = Callable[['TCP', Enum_Option, DefaultArg(Optional[Data_Option]),
+                                  KwArg(Any)], Schema_Option]
+    MPOptionConstructor = Callable[['TCP', Enum_MPTCPOption, DefaultArg(Optional[Data_MPTCP]),
+                                    KwArg(Any)], Schema_MPTCP]
 
 __all__ = ['TCP']
 
 
-class TCP(Transport[Data_TCP]):
+class TCP(Transport[Data_TCP, Schema_TCP],
+          schema=Schema_TCP, data=Data_TCP):
     """This class implements Transmission Control Protocol.
 
     This class currently supports parsing of the following protocols, which are
@@ -133,50 +181,73 @@ class TCP(Transport[Data_TCP]):
 
        * - Option Code
          - Option Parser
+         - Option Constructor
        * - :attr:`~pcapkit.const.tcp.option.Option.End_of_Option_List`
          - :meth:`~pcapkit.protocols.transport.tcp.TCP._read_mode_eool`
+         - :meth:`~pcapkit.protocols.transport.tcp.TCP._make_mode_eool`
        * - :attr:`~pcapkit.const.tcp.option.Option.No_Operation`
          - :meth:`~pcapkit.protocols.transport.tcp.TCP._read_mode_nop`
+         - :meth:`~pcapkit.protocols.transport.tcp.TCP._make_mode_nop`
        * - :attr:`~pcapkit.const.tcp.option.Option.Maximum_Segment_Size`
          - :meth:`~pcapkit.protocols.transport.tcp.TCP._read_mode_mss`
+         - :meth:`~pcapkit.protocols.transport.tcp.TCP._make_mode_mss`
        * - :attr:`~pcapkit.const.tcp.option.Option.Window_Scale`
          - :meth:`~pcapkit.protocols.transport.tcp.TCP._read_mode_ws`
+         - :meth:`~pcapkit.protocols.transport.tcp.TCP._make_mode_ws`
        * - :attr:`~pcapkit.const.tcp.option.Option.SACK_Permitted`
          - :meth:`~pcapkit.protocols.transport.tcp.TCP._read_mode_sackpmt`
+         - :meth:`~pcapkit.protocols.transport.tcp.TCP._make_mode_sackpmt`
        * - :attr:`~pcapkit.const.tcp.option.Option.SACK`
          - :meth:`~pcapkit.protocols.transport.tcp.TCP._read_mode_sack`
+         - :meth:`~pcapkit.protocols.transport.tcp.TCP._make_mode_sack`
        * - :attr:`~pcapkit.const.tcp.option.Option.Echo`
          - :meth:`~pcapkit.protocols.transport.tcp.TCP._read_mode_echo`
+         - :meth:`~pcapkit.protocols.transport.tcp.TCP._make_mode_echo`
        * - :attr:`~pcapkit.const.tcp.option.Option.Echo_Reply`
          - :meth:`~pcapkit.protocols.transport.tcp.TCP._read_mode_echore`
+         - :meth:`~pcapkit.protocols.transport.tcp.TCP._make_mode_echore`
        * - :attr:`~pcapkit.const.tcp.option.Option.Timestamps`
          - :meth:`~pcapkit.protocols.transport.tcp.TCP._read_mode_ts`
+         - :meth:`~pcapkit.protocols.transport.tcp.TCP._make_mode_ts`
        * - :attr:`~pcapkit.const.tcp.option.Option.Partial_Order_Connection_Permitted`
          - :meth:`~pcapkit.protocols.transport.tcp.TCP._read_mode_poc`
+         - :meth:`~pcapkit.protocols.transport.tcp.TCP._make_mode_poc`
        * - :attr:`~pcapkit.const.tcp.option.Option.Partial_Order_Service_Profile`
          - :meth:`~pcapkit.protocols.transport.tcp.TCP._read_mode_pocsp`
+         - :meth:`~pcapkit.protocols.transport.tcp.TCP._make_mode_pocsp`
        * - :attr:`~pcapkit.const.tcp.option.Option.CC`
          - :meth:`~pcapkit.protocols.transport.tcp.TCP._read_mode_cc`
+         - :meth:`~pcapkit.protocols.transport.tcp.TCP._make_mode_cc`
        * - :attr:`~pcapkit.const.tcp.option.Option.CC_NEW`
          - :meth:`~pcapkit.protocols.transport.tcp.TCP._read_mode_ccnew`
+         - :meth:`~pcapkit.protocols.transport.tcp.TCP._make_mode_ccnew`
        * - :attr:`~pcapkit.const.tcp.option.Option.CC_ECHO`
          - :meth:`~pcapkit.protocols.transport.tcp.TCP._read_mode_ccecho`
+         - :meth:`~pcapkit.protocols.transport.tcp.TCP._make_mode_ccecho`
        * - :attr:`~pcapkit.const.tcp.option.Option.TCP_Alternate_Checksum_Request`
          - :meth:`~pcapkit.protocols.transport.tcp.TCP._read_mode_chkreq`
+         - :meth:`~pcapkit.protocols.transport.tcp.TCP._make_mode_chkreq`
        * - :attr:`~pcapkit.const.tcp.option.Option.TCP_Alternate_Checksum_Data`
          - :meth:`~pcapkit.protocols.transport.tcp.TCP._read_mode_chksum`
+         - :meth:`~pcapkit.protocols.transport.tcp.TCP._make_mode_chksum`
        * - :attr:`~pcapkit.const.tcp.option.Option.MD5_Signature_Option`
          - :meth:`~pcapkit.protocols.transport.tcp.TCP._read_mode_sig`
+         - :meth:`~pcapkit.protocols.transport.tcp.TCP._make_mode_sig`
        * - :attr:`~pcapkit.const.tcp.option.Option.Quick_Start_Response`
          - :meth:`~pcapkit.protocols.transport.tcp.TCP._read_mode_qs`
+         - :meth:`~pcapkit.protocols.transport.tcp.TCP._make_mode_qs`
        * - :attr:`~pcapkit.const.tcp.option.Option.User_Timeout_Option`
          - :meth:`~pcapkit.protocols.transport.tcp.TCP._read_mode_timeout`
+         - :meth:`~pcapkit.protocols.transport.tcp.TCP._make_mode_timeout`
        * - :attr:`~pcapkit.const.tcp.option.Option.TCP_Authentication_Option`
          - :meth:`~pcapkit.protocols.transport.tcp.TCP._read_mode_ao`
+         - :meth:`~pcapkit.protocols.transport.tcp.TCP._make_mode_ao`
        * - :attr:`~pcapkit.const.tcp.option.Option.Multipath_TCP`
          - :meth:`~pcapkit.protocols.transport.tcp.TCP._read_mode_mp`
+         - :meth:`~pcapkit.protocols.transport.tcp.TCP._make_mode_mp`
        * - :attr:`~pcapkit.const.tcp.option.Option.TCP_Fast_Open_Cookie`
          - :meth:`~pcapkit.protocols.transport.tcp.TCP._read_mode_fastopen`
+         - :meth:`~pcapkit.protocols.transport.tcp.TCP._make_mode_fastopen`
 
     This class currently supports parsing of the following Multipath TCP options,
     which are directly mapped to the :class:`pcapkit.const.tcp.mp_tcp_option.MPTCPOption`
@@ -187,22 +258,31 @@ class TCP(Transport[Data_TCP]):
 
        * - Option Code
          - Option Parser
+         - Option Constructor
        * - :attr:`~pcapkit.const.tcp.mp_tcp_option.MPTCPOption.MP_CAPABLE`
          - :meth:`~pcapkit.protocols.transport.tcp.TCP._read_mptcp_capable`
+         - :meth:`~pcapkit.protocols.transport.tcp.TCP._make_mptcp_capable`
        * - :attr:`~pcapkit.const.tcp.mp_tcp_option.MPTCPOption.MP_JOIN`
          - :meth:`~pcapkit.protocols.transport.tcp.TCP._read_mptcp_join`
+         - :meth:`~pcapkit.protocols.transport.tcp.TCP._make_mptcp_join`
        * - :attr:`~pcapkit.const.tcp.mp_tcp_option.MPTCPOption.DSS`
          - :meth:`~pcapkit.protocols.transport.tcp.TCP._read_mptcp_dss`
+         - :meth:`~pcapkit.protocols.transport.tcp.TCP._make_mptcp_dss`
        * - :attr:`~pcapkit.const.tcp.mp_tcp_option.MPTCPOption.ADD_ADDR`
          - :meth:`~pcapkit.protocols.transport.tcp.TCP._read_mptcp_addaddr`
+         - :meth:`~pcapkit.protocols.transport.tcp.TCP._make_mptcp_addaddr`
        * - :attr:`~pcapkit.const.tcp.mp_tcp_option.MPTCPOption.REMOVE_ADDR`
          - :meth:`~pcapkit.protocols.transport.tcp.TCP._read_mptcp_remove`
+         - :meth:`~pcapkit.protocols.transport.tcp.TCP._make_mptcp_remove`
        * - :attr:`~pcapkit.const.tcp.mp_tcp_option.MPTCPOption.MP_PRIO`
          - :meth:`~pcapkit.protocols.transport.tcp.TCP._read_mptcp_prio`
+         - :meth:`~pcapkit.protocols.transport.tcp.TCP._make_mptcp_prio`
        * - :attr:`~pcapkit.const.tcp.mp_tcp_option.MPTCPOption.MP_FAIL`
          - :meth:`~pcapkit.protocols.transport.tcp.TCP._read_mptcp_fail`
+         - :meth:`~pcapkit.protocols.transport.tcp.TCP._make_mptcp_fail`
        * - :attr:`~pcapkit.const.tcp.mp_tcp_option.MPTCPOption.MP_FASTCLOSE`
          - :meth:`~pcapkit.protocols.transport.tcp.TCP._read_mptcp_fastclose`
+         - :meth:`~pcapkit.protocols.transport.tcp.TCP._make_mptcp_fastclose`
 
     """
 
@@ -221,11 +301,12 @@ class TCP(Transport[Data_TCP]):
         },
     )
 
-    #: DefaultDict[Enum_Option, str | OptionParser]: Option code to method
-    #: mapping, c.f. :meth:`_read_tcp_options`. Method names are expected to be
-    #: referred to the class by ``_read_mode_${name}``, and if such name not
-    #: found, the value should then be a method that can parse the option by
-    #: itself.
+    #: DefaultDict[Enum_Option, str | tuple[OptionParser, OptionConstructor]]:
+    #: Option code to method mapping, c.f. :meth:`_read_tcp_options` and
+    #: :meth:`_make_tcp_options`. Method names are expected to be referred to
+    #: the class by ``_read_mode_${name}`` and ``_make_mode_${name}``, and if
+    #: such name not found, the value should then be a method that can parse
+    #: the option by itself.
     __option__ = collections.defaultdict(
         lambda: 'donone',
         {
@@ -252,9 +333,13 @@ class TCP(Transport[Data_TCP]):
             Enum_Option.Multipath_TCP: 'mp',                        # [RFC 6824] Multipath TCP
             Enum_Option.TCP_Fast_Open_Cookie: 'fastopen',           # [RFC 7413] Fast Open
         },
-    )  # type: DefaultDict[int, str | OptionParser]
+    )  # type: DefaultDict[int, str | tuple[OptionParser, OptionConstructor]]
 
-    #: DefaultDict[Enum_MPTCPOption, str | MPOptionParser]: Option code to length mapping,
+    #: DefaultDict[Enum_MPTCPOption, str | tuple[MPOptionParser, MPOptionConstructor]]:
+    #: Option code to method mapping, c.f. :meth:`_read_mode_mp` and :meth:`_make_mode_mp`.
+    #: Method names are expected to be referred to the class by ``_read_mptcp_${name}``
+    #: and ``_make_mptcp_${name}``, and if such name not found, the value should
+    #: then be a method that can parse the option by itself.
     __mp_option__ = collections.defaultdict(
         lambda: 'unknown',
         {
@@ -267,7 +352,7 @@ class TCP(Transport[Data_TCP]):
             Enum_MPTCPOption.MP_FAIL: 'fail',
             Enum_MPTCPOption.MP_FASTCLOSE: 'fastclose',
         },
-    )  # type: DefaultDict[int, str | MPOptionParser]
+    )  # type: DefaultDict[int, str | tuple[MPOptionParser, MPOptionConstructor]]
 
     ##########################################################################
     # Properties.
@@ -391,25 +476,29 @@ class TCP(Transport[Data_TCP]):
         raise NotImplementedError
 
     @classmethod
-    def register_option(cls, code: 'Enum_Option', meth: 'str | OptionParser') -> 'None':
+    def register_option(cls, code: 'Enum_Option', meth: 'str | tuple[OptionParser, OptionConstructor]') -> 'None':
         """Register an option parser.
 
         Args:
             code: TCP option code.
-            meth: Method name or callable to parse the option.
+            meth: Method name or callable to parse and/or construct the option.
 
         """
+        if code in cls.__option__:
+            warn(f'option {code} already registered, overwriting', RegistryWarning)
         cls.__option__[code] = meth
 
     @classmethod
-    def register_mp_option(cls, code: 'Enum_MPTCPOption', meth: 'str | MPOptionParser') -> 'None':
+    def register_mp_option(cls, code: 'Enum_MPTCPOption', meth: 'str | tuple[MPOptionParser, MPOptionConstructor]') -> 'None':
         """Register an MPTCP option parser.
 
         Args:
             code: MPTCP option code.
-            meth: Method name or callable to parse the option.
+            meth: Method name or callable to parse and/or construct the option.
 
         """
+        if code in cls.__mp_option__:
+            warn(f'option {code} already registered, overwriting', RegistryWarning)
         cls.__mp_option__[code] = meth
 
     ##########################################################################

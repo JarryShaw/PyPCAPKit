@@ -1,33 +1,28 @@
 # -*- coding: utf-8 -*-
 """miscellaneous field class"""
 
-import collections
 import copy
 import io
 from typing import TYPE_CHECKING, TypeVar, cast
 
 from pcapkit.corekit.fields.field import NoValue, _Field
-from pcapkit.utilities.exceptions import FieldValueError, NoDefaultValue
+from pcapkit.utilities.exceptions import NoDefaultValue, FieldError
 
 __all__ = [
     'ConditionalField', 'PayloadField',
-    'ListField', 'OptionField',
+    'SwitchField',
 ]
 
 if TYPE_CHECKING:
-    from collections import defaultdict
-    from enum import IntEnum as StdlibEnum
     from typing import IO, Any, Callable, Optional, Type
-
-    from aenum import IntEnum as AenumEnum
 
     from pcapkit.corekit.fields.field import Field, NoValueType
     from pcapkit.protocols.protocol import Protocol
     from pcapkit.protocols.schema.schema import Schema
 
 _TC = TypeVar('_TC')
+_TS = TypeVar('_TS', bound='Schema')
 _TP = TypeVar('_TP', bound='Protocol')
-_TL = TypeVar('_TL', 'Schema', '_Field', 'bytes')
 
 
 class ConditionalField(_Field[_TC]):
@@ -238,7 +233,7 @@ class PayloadField(_Field[_TP]):
         if not isinstance(length, int):
             self._length_callback, length = length, 0
         self._length = length
-        self._template = '0s'
+        self._template = f'{self._length}s' if self._length else '1024s'  # use a reasonable default
 
     def __call__(self, packet: 'dict[str, Any]') -> 'PayloadField':
         """Update field attributes.
@@ -304,20 +299,8 @@ class PayloadField(_Field[_TP]):
         return self._protocol(file, self.length)  # type: ignore[abstract]
 
 
-class ListField(_Field[list[_TL]]):
-    """Field list for protocol fields.
-
-    Args:
-        length: field size (in bytes); if a callable is given, it should return
-            an integer value and accept the current packet as its only argument.
-        item_type: field type of the contained items.
-        callback: callback function to be called upon
-            :meth:`self.__call__ <pcapkit.corekit.fields.field._Field.__call__>`.
-
-    This field is used to represent a list of fields, as in the case of lists of
-    constrant-length-field items in a protocol.
-
-    """
+class SwitchField(_Field[_TC]):
+    """Conditional type-switching field for protocol schema."""
 
     @property
     def optional(self) -> 'bool':
@@ -325,26 +308,128 @@ class ListField(_Field[list[_TL]]):
         return True
 
     def __init__(self, length: 'int | Callable[[dict[str, Any]], Optional[int]]' = lambda _: None,
-                 item_type: 'Optional[Field]' = None,
-                 callback: 'Callable[[ListField, dict[str, Any]], None]' = lambda *_: None) -> 'None':
-        self._name = '<list>'
+                 selector: 'Callable[[dict[str, Any]], Optional[_Field[_TC]]]' = lambda _: None) -> 'None':
+        self._name = '<switch>'
+        self._field = None  # type: Optional[_Field[_TC]]
+        self._selector = selector
+
+    def __call__(self, packet: 'dict[str, Any]') -> 'SwitchField[_TC]':
+        """Call field.
+
+        Args:
+            packet: packet data.
+
+        Returns:
+            New field instance.
+
+        """
+        new_self = copy.copy(self)
+        new_self._field = self._selector(packet)
+        return new_self
+
+    def pre_process(self, value: '_TC', packet: 'dict[str, Any]') -> 'Any':  # pylint: disable=unused-argument
+        """Process field value before construction (packing).
+
+        Arguments:
+            value: field value.
+            packet: packet data.
+
+        Returns:
+            Processed field value.
+
+        """
+        if self._field is None:
+            return NoValue
+        return self._field.pre_process(value, packet)
+
+    def pack(self, value: 'Optional[_TC]', packet: 'dict[str, Any]') -> 'bytes':
+        """Pack field value into :obj:`bytes`.
+
+        Args:
+            value: field value.
+            packet: packet data.
+
+        Returns:
+            Packed field value.
+
+        """
+        if self._field is None:
+            return b''
+        return self._field.pack(value, packet)
+
+    def post_process(self, value: 'Any', packet: 'dict[str, Any]') -> '_TC':  # pylint: disable=unused-argument
+        """Process field value after parsing (unpacking).
+
+        Args:
+            value: field value.
+            packet: packet data.
+
+        Returns:
+            Processed field value.
+
+        """
+        if self._field is None:
+            return NoValue  # type: ignore[return-value]
+        return self._field.post_process(value, packet)
+
+    def unpack(self, buffer: 'bytes | Schema', packet: 'dict[str, Any]') -> '_TC':
+        """Unpack field value from :obj:`bytes`.
+
+        Args:
+            buffer: field buffer.
+            packet: packet data.
+
+        Returns:
+            Unpacked field value.
+
+        """
+        if self._field is None:
+            return None  # type: ignore[return-value]
+        return self._field.unpack(buffer, packet)
+
+
+class SchemaField(_Field[_TS]):
+    """Schema field for protocol schema."""
+
+    @property
+    def optional(self) -> 'bool':
+        """Field is optional."""
+        return True
+
+    @property
+    def schema(self) -> 'Type[_TS]':
+        """Field schema."""
+        return self._schema
+
+    def __init__(self, length: 'int | Callable[[dict[str, Any]], Optional[int]]' = lambda _: None,
+                 schema: 'Optional[Type[_TS]]' = None,
+                 default: '_TS | NoValueType | bytes' = NoValue,
+                 callback: 'Callable[[SchemaField[_TS], dict[str, Any]], None]' = lambda *_: None) -> 'None':
+        self._name = '<schema>'
         self._callback = callback
-        self._item_type = item_type
+
+        if schema is None:
+            raise FieldError('Schema field must have a schema.')
+        self._schema = schema
+
+        if isinstance(default, bytes):
+            default = cast('_TS', schema.unpack(default))
+        self._default = default
 
         self._length_callback = None
         if not isinstance(length, int):
-            self._length_callback, length = length, -1
+            self._length_callback, length = length, 0
         self._length = length
-        self._template = '0s'
+        self._template = f'{self._length}s' if self._length else '1024s'  # use a reasonable default
 
-    def __call__(self, packet: 'dict[str, Any]') -> 'ListField':
+    def __call__(self, packet: 'dict[str, Any]') -> 'SchemaField':
         """Update field attributes.
 
         Args:
             packet: packet data.
 
         Notes:
-            This method will return a new instance of :class:`ListField`
+            This method will return a new instance of :class:`SchemaField`
             instead of updating the current instance.
 
         """
@@ -354,7 +439,7 @@ class ListField(_Field[list[_TL]]):
             new_self._length = new_self._length_callback(packet)  # type: ignore[assignment]
         return new_self
 
-    def pack(self, value: 'Optional[list[_TL]]', packet: 'dict[str, Any]') -> 'bytes':
+    def pack(self, value: 'Optional[_TS | bytes]', packet: 'dict[str, Any]') -> 'bytes':
         """Pack field value into :obj:`bytes`.
 
         Args:
@@ -366,24 +451,15 @@ class ListField(_Field[list[_TL]]):
 
         """
         if value is None:
-            return b''
+            if self._default is NoValue:
+                raise NoDefaultValue(f'Field {self.name} has no default value.')
+            value = cast('_TS', self._default)
 
-        from pcapkit.protocols.schema.schema import \
-            Schema  # pylint: disable=import-outside-top-level
+        if isinstance(value, bytes):
+            return value
+        return value.pack()
 
-        temp = []  # type: list[bytes]
-        for item in value:
-            if isinstance(item, bytes):
-                temp.append(item)
-            elif isinstance(item, Schema):
-                temp.append(item.pack())
-            elif self._item_type is not None:
-                temp.append(self._item_type.pack(item, packet))
-            else:
-                raise FieldValueError(f'Field {self.name} has invalid value.')
-        return b''.join(temp)
-
-    def unpack(self, buffer: 'bytes | IO[bytes]', packet: 'dict[str, Any]') -> 'bytes | list[_TL]':  # type: ignore[override]
+    def unpack(self, buffer: 'bytes | IO[bytes]', packet: 'dict[str, Any]') -> '_TS':  # type: ignore[override]
         """Unpack field value from :obj:`bytes`.
 
         Args:
@@ -394,112 +470,8 @@ class ListField(_Field[list[_TL]]):
             Unpacked field value.
 
         """
-        length = self.length
         if isinstance(buffer, bytes):
             file = io.BytesIO(buffer)  # type: IO[bytes]
         else:
             file = buffer
-
-        if self._item_type is not None:
-            field = self._item_type(packet)
-
-            temp = []  # type: list[_TL]
-            while length:
-                length -= field.length
-                if length < 0:
-                    raise FieldValueError(f'Field {self.name} has invalid length.')
-
-                buffer = file.read(field.length)
-                temp.append(field.unpack(buffer, packet))
-            return temp
-        return file.read(length)
-
-
-class OptionField(ListField):
-    """Field list for protocol options.
-
-    Args:
-        length: field size (in bytes); if a callable is given, it should return
-            an integer value and accept the current packet as its only argument.
-        base_schema: base schema for option fields.
-        type_name: name of the option type field.
-        registry: option registry, as in a mapping from option types (enumeration
-            values) to option schemas, with the default value being the unknown
-            option schema.
-        callback: callback function to be called upon
-            :meth:`self.__call__ <pcapkit.corekit.fields.field._Field.__call__>`.
-
-    This field is used to represent a list of fields, as in the case of lists of
-    options and/or parameters in a protocol.
-
-    """
-
-    @property
-    def base_schema(self) -> 'Type[Schema]':
-        """Base schema."""
-        return self._base_schema
-
-    @property
-    def type_name(self) -> 'str':
-        """Type name."""
-        return self._type_name
-
-    @property
-    def registry(self) -> 'dict[int, Type[Schema]]':
-        """Option registry."""
-        return self._registry
-
-    def __init__(self, length: 'int | Callable[[dict[str, Any]], Optional[int]]' = lambda _: None,
-                 base_schema: 'Optional[Type[Schema]]' = None,
-                 type_name: 'str' = 'type',
-                 registry: 'Optional[defaultdict[int | StdlibEnum | AenumEnum, Type[Schema]]]' = None,
-                 callback: 'Callable[[ListField, dict[str, Any]], None]' = lambda *_: None) -> 'None':
-        super().__init__(length, None, callback)
-        self._name = '<option>'
-
-        if base_schema is None:
-            raise FieldValueError('Field <option> has no base schema.')
-        self._base_schema = base_schema
-
-        if not hasattr(self._base_schema, type_name):
-            raise FieldValueError(f'Field <option> has no type field "{type_name}".')
-        self._type_name = type_name
-
-        if registry is None:
-            raise FieldValueError('Field <option> has no registry.')
-        self._registry = registry
-
-    def unpack(self, buffer: 'bytes | IO[bytes]', packet: 'dict[str, Any]') -> 'list[Schema]':  # type: ignore[override]
-        """Unpack field value from :obj:`bytes`.
-
-        Args:
-            buffer: field buffer.
-            packet: packet data.
-
-        Returns:
-            Unpacked field value.
-
-        """
-        length = self.length
-        if isinstance(buffer, bytes):
-            file = io.BytesIO(buffer)  # type: IO[bytes]
-        else:
-            file = buffer
-
-        temp = []  # type: list[Schema]
-        while length:
-            # unpack option type using base schema
-            meta = self._base_schema.unpack(file, length, packet)
-            code = cast('int', meta[self._type_name])
-            schema = self._registry[code]
-
-            # rewind to the beginning of the option
-            file.seek(-len(meta), io.SEEK_CUR)
-
-            # unpack option using option schema
-            data = schema.unpack(file, length, packet)
-            temp.append(data)
-
-            # update length
-            length -= len(data)
-        return temp
+        return self._schema(file, self.length, packet)
