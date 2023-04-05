@@ -3,7 +3,7 @@
 """header schema for Host Identity Protocol"""
 
 import collections
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 from pcapkit.const.hip.certificate import Certificate as Enum_Certificate
 from pcapkit.const.hip.cipher import Cipher as Enum_Cipher
@@ -24,11 +24,14 @@ from pcapkit.const.hip.suite import Suite as Enum_Suite
 from pcapkit.const.hip.transport import Transport as Enum_Transport
 from pcapkit.const.reg.transtype import TransType as Enum_TransType
 from pcapkit.corekit.fields.ipaddress import IPv6Field
-from pcapkit.corekit.fields.misc import ConditionalField, ListField, OptionField, PayloadField
+from pcapkit.corekit.fields.misc import ConditionalField, SchemaField, PayloadField, SwitchField
+from pcapkit.corekit.fields.collections import ListField, OptionField
 from pcapkit.corekit.fields.numbers import (EnumField, NumberField, UInt8Field, UInt16Field,
                                             UInt32Field)
 from pcapkit.corekit.fields.strings import BitField, BytesField, PaddingField
 from pcapkit.protocols.schema.schema import Schema
+from pcapkit.utilities.exceptions import FieldValueError
+from pcapkit.utilities.warnings import warn, ProtocolWarning
 
 __all__ = [
     'HIP',
@@ -56,11 +59,13 @@ __all__ = [
 
 if TYPE_CHECKING:
     from ipaddress import IPv6Address
-    from typing import Optional
+    from typing import Optional, Any, IO
 
     from typing_extensions import Literal, TypedDict
 
     from pcapkit.protocols.protocol import Protocol
+    from pcapkit.protocols.data.internet.hip import HIPCipherParameter as Data_HIPCipherParameter, EncryptedParameter as Data_EncryptedParameter
+    from pcapkit.corekit.fields.field import _Field as Field
 
     class PacketType(TypedDict):
         """Packet type."""
@@ -105,6 +110,57 @@ if TYPE_CHECKING:
         symmetric: int
         #: Must-follow flag.
         must_follow: int
+
+
+def locator_value_selector(pkt: 'dict[str, Any]') -> 'Field':
+    """Selector function for :attr:`Locator.value` field.
+
+    Args:
+        pkt: Packet data.
+
+    Returns:
+        * If ``kind`` is ``0`` and ``size`` is ``16``,
+          returns an :class:`~pcapkit.corekit.fields.ipaddress.IPv6Field` instance.
+        * If ``kind`` is ``1`` and ``size`` is ``20``,
+          returns a :class:`~pcapkit.corekit.fields.misc.SchemaField` wrapped
+          :class:`~pcapkit.protocols.schema.internet.hip.LocatorData` instance.
+
+    """
+    if pkt['type'] == 0 and pkt['len'] == 4:
+        return IPv6Field()
+    if pkt['type'] == 1 and pkt['len'] == 5:
+        return SchemaField(
+            length=20,
+            schema=LocatorData,
+        )
+    raise FieldValueError('invalid locator type or length')
+
+
+def host_id_hi_selector(pkt: 'dict[str, Any]') -> 'Field':
+    """Selector function for :attr:`HostIDParameter.hi` field.
+
+    Args:
+        pkt: Packet data.
+
+    Returns:
+        * If ``algorithm`` is ``7`` (ECDSA), returns a
+          :class:`~pcapkit.corekit.fields.misc.SchemaField` wrapped
+          :class:`~pcapkit.protocols.schema.internet.hip.ECDSACurveHostIdentity` instance.
+        * If ``algorithm`` is ``9`` (ECDSA_LOW), returns a
+          :class:`~pcapkit.corekit.fields.misc.SchemaField` wrapped
+          :class:`~pcapkit.protocols.schema.internet.hip.ECDSALowCurveHostIdentity` instance.
+        * If ``algorithm`` is ``13`` (EdDSA), returns a
+          :class:`~pcapkit.corekit.fields.misc.SchemaField` wrapped
+          :class:`~pcapkit.protocols.schema.internet.hip.EdDSACurveHostIdentity` instance.
+
+    """
+    if pkt['algorithm'] == Enum_HIAlgorithm.ECDSA:
+        return SchemaField(schema=ECDSACurveHostIdentity)
+    if pkt['algorithm'] == Enum_HIAlgorithm.ECDSA_LOW:
+        return SchemaField(schema=ECDSALowCurveHostIdentity)
+    if pkt['algorithm'] == Enum_HIAlgorithm.EdDSA:
+        return SchemaField(schema=EdDSACurveHostIdentity)
+    return BytesField(length=pkt['hi_len'])
 
 
 class Parameter(Schema):
@@ -161,18 +217,6 @@ class R1CounterParameter(Parameter):
         def __init__(self, type: 'Enum_Parameter', len: 'int', counter: 'int') -> 'None': ...
 
 
-class LocatorSetParameter(Parameter):
-    """Header schema for HIP ``LOCATOR_SET`` parameters."""
-
-    #: List of locators.
-    locators: 'list[Locator]' = ListField(length=lambda pkt: pkt['len'])
-    #: Padding.
-    padding: 'bytes' = PaddingField(length=lambda pkt: (8 - (pkt['len'] % 8)) % 8)
-
-    if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_Parameter', len: 'int', locators: 'list[Locator]') -> 'None': ...
-
-
 class Locator(Schema):
     """Header schema for HIP locators."""
 
@@ -191,11 +235,29 @@ class Locator(Schema):
     )
     lifetime: 'int' = UInt32Field()
     #: Locator value.
-    value: 'IPv6Address | LocatorData' = BytesField(length=lambda pkt: pkt['len'] * 4)
+    value: 'IPv6Address | LocatorData' = SwitchField(
+        length=lambda pkt: pkt['len'] * 4,
+        selector=locator_value_selector,
+    )
 
     if TYPE_CHECKING:
         def __init__(self, traffic: 'int', type: 'int', len: 'int', flags: 'LocatorFlags',
                      lifetime: 'int', value: 'bytes | LocatorData') -> 'None': ...
+
+
+class LocatorSetParameter(Parameter):
+    """Header schema for HIP ``LOCATOR_SET`` parameters."""
+
+    #: List of locators.
+    locators: 'list[Locator]' = ListField(
+        length=lambda pkt: pkt['len'],
+        item_type=SchemaField(schema=Locator),
+    )
+    #: Padding.
+    padding: 'bytes' = PaddingField(length=lambda pkt: (8 - (pkt['len'] % 8)) % 8)
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_Parameter', len: 'int', locators: 'list[Locator]') -> 'None': ...
 
 
 class LocatorData(Schema):
@@ -385,6 +447,60 @@ class EncryptedParameter(Parameter):
     #: Padding.
     padding: 'bytes' = PaddingField(length=lambda pkt: (8 - (pkt['len'] % 8)) % 8)
 
+    @staticmethod
+    def pre_process(packet: 'dict[str, Any]') -> 'None':
+        """Prepare ``packet`` data for unpacking process.
+
+        Args:
+            packet: packet data
+
+        """
+        cipher_list = cast('list[Data_HIPCipherParameter]',
+                           packet['options'].getlist(Enum_Parameter.HIP_CIPHER))
+        if cipher_list:
+            warn(f'HIPv{packet["ver"]["version"]}: [ParamNo {Enum_Parameter.ENCRYPTED}] '
+                 'missing HIP_CIPHER parameter', ProtocolWarning)
+            # raise ProtocolError(f'HIPv{version}: [ParamNo {schema.type}] invalid format')
+
+            cipher_id = Enum_Cipher(0xffff)
+        else:
+            cipher_ids = []  # type: list[Enum_Cipher]
+            for cipher in cipher_list:
+                cipher_ids.extend(cipher.cipher_id)
+
+            encrypted_list = cast('list[Data_EncryptedParameter]',
+                                  packet['options'].getlist(Enum_Parameter.ENCRYPTED))
+            encrypted_index = len(encrypted_list)
+
+            if encrypted_index >= len(cipher_ids):
+                warn(f'HIPv{packet["ver"]["version"]}: [ParamNo {Enum_Parameter.ENCRYPTED}] '
+                     'too many ENCRYPTED parameters', ProtocolWarning)
+                # raise ProtocolError(f'HIPv{version}: [ParamNo {schema.type}] invalid format')
+
+                cipher_id = Enum_Cipher(0xfffe)
+            else:
+                cipher_id = cipher_ids[encrypted_index]
+
+        packet['__cipher__'] = cipher_id
+
+    @staticmethod
+    def post_process(schema: 'Schema', data: 'IO[bytes]', length: 'int',
+                     packet: 'dict[str, Any]') -> 'Schema':
+        """Revise ``schema`` data after unpacking process.
+
+        Args:
+            schema: parsed schema
+            data: Packed data.
+            length: Length of data.
+            packet: Unpacked data.
+
+        Returns:
+            Revised schema.
+
+        """
+        schema.cipher = packet['__cipher__']
+        return schema
+
     if TYPE_CHECKING:
         #: Cipher ID.
         cipher: 'Enum_Cipher'
@@ -409,7 +525,9 @@ class HostIDParameter(Parameter):
     #: Algorithm type.
     algorithm: 'Enum_HIAlgorithm' = EnumField(length=2, namespace=Enum_HIAlgorithm)
     #: Host ID.
-    hi: 'bytes | HostIdentity' = BytesField(length=lambda pkt: pkt['hi_len'])
+    hi: 'bytes | HostIdentity' = SwitchField(
+        length=lambda pkt: pkt['hi_len'],
+        selector=host_id_hi_selector)
     #: Domain ID.
     di: 'bytes' = BytesField(length=lambda pkt: pkt['di_data']['len'])
     #: Padding.

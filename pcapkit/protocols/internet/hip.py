@@ -220,8 +220,7 @@ if TYPE_CHECKING:
     from pcapkit.protocols.schema.internet.hip import Parameter as Schema_Parameter
 
     Parameter = OrderedMultiDict[Enum_Parameter, Data_Parameter]
-    ParameterParser = Callable[['HIP', Enum_Parameter, bool, int, NamedArg(bytes, 'data'),
-                                NamedArg(int, 'length'), NamedArg(int, 'version'),
+    ParameterParser = Callable[['HIP', Schema_Parameter, NamedArg(int, 'version'),
                                 NamedArg(Parameter, 'options')], Data_Parameter]
     ParameterConstructor = Callable[['HIP', Enum_Parameter, DefaultArg(Optional[Data_Parameter]),
                                      NamedArg(int, 'version'), KwArg(Any)], Schema_Parameter]
@@ -578,7 +577,7 @@ class HIP(Internet[Data_HIP, Schema_HIP],
             warn(f'parameter {code} already registered, overwriting', RegistryWarning)
 
         if isinstance(meth, str):
-            meth = (getattr(cls, f'_read_param_{meth}', cls._read_param_unassigned),
+            meth = (getattr(cls, f'_read_param_{meth}', cls._read_param_unassigned),  # type: ignore[arg-type]
                     getattr(cls, f'_make_param_{meth}', cls._make_param_unassigned))  # type: ignore[arg-type]
 
         setattr(cls, f'_read_param_{name}', meth[0])
@@ -672,46 +671,28 @@ class HIP(Internet[Data_HIP, Schema_HIP],
             ProtocolError: if packet length threshold check failed
 
         """
-        payload = cast('bytes', self.__header__.param)
-        self.__header__.param = []
-
         counter = 0                   # length of read parameters
         options = OrderedMultiDict()  # type: Parameter
 
-        while counter < length:
-            cbuf = payload[counter:counter + 2]
-            if not cbuf:  # break when eol triggered
-                break
+        for schema in self.__header__.param:
+            dscp = schema.type
+            cbit = bool(schema.type & 0b1)
 
-            # get parameter type & C-bit
-            code = int(cbuf, base=2)
-            cbit = bool(code & 0b1)
-
-            # get parameter length
-            cdat = payload[counter + 2:counter + 4]
-            clen = struct.unpack('!H', cdat)[0]   # Length of the Contents, in bytes, excluding Type, Length, and Padding
-            plen = 4 + clen + (8 - clen % 8) % 8  # Total Length = 4 [Type + Length] + Contents + Padding
-
-            # extract parameter
-            dscp = Enum_Parameter.get(code)
             meth_name = f'_read_param_{dscp.name.lower()}'
             meth = cast('ParameterParser',
                         getattr(self, meth_name, self._read_param_unassigned))
-            data = meth(self, dscp, cbit, clen, data=payload[counter:counter + plen],
-                        length=plen, version=version, options=options)
+            data = meth(self, schema, version=version, options=options)
 
             # record parameter data
-            counter += plen
             options.add(dscp, data)
+            counter += len(schema)
 
         # check threshold
         if counter != length:
             raise ProtocolError(f'HIPv{version}: invalid format')
-
         return options
 
-    def _read_param_unassigned(self, code: 'Enum_Parameter', cbit: 'bool', clen: 'int', *,  # pylint: disable=unused-argument
-                               data: 'bytes', length: 'int', version: 'int',  # pylint: disable=unused-argument
+    def _read_param_unassigned(self, schema: 'Schema_UnassignedParameter', *, version: 'int',  # pylint: disable=unused-argument
                                options: 'Parameter') -> 'Data_UnassignedParameter':  # pylint: disable=unused-argument
         """Read HIP unassigned parameters.
 
@@ -731,11 +712,7 @@ class HIP(Internet[Data_HIP, Schema_HIP],
            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
-            code: parameter code
-            cbit: critical bit
-            clen: length of contents
-            data: parameter payload data (incl. type, length, content and padding, if any)
-            length: parameter data length
+            schema: parsed parameter schama
             version: HIP protocol version
             options: parsed HIP parameters
 
@@ -743,19 +720,15 @@ class HIP(Internet[Data_HIP, Schema_HIP],
             Parsed parameter data.
 
         """
-        schema = Schema_UnassignedParameter.unpack(data, length)  # type: Schema_UnassignedParameter
-        self.__header__.param.append(schema)
-
         unassigned = Data_UnassignedParameter(
-            type=code,
-            critical=cbit,
-            length=length,
+            type=schema.type,
+            critical=bool(schema.type & 0b1),
+            length=4 + schema.len + (8 - schema.len % 8) % 8,
             contents=schema.value,
         )
         return unassigned
 
-    def _read_param_esp_info(self, code: 'Enum_Parameter', cbit: 'bool', clen: 'int', *,
-                             data: 'bytes', length: 'int', version: 'int',  # pylint: disable=unused-argument
+    def _read_param_esp_info(self, schema: 'Schema_ESPInfoParameter', *, version: 'int',  # pylint: disable=unused-argument
                              options: 'Parameter') -> 'Data_ESPInfoParameter':  # pylint: disable=unused-argument
         """Read HIP ``ESP_INFO`` parameter.
 
@@ -776,11 +749,7 @@ class HIP(Internet[Data_HIP, Schema_HIP],
            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
-            code: parameter code
-            cbit: critical bit
-            clen: length of contents
-            data: parameter payload data (incl. type, length, content and padding, if any)
-            length: parameter data length
+            schema: parsed parameter schama
             version: HIP protocol version
             options: parsed HIP parameters
 
@@ -788,27 +757,23 @@ class HIP(Internet[Data_HIP, Schema_HIP],
             Parsed parameter data.
 
         Raises:
-            ProtocolError: If ``clen`` is **NOT** ``12``.
+            ProtocolError: If ``schema.len`` is **NOT** ``12``.
 
         """
-        if clen != 12:
-            raise ProtocolError(f'HIPv{version}: [ParamNo {code}] invalid format')
-
-        schema = Schema_ESPInfoParameter.unpack(data, length)  # type: Schema_ESPInfoParameter
-        self.__header__.param.append(schema)
+        if schema.len != 12:
+            raise ProtocolError(f'HIPv{version}: [ParamNo {schema.type}] invalid format')
 
         esp_info = Data_ESPInfoParameter(
-            type=code,
-            critical=cbit,
-            length=length,
+            type=schema.type,
+            critical=bool(schema.type & 0b1),
+            length=4 + schema.len + (8 - schema.len % 8) % 8,
             index=schema.index,
             old_spi=schema.old_spi,
             new_spi=schema.new_spi,
         )
         return esp_info
 
-    def _read_param_r1_counter(self, code: 'Enum_Parameter', cbit: 'bool', clen: 'int', *,
-                               data: 'bytes', length: 'int', version: 'int',  # pylint: disable=unused-argument
+    def _read_param_r1_counter(self, schema: 'Schema_R1CounterParameter', *, version: 'int',  # pylint: disable=unused-argument
                                options: 'Parameter') -> 'Data_R1CounterParameter':  # pylint: disable=unused-argument
         """Read HIP ``R1_COUNTER`` parameter.
 
@@ -828,11 +793,7 @@ class HIP(Internet[Data_HIP, Schema_HIP],
            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
-            code: parameter code
-            cbit: critical bit
-            clen: length of contents
-            data: parameter payload data (incl. type, length, content and padding, if any)
-            length: parameter data length
+            schema: parsed parameter schama
             version: HIP protocol version
             options: parsed HIP parameters
 
@@ -840,27 +801,23 @@ class HIP(Internet[Data_HIP, Schema_HIP],
             Parsed parameter data.
 
         Raises:
-            ProtocolError: If ``clen`` is **NOT** ``12`` or the parameter is **NOT** used in HIPv1.
+            ProtocolError: If ``schema.len`` is **NOT** ``12`` or the parameter is **NOT** used in HIPv1.
 
         """
-        if clen != 12:
-            raise ProtocolError(f'HIPv{version}: [ParamNo {code}] invalid format')
-        if code == 128 and version != 1:
-            raise ProtocolError(f'HIPv{version}: [ParamNo {code}] invalid parameter')
-
-        schema = Schema_R1CounterParameter.unpack(data, length)  # type: Schema_R1CounterParameter
-        self.__header__.param.append(schema)
+        if schema.len != 12:
+            raise ProtocolError(f'HIPv{version}: [ParamNo {schema.type}] invalid format')
+        if schema.type == 128 and version != 1:
+            raise ProtocolError(f'HIPv{version}: [ParamNo {schema.type}] invalid parameter')
 
         r1_counter = Data_R1CounterParameter(
-            type=code,
-            critical=cbit,
-            length=length,
+            type=schema.type,
+            critical=bool(schema.type & 0b1),
+            length=4 + schema.len + (8 - schema.len % 8) % 8,
             counter=schema.counter,
         )
         return r1_counter
 
-    def _read_param_locator_set(self, code: 'Enum_Parameter', cbit: 'bool', clen: 'int', *,
-                                data: 'bytes', length: 'int', version: 'int',  # pylint: disable=unused-argument
+    def _read_param_locator_set(self, schema: 'Schema_LocatorSetParameter', *, version: 'int',  # pylint: disable=unused-argument
                                 options: 'Parameter') -> 'Data_LocatorSetParameter':  # pylint: disable=unused-argument
         """Read HIP ``LOCATOR_SET`` parameter.
 
@@ -896,11 +853,7 @@ class HIP(Internet[Data_HIP, Schema_HIP],
            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
-            code: parameter code
-            cbit: critical bit
-            clen: length of contents
-            data: parameter payload data (incl. type, length, content and padding, if any)
-            length: parameter data length
+            schema: parsed parameter schama
             version: HIP protocol version
             options: parsed HIP parameters
 
@@ -929,35 +882,23 @@ class HIP(Internet[Data_HIP, Schema_HIP],
             """
             kind = locator.type
             size = 8 + locator.len * 4
-            data = cast('bytes', locator.value)
 
             if kind == 0 and locator.len == 4:
-                value = cast('IPv6Address', ipaddress.ip_address(data))
-                locator.value = value
-                return value
+                return cast('IPv6Address', locator.value)
             if kind == 1 and locator.len == 5:
-                locator.value = Schema_LocatorData.unpack(data, size)
+                loc_val = cast('Schema_LocatorData', locator.value)
                 return Data_LocatorData(
-                    spi=locator.value.spi,
-                    ip=ipaddress.ip_address(locator.value.ip),  # type: ignore[arg-type]
+                    spi=loc_val.spi,
+                    ip=ipaddress.ip_address(loc_val.ip),  # type: ignore[arg-type]
                 )
-            raise ProtocolError(f'HIPv{version}: [ParamNo {code}] invalid format')
-
-        schema = Schema_LocatorSetParameter.unpack(data, length)  # type: Schema_LocatorSetParameter
-        self.__header__.param.append(schema)
-
-        locators = cast('bytes', schema.locators)
-        schema.locators = []
+            raise ProtocolError(f'HIPv{version}: [ParamNo {schema.type}] invalid format')
 
         # length of read locators
         _size = 0
         # list of locators
         _locs = []  # type: list[Data_Locator]
 
-        while _size < clen:
-            locator = Schema_Locator.unpack(locators[_size:])  # type: Schema_Locator
-            schema.locators.append(locator)
-
+        for locator in schema.locators:
             _traf = locator.traffic
             _loct = locator.type
             _locl = locator.len * 4
@@ -975,16 +916,15 @@ class HIP(Internet[Data_HIP, Schema_HIP],
             ))
 
         locator_set = Data_LocatorSetParameter(
-            type=code,
-            critical=cbit,
-            length=length,
+            type=schema.type,
+            critical=bool(schema.type & 0b1),
+            length=4 + schema.len + (8 - schema.len % 8) % 8,
             locator_set=tuple(_locs),
         )
 
         return locator_set
 
-    def _read_param_puzzle(self, code: 'Enum_Parameter', cbit: 'bool', clen: 'int', *,
-                           data: 'bytes', length: 'int', version: 'int',
+    def _read_param_puzzle(self, schema: 'Schema_PuzzleParameter', *, version: 'int',
                            options: 'Parameter') -> 'Data_PuzzleParameter':  # pylint: disable=unused-argument
         """Read HIP ``PUZZLE`` parameter.
 
@@ -1004,11 +944,7 @@ class HIP(Internet[Data_HIP, Schema_HIP],
            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
-            code: parameter code
-            cbit: critical bit
-            clen: length of contents
-            data: parameter payload data (incl. type, length, content and padding, if any)
-            length: parameter data length
+            schema: parsed parameter schama
             version: HIP protocol version
             options: parsed HIP parameters
 
@@ -1019,21 +955,18 @@ class HIP(Internet[Data_HIP, Schema_HIP],
             ProtocolError: The parameter is **ONLY** supported in HIPv1.
 
         """
-        if version == 1 and clen != 12:
-            raise ProtocolError(f'HIPv{version}: [ParamNo {code}] invalid format')
-
-        schema = Schema_PuzzleParameter.unpack(data, length)  # type: Schema_PuzzleParameter
-        self.__header__.param.append(schema)
+        if version == 1 and schema.len != 12:
+            raise ProtocolError(f'HIPv{version}: [ParamNo {schema.type}] invalid format')
 
         _numk = schema.index
         _time = schema.lifetime
         _opak = schema.opaque
-        _rand = schema.random  # Length (clen) = 4 + RHASH_len / 8
+        _rand = schema.random  # Length (schema.len) = 4 + RHASH_len / 8
 
         puzzle = Data_PuzzleParameter(
-            type=code,
-            critical=cbit,
-            length=length,
+            type=schema.type,
+            critical=bool(schema.type & 0b1),
+            length=4 + schema.len + (8 - schema.len % 8) % 8,
             index=_numk,
             lifetime=datetime.timedelta(seconds=2 ** (_time - 32)),
             opaque=_opak,
@@ -1041,8 +974,7 @@ class HIP(Internet[Data_HIP, Schema_HIP],
         )
         return puzzle
 
-    def _read_param_solution(self, code: 'Enum_Parameter', cbit: 'bool', clen: 'int', *,
-                             data: 'bytes', length: 'int', version: 'int',
+    def _read_param_solution(self, schema: 'Schema_SolutionParameter', *, version: 'int',
                              options: 'Parameter') -> 'Data_SolutionParameter':  # pylint: disable=unused-argument
         """Read HIP ``SOLUTION`` parameter.
 
@@ -1065,11 +997,7 @@ class HIP(Internet[Data_HIP, Schema_HIP],
            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
-            code: parameter code
-            cbit: critical bit
-            clen: length of contents
-            data: parameter payload data (incl. type, length, content and padding, if any)
-            length: parameter data length
+            schema: parsed parameter schama
             version: HIP protocol version
             options: parsed HIP parameters
 
@@ -1080,24 +1008,21 @@ class HIP(Internet[Data_HIP, Schema_HIP],
             ProtocolError: The parameter is **ONLY** supported in HIPv1.
 
         """
-        if version == 1 and clen != 20:
-            raise ProtocolError(f'HIPv{version}: [ParamNo {code}] invalid format')
-        if (clen - 4) % 2 != 0:
-            raise ProtocolError(f'HIPv{version}: [ParamNo {code}] invalid format')
-
-        schema = Schema_SolutionParameter.unpack(data, length)  # type: Schema_SolutionParameter
-        self.__header__.param.append(schema)
+        if version == 1 and schema.len != 20:
+            raise ProtocolError(f'HIPv{version}: [ParamNo {schema.type}] invalid format')
+        if (schema.len - 4) % 2 != 0:
+            raise ProtocolError(f'HIPv{version}: [ParamNo {schema.type}] invalid format')
 
         _numk = schema.index
         _time = schema.lifetime
         _opak = schema.opaque
         _rand = schema.random
-        _solt = schema.solution  # Length (clen) = 4 + RHASH_len / 4
+        _solt = schema.solution  # Length (schema.len) = 4 + RHASH_len / 4
 
         solution = Data_SolutionParameter(
-            type=code,
-            critical=cbit,
-            length=length,
+            type=schema.type,
+            critical=bool(schema.type & 0b1),
+            length=4 + schema.len + (8 - schema.len % 8) % 8,
             index=_numk,
             lifetime=datetime.timedelta(seconds=2 ** (_time - 32)),
             opaque=_opak,
@@ -1106,8 +1031,7 @@ class HIP(Internet[Data_HIP, Schema_HIP],
         )
         return solution
 
-    def _read_param_seq(self, code: 'Enum_Parameter', cbit: 'bool', clen: 'int', *,
-                        data: 'bytes', length: 'int', version: 'int',  # pylint: disable=unused-argument
+    def _read_param_seq(self, schema: 'Schema_SEQParameter', *, version: 'int',  # pylint: disable=unused-argument
                         options: 'Parameter') -> 'Data_SEQParameter':  # pylint: disable=unused-argument
         """Read HIP ``SEQ`` parameter.
 
@@ -1124,11 +1048,7 @@ class HIP(Internet[Data_HIP, Schema_HIP],
            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
-            code: parameter code
-            cbit: critical bit
-            clen: length of contents
-            data: parameter payload data (incl. type, length, content and padding, if any)
-            length: parameter data length
+            schema: parsed parameter schama
             version: HIP protocol version
             options: parsed HIP parameters
 
@@ -1136,27 +1056,23 @@ class HIP(Internet[Data_HIP, Schema_HIP],
             Parsed parameter data.
 
         Raises:
-            ProtocolError: If ``clen`` is **NOT** ``4``.
+            ProtocolError: If ``schema.len`` is **NOT** ``4``.
 
         """
-        if clen != 4:
-            raise ProtocolError(f'HIPv{version}: [ParamNo {code}] invalid format')
-
-        schema = Schema_SEQParameter.unpack(data, length)  # type: Schema_SEQParameter
-        self.__header__.param.append(schema)
+        if schema.len != 4:
+            raise ProtocolError(f'HIPv{version}: [ParamNo {schema.type}] invalid format')
 
         _upid = schema.update_id
 
         seq = Data_SEQParameter(
-            type=code,
-            critical=cbit,
-            length=length,
+            type=schema.type,
+            critical=bool(schema.type & 0b1),
+            length=4 + schema.len + (8 - schema.len % 8) % 8,
             id=_upid,
         )
         return seq
 
-    def _read_param_ack(self, code: 'Enum_Parameter', cbit: 'bool', clen: 'int', *,
-                        data: 'bytes', length: 'int', version: 'int',  # pylint: disable=unused-argument
+    def _read_param_ack(self, schema: 'Schema_ACKParameter', *, version: 'int',  # pylint: disable=unused-argument
                         options: 'Parameter') -> 'Data_ACKParameter':  # pylint: disable=unused-argument
         """Read HIP ``ACK`` parameter.
 
@@ -1175,11 +1091,7 @@ class HIP(Internet[Data_HIP, Schema_HIP],
            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
-            code: parameter code
-            cbit: critical bit
-            clen: length of contents
-            data: parameter payload data (incl. type, length, content and padding, if any)
-            length: parameter data length
+            schema: parsed parameter schama
             version: HIP protocol version
             options: parsed HIP parameters
 
@@ -1187,25 +1099,21 @@ class HIP(Internet[Data_HIP, Schema_HIP],
             Parsed parameter data.
 
         Raises:
-            ProtocolError: If ``clen`` is **NOT** ``4`` modulo.
+            ProtocolError: If ``schema.len`` is **NOT** ``4`` modulo.
 
         """
-        if clen % 4 != 0:
-            raise ProtocolError(f'HIPv{version}: [ParamNo {code}] invalid format')
-
-        schema = Schema_ACKParameter.unpack(data, length)  # type: Schema_ACKParameter
-        self.__header__.param.append(schema)
+        if schema.len % 4 != 0:
+            raise ProtocolError(f'HIPv{version}: [ParamNo {schema.type}] invalid format')
 
         ack = Data_ACKParameter(
-            type=code,
-            critical=cbit,
-            length=length,
+            type=schema.type,
+            critical=bool(schema.type & 0b1),
+            length=4 + schema.len + (8 - schema.len % 8) % 8,
             update_id=tuple(schema.update_id),
         )
         return ack
 
-    def _read_param_dh_group_list(self, code: 'Enum_Parameter', cbit: 'bool', clen: 'int', *,  # pylint: disable=unused-argument
-                                  data: 'bytes', length: 'int', version: 'int',  # pylint: disable=unused-argument
+    def _read_param_dh_group_list(self, schema: 'Schema_DHGroupListParameter', *, version: 'int',  # pylint: disable=unused-argument
                                   options: 'Parameter') -> 'Data_DHGroupListParameter':  # pylint: disable=unused-argument
         """Read HIP ``DH_GROUP_LIST`` parameter.
 
@@ -1224,11 +1132,7 @@ class HIP(Internet[Data_HIP, Schema_HIP],
            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
-            code: parameter code
-            cbit: critical bit
-            clen: length of contents
-            data: parameter payload data (incl. type, length, content and padding, if any)
-            length: parameter data length
+            schema: parsed parameter schama
             version: HIP protocol version
             options: parsed HIP parameters
 
@@ -1236,19 +1140,15 @@ class HIP(Internet[Data_HIP, Schema_HIP],
             Parsed parameter data.
 
         """
-        schema = Schema_DHGroupListParameter.unpack(data, length)  # type: Schema_DHGroupListParameter
-        self.__header__.param.append(schema)
-
         dh_group_list = Data_DHGroupListParameter(
-            type=code,
-            critical=cbit,
-            length=length,
+            type=schema.type,
+            critical=bool(schema.type & 0b1),
+            length=4 + schema.len + (8 - schema.len % 8) % 8,
             group_id=tuple(schema.groups),
         )
         return dh_group_list
 
-    def _read_param_diffie_hellman(self, code: 'Enum_Parameter', cbit: 'bool', clen: 'int', *,  # pylint: disable=unused-argument
-                                   data: 'bytes', length: 'int', version: 'int',  # pylint: disable=unused-argument
+    def _read_param_diffie_hellman(self, schema: 'Schema_DiffieHellmanParameter', *, version: 'int',  # pylint: disable=unused-argument
                                    options: 'Parameter') -> 'Data_DiffieHellmanParameter':  # pylint: disable=unused-argument
         """Read HIP ``DIFFIE_HELLMAN`` parameter.
 
@@ -1269,11 +1169,7 @@ class HIP(Internet[Data_HIP, Schema_HIP],
            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
-            code: parameter code
-            cbit: critical bit
-            clen: length of contents
-            data: parameter payload data (incl. type, length, content and padding, if any)
-            length: parameter data length
+            schema: parsed parameter schama
             version: HIP protocol version
             options: parsed HIP parameters
 
@@ -1281,21 +1177,17 @@ class HIP(Internet[Data_HIP, Schema_HIP],
             Parsed parameter data.
 
         """
-        schema = Schema_DiffieHellmanParameter.unpack(data, length)  # type: Schema_DiffieHellmanParameter
-        self.__header__.param.append(schema)
-
         diffie_hellman = Data_DiffieHellmanParameter(
-            type=code,
-            critical=cbit,
-            length=length,
+            type=schema.type,
+            critical=bool(schema.type & 0b1),
+            length=4 + schema.len + (8 - schema.len % 8) % 8,
             group_id=schema.group,
             pub_len=schema.pub_len,
             pub_val=schema.pub_val,
         )
         return diffie_hellman
 
-    def _read_param_hip_transform(self, code: 'Enum_Parameter', cbit: 'bool', clen: 'int', *,
-                                  data: 'bytes', length: 'int', version: 'int',
+    def _read_param_hip_transform(self, schema: 'Schema_HIPTransformParameter', *, version: 'int',
                                   options: 'Parameter') -> 'Data_HIPTransformParameter':  # pylint: disable=unused-argument
         """Read HIP ``HIP_TRANSFORM`` parameter.
 
@@ -1314,11 +1206,7 @@ class HIP(Internet[Data_HIP, Schema_HIP],
            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
-            code: parameter code
-            cbit: critical bit
-            clen: length of contents
-            data: parameter payload data (incl. type, length, content and padding, if any)
-            length: parameter data length
+            schema: parsed parameter schama
             version: HIP protocol version
             options: parsed HIP parameters
 
@@ -1330,23 +1218,19 @@ class HIP(Internet[Data_HIP, Schema_HIP],
 
         """
         if version != 1:
-            raise ProtocolError(f'HIPv{version}: [ParamNo {code}] invalid parameter')
-        if clen % 2 != 0:
-            raise ProtocolError(f'HIPv{version}: [ParamNo {code}] invalid format')
-
-        schema = Schema_HIPTransformParameter.unpack(data, length)  # type: Schema_HIPTransformParameter
-        self.__header__.param.append(schema)
+            raise ProtocolError(f'HIPv{version}: [ParamNo {schema.type}] invalid parameter')
+        if schema.len % 2 != 0:
+            raise ProtocolError(f'HIPv{version}: [ParamNo {schema.type}] invalid format')
 
         hip_transform = Data_HIPTransformParameter(
-            type=code,
-            critical=cbit,
-            length=length,
+            type=schema.type,
+            critical=bool(schema.type & 0b1),
+            length=4 + schema.len + (8 - schema.len % 8) % 8,
             suite_id=tuple(schema.suites),
         )
         return hip_transform
 
-    def _read_param_hip_cipher(self, code: 'Enum_Parameter', cbit: 'bool', clen: 'int', *,  # pylint: disable=unused-argument
-                               data: 'bytes', length: 'int', version: 'int',
+    def _read_param_hip_cipher(self, schema: 'Schema_HIPCipherParameter', *, version: 'int',
                                options: 'Parameter') -> 'Data_HIPCipherParameter':  # pylint: disable=unused-argument
         """Read HIP ``HIP_CIPHER`` parameter.
 
@@ -1365,11 +1249,7 @@ class HIP(Internet[Data_HIP, Schema_HIP],
            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
-            code: parameter code
-            cbit: critical bit
-            clen: length of contents
-            data: parameter payload data (incl. type, length, content and padding, if any)
-            length: parameter data length
+            schema: parsed parameter schama
             version: HIP protocol version
             options: parsed HIP parameters
 
@@ -1377,31 +1257,27 @@ class HIP(Internet[Data_HIP, Schema_HIP],
             Parsed parameter data.
 
         Raises:
-            ProtocolError: If ``clen`` is **NOT** a ``2`` modulo.
+            ProtocolError: If ``schema.len`` is **NOT** a ``2`` modulo.
 
         """
-        if clen % 2 != 0:
-            raise ProtocolError(f'HIPv{version}: [ParamNo {code}] invalid format')
-
-        schema = Schema_HIPCipherParameter.unpack(data, length)  # type: Schema_HIPCipherParameter
-        self.__header__.param.append(schema)
+        if schema.len % 2 != 0:
+            raise ProtocolError(f'HIPv{version}: [ParamNo {schema.type}] invalid format')
 
         # NOTE: The sender of a HIP_CIPHER parameter MUST make sure that there are no
         # more than six (6) Cipher IDs in one HIP_CIPHER parameter. [:rfc:`7401#section-5.2.8`]
         if len(schema.ciphers) > 5:
-            warn(f'HIPv{version}: [ParamNo {code}] invalid format', ProtocolWarning)
-            # raise ProtocolError(f'HIPv{version}: [ParamNo {code}] invalid format')
+            warn(f'HIPv{version}: [ParamNo {schema.type}] invalid format', ProtocolWarning)
+            # raise ProtocolError(f'HIPv{version}: [ParamNo {schema.type}] invalid format')
 
         hip_cipher = Data_HIPCipherParameter(
-            type=code,
-            critical=cbit,
-            length=length,
+            type=schema.type,
+            critical=bool(schema.type & 0b1),
+            length=4 + schema.len + (8 - schema.len % 8) % 8,
             cipher_id=tuple(schema.ciphers),
         )
         return hip_cipher
 
-    def _read_param_nat_traversal_mode(self, code: 'Enum_Parameter', cbit: 'bool', clen: 'int', *,  # pylint: disable=unused-argument
-                                       data: 'bytes', length: 'int', version: 'int',  # pylint: disable=unused-argument
+    def _read_param_nat_traversal_mode(self, schema: 'Schema_NATTraversalModeParameter', *, version: 'int',  # pylint: disable=unused-argument
                                        options: 'Parameter') -> 'Data_NATTraversalModeParameter':  # pylint: disable=unused-argument,line-too-long
         """Read HIP ``NAT_TRAVERSAL_MODE`` parameter.
 
@@ -1422,11 +1298,7 @@ class HIP(Internet[Data_HIP, Schema_HIP],
            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
-            code: parameter code
-            cbit: critical bit
-            clen: length of contents
-            data: parameter payload data (incl. type, length, content and padding, if any)
-            length: parameter data length
+            schema: parsed parameter schama
             version: HIP protocol version
             options: parsed HIP parameters
 
@@ -1434,25 +1306,21 @@ class HIP(Internet[Data_HIP, Schema_HIP],
             Parsed parameter data.
 
         Raises:
-            ProtocolError: If ``clen`` is **NOT** a ``2`` modulo.
+            ProtocolError: If ``schema.len`` is **NOT** a ``2`` modulo.
 
         """
-        if clen % 2 != 0:
-            raise ProtocolError(f'HIPv{version}: [ParamNo {code}] invalid format')
-
-        schema = Schema_NATTraversalModeParameter.unpack(data, length)  # type: Schema_NATTraversalModeParameter
-        self.__header__.param.append(schema)
+        if schema.len % 2 != 0:
+            raise ProtocolError(f'HIPv{version}: [ParamNo {schema.type}] invalid format')
 
         nat_traversal_mode = Data_NATTraversalModeParameter(
-            type=code,
-            critical=cbit,
-            length=length,
+            type=schema.type,
+            critical=bool(schema.type & 0b1),
+            length=4 + schema.len + (8 - schema.len % 8) % 8,
             mode_id=tuple(schema.modes),
         )
         return nat_traversal_mode
 
-    def _read_param_transaction_pacing(self, code: 'Enum_Parameter', cbit: 'bool', clen: 'int', *,
-                                       data: 'bytes', length: 'int', version: 'int',  # pylint: disable=unused-argument
+    def _read_param_transaction_pacing(self, schema: 'Schema_TransactionPacingParameter', *, version: 'int',  # pylint: disable=unused-argument
                                        options: 'Parameter') -> 'Data_TransactionPacingParameter':  # pylint: disable=unused-argument,line-too-long
         """Read HIP ``TRANSACTION_PACING`` parameter.
 
@@ -1469,11 +1337,7 @@ class HIP(Internet[Data_HIP, Schema_HIP],
            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
-            code: parameter code
-            cbit: critical bit
-            clen: length of contents
-            data: parameter payload data (incl. type, length, content and padding, if any)
-            length: parameter data length
+            schema: parsed parameter schama
             version: HIP protocol version
             options: parsed HIP parameters
 
@@ -1481,25 +1345,21 @@ class HIP(Internet[Data_HIP, Schema_HIP],
             Parsed parameter data.
 
         Raises:
-            ProtocolError: If ``clen`` is **NOT** ``4``.
+            ProtocolError: If ``schema.len`` is **NOT** ``4``.
 
         """
-        if clen != 4:
-            raise ProtocolError(f'HIPv{version}: [ParamNo {code}] invalid format')
-
-        schema = Schema_TransactionPacingParameter.unpack(data, length)  # type: Schema_TransactionPacingParameter
-        self.__header__.param.append(schema)
+        if schema.len != 4:
+            raise ProtocolError(f'HIPv{version}: [ParamNo {schema.type}] invalid format')
 
         transaction_pacing = Data_TransactionPacingParameter(
-            type=code,
-            critical=cbit,
-            length=length,
+            type=schema.type,
+            critical=bool(schema.type & 0b1),
+            length=4 + schema.len + (8 - schema.len % 8) % 8,
             min_ta=schema.min_ta,
         )
         return transaction_pacing
 
-    def _read_param_encrypted(self, code: 'Enum_Parameter', cbit: 'bool', clen: 'int', *,  # pylint: disable=unused-argument
-                              data: 'bytes', length: 'int', version: 'int',  # pylint: disable=unused-argument
+    def _read_param_encrypted(self, schema: 'Schema_EncryptedParameter', *, version: 'int',  # pylint: disable=unused-argument
                               options: 'Parameter') -> 'Data_EncryptedParameter':  # pylint: disable=unused-argument
         """Read HIP ``ENCRYPTED`` parameter.
 
@@ -1525,11 +1385,7 @@ class HIP(Internet[Data_HIP, Schema_HIP],
            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
-            code: parameter code
-            cbit: critical bit
-            clen: length of contents
-            data: parameter payload data (incl. type, length, content and padding, if any)
-            length: parameter data length
+            schema: parsed parameter schama
             version: HIP protocol version
             options: parsed HIP parameters
 
@@ -1537,48 +1393,17 @@ class HIP(Internet[Data_HIP, Schema_HIP],
             Parsed parameter data.
 
         """
-        cipher_list = cast('list[Data_HIPCipherParameter]',
-                           options.getlist(Enum_Parameter.HIP_CIPHER))  # type: ignore[arg-type]
-        if cipher_list:
-            warn(f'HIPv{version}: [ParamNo {code}] missing HIP_CIPHER parameter', ProtocolWarning)
-            # raise ProtocolError(f'HIPv{version}: [ParamNo {code}] invalid format')
-
-            cipher_id = Enum_Cipher(0xffff)
-        else:
-            cipher_ids = []  # type: list[Enum_Cipher]
-            for cipher in cipher_list:
-                cipher_ids.extend(cipher.cipher_id)
-
-            encrypted_list = cast('list[Data_EncryptedParameter]',
-                                options.getlist(Enum_Parameter.ENCRYPTED))  # type: ignore[arg-type]
-            encrypted_index = len(encrypted_list)
-
-            if encrypted_index >= len(cipher_ids):
-                warn(f'HIPv{version}: [ParamNo {code}] too many ENCRYPTED parameters', ProtocolWarning)
-                #raise ProtocolError(f'HIPv{version}: [ParamNo {code}] invalid format')
-
-                cipher_id = Enum_Cipher(0xfffe)
-            else:
-                cipher_id = cipher_ids[encrypted_index]
-
-        schema = Schema_EncryptedParameter.unpack(data, length, packet={
-            '__cipher__': cipher_id,
-        })  # type: Schema_EncryptedParameter
-        schema.cipher = cipher_id
-        self.__header__.param.append(schema)
-
         encrypted = Data_EncryptedParameter(
-            type=code,
-            critical=cbit,
-            length=length,
-            cipher=cipher_id,
+            type=schema.type,
+            critical=bool(schema.type & 0b1),
+            length=4 + schema.len + (8 - schema.len % 8) % 8,
+            cipher=schema.cipher,
             iv=getattr(schema, 'iv', None),
             data=schema.data,
         )
         return encrypted
 
-    def _read_param_host_id(self, code: 'Enum_Parameter', cbit: 'bool', clen: 'int', *,  # pylint: disable=unused-argument
-                            data: 'bytes', length: 'int', version: 'int',  # pylint: disable=unused-argument
+    def _read_param_host_id(self, schema: 'Schema_HostIDParameter', *, version: 'int',  # pylint: disable=unused-argument
                             options: 'Parameter') -> 'Data_HostIDParameter':  # pylint: disable=unused-argument
         """Read HIP ``HOST_ID`` parameter.
 
@@ -1601,11 +1426,7 @@ class HIP(Internet[Data_HIP, Schema_HIP],
            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
-            code: parameter code
-            cbit: critical bit
-            clen: length of contents
-            data: parameter payload data (incl. type, length, content and padding, if any)
-            length: parameter data length
+            schema: parsed parameter schama
             version: HIP protocol version
             options: parsed HIP parameters
 
@@ -1613,40 +1434,31 @@ class HIP(Internet[Data_HIP, Schema_HIP],
             Parsed parameter data.
 
         """
-        schema = Schema_HostIDParameter.unpack(data, length)  # type: Schema_HostIDParameter
-        self.__header__.param.append(schema)
-
         if schema.algorithm == Enum_HIAlgorithm.ECDSA:
-            schema.hi = Schema_ECDSACurveHostIdentity.unpack(
-                cast('bytes', schema.hi), schema.hi_len,
-            )
+            schema_hi = cast('Schema_ECDSACurveHostIdentity', schema.hi)
             hi = Data_HostIdentity(
-                curve=schema.hi.curve,
-                pubkey=schema.hi.pub_key,
+                curve=schema_hi.curve,
+                pubkey=schema_hi.pub_key,
             )
         elif schema.algorithm == Enum_HIAlgorithm.ECDSA_LOW:
-            schema.hi = Schema_ECDSALowCurveHostIdentity.unpack(
-                cast('bytes', schema.hi), schema.hi_len,
-            )
+            schema_hi = cast('Schema_ECDSALowCurveHostIdentity', schema.hi)  # type: ignore[assignment]
             hi = Data_HostIdentity(
-                curve=schema.hi.curve,
-                pubkey=schema.hi.pub_key,
+                curve=schema_hi.curve,
+                pubkey=schema_hi.pub_key,
             )
         elif schema.algorithm == Enum_HIAlgorithm.EdDSA:
-            schema.hi = Schema_EdDSACurveHostIdentity.unpack(
-                cast('bytes', schema.hi), schema.hi_len,
-            )
+            schema_hi = cast('Schema_EdDSACurveHostIdentity', schema.hi)  # type: ignore[assignment]
             hi = Data_HostIdentity(
-                curve=schema.hi.curve,
-                pubkey=schema.hi.pub_key,
+                curve=schema_hi.curve,
+                pubkey=schema_hi.pub_key,
             )
         else:
             hi = cast('bytes', schema.hi)  # type: ignore[assignment]
 
         host_id = Data_HostIDParameter(
-            type=code,
-            critical=cbit,
-            length=length,
+            type=schema.type,
+            critical=bool(schema.type & 0b1),
+            length=4 + schema.len + (8 - schema.len % 8) % 8,
             hi_len=schema.hi_len,
             di_type=schema.di_data['type'],
             di_len=schema.di_data['len'],
@@ -1656,8 +1468,7 @@ class HIP(Internet[Data_HIP, Schema_HIP],
         )
         return host_id
 
-    def _read_param_hit_suite_list(self, code: 'Enum_Parameter', cbit: 'bool', clen: 'int', *,  # pylint: disable=unused-argument
-                                   data: 'bytes', length: 'int', version: 'int',  # pylint: disable=unused-argument
+    def _read_param_hit_suite_list(self, schema: 'Schema_HITSuiteListParameter', *, version: 'int',  # pylint: disable=unused-argument
                                    options: 'Parameter') -> 'Data_HITSuiteListParameter':  # pylint: disable=unused-argument
         """Read HIP ``HIT_SUITE_LIST`` parameter.
 
@@ -1676,11 +1487,7 @@ class HIP(Internet[Data_HIP, Schema_HIP],
            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
-            code: parameter code
-            cbit: critical bit
-            clen: length of contents
-            data: parameter payload data (incl. type, length, content and padding, if any)
-            length: parameter data length
+            schema: parsed parameter schama
             version: HIP protocol version
             options: parsed HIP parameters
 
@@ -1688,19 +1495,15 @@ class HIP(Internet[Data_HIP, Schema_HIP],
             Parsed parameter data.
 
         """
-        schema = Schema_HITSuiteListParameter.unpack(data, length)  # type: Schema_HITSuiteListParameter
-        self.__header__.param.append(schema)
-
         hit_suite_list = Data_HITSuiteListParameter(
-            type=code,
-            critical=cbit,
-            length=length,
+            type=schema.type,
+            critical=bool(schema.type & 0b1),
+            length=4 + schema.len + (8 - schema.len % 8) % 8,
             suite_id=tuple(schema.suites),
         )
         return hit_suite_list
 
-    def _read_param_cert(self, code: 'Enum_Parameter', cbit: 'bool', clen: 'int', *,  # pylint: disable=unused-argument
-                         data: 'bytes', length: 'int', version: 'int',  # pylint: disable=unused-argument
+    def _read_param_cert(self, schema: 'Schema_CertParameter', *, version: 'int',  # pylint: disable=unused-argument
                          options: 'Parameter') -> 'Data_CertParameter':  # pylint: disable=unused-argument
         """Read HIP ``CERT`` parameter.
 
@@ -1721,11 +1524,7 @@ class HIP(Internet[Data_HIP, Schema_HIP],
            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
-            code: parameter code
-            cbit: critical bit
-            clen: length of contents
-            data: parameter payload data (incl. type, length, content and padding, if any)
-            length: parameter data length
+            schema: parsed parameter schama
             version: HIP protocol version
             options: parsed HIP parameters
 
@@ -1733,13 +1532,10 @@ class HIP(Internet[Data_HIP, Schema_HIP],
             Parsed parameter data.
 
         """
-        schema = Schema_CertParameter.unpack(data, length)  # type: Schema_CertParameter
-        self.__header__.param.append(schema)
-
         cert = Data_CertParameter(
-            type=code,
-            critical=cbit,
-            length=length,
+            type=schema.type,
+            critical=bool(schema.type & 0b1),
+            length=4 + schema.len + (8 - schema.len % 8) % 8,
             cert_group=schema.cert_group,
             cert_count=schema.cert_count,
             cert_id=schema.cert_id,
@@ -1748,8 +1544,7 @@ class HIP(Internet[Data_HIP, Schema_HIP],
         )
         return cert
 
-    def _read_param_notification(self, code: 'Enum_Parameter', cbit: 'bool', clen: 'int', *,  # pylint: disable=unused-argument
-                                 data: 'bytes', length: 'int', version: 'int',  # pylint: disable=unused-argument
+    def _read_param_notification(self, schema: 'Schema_NotificationParameter', *, version: 'int',  # pylint: disable=unused-argument
                                  options: 'Parameter') -> 'Data_NotificationParameter':  # pylint: disable=unused-argument
         """Read HIP ``NOTIFICATION`` parameter.
 
@@ -1771,11 +1566,7 @@ class HIP(Internet[Data_HIP, Schema_HIP],
            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
-            code: parameter code
-            cbit: critical bit
-            clen: length of contents
-            data: parameter payload data (incl. type, length, content and padding, if any)
-            length: parameter data length
+            schema: parsed parameter schama
             version: HIP protocol version
             options: parsed HIP parameters
 
@@ -1783,20 +1574,16 @@ class HIP(Internet[Data_HIP, Schema_HIP],
             Parsed parameter data.
 
         """
-        schema = Schema_NotificationParameter.unpack(data, length)  # type: Schema_NotificationParameter
-        self.__header__.param.append(schema)
-
         notification = Data_NotificationParameter(
-            type=code,
-            critical=cbit,
-            length=length,
+            type=schema.type,
+            critical=bool(schema.type & 0b1),
+            length=4 + schema.len + (8 - schema.len % 8) % 8,
             msg_type=schema.msg_type,
             msg=schema.msg,
         )
         return notification
 
-    def _read_param_echo_request_signed(self, code: 'Enum_Parameter', cbit: 'bool', clen: 'int', *,  # pylint: disable=unused-argument
-                                        data: 'bytes', length: 'int', version: 'int',  # pylint: disable=unused-argument
+    def _read_param_echo_request_signed(self, schema: 'Schema_EchoRequestSignedParameter', *, version: 'int',  # pylint: disable=unused-argument
                                         options: 'Parameter') -> 'Data_EchoRequestSignedParameter':  # pylint: disable=unused-argument
         """Read HIP ``ECHO_REQUEST_SIGNED`` parameter.
 
@@ -1813,11 +1600,7 @@ class HIP(Internet[Data_HIP, Schema_HIP],
            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
-            code: parameter code
-            cbit: critical bit
-            clen: length of contents
-            data: parameter payload data (incl. type, length, content and padding, if any)
-            length: parameter data length
+            schema: parsed parameter schama
             version: HIP protocol version
             options: parsed HIP parameters
 
@@ -1825,19 +1608,15 @@ class HIP(Internet[Data_HIP, Schema_HIP],
             Parsed parameter data.
 
         """
-        schema = Schema_EchoRequestSignedParameter.unpack(data, length)  # type: Schema_EchoRequestSignedParameter
-        self.__header__.param.append(schema)
-
         echo_request_signed = Data_EchoRequestSignedParameter(
-            type=code,
-            critical=cbit,
-            length=length,
+            type=schema.type,
+            critical=bool(schema.type & 0b1),
+            length=4 + schema.len + (8 - schema.len % 8) % 8,
             opaque=schema.opaque,
         )
         return echo_request_signed
 
-    def _read_param_reg_info(self, code: 'Enum_Parameter', cbit: 'bool', clen: 'int', *,  # pylint: disable=unused-argument
-                             data: 'bytes', length: 'int', version: 'int',  # pylint: disable=unused-argument
+    def _read_param_reg_info(self, schema: 'Schema_RegInfoParameter', *, version: 'int',  # pylint: disable=unused-argument
                              options: 'Parameter') -> 'Data_RegInfoParameter':  # pylint: disable=unused-argument
         """Read HIP ``REG_INFO`` parameter.
 
@@ -1858,11 +1637,7 @@ class HIP(Internet[Data_HIP, Schema_HIP],
            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
-            code: parameter code
-            cbit: critical bit
-            clen: length of contents
-            data: parameter payload data (incl. type, length, content and padding, if any)
-            length: parameter data length
+            schema: parsed parameter schama
             version: HIP protocol version
             options: parsed HIP parameters
 
@@ -1870,13 +1645,10 @@ class HIP(Internet[Data_HIP, Schema_HIP],
             Parsed parameter data.
 
         """
-        schema = Schema_RegInfoParameter.unpack(data, length)  # type: Schema_RegInfoParameter
-        self.__header__.param.append(schema)
-
         reg_info = Data_RegInfoParameter(
-            type=code,
-            critical=cbit,
-            length=length,
+            type=schema.type,
+            critical=bool(schema.type & 0b1),
+            length=4 + schema.len + (8 - schema.len % 8) % 8,
             lifetime=Data_Lifetime(
                 min=datetime.timedelta(seconds=schema.min_lifetime),
                 max=datetime.timedelta(seconds=schema.max_lifetime),
@@ -1885,8 +1657,7 @@ class HIP(Internet[Data_HIP, Schema_HIP],
         )
         return reg_info
 
-    def _read_param_reg_request(self, code: 'Enum_Parameter', cbit: 'bool', clen: 'int', *,  # pylint: disable=unused-argument
-                                data: 'bytes', length: 'int', version: 'int',  # pylint: disable=unused-argument
+    def _read_param_reg_request(self, schema: 'Schema_RegRequestParameter', *, version: 'int',  # pylint: disable=unused-argument
                                 options: 'Parameter') -> 'Data_RegRequestParameter':  # pylint: disable=unused-argument
         """Read HIP ``REG_REQUEST`` parameter.
 
@@ -1907,11 +1678,7 @@ class HIP(Internet[Data_HIP, Schema_HIP],
            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
-            code: parameter code
-            cbit: critical bit
-            clen: length of contents
-            data: parameter payload data (incl. type, length, content and padding, if any)
-            length: parameter data length
+            schema: parsed parameter schama
             version: HIP protocol version
             options: parsed HIP parameters
 
@@ -1919,20 +1686,16 @@ class HIP(Internet[Data_HIP, Schema_HIP],
             Parsed parameter data.
 
         """
-        schema = Schema_RegRequestParameter.unpack(data, length)  # type: Schema_RegRequestParameter
-        self.__header__.param.append(schema)
-
         reg_request = Data_RegRequestParameter(
-            type=code,
-            critical=cbit,
-            length=length,
+            type=schema.type,
+            critical=bool(schema.type & 0b1),
+            length=4 + schema.len + (8 - schema.len % 8) % 8,
             lifetime=datetime.timedelta(seconds=schema.lifetime),
             reg_type=tuple(schema.reg_request),
         )
         return reg_request
 
-    def _read_param_reg_response(self, code: 'Enum_Parameter', cbit: 'bool', clen: 'int', *,  # pylint: disable=unused-argument
-                                 data: 'bytes', length: 'int', version: 'int',  # pylint: disable=unused-argument
+    def _read_param_reg_response(self, schema: 'Schema_RegResponseParameter', *, version: 'int',  # pylint: disable=unused-argument
                                  options: 'Parameter') -> 'Data_RegResponseParameter':  # pylint: disable=unused-argument
         """Read HIP ``REG_RESPONSE`` parameter.
 
@@ -1953,11 +1716,7 @@ class HIP(Internet[Data_HIP, Schema_HIP],
            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
-            code: parameter code
-            cbit: critical bit
-            clen: length of contents
-            data: parameter payload data (incl. type, length, content and padding, if any)
-            length: parameter data length
+            schema: parsed parameter schama
             version: HIP protocol version
             options: parsed HIP parameters
 
@@ -1965,20 +1724,16 @@ class HIP(Internet[Data_HIP, Schema_HIP],
             Parsed parameter data.
 
         """
-        schema = Schema_RegResponseParameter.unpack(data, length)  # type: Schema_RegResponseParameter
-        self.__header__.param.append(schema)
-
         reg_response = Data_RegResponseParameter(
-            type=code,
-            critical=cbit,
-            length=length,
+            type=schema.type,
+            critical=bool(schema.type & 0b1),
+            length=4 + schema.len + (8 - schema.len % 8) % 8,
             lifetime=datetime.timedelta(seconds=schema.lifetime),
             reg_type=tuple(schema.reg_response),
         )
         return reg_response
 
-    def _read_param_reg_failed(self, code: 'Enum_Parameter', cbit: 'bool', clen: 'int', *,  # pylint: disable=unused-argument
-                               data: 'bytes', length: 'int', version: 'int',  # pylint: disable=unused-argument
+    def _read_param_reg_failed(self, schema: 'Schema_RegFailedParameter', *, version: 'int',  # pylint: disable=unused-argument
                                options: 'Parameter') -> 'Data_RegFailedParameter':  # pylint: disable=unused-argument
         """Read HIP ``REG_FAILED`` parameter.
 
@@ -1999,11 +1754,7 @@ class HIP(Internet[Data_HIP, Schema_HIP],
            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
-            code: parameter code
-            cbit: critical bit
-            clen: length of contents
-            data: parameter payload data (incl. type, length, content and padding, if any)
-            length: parameter data length
+            schema: parsed parameter schama
             version: HIP protocol version
             options: parsed HIP parameters
 
@@ -2011,20 +1762,16 @@ class HIP(Internet[Data_HIP, Schema_HIP],
             Parsed parameter data.
 
         """
-        schema = Schema_RegFailedParameter.unpack(data, length)  # type: Schema_RegFailedParameter
-        self.__header__.param.append(schema)
-
         reg_failed = Data_RegFailedParameter(
-            type=code,
-            critical=cbit,
-            length=length,
+            type=schema.type,
+            critical=bool(schema.type & 0b1),
+            length=4 + schema.len + (8 - schema.len % 8) % 8,
             lifetime=datetime.timedelta(seconds=schema.lifetime),
             reg_type=tuple(schema.reg_failed),
         )
         return reg_failed
 
-    def _read_param_reg_from(self, code: 'Enum_Parameter', cbit: 'bool', clen: 'int', *,  # pylint: disable=unused-argument
-                             data: 'bytes', length: 'int', version: 'int',  # pylint: disable=unused-argument
+    def _read_param_reg_from(self, schema: 'Schema_RegFromParameter', *, version: 'int',  # pylint: disable=unused-argument
                              options: 'Parameter') -> 'Data_RegFromParameter':  # pylint: disable=unused-argument
         """Read HIP ``REG_FROM`` parameter.
 
@@ -2046,11 +1793,7 @@ class HIP(Internet[Data_HIP, Schema_HIP],
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
-            code: parameter code
-            cbit: critical bit
-            clen: length of contents
-            data: parameter payload data (incl. type, length, content and padding, if any)
-            length: parameter data length
+            schema: parsed parameter schama
             version: HIP protocol version
             options: parsed HIP parameters
 
@@ -2058,30 +1801,23 @@ class HIP(Internet[Data_HIP, Schema_HIP],
             Parsed parameter data.
 
         Raises:
-            ProtocolError: If ``clen`` is **NOT** ``20``.
+            ProtocolError: If ``schema.len`` is **NOT** ``20``.
 
         """
-        if clen != 20:
-            raise ProtocolError(f'HIPv{version}: [ParamNo {code}] invalid format')
-
-        schema = Schema_RegFromParameter.unpack(data, length)  # type: Schema_RegFromParameter
-        self.__header__.param.append(schema)
-
-        _addr = ipaddress.ip_address(schema.address)
-        schema.address = _addr  # type: ignore[assignment]
+        if schema.len != 20:
+            raise ProtocolError(f'HIPv{version}: [ParamNo {schema.type}] invalid format')
 
         reg_from = Data_RegFromParameter(
-            type=code,
-            critical=cbit,
-            length=length,
+            type=schema.type,
+            critical=bool(schema.type & 0b1),
+            length=4 + schema.len + (8 - schema.len % 8) % 8,
             port=schema.port,
             protocol=schema.protocol,
-            address=_addr,  # type: ignore[arg-type]
+            address=schema.address,
         )
         return reg_from
 
-    def _read_param_echo_response_signed(self, code: 'Enum_Parameter', cbit: 'bool', clen: 'int', *,  # pylint: disable=unused-argument
-                                         data: 'bytes', length: 'int', version: 'int',  # pylint: disable=unused-argument
+    def _read_param_echo_response_signed(self, schema: 'Schema_EchoResponseSignedParameter', *, version: 'int',  # pylint: disable=unused-argument
                                          options: 'Parameter') -> 'Data_EchoResponseSignedParameter':  # pylint: disable=unused-argument
         """Read HIP ``ECHO_RESPONSE_SIGNED`` parameter.
 
@@ -2098,11 +1834,7 @@ class HIP(Internet[Data_HIP, Schema_HIP],
            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
-            code: parameter code
-            cbit: critical bit
-            clen: length of contents
-            data: parameter payload data (incl. type, length, content and padding, if any)
-            length: parameter data length
+            schema: parsed parameter schama
             version: HIP protocol version
             options: parsed HIP parameters
 
@@ -2110,19 +1842,15 @@ class HIP(Internet[Data_HIP, Schema_HIP],
             Parsed parameter data.
 
         """
-        schema = Schema_EchoResponseSignedParameter.unpack(data, length)  # type: Schema_EchoResponseSignedParameter
-        self.__header__.param.append(schema)
-
         echo_response_signed = Data_EchoResponseSignedParameter(
-            type=code,
-            critical=cbit,
-            length=length,
+            type=schema.type,
+            critical=bool(schema.type & 0b1),
+            length=4 + schema.len + (8 - schema.len % 8) % 8,
             opaque=schema.opaque,
         )
         return echo_response_signed
 
-    def _read_param_transport_format_list(self, code: 'Enum_Parameter', cbit: 'bool', clen: 'int', *,  # pylint: disable=unused-argument
-                                          data: 'bytes', length: 'int', version: 'int',  # pylint: disable=unused-argument
+    def _read_param_transport_format_list(self, schema: 'Schema_TransportFormatListParameter', *, version: 'int',  # pylint: disable=unused-argument
                                           options: 'Parameter') -> 'Data_TransportFormatListParameter':  # pylint: disable=unused-argument
         """Read HIP ``TRANSPORT_FORMAT_LIST`` parameter.
 
@@ -2141,11 +1869,7 @@ class HIP(Internet[Data_HIP, Schema_HIP],
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
-            code: parameter code
-            cbit: critical bit
-            clen: length of contents
-            data: parameter payload data (incl. type, length, content and padding, if any)
-            length: parameter data length
+            schema: parsed parameter schama
             version: HIP protocol version
             options: parsed HIP parameters
 
@@ -2153,25 +1877,21 @@ class HIP(Internet[Data_HIP, Schema_HIP],
             Parsed parameter data.
 
         Raises:
-            ProtocolError: If ``clen`` is **NOT** ``2`` modulo.
+            ProtocolError: If ``schema.len`` is **NOT** ``2`` modulo.
 
         """
-        if clen % 2 != 0:
-            raise ProtocolError(f'HIPv{version}: [ParamNo {code}] invalid format')
-
-        schema = Schema_TransportFormatListParameter.unpack(data, length)  # type: Schema_TransportFormatListParameter
-        self.__header__.param.append(schema)
+        if schema.len % 2 != 0:
+            raise ProtocolError(f'HIPv{version}: [ParamNo {schema.type}] invalid format')
 
         transport_format_list = Data_TransportFormatListParameter(
-            type=code,
-            critical=cbit,
-            length=length,
+            type=schema.type,
+            critical=bool(schema.type & 0b1),
+            length=4 + schema.len + (8 - schema.len % 8) % 8,
             tf_type=tuple(schema.formats),
         )
         return transport_format_list
 
-    def _read_param_esp_transform(self, code: 'Enum_Parameter', cbit: 'bool', clen: 'int', *,  # pylint: disable=unused-argument
-                                  data: 'bytes', length: 'int', version: 'int',  # pylint: disable=unused-argument
+    def _read_param_esp_transform(self, schema: 'Schema_ESPTransformParameter', *, version: 'int',  # pylint: disable=unused-argument
                                   options: 'Parameter') -> 'Data_ESPTransformParameter':  # pylint: disable=unused-argument
         """Read HIP ``ESP_TRANSFORM`` parameter.
 
@@ -2192,11 +1912,7 @@ class HIP(Internet[Data_HIP, Schema_HIP],
            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
-            code: parameter code
-            cbit: critical bit
-            clen: length of contents
-            data: parameter payload data (incl. type, length, content and padding, if any)
-            length: parameter data length
+            schema: parsed parameter schama
             version: HIP protocol version
             options: parsed HIP parameters
 
@@ -2204,25 +1920,21 @@ class HIP(Internet[Data_HIP, Schema_HIP],
             Parsed parameter data.
 
         Raises:
-            ProtocolError: If ``clen`` is **NOT** ``2`` modulo.
+            ProtocolError: If ``schema.len`` is **NOT** ``2`` modulo.
 
         """
-        if clen % 2 != 0:
-            raise ProtocolError(f'HIPv{version}: [ParamNo {code}] invalid format')
-
-        schema = Schema_ESPTransformParameter.unpack(data, length)  # type: Schema_ESPTransformParameter
-        self.__header__.param.append(schema)
+        if schema.len % 2 != 0:
+            raise ProtocolError(f'HIPv{version}: [ParamNo {schema.type}] invalid format')
 
         esp_transform = Data_ESPTransformParameter(
-            type=code,
-            critical=cbit,
-            length=length,
+            type=schema.type,
+            critical=bool(schema.type & 0b1),
+            length=4 + schema.len + (8 - schema.len % 8) % 8,
             suite_id=tuple(schema.suites),
         )
         return esp_transform
 
-    def _read_param_seq_data(self, code: 'Enum_Parameter', cbit: 'bool', clen: 'int', *,  # pylint: disable=unused-argument
-                             data: 'bytes', length: 'int', version: 'int',  # pylint: disable=unused-argument
+    def _read_param_seq_data(self, schema: 'Schema_SeqDataParameter', *, version: 'int',  # pylint: disable=unused-argument
                              options: 'Parameter') -> 'Data_SeqDataParameter':  # pylint: disable=unused-argument
         """Read HIP ``SEQ_DATA`` parameter.
 
@@ -2239,11 +1951,7 @@ class HIP(Internet[Data_HIP, Schema_HIP],
            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
-            code: parameter code
-            cbit: critical bit
-            clen: length of contents
-            data: parameter payload data (incl. type, length, content and padding, if any)
-            length: parameter data length
+            schema: parsed parameter schama
             version: HIP protocol version
             options: parsed HIP parameters
 
@@ -2251,25 +1959,21 @@ class HIP(Internet[Data_HIP, Schema_HIP],
             Parsed parameter data.
 
         Raises:
-            ProtocolError: If ``clen`` is **NOT** ``4``.
+            ProtocolError: If ``schema.len`` is **NOT** ``4``.
 
         """
-        if clen != 4:
-            raise ProtocolError(f'HIPv{version}: [ParamNo {code}] invalid format')
-
-        schema = Schema_SeqDataParameter.unpack(data, length)  # type: Schema_SeqDataParameter
-        self.__header__.param.append(schema)
+        if schema.len != 4:
+            raise ProtocolError(f'HIPv{version}: [ParamNo {schema.type}] invalid format')
 
         seq_data = Data_SeqDataParameter(
-            type=code,
-            critical=cbit,
-            length=length,
+            type=schema.type,
+            critical=bool(schema.type & 0b1),
+            length=4 + schema.len + (8 - schema.len % 8) % 8,
             seq=schema.seq,
         )
         return seq_data
 
-    def _read_param_ack_data(self, code: 'Enum_Parameter', cbit: 'bool', clen: 'int', *,  # pylint: disable=unused-argument
-                             data: 'bytes', length: 'int', version: 'int',  # pylint: disable=unused-argument
+    def _read_param_ack_data(self, schema: 'Schema_AckDataParameter', *, version: 'int',  # pylint: disable=unused-argument
                              options: 'Parameter') -> 'Data_AckDataParameter':  # pylint: disable=unused-argument
         """Read HIP ``ACK_DATA`` parameter.
 
@@ -2287,11 +1991,7 @@ class HIP(Internet[Data_HIP, Schema_HIP],
            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
-            code: parameter code
-            cbit: critical bit
-            clen: length of contents
-            data: parameter payload data (incl. type, length, content and padding, if any)
-            length: parameter data length
+            schema: parsed parameter schama
             version: HIP protocol version
             options: parsed HIP parameters
 
@@ -2299,25 +1999,21 @@ class HIP(Internet[Data_HIP, Schema_HIP],
             Parsed parameter data.
 
         Raises:
-            ProtocolError: If ``clen`` is **NOT** ``4`` modulo.
+            ProtocolError: If ``schema.len`` is **NOT** ``4`` modulo.
 
         """
-        if clen % 4 != 0:
-            raise ProtocolError(f'HIPv{version}: [ParamNo {code}] invalid format')
-
-        schema = Schema_AckDataParameter.unpack(data, length)  # type: Schema_AckDataParameter
-        self.__header__.param.append(schema)
+        if schema.len % 4 != 0:
+            raise ProtocolError(f'HIPv{version}: [ParamNo {schema.type}] invalid format')
 
         ack_data = Data_AckDataParameter(
-            type=code,
-            critical=cbit,
-            length=length,
+            type=schema.type,
+            critical=bool(schema.type & 0b1),
+            length=4 + schema.len + (8 - schema.len % 8) % 8,
             ack=tuple(schema.ack),
         )
         return ack_data
 
-    def _read_param_payload_mic(self, code: 'Enum_Parameter', cbit: 'bool', clen: 'int', *,  # pylint: disable=unused-argument
-                                data: 'bytes', length: 'int', version: 'int',  # pylint: disable=unused-argument
+    def _read_param_payload_mic(self, schema: 'Schema_PayloadMICParameter', *, version: 'int',  # pylint: disable=unused-argument
                                 options: 'Parameter') -> 'Data_PayloadMICParameter':  # pylint: disable=unused-argument
         """Read HIP ``PAYLOAD_MIC`` parameter.
 
@@ -2341,11 +2037,7 @@ class HIP(Internet[Data_HIP, Schema_HIP],
            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
-            code: parameter code
-            cbit: critical bit
-            clen: length of contents
-            data: parameter payload data (incl. type, length, content and padding, if any)
-            length: parameter data length
+            schema: parsed parameter schama
             version: HIP protocol version
             options: parsed HIP parameters
 
@@ -2353,21 +2045,17 @@ class HIP(Internet[Data_HIP, Schema_HIP],
             Parsed parameter data.
 
         """
-        schema = Schema_PayloadMICParameter.unpack(data, length)  # type: Schema_PayloadMICParameter
-        self.__header__.param.append(schema)
-
         payload_mic = Data_PayloadMICParameter(
-            type=code,
-            critical=cbit,
-            length=length,
+            type=schema.type,
+            critical=bool(schema.type & 0b1),
+            length=4 + schema.len + (8 - schema.len % 8) % 8,
             next=schema.next,
             payload=schema.payload,
             mic=schema.mic,
         )
         return payload_mic
 
-    def _read_param_transaction_id(self, code: 'Enum_Parameter', cbit: 'bool', clen: 'int', *,  # pylint: disable=unused-argument
-                                   data: 'bytes', length: 'int', version: 'int',  # pylint: disable=unused-argument
+    def _read_param_transaction_id(self, schema: 'Schema_TransactionIDParameter', *, version: 'int',  # pylint: disable=unused-argument
                                    options: 'Parameter') -> 'Data_TransactionIDParameter':  # pylint: disable=unused-argument
         """Read HIP ``TRANSACTION_ID`` parameter.
 
@@ -2386,11 +2074,7 @@ class HIP(Internet[Data_HIP, Schema_HIP],
            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
-            code: parameter code
-            cbit: critical bit
-            clen: length of contents
-            data: parameter payload data (incl. type, length, content and padding, if any)
-            length: parameter data length
+            schema: parsed parameter schama
             version: HIP protocol version
             options: parsed HIP parameters
 
@@ -2398,19 +2082,15 @@ class HIP(Internet[Data_HIP, Schema_HIP],
             Parsed parameter data.
 
         """
-        schema = Schema_TransactionIDParameter.unpack(data, length)  # type: Schema_TransactionIDParameter
-        self.__header__.param.append(schema)
-
         transaction_id = Data_TransactionIDParameter(
-            type=code,
-            critical=cbit,
-            length=length,
+            type=schema.type,
+            critical=bool(schema.type & 0b1),
+            length=4 + schema.len + (8 - schema.len % 8) % 8,
             id=schema.id,
         )
         return transaction_id
 
-    def _read_param_overlay_id(self, code: 'Enum_Parameter', cbit: 'bool', clen: 'int', *,  # pylint: disable=unused-argument
-                               data: 'bytes', length: 'int', version: 'int',  # pylint: disable=unused-argument
+    def _read_param_overlay_id(self, schema: 'Schema_OverlayIDParameter', *, version: 'int',  # pylint: disable=unused-argument
                                options: 'Parameter') -> 'Data_OverlayIDParameter':  # pylint: disable=unused-argument
         """Read HIP ``OVERLAY_ID`` parameter.
 
@@ -2429,11 +2109,7 @@ class HIP(Internet[Data_HIP, Schema_HIP],
            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
-            code: parameter code
-            cbit: critical bit
-            clen: length of contents
-            data: parameter payload data (incl. type, length, content and padding, if any)
-            length: parameter data length
+            schema: parsed parameter schama
             version: HIP protocol version
             options: parsed HIP parameters
 
@@ -2441,19 +2117,15 @@ class HIP(Internet[Data_HIP, Schema_HIP],
             Parsed parameter data.
 
         """
-        schema = Schema_OverlayIDParameter.unpack(data, length)  # type: Schema_OverlayIDParameter
-        self.__header__.param.append(schema)
-
         overlay_id = Data_OverlayIDParameter(
-            type=code,
-            critical=cbit,
-            length=length,
+            type=schema.type,
+            critical=bool(schema.type & 0b1),
+            length=4 + schema.len + (8 - schema.len % 8) % 8,
             id=schema.id,
         )
         return overlay_id
 
-    def _read_param_route_dst(self, code: 'Enum_Parameter', cbit: 'bool', clen: 'int', *,  # pylint: disable=unused-argument
-                              data: 'bytes', length: 'int', version: 'int',  # pylint: disable=unused-argument
+    def _read_param_route_dst(self, schema: 'Schema_RouteDstParameter', *, version: 'int',  # pylint: disable=unused-argument
                               options: 'Parameter') -> 'Data_RouteDstParameter':  # pylint: disable=unused-argument
         """Read HIP ``ROUTE_DST`` parameter.
 
@@ -2483,11 +2155,7 @@ class HIP(Internet[Data_HIP, Schema_HIP],
            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
-            code: parameter code
-            cbit: critical bit
-            clen: length of contents
-            data: parameter payload data (incl. type, length, content and padding, if any)
-            length: parameter data length
+            schema: parsed parameter schama
             version: HIP protocol version
             options: parsed HIP parameters
 
@@ -2498,31 +2166,22 @@ class HIP(Internet[Data_HIP, Schema_HIP],
             ProtocolError: If the parameter is malformed.
 
         """
-        if (clen - 4) % 16 != 0:
-            raise ProtocolError(f'HIPv{version}: [ParamNo {code}] invalid format')
-
-        schema = Schema_RouteDstParameter.unpack(data, length)  # type: Schema_RouteDstParameter
-        self.__header__.param.append(schema)
-
-        hits = []  # type: list[IPv6Address]
-        for hit in schema.hit:
-            hits.append(ipaddress.ip_address(hit))  # type: ignore[arg-type]
-        schema.hit = hits
+        if (schema.len - 4) % 16 != 0:
+            raise ProtocolError(f'HIPv{version}: [ParamNo {schema.type}] invalid format')
 
         route_dst = Data_RouteDstParameter(
-            type=code,
-            critical=cbit,
-            length=length,
+            type=schema.type,
+            critical=bool(schema.type & 0b1),
+            length=4 + schema.len + (8 - schema.len % 8) % 8,
             flags=Data_Flags(
                 symmetric=bool(schema.flags['symmetric']),
                 must_follow=bool(schema.flags['must_follow']),
             ),
-            hit=tuple(hits),
+            hit=tuple(schema.hit),
         )
         return route_dst
 
-    def _read_param_hip_transport_mode(self, code: 'Enum_Parameter', cbit: 'bool', clen: 'int', *,  # pylint: disable=unused-argument
-                                       data: 'bytes', length: 'int', version: 'int',  # pylint: disable=unused-argument
+    def _read_param_hip_transport_mode(self, schema: 'Schema_HIPTransportModeParameter', *, version: 'int',  # pylint: disable=unused-argument
                                        options: 'Parameter') -> 'Data_HIPTransportModeParameter':  # pylint: disable=unused-argument
         """Read HIP ``HIP_TRANSPORT_MODE`` parameter.
 
@@ -2543,11 +2202,7 @@ class HIP(Internet[Data_HIP, Schema_HIP],
            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
-            code: parameter code
-            cbit: critical bit
-            clen: length of contents
-            data: parameter payload data (incl. type, length, content and padding, if any)
-            length: parameter data length
+            schema: parsed parameter schama
             version: HIP protocol version
             options: parsed HIP parameters
 
@@ -2555,26 +2210,22 @@ class HIP(Internet[Data_HIP, Schema_HIP],
             Parsed parameter data.
 
         Raises:
-            ProtocolError: If ``clen`` is **NOT** ``2`` modulo.
+            ProtocolError: If ``schema.len`` is **NOT** ``2`` modulo.
 
         """
-        if clen % 2 != 0:
-            raise ProtocolError(f'HIPv{version}: [ParamNo {code}] invalid format')
-
-        schema = Schema_HIPTransportModeParameter.unpack(data, length)  # type: Schema_HIPTransportModeParameter
-        self.__header__.param.append(schema)
+        if schema.len % 2 != 0:
+            raise ProtocolError(f'HIPv{version}: [ParamNo {schema.type}] invalid format')
 
         hip_transport_mode = Data_HIPTransportModeParameter(
-            type=code,
-            critical=cbit,
-            length=length,
+            type=schema.type,
+            critical=bool(schema.type & 0b1),
+            length=4 + schema.len + (8 - schema.len % 8) % 8,
             port=schema.port,
             mode_id=tuple(schema.mode),
         )
         return hip_transport_mode
 
-    def _read_param_hip_mac(self, code: 'Enum_Parameter', cbit: 'bool', clen: 'int', *,  # pylint: disable=unused-argument
-                            data: 'bytes', length: 'int', version: 'int',  # pylint: disable=unused-argument
+    def _read_param_hip_mac(self, schema: 'Schema_HIPMACParameter', *, version: 'int',  # pylint: disable=unused-argument
                             options: 'Parameter') -> 'Data_HIPMACParameter':  # pylint: disable=unused-argument
         """Read HIP ``HIP_MAC`` parameter.
 
@@ -2595,11 +2246,7 @@ class HIP(Internet[Data_HIP, Schema_HIP],
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
-            code: parameter code
-            cbit: critical bit
-            clen: length of contents
-            data: parameter payload data (incl. type, length, content and padding, if any)
-            length: parameter data length
+            schema: parsed parameter schama
             version: HIP protocol version
             options: parsed HIP parameters
 
@@ -2607,19 +2254,15 @@ class HIP(Internet[Data_HIP, Schema_HIP],
             Parsed parameter data.
 
         """
-        schema = Schema_HIPMACParameter.unpack(data, length)  # type: Schema_HIPMACParameter
-        self.__header__.param.append(schema)
-
         hip_mac = Data_HIPMACParameter(
-            type=code,
-            critical=cbit,
-            length=length,
+            type=schema.type,
+            critical=bool(schema.type & 0b1),
+            length=4 + schema.len + (8 - schema.len % 8) % 8,
             hmac=schema.hmac,
         )
         return hip_mac
 
-    def _read_param_hip_mac_2(self, code: 'Enum_Parameter', cbit: 'bool', clen: 'int', *,  # pylint: disable=unused-argument
-                              data: 'bytes', length: 'int', version: 'int',  # pylint: disable=unused-argument
+    def _read_param_hip_mac_2(self, schema: 'Schema_HIPMAC2Parameter', *, version: 'int',  # pylint: disable=unused-argument
                               options: 'Parameter') -> 'Data_HIPMAC2Parameter':  # pylint: disable=unused-argument
         """Read HIP ``HIP_MAC_2`` parameter.
 
@@ -2640,11 +2283,7 @@ class HIP(Internet[Data_HIP, Schema_HIP],
            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
-            code: parameter code
-            cbit: critical bit
-            clen: length of contents
-            data: parameter payload data (incl. type, length, content and padding, if any)
-            length: parameter data length
+            schema: parsed parameter schama
             version: HIP protocol version
             options: parsed HIP parameters
 
@@ -2652,19 +2291,15 @@ class HIP(Internet[Data_HIP, Schema_HIP],
             Parsed parameter data.
 
         """
-        schema = Schema_HIPMAC2Parameter.unpack(data, length)  # type: Schema_HIPMAC2Parameter
-        self.__header__.param.append(schema)
-
         hip_mac_2 = Data_HIPMAC2Parameter(
-            type=code,
-            critical=cbit,
-            length=length,
+            type=schema.type,
+            critical=bool(schema.type & 0b1),
+            length=4 + schema.len + (8 - schema.len % 8) % 8,
             hmac=schema.hmac,
         )
         return hip_mac_2
 
-    def _read_param_hip_signature_2(self, code: 'Enum_Parameter', cbit: 'bool', clen: 'int', *,  # pylint: disable=unused-argument
-                                    data: 'bytes', length: 'int', version: 'int',  # pylint: disable=unused-argument
+    def _read_param_hip_signature_2(self, schema: 'Schema_HIPSignature2Parameter', *, version: 'int',  # pylint: disable=unused-argument
                                     options: 'Parameter') -> 'Data_HIPSignature2Parameter':  # pylint: disable=unused-argument
         """Read HIP ``HIP_SIGNATURE_2`` parameter.
 
@@ -2683,11 +2318,7 @@ class HIP(Internet[Data_HIP, Schema_HIP],
            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
-            code: parameter code
-            cbit: critical bit
-            clen: length of contents
-            data: parameter payload data (incl. type, length, content and padding, if any)
-            length: parameter data length
+            schema: parsed parameter schama
             version: HIP protocol version
             options: parsed HIP parameters
 
@@ -2695,20 +2326,16 @@ class HIP(Internet[Data_HIP, Schema_HIP],
             Parsed parameter data.
 
         """
-        schema = Schema_HIPSignature2Parameter.unpack(data, length)  # type: Schema_HIPSignature2Parameter
-        self.__header__.param.append(schema)
-
         hip_signature_2 = Data_HIPSignature2Parameter(
-            type=code,
-            critical=cbit,
-            length=length,
+            type=schema.type,
+            critical=bool(schema.type & 0b1),
+            length=4 + schema.len + (8 - schema.len % 8) % 8,
             algorithm=schema.algorithm,
             signature=schema.signature,
         )
         return hip_signature_2
 
-    def _read_param_hip_signature(self, code: 'Enum_Parameter', cbit: 'bool', clen: 'int', *,  # pylint: disable=unused-argument
-                                  data: 'bytes', length: 'int', version: 'int',  # pylint: disable=unused-argument
+    def _read_param_hip_signature(self, schema: 'Schema_HIPSignatureParameter', *, version: 'int',  # pylint: disable=unused-argument
                                   options: 'Parameter') -> 'Data_HIPSignatureParameter':  # pylint: disable=unused-argument
         """Read HIP ``HIP_SIGNATURE`` parameter.
 
@@ -2727,11 +2354,7 @@ class HIP(Internet[Data_HIP, Schema_HIP],
            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
-            code: parameter code
-            cbit: critical bit
-            clen: length of contents
-            data: parameter payload data (incl. type, length, content and padding, if any)
-            length: parameter data length
+            schema: parsed parameter schama
             version: HIP protocol version
             options: parsed HIP parameters
 
@@ -2739,20 +2362,16 @@ class HIP(Internet[Data_HIP, Schema_HIP],
             Parsed parameter data.
 
         """
-        schema = Schema_HIPSignatureParameter.unpack(data, length)  # type: Schema_HIPSignatureParameter
-        self.__header__.param.append(schema)
-
         hip_signature = Data_HIPSignatureParameter(
-            type=code,
-            critical=cbit,
-            length=length,
+            type=schema.type,
+            critical=bool(schema.type & 0b1),
+            length=4 + schema.len + (8 - schema.len % 8) % 8,
             algorithm=schema.algorithm,
             signature=schema.signature,
         )
         return hip_signature
 
-    def _read_param_echo_request_unsigned(self, code: 'Enum_Parameter', cbit: 'bool', clen: 'int', *,  # pylint: disable=unused-argument
-                                          data: 'bytes', length: 'int', version: 'int',  # pylint: disable=unused-argument
+    def _read_param_echo_request_unsigned(self, schema: 'Schema_EchoRequestUnsignedParameter', *, version: 'int',  # pylint: disable=unused-argument
                                           options: 'Parameter') -> 'Data_EchoRequestUnsignedParameter':  # pylint: disable=unused-argument
         """Read HIP ``ECHO_REQUEST_UNSIGNED`` parameter.
 
@@ -2769,11 +2388,7 @@ class HIP(Internet[Data_HIP, Schema_HIP],
            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
-            code: parameter code
-            cbit: critical bit
-            clen: length of contents
-            data: parameter payload data (incl. type, length, content and padding, if any)
-            length: parameter data length
+            schema: parsed parameter schama
             version: HIP protocol version
             options: parsed HIP parameters
 
@@ -2781,19 +2396,15 @@ class HIP(Internet[Data_HIP, Schema_HIP],
             Parsed parameter data.
 
         """
-        schema = Schema_EchoRequestUnsignedParameter.unpack(data, length)  # type: Schema_EchoRequestUnsignedParameter
-        self.__header__.param.append(schema)
-
         echo_request_unsigned = Data_EchoRequestUnsignedParameter(
-            type=code,
-            critical=cbit,
-            length=length,
+            type=schema.type,
+            critical=bool(schema.type & 0b1),
+            length=4 + schema.len + (8 - schema.len % 8) % 8,
             opaque=schema.opaque,
         )
         return echo_request_unsigned
 
-    def _read_param_echo_response_unsigned(self, code: 'Enum_Parameter', cbit: 'bool', clen: 'int', *,  # pylint: disable=unused-argument
-                                           data: 'bytes', length: 'int', version: 'int',  # pylint: disable=unused-argument
+    def _read_param_echo_response_unsigned(self, schema: 'Schema_EchoResponseUnsignedParameter', *, version: 'int',  # pylint: disable=unused-argument
                                            options: 'Parameter') -> 'Data_EchoResponseUnsignedParameter':  # pylint: disable=unused-argument
         """Read HIP ``ECHO_RESPONSE_UNSIGNED`` parameter.
 
@@ -2810,11 +2421,7 @@ class HIP(Internet[Data_HIP, Schema_HIP],
            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
-            code: parameter code
-            cbit: critical bit
-            clen: length of contents
-            data: parameter payload data (incl. type, length, content and padding, if any)
-            length: parameter data length
+            schema: parsed parameter schama
             version: HIP protocol version
             options: parsed HIP parameters
 
@@ -2822,19 +2429,15 @@ class HIP(Internet[Data_HIP, Schema_HIP],
             Parsed parameter data.
 
         """
-        schema = Schema_EchoResponseUnsignedParameter.unpack(data, length)  # type: Schema_EchoResponseUnsignedParameter
-        self.__header__.param.append(schema)
-
         echo_response_unsigned = Data_EchoResponseUnsignedParameter(
-            type=code,
-            critical=cbit,
-            length=length,
+            type=schema.type,
+            critical=bool(schema.type & 0b1),
+            length=4 + schema.len + (8 - schema.len % 8) % 8,
             opaque=schema.opaque,
         )
         return echo_response_unsigned
 
-    def _read_param_relay_from(self, code: 'Enum_Parameter', cbit: 'bool', clen: 'int', *,  # pylint: disable=unused-argument
-                               data: 'bytes', length: 'int', version: 'int',  # pylint: disable=unused-argument
+    def _read_param_relay_from(self, schema: 'Schema_RelayFromParameter', *, version: 'int',  # pylint: disable=unused-argument
                                options: 'Parameter') -> 'Data_RelayFromParameter':  # pylint: disable=unused-argument
         """Read HIP ``RELAY_FROM`` parameter.
 
@@ -2856,11 +2459,7 @@ class HIP(Internet[Data_HIP, Schema_HIP],
            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
-            code: parameter code
-            cbit: critical bit
-            clen: length of contents
-            data: parameter payload data (incl. type, length, content and padding, if any)
-            length: parameter data length
+            schema: parsed parameter schama
             version: HIP protocol version
             options: parsed HIP parameters
 
@@ -2868,30 +2467,26 @@ class HIP(Internet[Data_HIP, Schema_HIP],
             Parsed parameter data.
 
         Raises:
-            ProtocolError: If ``clen`` is **NOT** ``20``.
+            ProtocolError: If ``schema.len`` is **NOT** ``20``.
 
         """
-        if clen != 20:
-            raise ProtocolError(f'HIPv{version}: [ParamNo {code}] invalid format')
-
-        schema = Schema_RelayFromParameter.unpack(data, length)  # type: Schema_RelayFromParameter
-        self.__header__.param.append(schema)
+        if schema.len != 20:
+            raise ProtocolError(f'HIPv{version}: [ParamNo {schema.type}] invalid format')
 
         address = ipaddress.ip_address(schema.address)
         schema.address = address  # type: ignore[assignment]
 
         relay_from = Data_RelayFromParameter(
-            type=code,
-            critical=cbit,
-            length=length,
+            type=schema.type,
+            critical=bool(schema.type & 0b1),
+            length=4 + schema.len + (8 - schema.len % 8) % 8,
             port=schema.port,
             protocol=schema.protocol,
             address=address,  # type: ignore[arg-type]
         )
         return relay_from
 
-    def _read_param_relay_to(self, code: 'Enum_Parameter', cbit: 'bool', clen: 'int', *,  # pylint: disable=unused-argument
-                             data: 'bytes', length: 'int', version: 'int',  # pylint: disable=unused-argument
+    def _read_param_relay_to(self, schema: 'Schema_RelayToParameter', *, version: 'int',  # pylint: disable=unused-argument
                              options: 'Parameter') -> 'Data_RelayToParameter':  # pylint: disable=unused-argument
         """Read HIP ``RELAY_TO`` parameter.
 
@@ -2913,11 +2508,7 @@ class HIP(Internet[Data_HIP, Schema_HIP],
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
-            code: parameter code
-            cbit: critical bit
-            clen: length of contents
-            data: parameter payload data (incl. type, length, content and padding, if any)
-            length: parameter data length
+            schema: parsed parameter schama
             version: HIP protocol version
             options: parsed HIP parameters
 
@@ -2925,30 +2516,26 @@ class HIP(Internet[Data_HIP, Schema_HIP],
             Parsed parameter data.
 
         Raises:
-            ProtocolError: If ``clen`` is **NOT** ``20``.
+            ProtocolError: If ``schema.len`` is **NOT** ``20``.
 
         """
-        if clen != 20:
-            raise ProtocolError(f'HIPv{version}: [ParamNo {code}] invalid format')
-
-        schema = Schema_RelayToParameter.unpack(data, length)  # type: Schema_RelayToParameter
-        self.__header__.param.append(schema)
+        if schema.len != 20:
+            raise ProtocolError(f'HIPv{version}: [ParamNo {schema.type}] invalid format')
 
         address = ipaddress.ip_address(schema.address)
         schema.address = address  # type: ignore[assignment]
 
         relay_to = Data_RelayToParameter(
-            type=code,
-            critical=cbit,
-            length=length,
+            type=schema.type,
+            critical=bool(schema.type & 0b1),
+            length=4 + schema.len + (8 - schema.len % 8) % 8,
             port=schema.port,
             protocol=schema.protocol,
             address=address,  # type: ignore[arg-type]
         )
         return relay_to
 
-    def _read_param_overlay_ttl(self, code: 'Enum_Parameter', cbit: 'bool', clen: 'int', *,  # pylint: disable=unused-argument
-                                data: 'bytes', length: 'int', version: 'int',  # pylint: disable=unused-argument
+    def _read_param_overlay_ttl(self, schema: 'Schema_OverlayTTLParameter', *, version: 'int',  # pylint: disable=unused-argument
                                 options: 'Parameter') -> 'Data_OverlayTTLParameter':  # pylint: disable=unused-argument
         """Read HIP ``OVERLAY_TTL`` parameter.
 
@@ -2965,11 +2552,7 @@ class HIP(Internet[Data_HIP, Schema_HIP],
            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
-            code: parameter code
-            cbit: critical bit
-            clen: length of contents
-            data: parameter payload data (incl. type, length, content and padding, if any)
-            length: parameter data length
+            schema: parsed parameter schama
             version: HIP protocol version
             options: parsed HIP parameters
 
@@ -2977,25 +2560,21 @@ class HIP(Internet[Data_HIP, Schema_HIP],
             Parsed parameter data.
 
         Raises:
-            ProtocolError: If ``clen`` is **NOT** ``4``.
+            ProtocolError: If ``schema.len`` is **NOT** ``4``.
 
         """
-        if clen != 4:
-            raise ProtocolError(f'HIPv{version}: [ParamNo {code}] invalid format')
-
-        schema = Schema_OverlayTTLParameter.unpack(data, length)  # type: Schema_OverlayTTLParameter
-        self.__header__.param.append(schema)
+        if schema.len != 4:
+            raise ProtocolError(f'HIPv{version}: [ParamNo {schema.type}] invalid format')
 
         overlay_ttl = Data_OverlayTTLParameter(
-            type=code,
-            critical=cbit,
-            length=length,
+            type=schema.type,
+            critical=bool(schema.type & 0b1),
+            length=4 + schema.len + (8 - schema.len % 8) % 8,
             ttl=datetime.timedelta(seconds=schema.ttl),
         )
         return overlay_ttl
 
-    def _read_param_route_via(self, code: 'Enum_Parameter', cbit: 'bool', clen: 'int', *,  # pylint: disable=unused-argument
-                              data: 'bytes', length: 'int', version: 'int',  # pylint: disable=unused-argument
+    def _read_param_route_via(self, schema: 'Schema_RouteViaParameter', *, version: 'int',  # pylint: disable=unused-argument
                               options: 'Parameter') -> 'Data_RouteViaParameter':  # pylint: disable=unused-argument
         """Read HIP ``ROUTE_VIA`` parameter.
 
@@ -3025,11 +2604,7 @@ class HIP(Internet[Data_HIP, Schema_HIP],
            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
-            code: parameter code
-            cbit: critical bit
-            clen: length of contents
-            data: parameter payload data (incl. type, length, content and padding, if any)
-            length: parameter data length
+            schema: parsed parameter schama
             version: HIP protocol version
             options: parsed HIP parameters
 
@@ -3040,31 +2615,22 @@ class HIP(Internet[Data_HIP, Schema_HIP],
             ProtocolError: If the parameter is malformed.
 
         """
-        if (clen - 4) % 16 != 0:
-            raise ProtocolError(f'HIPv{version}: [ParamNo {code}] invalid format')
-
-        schema = Schema_RouteViaParameter.unpack(data, length)  # type: Schema_RouteViaParameter
-        self.__header__.param.append(schema)
-
-        hits = []  # type: list[IPv6Address]
-        for hit in schema.hit:
-            hits.append(ipaddress.ip_address(hit))  # type: ignore[arg-type]
-        schema.hit = hits
+        if (schema.len - 4) % 16 != 0:
+            raise ProtocolError(f'HIPv{version}: [ParamNo {schema.type}] invalid format')
 
         route_via = Data_RouteViaParameter(
-            type=code,
-            critical=cbit,
-            length=length,
+            type=schema.type,
+            critical=bool(schema.type & 0b1),
+            length=4 + schema.len + (8 - schema.len % 8) % 8,
             flags=Data_Flags(
                 symmetric=bool(schema.flags['symmetric']),
                 must_follow=bool(schema.flags['must_follow']),
             ),
-            hit=tuple(hits),
+            hit=tuple(schema.hit),
         )
         return route_via
 
-    def _read_param_from(self, code: 'Enum_Parameter', cbit: 'bool', clen: 'int', *,  # pylint: disable=unused-argument
-                         data: 'bytes', length: 'int', version: 'int',  # pylint: disable=unused-argument
+    def _read_param_from(self, schema: 'Schema_FromParameter', *, version: 'int',  # pylint: disable=unused-argument
                          options: 'Parameter') -> 'Data_FromParameter':  # pylint: disable=unused-argument
         """Read HIP ``FROM`` parameter.
 
@@ -3084,11 +2650,7 @@ class HIP(Internet[Data_HIP, Schema_HIP],
            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
-            code: parameter code
-            cbit: critical bit
-            clen: length of contents
-            data: parameter payload data (incl. type, length, content and padding, if any)
-            length: parameter data length
+            schema: parsed parameter schama
             version: HIP protocol version
             options: parsed HIP parameters
 
@@ -3096,28 +2658,21 @@ class HIP(Internet[Data_HIP, Schema_HIP],
             Parsed parameter data.
 
         Raises:
-            ProtocolError: If ``clen`` is **NOT** ``16``.
+            ProtocolError: If ``schema.len`` is **NOT** ``16``.
 
         """
-        if clen != 16:
-            raise ProtocolError(f'HIPv{version}: [ParamNo {code}] invalid format')
-
-        schema = Schema_FromParameter.unpack(data, length)  # type: Schema_FromParameter
-        self.__header__.param.append(schema)
-
-        address = ipaddress.ip_address(schema.address)
-        schema.address = address  # type: ignore[assignment]
+        if schema.len != 16:
+            raise ProtocolError(f'HIPv{version}: [ParamNo {schema.type}] invalid format')
 
         from_ = Data_FromParameter(
-            type=code,
-            critical=cbit,
-            length=length,
-            address=address,  # type: ignore[arg-type]
+            type=schema.type,
+            critical=bool(schema.type & 0b1),
+            length=4 + schema.len + (8 - schema.len % 8) % 8,
+            address=schema.address,
         )
         return from_
 
-    def _read_param_rvs_hmac(self, code: 'Enum_Parameter', cbit: 'bool', clen: 'int', *,  # pylint: disable=unused-argument
-                             data: 'bytes', length: 'int', version: 'int',  # pylint: disable=unused-argument
+    def _read_param_rvs_hmac(self, schema: 'Schema_RVSHMACParameter', *, version: 'int',  # pylint: disable=unused-argument
                              options: 'Parameter') -> 'Data_RVSHMACParameter':  # pylint: disable=unused-argument
         """Read HIP ``RVS_HMAC`` parameter.
 
@@ -3136,11 +2691,7 @@ class HIP(Internet[Data_HIP, Schema_HIP],
            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
-            code: parameter code
-            cbit: critical bit
-            clen: length of contents
-            data: parameter payload data (incl. type, length, content and padding, if any)
-            length: parameter data length
+            schema: parsed parameter schama
             version: HIP protocol version
             options: parsed HIP parameters
 
@@ -3148,19 +2699,15 @@ class HIP(Internet[Data_HIP, Schema_HIP],
             Parsed parameter data.
 
         """
-        schema = Schema_RVSHMACParameter.unpack(data, length)  # type: Schema_RVSHMACParameter
-        self.__header__.param.append(schema)
-
         rvs_hmac = Data_RVSHMACParameter(
-            type=code,
-            critical=cbit,
-            length=length,
+            type=schema.type,
+            critical=bool(schema.type & 0b1),
+            length=4 + schema.len + (8 - schema.len % 8) % 8,
             hmac=schema.hmac,
         )
         return rvs_hmac
 
-    def _read_param_via_rvs(self, code: 'Enum_Parameter', cbit: 'bool', clen: 'int', *,  # pylint: disable=unused-argument
-                            data: 'bytes', length: 'int', version: 'int',  # pylint: disable=unused-argument
+    def _read_param_via_rvs(self, schema: 'Schema_ViaRVSParameter', *, version: 'int',  # pylint: disable=unused-argument
                             options: 'Parameter') -> 'Data_ViaRVSParameter':  # pylint: disable=unused-argument
         """Read HIP ``VIA_RVS`` parameter.
 
@@ -3188,11 +2735,7 @@ class HIP(Internet[Data_HIP, Schema_HIP],
            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
-            code: parameter code
-            cbit: critical bit
-            clen: length of contents
-            data: parameter payload data (incl. type, length, content and padding, if any)
-            length: parameter data length
+            schema: parsed parameter schama
             version: HIP protocol version
             options: parsed HIP parameters
 
@@ -3200,30 +2743,21 @@ class HIP(Internet[Data_HIP, Schema_HIP],
             Parsed parameter data.
 
         Raises:
-            ProtocolError: If ``clen`` is **NOT** ``16`` modulo.
+            ProtocolError: If ``schema.len`` is **NOT** ``16`` modulo.
 
         """
-        if clen % 16 != 0:
-            raise ProtocolError(f'HIPv{version}: [ParamNo {code}] invalid format')
-
-        schema = Schema_ViaRVSParameter.unpack(data, length)  # type: Schema_ViaRVSParameter
-        self.__header__.param.append(schema)
-
-        address = []  # type: list[IPv6Address]
-        for addr in schema.address:
-            address.append(ipaddress.ip_address(addr))  # type: ignore[arg-type]
-        schema.address = address
+        if schema.len % 16 != 0:
+            raise ProtocolError(f'HIPv{version}: [ParamNo {schema.type}] invalid format')
 
         via_rvs = Data_ViaRVSParameter(
-            type=code,
-            critical=cbit,
-            length=length,
-            address=tuple(address),
+            type=schema.type,
+            critical=bool(schema.type & 0b1),
+            length=4 + schema.len + (8 - schema.len % 8) % 8,
+            address=tuple(schema.address),
         )
         return via_rvs
 
-    def _read_param_relay_hmac(self, code: 'Enum_Parameter', cbit: 'bool', clen: 'int', *,  # pylint: disable=unused-argument
-                               data: 'bytes', length: 'int', version: 'int',  # pylint: disable=unused-argument
+    def _read_param_relay_hmac(self, schema: 'Schema_RelayHMACParameter', version: 'int',  # pylint: disable=unused-argument
                                options: 'Parameter') -> 'Data_RelayHMACParameter':  # pylint: disable=unused-argument
         """Read HIP ``RELAY_HMAC`` parameter.
 
@@ -3242,11 +2776,7 @@ class HIP(Internet[Data_HIP, Schema_HIP],
            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
-            code: parameter code
-            cbit: critical bit
-            clen: length of contents
-            data: parameter payload data (incl. type, length, content and padding, if any)
-            length: parameter data length
+            schema: parsed parameter schama
             version: HIP protocol version
             options: parsed HIP parameters
 
@@ -3254,13 +2784,10 @@ class HIP(Internet[Data_HIP, Schema_HIP],
             Parsed parameter data.
 
         """
-        schema = Schema_RelayHMACParameter.unpack(data, length)  # type: Schema_RelayHMACParameter
-        self.__header__.param.append(schema)
-
         relay_hmac = Data_RelayHMACParameter(
-            type=code,
-            critical=cbit,
-            length=length,
+            type=schema.type,
+            critical=bool(schema.type & 0b1),
+            length=4 + schema.len + (8 - schema.len % 8) % 8,
             hmac=schema.hmac,
         )
         return relay_hmac
