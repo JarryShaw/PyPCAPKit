@@ -3,6 +3,7 @@
 
 import collections
 import collections.abc
+import functools
 import io
 import itertools
 from typing import TYPE_CHECKING, Generic, TypeVar, cast
@@ -12,6 +13,7 @@ from pcapkit.corekit.fields.misc import ConditionalField, PayloadField
 from pcapkit.corekit.fields.collections import ListField
 from pcapkit.corekit.fields.strings import PaddingField
 from pcapkit.utilities.compat import Mapping
+from pcapkit.utilities.decorators import prepare
 from pcapkit.utilities.exceptions import NoDefaultValue, ProtocolUnbound
 from pcapkit.utilities.warnings import UnknownFieldWarning, warn
 
@@ -376,6 +378,7 @@ class Schema(Mapping[str, VT], Generic[VT]):
         return self.__bytes__()
 
     @classmethod
+    @prepare
     def unpack(cls, data: 'bytes | IO[bytes]',
                length: 'Optional[int]' = None,
                packet: 'Optional[dict[str, Any]]' = None) -> 'Schema':
@@ -390,21 +393,13 @@ class Schema(Mapping[str, VT], Generic[VT]):
             Unpacked data as :class:`Schema`.
 
         """
+        # force cast arg type since decorator changed their signatures
+        if TYPE_CHECKING:
+            data = cast('IO[bytes]', data)
+            length = cast('int', length)
+            packet = cast('dict[str, Any]', packet)
+
         self = cls.__new__(cls)
-
-        if isinstance(data, bytes):
-            length = len(data) if length is None else length
-            data = io.BytesIO(data)
-        else:
-            if length is None:
-                current = data.tell()
-                length = data.seek(0, io.SEEK_END) - current
-                data.seek(current)
-
-        if packet is None:
-            packet = {}
-        packet['__length__'] = length
-
         for field in self.__fields__.values():
             field = field(packet)
 
@@ -446,3 +441,33 @@ class Schema(Mapping[str, VT], Generic[VT]):
 
         self.__updated__ = False
         return self
+
+    @staticmethod
+    def pre_process(packet: 'dict[str, Any]') -> 'None':
+        """Prepare ``packet`` data for unpacking process.
+
+        Args:
+            packet: packet data
+
+        Note:
+            This method is expected to directly modify any data stored
+            in the ``packet`` and thus no return is required.
+
+        """
+
+    @staticmethod
+    def post_process(schema: 'Schema', data: 'IO[bytes]', length: 'int',
+                     packet: 'dict[str, Any]') -> 'Schema':
+        """Revise ``schema`` data after unpacking process.
+
+        Args:
+            schema: parsed schema
+            data: Packed data.
+            length: Length of data.
+            packet: Unpacked data.
+
+        Returns:
+            Revised schema.
+
+        """
+        return schema

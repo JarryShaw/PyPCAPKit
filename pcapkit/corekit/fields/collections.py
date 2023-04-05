@@ -5,6 +5,7 @@ import copy
 import io
 from typing import TYPE_CHECKING, TypeVar, cast
 
+from pcapkit.corekit.multidict import OrderedMultiDict
 from pcapkit.corekit.fields.field import _Field
 from pcapkit.utilities.exceptions import FieldValueError
 
@@ -121,16 +122,28 @@ class ListField(_Field[list[_TL]]):
             file = buffer
 
         if self._item_type is not None:
+            from pcapkit.corekit.fields.misc import SchemaField
+            is_schema = isinstance(self._item_type, SchemaField)
+
             temp = []  # type: list[_TL]
             while length:
                 field = self._item_type(packet)
 
-                length -= field.length
-                if length < 0:
-                    raise FieldValueError(f'Field {self.name} has invalid length.')
+                if is_schema:
+                    data = cast('Schema', self._item_type).unpack(file, None, packet)  # type: ignore[call-arg,misc]
 
-                buffer = file.read(field.length)
-                temp.append(field.unpack(buffer, packet))
+                    length -= len(data)
+                    if length < 0:
+                        raise FieldValueError(f'Field {self.name} has invalid length.')
+                else:
+                    length -= field.length
+                    if length < 0:
+                        raise FieldValueError(f'Field {self.name} has invalid length.')
+
+                    buffer = file.read(field.length)
+                    data = field.unpack(buffer, packet)
+
+                temp.append(data)  # type: ignore[arg-type]
             return temp
         return file.read(length)
 
@@ -206,10 +219,15 @@ class OptionField(ListField):
         else:
             file = buffer
 
+        # make a copy of the ``packet`` dict so that we can include
+        # parsed option schema in the ``packet`` dict
+        new_packet = packet.copy()
+        new_packet[self.name] = OrderedMultiDict()
+
         temp = []  # type: list[Schema]
         while length:
             # unpack option type using base schema
-            meta = self._base_schema.unpack(file, length, packet)
+            meta = self._base_schema.unpack(file, length, packet)  # type: ignore[call-arg,misc]
             code = cast('int', meta[self._type_name])
             schema = self._registry[code]
 
@@ -217,7 +235,8 @@ class OptionField(ListField):
             file.seek(-len(meta), io.SEEK_CUR)
 
             # unpack option using option schema
-            data = schema.unpack(file, length, packet)
+            data = schema.unpack(file, length, packet)  # type: ignore[call-arg,misc]
+            new_packet[self.name].add(code, data)
             temp.append(data)
 
             # update length
