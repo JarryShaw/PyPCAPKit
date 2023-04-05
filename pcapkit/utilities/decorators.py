@@ -17,7 +17,7 @@ from typing import TYPE_CHECKING, cast
 from pcapkit.utilities.exceptions import StructError
 
 if TYPE_CHECKING:
-    from typing import Callable, Optional, TypeVar, Type, Any, IO
+    from typing import IO, Any, Callable, Optional, Type, TypeVar
 
     from typing_extensions import Concatenate, ParamSpec
 

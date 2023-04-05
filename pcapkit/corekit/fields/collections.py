@@ -5,8 +5,8 @@ import copy
 import io
 from typing import TYPE_CHECKING, TypeVar, cast
 
-from pcapkit.corekit.multidict import OrderedMultiDict
 from pcapkit.corekit.fields.field import _Field
+from pcapkit.corekit.multidict import OrderedMultiDict
 from pcapkit.utilities.exceptions import FieldValueError
 
 __all__ = [

@@ -8,9 +8,9 @@ from typing import TYPE_CHECKING
 from pcapkit.const.ipv6.option import Option as Enum_Option
 from pcapkit.const.ipv6.router_alert import RouterAlert as Enum_RouterAlert
 from pcapkit.const.reg.transtype import TransType as Enum_TransType
+from pcapkit.corekit.fields.collections import OptionField
 from pcapkit.corekit.fields.ipaddress import IPv6Field
 from pcapkit.corekit.fields.misc import ConditionalField, PayloadField
-from pcapkit.corekit.fields.collections import OptionField
 from pcapkit.corekit.fields.numbers import (EnumField, NumberField, UInt8Field, UInt16Field,
                                             UInt32Field)
 from pcapkit.corekit.fields.strings import BitField, BytesField, PaddingField

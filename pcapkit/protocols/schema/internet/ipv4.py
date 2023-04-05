@@ -8,9 +8,9 @@ from pcapkit.const.ipv4.classification_level import ClassificationLevel as Enum_
 from pcapkit.const.ipv4.option_number import OptionNumber as Enum_OptionNumber
 from pcapkit.const.ipv4.router_alert import RouterAlert as Enum_RouterAlert
 from pcapkit.const.reg.transtype import TransType as Enum_TransType
+from pcapkit.corekit.fields.collections import ListField
 from pcapkit.corekit.fields.ipaddress import IPv4Field
 from pcapkit.corekit.fields.misc import ConditionalField, PayloadField
-from pcapkit.corekit.fields.collections import ListField
 from pcapkit.corekit.fields.numbers import EnumField, UInt8Field, UInt16Field, UInt32Field
 from pcapkit.corekit.fields.strings import BitField, BytesField, PaddingField
 from pcapkit.protocols.schema.schema import Schema

@@ -6,7 +6,7 @@ import io
 from typing import TYPE_CHECKING, TypeVar, cast
 
 from pcapkit.corekit.fields.field import NoValue, _Field
-from pcapkit.utilities.exceptions import NoDefaultValue, FieldError
+from pcapkit.utilities.exceptions import FieldError, NoDefaultValue
 
 __all__ = [
     'ConditionalField', 'PayloadField',

@@ -23,15 +23,15 @@ from pcapkit.const.hip.registration_failure import RegistrationFailure as Enum_R
 from pcapkit.const.hip.suite import Suite as Enum_Suite
 from pcapkit.const.hip.transport import Transport as Enum_Transport
 from pcapkit.const.reg.transtype import TransType as Enum_TransType
-from pcapkit.corekit.fields.ipaddress import IPv6Field
-from pcapkit.corekit.fields.misc import ConditionalField, SchemaField, PayloadField, SwitchField
 from pcapkit.corekit.fields.collections import ListField, OptionField
+from pcapkit.corekit.fields.ipaddress import IPv6Field
+from pcapkit.corekit.fields.misc import ConditionalField, PayloadField, SchemaField, SwitchField
 from pcapkit.corekit.fields.numbers import (EnumField, NumberField, UInt8Field, UInt16Field,
                                             UInt32Field)
 from pcapkit.corekit.fields.strings import BitField, BytesField, PaddingField
 from pcapkit.protocols.schema.schema import Schema
 from pcapkit.utilities.exceptions import FieldValueError
-from pcapkit.utilities.warnings import warn, ProtocolWarning
+from pcapkit.utilities.warnings import ProtocolWarning, warn
 
 __all__ = [
     'HIP',
@@ -59,13 +59,14 @@ __all__ = [
 
 if TYPE_CHECKING:
     from ipaddress import IPv6Address
-    from typing import Optional, Any, IO
+    from typing import IO, Any, Optional
 
     from typing_extensions import Literal, TypedDict
 
-    from pcapkit.protocols.protocol import Protocol
-    from pcapkit.protocols.data.internet.hip import HIPCipherParameter as Data_HIPCipherParameter, EncryptedParameter as Data_EncryptedParameter
     from pcapkit.corekit.fields.field import _Field as Field
+    from pcapkit.protocols.data.internet.hip import EncryptedParameter as Data_EncryptedParameter
+    from pcapkit.protocols.data.internet.hip import HIPCipherParameter as Data_HIPCipherParameter
+    from pcapkit.protocols.protocol import Protocol
 
     class PacketType(TypedDict):
         """Packet type."""
