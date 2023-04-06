@@ -13,7 +13,7 @@ from pcapkit.utilities.exceptions import NoDefaultValue
 __all__ = ['Field']
 
 if TYPE_CHECKING:
-    from typing import Any, Callable, Optional, IO
+    from typing import IO, Any, Callable, Optional
 
     from typing_extensions import Literal
 

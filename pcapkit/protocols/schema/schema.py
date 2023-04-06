@@ -10,7 +10,7 @@ from typing import TYPE_CHECKING, Generic, TypeVar, cast
 
 from pcapkit.corekit.fields.collections import ListField
 from pcapkit.corekit.fields.field import NoValue, _Field
-from pcapkit.corekit.fields.misc import ConditionalField, PayloadField, ForwardMatchField
+from pcapkit.corekit.fields.misc import ConditionalField, ForwardMatchField, PayloadField
 from pcapkit.corekit.fields.strings import PaddingField
 from pcapkit.utilities.compat import Mapping
 from pcapkit.utilities.decorators import prepare

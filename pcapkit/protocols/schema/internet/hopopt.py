@@ -5,15 +5,16 @@
 import collections
 from typing import TYPE_CHECKING, cast
 
-from pcapkit.const.ipv6.qs_function import QSFunction as Enum_QSFunction
-from pcapkit.const.ipv6.tagger_id import TaggerID as Enum_TaggerID
-from pcapkit.const.ipv6.smf_dpd_mode import SMFDPDMode as Enum_SMFDPDMode
 from pcapkit.const.ipv6.option import Option as Enum_Option
+from pcapkit.const.ipv6.qs_function import QSFunction as Enum_QSFunction
 from pcapkit.const.ipv6.router_alert import RouterAlert as Enum_RouterAlert
+from pcapkit.const.ipv6.smf_dpd_mode import SMFDPDMode as Enum_SMFDPDMode
+from pcapkit.const.ipv6.tagger_id import TaggerID as Enum_TaggerID
 from pcapkit.const.reg.transtype import TransType as Enum_TransType
 from pcapkit.corekit.fields.collections import OptionField
-from pcapkit.corekit.fields.ipaddress import IPv6Field, IPv4Field
-from pcapkit.corekit.fields.misc import ConditionalField, PayloadField, SwitchField, SchemaField, ForwardMatchField, NoValueField
+from pcapkit.corekit.fields.ipaddress import IPv4Field, IPv6Field
+from pcapkit.corekit.fields.misc import (ConditionalField, ForwardMatchField, NoValueField,
+                                         PayloadField, SchemaField, SwitchField)
 from pcapkit.corekit.fields.numbers import (EnumField, NumberField, UInt8Field, UInt16Field,
                                             UInt32Field)
 from pcapkit.corekit.fields.strings import BitField, BytesField, PaddingField
@@ -34,12 +35,12 @@ __all__ = [
 
 if TYPE_CHECKING:
     from ipaddress import IPv4Address, IPv6Address
-    from typing import Any, Optional, IO
+    from typing import IO, Any, Optional
 
     from typing_extensions import TypedDict
 
-    from pcapkit.protocols.protocol import Protocol
     from pcapkit.corekit.fields.field import _Field as Field
+    from pcapkit.protocols.protocol import Protocol
 
     class TaggerIDInfo(TypedDict):
         """TaggerID information."""
