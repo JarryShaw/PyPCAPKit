@@ -41,6 +41,7 @@ __all__ = [
     'PaddingField',
 
     'ConditionalField', 'PayloadField', 'SchemaField',
+    'ForwardMatchField', 'NoValueField',
 
     'ListField', 'OptionField',
 

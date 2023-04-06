@@ -10,19 +10,21 @@ from pcapkit.utilities.exceptions import FieldError, NoDefaultValue
 
 __all__ = [
     'ConditionalField', 'PayloadField',
-    'SwitchField',
+    'SwitchField', 'ForwardMatchField',
+    'NoValueField',
 ]
 
 if TYPE_CHECKING:
     from typing import IO, Any, Callable, Optional, Type
 
-    from pcapkit.corekit.fields.field import Field, NoValueType
+    from pcapkit.corekit.fields.field import NoValueType
     from pcapkit.protocols.protocol import Protocol
     from pcapkit.protocols.schema.schema import Schema
 
 _TC = TypeVar('_TC')
 _TS = TypeVar('_TS', bound='Schema')
 _TP = TypeVar('_TP', bound='Protocol')
+_TN = TypeVar('_TN', bound='NoValueType')
 
 
 class ConditionalField(_Field[_TC]):
@@ -77,13 +79,13 @@ class ConditionalField(_Field[_TC]):
         return True
 
     @property
-    def field(self) -> 'Field[_TC]':
+    def field(self) -> '_Field[_TC]':
         """Field instance."""
         return self._field
 
-    def __init__(self, field: 'Field[_TC]',  # pylint: disable=super-init-not-called
+    def __init__(self, field: '_Field[_TC]',  # pylint: disable=super-init-not-called
                  condition: 'Callable[[dict[str, Any]], bool]') -> 'None':
-        self._field = field  # type: Field[_TC]
+        self._field = field  # type: _Field[_TC]
         self._condition = condition
 
     def __call__(self, packet: 'dict[str, Any]') -> 'ConditionalField':
@@ -143,7 +145,7 @@ class ConditionalField(_Field[_TC]):
         """
         return self._field.post_process(value, packet)
 
-    def unpack(self, buffer: 'bytes | Schema', packet: 'dict[str, Any]') -> '_TC':
+    def unpack(self, buffer: 'bytes | IO[bytes]', packet: 'dict[str, Any]') -> '_TC':
         """Unpack field value from :obj:`bytes`.
 
         Args:
@@ -276,7 +278,7 @@ class PayloadField(_Field[_TP]):
             return value.pack()
         return value.data  # type: ignore[union-attr]
 
-    def unpack(self, buffer: 'bytes | IO[bytes]', packet: 'dict[str, Any]') -> '_TP':  # type: ignore[override]
+    def unpack(self, buffer: 'bytes | IO[bytes]', packet: 'dict[str, Any]') -> '_TP':
         """Unpack field value from :obj:`bytes`.
 
         Args:
@@ -372,7 +374,7 @@ class SwitchField(_Field[_TC]):
             return NoValue  # type: ignore[return-value]
         return self._field.post_process(value, packet)
 
-    def unpack(self, buffer: 'bytes | Schema', packet: 'dict[str, Any]') -> '_TC':
+    def unpack(self, buffer: 'bytes | IO[bytes]', packet: 'dict[str, Any]') -> '_TC':
         """Unpack field value from :obj:`bytes`.
 
         Args:
@@ -413,7 +415,7 @@ class SchemaField(_Field[_TS]):
         self._schema = schema
 
         if isinstance(default, bytes):
-            default = cast('_TS', schema.unpack(default))
+            default = cast('_TS', schema.unpack(default))  # type: ignore[call-arg,misc]
         self._default = default
 
         self._length_callback = None
@@ -459,7 +461,7 @@ class SchemaField(_Field[_TS]):
             return value
         return value.pack()
 
-    def unpack(self, buffer: 'bytes | IO[bytes]', packet: 'dict[str, Any]') -> '_TS':  # type: ignore[override]
+    def unpack(self, buffer: 'bytes | IO[bytes]', packet: 'dict[str, Any]') -> '_TS':
         """Unpack field value from :obj:`bytes`.
 
         Args:
@@ -475,3 +477,122 @@ class SchemaField(_Field[_TS]):
         else:
             file = buffer
         return self._schema(file, self.length, packet)
+
+
+class ForwardMatchField(_Field[_TC]):
+    """Schema field for non-capturing forward matching."""
+
+    @property
+    def name(self) -> 'str':
+        """Field name."""
+        return self._field.name
+
+    @name.setter
+    def name(self, value: 'str') -> 'None':
+        """Set field name."""
+        self._field.name = value
+
+    @property
+    def default(self) -> '_TC | NoValueType':
+        """Field default value."""
+        return self._field.default
+
+    @default.setter
+    def default(self, value: '_TC | NoValueType') -> 'None':
+        """Set field default value."""
+        self._field.default = value
+
+    @default.deleter
+    def default(self) -> 'None':
+        """Delete field default value."""
+        self._field.default = NoValue
+
+    @property
+    def template(self) -> 'str':
+        """Field template."""
+        return self._field.template
+
+    @property
+    def length(self) -> 'int':
+        """Field size."""
+        return self._field.length
+
+    @property
+    def optional(self) -> 'bool':
+        """Field is optional."""
+        return True
+
+    @property
+    def field(self) -> '_Field[_TC]':
+        """Field instance."""
+        return self._field
+
+    def __init__(self, field: '_Field[_TC]') -> 'None':
+        self._name = '<forward_match>'
+        self._field = field
+
+    def pack(self, value: 'Optional[_TC]', packet: 'dict[str, Any]') -> 'bytes':
+        """Pack field value into :obj:`bytes`.
+
+        Args:
+            value: field value.
+            packet: packet data.
+
+        Returns:
+            Packed field value.
+
+        """
+        return b''
+
+    def unpack(self, buffer: 'bytes | IO[bytes]', packet: 'dict[str, Any]') -> '_TC':
+        """Unpack field value from :obj:`bytes`.
+
+        Args:
+            buffer: field buffer.
+            packet: packet data.
+
+        Returns:
+            Unpacked field value.
+
+        """
+        return self._field.unpack(buffer, packet)
+
+
+class NoValueField(_Field[_TN]):
+    """Schema field for no value type (or :obj:`None`)."""
+
+    @property
+    def template(self) -> 'str':
+        """Field template."""
+        return '0s'
+
+    @property
+    def length(self) -> 'int':
+        """Field size."""
+        return 0
+
+    def pack(self, value: 'Optional[_TN]', packet: 'dict[str, Any]') -> 'bytes':
+        """Pack field value into :obj:`bytes`.
+
+        Args:
+            value: field value.
+            packet: packet data.
+
+        Returns:
+            Packed field value.
+
+        """
+        return b''
+
+    def unpack(self, buffer: 'bytes | IO[bytes]', packet: 'dict[str, Any]') -> '_TN':
+        """Unpack field value from :obj:`bytes`.
+
+        Args:
+            buffer: field buffer.
+            packet: packet data.
+
+        Returns:
+            Unpacked field value.
+
+        """
+        return None  # type: ignore[return-value]

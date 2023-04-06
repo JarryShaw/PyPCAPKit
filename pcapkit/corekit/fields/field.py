@@ -13,11 +13,9 @@ from pcapkit.utilities.exceptions import NoDefaultValue
 __all__ = ['Field']
 
 if TYPE_CHECKING:
-    from typing import Any, Callable, Optional
+    from typing import Any, Callable, Optional, IO
 
     from typing_extensions import Literal
-
-    from pcapkit.protocols.schema.schema import Schema
 
 _T = TypeVar('_T')
 
@@ -140,7 +138,7 @@ class _Field(Generic[_T], metaclass=abc.ABCMeta):
         """
         return cast('_T', value)
 
-    def unpack(self, buffer: 'bytes | Schema', packet: 'dict[str, Any]') -> '_T':
+    def unpack(self, buffer: 'bytes | IO[bytes]', packet: 'dict[str, Any]') -> '_T':
         """Unpack field value from :obj:`bytes`.
 
         Args:
@@ -152,7 +150,7 @@ class _Field(Generic[_T], metaclass=abc.ABCMeta):
 
         """
         if not isinstance(buffer, bytes):
-            buffer = buffer.pack()
+            buffer = buffer.read(self.length)
         value = struct.unpack(self.template, buffer[:self.length].rjust(self.length, b'\x00'))[0]
         return self.post_process(value, packet)
 

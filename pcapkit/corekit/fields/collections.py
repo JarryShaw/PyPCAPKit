@@ -202,7 +202,7 @@ class OptionField(ListField):
             raise FieldValueError('Field <option> has no registry.')
         self._registry = registry
 
-    def unpack(self, buffer: 'bytes | IO[bytes]', packet: 'dict[str, Any]') -> 'list[Schema]':  # type: ignore[override]
+    def unpack(self, buffer: 'bytes | IO[bytes]', packet: 'dict[str, Any]') -> 'list[Schema]':
         """Unpack field value from :obj:`bytes`.
 
         Args:

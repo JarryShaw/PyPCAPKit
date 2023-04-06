@@ -58,6 +58,7 @@ __all__ = [
     'BytesField', 'StringField', 'BitField',                # text protocol fields
     'PaddingField',
     'ConditionalField', 'PayloadField', 'SchemaField',      # misc protocol fields
+    'ForwardMatchField', 'NoValueField',
     'IPv4Field', 'IPv6Field',                               # IP address protocol fields
     'ListField', 'OptionField',                             # container protocol fields
 
