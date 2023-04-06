@@ -676,7 +676,6 @@ class HIP(Internet[Data_HIP, Schema_HIP],
 
         for schema in self.__header__.param:
             dscp = schema.type
-            cbit = bool(schema.type & 0b1)
 
             meth_name = f'_read_param_{dscp.name.lower()}'
             meth = cast('ParameterParser',
