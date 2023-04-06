@@ -10,7 +10,7 @@ from typing import TYPE_CHECKING, Generic, TypeVar, cast
 
 from pcapkit.corekit.fields.collections import ListField
 from pcapkit.corekit.fields.field import NoValue, _Field
-from pcapkit.corekit.fields.misc import ConditionalField, PayloadField
+from pcapkit.corekit.fields.misc import ConditionalField, PayloadField, ForwardMatchField
 from pcapkit.corekit.fields.strings import PaddingField
 from pcapkit.utilities.compat import Mapping
 from pcapkit.utilities.decorators import prepare
@@ -367,6 +367,10 @@ class Schema(Mapping[str, VT], Generic[VT]):
                     continue
                 field = field.field
 
+            if isinstance(field, ForwardMatchField):
+                self.__buffer__[field.name] = b''
+                continue
+
             value = getattr(self, field.name)
             try:
                 temp = field.pack(value, self.__dict__)
@@ -437,7 +441,11 @@ class Schema(Mapping[str, VT], Generic[VT]):
             setattr(self, field.name, value)
 
             packet[field.name] = value
-            packet['__length__'] -= field.length
+
+            if isinstance(field, ForwardMatchField):
+                data.seek(-field.length, io.SEEK_CUR)
+            else:
+                packet['__length__'] -= field.length
 
         self.__updated__ = False
         return self
