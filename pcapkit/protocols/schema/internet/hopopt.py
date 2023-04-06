@@ -416,7 +416,7 @@ class PDMOption(Option):
                      psntp: 'int', psnlr: 'int', deltatlr: 'int', deltatls: 'int') -> 'None': ...
 
 
-class _QuickStartOption(Option):
+class _QuickStartOption(Schema):
     """Header schema for HOPOPT quick start options in generic representation."""
 
     #: Flags.
