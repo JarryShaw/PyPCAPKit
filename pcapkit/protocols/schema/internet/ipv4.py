@@ -2,18 +2,25 @@
 # mypy: disable-error-code=assignment
 """header schema for internet protocol version 4"""
 
-from typing import TYPE_CHECKING
+import collections
+import datetime
+import ipaddress
+from typing import TYPE_CHECKING, cast
 
+from pcapkit.const.ipv4.qs_function import QSFunction as Enum_QSFunction
+from pcapkit.const.ipv4.ts_flag import TSFlag as Enum_TSFlag
 from pcapkit.const.ipv4.classification_level import ClassificationLevel as Enum_ClassificationLevel
 from pcapkit.const.ipv4.option_number import OptionNumber as Enum_OptionNumber
 from pcapkit.const.ipv4.router_alert import RouterAlert as Enum_RouterAlert
 from pcapkit.const.reg.transtype import TransType as Enum_TransType
-from pcapkit.corekit.fields.collections import ListField
+from pcapkit.corekit.fields.collections import ListField, OptionField
 from pcapkit.corekit.fields.ipaddress import IPv4Field
-from pcapkit.corekit.fields.misc import ConditionalField, PayloadField
+from pcapkit.corekit.fields.misc import ConditionalField, PayloadField, SwitchField, ForwardMatchField, SchemaField
 from pcapkit.corekit.fields.numbers import EnumField, UInt8Field, UInt16Field, UInt32Field
 from pcapkit.corekit.fields.strings import BitField, BytesField, PaddingField
 from pcapkit.protocols.schema.schema import Schema
+from pcapkit.utilities.warnings import ProtocolWarning, warn
+from pcapkit.utilities.exceptions import FieldValueError
 
 __all__ = [
     'IPv4',
@@ -30,13 +37,15 @@ __all__ = [
 ]
 
 if TYPE_CHECKING:
+    from datetime import timedelta
     from ipaddress import IPv4Address
-    from typing import Optional
+    from typing import Optional, IO, Any
 
     from typing_extensions import TypedDict
 
     from pcapkit.corekit.multidict import OrderedMultiDict
     from pcapkit.protocols.protocol import Protocol
+    from pcapkit.corekit.fields.field import _Field as Field
 
     class VerIHLField(TypedDict):
         """Version and header length field."""
@@ -81,53 +90,36 @@ if TYPE_CHECKING:
         #: Rate request/report.
         rate: int
 
+    class QSTestFlags(TypedDict):
+        """Quick start test flag."""
 
-class IPv4(Schema):
-    """Header schema for IPv4 packet."""
+        #: QS function.
+        func: int
 
-    #: Version and header length.
-    vihl: 'VerIHLField' = BitField(length=1, namespace={
-        'version': (0, 4),
-        'ihl': (4, 8),
-    })
-    #: Type of service.
-    tos: 'ToSField' = BitField(length=1, namespace={
-        'pre': (0, 3),
-        'del': (3, 1),
-        'thr': (4, 1),
-        'rel': (5, 1),
-        'ecn': (6, 2),
-    })
-    #: Total length.
-    length: 'int' = UInt16Field()
-    #: Identification.
-    id: 'int' = UInt16Field()
-    #: Flags and fragment offset.
-    flags: 'Flags' = BitField(length=2, namespace={
-        'df': (1, 1),
-        'mf': (2, 1),
-        'offset': (3, 13),
-    })
-    #: Time to live.
-    ttl: 'int' = UInt8Field()
-    #: Protocol.
-    proto: 'Enum_TransType' = EnumField(length=1, namespace=Enum_TransType)
-    #: Header checksum.
-    chksum: 'bytes' = BytesField(length=2)
-    #: Source address.
-    src: 'IPv4Address' = IPv4Field()
-    #: Destination address.
-    dst: 'IPv4Address' = IPv4Field()
-    #: Options.
-    options: 'list[Option]' = ListField(length=lambda pkt: pkt['vihl']['ihl'] * 4 - 20)
-    #: Payload.
-    payload: 'bytes' = PayloadField(length=lambda pkt: pkt['length'] - pkt['vihl']['ihl'] * 4)
 
-    if TYPE_CHECKING:
-        def __init__(self, vihl: 'VerIHLField', tos: 'ToSField', length: 'int', id: 'int',
-                     flags: 'Flags', ttl: 'int', proto: 'Enum_TransType', chksum: 'bytes',
-                     src: 'IPv4Address | str | bytes | int', dst: 'IPv4Address | str | bytes | int',
-                     options: 'list[Option | bytes] | bytes', payload: 'bytes | Protocol | Schema') -> 'None': ...
+def quick_start_data_selector(pkt: 'dict[str, Any]') -> 'Field':
+    """Selector function for :attr:`_QSOption.data` field.
+
+    Args:
+        pkt: Packet data.
+
+    Returns:
+        * If ``func`` is ``0``, returns a :class:`~pcapkit.corekit.fields.misc.SchemaField`
+          wrapped :class:`~pcapkit.protocols.schema.internet.hopopt.QuickStartRequestOption`
+          instance.
+        * If ``func`` is ``8``, returns a :class:`~pcapkit.corekit.fields.misc.SchemaField`
+          wrapped :class:`~pcapkit.protocols.schema.internet.hopopt.QuickStartReportOption`
+          instance.
+
+    """
+    func = Enum_QSFunction.get(pkt['flags']['func'])
+    pkt['flags']['func'] = func
+
+    if func == Enum_QSFunction.Quick_Start_Request:
+        return SchemaField(schema=QuickStartRequestOption)
+    if func == Enum_QSFunction.Report_of_Approved_Rate:
+        return SchemaField(schema=QuickStartReportOption)
+    raise FieldValueError(f'HOPOPT: invalid QS function: {func}')
 
 
 class Option(Schema):
@@ -140,6 +132,29 @@ class Option(Schema):
         UInt8Field(),
         lambda pkt: pkt['type'] not in (Enum_OptionNumber.EOOL, Enum_OptionNumber.NOP),
     )
+
+    @staticmethod
+    def post_process(schema: 'Schema', data: 'IO[bytes]', length: 'int',
+                     packet: 'dict[str, Any]') -> 'Schema':
+        """Revise ``schema`` data after unpacking process.
+
+        Args:
+            schema: parsed schema
+            data: Packed data.
+            length: Length of data.
+            packet: Unpacked data.
+
+        Returns:
+            Revised schema.
+
+        """
+        if TYPE_CHECKING:
+            schema = cast('Option', schema)
+
+        # for EOOL/NOP option, length is always 1
+        if schema.type in (Enum_OptionNumber.EOOL, Enum_OptionNumber.NOP):
+            schema.length = 1
+        return schema
 
 
 class UnassignedOption(Option):
@@ -212,7 +227,7 @@ class TSOption(Option):
         'flag': (4, 4),
     })
     #: Timestamps and internet addresses.
-    data: 'list[int] | OrderedMultiDict[IPv4Address, int]' = ListField(
+    ts_data: 'list[int]' = ListField(
         length=lambda pkt: pkt['pointer'] - 5 if pkt['flags']['flag'] != 3 else pkt['length'] - 4,
         item_type=UInt32Field(),
     )
@@ -222,7 +237,91 @@ class TSOption(Option):
         default=bytes(36),  # 36 is the maximum length of the option data field for timestamps
     )
 
+    @staticmethod
+    def post_process(schema: 'Schema', data: 'IO[bytes]', length: 'int',
+                     packet: 'dict[str, Any]') -> 'Schema':
+        """Revise ``schema`` data after unpacking process.
+
+        Args:
+            schema: parsed schema
+            data: Packed data.
+            length: Length of data.
+            packet: Unpacked data.
+
+        Returns:
+            Revised schema.
+
+        """
+        if TYPE_CHECKING:
+            schema = cast('TSOption', schema)
+
+        ts_flag = Enum_TSFlag.get(schema.flags['flag'])
+        if ts_flag == Enum_TSFlag.Timestamp_Only:
+            ts_data = schema.ts_data
+            schema.data = []
+            ts_list = []  # type: list[int | timedelta]
+
+            for ts in ts_data:
+                schema.data.append(ts)
+
+                if ts >> 31:
+                    warn(f'IPv4: [OptNo {schema.type}] invalid format: timestamp error: {ts_val}', ProtocolWarning)
+                    ts_val = ts & 0x7FFFFFFF  # type: int | timedelta
+                else:
+                    ts_val = datetime.timedelta(milliseconds=ts)
+                ts_list.append(ts_val)
+            timestamp = tuple(ts_list)  # type: tuple[int | timedelta, ...] | OrderedMultiDict[IPv4Address, int | timedelta]
+        elif ts_flag == Enum_TSFlag.IP_with_Timestamp:
+            ts_data = schema.ts_data
+            schema.data = OrderedMultiDict()
+            timestamp = OrderedMultiDict()
+
+            for ip, ts in zip(ts_data[::2], ts_data[1::2]):
+                ip_val = cast('IPv4Address', ipaddress.ip_address(ip))
+                schema.data.add(ip_val, ts)
+
+                if ts >> 31:
+                    warn(f'IPv4: [OptNo {schema.type}] invalid format: timestamp error: {ts_val}', ProtocolWarning)
+                    ts_val = ts & 0x7FFFFFFF
+                else:
+                    ts_val = datetime.timedelta(milliseconds=ts)
+                timestamp.add(ip_val, ts_val)
+        elif ts_flag == Enum_TSFlag.Prespecified_IP_with_Timestamp:
+            ts_data = schema.ts_data
+            schema.data = OrderedMultiDict()
+            timestamp = OrderedMultiDict()
+
+            for ip, ts in zip(ts_data[::2], ts_data[1::2]):
+                ip_val = cast('IPv4Address', ipaddress.ip_address(ip))
+                schema.data.add(ip_val, ts)
+
+                if ts >> 31:
+                    warn(f'IPv4: [OptNo {schema.type}] invalid format: timestamp error: {ts_val}', ProtocolWarning)
+                    ts_val = ts & 0x7FFFFFFF
+                else:
+                    ts_val = datetime.timedelta(milliseconds=ts)
+                timestamp.add(ip_val, ts_val)
+
+            # extract also the prespecified IP addresses
+            # but set the timestamp to 0
+            pad = schema.remainder
+            for index in range(0, len(pad), 8):
+                buf_ip = pad[index:index + 4]
+                schema.data.add(ipaddress.ip_address(buf_ip), 0)  # type: ignore[arg-type]
+        else:
+            warn(f'IPv4: [OptNo {schema.type}] invalid format: unknown timestmap flag: {ts_flag}', ProtocolWarning)
+            schema.data = schema.ts_data
+            timestamp = tuple(schema.ts_data)
+
+        schema.ts_flag = ts_flag
+        schema.timestamp = timestamp
+        return schema
+
     if TYPE_CHECKING:
+        ts_flag: 'Enum_TSFlag'
+        data: 'list[int] | OrderedMultiDict[IPv4Address, int]'
+        timestamp: 'tuple[int | timedelta] | OrderedMultiDict[IPv4Address, int | timedelta]'
+
         def __init__(self, type: 'Enum_OptionNumber', length: 'int', pointer: 'int', flags: 'TSFlags', data: 'list[int]') -> 'None': ...
 
 
@@ -337,6 +436,42 @@ class RTRALTOption(Option):
         def __init__(self, type: 'Enum_OptionNumber', length: 'int', alert: 'Enum_RouterAlert') -> 'None': ...
 
 
+class _QSOption(Option):
+    """Header schema for IPv4 quick start (``QS``) options in generic representation."""
+
+    #: Flags.
+    flags: 'QSTestFlags' = ForwardMatchField(BitField(length=3, namespace={
+        'func': (16, 4),
+    }))
+    #: QS data.
+    data: 'QuickStartRequestOption | QuickStartReportOption' = SwitchField(
+        length=5,
+        selector=quick_start_data_selector,
+    )
+
+    @staticmethod
+    def post_process(schema: 'Schema', data: 'IO[bytes]', length: 'int',
+                     packet: 'dict[str, Any]') -> 'Schema':
+        """Revise ``schema`` data after unpacking process.
+
+        Args:
+            schema: parsed schema
+            data: Packed data.
+            length: Length of data.
+            packet: Unpacked data.
+
+        Returns:
+            Revised schema.
+
+        """
+        if TYPE_CHECKING:
+            schema = cast('_QSOption', schema)
+
+        ret = schema.data
+        ret.func = Enum_QSFunction.get(packet['flags']['func'])
+        return ret
+
+
 class QSOption(Option):
     """Header schema for IPV4 quick start (``QS``) options."""
 
@@ -345,6 +480,9 @@ class QSOption(Option):
         'func': (0, 4),
         'rate': (4, 4),
     })
+
+    if TYPE_CHECKING:
+        func: 'Enum_QSFunction'
 
 
 class QuickStartRequestOption(QSOption):
@@ -369,3 +507,71 @@ class QuickStartReportOption(QSOption):
     if TYPE_CHECKING:
         def __init__(self, type: 'Enum_OptionNumber', length: 'int', flags: 'QuickStartFlags',
                      nonce: 'bytes') -> 'None': ...
+
+
+class IPv4(Schema):
+    """Header schema for IPv4 packet."""
+
+    #: Version and header length.
+    vihl: 'VerIHLField' = BitField(length=1, namespace={
+        'version': (0, 4),
+        'ihl': (4, 8),
+    })
+    #: Type of service.
+    tos: 'ToSField' = BitField(length=1, namespace={
+        'pre': (0, 3),
+        'del': (3, 1),
+        'thr': (4, 1),
+        'rel': (5, 1),
+        'ecn': (6, 2),
+    })
+    #: Total length.
+    length: 'int' = UInt16Field()
+    #: Identification.
+    id: 'int' = UInt16Field()
+    #: Flags and fragment offset.
+    flags: 'Flags' = BitField(length=2, namespace={
+        'df': (1, 1),
+        'mf': (2, 1),
+        'offset': (3, 13),
+    })
+    #: Time to live.
+    ttl: 'int' = UInt8Field()
+    #: Protocol.
+    proto: 'Enum_TransType' = EnumField(length=1, namespace=Enum_TransType)
+    #: Header checksum.
+    chksum: 'bytes' = BytesField(length=2)
+    #: Source address.
+    src: 'IPv4Address' = IPv4Field()
+    #: Destination address.
+    dst: 'IPv4Address' = IPv4Field()
+    #: Options.
+    options: 'list[Option]' = OptionField(
+        length=lambda pkt: pkt['vihl']['ihl'] * 4 - 20,
+        base_schema=Option,
+        type_name='type',
+        registry=collections.defaultdict(lambda: UnassignedOption, {
+            Enum_OptionNumber.EOOL: EOOLOption,
+            Enum_OptionNumber.NOP: NOPOption,
+            Enum_OptionNumber.SEC: SECOption,
+            Enum_OptionNumber.LSR: LSROption,
+            Enum_OptionNumber.E_SEC: ESECOption,
+            Enum_OptionNumber.RR: RROption,
+            Enum_OptionNumber.SID: SIDOption,
+            Enum_OptionNumber.SSR: SSROption,
+            Enum_OptionNumber.MTUP: MTUPOption,
+            Enum_OptionNumber.MTUR: MTUROption,
+            Enum_OptionNumber.TR: TROption,
+            Enum_OptionNumber.RTRALT: RTRALTOption,
+            Enum_OptionNumber.QS: _QSOption,
+        }))
+    #: Padding.
+    padding: 'bytes' = PaddingField(length=lambda pkt: pkt.get('__option_padding__', 0))
+    #: Payload.
+    payload: 'bytes' = PayloadField(length=lambda pkt: pkt['length'] - pkt['vihl']['ihl'] * 4)
+
+    if TYPE_CHECKING:
+        def __init__(self, vihl: 'VerIHLField', tos: 'ToSField', length: 'int', id: 'int',
+                     flags: 'Flags', ttl: 'int', proto: 'Enum_TransType', chksum: 'bytes',
+                     src: 'IPv4Address | str | bytes | int', dst: 'IPv4Address | str | bytes | int',
+                     options: 'list[Option | bytes] | bytes', payload: 'bytes | Protocol | Schema') -> 'None': ...

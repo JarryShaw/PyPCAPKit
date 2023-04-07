@@ -35,7 +35,6 @@ Octets      Bits        Name                    Description
 import datetime
 import ipaddress
 import math
-import struct
 from typing import TYPE_CHECKING, cast
 
 from pcapkit.const.ipv4.classification_level import ClassificationLevel as Enum_ClassificationLevel
@@ -115,8 +114,7 @@ if TYPE_CHECKING:
     from pcapkit.protocols.schema.internet.ipv4 import Option as Schema_Option
 
     Option = OrderedMultiDict[Enum_OptionNumber, Data_Option]
-    OptionParser = Callable[['IPv4', Enum_OptionNumber, NamedArg(bytes, 'data'), NamedArg(int, 'length'),
-                             NamedArg(Option, 'options')], Data_Option]
+    OptionParser = Callable[['IPv4', Schema_Option, NamedArg(Option, 'options')], Data_Option]
     OptionConstructor = Callable[['IPv4', Enum_OptionNumber, DefaultArg(Optional[Data_Option]),
                                   KwArg(Any)], Schema_Option]
 
@@ -441,7 +439,7 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
             warn(f'option {code} already registered, overwriting', RegistryWarning)
 
         if isinstance(meth, str):
-            meth = (getattr(cls, f'_read_opt_{meth}', cls._read_opt_unassigned),
+            meth = (getattr(cls, f'_read_opt_{meth}', cls._read_opt_unassigned),  # type: ignore[arg-type]
                     getattr(cls, f'_make_opt_{meth}', cls._make_opt_unassigned))  # type: ignore[arg-type]
 
         setattr(cls, f'_read_opt_{name}', meth[0])
@@ -547,35 +545,17 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
             ProtocolError: If the threshold is **NOT** matching.
 
         """
-        payload = cast('bytes', self.__header__.options)
-        self.__header__.options = []
-
         counter = 0                   # length of read option list
         options = OrderedMultiDict()  # type: Option
 
-        while counter < length:
-            # break when eol triggerred
-            cbuf = payload[counter:counter + 1]
-            if not cbuf:
-                break
+        for schema in self.__header__.options:
+            kind = schema.type
+            name = kind.name.lower()
 
-            # get option type
-            code = int(cbuf, base=2)
-            kind = Enum_OptionNumber.get(code)
-
-            # get option length
-            if code in (Enum_OptionNumber.NOP, Enum_OptionNumber.EOOL):
-                clen = 1
-            else:
-                cbuf = payload[counter + 1:counter + 2]
-                clen = struct.unpack('!B', cbuf)[0]
-
-            # extract option data
-            meth_name = f'_read_opt_{kind.name.lower()}'
+            meth_name = f'_read_opt_{name}'
             meth = cast('OptionParser',
                         getattr(self, meth_name, self._read_opt_unassigned))
-            data = meth(self, kind, data=payload[counter:counter + clen],
-                        length=clen, options=options)
+            data = meth(self, schema, options=options)
 
             # record option data
             counter += data.length
@@ -585,14 +565,12 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
             if kind == Enum_OptionNumber.EOOL:
                 break
 
-        # get padding
-        if counter < length:
-            self._read_fileng(length - counter)
-
+        # check threshold
+        if counter > length:
+            raise ProtocolError(f'IPv4: invalid format')
         return options
 
-    def _read_opt_unassigned(self, kind: 'Enum_OptionNumber', *, data: 'bytes',
-                             length: 'int', options: 'Option') -> 'Data_UnassignedOption':  # pylint: disable=unused-argument
+    def _read_opt_unassigned(self, schema: 'Schema_UnassignedOption', *, options: 'Option') -> 'Data_UnassignedOption':  # pylint: disable=unused-argument
         """Read IPv4 unassigned options.
 
         Structure of IPv4 unassigned options [:rfc:`791`]:
@@ -606,9 +584,7 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Arguments:
-            kind: option type code
-            data: option payload
-            length: option payload length
+            schema: parsed option schema
             options: extracted IPv4 options
 
         Returns:
@@ -618,22 +594,18 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
             ProtocolError: If ``length`` is **LESS THAN** ``3``.
 
         """
-        if length < 3:
-            raise ProtocolError(f'{self.alias}: [OptNo {kind}] invalid format')
-
-        schema = Schema_UnassignedOption.unpack(data, length)  # type: Schema_UnassignedOption
-        self.__header__.options.append(schema)
+        if schema.length < 3:
+            raise ProtocolError(f'{self.alias}: [OptNo {schema.type}] invalid format')
 
         opt = Data_UnassignedOption(
-            code=kind,
-            type=self._read_ipv4_opt_type(kind),
+            code=schema.type,
+            type=self._read_ipv4_opt_type(schema.type),
             length=schema.length,
             data=schema.data,
         )
         return opt
 
-    def _read_opt_eool(self, kind: 'Enum_OptionNumber', *, data: 'bytes',
-                       length: 'int', options: 'Option') -> 'Data_EOOLOption':  # pylint: disable=unused-argument
+    def _read_opt_eool(self, schema: 'Schema_EOOLOption', *, options: 'Option') -> 'Data_EOOLOption':  # pylint: disable=unused-argument
         """Read IPv4 End of Option List (``EOOL``) option.
 
         Structure of IPv4 End of Option List (``EOOL``) option [:rfc:`719`]:
@@ -646,27 +618,21 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
              Type=0
 
         Arguments:
-            kind: option type code
-            data: option payload
-            length: option payload length
+            schema: parsed option schema
             options: extracted IPv4 options
 
         Returns:
             Parsed option data.
 
         """
-        schema = Schema_EOOLOption.unpack(data, length)  # type: Schema_EOOLOption
-        self.__header__.options.append(schema)
-
         opt = Data_EOOLOption(
-            code=kind,
-            type=self._read_ipv4_opt_type(kind),
+            code=schema.type,
+            type=self._read_ipv4_opt_type(schema.type),
             length=1,
         )
         return opt
 
-    def _read_opt_nop(self, kind: 'Enum_OptionNumber', *, data: 'bytes',
-                      length: 'int', options: 'Option') -> 'Data_NOPOption':  # pylint: disable=unused-argument
+    def _read_opt_nop(self, schema: 'Schema_NOPOption', *, options: 'Option') -> 'Data_NOPOption':  # pylint: disable=unused-argument
         """Read IPv4 No Operation (``NOP``) option.
 
         Structure of IPv4 No Operation (``NOP``) option [:rfc:`719`]:
@@ -679,27 +645,21 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
              Type=1
 
         Arguments:
-            kind: option type code
-            data: option payload
-            length: option payload length
+            schema: parsed option schema
             options: extracted IPv4 options
 
         Returns:
             Parsed option data.
 
         """
-        schema = Schema_NOPOption.unpack(data, length)  # type: Schema_NOPOption
-        self.__header__.options.append(schema)
-
         opt = Data_NOPOption(
-            code=kind,
-            type=self._read_ipv4_opt_type(kind),
+            code=schema.type,
+            type=self._read_ipv4_opt_type(schema.type),
             length=1,
         )
         return opt
 
-    def _read_opt_sec(self, kind: 'Enum_OptionNumber', *, data: 'bytes',
-                      length: 'int', options: 'Option') -> 'Data_SECOption':  # pylint: disable=unused-argument
+    def _read_opt_sec(self, schema: 'Schema_SECOption', *, options: 'Option') -> 'Data_SECOption':  # pylint: disable=unused-argument
         """Read IPv4 Security (``SEC``) option.
 
         Structure of IPv4 Security (``SEC``) option [:rfc:`1108`]:
@@ -715,9 +675,7 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
                                                                FLAGS
 
         Arguments:
-            kind: option type code
-            data: option payload
-            length: option payload length
+            schema: parsed option schema
             options: extracted IPv4 options
 
         Returns:
@@ -727,11 +685,8 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
             ProtocolError: If ``length`` is **LESS THAN** ``3``.
 
         """
-        if length < 3:
-            raise ProtocolError(f'{self.alias}: [OptNo {kind}] invalid format')
-
-        schema = Schema_SECOption.unpack(data, length)  # type: Schema_SECOption
-        self.__header__.options.append(schema)
+        if schema.length < 3:
+            raise ProtocolError(f'{self.alias}: [OptNo {schema.type}] invalid format')
 
         if schema.length > 3:
             flags = []  # type: list[Enum_ProtectionAuthority]
@@ -740,21 +695,21 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
                     authority = Enum_ProtectionAuthority.get(base * 8 + bit)
                     if byte & (0x80 >> bit):
                         if 'Unassigned' in authority.name:
-                            warn(f'{self.alias}: [OptNo {kind}] invalid format: unknown protection authority: {authority}', ProtocolWarning)
+                            warn(f'{self.alias}: [OptNo {schema.type}] invalid format: unknown protection authority: {authority}', ProtocolWarning)
                         flags.append(authority)
 
                 if byte & 0x01 == 1 and base < schema.length - 4:
                     #raise ProtocolError(f'{self.alias}: [OptNo {kind}] invalid format: remaining data')
-                    warn(f'{self.alias}: [OptNo {kind}] invalid format: remaining data', ProtocolWarning)
+                    warn(f'{self.alias}: [OptNo {schema.type}] invalid format: remaining data', ProtocolWarning)
 
             if schema.data[-1] & 0x01 == 0:
-                warn(f'{self.alias}: [OptNo {kind}] invalid format: field termination indicator not set', ProtocolWarning)
+                warn(f'{self.alias}: [OptNo {schema.type}] invalid format: field termination indicator not set', ProtocolWarning)
         else:
             flags = []
 
         opt = Data_SECOption(
-            code=kind,
-            type=self._read_ipv4_opt_type(kind),
+            code=schema.type,
+            type=self._read_ipv4_opt_type(schema.type),
             length=schema.length,
             level=schema.level,
             flags=tuple(flags),
@@ -762,8 +717,7 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
 
         return opt
 
-    def _read_opt_lsr(self, kind: 'Enum_OptionNumber', *, data: 'bytes',
-                      length: 'int', options: 'Option') -> 'Data_LSROption':  # pylint: disable=unused-argument
+    def _read_opt_lsr(self, schema: 'Schema_LSROption', *, options: 'Option') -> 'Data_LSROption':  # pylint: disable=unused-argument
         """Read IPv4 Loose Source Route (``LSR``) option.
 
         Structure of IPv4 Loose Source Route (``LSR``) option [:rfc:`791`]:
@@ -775,9 +729,7 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
            +--------+--------+--------+---------//--------+
 
         Arguments:
-            kind: option type code
-            data: option payload
-            length: option payload length
+            schema: parsed option schema
             options: extracted IPv4 options
 
         Returns:
@@ -787,26 +739,21 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
             ProtocolError: If option is malformed.
 
         """
-        if length < 3 or (length - 3) % 4 != 0:
-            raise ProtocolError(f'{self.alias}: [OptNo {kind}] invalid format')
-
-        schema = Schema_LSROption.unpack(data, length)  # type: Schema_LSROption
-        self.__header__.options.append(schema)
-
+        if schema.length < 3 or (schema.length - 3) % 4 != 0:
+            raise ProtocolError(f'{self.alias}: [OptNo {schema.type}] invalid format')
         if schema.pointer < 4:
-            raise ProtocolError(f'{self.alias}: [OptNo {kind}] invalid format: pointer too small: {schema.pointer}')
+            raise ProtocolError(f'{self.alias}: [OptNo {schema.type}] invalid format: pointer too small: {schema.pointer}')
 
         opt = Data_LSROption(
-            code=kind,
-            type=self._read_ipv4_opt_type(kind),
+            code=schema.type,
+            type=self._read_ipv4_opt_type(schema.type),
             length=schema.length,
             pointer=schema.pointer,
             route=tuple(schema.route),
         )
         return opt
 
-    def _read_opt_ts(self, kind: 'Enum_OptionNumber', *, data: 'bytes',
-                     length: 'int', options: 'Option') -> 'Data_TSOption':  # pylint: disable=unused-argument
+    def _read_opt_ts(self, schema: 'Schema_TSOption', *, options: 'Option') -> 'Data_TSOption':  # pylint: disable=unused-argument
         """Read IPv4 Time Stamp (``TS``) option.
 
         Structure of IPv4 Time Stamp (``TS``) option [:rfc:`791`]:
@@ -825,9 +772,7 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
                              .
 
         Arguments:
-            kind: option type code
-            data: option payload
-            length: option payload length
+            schema: parsed option schema
             options: extracted IPv4 options
 
         Returns:
@@ -837,85 +782,23 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
             ProtocolError: If the option is malformed.
 
         """
-        if length > 40 or length < 4:
-            raise ProtocolError(f'{self.alias}: [OptNo {kind}] invalid format')
-
-        schema = Schema_TSOption.unpack(data, length)  # type: Schema_TSOption
-        self.__header__.options.append(schema)
-
+        if schema.length > 40 or schema.length < 4:
+            raise ProtocolError(f'{self.alias}: [OptNo {schema.type}] invalid format')
         if schema.pointer < 5:
-            raise ProtocolError(f'{self.alias}: [OptNo {kind}] invalid format: pointer too small: {schema.pointer}')
-
-        ts_flag = Enum_TSFlag.get(schema.flags['flag'])
-        if ts_flag == Enum_TSFlag.Timestamp_Only:
-            ts_data = cast('list[int]', schema.data)
-            schema.data = []
-            ts_list = []  # type: list[int | timedelta]
-
-            for ts in ts_data:
-                schema.data.append(ts)
-
-                if ts >> 31:
-                    warn(f'{self.alias}: [OptNo {kind}] invalid format: timestamp error: {ts_val}', ProtocolWarning)
-                    ts_val = ts & 0x7FFFFFFF  # type: int | timedelta
-                else:
-                    ts_val = datetime.timedelta(milliseconds=ts)
-                ts_list.append(ts_val)
-            timestamp = tuple(ts_list)  # type: tuple[int | timedelta, ...] | OrderedMultiDict[IPv4Address, int | timedelta]
-        elif ts_flag == Enum_TSFlag.IP_with_Timestamp:
-            ts_data = cast('list[int]', schema.data)
-            schema.data = OrderedMultiDict()
-            timestamp = OrderedMultiDict()
-
-            for ip, ts in zip(ts_data[::2], ts_data[1::2]):
-                ip_val = cast('IPv4Address', ipaddress.ip_address(ip))
-                schema.data.add(ip_val, ts)
-
-                if ts >> 31:
-                    warn(f'{self.alias}: [OptNo {kind}] invalid format: timestamp error: {ts_val}', ProtocolWarning)
-                    ts_val = ts & 0x7FFFFFFF
-                else:
-                    ts_val = datetime.timedelta(milliseconds=ts)
-                timestamp.add(ip_val, ts_val)
-        elif ts_flag == Enum_TSFlag.Prespecified_IP_with_Timestamp:
-            ts_data = cast('list[int]', schema.data)
-            schema.data = OrderedMultiDict()
-            timestamp = OrderedMultiDict()
-
-            for ip, ts in zip(ts_data[::2], ts_data[1::2]):
-                ip_val = cast('IPv4Address', ipaddress.ip_address(ip))
-                schema.data.add(ip_val, ts)
-
-                if ts >> 31:
-                    warn(f'{self.alias}: [OptNo {kind}] invalid format: timestamp error: {ts_val}', ProtocolWarning)
-                    ts_val = ts & 0x7FFFFFFF
-                else:
-                    ts_val = datetime.timedelta(milliseconds=ts)
-                timestamp.add(ip_val, ts_val)
-
-            # extract also the prespecified IP addresses
-            # but set the timestamp to 0
-            pad = schema.remainder
-            for index in range(0, len(pad), 8):
-                buf_ip = pad[index:index + 4]
-                schema.data.add(ipaddress.ip_address(buf_ip), 0)  # type: ignore[arg-type]
-        else:
-            warn(f'{self.alias}: [OptNo {kind}] invalid format: unknown timestmap flag: {ts_flag}', ProtocolWarning)
-            timestamp = tuple(schema.data)
+            raise ProtocolError(f'{self.alias}: [OptNo {schema.type}] invalid format: pointer too small: {schema.pointer}')
 
         opt = Data_TSOption(
-            code=kind,
-            type=self._read_ipv4_opt_type(kind),
+            code=schema.type,
+            type=self._read_ipv4_opt_type(schema.type),
             length=schema.length,
             pointer=schema.pointer,
             overflow=schema.flags['oflw'],
-            flag=ts_flag,
-            timestamp=timestamp,
+            flag=schema.ts_flag,
+            timestamp=schema.timestamp,
         )
         return opt
 
-    def _read_opt_esec(self, kind: 'Enum_OptionNumber', *, data: 'bytes',
-                       length: 'int', options: 'Option') -> 'Data_ESECOption':  # pylint: disable=unused-argument
+    def _read_opt_esec(self, schema: 'Schema_ESECOption', *, options: 'Option') -> 'Data_ESECOption':  # pylint: disable=unused-argument
         """Read IPv4 Extended Security (``ESEC``) option.
 
         Structure of IPv4 Extended Security (``ESEC``) option [:rfc:`1108`]:
@@ -930,9 +813,7 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
                                        FORMAT CODE        INFO
 
         Arguments:
-            kind: option type code
-            data: option payload
-            length: option payload length
+            schema: parsed option schema
             options: extracted IPv4 options
 
         Returns:
@@ -942,23 +823,19 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
             ProtocolError: If ``length`` is **LESS THAN** ``3``.
 
         """
-        if length < 3:
-            raise ProtocolError(f'{self.alias}: [OptNo {kind}] invalid format')
-
-        schema = Schema_ESECOption.unpack(data, length)  # type: Schema_ESECOption
-        self.__header__.options.append(schema)
+        if schema.length < 3:
+            raise ProtocolError(f'{self.alias}: [OptNo {schema.type}] invalid format')
 
         opt = Data_ESECOption(
-            code=kind,
-            type=self._read_ipv4_opt_type(kind),
+            code=schema.type,
+            type=self._read_ipv4_opt_type(schema.type),
             length=schema.length,
             format=schema.format,
             info=schema.info,
         )
         return opt
 
-    def _read_opt_rr(self, kind: 'Enum_OptionNumber', *, data: 'bytes',
-                     length: 'int', options: 'Option') -> 'Data_RROption':  # pylint: disable=unused-argument
+    def _read_opt_rr(self, schema: 'Schema_RROption', *, options: 'Option') -> 'Data_RROption':  # pylint: disable=unused-argument
         """Read IPv4 Record Route (``RR``) option.
 
         Structure of IPv4 Record Route (``RR``) option [:rfc:`791`]:
@@ -971,9 +848,7 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
              Type=7
 
         Arguments:
-            kind: option type code
-            data: option payload
-            length: option payload length
+            schema: parsed option schema
             options: extracted IPv4 options
 
         Returns:
@@ -983,26 +858,21 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
             ProtocolError: If option is malformed.
 
         """
-        if length < 3 or (length - 3) % 4 != 0:
-            raise ProtocolError(f'{self.alias}: [OptNo {kind}] invalid format')
-
-        schema = Schema_RROption.unpack(data, length)  # type: Schema_RROption
-        self.__header__.options.append(schema)
-
+        if schema.length < 3 or (schema.length - 3) % 4 != 0:
+            raise ProtocolError(f'{self.alias}: [OptNo {schema.type}] invalid format')
         if schema.pointer < 4:
-            raise ProtocolError(f'{self.alias}: [OptNo {kind}] invalid format: pointer too small: {schema.pointer}')
+            raise ProtocolError(f'{self.alias}: [OptNo {schema.type}] invalid format: pointer too small: {schema.pointer}')
 
         opt = Data_RROption(
-            code=kind,
-            type=self._read_ipv4_opt_type(kind),
+            code=schema.type,
+            type=self._read_ipv4_opt_type(schema.type),
             length=schema.length,
             pointer=schema.pointer,
             route=tuple(schema.route),
         )
         return opt
 
-    def _read_opt_sid(self, kind: 'Enum_OptionNumber', *, data: 'bytes',
-                      length: 'int', options: 'Option') -> 'Data_SIDOption':  # pylint: disable=unused-argument
+    def _read_opt_sid(self, schema: 'Schema_SIDOption', *, options: 'Option') -> 'Data_SIDOption':  # pylint: disable=unused-argument
         """Read IPv4 Stream ID (``SID``) option.
 
         Structure of IPv4 Stream ID (``SID``) option [:rfc:`791`][:rfc:`6814`]:
@@ -1015,9 +885,7 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
             Type=136 Length=4
 
         Arguments:
-            kind: option type code
-            data: option payload
-            length: option payload length
+            schema: parsed option schema
             options: extracted IPv4 options
 
         Returns:
@@ -1027,22 +895,18 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
             ProtocolError: If ``length`` is **NOT** ``4``.
 
         """
-        if length != 4:
-            raise ProtocolError(f'{self.alias}: [OptNo {kind}] invalid format')
-
-        schema = Schema_SIDOption.unpack(data, length)  # type: Schema_SIDOption
-        self.__header__.options.append(schema)
+        if schema.length != 4:
+            raise ProtocolError(f'{self.alias}: [OptNo {schema.type}] invalid format')
 
         opt = Data_SIDOption(
-            code=kind,
-            type=self._read_ipv4_opt_type(kind),
+            code=schema.type,
+            type=self._read_ipv4_opt_type(schema.type),
             length=schema.length,
             sid=schema.sid,
         )
         return opt
 
-    def _read_opt_ssr(self, kind: 'Enum_OptionNumber', *, data: 'bytes',
-                      length: 'int', options: 'Option') -> 'Data_SSROption':  # pylint: disable=unused-argument
+    def _read_opt_ssr(self, schema: 'Schema_SSROption', *, options: 'Option') -> 'Data_SSROption':  # pylint: disable=unused-argument
         """Read IPv4 Strict Source Route (``SSR``) option.
 
         Structure of IPv4 Strict Source Route (``SSR``) option [:rfc:`791`]:
@@ -1055,9 +919,7 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
             Type=137
 
         Arguments:
-            kind: option type code
-            data: option payload
-            length: option payload length
+            schema: parsed option schema
             options: extracted IPv4 options
 
         Returns:
@@ -1067,26 +929,21 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
             ProtocolError: If option is malformed.
 
         """
-        if length < 3 or (length - 3) % 4 != 0:
-            raise ProtocolError(f'{self.alias}: [OptNo {kind}] invalid format')
-
-        schema = Schema_SSROption.unpack(data, length)  # type: Schema_SSROption
-        self.__header__.options.append(schema)
-
+        if schema.length < 3 or (schema.length - 3) % 4 != 0:
+            raise ProtocolError(f'{self.alias}: [OptNo {schema.type}] invalid format')
         if schema.pointer < 4:
-            raise ProtocolError(f'{self.alias}: [OptNo {kind}] invalid format: pointer too small: {schema.pointer}')
+            raise ProtocolError(f'{self.alias}: [OptNo {schema.type}] invalid format: pointer too small: {schema.pointer}')
 
         opt = Data_SSROption(
-            code=kind,
-            type=self._read_ipv4_opt_type(kind),
+            code=schema.type,
+            type=self._read_ipv4_opt_type(schema.type),
             length=schema.length,
             pointer=schema.pointer,
             route=tuple(schema.route),
         )
         return opt
 
-    def _read_opt_mtup(self, kind: 'Enum_OptionNumber', *, data: 'bytes',
-                       length: 'int', options: 'Option') -> 'Data_MTUPOption':  # pylint: disable=unused-argument
+    def _read_opt_mtup(self, schema: 'Schema_MTUPOption', *, options: 'Option') -> 'Data_MTUPOption':  # pylint: disable=unused-argument
         """Read IPv4 MTU Probe (``MTUP``) option.
 
         Structure of IPv4 MTU Probe (``MTUP``) option [:rfc:`1063`][:rfc:`1191`]:
@@ -1098,9 +955,7 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
            +--------+--------+--------+--------+
 
         Arguments:
-            kind: option type code
-            data: option payload
-            length: option payload length
+            schema: parsed option schema
             options: extracted IPv4 options
 
         Returns:
@@ -1110,22 +965,18 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
             ProtocolError: If ``length`` is **NOT** ``4``.
 
         """
-        if length != 4:
-            raise ProtocolError(f'{self.alias}: [OptNo {kind}] invalid format')
-
-        schema = Schema_MTUPOption.unpack(data, length)  # type: Schema_MTUPOption
-        self.__header__.options.append(schema)
+        if schema.length != 4:
+            raise ProtocolError(f'{self.alias}: [OptNo {schema.type}] invalid format')
 
         opt = Data_MTUPOption(
-            code=kind,
-            type=self._read_ipv4_opt_type(kind),
+            code=schema.type,
+            type=self._read_ipv4_opt_type(schema.type),
             length=schema.length,
             mtu=schema.mtu,
         )
         return opt
 
-    def _read_opt_mtur(self, kind: 'Enum_OptionNumber', *, data: 'bytes',
-                       length: 'int', options: 'Option') -> 'Data_MTUROption':  # pylint: disable=unused-argument
+    def _read_opt_mtur(self, schema: 'Schema_MTUROption', *, options: 'Option') -> 'Data_MTUROption':  # pylint: disable=unused-argument
         """Read IPv4 MTU Reply (``MTUR``) option.
 
         Structure of IPv4 MTU Reply (``MTUR``) option [:rfc:`1063`][:rfc:`1191`]:
@@ -1137,9 +988,7 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
            +--------+--------+--------+--------+
 
         Arguments:
-            kind: option type code
-            data: option payload
-            length: option payload length
+            schema: parsed option schema
             options: extracted IPv4 options
 
         Returns:
@@ -1149,22 +998,18 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
             ProtocolError: If ``length`` is **NOT** ``4``.
 
         """
-        if length != 4:
-            raise ProtocolError(f'{self.alias}: [OptNo {kind}] invalid format')
-
-        schema = Schema_MTUROption.unpack(data, length)  # type: Schema_MTUROption
-        self.__header__.options.append(schema)
+        if schema.length != 4:
+            raise ProtocolError(f'{self.alias}: [OptNo {schema.type}] invalid format')
 
         opt = Data_MTUROption(
-            code=kind,
-            type=self._read_ipv4_opt_type(kind),
+            code=schema.type,
+            type=self._read_ipv4_opt_type(schema.type),
             length=schema.length,
             mtu=schema.mtu,
         )
         return opt
 
-    def _read_opt_tr(self, kind: 'Enum_OptionNumber', *, data: 'bytes',
-                     length: 'int', options: 'Option') -> 'Data_TROption':  # pylint: disable=unused-argument
+    def _read_opt_tr(self, schema: 'Schema_TROption', *, options: 'Option') -> 'Data_TROption':  # pylint: disable=unused-argument
         """Read IPv4 Traceroute (``TR``) option.
 
         Structure of IPv4 Traceroute (``TR``) option [:rfc:`1393`][:rfc:`6814`]:
@@ -1181,9 +1026,7 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
            +---------------+---------------+---------------+---------------+
 
         Arguments:
-            kind: option type code
-            data: option payload
-            length: option payload length
+            schema: parsed option schema
             options: extracted IPv4 options
 
         Returns:
@@ -1193,15 +1036,12 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
             ProtocolError: If ``length`` is **NOT** ``12``.
 
         """
-        if length != 12:
-            raise ProtocolError(f'{self.alias}: [OptNo {kind}] invalid format')
-
-        schema = Schema_TROption.unpack(data, length)  # type: Schema_TROption
-        self.__header__.options.append(schema)
+        if schema.length != 12:
+            raise ProtocolError(f'{self.alias}: [OptNo {schema.type}] invalid format')
 
         opt = Data_TROption.from_dict({
-            'code': kind,
-            'type': self._read_ipv4_opt_type(kind),
+            'code': schema.type,
+            'type': self._read_ipv4_opt_type(schema.type),
             'length': schema.length,
             'id': schema.id,
             'outbound': schema.out,
@@ -1210,8 +1050,7 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
         })
         return opt
 
-    def _read_opt_rtralt(self, kind: 'Enum_OptionNumber', *, data: 'bytes',
-                         length: 'int', options: 'Option') -> 'Data_RTRALTOption':  # pylint: disable=unused-argument
+    def _read_opt_rtralt(self, schema: 'Schema_RTRALTOption', *, options: 'Option') -> 'Data_RTRALTOption':  # pylint: disable=unused-argument
         """Read IPv4 Router Alert (``RTRALT``) option.
 
         Structure of IPv4 Router Alert (``RTRALT``) option [:rfc:`2113`]:
@@ -1223,9 +1062,7 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
            +--------+--------+--------+--------+
 
         Arguments:
-            kind: option type code
-            data: option payload
-            length: option payload length
+            schema: parsed option schema
             options: extracted IPv4 options
 
         Returns:
@@ -1235,22 +1072,18 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
             ProtocolError: If ``length`` is **NOT** ``4``.
 
         """
-        if length != 4:
-            raise ProtocolError(f'{self.alias}: [OptNo {kind}] invalid format')
-
-        schema = Schema_RTRALTOption.unpack(data, length)  # type: Schema_RTRALTOption
-        self.__header__.options.append(schema)
+        if schema.length != 4:
+            raise ProtocolError(f'{self.alias}: [OptNo {schema.type}] invalid format')
 
         opt = Data_RTRALTOption(
-            code=kind,
-            type=self._read_ipv4_opt_type(kind),
+            code=schema.type,
+            type=self._read_ipv4_opt_type(schema.type),
             length=schema.length,
             alert=schema.alert,
         )
         return opt
 
-    def _read_opt_qs(self, kind: 'Enum_OptionNumber', *, data: 'bytes',
-                     length: 'int', options: 'Option') -> 'Data_QSOption':  # pylint: disable=unused-argument
+    def _read_opt_qs(self, schema: 'Schema_QSOption', *, options: 'Option') -> 'Data_QSOption':  # pylint: disable=unused-argument
         """Read IPv4 Quick Start (``QS``) option.
 
         Structure of IPv4 Quick Start (``QS``) option [:rfc:`4782`]:
@@ -1282,9 +1115,7 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
              +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Arguments:
-            kind: option type code
-            data: option payload
-            length: option payload length
+            schema: parsed option schema
             options: extracted IPv4 options
 
         Returns:
@@ -1294,18 +1125,17 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
             ProtocolError: If the option is malformed.
 
         """
-        if length != 8:
-            raise ProtocolError(f'{self.alias}: [OptNo {kind}] invalid format')
+        if schema.length != 8:
+            raise ProtocolError(f'{self.alias}: [OptNo {schema.type}] invalid format')
 
-        func = Enum_QSFunction.get((data[2] & 0xf0) >> 4)
+        func = schema.func
         if func == Enum_QSFunction.Quick_Start_Request:
-            schema_req = Schema_QuickStartRequestOption.unpack(data, length)  # type: Schema_QuickStartRequestOption
-            self.__header__.options.append(schema_req)
+            schema_req = cast('Schema_QuickStartRequestOption', schema)
 
             rate = schema_req.flags['rate']
             opt = Data_QuickStartRequestOption(
-                code=kind,
-                type=self._read_ipv4_opt_type(kind),
+                code=schema.type,
+                type=self._read_ipv4_opt_type(schema.type),
                 length=schema_req.length,
                 func=func,
                 rate=40000 * (2 ** rate) / 1000 if rate > 0 else 0,
@@ -1313,20 +1143,19 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
                 nonce=schema_req.nonce,
             )  # type: Data_QSOption
         elif func == Enum_QSFunction.Report_of_Approved_Rate:
-            schema_rep = Schema_QuickStartReportOption.unpack(data, length)  # type: Schema_QuickStartReportOption
-            self.__header__.options.append(schema_rep)
+            schema_rep = cast('Schema_QuickStartReportOption', schema)
 
             rate = schema_rep.flags['rate']
             opt = Data_QuickStartReportOption(
-                code=kind,
-                type=self._read_ipv4_opt_type(kind),
+                code=schema.type,
+                type=self._read_ipv4_opt_type(schema.type),
                 length=schema_req.length,
                 func=func,
                 rate=40000 * (2 ** rate) / 1000 if rate > 0 else 0,
                 nonce=schema_rep.nonce,
             )
         else:
-            raise ProtocolError(f'{self.alias}: [OptNo {kind}] unknown QS function: {func}')
+            raise ProtocolError(f'{self.alias}: [OptNo {schema.type}] unknown QS function: {func}')
         return opt
 
     def _make_ipv4_options(self, options: 'list[Schema_Option | tuple[Enum_OptionNumber, dict[str, Any]] | bytes] | Option') -> 'tuple[list[Schema_Option | bytes], int]':
