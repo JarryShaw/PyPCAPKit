@@ -115,8 +115,7 @@ if TYPE_CHECKING:
     from pcapkit.protocols.schema.internet.ipv6_opts import SMFDPDOption as Schema_SMFDPDOption
 
     Option = OrderedMultiDict[Enum_Option, Data_Option]
-    OptionParser = Callable[['IPv6_Opts', Enum_Option, int, bool, int, NamedArg(bytes, 'data'),
-                             NamedArg(int, 'length'), NamedArg(Option, 'options')], Data_Option]
+    OptionParser = Callable[['IPv6_Opts', Schema_Option, NamedArg(Option, 'options')], Data_Option]
     OptionConstructor = Callable[['IPv6_Opts', Enum_Option,
                                   DefaultArg(Optional[Data_Option]), KwArg(Any)], Schema_Option]
 
@@ -465,55 +464,31 @@ class IPv6_Opts(Internet[Data_IPv6_Opts, Schema_IPv6_Opts],
             ProtocolError: If the threshold is **NOT** matching.
 
         """
-        payload = cast('bytes', self.__header__.options)
-        self.__header__.options = []
-
         counter = 0                   # length of read options
         options = OrderedMultiDict()  # type: Option
 
-        while counter < length:
-            cbuf = payload[counter:counter + 1]
-            if not cbuf:  # break when eol triggered
-                break
+        for schema in self.__header__.options:
+            dscp = schema.type
+            name = self.__option__[dscp]
 
-            # get option type
-            code = int(cbuf, base=2)
-            kind = Enum_Option.get(code)
-            acts = Enum_OptionAction.get(code >> 6)
-            cflg = bool(code & 0b00100000)
-
-            # get option length
-            if kind == Enum_Option.Pad1:
-                clen, olen = 0, 1
-            else:
-                cbuf = payload[counter + 1:counter + 2]
-                clen = struct.unpack('!B', cbuf)[0]  # length of option data
-                olen = clen + 2                      # total length
-
-            # extract option data
-            name = self.__option__[kind]  # type: str | tuple[OptionParser, OptionConstructor]
             if isinstance(name, str):
                 meth_name = f'_read_opt_{name}'
                 meth = cast('OptionParser',
                             getattr(self, meth_name, self._read_opt_none))
             else:
                 meth = name[0]
-            data = meth(self, kind, acts, cflg, clen,
-                        data=payload[counter:counter + olen],
-                        length=olen, options=options)
+            data = meth(self, schema, options=options)
 
             # record option data
-            counter += data.length
-            options.add(kind, data)
+            options.add(dscp, data)
+            counter += len(schema)
 
         # check threshold
         if counter != length:
-            raise ProtocolError(f'{self.alias}: invalid format')
-
+            raise ProtocolError('IPv6-Opts: invalid format')
         return options
 
-    def _read_opt_none(self, code: 'Enum_Option', acts: 'Enum_OptionAction', cflg: 'bool', clen: 'int', *,
-                       data: 'bytes', length: 'int', option: 'Option') -> 'Data_UnassignedOption':  # pylint: disable=unused-argument
+    def _read_opt_none(self, schema: 'Schema_UnassignedOption', option: 'Option') -> 'Data_UnassignedOption':  # pylint: disable=unused-argument
         """Read IPv6-Opts unassigned options.
 
         Structure of IPv6-Opts unassigned options [:rfc:`8200`]:
@@ -525,11 +500,7 @@ class IPv6_Opts(Internet[Data_IPv6_Opts, Schema_IPv6_Opts],
            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+- - - - - - - - -
 
         Args:
-            code: option type value
-            acts: unknown option action value
-            cflg: change flag value
-            clen: option data length
-            data: option payload data (incl. type, length, content)
+            schema: parsed parameter schema
             length: option length (incl. type, length, content)
             option: extracted IPv6-Opts options
 
@@ -537,20 +508,16 @@ class IPv6_Opts(Internet[Data_IPv6_Opts, Schema_IPv6_Opts],
             Parsed option data.
 
         """
-        schema = Schema_UnassignedOption.unpack(data, length)  # type: Schema_UnassignedOption
-        self.__header__.options.append(schema)
-
         opt = Data_UnassignedOption(
-            type=code,
-            action=acts,
-            change=cflg,
+            type=schema.type,
+            action=Enum_OptionAction.get(schema.type >> 6),
+            change=bool(schema.type & 0b00100000),
             length=schema.len + 2,
             data=schema.data,
         )
         return opt
 
-    def _read_opt_pad(self, code: 'Enum_Option', acts: 'Enum_OptionAction', cflg: 'bool', clen: 'int', *,
-                      data: 'bytes', length: 'int', option: 'Option') -> 'Data_PadOption':  # pylint: disable=unused-argument
+    def _read_opt_pad(self, schema: 'Schema_PadOption', option: 'Option') -> 'Data_PadOption':  # pylint: disable=unused-argument
         """Read IPv6-Opts padding options.
 
         Structure of IPv6-Opts padding options [:rfc:`8200`]:
@@ -572,12 +539,7 @@ class IPv6_Opts(Internet[Data_IPv6_Opts, Schema_IPv6_Opts],
              +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+- - - - - - - - -
 
         Args:
-            code: option type value
-            acts: unknown option action value
-            cflg: change flag value
-            clen: option data length
-            data: option payload data (incl. type, length, content)
-            length: option length (incl. type, length, content)
+            schema: parsed parameter schema
             option: extracted IPv6-Opts options
 
         Returns:
@@ -587,6 +549,8 @@ class IPv6_Opts(Internet[Data_IPv6_Opts, Schema_IPv6_Opts],
             ProtocolError: If ``code`` is **NOT** ``0`` or ``1``.
 
         """
+        code, clen = schema.type, schema.len
+
         if code not in (Enum_Option.Pad1, Enum_Option.PadN):
             raise ProtocolError(f'{self.alias}: [OptNo {code}] invalid format')
         if code == Enum_Option.Pad1 and clen != 0:
@@ -594,24 +558,20 @@ class IPv6_Opts(Internet[Data_IPv6_Opts, Schema_IPv6_Opts],
         if code == Enum_Option.PadN and clen == 0:
             raise ProtocolError(f'{self.alias}: [OptNo {code}] invalid format')
 
-        schema = Schema_PadOption.unpack(data)  # type: Schema_PadOption
-        self.__header__.options.append(schema)
-
         if code == Enum_Option.Pad1:
             _size = 1
         else:
             _size = schema.len + 2
 
         opt = Data_PadOption(
-            type=code,
-            action=acts,
-            change=cflg,
+            type=schema.type,
+            action=Enum_OptionAction.get(schema.type >> 6),
+            change=bool(schema.type & 0b00100000),
             length=_size,
         )
         return opt
 
-    def _read_opt_tun(self, code: 'Enum_Option', acts: 'Enum_OptionAction', cflg: 'bool', clen: 'int', *,
-                      data: 'bytes', length: 'int', option: 'Option') -> 'Data_TunnelEncapsulationLimitOption':  # pylint: disable=unused-argument
+    def _read_opt_tun(self, schema: 'Schema_TunnelEncapsulationLimitOption', option: 'Option') -> 'Data_TunnelEncapsulationLimitOption':  # pylint: disable=unused-argument
         """Read IPv6-Opts Tunnel Encapsulation Limit option.
 
         Structure of IPv6-Opts Tunnel Encapsulation Limit option [:rfc:`2473`]:
@@ -625,11 +585,7 @@ class IPv6_Opts(Internet[Data_IPv6_Opts, Schema_IPv6_Opts],
            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
-            code: option type value
-            acts: unknown option action value
-            cflg: change flag value
-            clen: option data length
-            data: option payload data (incl. type, length, content)
+            schema: parsed parameter schema
             length: option length (incl. type, length, content)
             option: extracted IPv6-Opts options
 
@@ -640,23 +596,19 @@ class IPv6_Opts(Internet[Data_IPv6_Opts, Schema_IPv6_Opts],
             ProtocolError: If ``ipv6_opts.tun.length`` is **NOT** ``1``.
 
         """
-        if clen != 1:
-            raise ProtocolError(f'{self.alias}: [OptNo {code}] invalid format')
-
-        schema = Schema_TunnelEncapsulationLimitOption.unpack(data)  # type: Schema_TunnelEncapsulationLimitOption
-        self.__header__.options.append(schema)
+        if schema.len != 1:
+            raise ProtocolError(f'{self.alias}: [OptNo {schema.type}] invalid format')
 
         opt = Data_TunnelEncapsulationLimitOption(
-            type=code,
-            action=acts,
-            change=cflg,
+            type=schema.type,
+            action=Enum_OptionAction.get(schema.type >> 6),
+            change=bool(schema.type & 0b00100000),
             length=schema.len + 2,
             limit=schema.limit,
         )
         return opt
 
-    def _read_opt_ra(self, code: 'Enum_Option', acts: 'Enum_OptionAction', cflg: 'bool', clen: 'int', *,
-                     data: 'bytes', length: 'int', option: 'Option') -> 'Data_RouterAlertOption':  # pylint: disable=unused-argument
+    def _read_opt_ra(self, schema: 'Schema_RouterAlertOption', option: 'Option') -> 'Data_RouterAlertOption':  # pylint: disable=unused-argument
         """Read IPv6-Opts Router Alert option.
 
         Structure of IPv6-Opts Router Alert option [:rfc:`2711`]:
@@ -668,11 +620,7 @@ class IPv6_Opts(Internet[Data_IPv6_Opts, Schema_IPv6_Opts],
            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
-            code: option type value
-            acts: unknown option action value
-            cflg: change flag value
-            clen: option data length
-            data: option payload data (incl. type, length, content)
+            schema: parsed parameter schema
             length: option length (incl. type, length, content)
             option: extracted IPv6-Opts options
 
@@ -683,24 +631,19 @@ class IPv6_Opts(Internet[Data_IPv6_Opts, Schema_IPv6_Opts],
             ProtocolError: If ``ipv6_opts.tun.length`` is **NOT** ``2``.
 
         """
-        _size = self._read_unpack(1)
-        if _size != 2:
-            raise ProtocolError(f'{self.alias}: [OptNo {code}] invalid format')
-
-        schema = Schema_RouterAlertOption.unpack(data, length)  # type: Schema_RouterAlertOption
-        self.__header__.options.append(schema)
+        if schema.len != 2:
+            raise ProtocolError(f'{self.alias}: [OptNo {schema.type}] invalid format')
 
         opt = Data_RouterAlertOption(
-            type=code,
-            action=acts,
-            change=cflg,
+            type=schema.type,
+            action=Enum_OptionAction.get(schema.type >> 6),
+            change=bool(schema.type & 0b00100000),
             length=schema.len + 2,
             value=schema.alert,
         )
         return opt
 
-    def _read_opt_calipso(self, code: 'Enum_Option', acts: 'Enum_OptionAction', cflg: 'bool', clen: 'int', *,
-                          data: 'bytes', length: 'int', option: 'Option') -> 'Data_CALIPSOOption':  # pylint: disable=unused-argument
+    def _read_opt_calipso(self, schema: 'Schema_CALIPSOOption', option: 'Option') -> 'Data_CALIPSOOption':  # pylint: disable=unused-argument
         """Read IPv6-Opts Common Architecture Label IPv6 Security Option (CALIPSO) option.
 
         Structure of IPv6-Opts CALIPSO option [:rfc:`5570`]:
@@ -718,11 +661,7 @@ class IPv6_Opts(Internet[Data_IPv6_Opts, Schema_IPv6_Opts],
            +-------------+---------------+-------------+--------------+
 
         Args:
-            code: option type value
-            acts: unknown option action value
-            cflg: change flag value
-            clen: option data length
-            data: option payload data (incl. type, length, content)
+            schema: parsed parameter schema
             length: option length (incl. type, length, content)
             option: extracted IPv6-Opts options
 
@@ -733,19 +672,15 @@ class IPv6_Opts(Internet[Data_IPv6_Opts, Schema_IPv6_Opts],
             ProtocolError: If the option is malformed.
 
         """
-        if clen < 8 and clen % 8 != 0:
-            raise ProtocolError(f'{self.alias}: [OptNo {code}] invalid format')
-
-        schema = Schema_CALIPSOOption.unpack(data, length)  # type: Schema_CALIPSOOption
-        self.__header__.options.append(schema)
-
+        if schema.len < 8 and schema.len % 8 != 0:
+            raise ProtocolError(f'{self.alias}: [OptNo {schema.type}] invalid format')
         if schema.cmpt_len % 2 != 0:
-            raise ProtocolError(f'{self.alias}: [OptNo {code}] invalid format')
+            raise ProtocolError(f'{self.alias}: [OptNo {schema.type}] invalid format')
 
         opt = Data_CALIPSOOption(
-            type=code,
-            action=acts,
-            change=cflg,
+            type=schema.type,
+            action=Enum_OptionAction.get(schema.type >> 6),
+            change=bool(schema.type & 0b00100000),
             length=schema.len + 2,
             domain=schema.domain,
             cmpt_len=schema.cmpt_len * 4,
@@ -759,8 +694,7 @@ class IPv6_Opts(Internet[Data_IPv6_Opts, Schema_IPv6_Opts],
             ])
         return opt
 
-    def _read_opt_smf_dpd(self, code: 'Enum_Option', acts: 'Enum_OptionAction', cflg: 'bool', clen: 'int', *,
-                          data: 'bytes', length: 'int', option: 'Option') -> 'Data_SMFDPDOption':  # pylint: disable=unused-argument,line-too-long
+    def _read_opt_smf_dpd(self, schema: 'Schema_SMFDPDOption', option: 'Option') -> 'Data_SMFDPDOption':  # pylint: disable=unused-argument,line-too-long
         """Read IPv6-Opts Simplified Multicast Forwarding Duplicate Packet Detection (``SMF_DPD``) option.
 
         Structure of IPv6-Opts ``SMF_DPD`` option [:rfc:`6621`]:
@@ -792,11 +726,7 @@ class IPv6_Opts(Internet[Data_IPv6_Opts, Schema_IPv6_Opts],
              +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
-            code: option type value
-            acts: unknown option action value
-            cflg: change flag value
-            clen: option data length
-            data: option payload data (incl. type, length, content)
+            schema: parsed parameter schema
             length: option length (incl. type, length, content)
             option: extracted IPv6-Opts options
 
@@ -807,95 +737,42 @@ class IPv6_Opts(Internet[Data_IPv6_Opts, Schema_IPv6_Opts],
             ProtocolError: If the option is malformed.
 
         """
-        mode = Enum_SMFDPDMode.get((data[2] & 0x80) >> 7)
+        mode = schema.mode
         if mode == Enum_SMFDPDMode.I_DPD:  # I-DPD mode
-            schema = Schema_SMFIdentificationBasedDPDOption.unpack(data, length)  # type: Schema_SMFIdentificationBasedDPDOption  # pylint: disable=line-too-long
-            self.__header__.options.append(schema)
+            if TYPE_CHECKING:
+                schema = cast('Schema_SMFIdentificationBasedDPDOption', schema)
 
             tid_type = Enum_TaggerID.get(schema.info['type'])
             tid_len = schema.info['len']
 
-            if tid_type == Enum_TaggerID.NULL:
-                if tid_len != 0:
-                    raise ProtocolError(f'{self.alias}: [OptNo {code}] invalid TaggedID length: {tid_len}')
-
-                opt = Data_SMFIdentificationBasedDPDOption(
-                    type=code,
-                    action=acts,
-                    change=cflg,
-                    length=schema.len + 2,
-                    dpd_type=mode,
-                    tid_type=tid_type,
-                    tid_len=tid_len,
-                    tid=None,
-                    id=schema.id,
-                )  # type: Data_SMFDPDOption
-            elif tid_type == Enum_TaggerID.IPv4:
-                if tid_len != 3:
-                    raise ProtocolError(f'{self.alias}: [OptNo {code}] invalid TaggedID length: {tid_len}')
-
-                tid = cast('IPv4Address', ipaddress.ip_address(schema.tid))
-                schema.tid = tid
-
-                opt = Data_SMFIdentificationBasedDPDOption(
-                    type=code,
-                    action=acts,
-                    change=cflg,
-                    length=schema.len + 2,
-                    dpd_type=mode,
-                    tid_type=tid_type,
-                    tid_len=tid_len,
-                    tid=tid,
-                    id=schema.id,
-                )
-            elif tid_type == Enum_TaggerID.IPv6:
-                if tid_len != 15:
-                    raise ProtocolError(f'{self.alias}: [OptNo {code}] invalid TaggedID length: {tid_len}')
-
-                tid = cast('IPv6Address', ipaddress.ip_address(schema.tid))  # type: ignore[assignment]
-                schema.tid = tid
-
-                opt = Data_SMFIdentificationBasedDPDOption(
-                    type=code,
-                    action=acts,
-                    change=cflg,
-                    length=schema.len + 2,
-                    dpd_type=mode,
-                    tid_type=tid_type,
-                    tid_len=tid_len,
-                    tid=tid,
-                    id=schema.id,
-                )
-            else:
-                opt = Data_SMFIdentificationBasedDPDOption(
-                    type=code,
-                    action=acts,
-                    change=cflg,
-                    length=schema.len + 2,
-                    dpd_type=mode,
-                    tid_type=tid_type,
-                    tid_len=tid_len,
-                    tid=schema.tid,
-                    id=schema.id,
-                )
+            opt = Data_SMFIdentificationBasedDPDOption(
+                type=schema.type,
+                action=Enum_OptionAction.get(schema.type >> 6),
+                change=bool(schema.type & 0b00100000),
+                length=schema.len + 2,
+                dpd_type=mode,
+                tid_type=tid_type,
+                tid_len=tid_len,
+                tid=schema.tid,
+                id=schema.id,
+            )  # type: Data_SMFDPDOption
         elif mode == Enum_SMFDPDMode.H_DPD:  # H-DPD mode
-            h_schema = Schema_SMFHashBasedDPDOption.unpack(data, length)  # type: Schema_SMFHashBasedDPDOption  # pylint: disable=line-too-long
-            self.__header__.options.append(h_schema)
+            if TYPE_CHECKING:
+                schema = cast('Schema_SMFHashBasedDPDOption', schema)
 
             opt = Data_SMFHashBasedDPDOption(
-                type=code,
-                action=acts,
-                change=cflg,
-                length=h_schema.len + 2,
+                type=schema.type,
+                action=Enum_OptionAction.get(schema.type >> 6),
+                change=bool(schema.type & 0b00100000),
+                length=schema.len + 2,
                 dpd_type=mode,
-                hav=h_schema.hav,
+                hav=schema.hav,
             )
         else:
-            raise ProtocolError(f'{self.alias}: [OptNo {code}] invalid DPD mode: {mode}')
+            raise ProtocolError(f'{self.alias}: [OptNo {schema.type}] invalid DPD mode: {mode}')
         return opt
 
-    def _read_opt_pdm(self, code: 'Enum_Option', acts: 'Enum_OptionAction', cflg: 'bool', clen: 'int', *,
-                      data: 'bytes', length: 'int', option: 'Option') -> 'Data_PDMOption':  # pylint: disable=unused-argument
+    def _read_opt_pdm(self, schema: 'Schema_PDMOption', option: 'Option') -> 'Data_PDMOption':  # pylint: disable=unused-argument
         """Read IPv6-Opts Performance and Diagnostic Metrics (PDM) option.
 
         Structure of IPv6-Opts PDM option [:rfc:`8250`]:
@@ -913,11 +790,7 @@ class IPv6_Opts(Internet[Data_IPv6_Opts, Schema_IPv6_Opts],
            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
-            code: option type value
-            acts: unknown option action value
-            cflg: change flag value
-            clen: option data length
-            data: option payload data (incl. type, length, content)
+            schema: parsed parameter schema
             length: option length (incl. type, length, content)
             option: extracted IPv6-Opts options
 
@@ -928,16 +801,13 @@ class IPv6_Opts(Internet[Data_IPv6_Opts, Schema_IPv6_Opts],
             ProtocolError: If ``ipv6_opts.pdm.length`` is **NOT** ``10``.
 
         """
-        if clen != 10:
-            raise ProtocolError(f'{self.alias}: [OptNo {code}] invalid format')
-
-        schema = Schema_PDMOption.unpack(data, length)  # type: Schema_PDMOption
-        self.__header__.options.append(schema)
+        if schema.len != 10:
+            raise ProtocolError(f'{self.alias}: [OptNo {schema.type}] invalid format')
 
         opt = Data_PDMOption(
-            type=code,
-            action=acts,
-            change=cflg,
+            type=schema.type,
+            action=Enum_OptionAction.get(schema.type >> 6),
+            change=bool(schema.type & 0b00100000),
             length=schema.len + 2,
             scaledtlr=schema.scaledtlr,
             scaledtls=schema.scaledtls,
@@ -948,8 +818,7 @@ class IPv6_Opts(Internet[Data_IPv6_Opts, Schema_IPv6_Opts],
         )
         return opt
 
-    def _read_opt_qs(self, code: 'Enum_Option', acts: 'Enum_OptionAction', cflg: 'bool', clen: 'int', *,
-                     data: 'bytes', length: 'int', option: 'Option') -> 'Data_QuickStartOption':  # pylint: disable=unused-argument  # pylint: disable=unused-argument
+    def _read_opt_qs(self, schema: 'Schema_QuickStartOption', option: 'Option') -> 'Data_QuickStartOption':  # pylint: disable=unused-argument  # pylint: disable=unused-argument
         """Read IPv6-Opts Quick Start option.
 
         Structure of IPv6-Opts Quick-Start option [:rfc:`4782`]:
@@ -981,11 +850,7 @@ class IPv6_Opts(Internet[Data_IPv6_Opts, Schema_IPv6_Opts],
              +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
-            code: option type value
-            acts: unknown option action value
-            cflg: change flag value
-            clen: option data length
-            data: option payload data (incl. type, length, content)
+            schema: parsed parameter schema
             length: option length (incl. type, length, content)
             option: extracted IPv6-Opts options
 
@@ -996,19 +861,18 @@ class IPv6_Opts(Internet[Data_IPv6_Opts, Schema_IPv6_Opts],
             ProtocolError: If the option is malformed.
 
         """
-        if clen != 6:
-            raise ProtocolError(f'{self.alias}: [OptNo {code}] invalid format')
+        if schema.len != 6:
+            raise ProtocolError(f'{self.alias}: [OptNo {schema.type}] invalid format')
 
-        func = Enum_QSFunction.get((data[2] & 0xF0) >> 4)
+        func = schema.func
         if func == Enum_QSFunction.Quick_Start_Request:
-            schema_req = Schema_QuickStartRequestOption.unpack(data, length)  # type: Schema_QuickStartRequestOption
-            self.__header__.options.append(schema_req)
+            schema_req = cast('Schema_QuickStartRequestOption', schema)
 
             rate = schema_req.flags['rate']
             opt = Data_QuickStartRequestOption(
-                type=code,
-                action=acts,
-                change=cflg,
+                type=schema.type,
+                action=Enum_OptionAction.get(schema.type >> 6),
+                change=bool(schema.type & 0b00100000),
                 length=schema_req.len + 2,
                 func=func,
                 rate=40000 * (2 ** rate) / 1000 if rate > 0 else 0,
@@ -1016,25 +880,23 @@ class IPv6_Opts(Internet[Data_IPv6_Opts, Schema_IPv6_Opts],
                 nonce=schema_req.nonce,
             )  # type: Data_QuickStartOption
         elif func == Enum_QSFunction.Report_of_Approved_Rate:
-            schema_rep = Schema_QuickStartReportOption.unpack(data, length)  # type: Schema_QuickStartReportOption
-            self.__header__.options.append(schema_rep)
+            schema_rep = cast('Schema_QuickStartReportOption', schema)
 
             rate = schema_rep.flags['rate']
             opt = Data_QuickStartReportOption(
-                type=code,
-                action=acts,
-                change=cflg,
+                type=schema.type,
+                action=Enum_OptionAction.get(schema.type >> 6),
+                change=bool(schema.type & 0b00100000),
                 length=schema_rep.len + 2,
                 func=func,
                 rate=40000 * (2 ** rate) / 1000 if rate > 0 else 0,
                 nonce=schema_rep.nonce,
             )
         else:
-            raise ProtocolError(f'{self.alias}: [OptNo {code}] unknown QS function: {func}')
+            raise ProtocolError(f'{self.alias}: [OptNo {schema.type}] unknown QS function: {func}')
         return opt
 
-    def _read_opt_rpl(self, code: 'Enum_Option', acts: 'Enum_OptionAction', cflg: 'bool', clen: 'int', *,
-                      data: 'bytes', length: 'int', option: 'Option') -> 'Data_RPLOption':  # pylint: disable=unused-argument
+    def _read_opt_rpl(self, schema: 'Schema_RPLOption', option: 'Option') -> 'Data_RPLOption':  # pylint: disable=unused-argument
         """Read IPv6-Opts Routing Protocol for Low-Power and Lossy Networks (RPL) option.
 
         Structure of IPv6-Opts RPL option [:rfc:`6553`]:
@@ -1052,11 +914,7 @@ class IPv6_Opts(Internet[Data_IPv6_Opts, Schema_IPv6_Opts],
            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
-            code: option type value
-            acts: unknown option action value
-            cflg: change flag value
-            clen: option data length
-            data: option payload data (incl. type, length, content)
+            schema: parsed parameter schema
             length: option length (incl. type, length, content)
             option: extracted IPv6-Opts options
 
@@ -1067,16 +925,13 @@ class IPv6_Opts(Internet[Data_IPv6_Opts, Schema_IPv6_Opts],
             ProtocolError: If ``ipv6_opts.rpl.length`` is **NOT** ``4``.
 
         """
-        if clen != 4:
-            raise ProtocolError(f'{self.alias}: [OptNo {code}] invalid format')
-
-        schema = Schema_RPLOption.unpack(data, length)  # type: Schema_RPLOption
-        self.__header__.options.append(schema)
+        if schema.len != 4:
+            raise ProtocolError(f'{self.alias}: [OptNo {schema.type}] invalid format')
 
         opt = Data_RPLOption(
-            type=code,
-            action=acts,
-            change=cflg,
+            type=schema.type,
+            action=Enum_OptionAction.get(schema.type >> 6),
+            change=bool(schema.type & 0b00100000),
             length=schema.len + 2,
             flags=Data_RPLFlags(
                 down=bool(schema.flags['down']),
@@ -1088,8 +943,7 @@ class IPv6_Opts(Internet[Data_IPv6_Opts, Schema_IPv6_Opts],
         )
         return opt
 
-    def _read_opt_mpl(self, code: 'Enum_Option', acts: 'Enum_OptionAction', cflg: 'bool', clen: 'int', *,
-                      data: 'bytes', length: 'int', option: 'Option') -> 'Data_MPLOption':  # pylint: disable=unused-argument
+    def _read_opt_mpl(self, schema: 'Schema_MPLOption', option: 'Option') -> 'Data_MPLOption':  # pylint: disable=unused-argument
         """Read IPv6-Opts Multicast Protocol for Low-Power and Lossy Networks (MPL) option.
 
         Structure of IPv6-Opts MPL option [:rfc:`7731`]:
@@ -1105,11 +959,7 @@ class IPv6_Opts(Internet[Data_IPv6_Opts, Schema_IPv6_Opts],
            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
-            code: option type value
-            acts: unknown option action value
-            cflg: change flag value
-            clen: option data length
-            data: option payload data (incl. type, length, content)
+            schema: parsed parameter schema
             length: option length (incl. type, length, content)
             option: extracted IPv6-Opts options
 
@@ -1120,32 +970,30 @@ class IPv6_Opts(Internet[Data_IPv6_Opts, Schema_IPv6_Opts],
             ProtocolError: If the option is malformed.
 
         """
-        if clen < 2:
-            raise ProtocolError(f'{self.alias}: [OptNo {code}] invalid format')
+        kind = Enum_SeedID.get(schema.flags['type'])
+        clen = schema.len
 
-        kind = Enum_SeedID.get(data[2] >> 6)
+        if schema.len < 2:
+            raise ProtocolError(f'{self.alias}: [OptNo {schema.type}] invalid format')
         if kind == kind.IPV6_SOURCE_ADDRESS:
             if clen != 2:
-                raise ProtocolError(f'{self.alias}: [OptNo {code}] invalid seed-id length: {clen - 2}')
+                raise ProtocolError(f'{self.alias}: [OptNo {schema.type}] invalid seed-id length: {clen - 2}')
         elif kind == kind.SEEDID_16_BIT_UNSIGNED_INTEGER:
             if clen != 4:
-                raise ProtocolError(f'{self.alias}: [OptNo {code}] invalid seed-id length: {clen - 2}')
+                raise ProtocolError(f'{self.alias}: [OptNo {schema.type}] invalid seed-id length: {clen - 2}')
         elif kind == kind.SEEDID_64_BIT_UNSIGNED_INTEGER:
             if clen != 10:
-                raise ProtocolError(f'{self.alias}: [OptNo {code}] invalid seed-id length: {clen - 2}')
+                raise ProtocolError(f'{self.alias}: [OptNo {schema.type}] invalid seed-id length: {clen - 2}')
         elif kind == kind.SEEDID_128_BIT_UNSIGNED_INTEGER:
             if clen != 18:
-                raise ProtocolError(f'{self.alias}: [OptNo {code}] invalid seed-id length: {clen - 2}')
+                raise ProtocolError(f'{self.alias}: [OptNo {schema.type}] invalid seed-id length: {clen - 2}')
         else:
-            raise ProtocolError(f'{self.alias}: [OptNo {code}] invalid seed-id type: {kind}')
-
-        schema = Schema_MPLOption.unpack(data, length)  # type: Schema_MPLOption
-        self.__header__.options.append(schema)
+            raise ProtocolError(f'{self.alias}: [OptNo {schema.type}] invalid seed-id type: {kind}')
 
         opt = Data_MPLOption(
-            type=code,
-            action=acts,
-            change=cflg,
+            type=schema.type,
+            action=Enum_OptionAction.get(schema.type >> 6),
+            change=bool(schema.type & 0b00100000),
             length=schema.len + 2,
             seed_type=kind,
             flags=Data_MPLFlags(
@@ -1157,8 +1005,7 @@ class IPv6_Opts(Internet[Data_IPv6_Opts, Schema_IPv6_Opts],
         )
         return opt
 
-    def _read_opt_ilnp(self, code: 'Enum_Option', acts: 'Enum_OptionAction', cflg: 'bool', clen: 'int', *,
-                       data: 'bytes', length: 'int', option: 'Option') -> 'Data_ILNPOption':  # pylint: disable=unused-argument
+    def _read_opt_ilnp(self, schema: 'Schema_ILNPOption', option: 'Option') -> 'Data_ILNPOption':  # pylint: disable=unused-argument
         """Read IPv6-Opts Identifier-Locator Network Protocol (ILNP) Nonce option.
 
         Structure of IPv6-Opts ILNP Nonce option [:rfc:`6744`]:
@@ -1174,11 +1021,7 @@ class IPv6_Opts(Internet[Data_IPv6_Opts, Schema_IPv6_Opts],
            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
-            code: option type value
-            acts: unknown option action value
-            cflg: change flag value
-            clen: option data length
-            data: option payload data (incl. type, length, content)
+            schema: parsed parameter schema
             length: option length (incl. type, length, content)
             option: extracted IPv6-Opts options
 
@@ -1186,20 +1029,16 @@ class IPv6_Opts(Internet[Data_IPv6_Opts, Schema_IPv6_Opts],
             Parsed option data.
 
         """
-        schema = Schema_ILNPOption.unpack(data, length)  # type: Schema_ILNPOption
-        self.__header__.options.append(schema)
-
         opt = Data_ILNPOption(
-            type=code,
-            action=acts,
-            change=cflg,
+            type=schema.type,
+            action=Enum_OptionAction.get(schema.type >> 6),
+            change=bool(schema.type & 0b00100000),
             length=schema.len + 2,
             nonce=schema.nonce,
         )
         return opt
 
-    def _read_opt_lio(self, code: 'Enum_Option', acts: 'Enum_OptionAction', cflg: 'bool', clen: 'int', *,
-                      data: 'bytes', length: 'int', option: 'Option') -> 'Data_LineIdentificationOption':  # pylint: disable=unused-argument
+    def _read_opt_lio(self, schema: 'Schema_LineIdentificationOption', option: 'Option') -> 'Data_LineIdentificationOption':  # pylint: disable=unused-argument
         """Read IPv6-Opts Line-Identification option.
 
         Structure of IPv6-Opts Line-Identification option [:rfc:`6788`]:
@@ -1215,11 +1054,7 @@ class IPv6_Opts(Internet[Data_IPv6_Opts, Schema_IPv6_Opts],
            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
-            code: option type value
-            acts: unknown option action value
-            cflg: change flag value
-            clen: option data length
-            data: option payload data (incl. type, length, content)
+            schema: parsed parameter schema
             length: option length (incl. type, length, content)
             option: extracted IPv6-Opts options
 
@@ -1227,21 +1062,17 @@ class IPv6_Opts(Internet[Data_IPv6_Opts, Schema_IPv6_Opts],
             Parsed option data.
 
         """
-        schema = Schema_LineIdentificationOption.unpack(data, length)  # type: Schema_LineIdentificationOption
-        self.__header__.options.append(schema)
-
         opt = Data_LineIdentificationOption(
-            type=code,
-            action=acts,
-            change=cflg,
+            type=schema.type,
+            action=Enum_OptionAction.get(schema.type >> 6),
+            change=bool(schema.type & 0b00100000),
             length=schema.len + 2,
             line_id_len=schema.id_len,
             line_id=schema.id,
         )
         return opt
 
-    def _read_opt_jumbo(self, code: 'Enum_Option', acts: 'Enum_OptionAction', cflg: 'bool', clen: 'int', *,
-                        data: 'bytes', length: 'int', option: 'Option') -> 'Data_JumboPayloadOption':  # pylint: disable=unused-argument
+    def _read_opt_jumbo(self, schema: 'Schema_JumboPayloadOption', option: 'Option') -> 'Data_JumboPayloadOption':  # pylint: disable=unused-argument
         """Read IPv6-Opts Jumbo Payload option.
 
         Structure of IPv6-Opts Jumbo Payload option [:rfc:`2675`]:
@@ -1255,11 +1086,7 @@ class IPv6_Opts(Internet[Data_IPv6_Opts, Schema_IPv6_Opts],
            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
-            code: option type value
-            acts: unknown option action value
-            cflg: change flag value
-            clen: option data length
-            data: option payload data (incl. type, length, content)
+            schema: parsed parameter schema
             length: option length (incl. type, length, content)
             option: extracted IPv6-Opts options
 
@@ -1270,23 +1097,19 @@ class IPv6_Opts(Internet[Data_IPv6_Opts, Schema_IPv6_Opts],
             ProtocolError: If ``ipv6_opts.jumbo.length`` is **NOT** ``4``.
 
         """
-        if clen != 4:
-            raise ProtocolError(f'{self.alias}: [OptNo {code}] invalid format')
-
-        schema = Schema_JumboPayloadOption.unpack(data, length)  # type: Schema_JumboPayloadOption
-        self.__header__.options.append(schema)
+        if schema.len != 4:
+            raise ProtocolError(f'{self.alias}: [OptNo {schema.type}] invalid format')
 
         opt = Data_JumboPayloadOption(
-            type=code,
-            action=acts,
-            change=cflg,
+            type=schema.type,
+            action=Enum_OptionAction.get(schema.type >> 6),
+            change=bool(schema.type & 0b00100000),
             length=schema.len + 2,
             jumbo_len=schema.jumbo_len,
         )
         return opt
 
-    def _read_opt_home(self, code: 'Enum_Option', acts: 'Enum_OptionAction', cflg: 'bool', clen: 'int', *,
-                       data: 'bytes', length: 'int', option: 'Option') -> 'Data_HomeAddressOption':  # pylint: disable=unused-argument
+    def _read_opt_home(self, schema: 'Schema_HomeAddressOption', option: 'Option') -> 'Data_HomeAddressOption':  # pylint: disable=unused-argument
         """Read IPv6-Opts Home Address option.
 
         Structure of IPv6-Opts Home Address option [:rfc:`6275`]:
@@ -1308,11 +1131,7 @@ class IPv6_Opts(Internet[Data_IPv6_Opts, Schema_IPv6_Opts],
            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
-            code: option type value
-            acts: unknown option action value
-            cflg: change flag value
-            clen: option data length
-            data: option payload data (incl. type, length, content)
+            schema: parsed parameter schema
             length: option length (incl. type, length, content)
             option: extracted IPv6-Opts options
 
@@ -1323,23 +1142,19 @@ class IPv6_Opts(Internet[Data_IPv6_Opts, Schema_IPv6_Opts],
             ProtocolError: If ``ipv6_opts.jumbo.length`` is **NOT** ``16``.
 
         """
-        if clen != 16:
-            raise ProtocolError(f'{self.alias}: [OptNo {code}] invalid format')
-
-        schema = Schema_HomeAddressOption.unpack(data, length)  # type: Schema_HomeAddressOption
-        self.__header__.options.append(schema)
+        if schema.len != 16:
+            raise ProtocolError(f'{self.alias}: [OptNo {schema.type}] invalid format')
 
         opt = Data_HomeAddressOption(
-            type=code,
-            action=acts,
-            change=cflg,
+            type=schema.type,
+            action=Enum_OptionAction.get(schema.type >> 6),
+            change=bool(schema.type & 0b00100000),
             length=schema.len + 2,
             address=schema.addr,
         )
         return opt
 
-    def _read_opt_ip_dff(self, code: 'Enum_Option', acts: 'Enum_OptionAction', cflg: 'bool', clen: 'int', *,
-                         data: 'bytes', length: 'int', option: 'Option') -> 'Data_IPDFFOption':  # pylint: disable=unused-argument
+    def _read_opt_ip_dff(self, schema: 'Schema_IPDFFOption', option: 'Option') -> 'Data_IPDFFOption':  # pylint: disable=unused-argument
         """Read IPv6-Opts Depth-First Forwarding (``IP_DFF``) option.
 
         Structure of IPv6-Opts ``IP_DFF`` option [:rfc:`6971`]:
@@ -1355,11 +1170,7 @@ class IPv6_Opts(Internet[Data_IPv6_Opts, Schema_IPv6_Opts],
            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
-            code: option type value
-            acts: unknown option action value
-            cflg: change flag value
-            clen: option data length
-            data: option payload data (incl. type, length, content)
+            schema: parsed parameter schema
             length: option length (incl. type, length, content)
             option: extracted IPv6-Opts options
 
@@ -1370,16 +1181,13 @@ class IPv6_Opts(Internet[Data_IPv6_Opts, Schema_IPv6_Opts],
             ProtocolError: If ``ipv6_opts.ip_dff.length`` is **NOT** ``2``.
 
         """
-        if clen != 2:
-            raise ProtocolError(f'{self.alias}: [OptNo {code}] invalid format')
-
-        schema = Schema_IPDFFOption.unpack(data, length)  # type: Schema_IPDFFOption
-        self.__header__.options.append(schema)
+        if schema.len != 2:
+            raise ProtocolError(f'{self.alias}: [OptNo {schema.type}] invalid format')
 
         opt = Data_IPDFFOption(
-            type=code,
-            action=acts,
-            change=cflg,
+            type=schema.type,
+            action=Enum_OptionAction.get(schema.type >> 6),
+            change=bool(schema.type & 0b00100000),
             length=schema.len + 2,
             version=schema.flags['ver'],
             flags=Data_DFFFlags(
