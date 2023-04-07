@@ -159,6 +159,7 @@ class OptionField(ListField):
         registry: option registry, as in a mapping from option types (enumeration
             values) to option schemas, with the default value being the unknown
             option schema.
+        eool: enumeration of the EOOL (end-of-option-list, or equivalent) option
         callback: callback function to be called upon
             :meth:`self.__call__ <pcapkit.corekit.fields.field._Field.__call__>`.
 
@@ -178,17 +179,24 @@ class OptionField(ListField):
         return self._type_name
 
     @property
-    def registry(self) -> 'dict[int, Type[Schema]]':
+    def registry(self) -> 'defaultdict[int | StdlibEnum | AenumEnum, Type[Schema]]':
         """Option registry."""
         return self._registry
+
+    @property
+    def eool(self) -> 'int | StdlibEnum | AenumEnum':
+        """EOOL option."""
+        return self._eool
 
     def __init__(self, length: 'int | Callable[[dict[str, Any]], Optional[int]]' = lambda _: None,
                  base_schema: 'Optional[Type[Schema]]' = None,
                  type_name: 'str' = 'type',
                  registry: 'Optional[defaultdict[int | StdlibEnum | AenumEnum, Type[Schema]]]' = None,
+                 eool: 'Optional[int | StdlibEnum | AenumEnum]' = None,
                  callback: 'Callable[[ListField, dict[str, Any]], None]' = lambda *_: None) -> 'None':
         super().__init__(length, None, callback)
         self._name = '<option>'
+        self._eool = eool
 
         if base_schema is None:
             raise FieldValueError('Field <option> has no base schema.')
@@ -241,4 +249,9 @@ class OptionField(ListField):
 
             # update length
             length -= len(data)
+
+            # check for EOOL
+            if code == self._eool:
+                packet['__option_padding__'] = length
+                break
         return temp
