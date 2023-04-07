@@ -7,20 +7,21 @@ import datetime
 import ipaddress
 from typing import TYPE_CHECKING, cast
 
-from pcapkit.const.ipv4.qs_function import QSFunction as Enum_QSFunction
-from pcapkit.const.ipv4.ts_flag import TSFlag as Enum_TSFlag
 from pcapkit.const.ipv4.classification_level import ClassificationLevel as Enum_ClassificationLevel
 from pcapkit.const.ipv4.option_number import OptionNumber as Enum_OptionNumber
+from pcapkit.const.ipv4.qs_function import QSFunction as Enum_QSFunction
 from pcapkit.const.ipv4.router_alert import RouterAlert as Enum_RouterAlert
+from pcapkit.const.ipv4.ts_flag import TSFlag as Enum_TSFlag
 from pcapkit.const.reg.transtype import TransType as Enum_TransType
 from pcapkit.corekit.fields.collections import ListField, OptionField
 from pcapkit.corekit.fields.ipaddress import IPv4Field
-from pcapkit.corekit.fields.misc import ConditionalField, PayloadField, SwitchField, ForwardMatchField, SchemaField
+from pcapkit.corekit.fields.misc import (ConditionalField, ForwardMatchField, PayloadField,
+                                         SchemaField, SwitchField)
 from pcapkit.corekit.fields.numbers import EnumField, UInt8Field, UInt16Field, UInt32Field
 from pcapkit.corekit.fields.strings import BitField, BytesField, PaddingField
 from pcapkit.protocols.schema.schema import Schema
-from pcapkit.utilities.warnings import ProtocolWarning, warn
 from pcapkit.utilities.exceptions import FieldValueError
+from pcapkit.utilities.warnings import ProtocolWarning, warn
 
 __all__ = [
     'IPv4',
@@ -39,13 +40,13 @@ __all__ = [
 if TYPE_CHECKING:
     from datetime import timedelta
     from ipaddress import IPv4Address
-    from typing import Optional, IO, Any
+    from typing import IO, Any, Optional
 
     from typing_extensions import TypedDict
 
+    from pcapkit.corekit.fields.field import _Field as Field
     from pcapkit.corekit.multidict import OrderedMultiDict
     from pcapkit.protocols.protocol import Protocol
-    from pcapkit.corekit.fields.field import _Field as Field
 
     class VerIHLField(TypedDict):
         """Version and header length field."""
