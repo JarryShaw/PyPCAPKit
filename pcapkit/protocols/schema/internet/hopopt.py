@@ -101,7 +101,7 @@ if TYPE_CHECKING:
         mode: int
 
     class QSTestFlags(TypedDict):
-        """``QS_TEST`` flags."""
+        """Quick start test flag."""
 
         #: QS function.
         func: int

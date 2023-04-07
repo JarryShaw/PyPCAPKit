@@ -23,7 +23,6 @@ import collections
 import datetime
 import ipaddress
 import math
-import struct
 from typing import TYPE_CHECKING, cast, overload
 
 from pcapkit.const.ipv6.option import Option as Enum_Option
