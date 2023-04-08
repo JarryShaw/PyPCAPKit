@@ -93,7 +93,8 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
     # Methods.
     ##########################################################################
 
-    def read(self, length: 'Optional[int]' = None, **kwargs: 'Any') -> 'Data_IPv6':  # pylint: disable=unused-argument
+    def read(self, length: 'Optional[int]' = None, *,
+             packet: 'Optional[dict[str, Any]]' = None, **kwargs: 'Any') -> 'Data_IPv6':  # pylint: disable=unused-argument
         """Read Internet Protocol version 6 (IPv6).
 
         Structure of IPv6 header [:rfc:`2460`]:
@@ -126,6 +127,7 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
 
         Args:
             length: Length of packet data.
+            packet: Optional packet data.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
@@ -147,7 +149,15 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
             'dst': schema.dst,
         })  # type: Data_IPv6
 
-        return self._decode_next_layer(ipv6, schema.next, ipv6.payload)  # pylint: disable=no-member
+        # update packet info
+        if packet is None:
+            packet = {}
+        packet.update({
+            'src': ipv6.src,
+            'dst': ipv6.dst,
+        })
+
+        return self._decode_next_layer(ipv6, schema.next, ipv6.payload, packet=packet)  # pylint: disable=no-member
 
     def make(self,
              traffic_class: 'int' = 0,
@@ -277,13 +287,14 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
         return ipaddress.ip_address(self._read_fileng(16))  # type: ignore[return-value]
 
     def _decode_next_layer(self, ipv6: 'Data_IPv6', proto: 'Optional[int]' = None,  # type: ignore[override] # pylint: disable=arguments-differ,arguments-renamed
-                           length: 'Optional[int]' = None) -> 'Data_IPv6':  # pylint: disable=arguments-differ
+                           length: 'Optional[int]' = None, *, packet: 'Optional[dict[str, Any]]' = None) -> 'Data_IPv6':  # pylint: disable=arguments-differ
         """Decode next layer extractor.
 
         Arguments:
             ipv6: info buffer
             proto: next layer protocol name
             length: valid (*not padding*) length
+            packet: packet info (passed from :meth:`self.unpack <pcapkit.protocols.protocol.Protocol.unpack>`)
 
         Returns:
             Current protocol with next layer extracted.
@@ -309,7 +320,7 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
             #     break
 
             # make protocol name
-            next_ = self._import_next_layer(proto, version=6, extension=True)  # type: ignore[misc,call-arg,arg-type]
+            next_ = self._import_next_layer(proto, packet=packet, version=6, extension=True)  # type: ignore[misc,call-arg,arg-type]
             info = next_.info
             name = next_.alias.lstrip('IPv6-').lower()
             ipv6.__update__({
@@ -345,4 +356,4 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
         })
 
         ipv6_exthdr = ProtoChain.from_list(_protos)  # type: ignore[arg-type]
-        return super()._decode_next_layer(ipv6, proto, raw_len, ipv6_exthdr=ipv6_exthdr)
+        return super()._decode_next_layer(ipv6, proto, raw_len, packet=packet, ipv6_exthdr=ipv6_exthdr)

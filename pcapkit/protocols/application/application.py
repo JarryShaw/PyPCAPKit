@@ -14,7 +14,7 @@ from typing import TYPE_CHECKING, Generic, overload
 
 from pcapkit.corekit.protochain import ProtoChain
 from pcapkit.protocols.misc.null import NoPayload
-from pcapkit.protocols.protocol import PT, Protocol
+from pcapkit.protocols.protocol import PT, ST, Protocol
 from pcapkit.utilities.exceptions import IntError, UnsupportedCall
 
 if TYPE_CHECKING:
@@ -25,7 +25,7 @@ if TYPE_CHECKING:
 __all__ = ['Application']
 
 
-class Application(Protocol[PT], Generic[PT]):  # pylint: disable=abstract-method
+class Application(Protocol[PT, ST], Generic[PT, ST]):  # pylint: disable=abstract-method
     """Abstract base class for transport layer protocol family."""
 
     ##########################################################################
@@ -50,11 +50,11 @@ class Application(Protocol[PT], Generic[PT]):  # pylint: disable=abstract-method
     ##########################################################################
 
     @overload
-    def __post_init__(self, file: 'IO[bytes]', length: 'Optional[int]' = ..., **kwargs: 'Any') -> 'None': ...
+    def __post_init__(self, file: 'IO[bytes] | bytes', length: 'Optional[int]' = ..., **kwargs: 'Any') -> 'None': ...
     @overload
-    def __post_init__(self, **kwargs: 'Any') -> 'None': ...  # pylint: disable=arguments-differ
+    def __post_init__(self, **kwargs: 'Any') -> 'None': ...
 
-    def __post_init__(self, file: 'Optional[IO[bytes]]' = None,
+    def __post_init__(self, file: 'Optional[IO[bytes] | bytes]' = None,
                       length: 'Optional[int]' = None, **kwargs: 'Any') -> 'None':
         """Post initialisation hook.
 
@@ -90,8 +90,8 @@ class Application(Protocol[PT], Generic[PT]):  # pylint: disable=abstract-method
     # Utilities.
     ##########################################################################
 
-    def _decode_next_layer(self, dict_: 'PT', proto: 'Optional[int]' = None,
-                           length: 'Optional[int]' = None) -> 'NoReturn':
+    def _decode_next_layer(self, dict_: 'PT', proto: 'Optional[int]' = None, length: 'Optional[int]' = None, *,
+                           packet: 'Optional[dict[str, Any]]' = None) -> 'NoReturn':
         """Decode next layer protocol.
 
         Raises:
@@ -100,7 +100,8 @@ class Application(Protocol[PT], Generic[PT]):  # pylint: disable=abstract-method
         """
         raise UnsupportedCall(f"'{self.__class__.__name__}' object has no attribute '_decode_next_layer'")
 
-    def _import_next_layer(self, proto: 'int', length: 'Optional[int]' = None) -> 'NoReturn':  # type: ignore[override]
+    def _import_next_layer(self, proto: 'int', length: 'Optional[int]' = None, *,  # type: ignore[override]
+                           packet: 'Optional[dict[str, Any]]' = None) -> 'NoReturn':
         """Import next layer extractor.
 
         Raises:

@@ -372,19 +372,20 @@ class Frame(Protocol[Data_Frame, Schema_Frame],
         return ts_sec, ts_usec
 
     def _decode_next_layer(self, dict_: 'Data_Frame', proto: 'Optional[int]' = None,
-                           length: 'Optional[int]' = None) -> 'Data_Frame':  # pylint: disable=arguments-differ
+                           length: 'Optional[int]' = None, *, packet: 'Optional[dict[str, Any]]' = None) -> 'Data_Frame':  # pylint: disable=arguments-differ
         r"""Decode next layer protocol.
 
         Arguments:
             dict\_: info buffer
             proto: next layer protocol index
             length: valid (*non-padding*) length
+            packet: packet info (passed from :meth:`self.unpack <pcapkit.protocols.protocol.Protocol.unpack>`)
 
         Returns:
             Current protocol with packet extracted.
 
         """
-        next_ = cast('Protocol', self._import_next_layer(proto, length))  # type: ignore[misc,call-arg,redundant-cast]
+        next_ = cast('Protocol', self._import_next_layer(proto, length, packet=packet))  # type: ignore[misc,call-arg,redundant-cast]
         info, chain = next_.info, next_.protochain
 
         # make next layer protocol name

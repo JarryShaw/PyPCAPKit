@@ -244,7 +244,8 @@ class Protocol(Generic[PT, ST], metaclass=abc.ABCMeta):
 
         """
         if cast('Optional[ST]', self.__header__) is None:
-            self.__header__ = self.__schema__.unpack(self._file, length)
+            packet = kwargs.get('packet', {})  # packet data
+            self.__header__ = cast('ST', self.__schema__.unpack(self._file, length, packet))  # type: ignore[call-arg,misc]
         return self.read(length, **kwargs)
 
     @staticmethod
@@ -1029,19 +1030,21 @@ class Protocol(Generic[PT, ST], metaclass=abc.ABCMeta):
 
         return proto.from_data(data[name])
 
-    def _decode_next_layer(self, dict_: 'PT', proto: 'int', length: 'Optional[int]' = None) -> 'PT':
+    def _decode_next_layer(self, dict_: 'PT', proto: 'int', length: 'Optional[int]' = None, *,
+                           packet: 'Optional[dict[str, Any]]' = None) -> 'PT':
         r"""Decode next layer protocol.
 
         Arguments:
             dict\_: info buffer
             proto: next layer protocol index
             length: valid (*non-padding*) length
+            packet: packet info (passed from :meth:`unpack`)
 
         Returns:
             Current protocol with next layer extracted.
 
         """
-        next_ = cast('Protocol', self._import_next_layer(proto, length))  # type: ignore[misc,call-arg,redundant-cast]
+        next_ = cast('Protocol', self._import_next_layer(proto, length, packet=packet))  # type: ignore[misc,call-arg,redundant-cast]
         info, chain = next_.info, next_.protochain
 
         # make next layer protocol name
@@ -1059,12 +1062,14 @@ class Protocol(Generic[PT, ST], metaclass=abc.ABCMeta):
         return dict_
 
     @beholder
-    def _import_next_layer(self, proto: 'int', length: 'Optional[int]' = None) -> 'Protocol':
+    def _import_next_layer(self, proto: 'int', length: 'Optional[int]' = None, *,
+                           packet: 'Optional[dict[str, Any]]' = None) -> 'Protocol':
         """Import next layer extractor.
 
         Arguments:
             proto: next layer protocol index
             length: valid (*non-padding*) length
+            packet: packet info (passed from :meth:`unpack`)
 
         Returns:
             Instance of next layer.
@@ -1082,7 +1087,7 @@ class Protocol(Generic[PT, ST], metaclass=abc.ABCMeta):
             protocol = cast('Type[Protocol]', getattr(importlib.import_module(module), name))
 
         file_ = self.__header__.get_payload()
-        next_ = protocol(file_, length, alias=proto,
+        next_ = protocol(file_, length, alias=proto, packet=packet,
                          layer=self._exlayer, protocol=self._exproto)  # type: ignore[abstract]
         return next_
 

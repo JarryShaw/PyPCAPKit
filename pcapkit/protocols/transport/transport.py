@@ -116,7 +116,8 @@ class Transport(Protocol[PT, ST], Generic[PT, ST]):  # pylint: disable=abstract-
     # Utilities.
     ##########################################################################
 
-    def _decode_next_layer(self, dict_: 'PT', ports: 'tuple[int, int]', length: 'Optional[int]' = None) -> 'PT':  # type: ignore[override] # pylint: disable=arguments-renamed
+    def _decode_next_layer(self, dict_: 'PT', ports: 'tuple[int, int]', length: 'Optional[int]' = None, *,  # type: ignore[override]
+                           packet: 'Optional[dict[str, Any]]' = None) -> 'PT':  # pylint: disable=arguments-renamed
         """Decode next layer protocol.
 
         The method will check if the next layer protocol is supported based on
@@ -127,6 +128,7 @@ class Transport(Protocol[PT, ST], Generic[PT, ST]):  # pylint: disable=abstract-
             dict_: info buffer
             ports: source & destination port numbers
             length: valid (*non-padding*) length
+            packet: packet info (passed from :meth:`self.unpack <pcapkit.protocols.protocol.Protocol.unpack>`)
 
         Returns:
             Current protocol with next layer extracted.
@@ -134,4 +136,4 @@ class Transport(Protocol[PT, ST], Generic[PT, ST]):  # pylint: disable=abstract-
         """
         sort_port = sorted(ports)
         proto = sort_port[0] if sort_port[0] in self.__proto__ else sort_port[1]
-        return super()._decode_next_layer(dict_, proto, length)
+        return super()._decode_next_layer(dict_, proto, length, packet=packet)
