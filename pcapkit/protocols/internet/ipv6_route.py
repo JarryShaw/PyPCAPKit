@@ -23,6 +23,7 @@ Octets      Bits        Name                    Description
 import collections
 import ipaddress
 import math
+import os.path as os_path
 from typing import TYPE_CHECKING, cast, overload
 
 from pcapkit.const.ipv6.routing import Routing as Enum_Routing
@@ -48,16 +49,16 @@ if TYPE_CHECKING:
     from typing import IO, Any, Callable, DefaultDict, NoReturn, Optional, Type
 
     from aenum import IntEnum as AenumEnum
-    from mypy_extensions import DefaultArg, KwArg
+    from mypy_extensions import DefaultArg, KwArg, NamedArg
     from typing_extensions import Literal
 
     from pcapkit.corekit.protochain import ProtoChain
     from pcapkit.protocols.protocol import Protocol
     from pcapkit.protocols.schema.internet.ipv6_route import RoutingType as Schema_RoutingType
 
-    TypeParser = Callable[['IPv6_Route', Enum_Routing, int, bytes], Data_IPv6_Route]
+    TypeParser = Callable[['IPv6_Route', Schema_RoutingType, NamedArg(Schema_IPv6_Route, 'header')], Data_IPv6_Route]
     TypeConstructor = Callable[['IPv6_Route', Enum_Routing, DefaultArg(Optional[Data_IPv6_Route]),
-                                DefaultArg(Optional[Data_IPv6_Route]), KwArg(Any)], Schema_RoutingType]
+                                NamedArg(Optional[IPv6Address], 'dst'), KwArg(Any)], Schema_RoutingType]
 
 __all__ = ['IPv6_Route']
 
@@ -194,9 +195,6 @@ class IPv6_Route(Internet[Data_IPv6_Route, Schema_IPv6_Route],
             length = len(self)
         schema = self.__header__
 
-        dlen = schema.length - 4
-        data = cast('bytes', schema.data)
-
         name = self.__routing__[schema.type]
         if isinstance(name, str):
             name = f'_read_data_type_{name.lower()}'
@@ -204,13 +202,14 @@ class IPv6_Route(Internet[Data_IPv6_Route, Schema_IPv6_Route],
                             getattr(self, name, self._read_data_type_none))
         else:
             meth = name[0]
-        ipv6_route = meth(self, schema.type, dlen, data)
+        ipv6_route = meth(self, schema.data, header=schema)
 
         if extension:
             return ipv6_route
         return self._decode_next_layer(ipv6_route, schema.next, length - ipv6_route.length)
 
     def make(self,
+             dst: 'Optional[IPv6Address | str | int| bytes]' = None,
              next: 'Enum_TransType | StdlibEnum | AenumEnum | str | int' = Enum_TransType.UDP,
              next_default: 'Optional[int]' = None,
              next_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
@@ -220,12 +219,13 @@ class IPv6_Route(Internet[Data_IPv6_Route, Schema_IPv6_Route],
              type_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
              type_reversed: 'bool' = False,
              seg_left: 'int' = 0,
-             data: 'bytes | Schema_RoutingType | dict[str, Any]' = b'\x00\x00\x00\x00',
+             data: 'bytes | Data_IPv6_Route | Schema_RoutingType | dict[str, Any]' = b'\x00\x00\x00\x00',
              payload: 'Protocol | Schema | bytes' = b'',
              **kwargs: 'Any') -> 'Schema_IPv6_Route':
         """Make (construct) packet data.
 
         Args:
+            dst: Destination address.
             next: Next header type.
             next_default: Default value of next header type.
             next_namespace: Namespace of next header type.
@@ -251,7 +251,7 @@ class IPv6_Route(Internet[Data_IPv6_Route, Schema_IPv6_Route],
         if isinstance(data, bytes):
             length = math.ceil((len(data) + 4) / 8)
             data_val = data.ljust(length * 8 - 4, b'\x00')  # type: bytes | Schema_RoutingType
-        elif isinstance(data, dict):
+        elif isinstance(data, (dict, Data_IPv6_Route)):
             name = self.__routing__[type_val]
             if isinstance(name, str):
                 name = f'_make_data_type_{name.lower()}'
@@ -260,7 +260,11 @@ class IPv6_Route(Internet[Data_IPv6_Route, Schema_IPv6_Route],
             else:
                 meth = name[1]
 
-            data_val = meth(self, type_val, **data)
+            dst_val = cast('IPv6Address', ipaddress.ip_address(dst)) if dst is not None else None
+            if isinstance(data, dict):
+                data_val = meth(self, type_val, dst=dst_val, **data)
+            else:
+                data_val = meth(self, type_val, data, dst=dst_val)
             length = len(data_val.pack())
         elif isinstance(data, Schema):
             length = math.ceil((len(data.pack()) + 4) / 8)
@@ -296,7 +300,8 @@ class IPv6_Route(Internet[Data_IPv6_Route, Schema_IPv6_Route],
 
     @overload
     def __post_init__(self, file: 'IO[bytes] | bytes', length: 'Optional[int]' = ..., *,  # pylint: disable=arguments-differ
-                      extension: 'bool' = ..., **kwargs: 'Any') -> 'None': ...
+                      extension: 'bool' = ..., src_ip: 'Optional[IPv6Address]'= ...,
+                      dst_ip: 'Optional[IPv6Address]'= ..., **kwargs: 'Any') -> 'None': ...
 
     @overload
     def __post_init__(self, **kwargs: 'Any') -> 'None': ...  # pylint: disable=arguments-differ
@@ -309,6 +314,8 @@ class IPv6_Route(Internet[Data_IPv6_Route, Schema_IPv6_Route],
             file: Source packet stream.
             length: Length of packet data.
             extension: If the protocol is used as an IPv6 extension header.
+            src_ip: source IP address
+            dst_ip: destination IP address
             **kwargs: Arbitrary keyword arguments.
 
         See Also:
@@ -360,7 +367,7 @@ class IPv6_Route(Internet[Data_IPv6_Route, Schema_IPv6_Route],
             'payload': cls._make_payload(data),
         }
 
-    def _read_data_type_none(self, type: 'Enum_Routing', length: 'int', data: 'bytes') -> 'Data_UnknownType':
+    def _read_data_type_none(self, schema: 'Schema_UnknownType', *, header: 'Schema_IPv6_Route') -> 'Data_UnknownType':
         """Read IPv6-Route unknown type data.
 
         Structure of IPv6-Route unknown type data [:rfc:`8200`][:rfc:`5095`]:
@@ -378,18 +385,13 @@ class IPv6_Route(Internet[Data_IPv6_Route, Schema_IPv6_Route],
            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
-            type: routing type
-            length: route data length
-            data: route data
+            schema: parsed routing data schema
+            header: parsed IPv6-Route header schema
 
         Returns:
             Parsed route data.
 
         """
-        schema = Schema_UnknownType.unpack(data, length)  # type: Schema_UnknownType
-        self.__header__.data = schema
-
-        header = self.__header__
         ipv6_route = Data_UnknownType(
             next=header.next,
             length=header.length,
@@ -399,7 +401,7 @@ class IPv6_Route(Internet[Data_IPv6_Route, Schema_IPv6_Route],
         )
         return ipv6_route
 
-    def _read_data_type_src(self, type: 'Enum_Routing', length: 'int', data: 'bytes') -> 'Data_SourceRoute':
+    def _read_data_type_src(self, schema: 'Schema_SourceRoute', *, header: 'Schema_IPv6_Route') -> 'Data_SourceRoute':
         """Read IPv6-Route Source Route data.
 
         Structure of IPv6-Route Source Route data [:rfc:`5095`]:
@@ -441,21 +443,16 @@ class IPv6_Route(Internet[Data_IPv6_Route, Schema_IPv6_Route],
            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
-            type: routing type
-            length: route data length
-            data: route data
+            schema: parsed routing data schema
+            header: parsed IPv6-Route header schema
 
         Returns:
             Parsed route data.
 
         """
-        if (length - 8) % 16 != 0:
+        if (header.length - 8) % 16 != 0:
             raise ProtocolError(f'{self.alias} [TypeNo {type}]: invalid format')
 
-        schema = Schema_SourceRoute.unpack(data, length)  # type: Schema_SourceRoute
-        self.__header__.data = schema
-
-        header = self.__header__
         ipv6_route = Data_SourceRoute(
             next=header.next,
             length=header.length,
@@ -465,7 +462,7 @@ class IPv6_Route(Internet[Data_IPv6_Route, Schema_IPv6_Route],
         )
         return ipv6_route
 
-    def _read_data_type_2(self, type: 'Enum_Routing', length: 'int', data: 'bytes') -> 'Data_Type2':
+    def _read_data_type_2(self, schema: 'Schema_Type2', *, header: 'Schema_IPv6_Route') -> 'Data_Type2':
         """Read IPv6-Route Type 2 data.
 
         Structure of IPv6-Route Type 2 data [:rfc:`6275`]:
@@ -487,24 +484,19 @@ class IPv6_Route(Internet[Data_IPv6_Route, Schema_IPv6_Route],
            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
-            type: routing type
-            length: route data length
-            data: route data
+            schema: parsed routing data schema
+            header: parsed IPv6-Route header schema
 
         Returns:
             Parsed route data.
 
         Raises:
-            ProtocolError: If ``length`` is **NOT** ``20``.
+            ProtocolError: If ``length`` is **NOT** ``24``.
 
         """
-        if length != 20:
+        if header.length != 24:
             raise ProtocolError(f'{self.alias}: [TypeNo {type}] invalid format')
 
-        schema = Schema_Type2.unpack(data, length)  # type: Schema_Type2
-        self.__header__.data = schema
-
-        header = self.__header__
         ipv6_route = Data_Type2(
             next=header.next,
             length=header.length,
@@ -514,7 +506,7 @@ class IPv6_Route(Internet[Data_IPv6_Route, Schema_IPv6_Route],
         )
         return ipv6_route
 
-    def _read_data_type_rpl(self, type: 'Enum_Routing', length: 'int', data: 'bytes') -> 'Data_RPL':
+    def _read_data_type_rpl(self, schema: 'Schema_RPL', *, header: 'Schema_IPv6_Route') -> 'Data_RPL':
         """Read IPv6-Route RPL Source data.
 
         Structure of IPv6-Route RPL Source data [:rfc:`6554`]:
@@ -542,37 +534,9 @@ class IPv6_Route(Internet[Data_IPv6_Route, Schema_IPv6_Route],
             Parsed route data.
 
         """
-        if length % 16 != 0:
+        if header.length % 16 != 0:
             raise ProtocolError(f'{self.alias}: [TypeNo {type}] invalid format')
 
-        schema = Schema_RPL.unpack(data, length)  # type: Schema_RPL
-        self.__header__.data = schema
-        header = self.__header__
-
-        ilen = 16 - schema.cmpr_i
-        elen = 16 - schema.cmpr_e
-        addr = []  # type: list[IPv6Address | bytes]
-        counter = 0
-
-        # Addresses[1..n-1]
-        for _ in range(header.length - 8 - schema.pad['pad_len'] - elen):
-            buf = data[counter:counter + ilen]
-            try:
-                ip = cast('IPv6Address | bytes', ipaddress.ip_address(buf))
-            except ValueError:
-                ip = buf
-            addr.append(ip)
-            counter += ilen
-
-        # Addresses[n]
-        buf = data[counter:counter + elen]
-        try:
-            ip = cast('IPv6Address | bytes', ipaddress.ip_address(buf))
-        except ValueError:
-            ip = buf
-        addr.append(ip)
-
-        schema.ip = addr
         ipv6_route = Data_RPL(
             next=header.next,
             length=header.length,
@@ -581,11 +545,12 @@ class IPv6_Route(Internet[Data_IPv6_Route, Schema_IPv6_Route],
             cmpr_i=schema.cmpr_i,
             cmpr_e=schema.cmpr_e,
             pad=schema.pad['pad_len'],
-            ip=tuple(addr),
+            ip=tuple(schema.ip),
         )
         return ipv6_route
 
     def _make_data_type_none(self, type: 'Enum_Routing', route: 'Optional[Data_UnknownType]' = None, *,
+                             dst: 'Optional[IPv6Address]' = None,
                              data: 'bytes' = b'\x00\x00\x00\x00',
                              **kwargs: 'Any') -> 'Schema_UnknownType':
         """Make IPv6-Route unknown type data.
@@ -593,6 +558,7 @@ class IPv6_Route(Internet[Data_IPv6_Route, Schema_IPv6_Route],
         Args:
             type: routing type
             route: route data
+            dst: destination IPv6 address
             data: raw route data as :obj:`bytes`
             **kwargs: arbitrary keyword arguments
 
@@ -612,6 +578,7 @@ class IPv6_Route(Internet[Data_IPv6_Route, Schema_IPv6_Route],
         )
 
     def _make_data_type_src(self, type: 'Enum_Routing', route: 'Optional[Data_SourceRoute]' = None, *,
+                            dst: 'Optional[IPv6Address]' = None,
                             ip: 'Optional[list[IPv6Address | str | bytes | int]]' = None,
                             **kwargs: 'Any') -> 'Schema_SourceRoute':
         """Make IPv6-Route Source Route data.
@@ -619,6 +586,7 @@ class IPv6_Route(Internet[Data_IPv6_Route, Schema_IPv6_Route],
         Args:
             type: routing type
             route: route data
+            dst: destination IPv6 address
             ip: list of IPv6 addresses
             **kwargs: arbitrary keyword arguments
 
@@ -636,6 +604,7 @@ class IPv6_Route(Internet[Data_IPv6_Route, Schema_IPv6_Route],
         )
 
     def _make_data_type_2(self, type: 'Enum_Routing', route: 'Optional[Data_Type2]' = None, *,
+                          dst: 'Optional[IPv6Address]' = None,
                           ip: 'IPv6Address | str | bytes | int' = '::',
                           **kwargs: 'Any') -> 'Schema_Type2':
         """Make IPv6-Route Type 2 data.
@@ -643,6 +612,7 @@ class IPv6_Route(Internet[Data_IPv6_Route, Schema_IPv6_Route],
         Args:
             type: routing type
             route: route data
+            dst: destination IPv6 address
             ip: home address
             **kwargs: arbitrary keyword arguments
 
@@ -658,6 +628,7 @@ class IPv6_Route(Internet[Data_IPv6_Route, Schema_IPv6_Route],
         )
 
     def _make_data_type_rpl(self, type: 'Enum_Routing', route: 'Optional[Data_RPL]' = None, *,
+                            dst: 'Optional[IPv6Address]' = None,
                             ip: 'Optional[list[IPv6Address | str | bytes | int]]' = None,
                             **kwargs: 'Any') -> 'Schema_RPL':
         """Make IPv6-Route RPL Source data.
@@ -665,19 +636,12 @@ class IPv6_Route(Internet[Data_IPv6_Route, Schema_IPv6_Route],
         Args:
             type: routing type
             route: route data
-            cmpr_i: compression for intermediate nodes
-            cmpr_e: compression for the last node
-            pad: padding length
+            dst: destination IPv6 address
             ip: list of IPv6 addresses
             **kwargs: arbitrary keyword arguments
 
         Returns:
             Constructed route data schema.
-
-        Notes:
-            We did not implement the SRH prefix compression for simplicity.
-            The ``ip`` argument is expected to be a list of IPv6 addresses,
-            and the method will not perform any compression.
 
         """
         if route is not None:
@@ -690,12 +654,43 @@ class IPv6_Route(Internet[Data_IPv6_Route, Schema_IPv6_Route],
         else:
             ip = [] if ip is None else ip
 
-            pad = 0
-            cmpr_i = 0
-            cmpr_e = 0
-            ip_val = [
-                cast('IPv6Address', ipaddress.ip_address(addr)).packed for addr in ip
-            ]
+            if dst is None:
+                pad = 0
+                cmpr_i = 0
+                cmpr_e = 0
+                ip_val = [
+                    cast('IPv6Address', ipaddress.ip_address(addr)).packed for addr in ip
+                ]
+            else:
+                test_list = [dst.packed]  # type: list[bytes]
+                for item in ip[:-1]:
+                    if isinstance(item, bytes):
+                        test_list.append(item)
+                    else:
+                        test_list.append(cast('IPv6Address', ipaddress.ip_address(item)).packed)
+                prefix_i = os_path.commonprefix(test_list)
+                cmpr_i = len(prefix_i)
+
+                test_list = [dst.packed]
+                if isinstance(ip[-1], bytes):
+                    test_list.append(ip[-1])
+                else:
+                    test_list.append(cast('IPv6Address', ipaddress.ip_address(ip[-1])).packed)
+                prefix_e = os_path.commonprefix(test_list)
+                cmpr_e = len(prefix_e)
+
+                pad = 8 - ((len(ip) - 1) * (16 - cmpr_i) + (16 - cmpr_e)) % 8
+
+                ip_val = []
+                for item in ip[:-1]:
+                    if isinstance(item, bytes):
+                        ip_val.append(item[cmpr_i:])
+                    else:
+                        ip_val.append(cast('IPv6Address', ipaddress.ip_address(item)).packed[cmpr_i:])
+                if isinstance(ip[-1], bytes):
+                    ip_val.append(ip[-1][cmpr_e:])
+                else:
+                    ip_val.append(cast('IPv6Address', ipaddress.ip_address(ip[-1])).packed[cmpr_e:])
 
         return Schema_RPL(
             cmpr_i=cmpr_i,
@@ -703,5 +698,5 @@ class IPv6_Route(Internet[Data_IPv6_Route, Schema_IPv6_Route],
             pad={
                 'pad_len': pad,
             },
-            ip=ip_val,
+            addresses=ip_val,
         )
