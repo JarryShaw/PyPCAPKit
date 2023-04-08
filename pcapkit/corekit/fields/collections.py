@@ -121,31 +121,32 @@ class ListField(_Field[list[_TL]]):
         else:
             file = buffer
 
-        if self._item_type is not None:
-            from pcapkit.corekit.fields.misc import SchemaField
-            is_schema = isinstance(self._item_type, SchemaField)
+        if self._item_type is None:
+            return file.read(length)
 
-            temp = []  # type: list[_TL]
-            while length:
-                field = self._item_type(packet)
+        from pcapkit.corekit.fields.misc import SchemaField
+        is_schema = isinstance(self._item_type, SchemaField)
 
-                if is_schema:
-                    data = cast('Schema', self._item_type).unpack(file, None, packet)  # type: ignore[call-arg,misc]
+        temp = []  # type: list[_TL]
+        while length:
+            field = self._item_type(packet)
 
-                    length -= len(data)
-                    if length < 0:
-                        raise FieldValueError(f'Field {self.name} has invalid length.')
-                else:
-                    length -= field.length
-                    if length < 0:
-                        raise FieldValueError(f'Field {self.name} has invalid length.')
+            if is_schema:
+                data = cast('Schema', self._item_type).unpack(file, None, packet)  # type: ignore[call-arg,misc]
 
-                    buffer = file.read(field.length)
-                    data = field.unpack(buffer, packet)
+                length -= len(data)
+                if length < 0:
+                    raise FieldValueError(f'Field {self.name} has invalid length.')
+            else:
+                length -= field.length
+                if length < 0:
+                    raise FieldValueError(f'Field {self.name} has invalid length.')
 
-                temp.append(data)  # type: ignore[arg-type]
-            return temp
-        return file.read(length)
+                buffer = file.read(field.length)
+                data = field.unpack(buffer, packet)
+
+            temp.append(data)  # type: ignore[arg-type]
+        return temp
 
 
 class OptionField(ListField):
