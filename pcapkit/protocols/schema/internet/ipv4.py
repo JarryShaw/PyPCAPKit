@@ -443,7 +443,7 @@ class RTRALTOption(Option):
         def __init__(self, type: 'Enum_OptionNumber', length: 'int', alert: 'Enum_RouterAlert') -> 'None': ...
 
 
-class _QSOption(Option):
+class _QSOption(Schema):
     """Header schema for IPv4 quick start (``QS``) options in generic representation."""
 
     #: Flags.

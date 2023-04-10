@@ -99,6 +99,8 @@ if TYPE_CHECKING:
     class SMFDPDTestFlag(TypedDict):
         """``SMF_DPD`` test flag."""
 
+        #: Length.
+        len: int
         #: DPD mode.
         mode: int
 
@@ -326,11 +328,12 @@ class _SMFDPDOption(Schema):
 
     #: SMF DPD mode.
     test: 'SMFDPDTestFlag' = ForwardMatchField(BitField(length=3, namespace={
+        'len': (1, 8),
         'mode': (16, 1),
     }))
     #: SMF DPD data.
     data: 'SMFIdentificationBasedDPDOption | SMFHashBasedDPDOption' = SwitchField(
-        length=lambda pkt: pkt['len'],
+        length=lambda pkt: pkt['test']['len'],
         selector=smf_dpd_data_selector,
     )
 
