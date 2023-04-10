@@ -331,17 +331,17 @@ class QuickStartRequestOption(QSOption):
     #: TTL.
     ttl: 'timedelta'
     #: Nonce.
-    nonce: 'bytes'
+    nonce: 'int'
 
     if TYPE_CHECKING:
-         def __init__(self, code: 'OptionNumber', length: 'int', type: 'OptionType', func: 'QSFunction', rate: 'int', ttl: 'timedelta', nonce: 'bytes') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
+         def __init__(self, code: 'OptionNumber', length: 'int', type: 'OptionType', func: 'QSFunction', rate: 'int', ttl: 'timedelta', nonce: 'int') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
 class QuickStartReportOption(QSOption):
     """Data model for IPv4 Quick Start report of approved rate option."""
 
     #: Nonce.
-    nonce: 'bytes'
+    nonce: 'int'
 
     if TYPE_CHECKING:
-        def __init__(self, code: 'OptionNumber', length: 'int', type: 'OptionType', func: 'QSFunction', rate: 'int', nonce: 'bytes') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
+        def __init__(self, code: 'OptionNumber', length: 'int', type: 'OptionType', func: 'QSFunction', rate: 'int', nonce: 'int') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin

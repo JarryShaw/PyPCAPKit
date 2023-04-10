@@ -8,10 +8,12 @@ from typing import TYPE_CHECKING, cast
 from pcapkit.const.ipv6.option import Option as Enum_Option
 from pcapkit.const.ipv6.qs_function import QSFunction as Enum_QSFunction
 from pcapkit.const.ipv6.router_alert import RouterAlert as Enum_RouterAlert
+from pcapkit.const.ipv6.seed_id import SeedID as Enum_SeedID
 from pcapkit.const.ipv6.smf_dpd_mode import SMFDPDMode as Enum_SMFDPDMode
 from pcapkit.const.ipv6.tagger_id import TaggerID as Enum_TaggerID
 from pcapkit.const.reg.transtype import TransType as Enum_TransType
 from pcapkit.corekit.fields.collections import OptionField
+from pcapkit.corekit.fields.field import NoValue
 from pcapkit.corekit.fields.ipaddress import IPv4Field, IPv6Field
 from pcapkit.corekit.fields.misc import (ConditionalField, ForwardMatchField, NoValueField,
                                          PayloadField, SchemaField, SwitchField)
@@ -105,6 +107,12 @@ if TYPE_CHECKING:
 
         #: QS function.
         func: int
+
+    class QSNonce(TypedDict):
+        """Quick start nonce."""
+
+        #: Nonce.
+        nonce: int
 
 
 def mpl_opt_seed_id_len(pkt: 'dict[str, Any]') -> 'int':
@@ -471,11 +479,13 @@ class QuickStartRequestOption(QuickStartOption):
     #: QS time-to-live (TTL).
     ttl: 'int' = UInt8Field()
     #: QS nonce.
-    nonce: 'bytes' = BytesField(length=4)
+    nonce: 'QSNonce' = BitField(length=4, namespace={
+        'nonce': (0, 30),
+    })
 
     if TYPE_CHECKING:
         def __init__(self, type: 'Enum_Option', len: 'int', flags: 'QuickStartFlags',
-                     ttl: 'int', nonce: 'bytes') -> 'None': ...
+                     ttl: 'int', nonce: 'QSNonce') -> 'None': ...
 
 
 class QuickStartReportOption(QuickStartOption):
@@ -484,11 +494,13 @@ class QuickStartReportOption(QuickStartOption):
     #: Reserved.
     reserved: 'bytes' = PaddingField(length=1)
     #: QS nonce.
-    nonce: 'bytes' = BytesField(length=4)
+    nonce: 'QSNonce' = BitField(length=4, namespace={
+        'nonce': (0, 30),
+    })
 
     if TYPE_CHECKING:
         def __init__(self, type: 'Enum_Option', len: 'int', flags: 'QuickStartFlags',
-                     nonce: 'bytes') -> 'None': ...
+                     nonce: 'QSNonce') -> 'None': ...
 
 
 class RPLOption(Option):
@@ -524,12 +536,34 @@ class MPLOption(Option):
     #: MPL Seed-ID.
     seed: 'int' = ConditionalField(
         NumberField(length=mpl_opt_seed_id_len, signed=False),
-        lambda pkt: pkt['flags']['type'] != 0,
+        lambda pkt: pkt['flags']['type'] != Enum_SeedID.IPV6_SOURCE_ADDRESS,
     )
     #: Reserved data (padding).
     pad: 'bytes' = PaddingField(length=lambda pkt: pkt['len'] - 2 - (
         0 if pkt['flags']['type'] == 0 else mpl_opt_seed_id_len(pkt)
     ))
+
+    @staticmethod
+    def post_process(schema: 'Schema', data: 'IO[bytes]', length: 'int',
+                     packet: 'dict[str, Any]') -> 'Schema':
+        """Revise ``schema`` data after unpacking process.
+
+        Args:
+            schema: parsed schema
+            data: Packed data.
+            length: Length of data.
+            packet: Unpacked data.
+
+        Returns:
+            Revised schema.
+
+        """
+        if TYPE_CHECKING:
+            schema = cast('MPLOption', schema)
+
+        if schema.flags['type'] == Enum_SeedID.IPV6_SOURCE_ADDRESS:
+            schema.seed = packet.get('src', NoValue)
+        return schema
 
     if TYPE_CHECKING:
         def __init__(self, type: 'Enum_Option', len: 'int', flags: 'MPLFlags', seq: 'int',
@@ -540,10 +574,10 @@ class ILNPOption(Option):
     """Header schema for HOPOPT identifier-locator network protocol (ILNP) options."""
 
     #: Nonce value.
-    nonce: 'bytes' = BytesField(length=lambda pkt: pkt['len'])
+    nonce: 'int' = NumberField(length=lambda pkt: pkt['len'], signed=False)
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_Option', len: 'int', nonce: 'bytes') -> 'None': ...
+        def __init__(self, type: 'Enum_Option', len: 'int', nonce: 'int') -> 'None': ...
 
 
 class LineIdentificationOption(Option):

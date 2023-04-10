@@ -1140,7 +1140,7 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
                 func=func,
                 rate=40000 * (2 ** rate) / 1000 if rate > 0 else 0,
                 ttl=datetime.timedelta(seconds=schema_req.ttl),
-                nonce=schema_req.nonce,
+                nonce=schema_req.nonce['nonce'],
             )  # type: Data_QSOption
         elif func == Enum_QSFunction.Report_of_Approved_Rate:
             schema_rep = cast('Schema_QuickStartReportOption', schema)
@@ -1152,7 +1152,7 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
                 length=schema_req.length,
                 func=func,
                 rate=40000 * (2 ** rate) / 1000 if rate > 0 else 0,
-                nonce=schema_rep.nonce,
+                nonce=schema_rep.nonce['nonce'],
             )
         else:
             raise ProtocolError(f'{self.alias}: [OptNo {schema.type}] unknown QS function: {func}')
@@ -1203,12 +1203,13 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
 
                 # force alignment to 32-bit boundary
                 if data_len % 4:
-                    data_len = 4 - (data_len % 4)
-                    pad_opt = self._make_opt_nop(code)
+                    pad_len = 4 - (data_len % 4)
+                    pad_opt = self._make_opt_nop(Enum_OptionNumber.NOP)  # type: ignore[arg-type]
+                    total_length += pad_len
 
-                    for _ in range(data_len):
+                    for _ in range(pad_len - 1):
                         options_list.append(pad_opt)
-                    total_length += data_len
+                    options_list.append(Enum_OptionNumber.EOOL)  # type: ignore[arg-type]
             return options_list, total_length
 
         options_list = []
@@ -1230,11 +1231,12 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
             # force alignment to 32-bit boundary
             if data_len % 4:
                 pad_len = 4 - (data_len % 4)
-                pad_opt = self._make_opt_nop(code)
-
-                for _ in range(pad_len):
-                    options_list.append(pad_opt)
+                pad_opt = self._make_opt_nop(Enum_OptionNumber.NOP)  # type: ignore[arg-type]
                 total_length += pad_len
+
+                for _ in range(pad_len - 1):
+                    options_list.append(pad_opt)
+                options_list.append(Enum_OptionNumber.EOOL)  # type: ignore[arg-type]
         return options_list, total_length
 
     def _make_opt_unassigned(self, kind: 'Enum_OptionNumber', option: 'Optional[Data_UnassignedOption]' = None, *,
@@ -1710,14 +1712,14 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
             alert=alert_val,
         )
 
-    def _make_opt_qs(self, kind: 'Enum_OptionNumber', option: 'Optional[Data_QSOption]' = None, *,
+    def _make_opt_qs(self, kind: 'Enum_OptionNumber', option: 'Optional[Data_QuickStartRequestOption | Data_QuickStartReportOption]' = None, *,
                      func: 'Enum_QSFunction | StdlibEnum | AenumEnum | str | int' = Enum_QSFunction.Quick_Start_Request,
                      func_default: 'Optional[int]' = None,
                      func_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,   # pylint: disable=line-too-long
                      func_reversed: 'bool' = False,
                      rate: 'int' = 0,
                      ttl: 'timedelta | int' = 0,
-                     nonce: 'bytes' = b'\x00\x00\x00\x00',
+                     nonce: 'int' = 0,
                      **kwargs: 'Any') -> 'Schema_QSOption':
         """Make IPv4 Quick-Start (``QS``) option.
 
@@ -1737,8 +1739,14 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
             Constructured option schema.
 
         """
-        func_enum = self._make_index(func, func_default, namespace=func_namespace,  # type: ignore[call-overload]
-                                     reversed=func_reversed, pack=False)
+        if option is not None:
+            func_enum = option.func
+            rate = option.rate
+            ttl = getattr(option, 'ttl', 0)
+            nonce = option.nonce
+        else:
+            func_enum = self._make_index(func, func_default, namespace=func_namespace,  # type: ignore[call-overload]
+                                         reversed=func_reversed, pack=False)
         rate_val = math.floor(math.log2(rate * 1000 / 40000)) if rate > 0 else 0
 
         if func_enum == Enum_QSFunction.Quick_Start_Request:
@@ -1752,7 +1760,9 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
                     'rate': rate_val,
                 },
                 ttl=ttl_value,
-                nonce=nonce,
+                nonce={
+                    'nonce': nonce,
+                },
             )
         if func_enum == Enum_QSFunction.Report_of_Approved_Rate:
             return Schema_QuickStartReportOption(
@@ -1762,6 +1772,8 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
                     'func': func_enum,
                     'rate': rate_val,
                 },
-                nonce=nonce,
+                nonce={
+                    'nonce': nonce,
+                },
             )
         raise ProtocolError(f'{self.alias}: [OptNo {kind}] invalid QS function: {func_enum}')

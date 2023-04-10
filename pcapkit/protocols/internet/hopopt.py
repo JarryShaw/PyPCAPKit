@@ -33,6 +33,7 @@ from pcapkit.const.ipv6.seed_id import SeedID as Enum_SeedID
 from pcapkit.const.ipv6.smf_dpd_mode import SMFDPDMode as Enum_SMFDPDMode
 from pcapkit.const.ipv6.tagger_id import TaggerID as Enum_TaggerID
 from pcapkit.const.reg.transtype import TransType as Enum_TransType
+from pcapkit.corekit.fields.field import NoValue
 from pcapkit.corekit.multidict import OrderedMultiDict
 from pcapkit.protocols.data.internet.hopopt import HOPOPT as Data_HOPOPT
 from pcapkit.protocols.data.internet.hopopt import CALIPSOOption as Data_CALIPSOOption
@@ -865,7 +866,7 @@ class HOPOPT(Internet[Data_HOPOPT, Schema_HOPOPT],
                 func=func,
                 rate=40000 * (2 ** rate) / 1000 if rate > 0 else 0,
                 ttl=datetime.timedelta(seconds=schema_req.ttl),
-                nonce=schema_req.nonce,
+                nonce=schema_req.nonce['nonce'],
             )  # type: Data_QuickStartOption
         elif func == Enum_QSFunction.Report_of_Approved_Rate:
             schema_rep = cast('Schema_QuickStartReportOption', schema)
@@ -878,7 +879,7 @@ class HOPOPT(Internet[Data_HOPOPT, Schema_HOPOPT],
                 length=schema_rep.len + 2,
                 func=func,
                 rate=40000 * (2 ** rate) / 1000 if rate > 0 else 0,
-                nonce=schema_rep.nonce,
+                nonce=schema_rep.nonce['nonce'],
             )
         else:
             raise ProtocolError(f'{self.alias}: [OptNo {schema.type}] unknown QS function: {func}')
@@ -989,7 +990,7 @@ class HOPOPT(Internet[Data_HOPOPT, Schema_HOPOPT],
                 drop=bool(schema.flags['drop']),
             ),
             seq=schema.seq,
-            seed_id=schema.seed if kind != kind.IPV6_SOURCE_ADDRESS else None,
+            seed_id=schema.seed if schema.seed is not NoValue else None,  # type: ignore[comparison-overlap]
         )
         return opt
 
@@ -1429,7 +1430,7 @@ class HOPOPT(Internet[Data_HOPOPT, Schema_HOPOPT],
             bitmap=bitmap,
         )
 
-    def _make_opt_smf_dpd(self, code: 'Enum_Option', opt: 'Optional[Data_SMFDPDOption]' = None, *,
+    def _make_opt_smf_dpd(self, code: 'Enum_Option', opt: 'Optional[Data_SMFIdentificationBasedDPDOption | Data_SMFHashBasedDPDOption]' = None, *,
                           mode: 'Enum_SMFDPDMode | StdlibEnum | AenumEnum | str | int' = Enum_SMFDPDMode.I_DPD,
                           mode_default: 'Optional[int]' = None,
                           mode_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
@@ -1456,6 +1457,12 @@ class HOPOPT(Internet[Data_HOPOPT, Schema_HOPOPT],
             Constructured option schema.
 
         """
+        if opt is not None:
+            dpd_type = opt.dpd_type
+            tid = getattr(opt, 'tid', None)
+            id = getattr(opt, 'id', b'')
+            hav = getattr(opt, 'hav', b'')
+
         dpd_type = self._make_index(mode, mode_default, namespace=mode_namespace,  # type: ignore[call-overload]
                                     reversed=mode_reversed, pack=False)
 
@@ -1555,6 +1562,12 @@ class HOPOPT(Internet[Data_HOPOPT, Schema_HOPOPT],
             Constructured option schema.
 
         """
+        if opt is not None:
+            psntp = opt.psntp
+            psnlr = opt.psnlr
+            deltatlr = opt.deltatlr
+            deltatls = opt.deltatls
+
         dtlr_bl = deltatlr.bit_length()
         scale_dtlr = dtlr_bl - 16 if dtlr_bl > 16 else 0
         if scale_dtlr > 255:
@@ -1585,7 +1598,7 @@ class HOPOPT(Internet[Data_HOPOPT, Schema_HOPOPT],
                      func_reversed: 'bool' = False,
                      rate: 'int' = 0,
                      ttl: 'timedelta | int' = 0,
-                     nonce: 'bytes' = b'\x00\x00\x00\x00',
+                     nonce: 'int' = 0,
                      **kwargs: 'Any') -> 'Schema_QuickStartOption':
         """Make HOPOPT QS option.
 
@@ -1605,8 +1618,14 @@ class HOPOPT(Internet[Data_HOPOPT, Schema_HOPOPT],
             Constructured option schema.
 
         """
-        func_enum = self._make_index(func, func_default, namespace=func_namespace,  # type: ignore[call-overload]
-                                     reversed=func_reversed, pack=False)
+        if opt is not None:
+            func_enum = opt.func
+            rate = opt.rate
+            ttl = getattr(opt, 'ttl', 0)
+            nonce = getattr(opt, 'nonce', 0)
+        else:
+            func_enum = self._make_index(func, func_default, namespace=func_namespace,  # type: ignore[call-overload]
+                                         reversed=func_reversed, pack=False)
         rate_val = math.floor(math.log2(rate * 1000 / 40000)) if rate > 0 else 0
 
         if func_enum == Enum_QSFunction.Quick_Start_Request:
@@ -1620,7 +1639,9 @@ class HOPOPT(Internet[Data_HOPOPT, Schema_HOPOPT],
                     'rate': rate_val,
                 },
                 ttl=ttl_value,
-                nonce=nonce,
+                nonce={
+                    'nonce': nonce,
+                },
             )
         if func_enum == Enum_QSFunction.Report_of_Approved_Rate:
             return Schema_QuickStartReportOption(
@@ -1630,7 +1651,9 @@ class HOPOPT(Internet[Data_HOPOPT, Schema_HOPOPT],
                     'func': func_enum,
                     'rate': rate_val,
                 },
-                nonce=nonce,
+                nonce={
+                    'nonce': nonce,
+                },
             )
         raise ProtocolError(f'{self.alias}: [OptNo {code}] invalid QS function: {func_enum}')
 
@@ -1657,6 +1680,13 @@ class HOPOPT(Internet[Data_HOPOPT, Schema_HOPOPT],
             Constructured option schema.
 
         """
+        if opt is not None:
+            down = opt.flags.down
+            rank_err = opt.flags.rank_err
+            fwd_err = opt.flags.fwd_err
+            id = opt.id
+            rank = opt.rank
+
         return Schema_RPLOption(
             type=code,
             len=4,
@@ -1690,6 +1720,12 @@ class HOPOPT(Internet[Data_HOPOPT, Schema_HOPOPT],
             Constructured option schema.
 
         """
+        if opt is not None:
+            max = opt.flags.max
+            drop = opt.flags.drop
+            seq = opt.seq
+            seed = opt.seed_id
+
         if seed is None:
             kind = Enum_SeedID.IPV6_SOURCE_ADDRESS
             clen = 2
@@ -1720,7 +1756,7 @@ class HOPOPT(Internet[Data_HOPOPT, Schema_HOPOPT],
         )
 
     def _make_opt_ilnp(self, code: 'Enum_Option', opt: 'Optional[Data_ILNPOption]' = None, *,
-                       nonce: 'bytes' = b'',
+                       nonce: 'int' = 0,
                        **kwargs: 'Any') -> 'Schema_ILNPOption':
         """Make HOPOPT ILNP option.
 
@@ -1734,9 +1770,12 @@ class HOPOPT(Internet[Data_HOPOPT, Schema_HOPOPT],
             Constructured option schema.
 
         """
+        if opt is not None:
+            nonce = opt.nonce
+
         return Schema_ILNPOption(
             type=code,
-            len=len(nonce),
+            len=math.ceil(nonce.bit_length() // 8),
             nonce=nonce,
         )
 
@@ -1755,6 +1794,9 @@ class HOPOPT(Internet[Data_HOPOPT, Schema_HOPOPT],
             Constructured option schema.
 
         """
+        if opt is not None:
+            id = opt.line_id
+
         return Schema_LineIdentificationOption(
             type=code,
             len=len(id) + 1,
@@ -1777,6 +1819,9 @@ class HOPOPT(Internet[Data_HOPOPT, Schema_HOPOPT],
             Constructured option schema.
 
         """
+        if opt is not None:
+            len = opt.jumbo_len
+
         return Schema_JumboPayloadOption(
             type=code,
             len=4,
@@ -1798,6 +1843,9 @@ class HOPOPT(Internet[Data_HOPOPT, Schema_HOPOPT],
             Constructured option schema.
 
         """
+        if opt is not None:
+            addr = opt.address
+
         return Schema_HomeAddressOption(
             type=code,
             len=16,
@@ -1825,6 +1873,12 @@ class HOPOPT(Internet[Data_HOPOPT, Schema_HOPOPT],
             Constructured option schema.
 
         """
+        if opt is not None:
+            version = opt.version
+            dup = opt.flags.dup
+            ret = opt.flags.ret
+            seq = opt.seq
+
         return Schema_IPDFFOption(
             type=code,
             len=2,

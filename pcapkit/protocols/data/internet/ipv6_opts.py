@@ -195,21 +195,21 @@ class QuickStartRequestOption(QuickStartOption):
     #: TTL.
     ttl: 'timedelta'
     #: Nonce.
-    nonce: 'bytes'
+    nonce: 'int'
 
     if TYPE_CHECKING:
         def __init__(self, type: 'Enum_Option', action: 'int', change: 'bool', length: 'int', func: 'QSFunction', rate: 'int', ttl: 'timedelta',
-                     nonce: 'bytes') -> 'None': ...  # pylint: disable=super-init-not-called,unused-argument,redefined-builtin,multiple-statements,line-too-long
+                     nonce: 'int') -> 'None': ...  # pylint: disable=super-init-not-called,unused-argument,redefined-builtin,multiple-statements,line-too-long
 
 
 class QuickStartReportOption(QuickStartOption):
     """Data model for IPv6-Opts Quick Start report of approved rate option."""
 
     #: Nonce.
-    nonce: 'bytes'
+    nonce: 'int'
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_Option', action: 'int', change: 'bool', length: 'int', func: 'QSFunction', rate: 'int', nonce: 'bytes') -> 'None':
+        def __init__(self, type: 'Enum_Option', action: 'int', change: 'bool', length: 'int', func: 'QSFunction', rate: 'int', nonce: 'int') -> 'None':
             ...
 
 
@@ -276,11 +276,11 @@ class ILNPOption(Option):
     """Data model for IPv6-Opts Identifier-Locator Network Protocol (ILNP) Nonce option."""
 
     #: Nonce value.
-    nonce: 'bytes'
+    nonce: 'int'
 
     if TYPE_CHECKING:
         def __init__(self, type: 'Enum_Option', action: 'int', change: 'bool', length: 'int',
-                     nonce: 'bytes') -> 'None': ...  # pylint: disable=super-init-not-called,unused-argument,redefined-builtin,multiple-statements,line-too-long
+                     nonce: 'int') -> 'None': ...  # pylint: disable=super-init-not-called,unused-argument,redefined-builtin,multiple-statements,line-too-long
 
 
 class LineIdentificationOption(Option):

@@ -97,6 +97,12 @@ if TYPE_CHECKING:
         #: QS function.
         func: int
 
+    class QSNonce(TypedDict):
+        """Quick start nonce field."""
+
+        #: Nonce.
+        nonce: int
+
 
 def quick_start_data_selector(pkt: 'dict[str, Any]') -> 'Field':
     """Selector function for :attr:`_QSOption.data` field.
@@ -492,22 +498,26 @@ class QuickStartRequestOption(QSOption):
     #: QS time-to-live (TTL).
     ttl: 'int' = UInt8Field()
     #: QS nonce.
-    nonce: 'bytes' = BytesField(length=4)
+    nonce: 'QSNonce' = BitField(length=4, namespace={
+        'nonce': (0, 30),
+    })
 
     if TYPE_CHECKING:
         def __init__(self, type: 'Enum_OptionNumber', length: 'int', flags: 'QuickStartFlags',
-                     ttl: 'int', nonce: 'bytes') -> 'None': ...
+                     ttl: 'int', nonce: 'QSNonce') -> 'None': ...
 
 
 class QuickStartReportOption(QSOption):
     """Header schema for IPV4 quick start report of approved rate options."""
 
     #: QS nonce.
-    nonce: 'bytes' = BytesField(length=4)
+    nonce: 'QSNonce' = BitField(length=4, namespace={
+        'nonce': (0, 30),
+    })
 
     if TYPE_CHECKING:
         def __init__(self, type: 'Enum_OptionNumber', length: 'int', flags: 'QuickStartFlags',
-                     nonce: 'bytes') -> 'None': ...
+                     nonce: 'QSNonce') -> 'None': ...
 
 
 class IPv4(Schema):
