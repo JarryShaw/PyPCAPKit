@@ -122,8 +122,41 @@ from pcapkit.protocols.schema.internet.ipv4 import TROption as IPv4_TROption
 from pcapkit.protocols.schema.internet.ipv4 import TSOption as IPv4_TSOption
 from pcapkit.protocols.schema.internet.ipv4 import UnassignedOption as IPv4_UnassignedOption
 
+# Internet Protocol version 6
+from pcapkit.protocols.schema.internet.ipv6 import IPv6
+
 # IPv6 Fragment Header
 from pcapkit.protocols.schema.internet.ipv6_frag import IPv6_Frag
+
+# IPv6 Destination Options
+from pcapkit.protocols.schema.internet.ipv6_opts import CALIPSOOption as IPv6_Opts_CALIPSOOption
+from pcapkit.protocols.schema.internet.ipv6_opts import \
+    HomeAddressOption as IPv6_Opts_HomeAddressOption
+from pcapkit.protocols.schema.internet.ipv6_opts import ILNPOption as IPv6_Opts_ILNPOption
+from pcapkit.protocols.schema.internet.ipv6_opts import IPDFFOption as IPv6_Opts_IPDFFOption
+from pcapkit.protocols.schema.internet.ipv6_opts import IPv6_Opts
+from pcapkit.protocols.schema.internet.ipv6_opts import \
+    JumboPayloadOption as IPv6_Opts_JumboPayloadOption
+from pcapkit.protocols.schema.internet.ipv6_opts import \
+    LineIdentificationOption as IPv6_Opts_LineIdentificationOption
+from pcapkit.protocols.schema.internet.ipv6_opts import MPLOption as IPv6_Opts_MPLOption
+from pcapkit.protocols.schema.internet.ipv6_opts import PadOption as IPv6_Opts_PadOption
+from pcapkit.protocols.schema.internet.ipv6_opts import PDMOption as IPv6_Opts_PDMOption
+from pcapkit.protocols.schema.internet.ipv6_opts import \
+    QuickStartReportOption as IPv6_Opts_QuickStartReportOption
+from pcapkit.protocols.schema.internet.ipv6_opts import \
+    QuickStartRequestOption as IPv6_Opts_QuickStartRequestOption
+from pcapkit.protocols.schema.internet.ipv6_opts import \
+    RouterAlertOption as IPv6_Opts_RouterAlertOption
+from pcapkit.protocols.schema.internet.ipv6_opts import RPLOption as IPv6_Opts_RPLOption
+from pcapkit.protocols.schema.internet.ipv6_opts import \
+    SMFHashBasedDPDOption as IPv6_Opts_SMFHashBasedDPDOption
+from pcapkit.protocols.schema.internet.ipv6_opts import \
+    SMFIdentificationBasedDPDOption as IPv6_Opts_SMFIdentificationBasedDPDOption
+from pcapkit.protocols.schema.internet.ipv6_opts import \
+    TunnelEncapsulationLimitOption as IPv6_Opts_TunnelEncapsulationLimitOption
+from pcapkit.protocols.schema.internet.ipv6_opts import \
+    UnassignedOption as IPv6_Opts_UnassignedOption
 
 # IPv6 Routing Header
 from pcapkit.protocols.schema.internet.ipv6_route import RPL as IPv6_Route_RPL
@@ -131,9 +164,6 @@ from pcapkit.protocols.schema.internet.ipv6_route import IPv6_Route
 from pcapkit.protocols.schema.internet.ipv6_route import SourceRoute as IPv6_Route_SourceRoute
 from pcapkit.protocols.schema.internet.ipv6_route import Type2 as IPv6_Route_Type2
 from pcapkit.protocols.schema.internet.ipv6_route import UnknownType as IPv6_Route_UnknownType
-
-# Internet Protocol version 6
-from pcapkit.protocols.schema.internet.ipv6 import IPv6
 
 # Internetwork Packet Exchange
 from pcapkit.protocols.schema.internet.ipx import IPX
@@ -186,6 +216,15 @@ __all__ = [
 
     # IPv6 Fragment Header
     'IPv6_Frag',
+
+    # IPv6 Destination Options
+    'IPv6_Opts',
+    'IPv6_Opts_UnassignedOption', 'IPv6_Opts_PadOption', 'IPv6_Opts_TunnelEncapsulationLimitOption',
+    'IPv6_Opts_RouterAlertOption', 'IPv6_Opts_CALIPSOOption', 'IPv6_Opts_SMFIdentificationBasedDPDOption',
+    'IPv6_Opts_SMFHashBasedDPDOption', 'IPv6_Opts_PDMOption', 'IPv6_Opts_QuickStartRequestOption',
+    'IPv6_Opts_QuickStartReportOption', 'IPv6_Opts_RPLOption', 'IPv6_Opts_MPLOption', 'IPv6_Opts_ILNPOption',
+    'IPv6_Opts_LineIdentificationOption', 'IPv6_Opts_JumboPayloadOption', 'IPv6_Opts_HomeAddressOption',
+    'IPv6_Opts_IPDFFOption',
 
     # IPv6 Routing Header
     'IPv6_Route',

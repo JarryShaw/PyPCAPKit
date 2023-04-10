@@ -58,12 +58,33 @@ __all__ = [
     'IPv4_TROption', 'IPv4_RTRALTOption', 'IPv4_QSOption',
     'IPv4_QuickStartRequestOption', 'IPv4_QuickStartReportOption',
     'IPv6_Frag',
+    'IPv6_Opts',
+    'IPv6_Opts_UnassignedOption', 'IPv6_Opts_PadOption', 'IPv6_Opts_TunnelEncapsulationLimitOption',
+    'IPv6_Opts_RouterAlertOption', 'IPv6_Opts_CALIPSOOption', 'IPv6_Opts_SMFIdentificationBasedDPDOption',
+    'IPv6_Opts_SMFHashBasedDPDOption', 'IPv6_Opts_PDMOption', 'IPv6_Opts_QuickStartRequestOption',
+    'IPv6_Opts_QuickStartReportOption', 'IPv6_Opts_RPLOption', 'IPv6_Opts_MPLOption', 'IPv6_Opts_ILNPOption',
+    'IPv6_Opts_LineIdentificationOption', 'IPv6_Opts_JumboPayloadOption', 'IPv6_Opts_HomeAddressOption',
+    'IPv6_Opts_IPDFFOption',
     'IPv6_Route',
     'IPv6_Route_UnknownType', 'IPv6_Route_SourceRoute', 'IPv6_Route_Type2', 'IPv6_Route_RPL',
     'IPv6',
     'IPX',
 
     # Transport Layer Protocols
+    'TCP',
+    'TCP_SACKBlock',
+    'TCP_Option',
+    'TCP_UnassignedOption', 'TCP_EndOfOptionList', 'TCP_NoOperation', 'TCP_MaximumSegmentSize', 'TCP_WindowScale',
+    'TCP_SACKPermitted', 'TCP_SACK', 'TCP_Echo', 'TCP_EchoReply', 'TCP_Timestamp', 'TCP_PartialOrderConnectionPermitted',  # pylint: disable=line-too-long
+    'TCP_PartialOrderConnectionProfile', 'TCP_CC', 'TCP_CCNew', 'TCP_CCEcho', 'TCP_AlternateChecksumRequest',
+    'TCP_AlternateChecksumData', 'TCP_MD5Signature', 'TCP_QuickStartResponse', 'TCP_UserTimeout',
+    'TCP_Authentication', 'TCP_FastOpenCookie',
+    'TCP_MPTCP',
+    'TCP_MPTCPUnknown', 'TCP_MPTCPCapable', 'TCP_MPTCPDSS', 'TCP_MPTCPAddAddress', 'TCP_MPTCPRemoveAddress',
+    'TCP_MPTCPPriority', 'TCP_MPTCPFallback', 'TCP_MPTCPFastclose',
+    'TCP_MPTCPJoin',
+    'TCP_MPTCPJoinSYN', 'TCP_MPTCPJoinSYNACK', 'TCP_MPTCPJoinACK',
+    'UDP',
 
     # Application Layer Protocols
 
