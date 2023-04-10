@@ -11,9 +11,9 @@ APIs for :mod:`pcapkit`, and TCP/IP reassembly implementations.
 
 """
 from pcapkit.foundation.extraction import Extractor
-from pcapkit.foundation.traceflow import TraceFlow
 from pcapkit.foundation.reassembly import *
 from pcapkit.foundation.registry import *
+from pcapkit.foundation.traceflow import TraceFlow
 
 __all__ = [
     'Extractor', 'TraceFlow',

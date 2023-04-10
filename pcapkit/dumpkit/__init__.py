@@ -7,7 +7,7 @@
 in :mod:`dictdumper`.
 
 """
-from pcapkit.dumpkit.pcap import PCAPIO
 from pcapkit.dumpkit.null import NotImplementedIO
+from pcapkit.dumpkit.pcap import PCAPIO
 
 __all__ = ['PCAPIO', 'NotImplementedIO']

@@ -129,13 +129,15 @@ from pcapkit.protocols.data.internet.ipv6 import IPv6
 from pcapkit.protocols.data.internet.ipv6_frag import IPv6_Frag
 
 # IPv6 Destination Options
-from pcapkit.protocols.data.internet.ipv6_opts import IPv6_Opts
 from pcapkit.protocols.data.internet.ipv6_opts import CALIPSOOption as IPv6_Opts_CALIPSOOption
 from pcapkit.protocols.data.internet.ipv6_opts import DFFFlags as IPv6_Opts_DFFFlags
-from pcapkit.protocols.data.internet.ipv6_opts import HomeAddressOption as IPv6_Opts_HomeAddressOption
+from pcapkit.protocols.data.internet.ipv6_opts import \
+    HomeAddressOption as IPv6_Opts_HomeAddressOption
 from pcapkit.protocols.data.internet.ipv6_opts import ILNPOption as IPv6_Opts_ILNPOption
 from pcapkit.protocols.data.internet.ipv6_opts import IPDFFOption as IPv6_Opts_IPDFFOption
-from pcapkit.protocols.data.internet.ipv6_opts import JumboPayloadOption as IPv6_Opts_JumboPayloadOption
+from pcapkit.protocols.data.internet.ipv6_opts import IPv6_Opts
+from pcapkit.protocols.data.internet.ipv6_opts import \
+    JumboPayloadOption as IPv6_Opts_JumboPayloadOption
 from pcapkit.protocols.data.internet.ipv6_opts import \
     LineIdentificationOption as IPv6_Opts_LineIdentificationOption
 from pcapkit.protocols.data.internet.ipv6_opts import MPLFlags as IPv6_Opts_MPLFlags
@@ -146,7 +148,8 @@ from pcapkit.protocols.data.internet.ipv6_opts import \
     QuickStartReportOption as IPv6_Opts_QuickStartReportOption
 from pcapkit.protocols.data.internet.ipv6_opts import \
     QuickStartRequestOption as IPv6_Opts_QuickStartRequestOption
-from pcapkit.protocols.data.internet.ipv6_opts import RouterAlertOption as IPv6_Opts_RouterAlertOption
+from pcapkit.protocols.data.internet.ipv6_opts import \
+    RouterAlertOption as IPv6_Opts_RouterAlertOption
 from pcapkit.protocols.data.internet.ipv6_opts import RPLFlags as IPv6_Opts_RPLFlags
 from pcapkit.protocols.data.internet.ipv6_opts import RPLOption as IPv6_Opts_RPLOption
 from pcapkit.protocols.data.internet.ipv6_opts import \

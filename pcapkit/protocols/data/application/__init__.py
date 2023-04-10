@@ -17,17 +17,15 @@ from pcapkit.protocols.data.application.httpv1 import ResponseHeader as HTTPv1_R
 
 # Hypertext Transfer Protocol (HTTP/2)
 from pcapkit.protocols.data.application.httpv2 import HTTP as HTTPv2
-from pcapkit.protocols.data.application.httpv2 import Flags as HTTPv2_Flags
-from pcapkit.protocols.data.application.httpv2 import \
-    ContinuationFrame as HTTPv2_ContinuationFrame
+from pcapkit.protocols.data.application.httpv2 import ContinuationFrame as HTTPv2_ContinuationFrame
 from pcapkit.protocols.data.application.httpv2 import \
     ContinuationFrameFlags as HTTPv2_ContinuationFrameFlags
 from pcapkit.protocols.data.application.httpv2 import DataFrame as HTTPv2_DataFrame
 from pcapkit.protocols.data.application.httpv2 import DataFrameFlags as HTTPv2_DataFrameFlags
+from pcapkit.protocols.data.application.httpv2 import Flags as HTTPv2_Flags
 from pcapkit.protocols.data.application.httpv2 import GoawayFrame as HTTPv2_GoawayFrame
 from pcapkit.protocols.data.application.httpv2 import HeadersFrame as HTTPv2_HeadersFrame
-from pcapkit.protocols.data.application.httpv2 import \
-    HeadersFrameFlags as HTTPv2_HeadersFrameFlags
+from pcapkit.protocols.data.application.httpv2 import HeadersFrameFlags as HTTPv2_HeadersFrameFlags
 from pcapkit.protocols.data.application.httpv2 import PingFrame as HTTPv2_PingFrame
 from pcapkit.protocols.data.application.httpv2 import PingFrameFlags as HTTPv2_PingFrameFlags
 from pcapkit.protocols.data.application.httpv2 import PriorityFrame as HTTPv2_PriorityFrame
@@ -39,8 +37,7 @@ from pcapkit.protocols.data.application.httpv2 import SettingsFrame as HTTPv2_Se
 from pcapkit.protocols.data.application.httpv2 import \
     SettingsFrameFlags as HTTPv2_SettingsFrameFlags
 from pcapkit.protocols.data.application.httpv2 import UnassignedFrame as HTTPv2_UnassignedFrame
-from pcapkit.protocols.data.application.httpv2 import \
-    WindowUpdateFrame as HTTPv2_WindowUpdateFrame
+from pcapkit.protocols.data.application.httpv2 import WindowUpdateFrame as HTTPv2_WindowUpdateFrame
 
 __all__ = [
     # File Transfer Protocol
