@@ -19,9 +19,9 @@ from pcapkit.protocols.application.application import Application
 from pcapkit.protocols.data.application.ftp import FTP as Data_FTP
 from pcapkit.protocols.data.application.ftp import Request as Data_Request
 from pcapkit.protocols.data.application.ftp import Response as Data_Response
-from pcapkit.utilities.exceptions import ProtocolError, UnsupportedCall
-from pcapkit.protocols.schema.application.ftp import FTP as Schema_FTP
 from pcapkit.protocols.misc.raw import Raw
+from pcapkit.protocols.schema.application.ftp import FTP as Schema_FTP
+from pcapkit.utilities.exceptions import ProtocolError, UnsupportedCall
 
 if TYPE_CHECKING:
     from typing import Any, NoReturn, Optional
