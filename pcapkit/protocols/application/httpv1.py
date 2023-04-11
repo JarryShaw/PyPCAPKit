@@ -36,14 +36,15 @@ from pcapkit.protocols.application.http import HTTP as HTTPBase
 from pcapkit.protocols.data.application.httpv1 import HTTP as Data_HTTP
 from pcapkit.protocols.data.application.httpv1 import RequestHeader as Data_RequestHeader
 from pcapkit.protocols.data.application.httpv1 import ResponseHeader as Data_ResponseHeader
-from pcapkit.utilities.exceptions import ProtocolError
 from pcapkit.protocols.schema.application.httpv1 import HTTP as Schema_HTTP
+from pcapkit.utilities.exceptions import ProtocolError
 
 if TYPE_CHECKING:
-    from typing import Any, Optional, Type as _Type
     from enum import IntEnum as StdlibEnum
-    from aenum import IntEnum as AenumEnum
+    from typing import Any, Optional
+    from typing import Type as _Type
 
+    from aenum import IntEnum as AenumEnum
     from typing_extensions import Literal
 
     from pcapkit.protocols.data.application.httpv1 import Header as Data_Header

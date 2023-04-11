@@ -10,10 +10,10 @@ if TYPE_CHECKING:
 
     from typing_extensions import Literal
 
-    from pcapkit.corekit.multidict import OrderedMultiDict
-    from pcapkit.protocols.application.httpv1 import Type as HTTP_Type
     from pcapkit.const.http.method import Method as Enum_Method
     from pcapkit.const.http.status_code import StatusCode as Enum_StatusCode
+    from pcapkit.corekit.multidict import OrderedMultiDict
+    from pcapkit.protocols.application.httpv1 import Type as HTTP_Type
 
 __all__ = [
     'HTTP',
