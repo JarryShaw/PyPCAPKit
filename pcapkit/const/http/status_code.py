@@ -8,7 +8,12 @@ which is automatically generated from :class:`pcapkit.vendor.http.status_code.St
 
 """
 
+from typing import TYPE_CHECKING
+
 from aenum import IntEnum, extend_enum
+
+if TYPE_CHECKING:
+    from typing import Type
 
 __all__ = ['StatusCode']
 
@@ -16,204 +21,213 @@ __all__ = ['StatusCode']
 class StatusCode(IntEnum):
     """[StatusCode] HTTP Status Code"""
 
+    def __new__(cls, value: 'int', message: 'str' = '') -> 'Type[StatusCode]':
+        obj = int.__new__(cls, value)
+        obj._value_ = value
+
+        #: Status message.
+        obj.message = message
+
+        return obj
+
     #: Continue [:rfc:`9110#section-15.2.1`]
-    Continue = 100
+    CONTINUE = 100, 'Continue'
 
     #: Switching Protocols [:rfc:`9110#section-15.2.2`]
-    Switching_Protocols = 101
+    SWITCHING_PROTOCOLS = 101, 'Switching Protocols'
 
     #: Processing [:rfc:`2518`]
-    Processing = 102
+    PROCESSING = 102, 'Processing'
 
     #: Early Hints [:rfc:`8297`]
-    Early_Hints = 103
+    EARLY_HINTS = 103, 'Early Hints'
 
     #: OK [:rfc:`9110#section-15.3.1`]
-    OK = 200
+    OK = 200, 'OK'
 
     #: Created [:rfc:`9110#section-15.3.2`]
-    Created = 201
+    CREATED = 201, 'Created'
 
     #: Accepted [:rfc:`9110#section-15.3.3`]
-    Accepted = 202
+    ACCEPTED = 202, 'Accepted'
 
     #: Non-Authoritative Information [:rfc:`9110#section-15.3.4`]
-    Non_Authoritative_Information = 203
+    NON_AUTHORITATIVE_INFORMATION = 203, 'Non-Authoritative Information'
 
     #: No Content [:rfc:`9110#section-15.3.5`]
-    No_Content = 204
+    NO_CONTENT = 204, 'No Content'
 
     #: Reset Content [:rfc:`9110#section-15.3.6`]
-    Reset_Content = 205
+    RESET_CONTENT = 205, 'Reset Content'
 
     #: Partial Content [:rfc:`9110#section-15.3.7`]
-    Partial_Content = 206
+    PARTIAL_CONTENT = 206, 'Partial Content'
 
     #: Multi-Status [:rfc:`4918`]
-    Multi_Status = 207
+    MULTI_STATUS = 207, 'Multi-Status'
 
     #: Already Reported [:rfc:`5842`]
-    Already_Reported = 208
+    ALREADY_REPORTED = 208, 'Already Reported'
 
     #: IM Used [:rfc:`3229`]
-    IM_Used = 226
+    IM_USED = 226, 'IM Used'
 
     #: Multiple Choices [:rfc:`9110#section-15.4.1`]
-    Multiple_Choices = 300
+    MULTIPLE_CHOICES = 300, 'Multiple Choices'
 
     #: Moved Permanently [:rfc:`9110#section-15.4.2`]
-    Moved_Permanently = 301
+    MOVED_PERMANENTLY = 301, 'Moved Permanently'
 
     #: Found [:rfc:`9110#section-15.4.3`]
-    Found = 302
+    FOUND = 302, 'Found'
 
     #: See Other [:rfc:`9110#section-15.4.4`]
-    See_Other = 303
+    SEE_OTHER = 303, 'See Other'
 
     #: Not Modified [:rfc:`9110#section-15.4.5`]
-    Not_Modified = 304
+    NOT_MODIFIED = 304, 'Not Modified'
 
     #: Use Proxy [:rfc:`9110#section-15.4.6`]
-    Use_Proxy = 305
+    USE_PROXY = 305, 'Use Proxy'
 
     #: (Unused) [:rfc:`9110#section-15.4.7`]
-    StatusCode_306 = 306
+    STATUSCODE_306 = 306, '(Unused)'
 
     #: Temporary Redirect [:rfc:`9110#section-15.4.8`]
-    Temporary_Redirect = 307
+    TEMPORARY_REDIRECT = 307, 'Temporary Redirect'
 
     #: Permanent Redirect [:rfc:`9110#section-15.4.9`]
-    Permanent_Redirect = 308
+    PERMANENT_REDIRECT = 308, 'Permanent Redirect'
 
     #: Bad Request [:rfc:`9110#section-15.5.1`]
-    Bad_Request = 400
+    BAD_REQUEST = 400, 'Bad Request'
 
     #: Unauthorized [:rfc:`9110#section-15.5.2`]
-    Unauthorized = 401
+    UNAUTHORIZED = 401, 'Unauthorized'
 
     #: Payment Required [:rfc:`9110#section-15.5.3`]
-    Payment_Required = 402
+    PAYMENT_REQUIRED = 402, 'Payment Required'
 
     #: Forbidden [:rfc:`9110#section-15.5.4`]
-    Forbidden = 403
+    FORBIDDEN = 403, 'Forbidden'
 
     #: Not Found [:rfc:`9110#section-15.5.5`]
-    Not_Found = 404
+    NOT_FOUND = 404, 'Not Found'
 
     #: Method Not Allowed [:rfc:`9110#section-15.5.6`]
-    Method_Not_Allowed = 405
+    METHOD_NOT_ALLOWED = 405, 'Method Not Allowed'
 
     #: Not Acceptable [:rfc:`9110#section-15.5.7`]
-    Not_Acceptable = 406
+    NOT_ACCEPTABLE = 406, 'Not Acceptable'
 
     #: Proxy Authentication Required [:rfc:`9110#section-15.5.8`]
-    Proxy_Authentication_Required = 407
+    PROXY_AUTHENTICATION_REQUIRED = 407, 'Proxy Authentication Required'
 
     #: Request Timeout [:rfc:`9110#section-15.5.9`]
-    Request_Timeout = 408
+    REQUEST_TIMEOUT = 408, 'Request Timeout'
 
     #: Conflict [:rfc:`9110#section-15.5.10`]
-    Conflict = 409
+    CONFLICT = 409, 'Conflict'
 
     #: Gone [:rfc:`9110#section-15.5.11`]
-    Gone = 410
+    GONE = 410, 'Gone'
 
     #: Length Required [:rfc:`9110#section-15.5.12`]
-    Length_Required = 411
+    LENGTH_REQUIRED = 411, 'Length Required'
 
     #: Precondition Failed [:rfc:`9110#section-15.5.13`]
-    Precondition_Failed = 412
+    PRECONDITION_FAILED = 412, 'Precondition Failed'
 
     #: Content Too Large [:rfc:`9110#section-15.5.14`]
-    Content_Too_Large = 413
+    CONTENT_TOO_LARGE = 413, 'Content Too Large'
 
     #: URI Too Long [:rfc:`9110#section-15.5.15`]
-    URI_Too_Long = 414
+    URI_TOO_LONG = 414, 'URI Too Long'
 
     #: Unsupported Media Type [:rfc:`9110#section-15.5.16`]
-    Unsupported_Media_Type = 415
+    UNSUPPORTED_MEDIA_TYPE = 415, 'Unsupported Media Type'
 
     #: Range Not Satisfiable [:rfc:`9110#section-15.5.17`]
-    Range_Not_Satisfiable = 416
+    RANGE_NOT_SATISFIABLE = 416, 'Range Not Satisfiable'
 
     #: Expectation Failed [:rfc:`9110#section-15.5.18`]
-    Expectation_Failed = 417
+    EXPECTATION_FAILED = 417, 'Expectation Failed'
 
     #: (Unused) [:rfc:`9110#section-15.5.19`]
-    StatusCode_418 = 418
+    STATUSCODE_418 = 418, '(Unused)'
 
     #: Misdirected Request [:rfc:`9110#section-15.5.20`]
-    Misdirected_Request = 421
+    MISDIRECTED_REQUEST = 421, 'Misdirected Request'
 
     #: Unprocessable Content [:rfc:`9110#section-15.5.21`]
-    Unprocessable_Content = 422
+    UNPROCESSABLE_CONTENT = 422, 'Unprocessable Content'
 
     #: Locked [:rfc:`4918`]
-    Locked = 423
+    LOCKED = 423, 'Locked'
 
     #: Failed Dependency [:rfc:`4918`]
-    Failed_Dependency = 424
+    FAILED_DEPENDENCY = 424, 'Failed Dependency'
 
     #: Too Early [:rfc:`8470`]
-    Too_Early = 425
+    TOO_EARLY = 425, 'Too Early'
 
     #: Upgrade Required [:rfc:`9110#section-15.5.22`]
-    Upgrade_Required = 426
+    UPGRADE_REQUIRED = 426, 'Upgrade Required'
 
     #: Unassigned
-    Unassigned_427 = 427
+    UNASSIGNED_427 = 427, 'Unassigned'
 
     #: Precondition Required [:rfc:`6585`]
-    Precondition_Required = 428
+    PRECONDITION_REQUIRED = 428, 'Precondition Required'
 
     #: Too Many Requests [:rfc:`6585`]
-    Too_Many_Requests = 429
+    TOO_MANY_REQUESTS = 429, 'Too Many Requests'
 
     #: Unassigned
-    Unassigned_430 = 430
+    UNASSIGNED_430 = 430, 'Unassigned'
 
     #: Request Header Fields Too Large [:rfc:`6585`]
-    Request_Header_Fields_Too_Large = 431
+    REQUEST_HEADER_FIELDS_TOO_LARGE = 431, 'Request Header Fields Too Large'
 
     #: Unavailable For Legal Reasons [:rfc:`7725`]
-    Unavailable_For_Legal_Reasons = 451
+    UNAVAILABLE_FOR_LEGAL_REASONS = 451, 'Unavailable For Legal Reasons'
 
     #: Internal Server Error [:rfc:`9110#section-15.6.1`]
-    Internal_Server_Error = 500
+    INTERNAL_SERVER_ERROR = 500, 'Internal Server Error'
 
     #: Not Implemented [:rfc:`9110#section-15.6.2`]
-    Not_Implemented = 501
+    NOT_IMPLEMENTED = 501, 'Not Implemented'
 
     #: Bad Gateway [:rfc:`9110#section-15.6.3`]
-    Bad_Gateway = 502
+    BAD_GATEWAY = 502, 'Bad Gateway'
 
     #: Service Unavailable [:rfc:`9110#section-15.6.4`]
-    Service_Unavailable = 503
+    SERVICE_UNAVAILABLE = 503, 'Service Unavailable'
 
     #: Gateway Timeout [:rfc:`9110#section-15.6.5`]
-    Gateway_Timeout = 504
+    GATEWAY_TIMEOUT = 504, 'Gateway Timeout'
 
     #: HTTP Version Not Supported [:rfc:`9110#section-15.6.6`]
-    HTTP_Version_Not_Supported = 505
+    HTTP_VERSION_NOT_SUPPORTED = 505, 'HTTP Version Not Supported'
 
     #: Variant Also Negotiates [:rfc:`2295`]
-    Variant_Also_Negotiates = 506
+    VARIANT_ALSO_NEGOTIATES = 506, 'Variant Also Negotiates'
 
     #: Insufficient Storage [:rfc:`4918`]
-    Insufficient_Storage = 507
+    INSUFFICIENT_STORAGE = 507, 'Insufficient Storage'
 
     #: Loop Detected [:rfc:`5842`]
-    Loop_Detected = 508
+    LOOP_DETECTED = 508, 'Loop Detected'
 
     #: Unassigned
-    Unassigned_509 = 509
+    UNASSIGNED_509 = 509, 'Unassigned'
 
     #: Not Extended (OBSOLETED) [:rfc:`2774`][status-change-http-experiments-to-
     #: historic]
-    Not_Extended = 510
+    NOT_EXTENDED = 510, 'Not Extended (OBSOLETED)'
 
     #: Network Authentication Required [:rfc:`6585`]
-    Network_Authentication_Required = 511
+    NETWORK_AUTHENTICATION_REQUIRED = 511, 'Network Authentication Required'
 
     @staticmethod
     def get(key: 'int | str', default: 'int' = -1) -> 'StatusCode':

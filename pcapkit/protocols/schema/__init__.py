@@ -88,6 +88,7 @@ __all__ = [
 
     # Application Layer Protocols
     'FTP',
+    'HTTPv1',
 
     # PCAP file format
     'Header',
