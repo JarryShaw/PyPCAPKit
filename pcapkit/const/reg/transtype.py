@@ -286,10 +286,7 @@ class TransType(IntEnum):
     #: VINES [Brian Horn]
     VINES = 83
 
-    #: Transaction Transport Protocol [Jim Stevens]
-    TTP = 84
-
-    #: Internet Protocol Traffic Manager [Jim Stevens]
+    #: Internet Protocol Traffic Manager [Jim Stevens][1]
     IPTM = 84
 
     #: NSFNET-IGP [Hans Werner Braun]
