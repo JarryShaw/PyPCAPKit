@@ -411,7 +411,7 @@ class Protocol(Generic[PT, ST], metaclass=abc.ABCMeta):
         self.__header__ = schema
 
         # initialize protocol instance
-        self.__init__(length=len(schema))  # type: ignore[misc]
+        self.__init__(bytes(schema), len(schema))  # type: ignore[misc]
 
         return self
 
@@ -427,7 +427,7 @@ class Protocol(Generic[PT, ST], metaclass=abc.ABCMeta):
 
         """
         if not isinstance(data, Data):
-            data = cast('PT', cls.__data__(**data))
+            data = cast('PT', cls.__data__.from_dict(data))
 
         self = cls.__new__(cls)
         kwargs = self._make_data(data)

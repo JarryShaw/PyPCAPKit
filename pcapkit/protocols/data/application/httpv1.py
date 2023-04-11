@@ -3,7 +3,6 @@
 
 from typing import TYPE_CHECKING
 
-from pcapkit.protocols.data.application.http import HTTP as Data_HTTP
 from pcapkit.protocols.data.data import Data
 
 if TYPE_CHECKING:
@@ -21,7 +20,7 @@ __all__ = [
 ]
 
 
-class HTTP(Data_HTTP):
+class HTTP(Data):
     """Data model for HTTP/1.* protocol."""
 
     #: HTTP receipt.

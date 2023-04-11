@@ -6,9 +6,6 @@ from pcapkit.protocols.data.application.ftp import FTP
 from pcapkit.protocols.data.application.ftp import Request as FTP_Request
 from pcapkit.protocols.data.application.ftp import Response as FTP_Response
 
-# Hypertext Transfer Protocol
-from pcapkit.protocols.data.application.http import HTTP
-
 # Hypertext Transfer Protocol (HTTP/1.*)
 from pcapkit.protocols.data.application.httpv1 import HTTP as HTTPv1
 from pcapkit.protocols.data.application.httpv1 import Header as HTTPv1_Header
@@ -43,9 +40,6 @@ __all__ = [
     # File Transfer Protocol
     'FTP',
     'FTP_Request', 'FTP_Response',
-
-    # Hypertext Transfer Protocol
-    'HTTP',
 
     # Hypertext Transfer Protocol (HTTP/1.*)
     'HTTPv1',

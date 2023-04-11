@@ -3,7 +3,6 @@
 
 from typing import TYPE_CHECKING
 
-from pcapkit.protocols.data.application.http import HTTP as Data_HTTP
 from pcapkit.protocols.data.data import Data
 
 if TYPE_CHECKING:
@@ -33,7 +32,7 @@ class Flags(Data):
     """Data model for HTTP/2 flags."""
 
 
-class HTTP(Data_HTTP):
+class HTTP(Data):
     """Data model for HTTP/2 protocol."""
 
     #: Length.

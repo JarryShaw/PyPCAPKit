@@ -137,9 +137,6 @@ __all__ = [
     'FTP',
     'FTP_Request', 'FTP_Response',
 
-    # Hypertext Transfer Protocol
-    'HTTP',
-
     # Hypertext Transfer Protocol (HTTP/1.*)
     'HTTPv1',
     'HTTPv1_Header',
