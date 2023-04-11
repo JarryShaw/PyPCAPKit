@@ -145,7 +145,7 @@ class HTTP(Application[PT, ST], Generic[PT, ST]):
         if version == 1:
             from pcapkit.protocols.application.httpv1 import HTTP as protocol
         elif version == 2:
-            from pcapkit.protocols.application.httpv2 import HTTP as protocol  # type: ignore[no-redef]
+            from pcapkit.protocols.application.httpv2 import HTTP as protocol  # type: ignore[no-redef] # isort: skip
         else:
             raise ProtocolError(f"invalid HTTP version: {version}")
         return protocol._make_data(data)  # type: ignore[arg-type]
