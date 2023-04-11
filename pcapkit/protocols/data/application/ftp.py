@@ -7,12 +7,11 @@ from typing import TYPE_CHECKING
 from pcapkit.protocols.data.data import Data
 
 if TYPE_CHECKING:
-    from typing import Optional
-
     from typing_extensions import Literal
 
-    from pcapkit.const.ftp.command import CommandType
+    from pcapkit.const.ftp.command import Command
     from pcapkit.const.ftp.return_code import ReturnCode
+    from pcapkit.protocols.application.ftp import Type as FTP_Type
 
 __all__ = [
     'FTP',
@@ -24,38 +23,34 @@ class FTP(Data):
     """Data model for FTP protocol."""
 
     #: Type.
-    type: 'Literal["response", "request"]'
+    type: 'FTP_Type'
 
 
 class Request(FTP):
     """Data model for FTP request."""
 
     #: Type.
-    type: 'Literal["request"]'
+    type: 'Literal[FTP_Type.REQUEST]'
     #: Command.
-    command: 'CommandType'
+    cmmd: 'Command'
     #: Arguments.
-    arg: 'Optional[str]'
-    #: Raw data.
-    raw: 'Optional[bytes]'
+    args: 'str'
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'Literal["request"]', command: 'CommandType', arg: 'Optional[str]', raw: 'Optional[bytes]') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
+        def __init__(self, type: 'Literal[FTP_Type.REQUEST]', cmmd: 'Command', args: 'str') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
 class Response(FTP):
     """Data model for FTP response."""
 
     #: Type.
-    type: 'Literal["response"]'
+    type: 'Literal[FTP_Type.RESPONSE]'
     #: Return code.
     code: 'ReturnCode'
     #: Arguments.
-    arg: 'Optional[str]'
+    args: 'str'
     #: More data flag.
-    mf: 'bool'
-    #: Raw data.
-    raw: 'Optional[bytes]'
+    more: 'bool'
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'Literal["response"]', code: 'ReturnCode', arg: 'Optional[str]', mf: 'bool', raw: 'Optional[bytes]') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
+        def __init__(self, type: 'Literal[FTP_Type.RESPONSE]', code: 'ReturnCode', args: 'str', more: 'bool') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin

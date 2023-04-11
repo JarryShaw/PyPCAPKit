@@ -57,7 +57,8 @@ __all__ = [
     'TCP', 'UDP',
 
     # Application Layer
-    'FTP', 'HTTP', 'HTTPv1', 'HTTPv2',
+    'FTP', 'FTP_DATA',
+    'HTTP', 'HTTPv1', 'HTTPv2',
 ]
 
 # protocol registry

@@ -34,7 +34,12 @@ which is automatically generated from :class:`{MODL}.{NAME}`.
 
 """
 
+from typing import TYPE_CHECKING
+
 from aenum import IntEnum, extend_enum
+
+if TYPE_CHECKING:
+    from typing import Optional, Type
 
 __all__ = ['{NAME}']
 
@@ -61,6 +66,23 @@ INFO = {{
 
 class {NAME}(IntEnum):
     """[{NAME}] {DOCS}"""
+
+    def __new__(cls, value: 'int', description: 'Optional[str]' = None) -> 'Type[{NAME}]':
+        obj = int.__new__(cls, value)
+        obj._value_ = value
+
+        code = str(value)
+        #: Description of the return code.
+        obj.description = description
+        #: Response kind.
+        obj.kind = KIND.get(str(value)[0], 'Reserved')
+        #: Grouping information.
+        obj.group = INFO.get(str(value)[1], 'Reserved')
+
+        return obj
+
+    def __repr__(self) -> 'str':
+        return "<%s [%s]>" % (self.__class__.__name__, self._value_)
 
     {ENUM}
 
@@ -89,10 +111,8 @@ class {NAME}(IntEnum):
         """
         if not ({FLAG}):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))
-        code = str(value)
-        kind = KIND.get(code[0], 'Reserved')
-        info = INFO.get(code[1], 'Reserved')
-        extend_enum(cls, '%s - %s [%s]' % (kind, info, value), value)
+
+        extend_enum(cls, 'CODE_%s' % value, value)
         return cls(value)
 '''  # type: Callable[[str, str, str, str, str], str]
 
@@ -156,8 +176,10 @@ class ReturnCode(Vendor):
             #desc = f"{' '.join(line[1].stripped_strings).split('.')[0].strip()}."
             #enum.append(f'{self.NAME}[{self.rename(desc, code)!r}] = {code}')
 
-            sufs = self.wrap_comment('. '.join(map(lambda s: s.strip(), ' '.join(line[1].stripped_strings).split('.'))).replace('e. g. ,', 'e.g.,'))  # pylint: disable=line-too-long
-            pref = f"CODE_{code} = {code}"
+            cmmt = '. '.join(map(lambda s: s.strip(), ' '.join(
+                line[1].stripped_strings).split('.'))).replace('e. g. ,', 'e.g.,').strip()
+            sufs = self.wrap_comment(cmmt)  # pylint: disable=line-too-long
+            pref = f"CODE_{code} = {code}, {cmmt!r}"
 
             enum.append(f'#: {sufs}\n    {pref}')
         return enum

@@ -9,26 +9,43 @@ which implements extractor for File Transfer Protocol
 .. [*] https://en.wikipedia.org/wiki/File_Transfer_Protocol
 
 """
+import enum
 import re
 from typing import TYPE_CHECKING
 
-from pcapkit.const.ftp.command import Command
-from pcapkit.const.ftp.return_code import ReturnCode
+from pcapkit.const.ftp.command import Command as Enum_Command
+from pcapkit.const.ftp.return_code import ReturnCode as Enum_ReturnCode
 from pcapkit.protocols.application.application import Application
 from pcapkit.protocols.data.application.ftp import FTP as Data_FTP
 from pcapkit.protocols.data.application.ftp import Request as Data_Request
 from pcapkit.protocols.data.application.ftp import Response as Data_Response
 from pcapkit.utilities.exceptions import ProtocolError, UnsupportedCall
+from pcapkit.protocols.schema.application.ftp import FTP as Schema_FTP
+from pcapkit.protocols.misc.raw import Raw
 
 if TYPE_CHECKING:
     from typing import Any, NoReturn, Optional
 
     from typing_extensions import Literal
 
-__all__ = ['FTP']
+__all__ = ['FTP', 'FTP_DATA']
+
+# regex for FTP
+FTP_REQUEST = re.compile(rb'^(?P<cmmd>[A-Z]{3,4})( +(?P<args>.*))?\r\n$', re.I)
+FTP_RESPONSE = re.compile(rb'^(?P<code>[0-9]{3})(?P<more>\-)?( +(?P<args>.*))?\r\n$', re.I)
 
 
-class FTP(Application[Data_FTP]):
+class Type(enum.StrEnum):
+    """FTP packet type."""
+
+    #: Request packet.
+    REQUEST = 'request'
+    #: Response packet.
+    RESPONSE = 'response'
+
+
+class FTP(Application[Data_FTP, Schema_FTP],
+          data=Data_FTP, schema=Schema_FTP):
     """This class implements File Transfer Protocol."""
 
     ##########################################################################
@@ -70,57 +87,118 @@ class FTP(Application[Data_FTP]):
         """
         if length is None:
             length = len(self)
+        schema = self.__header__
 
-        byte = self._read_fileng(length)
-        if (not byte.endswith(b'\r\n')) or (len(byte.splitlines()) > 1):
-            raise ProtocolError('FTP: invalid format')
-        text = self.decode(byte.strip())
+        data = schema.data
+        if (match := FTP_REQUEST.match(data)) is not None:
+            cmmd = match.group('cmmd').decode()
+            args = match.group('args')
 
-        if TYPE_CHECKING:
-            pref: 'int | str'
-            ftp: 'Data_Request | Data_Response'
+            cmmd_val = Enum_Command.get(cmmd)
+            args_val = self.decode(args)
 
-        if re.match(r'^\d{3}', text):
-            pref = int(text[:3])
-            try:
-                flag = text[3] == '-'
-            except IndexError:
-                flag = False
-            suff = text[4:] or None
+            ftp = Data_Request(
+                type=Type.REQUEST,
+                cmmd=cmmd_val,
+                args=args_val,
+            )  # type: Data_FTP
+        elif (match := FTP_RESPONSE.match(data)) is not None:
+            code = int(match.group('code'))
+            more = bool(match.group('more'))
+            args = match.group('args')
 
-            code = ReturnCode.get(pref)
+            code_val = Enum_ReturnCode.get(code)
+            args_val = self.decode(args)
+
             ftp = Data_Response(
-                type='response',
-                code=code,
-                arg=suff,
-                mf=flag,
-                raw=byte,
+                type=Type.RESPONSE,
+                code=code_val,
+                more=more,
+                args=args_val,
             )
         else:
-            temp = text.split(maxsplit=1)
-            if len(temp) == 2:
-                pref, suff = temp
-            else:
-                pref, suff = text, None
-
-            cmmd = Command[pref]
-            ftp = Data_Request(
-                type='request',
-                command=cmmd,
-                arg=suff,
-                raw=byte,
-            )
-
+            raise ProtocolError('FTP: invalid packet format')
         return ftp
 
-    def make(self, **kwargs: 'Any') -> 'NoReturn':
+    def make(self,
+             cmmd: 'Optional[Enum_Command | str | bytes]' = None,
+             code: 'Optional[Enum_ReturnCode | int | str | bytes]' = None,
+             args: 'Optional[str | bytes]' = None,
+             more: 'bool' = False,
+             **kwargs: 'Any') -> 'Schema_FTP':
         """Make (construct) packet data.
 
         Args:
-            Arbitrary keyword arguments.
+            cmmd: FTP command.
+            code: FTP status code.
+            args: Optional FTP command arguments and/or status messages.
+            more: More status messages to follow for response packets.
+            **kwargs: Arbitrary keyword arguments.
 
         Returns:
             Constructed packet data.
 
         """
-        raise NotImplementedError
+        if cmmd is not None and code is None:
+            if isinstance(cmmd, bytes):
+                prefix = cmmd
+            elif isinstance(cmmd, str):
+                prefix = cmmd.encode()
+            else:
+                prefix = cmmd.value
+
+            mf = b''
+        elif cmmd is None and code is not None:
+            code_val = int(code)
+            prefix = str(code_val).encode()
+
+            mf = b'-' if more else b''
+        else:
+            raise ProtocolError('FTP: invalid packet type')
+
+        if args is None:
+            suffix = b''
+        elif isinstance(args, bytes):
+            suffix = args
+        else:
+            suffix = args.encode()
+
+        return Schema_FTP(
+            data=b'%s%s %s' % (prefix, mf, suffix),
+        )
+
+    ##########################################################################
+    # Utilities.
+    ##########################################################################
+
+    @classmethod
+    def _make_data(cls, data: 'Data_FTP') -> 'dict[str, Any]':  # type: ignore[override]
+        """Create key-value pairs from ``data`` for protocol construction.
+
+        Args:
+            data: protocol data
+
+        Returns:
+            Key-value pairs for protocol construction.
+
+        """
+        return {
+            'cmmd': getattr(data, 'cmmd', None),
+            'code': getattr(data, 'code', None),
+            'args': getattr(data, 'args', None),
+            'more': getattr(data, 'more', False),
+        }
+
+
+class FTP_DATA(Raw):
+    """This class implements FTP data channel transmission."""
+
+    ##########################################################################
+    # Properties.
+    ##########################################################################
+
+    # name of current protocol
+    @property
+    def name(self) -> 'Literal["FTP_DATA"]':  # type: ignore[override]
+        """Name of current protocol."""
+        return 'FTP_DATA'

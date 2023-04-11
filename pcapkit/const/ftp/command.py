@@ -10,592 +10,239 @@ which is automatically generated from :class:`pcapkit.vendor.ftp.command.Command
 
 from typing import TYPE_CHECKING
 
-from pcapkit.corekit.infoclass import Info
+from aenum import StrEnum, extend_enum
 
 if TYPE_CHECKING:
-    from typing import Optional
+    from typing import Optional, Type
 
 __all__ = ['Command']
 
 
-class CommandType(Info):
-    """FTP command type."""
+class Command(StrEnum):
+    """[Command] FTP Command"""
 
-    #: Name of command.
-    name: 'str'
-    #: Feature of command.
-    feat: 'Optional[str]'
-    #: Description of command.
-    desc: 'Optional[str]'
-    #: Type of command.
-    type: 'Optional[tuple[str, ...]]'
-    #: Conformance of command.
-    conf: 'Optional[str]'
-    #: Note of command.
-    note: 'Optional[tuple[str, ...]]'
+    def __new__(cls, name: 'str', feat: 'Optional[str]' = None, desc: 'Optional[str]' = None,
+                type: 'Optional[tuple[str, ...]]' = None, conf: 'Optional[str]' = None,
+                note: 'Optional[tuple[str, ...]]' = None) -> 'Type[Command]':
+        obj = str.__new__(cls, name)
+        obj._value_ = name
 
-    if TYPE_CHECKING:
-        def __init__(self, name: 'str', feat: 'Optional[str]', desc: 'Optional[str]', type: 'Optional[tuple[str, ...]]', conf: 'Optional[str]', note: 'Optional[tuple[str, ...]]') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
+        #: Feature of command.
+        obj.feat = feat
+        #: Description of command.
+        obj.desc = desc
+        #: Type of command.
+        obj.type = type
+        #: Conformance of command.
+        obj.conf = conf
+        #: Note of command.
+        obj.note = note
 
+        return obj
 
-class defaultInfo(Info[CommandType]):
-    """Extended :class:`~pcapkit.corekit.infoclass.Info` with default values.
+    def __repr__(self) -> 'str':
+        return "<%s.%s>" % (self.__class__.__name__, self._name_)
 
-    Args:
-        *args: Arbitrary positional arguments.
-        **kwargs: Arbitrary keyword arguments.
+    #: Abort [:rfc:`959`]
+    ABOR = 'ABOR', '<base>', 'Abort', ('service execution',), 'mandatory to implement', ('RFC 959',)
 
-    """
+    #: Account [:rfc:`959`]
+    ACCT = 'ACCT', '<base>', 'Account', ('access control',), 'mandatory to implement', ('RFC 959',)
 
-    def __getitem__(self, key: 'str') -> 'CommandType':
-        """Missing keys as specified in :rfc:`3659`.
+    #: Authentication/Security Data [:rfc:`2228`][:rfc:`2773`][:rfc:`4217`]
+    ADAT = 'ADAT', '<secu>', 'Authentication/Security Data', ('access control',), 'optional', ('RFC 2228', 'RFC 2773', 'RFC 4217')
+
+    #: FTP64 ALG status [:rfc:`6384`][Section 11]
+    ALGS = 'ALGS', None, 'FTP64 ALG status', None, 'optional', ('RFC 6384',)
+
+    #: Allocate [:rfc:`959`]
+    ALLO = 'ALLO', '<base>', 'Allocate', ('service execution',), 'mandatory to implement', ('RFC 959',)
+
+    #: Append (with create) [:rfc:`959`]
+    APPE = 'APPE', '<base>', 'Append (with create)', ('service execution',), 'mandatory to implement', ('RFC 959',)
+
+    #: Authentication/Security Mechanism [2][:rfc:`2773`][:rfc:`4217`]
+    AUTH = 'AUTH', 'AUTH', 'Authentication/Security Mechanism', ('access control',), 'optional', ('RFC 2773', 'RFC 4217')
+
+    #: Clear Command Channel [:rfc:`2228`]
+    CCC = 'CCC', '<secu>', 'Clear Command Channel', ('access control',), 'optional', ('RFC 2228',)
+
+    #: Change to Parent Directory [:rfc:`959`]
+    CDUP = 'CDUP', '<base>', 'Change to Parent Directory', ('access control',), 'optional', ('RFC 959',)
+
+    #: Confidentiality Protected Command [:rfc:`2228`]
+    CONF = 'CONF', '<secu>', 'Confidentiality Protected Command', ('access control',), 'optional', ('RFC 2228',)
+
+    #: Change Working Directory [:rfc:`959`]
+    CWD = 'CWD', '<base>', 'Change Working Directory', ('access control',), 'mandatory to implement', ('RFC 959',)
+
+    #: Delete File [:rfc:`959`]
+    DELE = 'DELE', '<base>', 'Delete File', ('service execution',), 'mandatory to implement', ('RFC 959',)
+
+    #: Privacy Protected Command [:rfc:`2228`][:rfc:`2773`][:rfc:`4217`]
+    ENC = 'ENC', '<secu>', 'Privacy Protected Command', ('access control',), 'optional', ('RFC 2228', 'RFC 2773', 'RFC 4217')
+
+    #: Extended Port [:rfc:`2428`]
+    EPRT = 'EPRT', '<nat6>', 'Extended Port', ('parameter setting',), 'optional', ('RFC 2428',)
+
+    #: Extended Passive Mode [:rfc:`2428`]
+    EPSV = 'EPSV', '<nat6>', 'Extended Passive Mode', ('parameter setting',), 'optional', ('RFC 2428',)
+
+    #: Feature Negotiation [:rfc:`2389`]
+    FEAT = 'FEAT', '<feat>', 'Feature Negotiation', ('access control',), 'mandatory to implement', ('RFC 2389',)
+
+    #: Help [:rfc:`959`]
+    HELP = 'HELP', '<base>', 'Help', ('service execution',), 'mandatory to implement', ('RFC 959',)
+
+    #: Hostname [:rfc:`7151`]
+    HOST = 'HOST', 'HOST', 'Hostname', ('access control',), 'optional', ('RFC 7151',)
+
+    #: Language (for Server Messages) [:rfc:`2640`]
+    LANG = 'LANG', 'UTF8', 'Language (for Server Messages)', ('parameter setting',), 'optional', ('RFC 2640',)
+
+    #: List [:rfc:`959`][:rfc:`1123`]
+    LIST = 'LIST', '<base>', 'List', ('service execution',), 'mandatory to implement', ('RFC 959', 'RFC 1123')
+
+    #: Data Port [:rfc:`1545`][:rfc:`1639`]
+    LPRT = 'LPRT', '<hist>', 'Data Port', ('parameter setting',), 'historic', ('RFC 1545', 'RFC 1639')
+
+    #: Passive Mode [:rfc:`1545`][:rfc:`1639`]
+    LPSV = 'LPSV', '<hist>', 'Passive Mode', ('parameter setting',), 'historic', ('RFC 1545', 'RFC 1639')
+
+    #: File Modification Time [:rfc:`3659`]
+    MDTM = 'MDTM', 'MDTM', 'File Modification Time', ('service execution',), 'optional', ('RFC 3659',)
+
+    #: Integrity Protected Command [:rfc:`2228`][:rfc:`2773`][:rfc:`4217`]
+    MIC = 'MIC', '<secu>', 'Integrity Protected Command', ('access control',), 'optional', ('RFC 2228', 'RFC 2773', 'RFC 4217')
+
+    #: Make Directory [:rfc:`959`]
+    MKD = 'MKD', '<base>', 'Make Directory', ('service execution',), 'optional', ('RFC 959',)
+
+    #: List Directory (for machine) [:rfc:`3659`]
+    MLSD = 'MLSD', 'MLST', 'List Directory (for machine)', ('service execution',), 'optional', ('RFC 3659',)
+
+    #: List Single Object [:rfc:`3659`]
+    MLST = 'MLST', 'MLST', 'List Single Object', ('service execution',), 'optional', ('RFC 3659',)
+
+    #: Transfer Mode [:rfc:`959`]
+    MODE = 'MODE', '<base>', 'Transfer Mode', ('parameter setting',), 'mandatory to implement', ('RFC 959',)
+
+    #: Name List [:rfc:`959`][:rfc:`1123`]
+    NLST = 'NLST', '<base>', 'Name List', ('service execution',), 'mandatory to implement', ('RFC 959', 'RFC 1123')
+
+    #: No-Op [:rfc:`959`]
+    NOOP = 'NOOP', '<base>', 'No-Op', ('service execution',), 'mandatory to implement', ('RFC 959',)
+
+    #: Options [:rfc:`2389`]
+    OPTS = 'OPTS', '<feat>', 'Options', ('parameter setting',), 'mandatory to implement', ('RFC 2389',)
+
+    #: Password [:rfc:`959`]
+    PASS = 'PASS', '<base>', 'Password', ('access control',), 'mandatory to implement', ('RFC 959',)
+
+    #: Passive Mode [:rfc:`959`][:rfc:`1123`]
+    PASV = 'PASV', '<base>', 'Passive Mode', ('parameter setting',), 'mandatory to implement', ('RFC 959', 'RFC 1123')
+
+    #: Protection Buffer Size [:rfc:`4217`]
+    PBSZ = 'PBSZ', 'PBSZ', 'Protection Buffer Size', ('parameter setting',), 'optional', ('RFC 4217',)
+
+    #: Data Port [:rfc:`959`]
+    PORT = 'PORT', '<base>', 'Data Port', ('parameter setting',), 'mandatory to implement', ('RFC 959',)
+
+    #: Data Channel Protection Level [:rfc:`4217`]
+    PROT = 'PROT', 'PROT', 'Data Channel Protection Level', ('parameter setting',), 'optional', ('RFC 4217',)
+
+    #: Print Directory [:rfc:`959`]
+    PWD = 'PWD', '<base>', 'Print Directory', ('service execution',), 'optional', ('RFC 959',)
+
+    #: Logout [:rfc:`959`]
+    QUIT = 'QUIT', '<base>', 'Logout', ('access control',), 'mandatory to implement', ('RFC 959',)
+
+    #: Reinitialize [:rfc:`959`]
+    REIN = 'REIN', '<base>', 'Reinitialize', ('access control',), 'mandatory to implement', ('RFC 959',)
+
+    #: Restart (for STREAM mode) [3][:rfc:`3659`]
+    REST = 'REST', 'REST', 'Restart (for STREAM mode)', ('service execution', 'parameter setting'), 'mandatory to implement', ('RFC 3659',)
+
+    #: Retrieve [:rfc:`959`]
+    RETR = 'RETR', '<base>', 'Retrieve', ('service execution',), 'mandatory to implement', ('RFC 959',)
+
+    #: Remove Directory [:rfc:`959`]
+    RMD = 'RMD', '<base>', 'Remove Directory', ('service execution',), 'optional', ('RFC 959',)
+
+    #: Rename From [:rfc:`959`]
+    RNFR = 'RNFR', '<base>', 'Rename From', ('service execution', 'parameter setting'), 'mandatory to implement', ('RFC 959',)
+
+    #: Rename From [:rfc:`959`]
+    RNTO = 'RNTO', '<base>', 'Rename From', ('service execution',), 'mandatory to implement', ('RFC 959',)
+
+    #: Site Parameters [:rfc:`959`][:rfc:`1123`]
+    SITE = 'SITE', '<base>', 'Site Parameters', ('service execution',), 'mandatory to implement', ('RFC 959', 'RFC 1123')
+
+    #: File Size [:rfc:`3659`]
+    SIZE = 'SIZE', 'SIZE', 'File Size', ('service execution',), 'optional', ('RFC 3659',)
+
+    #: Structure Mount [:rfc:`959`]
+    SMNT = 'SMNT', '<base>', 'Structure Mount', ('access control',), 'optional', ('RFC 959',)
+
+    #: Status [:rfc:`959`]
+    STAT = 'STAT', '<base>', 'Status', ('service execution',), 'mandatory to implement', ('RFC 959',)
+
+    #: Store [:rfc:`959`]
+    STOR = 'STOR', '<base>', 'Store', ('service execution',), 'mandatory to implement', ('RFC 959',)
+
+    #: Store Unique [:rfc:`959`][:rfc:`1123`]
+    STOU = 'STOU', '<base>', 'Store Unique', ('access control',), 'optional', ('RFC 959', 'RFC 1123')
+
+    #: File Structure [:rfc:`959`]
+    STRU = 'STRU', '<base>', 'File Structure', ('parameter setting',), 'mandatory to implement', ('RFC 959',)
+
+    #: System [:rfc:`959`]
+    SYST = 'SYST', '<base>', 'System', ('service execution',), 'optional', ('RFC 959',)
+
+    #: Representation Type [4][:rfc:`959`]
+    TYPE = 'TYPE', '<base>', 'Representation Type', ('parameter setting',), 'mandatory to implement', ('RFC 959',)
+
+    #: User Name [:rfc:`959`]
+    USER = 'USER', '<base>', 'User Name', ('access control',), 'mandatory to implement', ('RFC 959',)
+
+    #: None [:rfc:`775`][:rfc:`1123`]
+    XCUP = 'XCUP', '<hist>', None, ('service execution',), 'historic', ('RFC 775', 'RFC 1123')
+
+    #: None [:rfc:`775`][:rfc:`1123`]
+    XCWD = 'XCWD', '<hist>', None, ('service execution',), 'historic', ('RFC 775', 'RFC 1123')
+
+    #: None [:rfc:`775`][:rfc:`1123`]
+    XMKD = 'XMKD', '<hist>', None, ('service execution',), 'historic', ('RFC 775', 'RFC 1123')
+
+    #: None [:rfc:`775`][:rfc:`1123`]
+    XPWD = 'XPWD', '<hist>', None, ('service execution',), 'historic', ('RFC 775', 'RFC 1123')
+
+    #: None [:rfc:`775`][:rfc:`1123`]
+    XRMD = 'XRMD', '<hist>', None, ('service execution',), 'historic', ('RFC 775', 'RFC 1123')
+
+    #: Trivial Virtual File Store [:rfc:`3659`]
+    TVFS = 'TVFS', 'TVFS', 'Trivial Virtual File Store', ('parameter setting',), 'optional', ('RFC 3659',)
+
+    @staticmethod
+    def get(key: 'str', default: 'Optional[str]' = None) -> 'Command':
+        """Backport support for original codes.
 
         Args:
-            key: Key of missing command.
+            key: Key to get enum item.
+            default: Default value if not found.
 
         """
-        try:
-            return super().__getitem__(key)
-        except KeyError:
-            return CommandType(name=key,
-                               feat='TVFS',
-                               desc='Trivial Virtual File Store',
-                               type=('parameter setting',),
-                               conf='optional',
-                               note=('RFC 3659',))
+        if key not in Command._member_map_:  # pylint: disable=no-member
+            extend_enum(Command, key.upper(), default if default is not None else key)
+        return Command[key]  # type: ignore[misc]
 
+    @classmethod
+    def _missing_(cls, value: 'str') -> 'Command':
+        """Lookup function used when value is not found.
 
-#: FTP Command
-Command = defaultInfo(
-    # ABOR [:rfc:`959`]
-    ABOR=CommandType(
-        name='ABOR',
-        feat='base',
-        desc='Abort',
-        type=('service execution',),
-        conf='mandatory to implement',
-        note=('RFC 959',),
-    ),
-    # ACCT [:rfc:`959`]
-    ACCT=CommandType(
-        name='ACCT',
-        feat='base',
-        desc='Account',
-        type=('access control',),
-        conf='mandatory to implement',
-        note=('RFC 959',),
-    ),
-    # ADAT [:rfc:`2228`][:rfc:`2773`][:rfc:`4217`]
-    ADAT=CommandType(
-        name='ADAT',
-        feat='secu',
-        desc='Authentication/Security Data',
-        type=('access control',),
-        conf='optional',
-        note=('RFC 2228', 'RFC 2773', 'RFC 4217'),
-    ),
-    # ALGS [:rfc:`6384`][Section 11]
-    ALGS=CommandType(
-        name='ALGS',
-        feat=None,
-        desc='FTP64 ALG status',
-        type=None,
-        conf='optional',
-        note=('RFC 6384',),
-    ),
-    # ALLO [:rfc:`959`]
-    ALLO=CommandType(
-        name='ALLO',
-        feat='base',
-        desc='Allocate',
-        type=('service execution',),
-        conf='mandatory to implement',
-        note=('RFC 959',),
-    ),
-    # APPE [:rfc:`959`]
-    APPE=CommandType(
-        name='APPE',
-        feat='base',
-        desc='Append (with create)',
-        type=('service execution',),
-        conf='mandatory to implement',
-        note=('RFC 959',),
-    ),
-    # AUTH [2][:rfc:`2773`][:rfc:`4217`]
-    AUTH=CommandType(
-        name='AUTH',
-        feat='AUTH',
-        desc='Authentication/Security Mechanism',
-        type=('access control',),
-        conf='optional',
-        note=('RFC 2773', 'RFC 4217'),
-    ),
-    # CCC [:rfc:`2228`]
-    CCC=CommandType(
-        name='CCC',
-        feat='secu',
-        desc='Clear Command Channel',
-        type=('access control',),
-        conf='optional',
-        note=('RFC 2228',),
-    ),
-    # CDUP [:rfc:`959`]
-    CDUP=CommandType(
-        name='CDUP',
-        feat='base',
-        desc='Change to Parent Directory',
-        type=('access control',),
-        conf='optional',
-        note=('RFC 959',),
-    ),
-    # CONF [:rfc:`2228`]
-    CONF=CommandType(
-        name='CONF',
-        feat='secu',
-        desc='Confidentiality Protected Command',
-        type=('access control',),
-        conf='optional',
-        note=('RFC 2228',),
-    ),
-    # CWD [:rfc:`959`]
-    CWD=CommandType(
-        name='CWD',
-        feat='base',
-        desc='Change Working Directory',
-        type=('access control',),
-        conf='mandatory to implement',
-        note=('RFC 959',),
-    ),
-    # DELE [:rfc:`959`]
-    DELE=CommandType(
-        name='DELE',
-        feat='base',
-        desc='Delete File',
-        type=('service execution',),
-        conf='mandatory to implement',
-        note=('RFC 959',),
-    ),
-    # ENC [:rfc:`2228`][:rfc:`2773`][:rfc:`4217`]
-    ENC=CommandType(
-        name='ENC',
-        feat='secu',
-        desc='Privacy Protected Command',
-        type=('access control',),
-        conf='optional',
-        note=('RFC 2228', 'RFC 2773', 'RFC 4217'),
-    ),
-    # EPRT [:rfc:`2428`]
-    EPRT=CommandType(
-        name='EPRT',
-        feat='nat6',
-        desc='Extended Port',
-        type=('parameter setting',),
-        conf='optional',
-        note=('RFC 2428',),
-    ),
-    # EPSV [:rfc:`2428`]
-    EPSV=CommandType(
-        name='EPSV',
-        feat='nat6',
-        desc='Extended Passive Mode',
-        type=('parameter setting',),
-        conf='optional',
-        note=('RFC 2428',),
-    ),
-    # FEAT [:rfc:`2389`]
-    FEAT=CommandType(
-        name='FEAT',
-        feat='feat',
-        desc='Feature Negotiation',
-        type=('access control',),
-        conf='mandatory to implement',
-        note=('RFC 2389',),
-    ),
-    # HELP [:rfc:`959`]
-    HELP=CommandType(
-        name='HELP',
-        feat='base',
-        desc='Help',
-        type=('service execution',),
-        conf='mandatory to implement',
-        note=('RFC 959',),
-    ),
-    # HOST [:rfc:`7151`]
-    HOST=CommandType(
-        name='HOST',
-        feat='HOST',
-        desc='Hostname',
-        type=('access control',),
-        conf='optional',
-        note=('RFC 7151',),
-    ),
-    # LANG [:rfc:`2640`]
-    LANG=CommandType(
-        name='LANG',
-        feat='UTF8',
-        desc='Language (for Server Messages)',
-        type=('parameter setting',),
-        conf='optional',
-        note=('RFC 2640',),
-    ),
-    # LIST [:rfc:`959`][:rfc:`1123`]
-    LIST=CommandType(
-        name='LIST',
-        feat='base',
-        desc='List',
-        type=('service execution',),
-        conf='mandatory to implement',
-        note=('RFC 959', 'RFC 1123'),
-    ),
-    # LPRT [:rfc:`1545`][:rfc:`1639`]
-    LPRT=CommandType(
-        name='LPRT',
-        feat='hist',
-        desc='Data Port',
-        type=('parameter setting',),
-        conf='historic',
-        note=('RFC 1545', 'RFC 1639'),
-    ),
-    # LPSV [:rfc:`1545`][:rfc:`1639`]
-    LPSV=CommandType(
-        name='LPSV',
-        feat='hist',
-        desc='Passive Mode',
-        type=('parameter setting',),
-        conf='historic',
-        note=('RFC 1545', 'RFC 1639'),
-    ),
-    # MDTM [:rfc:`3659`]
-    MDTM=CommandType(
-        name='MDTM',
-        feat='MDTM',
-        desc='File Modification Time',
-        type=('service execution',),
-        conf='optional',
-        note=('RFC 3659',),
-    ),
-    # MIC [:rfc:`2228`][:rfc:`2773`][:rfc:`4217`]
-    MIC=CommandType(
-        name='MIC',
-        feat='secu',
-        desc='Integrity Protected Command',
-        type=('access control',),
-        conf='optional',
-        note=('RFC 2228', 'RFC 2773', 'RFC 4217'),
-    ),
-    # MKD [:rfc:`959`]
-    MKD=CommandType(
-        name='MKD',
-        feat='base',
-        desc='Make Directory',
-        type=('service execution',),
-        conf='optional',
-        note=('RFC 959',),
-    ),
-    # MLSD [:rfc:`3659`]
-    MLSD=CommandType(
-        name='MLSD',
-        feat='MLST',
-        desc='List Directory (for machine)',
-        type=('service execution',),
-        conf='optional',
-        note=('RFC 3659',),
-    ),
-    # MLST [:rfc:`3659`]
-    MLST=CommandType(
-        name='MLST',
-        feat='MLST',
-        desc='List Single Object',
-        type=('service execution',),
-        conf='optional',
-        note=('RFC 3659',),
-    ),
-    # MODE [:rfc:`959`]
-    MODE=CommandType(
-        name='MODE',
-        feat='base',
-        desc='Transfer Mode',
-        type=('parameter setting',),
-        conf='mandatory to implement',
-        note=('RFC 959',),
-    ),
-    # NLST [:rfc:`959`][:rfc:`1123`]
-    NLST=CommandType(
-        name='NLST',
-        feat='base',
-        desc='Name List',
-        type=('service execution',),
-        conf='mandatory to implement',
-        note=('RFC 959', 'RFC 1123'),
-    ),
-    # NOOP [:rfc:`959`]
-    NOOP=CommandType(
-        name='NOOP',
-        feat='base',
-        desc='No-Op',
-        type=('service execution',),
-        conf='mandatory to implement',
-        note=('RFC 959',),
-    ),
-    # OPTS [:rfc:`2389`]
-    OPTS=CommandType(
-        name='OPTS',
-        feat='feat',
-        desc='Options',
-        type=('parameter setting',),
-        conf='mandatory to implement',
-        note=('RFC 2389',),
-    ),
-    # PASS [:rfc:`959`]
-    PASS=CommandType(
-        name='PASS',
-        feat='base',
-        desc='Password',
-        type=('access control',),
-        conf='mandatory to implement',
-        note=('RFC 959',),
-    ),
-    # PASV [:rfc:`959`][:rfc:`1123`]
-    PASV=CommandType(
-        name='PASV',
-        feat='base',
-        desc='Passive Mode',
-        type=('parameter setting',),
-        conf='mandatory to implement',
-        note=('RFC 959', 'RFC 1123'),
-    ),
-    # PBSZ [:rfc:`4217`]
-    PBSZ=CommandType(
-        name='PBSZ',
-        feat='PBSZ',
-        desc='Protection Buffer Size',
-        type=('parameter setting',),
-        conf='optional',
-        note=('RFC 4217',),
-    ),
-    # PORT [:rfc:`959`]
-    PORT=CommandType(
-        name='PORT',
-        feat='base',
-        desc='Data Port',
-        type=('parameter setting',),
-        conf='mandatory to implement',
-        note=('RFC 959',),
-    ),
-    # PROT [:rfc:`4217`]
-    PROT=CommandType(
-        name='PROT',
-        feat='PROT',
-        desc='Data Channel Protection Level',
-        type=('parameter setting',),
-        conf='optional',
-        note=('RFC 4217',),
-    ),
-    # PWD [:rfc:`959`]
-    PWD=CommandType(
-        name='PWD',
-        feat='base',
-        desc='Print Directory',
-        type=('service execution',),
-        conf='optional',
-        note=('RFC 959',),
-    ),
-    # QUIT [:rfc:`959`]
-    QUIT=CommandType(
-        name='QUIT',
-        feat='base',
-        desc='Logout',
-        type=('access control',),
-        conf='mandatory to implement',
-        note=('RFC 959',),
-    ),
-    # REIN [:rfc:`959`]
-    REIN=CommandType(
-        name='REIN',
-        feat='base',
-        desc='Reinitialize',
-        type=('access control',),
-        conf='mandatory to implement',
-        note=('RFC 959',),
-    ),
-    # REST [3][:rfc:`3659`]
-    REST=CommandType(
-        name='REST',
-        feat='REST',
-        desc='Restart (for STREAM mode)',
-        type=('service execution', 'parameter setting'),
-        conf='mandatory to implement',
-        note=('RFC 3659',),
-    ),
-    # RETR [:rfc:`959`]
-    RETR=CommandType(
-        name='RETR',
-        feat='base',
-        desc='Retrieve',
-        type=('service execution',),
-        conf='mandatory to implement',
-        note=('RFC 959',),
-    ),
-    # RMD [:rfc:`959`]
-    RMD=CommandType(
-        name='RMD',
-        feat='base',
-        desc='Remove Directory',
-        type=('service execution',),
-        conf='optional',
-        note=('RFC 959',),
-    ),
-    # RNFR [:rfc:`959`]
-    RNFR=CommandType(
-        name='RNFR',
-        feat='base',
-        desc='Rename From',
-        type=('service execution', 'parameter setting'),
-        conf='mandatory to implement',
-        note=('RFC 959',),
-    ),
-    # RNTO [:rfc:`959`]
-    RNTO=CommandType(
-        name='RNTO',
-        feat='base',
-        desc='Rename From',
-        type=('service execution',),
-        conf='mandatory to implement',
-        note=('RFC 959',),
-    ),
-    # SITE [:rfc:`959`][:rfc:`1123`]
-    SITE=CommandType(
-        name='SITE',
-        feat='base',
-        desc='Site Parameters',
-        type=('service execution',),
-        conf='mandatory to implement',
-        note=('RFC 959', 'RFC 1123'),
-    ),
-    # SIZE [:rfc:`3659`]
-    SIZE=CommandType(
-        name='SIZE',
-        feat='SIZE',
-        desc='File Size',
-        type=('service execution',),
-        conf='optional',
-        note=('RFC 3659',),
-    ),
-    # SMNT [:rfc:`959`]
-    SMNT=CommandType(
-        name='SMNT',
-        feat='base',
-        desc='Structure Mount',
-        type=('access control',),
-        conf='optional',
-        note=('RFC 959',),
-    ),
-    # STAT [:rfc:`959`]
-    STAT=CommandType(
-        name='STAT',
-        feat='base',
-        desc='Status',
-        type=('service execution',),
-        conf='mandatory to implement',
-        note=('RFC 959',),
-    ),
-    # STOR [:rfc:`959`]
-    STOR=CommandType(
-        name='STOR',
-        feat='base',
-        desc='Store',
-        type=('service execution',),
-        conf='mandatory to implement',
-        note=('RFC 959',),
-    ),
-    # STOU [:rfc:`959`][:rfc:`1123`]
-    STOU=CommandType(
-        name='STOU',
-        feat='base',
-        desc='Store Unique',
-        type=('access control',),
-        conf='optional',
-        note=('RFC 959', 'RFC 1123'),
-    ),
-    # STRU [:rfc:`959`]
-    STRU=CommandType(
-        name='STRU',
-        feat='base',
-        desc='File Structure',
-        type=('parameter setting',),
-        conf='mandatory to implement',
-        note=('RFC 959',),
-    ),
-    # SYST [:rfc:`959`]
-    SYST=CommandType(
-        name='SYST',
-        feat='base',
-        desc='System',
-        type=('service execution',),
-        conf='optional',
-        note=('RFC 959',),
-    ),
-    # TYPE [4][:rfc:`959`]
-    TYPE=CommandType(
-        name='TYPE',
-        feat='base',
-        desc='Representation Type',
-        type=('parameter setting',),
-        conf='mandatory to implement',
-        note=('RFC 959',),
-    ),
-    # USER [:rfc:`959`]
-    USER=CommandType(
-        name='USER',
-        feat='base',
-        desc='User Name',
-        type=('access control',),
-        conf='mandatory to implement',
-        note=('RFC 959',),
-    ),
-    # XCUP [:rfc:`775`][:rfc:`1123`]
-    XCUP=CommandType(
-        name='XCUP',
-        feat='hist',
-        desc=None,
-        type=('service execution',),
-        conf='historic',
-        note=('RFC 775', 'RFC 1123'),
-    ),
-    # XCWD [:rfc:`775`][:rfc:`1123`]
-    XCWD=CommandType(
-        name='XCWD',
-        feat='hist',
-        desc=None,
-        type=('service execution',),
-        conf='historic',
-        note=('RFC 775', 'RFC 1123'),
-    ),
-    # XMKD [:rfc:`775`][:rfc:`1123`]
-    XMKD=CommandType(
-        name='XMKD',
-        feat='hist',
-        desc=None,
-        type=('service execution',),
-        conf='historic',
-        note=('RFC 775', 'RFC 1123'),
-    ),
-    # XPWD [:rfc:`775`][:rfc:`1123`]
-    XPWD=CommandType(
-        name='XPWD',
-        feat='hist',
-        desc=None,
-        type=('service execution',),
-        conf='historic',
-        note=('RFC 775', 'RFC 1123'),
-    ),
-    # XRMD [:rfc:`775`][:rfc:`1123`]
-    XRMD=CommandType(
-        name='XRMD',
-        feat='hist',
-        desc=None,
-        type=('service execution',),
-        conf='historic',
-        note=('RFC 775', 'RFC 1123'),
-    ),
-)
+        Args:
+            value: Value to get enum item.
+
+        """
+        extend_enum(cls, value.upper(), value)
+        return cls(value)

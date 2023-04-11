@@ -87,6 +87,7 @@ __all__ = [
     'UDP',
 
     # Application Layer Protocols
+    'FTP',
 
     # PCAP file format
     'Header',

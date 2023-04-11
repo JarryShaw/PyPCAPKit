@@ -106,5 +106,6 @@ __all__ = [
 
     'TCP', 'UDP',                                           # Transport Layer
 
-    'FTP', 'HTTP',                                          # Application Layer
+    'FTP', 'FTP_DATA',                                      # Application Layer
+    'HTTP',
 ]

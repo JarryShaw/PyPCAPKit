@@ -15,11 +15,14 @@ application layer, with detailed implementation and methods.
 from pcapkit.protocols.application.application import Application
 
 # Utility Classes for Protocols
-from pcapkit.protocols.application.ftp import FTP
+from pcapkit.protocols.application.ftp import FTP, FTP_DATA
 from pcapkit.protocols.application.httpv1 import HTTP as HTTPv1
 from pcapkit.protocols.application.httpv2 import HTTP as HTTPv2
 
 # Deprecated / Base Classes
 from pcapkit.protocols.application.http import HTTP
 
-__all__ = ['FTP', 'HTTP', 'HTTPv1', 'HTTPv2']
+__all__ = [
+    'FTP', 'FTP_DATA',
+    'HTTP', 'HTTPv1', 'HTTPv2',
+]
