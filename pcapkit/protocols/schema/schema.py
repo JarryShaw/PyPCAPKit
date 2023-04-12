@@ -317,14 +317,20 @@ class Schema(Mapping[str, VT], Generic[VT]):
             raise ProtocolUnbound(f'not a payload field: {name!r}')
         return self.__buffer__[name]
 
-    def pack(self) -> 'bytes':
+    def pack(self, packet: 'Optional[dict[str, Any]]' = None) -> 'bytes':
         """Pack :class:`Schema` into :obj:`bytes`.
+
+        Args:
+            packet: Packet data.
 
         Returns:
             Packed :class:`Schema` as :obj:`bytes`.
 
         """
-        packet = self.__dict__
+        if packet is None:
+            packet = {}
+        packet.update(self.__dict__)
+
         for field in self.__fields__.values():
             field = field(packet)
 
@@ -340,7 +346,7 @@ class Schema(Mapping[str, VT], Generic[VT]):
                 elif isinstance(data, bytes):
                     self.__buffer__[field.name] = data
                 elif isinstance(data, Schema):
-                    self.__buffer__[field.name] = data.pack()
+                    self.__buffer__[field.name] = data.pack(packet)
                 else:
                     raise ProtocolUnbound(f'unsupported type {type(data)}')
                 continue
@@ -437,7 +443,7 @@ class Schema(Mapping[str, VT], Generic[VT]):
             byte = data.read(field.length)
             self.__buffer__[field.name] = byte
 
-            value = field.unpack(byte, packet)
+            value = field.unpack(byte, packet.copy())
             setattr(self, field.name, value)
 
             packet[field.name] = value
@@ -450,8 +456,8 @@ class Schema(Mapping[str, VT], Generic[VT]):
         self.__updated__ = False
         return self
 
-    @staticmethod
-    def pre_process(packet: 'dict[str, Any]') -> 'None':
+    @classmethod
+    def pre_process(cls, packet: 'dict[str, Any]') -> 'None':
         """Prepare ``packet`` data for unpacking process.
 
         Args:
@@ -463,9 +469,9 @@ class Schema(Mapping[str, VT], Generic[VT]):
 
         """
 
-    @staticmethod
-    def post_process(schema: 'Schema', data: 'IO[bytes]', length: 'int',
-                     packet: 'dict[str, Any]') -> 'Schema':
+    @classmethod
+    def post_process(cls, schema: 'Schema', data: 'IO[bytes]',
+                     length: 'int', packet: 'dict[str, Any]') -> 'Schema':
         """Revise ``schema`` data after unpacking process.
 
         Args:

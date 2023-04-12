@@ -140,9 +140,9 @@ class Option(Schema):
         lambda pkt: pkt['type'] not in (Enum_OptionNumber.EOOL, Enum_OptionNumber.NOP),
     )
 
-    @staticmethod
-    def post_process(schema: 'Schema', data: 'IO[bytes]', length: 'int',
-                     packet: 'dict[str, Any]') -> 'Schema':
+    @classmethod
+    def post_process(cls, schema: 'Schema', data: 'IO[bytes]',
+                     length: 'int', packet: 'dict[str, Any]') -> 'Schema':
         """Revise ``schema`` data after unpacking process.
 
         Args:
@@ -244,9 +244,9 @@ class TSOption(Option):
         default=bytes(36),  # 36 is the maximum length of the option data field for timestamps
     )
 
-    @staticmethod
-    def post_process(schema: 'Schema', data: 'IO[bytes]', length: 'int',
-                     packet: 'dict[str, Any]') -> 'Schema':
+    @classmethod
+    def post_process(cls, schema: 'Schema', data: 'IO[bytes]',
+                     length: 'int', packet: 'dict[str, Any]') -> 'Schema':
         """Revise ``schema`` data after unpacking process.
 
         Args:
@@ -456,9 +456,9 @@ class _QSOption(Schema):
         selector=quick_start_data_selector,
     )
 
-    @staticmethod
-    def post_process(schema: 'Schema', data: 'IO[bytes]', length: 'int',
-                     packet: 'dict[str, Any]') -> 'Schema':
+    @classmethod
+    def post_process(cls, schema: 'Schema', data: 'IO[bytes]',
+                     length: 'int', packet: 'dict[str, Any]') -> 'Schema':
         """Revise ``schema`` data after unpacking process.
 
         Args:

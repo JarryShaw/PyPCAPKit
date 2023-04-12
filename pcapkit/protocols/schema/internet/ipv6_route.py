@@ -77,7 +77,7 @@ class IPv6_Route(Schema):
     seg_left: 'int' = UInt8Field()
     #: Routing data.
     data: 'RoutingType' = SwitchField(
-        length=lambda pkt: pkt['length'] * 8 + 4,
+        length=lambda pkt: pkt['length'] * 8 - 4,
         selector=ipv6_route_data_selector,
     )
     #: Payload.
@@ -96,7 +96,7 @@ class UnknownType(RoutingType):
     """Header schema for IPv6-Route unknown type routing data."""
 
     #: Type-specific data.
-    data: 'bytes' = BytesField(length=lambda pkt: pkt['length'] * 8 + 4)
+    data: 'bytes' = BytesField(length=lambda pkt: pkt['length'] * 8 - 4)
 
     if TYPE_CHECKING:
         def __init__(self, data: 'bytes') -> 'None': ...
@@ -147,9 +147,9 @@ class RPL(RoutingType):
     #: Padding.
     padding: 'bytes' = PaddingField(length=lambda pkt: pkt['pad']['pad_len'])
 
-    @staticmethod
-    def post_process(schema: 'Schema', data: 'IO[bytes]', length: 'int',
-                     packet: 'dict[str, Any]') -> 'Schema':
+    @classmethod
+    def post_process(cls, schema: 'Schema', data: 'IO[bytes]',
+                     length: 'int', packet: 'dict[str, Any]') -> 'Schema':
         """Revise ``schema`` data after unpacking process.
 
         Args:

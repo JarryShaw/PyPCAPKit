@@ -235,9 +235,9 @@ class Option(Schema):
         lambda pkt: pkt['type'] != Enum_Option.Pad1,
     )
 
-    @staticmethod
-    def post_process(schema: 'Schema', data: 'IO[bytes]', length: 'int',
-                     packet: 'dict[str, Any]') -> 'Schema':
+    @classmethod
+    def post_process(cls, schema: 'Schema', data: 'IO[bytes]',
+                     length: 'int', packet: 'dict[str, Any]') -> 'Schema':
         """Revise ``schema`` data after unpacking process.
 
         Args:
@@ -337,9 +337,9 @@ class _SMFDPDOption(Schema):
         selector=smf_dpd_data_selector,
     )
 
-    @staticmethod
-    def post_process(schema: 'Schema', data: 'IO[bytes]', length: 'int',
-                     packet: 'dict[str, Any]') -> 'Schema':
+    @classmethod
+    def post_process(cls, schema: 'Schema', data: 'IO[bytes]',
+                     length: 'int', packet: 'dict[str, Any]') -> 'Schema':
         """Revise ``schema`` data after unpacking process.
 
         Args:
@@ -440,9 +440,9 @@ class _QuickStartOption(Schema):
         selector=quick_start_data_selector,
     )
 
-    @staticmethod
-    def post_process(schema: 'Schema', data: 'IO[bytes]', length: 'int',
-                     packet: 'dict[str, Any]') -> 'Schema':
+    @classmethod
+    def post_process(cls, schema: 'Schema', data: 'IO[bytes]',
+                     length: 'int', packet: 'dict[str, Any]') -> 'Schema':
         """Revise ``schema`` data after unpacking process.
 
         Args:
@@ -546,9 +546,9 @@ class MPLOption(Option):
         0 if pkt['flags']['type'] == 0 else mpl_opt_seed_id_len(pkt)
     ))
 
-    @staticmethod
-    def post_process(schema: 'Schema', data: 'IO[bytes]', length: 'int',
-                     packet: 'dict[str, Any]') -> 'Schema':
+    @classmethod
+    def post_process(cls, schema: 'Schema', data: 'IO[bytes]',
+                     length: 'int', packet: 'dict[str, Any]') -> 'Schema':
         """Revise ``schema`` data after unpacking process.
 
         Args:

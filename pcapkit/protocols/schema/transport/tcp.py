@@ -269,9 +269,9 @@ class Option(Schema):
         lambda pkt: pkt['kind'] not in (Enum_Option.End_of_Option_List, Enum_Option.No_Operation),
     )
 
-    @staticmethod
-    def post_process(schema: 'Schema', data: 'IO[bytes]', length: 'int',
-                     packet: 'dict[str, Any]') -> 'Schema':
+    @classmethod
+    def post_process(cls, schema: 'Schema', data: 'IO[bytes]',
+                     length: 'int', packet: 'dict[str, Any]') -> 'Schema':
         """Revise ``schema`` data after unpacking process.
 
         Args:
@@ -540,9 +540,9 @@ class _MPTCP(Schema):
         selector=mptcp_data_selector,
     )
 
-    @staticmethod
-    def post_process(schema: 'Schema', data: 'IO[bytes]', length: 'int',
-                     packet: 'dict[str, Any]') -> 'Schema':
+    @classmethod
+    def post_process(cls, schema: 'Schema', data: 'IO[bytes]',
+                     length: 'int', packet: 'dict[str, Any]') -> 'Schema':
         """Revise ``schema`` data after unpacking process.
 
         Args:

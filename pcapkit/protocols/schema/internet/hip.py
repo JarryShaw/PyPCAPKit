@@ -448,8 +448,8 @@ class EncryptedParameter(Parameter):
     #: Padding.
     padding: 'bytes' = PaddingField(length=lambda pkt: (8 - (pkt['len'] % 8)) % 8)
 
-    @staticmethod
-    def pre_process(packet: 'dict[str, Any]') -> 'None':
+    @classmethod
+    def pre_process(cls, packet: 'dict[str, Any]') -> 'None':
         """Prepare ``packet`` data for unpacking process.
 
         Args:
@@ -484,9 +484,9 @@ class EncryptedParameter(Parameter):
 
         packet['__cipher__'] = cipher_id
 
-    @staticmethod
-    def post_process(schema: 'Schema', data: 'IO[bytes]', length: 'int',
-                     packet: 'dict[str, Any]') -> 'Schema':
+    @classmethod
+    def post_process(cls, schema: 'Schema', data: 'IO[bytes]',
+                     length: 'int', packet: 'dict[str, Any]') -> 'Schema':
         """Revise ``schema`` data after unpacking process.
 
         Args:
