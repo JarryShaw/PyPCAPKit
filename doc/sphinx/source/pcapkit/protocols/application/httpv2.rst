@@ -146,7 +146,7 @@ Data Structures
    .. autoattribute:: stream_dependency
    .. autoattribute:: weight
 
-.. autoclass:: pcapkit.protocols.data.application.httpv2.RstStreamFrame(length, type, flags, sid, error)
+.. autoclass:: pcapkit.protocols.data.application.httpv2.RSTStreamFrame(length, type, flags, sid, error)
    :no-members:
    :show-inheritance:
 

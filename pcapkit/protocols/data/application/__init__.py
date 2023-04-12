@@ -29,7 +29,7 @@ from pcapkit.protocols.data.application.httpv2 import PriorityFrame as HTTPv2_Pr
 from pcapkit.protocols.data.application.httpv2 import PushPromiseFrame as HTTPv2_PushPromiseFrame
 from pcapkit.protocols.data.application.httpv2 import \
     PushPromiseFrameFlags as HTTPv2_PushPromiseFrameFlags
-from pcapkit.protocols.data.application.httpv2 import RstStreamFrame as HTTPv2_RstStreamFrame
+from pcapkit.protocols.data.application.httpv2 import RSTStreamFrame as HTTPv2_RSTStreamFrame
 from pcapkit.protocols.data.application.httpv2 import SettingsFrame as HTTPv2_SettingsFrame
 from pcapkit.protocols.data.application.httpv2 import \
     SettingsFrameFlags as HTTPv2_SettingsFrameFlags
@@ -52,6 +52,6 @@ __all__ = [
     'HTTPv2_DataFrameFlags', 'HTTPv2_HeadersFrameFlags', 'HTTPv2_SettingsFrameFlags',
     'HTTPv2_PushPromiseFrameFlags', 'HTTPv2_PingFrameFlags', 'HTTPv2_ContinuationFrameFlags',
     'HTTPv2_UnassignedFrame', 'HTTPv2_DataFrame', 'HTTPv2_HeadersFrame', 'HTTPv2_PriorityFrame',
-    'HTTPv2_RstStreamFrame', 'HTTPv2_SettingsFrame', 'HTTPv2_PushPromiseFrame', 'HTTPv2_PingFrame',
+    'HTTPv2_RSTStreamFrame', 'HTTPv2_SettingsFrame', 'HTTPv2_PushPromiseFrame', 'HTTPv2_PingFrame',
     'HTTPv2_GoawayFrame', 'HTTPv2_WindowUpdateFrame', 'HTTPv2_ContinuationFrame',
 ]

@@ -89,6 +89,11 @@ __all__ = [
     # Application Layer Protocols
     'FTP',
     'HTTPv1',
+    'HTTPv2',
+    'HTTPv2_FrameType',
+    'HTTPv2_UnassignedFrame', 'HTTPv2_DataFrame', 'HTTPv2_HeadersFrame', 'HTTPv2_PriorityFrame',
+    'HTTPv2_RSTStreamFrame', 'HTTPv2_SettingsFrame', 'HTTPv2_PushPromiseFrame', 'HTTPv2_PingFrame',
+    'HTTPv2_GoawayFrame', 'HTTPv2_WindowUpdateFrame', 'HTTPv2_ContinuationFrame',
 
     # PCAP file format
     'Header',
