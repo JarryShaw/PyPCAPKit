@@ -459,7 +459,7 @@ class SchemaField(_Field[_TS]):
 
         if isinstance(value, bytes):
             return value
-        return value.pack()
+        return value.pack(packet)
 
     def unpack(self, buffer: 'bytes | IO[bytes]', packet: 'dict[str, Any]') -> '_TS':
         """Unpack field value from :obj:`bytes`.

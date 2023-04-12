@@ -97,7 +97,7 @@ class ListField(_Field[list[_TL]]):
             if isinstance(item, bytes):
                 temp.append(item)
             elif isinstance(item, Schema):
-                temp.append(item.pack())
+                temp.append(item.pack(packet))
             elif self._item_type is not None:
                 temp.append(self._item_type.pack(item, packet))
             else:
