@@ -47,6 +47,10 @@ class Schema(Mapping[str, VT], Generic[VT]):
 
     #: Field name of the payload.
     __payload__: 'str' = 'payload'
+    #: List of additional built-in names.
+    __additional__: 'list[str]' = []
+    #: List of names to be excluded from :obj:`dict` conversion.
+    __excluded__: 'list[str]' = []
 
     def __new__(cls, *args: 'VT', **kwargs: 'VT') -> 'Schema':  # pylint: disable=unused-argument
         """Create a new instance.
@@ -65,9 +69,11 @@ class Schema(Mapping[str, VT], Generic[VT]):
         temp = ['__map__', '__map_reverse__', '__builtin__',
                 '__fields__', '__buffer__', '__updated__',
                 '__payload__']
+        temp.extend(cls.__additional__)
         for obj in cls.mro():
             temp.extend(dir(obj))
         cls.__builtin__ = set(temp)
+        cls.__excluded__.extend(cls.__builtin__)
 
         args_ = []  # type: list[str]
         dict_ = []  # type: list[str]
@@ -204,6 +210,9 @@ class Schema(Mapping[str, VT], Generic[VT]):
     def __str__(self) -> 'str':
         temp = []  # type: list[str]
         for (key, value) in self.__dict__.items():
+            if key in self.__excluded__:
+                continue
+
             out_key = self.__map_reverse__.get(key, key)
             temp.append(f'{out_key}={value}')
         args = ', '.join(temp)
@@ -212,6 +221,9 @@ class Schema(Mapping[str, VT], Generic[VT]):
     def __repr__(self) -> 'str':
         temp = []  # type: list[str]
         for (key, value) in self.__dict__.items():
+            if key in self.__excluded__:
+                continue
+
             out_key = self.__map_reverse__.get(key, key)
             if isinstance(value, Schema):
                 temp.append(f'{out_key}={type(value).__name__}(...)')
@@ -235,6 +247,8 @@ class Schema(Mapping[str, VT], Generic[VT]):
 
     def __iter__(self) -> 'Iterator[str]':
         for key in self.__dict__:
+            if key in self.__builtin__:
+                continue
             yield self.__map_reverse__.get(key, key)
 
     def __getitem__(self, name: 'str') -> 'VT':
@@ -294,6 +308,9 @@ class Schema(Mapping[str, VT], Generic[VT]):
         """
         dict_ = {}  # type: dict[str, Any]
         for (key, value) in self.__dict__.items():
+            if key in self.__excluded__:
+                continue
+
             out_key = self.__map_reverse__.get(key, key)
             if isinstance(value, Schema):
                 dict_[out_key] = value.to_dict()

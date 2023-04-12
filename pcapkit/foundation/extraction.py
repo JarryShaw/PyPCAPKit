@@ -464,9 +464,9 @@ class Extractor:
 
         if self._flag_f:
             ofile = self._ofile(f'{self._ofnm}/Global Header.{self._fext}')
-            ofile(self._gbhdr.info, name='Global Header')
+            ofile(self._gbhdr.info.to_dict(), name='Global Header')
         else:
-            self._ofile(self._gbhdr.info, name='Global Header')
+            self._ofile(self._gbhdr.info.to_dict(), name='Global Header')
             ofile = self._ofile
         self._type = ofile.kind
 
@@ -795,9 +795,9 @@ class Extractor:
         if not self._flag_q:
             if self._flag_f:
                 ofile = self._ofile(f'{self._ofnm}/{frnum}.{self._fext}')
-                ofile(frame.info, name=frnum)
+                ofile(frame.info.to_dict(), name=frnum)
             else:
-                self._ofile(frame.info, name=frnum)
+                self._ofile(frame.info.to_dict(), name=frnum)
 
         # record fragments
         if self._ipv4:
