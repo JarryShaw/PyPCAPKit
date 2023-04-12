@@ -140,8 +140,8 @@ class Schema(Mapping[str, VT], Generic[VT]):
         # NOTE: We define the ``__map__`` and ``__map_reverse__`` attributes
         # here under ``self`` to avoid them being considered as class variables
         # and thus being shared by all instances.
-        self.__map__ = {}
-        self.__map_reverse__ = {}
+        super().__setattr__(self, '__map__', {})
+        super().__setattr__(self, '__map_reverse__', {})
 
         # NOTE: We only create the attributes for the instance itself,
         # to avoid creating shared attributes for the class.
@@ -238,18 +238,26 @@ class Schema(Mapping[str, VT], Generic[VT]):
             yield self.__map_reverse__.get(key, key)
 
     def __getitem__(self, name: 'str') -> 'VT':
-        key = self.__map__.get(name, name)
-        return self.__dict__[key]
+        if name in self.__fields__:
+            key = self.__map__.get(name, name)
+            return self.__dict__[key]
+        return super().__getitem__(name)
 
     def __setattr__(self, name: 'str', value: 'VT') -> 'None':
-        key = self.__map__.get(name, name)
-        self.__dict__[key] = value
-        self.__updated__ = True
+        if name in self.__fields__:
+            key = self.__map__.get(name, name)
+            self.__dict__[key] = value
+            self.__updated__ = True
+            return
+        return super().__setattr__(name, value)
 
     def __delattr__(self, name: 'str') -> 'None':
-        key = self.__map__.get(name, name)
-        del self.__dict__[key]
-        self.__updated__ = True
+        if name in self.__fields__:
+            key = self.__map__.get(name, name)
+            del self.__dict__[key]
+            self.__updated__ = True
+            return
+        return super().__delattr__(name)
 
     @classmethod
     def from_dict(cls, dict_: 'Optional[Mapping[str, VT] | Iterable[tuple[str, VT]]]' = None,
