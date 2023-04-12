@@ -138,7 +138,7 @@ class HTTP(HTTPBase[Data_HTTP, Schema_HTTP],
         )
         self._receipt = header_line.type
         self._version = header_line.version  # type: ignore[attr-defined]
-        self._length = len(packet)
+        self._length = len(header)
 
         return http
 
