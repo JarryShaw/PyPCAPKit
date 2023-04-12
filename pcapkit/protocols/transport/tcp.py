@@ -164,22 +164,22 @@ __all__ = ['TCP']
 class Flags(enum.IntFlag):
     """TCP connection control flags."""
 
-    #: Congestion window reduced (CWR).
-    CWR = enum.auto()
-    #: ECN-Echo (ECE).
-    ECE = enum.auto()
-    #: Urgent pointer (URG).
-    URG = enum.auto()
-    #: Acknowledgment number valid (ACK).
-    ACK = enum.auto()
-    #: Push function (PSH).
-    PSH = enum.auto()
-    #: Reset the connection (RST).
-    RST = enum.auto()
-    #: Synchronize sequence numbers (SYN).
-    SYN = enum.auto()
     #: No more data from sender (FIN).
     FIN = enum.auto()
+    #: Synchronize sequence numbers (SYN).
+    SYN = enum.auto()
+    #: Reset the connection (RST).
+    RST = enum.auto()
+    #: Push function (PSH).
+    PSH = enum.auto()
+    #: Acknowledgment number valid (ACK).
+    ACK = enum.auto()
+    #: Urgent pointer (URG).
+    URG = enum.auto()
+    #: ECN-Echo (ECE).
+    ECE = enum.auto()
+    #: Congestion window reduced (CWR).
+    CWR = enum.auto()
 
 
 class TCP(Transport[Data_TCP, Schema_TCP],
