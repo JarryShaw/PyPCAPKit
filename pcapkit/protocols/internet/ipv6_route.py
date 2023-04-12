@@ -77,12 +77,16 @@ class IPv6_Route(Internet[Data_IPv6_Route, Schema_IPv6_Route],
 
        * - Routing Code
          - Data Parser
+         - Data Constructor
        * - :attr:`~pcapkit.const.ipv6.routing.Routing.Source_Route`
          - :meth:`~pcapkit.protocols.internet.ipv6_route.IPv6_Route._read_data_type_src`
+         - :meth:`~pcapkit.protocols.internet.ipv6_route.IPv6_Route._make_data_type_src`
        * - :attr:`~pcapkit.const.ipv6.routing.Routing.Type_2_Routing_Header`
          - :meth:`~pcapkit.protocols.internet.ipv6_route.IPv6_Route._read_data_type_2`
+         - :meth:`~pcapkit.protocols.internet.ipv6_route.IPv6_Route._make_data_type_2`
        * - :attr:`~pcapkit.const.ipv6.routing.Routing.RPL_Source_Route_Header`
          - :meth:`~pcapkit.protocols.internet.ipv6_route.IPv6_Route._read_data_type_rpl`
+         - :meth:`~pcapkit.protocols.internet.ipv6_route.IPv6_Route._make_data_type_rpl`
 
     """
 
