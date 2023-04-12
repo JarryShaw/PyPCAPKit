@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """numerical field class"""
 
+import copy
 import enum
 from typing import TYPE_CHECKING, Generic, TypeVar, cast
 
@@ -83,13 +84,13 @@ class NumberField(Field[int], Generic[_T]):
 
     def __call__(self, packet: 'dict[str, Any]') -> 'NumberField':
         """Update field attributes."""
-        old_length = self._length
-        new_self = cast('NumberField', super().__call__(packet))
+        new_self = copy.copy(self)
+        new_self._callback(self, packet)
 
-        if old_length != new_self._length:
-            endian = '>' if new_self._byteorder == 'big' else '<'
-            struct_fmt = new_self.build_template(new_self._length, new_self._signed)
-            new_self._template = f'{endian}{struct_fmt}'
+        endian = '>' if new_self._byteorder == 'big' else '<'
+        struct_fmt = new_self.build_template(new_self._length, new_self._signed)
+
+        new_self._template = f'{endian}{struct_fmt}'
         return new_self
 
     def build_template(self, length: 'int', signed: 'bool') -> 'str':
@@ -97,6 +98,7 @@ class NumberField(Field[int], Generic[_T]):
 
         Arguments:
             length: field size (in bytes)
+            signed: whether the field is signed
 
         Returns:
             Template for field.

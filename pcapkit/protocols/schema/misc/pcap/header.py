@@ -23,7 +23,7 @@ def magic_number_callback(field: 'NumberField', packet: 'dict[str, Any]') -> 'No
 
     Args:
         field: Field instance.
-        magic_number: Magic number of PCAP file.
+        packet: Packet data.
 
     """
     magic_number = packet['magic_number']

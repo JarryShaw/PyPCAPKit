@@ -77,7 +77,7 @@ class Header(Protocol[Data_Header, Schema_Header],
 
     @property
     def version(self) -> 'VersionInfo':
-        """Version infomation of input PCAP file."""
+        """Version information of input PCAP file."""
         return self._info.version
 
     @property
