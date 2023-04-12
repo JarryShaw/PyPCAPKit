@@ -165,6 +165,9 @@ def prepare(func: 'Callable[Concatenate[Type[Schema], bytes | IO[bytes], Optiona
                 length = data.seek(0, io.SEEK_END) - current
                 data.seek(current)
 
+        if length == 0:
+            raise EOFError
+
         if packet is None:
             packet = {}
         packet['__length__'] = length

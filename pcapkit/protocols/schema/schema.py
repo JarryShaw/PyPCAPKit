@@ -423,11 +423,14 @@ class Schema(Mapping[str, VT], Generic[VT]):
 
             if isinstance(field, PayloadField):
                 payload_length = field.length or cast('int', packet['__length__'])
-                payload = data.read(payload_length)
 
+                payload = data.read(payload_length)
                 self.__buffer__[field.name] = payload
-                setattr(self, field.name, payload)
+
+                packet['__length__'] -= field.length
                 packet[field.name] = payload
+
+                setattr(self, field.name, payload)
                 continue
 
             if isinstance(field, PaddingField):

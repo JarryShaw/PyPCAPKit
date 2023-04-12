@@ -186,16 +186,13 @@ class Frame(Protocol[Data_Frame, Schema_Frame],
 
         if not _read:
             # move backward to the beginning of the packet
-            self._file.seek(-self.length, io.SEEK_CUR)
+            self._file.seek(0, io.SEEK_SET)
         else:
             # NOTE: We create a copy of the frame packet data here for parsing
             # scenarios to keep the original packet data intact.
 
-            # move backward to the beginning of the frame
-            self._file.seek(-self.length, io.SEEK_CUR)
-
             #: bytes: Raw packet data.
-            self._data = self._read_fileng(self.length + frame.len)
+            self._data = schema.packet
             #: io.BytesIO: Source packet stream.
             self._file = io.BytesIO(self._data)
 
