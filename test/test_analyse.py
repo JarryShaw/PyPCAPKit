@@ -11,11 +11,11 @@ extraction = pcapkit.extract(
 # pprint.pprint(extraction.reassembly.tcp)
 print()
 for reassembly in extraction.reassembly.tcp:
-    for packet in reassembly.packets:
-        if pcapkit.HTTP in packet.protochain:
-            # with open('../sample/37fc254c-68c1-4677-9ed1-806c5eab8acb.dat', 'ab') as file:
-            #     file.write(packet.info.raw.header or b'')
-            pprint.pprint(packet.info)
+    if reassembly.packet is None:
+        pprint.pprint(reassembly.payload)
+    else:
+        if pcapkit.HTTP in reassembly.packet:
+            pprint.pprint(reassembly.packet.info.to_dict())
         else:
-            print(packet)
+            print(reassembly.packet)
     print()
