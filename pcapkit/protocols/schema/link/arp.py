@@ -15,7 +15,7 @@ from pcapkit.protocols.schema.schema import Schema
 __all__ = ['ARP']
 
 if TYPE_CHECKING:
-    from pcapkit.protocols.protocol import Protocol
+    pass
 
 
 class ARP(Schema):
@@ -25,7 +25,7 @@ class ARP(Schema):
     ptype: 'Enum_EtherType' = EnumField(length=2, namespace=Enum_EtherType)
     hlen: 'int' = UInt8Field()
     plen: 'int' = UInt8Field()
-    oper: 'Enum_Operation' = EnumField(length=4, namespace=Enum_Operation)
+    oper: 'Enum_Operation' = EnumField(length=2, namespace=Enum_Operation)
     sha: 'bytes' = BytesField(length=lambda pkt: pkt['hlen'])
     spa: 'bytes' = BytesField(length=lambda pkt: pkt['plen'])
     tha: 'bytes' = BytesField(length=lambda pkt: pkt['hlen'])
