@@ -39,6 +39,7 @@ class _Field(Generic[_T], metaclass=abc.ABCMeta):
     if TYPE_CHECKING:
         _name: 'str'
         _default: '_T | NoValueType'
+        _template: 'str'
 
     @property
     def name(self) -> 'str':
@@ -68,7 +69,7 @@ class _Field(Generic[_T], metaclass=abc.ABCMeta):
     @property
     def template(self) -> 'str':
         """Field template."""
-        return '1024s'  # use a reasonable default
+        return self._template
 
     @property
     def length(self) -> 'int':

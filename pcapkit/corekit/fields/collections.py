@@ -45,7 +45,7 @@ class ListField(_Field[list[_TL]]):
         """Field is optional."""
         return True
 
-    def __init__(self, length: 'int | Callable[[dict[str, Any]], Optional[int]]' = lambda _: None,
+    def __init__(self, length: 'int | Callable[[dict[str, Any]], int]' = lambda _: -1,
                  item_type: 'Optional[_Field]' = None,
                  callback: 'Callable[[ListField, dict[str, Any]], None]' = lambda *_: None) -> 'None':
         self._name = '<list>'
@@ -72,7 +72,8 @@ class ListField(_Field[list[_TL]]):
         new_self = copy.copy(self)
         new_self._callback(self, packet)
         if new_self._length_callback is not None:
-            new_self._length = new_self._length_callback(packet)  # type: ignore[assignment]
+            new_self._length = new_self._length_callback(packet)
+            new_self._template = f'{new_self._length}s'
         return new_self
 
     def pack(self, value: 'Optional[list[_TL]]', packet: 'dict[str, Any]') -> 'bytes':
@@ -189,7 +190,7 @@ class OptionField(ListField):
         """EOOL option."""
         return self._eool
 
-    def __init__(self, length: 'int | Callable[[dict[str, Any]], Optional[int]]' = lambda _: None,
+    def __init__(self, length: 'int | Callable[[dict[str, Any]], int]' = lambda _: -1,
                  base_schema: 'Optional[Type[Schema]]' = None,
                  type_name: 'str' = 'type',
                  registry: 'Optional[defaultdict[int | StdlibEnum | AenumEnum, Type[Schema]]]' = None,

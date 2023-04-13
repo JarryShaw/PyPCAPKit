@@ -222,7 +222,7 @@ class PayloadField(_Field[_TP]):
             protocol = cast('Type[_TP]', __proto__.get(protocol))
         self._protocol = protocol
 
-    def __init__(self, length: 'int | Callable[[dict[str, Any]], Optional[int]]' = lambda _: None,
+    def __init__(self, length: 'int | Callable[[dict[str, Any]], int]' = lambda _: -1,
                  default: '_TP | NoValueType | bytes' = NoValue,
                  protocol: 'Optional[Type[_TP]]' = None,
                  callback: 'Callable[[PayloadField[_TP], dict[str, Any]], None]' = lambda *_: None) -> 'None':
@@ -251,7 +251,8 @@ class PayloadField(_Field[_TP]):
         new_self = copy.copy(self)
         new_self._callback(self, packet)
         if new_self._length_callback is not None:
-            new_self._length = new_self._length_callback(packet)  # type: ignore[assignment]
+            new_self._length = new_self._length_callback(packet)
+            new_self._template = f'{new_self._length}s'
         return new_self
 
     def pack(self, value: 'Optional[_TP | Schema | bytes]', packet: 'dict[str, Any]') -> 'bytes':
@@ -309,7 +310,7 @@ class SwitchField(_Field[_TC]):
         """Field is optional."""
         return True
 
-    def __init__(self, length: 'int | Callable[[dict[str, Any]], Optional[int]]' = lambda _: None,
+    def __init__(self, length: 'int | Callable[[dict[str, Any]], int]' = lambda _: -1,
                  selector: 'Callable[[dict[str, Any]], Optional[_Field[_TC]]]' = lambda _: None) -> 'None':
         self._name = '<switch>'
         self._field = None  # type: Optional[_Field[_TC]]
@@ -327,6 +328,7 @@ class SwitchField(_Field[_TC]):
         """
         new_self = copy.copy(self)
         new_self._field = self._selector(packet)
+        new_self._template = new_self._field.template if new_self._field else '1024s'  # use a reasonable default
         return new_self
 
     def pre_process(self, value: '_TC', packet: 'dict[str, Any]') -> 'Any':  # pylint: disable=unused-argument
@@ -403,7 +405,7 @@ class SchemaField(_Field[_TS]):
         """Field schema."""
         return self._schema
 
-    def __init__(self, length: 'int | Callable[[dict[str, Any]], Optional[int]]' = lambda _: None,
+    def __init__(self, length: 'int | Callable[[dict[str, Any]], int]' = lambda _: -1,
                  schema: 'Optional[Type[_TS]]' = None,
                  default: '_TS | NoValueType | bytes' = NoValue,
                  callback: 'Callable[[SchemaField[_TS], dict[str, Any]], None]' = lambda *_: None) -> 'None':
@@ -438,7 +440,8 @@ class SchemaField(_Field[_TS]):
         new_self = copy.copy(self)
         new_self._callback(self, packet)
         if new_self._length_callback is not None:
-            new_self._length = new_self._length_callback(packet)  # type: ignore[assignment]
+            new_self._length = new_self._length_callback(packet)
+            new_self._template = f'{new_self._length}s'
         return new_self
 
     def pack(self, value: 'Optional[_TS | bytes]', packet: 'dict[str, Any]') -> 'bytes':
