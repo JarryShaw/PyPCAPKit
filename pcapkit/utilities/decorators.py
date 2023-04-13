@@ -12,11 +12,9 @@ decorators, including :func:`~pcapkit.utilities.decorators.seekset`,
 import functools
 import io
 import os
-import traceback
 from typing import TYPE_CHECKING, cast
 
 from pcapkit.utilities.exceptions import StructError
-from pcapkit.utilities.logging import DEVMODE
 
 if TYPE_CHECKING:
     from typing import IO, Any, Callable, Optional, Type, TypeVar
@@ -107,24 +105,25 @@ def beholder(func: 'Callable[Concatenate[Protocol, int, Optional[int], P], R_beh
             length = None
 
         # record file pointer
-        seek_cur = self._file.tell()
         try:
             # call method
             return func(*args, **kwargs)
         except Exception as exc:
             if isinstance(exc, StructError) and exc.eof:  # pylint: disable=no-member
-                from pcapkit.protocols.misc.null import NoPayload as protocol  # isort: skip # pylint: disable=import-outside-toplevel
+                from pcapkit.protocols.misc.null import \
+                    NoPayload as protocol  # isort: skip # pylint: disable=import-outside-toplevel
             else:
-                from pcapkit.protocols.misc.raw import Raw as protocol  # type: ignore[no-redef] # isort: skip # pylint: disable=import-outside-toplevel
+                from pcapkit.protocols.misc.raw import \
+                    Raw as protocol  # type: ignore[no-redef] # isort: skip # pylint: disable=import-outside-toplevel
             # error = traceback.format_exc(limit=1).strip().rsplit(os.linesep, maxsplit=1)[-1]
 
             # log error
-            #logger.error(str(exc), exc_info=exc, stack_info=DEVMODE, stacklevel=stacklevel())
-            if DEVMODE:
-                traceback.print_exc()
+            # logger.error(str(exc), exc_info=exc, stack_info=DEVMODE, stacklevel=stacklevel())
+            # if DEVMODE:
+            #    traceback.print_exc()
 
-            self._file.seek(seek_cur, os.SEEK_SET)
-            next_ = protocol(io.BytesIO(self._read_fileng(length)), length, error=str(exc))
+            file_ = self.__header__.get_payload()
+            next_ = protocol(file_, length, error=str(exc))
             return cast('R_beholder', next_)
     return behold
 
