@@ -165,10 +165,10 @@ class HTTP(Application[PT, ST], Generic[PT, ST]):
         """
         from pcapkit.protocols.application.httpv1 import HTTP as HTTPv1  # isort: skip # pylint: disable=line-too-long,import-outside-toplevel
         with contextlib.suppress(ProtocolError):
-            return HTTPv1(self._file, length, **kwargs)
+            return HTTPv1(self._data, length, **kwargs)
 
         from pcapkit.protocols.application.httpv2 import HTTP as HTTPv2  # isort: skip # pylint: disable=line-too-long,import-outside-toplevel
         with contextlib.suppress(ProtocolError):
-            return HTTPv2(self._file, length, **kwargs)
+            return HTTPv2(self._data, length, **kwargs)
 
         raise ProtocolError("unknown HTTP version")
