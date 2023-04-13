@@ -27,20 +27,25 @@ from typing import TYPE_CHECKING, overload
 from pcapkit.const.reg.transtype import TransType as Enum_TransType
 from pcapkit.protocols.data.internet.ipv6_frag import IPv6_Frag as Data_IPv6_Frag
 from pcapkit.protocols.internet.internet import Internet
+from pcapkit.protocols.schema.internet.ipv6_frag import IPv6_Frag as Schema_IPv6_Frag
 from pcapkit.utilities.exceptions import UnsupportedCall
 
 if TYPE_CHECKING:
-    from typing import IO, Any, NoReturn, Optional
+    from enum import IntEnum as StdlibEnum
+    from typing import IO, Any, NoReturn, Optional, Type
 
+    from aenum import IntEnum as AenumEnum
     from typing_extensions import Literal
 
     from pcapkit.corekit.protochain import ProtoChain
     from pcapkit.protocols.protocol import Protocol
+    from pcapkit.protocols.schema.schema import Schema
 
 __all__ = ['IPv6_Frag']
 
 
-class IPv6_Frag(Internet[Data_IPv6_Frag]):
+class IPv6_Frag(Internet[Data_IPv6_Frag, Schema_IPv6_Frag],
+                schema=Schema_IPv6_Frag, data=Data_IPv6_Frag):
     """This class implements Fragment Header for IPv6."""
 
     ##########################################################################
@@ -127,54 +132,77 @@ class IPv6_Frag(Internet[Data_IPv6_Frag]):
         """
         if length is None:
             length = len(self)
-
-        _next = self._read_protos(1)
-        _temp = self._read_fileng(1)
-        _offm = self._read_binary(2)
-        _ipid = self._read_unpack(4)
+        schema = self.__header__
 
         ipv6_frag = Data_IPv6_Frag(
-            next=_next,
-            offset=int(_offm[:13], base=2),
-            mf=bool(int(_offm[15], base=2)),
-            id=_ipid,
+            next=schema.next,
+            offset=schema.flags['offset'],
+            mf=bool(schema.flags['mf']),
+            id=schema.id,
         )
 
         if extension:
             return ipv6_frag
-        return self._decode_next_layer(ipv6_frag, _next, length - self.length)
+        return self._decode_next_layer(ipv6_frag, schema.next, length - self.length)
 
-    def make(self, **kwargs: 'Any') -> 'NoReturn':
+    def make(self,
+             next: 'Enum_TransType | StdlibEnum | AenumEnum | str | int' = Enum_TransType.UDP,
+             next_default: 'Optional[int]' = None,
+             next_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
+             next_reversed: 'bool' = False,
+             offset: 'int' = 0,
+             mf: 'bool' = False,
+             id: 'int' = 0,
+             payload: 'bytes | Protocol | Schema' = b'',
+             **kwargs: 'Any') -> 'Schema_IPv6_Frag':
         """Make (construct) packet data.
 
         Args:
+            next: Next header.
+            next_default: Default value of next header.
+            next_namespace: Namespace of next header.
+            next_reversed: If the namespace of next header is reversed.
+            offset: Fragment offset.
+            mf: More fragments flag.
+            id: Identification.
+            payload: Payload of current instance.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
             Constructed packet data.
 
         """
-        raise NotImplementedError
+        next_val = self._make_index(next, next_default, namespace=next_namespace,  # type: ignore[call-overload]
+                                    reversed=next_reversed, pack=False)
+
+        return Schema_IPv6_Frag(
+            next=next_val,
+            flags={
+                'offset': offset,
+                'mf': mf,
+            },
+            id=id,
+            payload=payload,
+        )
 
     ##########################################################################
     # Data models.
     ##########################################################################
 
     @overload
-    def __post_init__(self, file: 'IO[bytes]', length: 'Optional[int]' = ..., *,  # pylint: disable=arguments-differ
+    def __post_init__(self, file: 'IO[bytes] | bytes', length: 'Optional[int]' = ..., *,  # pylint: disable=arguments-differ
                       extension: 'bool' = ..., **kwargs: 'Any') -> 'None': ...
+
     @overload
     def __post_init__(self, **kwargs: 'Any') -> 'None': ...  # pylint: disable=arguments-differ
 
-    def __post_init__(self, file: 'Optional[IO[bytes]]' = None, length: 'Optional[int]' = None, *,  # pylint: disable=arguments-differ
+    def __post_init__(self, file: 'Optional[IO[bytes] | bytes]' = None, length: 'Optional[int]' = None, *,  # pylint: disable=arguments-differ
                       extension: 'bool' = False, **kwargs: 'Any') -> 'None':
         """Post initialisation hook.
 
         Args:
             file: Source packet stream.
             length: Length of packet data.
-
-        Keyword Args:
             extension: If the protocol is used as an IPv6 extension header.
             **kwargs: Arbitrary keyword arguments.
 
@@ -203,3 +231,26 @@ class IPv6_Frag(Internet[Data_IPv6_Frag]):
 
         """
         return Enum_TransType.IPv6_Frag  # type: ignore[return-value]
+
+    ##########################################################################
+    # Utilities.
+    ##########################################################################
+
+    @classmethod
+    def _make_data(cls, data: 'Data_IPv6_Frag') -> 'dict[str, Any]':  # type: ignore[override]
+        """Create key-value pairs from ``data`` for protocol construction.
+
+        Args:
+            data: protocol data
+
+        Returns:
+            Key-value pairs for protocol construction.
+
+        """
+        return {
+            'next': data.next,
+            'offset': data.offset,
+            'mf': data.mf,
+            'id': data.id,
+            'payload': cls._make_payload(data),
+        }

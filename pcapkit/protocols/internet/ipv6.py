@@ -33,19 +33,24 @@ from pcapkit.corekit.multidict import OrderedMultiDict
 from pcapkit.corekit.protochain import ProtoChain
 from pcapkit.protocols.data.internet.ipv6 import IPv6 as Data_IPv6
 from pcapkit.protocols.internet.ip import IP
+from pcapkit.protocols.schema.internet.ipv6 import IPv6 as Schema_IPv6
 
 if TYPE_CHECKING:
+    from enum import IntEnum as StdlibEnum
     from ipaddress import IPv6Address
-    from typing import Any, NoReturn, Optional
+    from typing import IO, Any, NoReturn, Optional, Type
 
+    from aenum import IntEnum as AenumEnum
     from typing_extensions import Literal
 
     from pcapkit.protocols.protocol import Protocol
+    from pcapkit.protocols.schema.schema import Schema
 
 __all__ = ['IPv6']
 
 
-class IPv6(IP[Data_IPv6]):
+class IPv6(IP[Data_IPv6, Schema_IPv6],
+           schema=Schema_IPv6, data=Data_IPv6):
     """This class implements Internet Protocol version 6."""
 
     ##########################################################################
@@ -88,7 +93,8 @@ class IPv6(IP[Data_IPv6]):
     # Methods.
     ##########################################################################
 
-    def read(self, length: 'Optional[int]' = None, **kwargs: 'Any') -> 'Data_IPv6':  # pylint: disable=unused-argument
+    def read(self, length: 'Optional[int]' = None, *,
+             packet: 'Optional[dict[str, Any]]' = None, **kwargs: 'Any') -> 'Data_IPv6':  # pylint: disable=unused-argument
         """Read Internet Protocol version 6 (IPv6).
 
         Structure of IPv6 header [:rfc:`2460`]:
@@ -121,6 +127,7 @@ class IPv6(IP[Data_IPv6]):
 
         Args:
             length: Length of packet data.
+            packet: Optional packet data.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
@@ -129,38 +136,76 @@ class IPv6(IP[Data_IPv6]):
         """
         if length is None:
             length = len(self)
-
-        _htet = self._read_ip_hextet()
-        _plen = self._read_unpack(2)
-        _next = self._read_protos(1)
-        _hlmt = self._read_unpack(1)
-        _srca = self._read_ip_addr()
-        _dsta = self._read_ip_addr()
+        schema = self.__header__
 
         ipv6 = Data_IPv6.from_dict({
-            'version': _htet[0],
-            'class': _htet[1],
-            'label': _htet[2],
-            'payload': _plen,
-            'next': _next,
-            'limit': _hlmt,
-            'src': _srca,
-            'dst': _dsta,
+            'version': schema.hextet['version'],
+            'class': schema.hextet['class'],
+            'label': schema.hextet['label'],
+            'payload': schema.length,
+            'next': schema.next,
+            'limit': schema.limit,
+            'src': schema.src,
+            'dst': schema.dst,
         })  # type: Data_IPv6
 
-        return self._decode_next_layer(ipv6, _next, ipv6.payload)  # pylint: disable=no-member
+        # update packet info
+        if packet is None:
+            packet = {}
+        packet.update({
+            'src': ipv6.src,
+            'dst': ipv6.dst,
+        })
 
-    def make(self, **kwargs: 'Any') -> 'NoReturn':
+        return self._decode_next_layer(ipv6, schema.next, ipv6.payload, packet=packet)  # pylint: disable=no-member
+
+    def make(self,
+             traffic_class: 'int' = 0,
+             flow_label: 'int' = 0,
+             next: 'Enum_TransType | StdlibEnum | AenumEnum | str | int' = Enum_TransType.UDP,
+             next_default: 'Optional[int]' = None,
+             next_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
+             next_reversed: 'bool' = False,
+             hop_limit: 'int' = 64,  # reasonable default
+             src: 'IPv6Address | str | bytes | int' = '::1',
+             dst: 'IPv6Address | str | bytes | int' = '::',
+             payload: 'bytes | Protocol | Schema' = b'',
+             **kwargs: 'Any') -> 'Schema_IPv6':
         """Make (construct) packet data.
 
         Args:
+            traffic_class: Traffic class.
+            flow_label: Flow label.
+            next: Next header.
+            next_default: Default value of next header.
+            next_namespace: Namespace of next header.
+            next_reversed: Whether to reverse the namespace of next header.
+            hop_limit: Hop limit.
+            src: Source IP address.
+            dst: Destination IP address.
+            payload: Payload data.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
             Constructed packet data.
 
         """
-        raise NotImplementedError
+        next_val = self._make_index(next, next_default, namespace=next_namespace,  # type: ignore[call-overload]
+                                    reversed=next_reversed, pack=False)
+
+        return Schema_IPv6(
+            hextet={
+                'version': 6,
+                'class': traffic_class,
+                'label': flow_label,
+            },
+            length=len(payload),
+            next=next_val,
+            limit=hop_limit,
+            src=src,
+            dst=dst,
+            payload=payload,
+        )
 
     @classmethod
     def id(cls) -> 'tuple[Literal["IPv6"]]':  # type: ignore[override]
@@ -196,6 +241,27 @@ class IPv6(IP[Data_IPv6]):
     # Utilities.
     ##########################################################################
 
+    @classmethod
+    def _make_data(cls, data: 'Data_IPv6') -> 'dict[str, Any]':  # type: ignore[override]
+        """Create key-value pairs from ``data`` for protocol construction.
+
+        Args:
+            data: protocol data
+
+        Returns:
+            Key-value pairs for protocol construction.
+
+        """
+        return {
+            'traffic_class': data['class'],
+            'flow_label': data.label,
+            'next': data.next,
+            'hop_limit': data.limit,
+            'src': data.src,
+            'dst': data.dst,
+            'payload': cls._make_payload(data)
+        }
+
     def _read_ip_hextet(self) -> 'tuple[int, int, int]':
         """Read first four hextets of IPv6.
 
@@ -221,13 +287,14 @@ class IPv6(IP[Data_IPv6]):
         return ipaddress.ip_address(self._read_fileng(16))  # type: ignore[return-value]
 
     def _decode_next_layer(self, ipv6: 'Data_IPv6', proto: 'Optional[int]' = None,  # type: ignore[override] # pylint: disable=arguments-differ,arguments-renamed
-                           length: 'Optional[int]' = None) -> 'Data_IPv6':  # pylint: disable=arguments-differ
+                           length: 'Optional[int]' = None, *, packet: 'Optional[dict[str, Any]]' = None) -> 'Data_IPv6':  # pylint: disable=arguments-differ
         """Decode next layer extractor.
 
         Arguments:
             ipv6: info buffer
             proto: next layer protocol name
             length: valid (*not padding*) length
+            packet: packet info (passed from :meth:`self.unpack <pcapkit.protocols.protocol.Protocol.unpack>`)
 
         Returns:
             Current protocol with next layer extracted.
@@ -253,7 +320,7 @@ class IPv6(IP[Data_IPv6]):
             #     break
 
             # make protocol name
-            next_ = self._import_next_layer(proto, version=6, extension=True)  # type: ignore[misc,call-arg,arg-type]
+            next_ = self._import_next_layer(proto, packet=packet, version=6, extension=True)  # type: ignore[misc,call-arg,arg-type]
             info = next_.info
             name = next_.alias.lstrip('IPv6-').lower()
             ipv6.__update__({
@@ -289,4 +356,4 @@ class IPv6(IP[Data_IPv6]):
         })
 
         ipv6_exthdr = ProtoChain.from_list(_protos)  # type: ignore[arg-type]
-        return super()._decode_next_layer(ipv6, proto, raw_len, ipv6_exthdr=ipv6_exthdr)
+        return super()._decode_next_layer(ipv6, proto, raw_len, packet=packet, ipv6_exthdr=ipv6_exthdr)

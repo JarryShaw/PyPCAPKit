@@ -23,23 +23,31 @@ Octets      Bits        Name                    Description
 """
 from typing import TYPE_CHECKING
 
+from pcapkit.const.reg.ethertype import EtherType as Enum_EtherType
 from pcapkit.const.vlan.priority_level import PriorityLevel as Enum_PriorityLevel
 from pcapkit.protocols.data.link.vlan import TCI as Data_TCI
 from pcapkit.protocols.data.link.vlan import VLAN as Data_VLAN
 from pcapkit.protocols.link.link import Link
+from pcapkit.protocols.schema.link.vlan import TCI as Schema_TCI
+from pcapkit.protocols.schema.link.vlan import VLAN as Schema_VLAN
 from pcapkit.utilities.exceptions import UnsupportedCall
 
 if TYPE_CHECKING:
-    from typing import Any, NoReturn, Optional
+    from enum import IntEnum as StdlibEnum
+    from typing import Any, NoReturn, Optional, Type
 
+    from aenum import IntEnum as AenumEnum
     from typing_extensions import Literal
 
-    from pcapkit.const.reg.ethertype import EtherType as Enum_EtherType
+    from pcapkit.protocols.protocol import Protocol
+    from pcapkit.protocols.schema.link.vlan import TCIType
+    from pcapkit.protocols.schema.schema import Schema
 
 __all__ = ['VLAN']
 
 
-class VLAN(Link[Data_VLAN]):
+class VLAN(Link[Data_VLAN, Schema_VLAN],
+           schema=Schema_VLAN, data=Data_VLAN):
     """This class implements 802.1Q Customer VLAN Tag Type."""
 
     ##########################################################################
@@ -102,21 +110,33 @@ class VLAN(Link[Data_VLAN]):
         """
         if length is None:
             length = len(self)
+        schema = self.__header__
 
-        _tcif = self._read_binary(2)
-        _type = self._read_protos(2)
-
+        tci = schema.tci
         vlan = Data_VLAN(
             tci=Data_TCI(
-                pcp=Enum_PriorityLevel.get(int(_tcif[:3], base=2)),
-                dei=bool(_tcif[3]),
-                vid=int(_tcif[4:], base=2),
+                pcp=Enum_PriorityLevel.get(tci['pcp']),
+                dei=bool(tci['pcp']),
+                vid=int(tci['vid']),
             ),
-            type=_type,
+            type=schema.type,
         )
-        return self._decode_next_layer(vlan, _type, length - self.length)
+        return self._decode_next_layer(vlan, schema.type, length - self.length)
 
-    def make(self, **kwargs: 'Any') -> 'NoReturn':
+    def make(self,
+             tci: 'Optional[Schema_TCI | TCIType]' = None,
+             pcp: 'Enum_PriorityLevel | StdlibEnum | AenumEnum | str | int' = Enum_PriorityLevel.BE,
+             pcp_default: 'Optional[int]' = None,
+             pcp_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
+             pcp_reversed: 'bool' = False,
+             dei: 'bool' = False,
+             vid: 'int' = 0,
+             type: 'Enum_EtherType | StdlibEnum | AenumEnum | str | int' = Enum_EtherType.Internet_Protocol_version_4,
+             type_default: 'Optional[int]' = None,
+             type_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
+             type_reversed: 'bool' = False,
+             payload: 'bytes | Protocol | Schema' = b'',
+             **kwargs: 'Any') -> 'Schema_VLAN':
         """Make (construct) packet data.
 
         Args:
@@ -126,7 +146,25 @@ class VLAN(Link[Data_VLAN]):
             Constructed packet data.
 
         """
-        raise NotImplementedError
+        if tci is not None:
+            pcp_value = tci['pcp']
+            dei = tci['dei']  # type: ignore[assignment]
+            vid = tci['vid']
+        else:
+            pcp_value = self._make_index(pcp, pcp_default, namespace=pcp_namespace,  # type: ignore[call-overload]
+                                         reversed=pcp_reversed, pack=False)
+        type_value = self._make_index(type, type_default, namespace=type_namespace,  # type: ignore[call-overload]
+                                      reversed=type_reversed, pack=False)
+
+        return Schema_VLAN(
+            tci={
+                'pcp': pcp_value,
+                'dei': dei,
+                'vid': vid,
+            },
+            type=type_value,
+            payload=payload,
+        )
 
     ##########################################################################
     # Data models.
@@ -145,3 +183,28 @@ class VLAN(Link[Data_VLAN]):
 
         """
         raise UnsupportedCall(f'{cls.__name__!r} object cannot be interpreted as an integer')
+
+    ##########################################################################
+    # Utilities.
+    ##########################################################################
+
+    @classmethod
+    def _make_data(cls, data: 'Data_VLAN') -> 'dict[str, Any]':  # type: ignore[override]
+        """Create key-value pairs from ``data`` for protocol construction.
+
+        Args:
+            data: protocol data
+
+        Returns:
+            Key-value pairs for protocol construction.
+
+        """
+        return {
+            'tci': {
+                'pcp': data.tci.pcp,
+                'dei': data.tci.dei,
+                'vid': data.tci.vid,
+            },
+            'type': data.type,
+            'payload': cls._make_payload(data),
+        }

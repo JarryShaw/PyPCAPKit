@@ -308,7 +308,7 @@ Data Structures
 
    .. autoattribute:: digest
 
-.. autoclass:: pcapkit.protocols.data.transport.tcp.QuickStartResponse(kind, length, req_rate, ttl_diff, nounce)
+.. autoclass:: pcapkit.protocols.data.transport.tcp.QuickStartResponse(kind, length, req_rate, ttl_diff, nonce)
    :no-members:
    :show-inheritance:
 
@@ -317,7 +317,7 @@ Data Structures
 
    .. autoattribute:: req_rate
    .. autoattribute:: ttl_diff
-   .. autoattribute:: nounce
+   .. autoattribute:: nonce
 
 .. autoclass:: pcapkit.protocols.data.transport.tcp.UserTimeout(kind, length, timeout)
    :no-members:
@@ -396,7 +396,7 @@ Data Structures
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
-.. autoclass:: pcapkit.protocols.data.transport.tcp.MPTCPJoinSYN(kind, length, subtype, connection, backup, addr_id, token, nounce)
+.. autoclass:: pcapkit.protocols.data.transport.tcp.MPTCPJoinSYN(kind, length, subtype, connection, backup, addr_id, token, nonce)
    :no-members:
    :show-inheritance:
 
@@ -407,9 +407,9 @@ Data Structures
    .. autoattribute:: backup
    .. autoattribute:: addr_id
    .. autoattribute:: token
-   .. autoattribute:: nounce
+   .. autoattribute:: nonce
 
-.. autoclass:: pcapkit.protocols.data.transport.tcp.MPTCPJoinSYNACK(kind, length, subtype, connection, backup, addr_id, hmac, nounce)
+.. autoclass:: pcapkit.protocols.data.transport.tcp.MPTCPJoinSYNACK(kind, length, subtype, connection, backup, addr_id, hmac, nonce)
    :no-members:
    :show-inheritance:
 
@@ -420,7 +420,7 @@ Data Structures
    .. autoattribute:: backup
    .. autoattribute:: addr_id
    .. autoattribute:: hmac
-   .. autoattribute:: nounce
+   .. autoattribute:: nonce
 
 .. autoclass:: pcapkit.protocols.data.transport.tcp.MPTCPJoinACK(kind, length, subtype, connection, hmac)
    :no-members:

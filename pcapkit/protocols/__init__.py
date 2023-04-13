@@ -21,6 +21,10 @@ from pcapkit.protocols.internet import *
 from pcapkit.protocols.transport import *
 from pcapkit.protocols.application import *
 
+# Protocol Data
+from pcapkit.protocols import data
+from pcapkit.protocols.data.data import Data
+
 # Protocol Schema
 from pcapkit.protocols import schema
 from pcapkit.protocols.schema.schema import Schema
@@ -53,10 +57,8 @@ __all__ = [
     'TCP', 'UDP',
 
     # Application Layer
-    'FTP', 'HTTP', 'HTTPv1', 'HTTPv2',
-
-    # Protocol Schema
-    'Schema', 'schema',
+    'FTP', 'FTP_DATA',
+    'HTTP', 'HTTPv1', 'HTTPv2',
 ]
 
 # protocol registry
@@ -67,4 +69,10 @@ for name in __all__:
 __all__.extend((
     # Protocol Numbers
     'LINKTYPE', 'ETHERTYPE', 'TRANSTYPE',
+
+    # Protocol Data
+    'Data', 'data',
+
+    # Protocol Schema
+    'Schema', 'schema',
 ))

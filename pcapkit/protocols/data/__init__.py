@@ -52,7 +52,7 @@ __all__ = [
     'HIP_UnassignedParameter', 'HIP_ESPInfoParameter', 'HIP_R1CounterParameter',
     'HIP_LocatorSetParameter', 'HIP_PuzzleParameter', 'HIP_SolutionParameter',
     'HIP_SEQParameter', 'HIP_ACKParameter', 'HIP_DHGroupListParameter',
-    'HIP_DeffieHellmanParameter', 'HIP_HIPTransformParameter', 'HIP_HIPCipherParameter',
+    'HIP_DiffieHellmanParameter', 'HIP_HIPTransformParameter', 'HIP_HIPCipherParameter',
     'HIP_NATTraversalModeParameter', 'HIP_TransactionPacingParameter', 'HIP_EncryptedParameter',
     'HIP_HostIDParameter', 'HIP_HITSuiteListParameter', 'HIP_CertParameter',
     'HIP_NotificationParameter', 'HIP_EchoRequestSignedParameter', 'HIP_RegInfoParameter',
@@ -85,6 +85,7 @@ __all__ = [
     'IPv4_ESECOption', 'IPv4_RROption', 'IPv4_SIDOption',
     'IPv4_SSROption', 'IPv4_MTUPOption', 'IPv4_MTUROption',
     'IPv4_TROption', 'IPv4_RTRALTOption', 'IPv4_QSOption',
+    'IPv4_QuickStartRequestOption', 'IPv4_QuickStartReportOption',
 
     # IPv6 Fragment Header
     'IPv6_Frag',
@@ -94,8 +95,8 @@ __all__ = [
     'IPv6_Opts_RPLFlags', 'IPv6_Opts_MPLFlags', 'IPv6_Opts_DFFFlags',
     'IPv6_Opts_UnassignedOption', 'IPv6_Opts_PadOption', 'IPv6_Opts_TunnelEncapsulationLimitOption',
     'IPv6_Opts_RouterAlertOption', 'IPv6_Opts_CALIPSOOption', 'IPv6_Opts_SMFIdentificationBasedDPDOption',
-    'IPv6_Opts_SMFHashBasedDPDOption', 'IPv6_Opts_PDMOption', 'IPv6_Opts_QuickStartOption',
-    'IPv6_Opts_RPLOption', 'IPv6_Opts_MPLOption', 'IPv6_Opts_ILNPOption',
+    'IPv6_Opts_SMFHashBasedDPDOption', 'IPv6_Opts_PDMOption', 'IPv6_Opts_QuickStartRequestOption',
+    'IPv6_Opts_QuickStartReportOption', 'IPv6_Opts_RPLOption', 'IPv6_Opts_MPLOption', 'IPv6_Opts_ILNPOption',
     'IPv6_Opts_LineIdentificationOption', 'IPv6_Opts_JumboPayloadOption', 'IPv6_Opts_HomeAddressOption',
     'IPv6_Opts_IPDFFOption',
 
@@ -115,14 +116,14 @@ __all__ = [
 
     # Transmission Control Protocol
     'TCP',
-    'TCP_Flags',
+    'TCP_Flags', 'TCP_SACKBlock',
     'TCP_Option',
     'TCP_UnassignedOption', 'TCP_EndOfOptionList', 'TCP_NoOperation', 'TCP_MaximumSegmentSize', 'TCP_WindowScale',
     'TCP_SACKPermitted', 'TCP_SACK', 'TCP_Echo', 'TCP_EchoReply', 'TCP_Timestamp', 'TCP_PartialOrderConnectionPermitted',  # pylint: disable=line-too-long
     'TCP_PartialOrderConnectionProfile', 'TCP_CC', 'TCP_CCNew', 'TCP_CCEcho', 'TCP_AlternateChecksumRequest',
     'TCP_AlternateChecksumData', 'TCP_MD5Signature', 'TCP_QuickStartResponse', 'TCP_UserTimeout',
     'TCP_Authentication', 'TCP_FastOpenCookie',
-    'TCP_MPTCPCapableFlag', 'TCP_MPTCPDSSFlag',
+    'TCP_MPTCPCapableFlag',
     'TCP_MPTCP',
     'TCP_MPTCPUnknown', 'TCP_MPTCPCapable', 'TCP_MPTCPDSS', 'TCP_MPTCPAddAddress', 'TCP_MPTCPRemoveAddress',
     'TCP_MPTCPPriority', 'TCP_MPTCPFallback', 'TCP_MPTCPFastclose',
@@ -136,9 +137,6 @@ __all__ = [
     'FTP',
     'FTP_Request', 'FTP_Response',
 
-    # Hypertext Transfer Protocol
-    'HTTP',
-
     # Hypertext Transfer Protocol (HTTP/1.*)
     'HTTPv1',
     'HTTPv1_Header',
@@ -150,7 +148,7 @@ __all__ = [
     'HTTPv2_DataFrameFlags', 'HTTPv2_HeadersFrameFlags', 'HTTPv2_SettingsFrameFlags',
     'HTTPv2_PushPromiseFrameFlags', 'HTTPv2_PingFrameFlags', 'HTTPv2_ContinuationFrameFlags',
     'HTTPv2_UnassignedFrame', 'HTTPv2_DataFrame', 'HTTPv2_HeadersFrame', 'HTTPv2_PriorityFrame',
-    'HTTPv2_RstStreamFrame', 'HTTPv2_SettingsFrame', 'HTTPv2_PushPromiseFrame', 'HTTPv2_PingFrame',
+    'HTTPv2_RSTStreamFrame', 'HTTPv2_SettingsFrame', 'HTTPv2_PushPromiseFrame', 'HTTPv2_PingFrame',
     'HTTPv2_GoawayFrame', 'HTTPv2_WindowUpdateFrame', 'HTTPv2_ContinuationFrame',
 
     # No Payload

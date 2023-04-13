@@ -13,19 +13,20 @@ import importlib
 import io
 from typing import TYPE_CHECKING, Generic, cast
 
-from pcapkit.protocols.protocol import PT, Protocol
+from pcapkit.protocols.protocol import PT, ST, Protocol
 from pcapkit.utilities.exceptions import StructError, UnsupportedCall, stacklevel
 from pcapkit.utilities.logging import DEVMODE, logger
+from pcapkit.utilities.warnings import RegistryWarning, warn
 
 if TYPE_CHECKING:
-    from typing import Any, Optional, Type
+    from typing import Any, Optional
 
     from typing_extensions import Literal
 
 __all__ = ['Transport']
 
 
-class Transport(Protocol[PT], Generic[PT]):  # pylint: disable=abstract-method
+class Transport(Protocol[PT, ST], Generic[PT, ST]):  # pylint: disable=abstract-method
     """Abstract base class for transport layer protocol family."""
 
     ##########################################################################
@@ -71,6 +72,8 @@ class Transport(Protocol[PT], Generic[PT]):  # pylint: disable=abstract-method
         if cls is Transport:
             raise UnsupportedCall(f'{cls.__name__} is an abstract class')
 
+        if code in cls.__proto__:
+            warn(f'port {code} already registered, overwriting', RegistryWarning)
         cls.__proto__[code] = (module, class_)
 
     @classmethod
@@ -113,7 +116,8 @@ class Transport(Protocol[PT], Generic[PT]):  # pylint: disable=abstract-method
     # Utilities.
     ##########################################################################
 
-    def _decode_next_layer(self, dict_: 'PT', ports: 'tuple[int, int]', length: 'Optional[int]' = None) -> 'PT':  # type: ignore[override] # pylint: disable=arguments-renamed
+    def _decode_next_layer(self, dict_: 'PT', ports: 'tuple[int, int]', length: 'Optional[int]' = None, *,  # type: ignore[override]
+                           packet: 'Optional[dict[str, Any]]' = None) -> 'PT':  # pylint: disable=arguments-renamed
         """Decode next layer protocol.
 
         The method will check if the next layer protocol is supported based on
@@ -124,11 +128,17 @@ class Transport(Protocol[PT], Generic[PT]):  # pylint: disable=abstract-method
             dict_: info buffer
             ports: source & destination port numbers
             length: valid (*non-padding*) length
+            packet: packet info (passed from :meth:`self.unpack <pcapkit.protocols.protocol.Protocol.unpack>`)
 
         Returns:
             Current protocol with next layer extracted.
 
         """
         sort_port = sorted(ports)
-        proto = sort_port[0] if sort_port[0] in self.__proto__ else sort_port[1]
-        return super()._decode_next_layer(dict_, proto, length)
+        if sort_port[0] in self.__proto__:
+            proto = sort_port[0]
+        elif sort_port[1] in self.__proto__:
+            proto = sort_port[1]
+        else:
+            proto = None  # type: ignore[assignment]
+        return super()._decode_next_layer(dict_, proto, length, packet=packet)

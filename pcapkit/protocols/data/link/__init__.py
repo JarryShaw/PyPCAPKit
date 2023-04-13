@@ -15,8 +15,8 @@ from pcapkit.protocols.data.link.ospf import \
     CrytographicAuthentication as OSPF_CrytographicAuthentication
 
 # 802.1Q Customer VLAN Tag Type
-from pcapkit.protocols.data.link.vlan import VLAN
 from pcapkit.protocols.data.link.vlan import TCI as VLAN_TCI
+from pcapkit.protocols.data.link.vlan import VLAN
 
 __all__ = [
     # Address Resolution Protocol

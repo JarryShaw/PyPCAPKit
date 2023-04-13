@@ -16,7 +16,7 @@ protocol family [*]_, eg.
 from typing import TYPE_CHECKING, Generic
 
 from pcapkit.protocols.internet.internet import Internet
-from pcapkit.protocols.protocol import PT
+from pcapkit.protocols.protocol import PT, ST
 
 if TYPE_CHECKING:
     from typing_extensions import Literal
@@ -24,7 +24,7 @@ if TYPE_CHECKING:
 __all__ = ['IP']
 
 
-class IP(Internet[PT], Generic[PT]):  # pylint: disable=abstract-method
+class IP(Internet[PT, ST], Generic[PT, ST]):  # pylint: disable=abstract-method
     """This class implements all protocols in IP family.
 
     - Internet Protocol version 4 (:class:`~pcapkit.protocols.internet.ipv4.IPv4`) [:rfc:`791`]

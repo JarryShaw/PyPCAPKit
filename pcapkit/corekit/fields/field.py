@@ -2,6 +2,7 @@
 """base field class"""
 
 import abc
+import copy
 import struct
 from typing import TYPE_CHECKING, Generic, TypeVar, cast
 
@@ -12,7 +13,9 @@ from pcapkit.utilities.exceptions import NoDefaultValue
 __all__ = ['Field']
 
 if TYPE_CHECKING:
-    from typing import Any, Callable, Optional
+    from typing import IO, Any, Callable, Optional
+
+    from typing_extensions import Literal
 
 _T = TypeVar('_T')
 
@@ -20,6 +23,10 @@ _T = TypeVar('_T')
 @final
 class NoValueType:
     """Default value for fields."""
+
+    def __bool__(self) -> 'Literal[False]':
+        """Return :obj:`False`."""
+        return False
 
 
 #: Default value for :attr:`_Field.default`.
@@ -32,6 +39,7 @@ class _Field(Generic[_T], metaclass=abc.ABCMeta):
     if TYPE_CHECKING:
         _name: 'str'
         _default: '_T | NoValueType'
+        _template: 'str'
 
     @property
     def name(self) -> 'str':
@@ -59,9 +67,9 @@ class _Field(Generic[_T], metaclass=abc.ABCMeta):
         self._default = NoValue
 
     @property
-    @abc.abstractmethod
     def template(self) -> 'str':
         """Field template."""
+        return self._template
 
     @property
     def length(self) -> 'int':
@@ -80,7 +88,9 @@ class _Field(Generic[_T], metaclass=abc.ABCMeta):
             packet: packet data.
 
         """
-        return self
+        new_self = copy.copy(self)
+        new_self._callback(new_self, packet)  # type: ignore[attr-defined]
+        return new_self
 
     def __repr__(self) -> 'str':
         return f'<{self.__class__.__name__} {self.name}>'
@@ -130,7 +140,7 @@ class _Field(Generic[_T], metaclass=abc.ABCMeta):
         """
         return cast('_T', value)
 
-    def unpack(self, buffer: 'bytes', packet: 'dict[str, Any]') -> '_T':
+    def unpack(self, buffer: 'bytes | IO[bytes]', packet: 'dict[str, Any]') -> '_T':
         """Unpack field value from :obj:`bytes`.
 
         Args:
@@ -141,7 +151,9 @@ class _Field(Generic[_T], metaclass=abc.ABCMeta):
             Unpacked field value.
 
         """
-        value = struct.unpack(self.template, buffer[:self.length])[0]
+        if not isinstance(buffer, bytes):
+            buffer = buffer.read(self.length)
+        value = struct.unpack(self.template, buffer[:self.length].rjust(self.length, b'\x00'))[0]
         return self.post_process(value, packet)
 
 
@@ -152,6 +164,8 @@ class Field(_Field[_T], Generic[_T]):
         length: field size (in bytes); if a callable is given, it should return
             an integer value and accept the current packet as its only argument.
         default: field default value, if any.
+        callback: callback function to be called upon
+            :meth:`self.__call__ <pcapkit.corekit.fields.field._Field.__call__>`.
 
     """
 
@@ -169,17 +183,30 @@ class Field(_Field[_T], Generic[_T]):
         return struct.calcsize(self.template)
 
     def __init__(self, length: 'int | Callable[[dict[str, Any]], int]',
-                 default: '_T | NoValueType' = NoValue) -> 'None':
+                 default: '_T | NoValueType' = NoValue,
+                 callback: 'Callable[[Field[_T], dict[str, Any]], None]' = lambda *_: None) -> 'None':
         self._name = '<unknown>'
         self._default = default
+        self._callback = callback
 
         self._length_callback = None
         if not isinstance(length, int):
-            self._length_callback, length = length, 1
+            self._length_callback, length = length, 0
         self._length = length
 
     def __call__(self, packet: 'dict[str, Any]') -> 'Field':
-        """Update field attributes."""
-        if self._length_callback is not None:
-            self._length = self._length_callback(packet)
-        return self
+        """Update field attributes.
+
+        Args:
+            packet: packet data.
+
+        Notes:
+            This method will return a new instance of :class:`Field` instead of
+            updating the current instance.
+
+        """
+        new_self = copy.copy(self)
+        new_self._callback(new_self, packet)
+        if new_self._length_callback is not None:
+            new_self._length = new_self._length_callback(packet)
+        return new_self

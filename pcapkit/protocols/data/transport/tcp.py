@@ -16,13 +16,14 @@ if TYPE_CHECKING:
     from pcapkit.const.tcp.mp_tcp_option import MPTCPOption
     from pcapkit.const.tcp.option import Option as OptionNumber
     from pcapkit.corekit.multidict import OrderedMultiDict
+    from pcapkit.protocols.transport.tcp import Flags as TCP_Flags
 
     IPAddress = Union[IPv4Address, IPv6Address]
 
 __all__ = [
     'TCP',
 
-    'Flags',
+    'Flags', 'SACKBlock',
 
     'Option',
     'UnassignedOption', 'EndOfOptionList', 'NoOperation', 'MaximumSegmentSize', 'WindowScale',
@@ -31,7 +32,7 @@ __all__ = [
     'AlternateChecksumData', 'MD5Signature', 'QuickStartResponse', 'UserTimeout',
     'Authentication', 'FastOpenCookie',
 
-    'MPTCPCapableFlag', 'MPTCPDSSFlag',
+    'MPTCPCapableFlag',
 
     'MPTCP',
     'MPTCPUnknown', 'MPTCPCapable', 'MPTCPDSS', 'MPTCPAddAddress', 'MPTCPRemoveAddress',
@@ -91,7 +92,10 @@ class TCP(Data):
     urgent_pointer: 'int'
 
     if TYPE_CHECKING:
+        #: TCP options.
         options: 'OrderedMultiDict[OptionNumber, Option]'
+        #: Connection control flags.
+        connection: 'TCP_Flags'
 
         def __init__(self, srcport: 'int', dstport: 'int', seq: 'int', ack: 'int', hdr_len: 'int', flags: 'Flags', window_size: 'int', checksum: 'bytes', urgent_pointer: 'int') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
@@ -156,14 +160,26 @@ class SACKPermitted(Option):
         def __init__(self, kind: 'OptionNumber', length: 'int') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
+class SACKBlock(Data):
+    """Data model for TCP SACK block."""
+
+    #: Left edge.
+    left: 'int'
+    #: Right edge.
+    right: 'int'
+
+    if TYPE_CHECKING:
+        def __init__(self, left: 'int', right: 'int') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
+
+
 class SACK(Option):
     """Data model for TCP SACK option."""
 
     #: SACK blocks.
-    sack: 'tuple[int, ...]'
+    sack: 'tuple[SACKBlock, ...]'
 
     if TYPE_CHECKING:
-        def __init__(self, kind: 'OptionNumber', length: 'int', sack: 'tuple[int, ...]') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
+        def __init__(self, kind: 'OptionNumber', length: 'int', sack: 'tuple[SACKBlock, ...]') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
 class Echo(Option):
@@ -192,10 +208,10 @@ class Timestamp(Option):
     #: Timestamp .
     timestamp: 'int'
     #: Echo data.
-    echo: 'bytes'
+    echo: 'int'
 
     if TYPE_CHECKING:
-        def __init__(self, kind: 'OptionNumber', length: 'int', timestamp: 'int', echo: 'bytes') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
+        def __init__(self, kind: 'OptionNumber', length: 'int', timestamp: 'int', echo: 'int') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
 class PartialOrderConnectionPermitted(Option):
@@ -284,11 +300,11 @@ class QuickStartResponse(Option):
     req_rate: 'int'
     #: TTL difference.
     ttl_diff: 'int'
-    #: QS nounce.
-    nounce: 'int'
+    #: QS nonce.
+    nonce: 'int'
 
     if TYPE_CHECKING:
-        def __init__(self, kind: 'OptionNumber', length: 'int', req_rate: 'int', ttl_diff: 'int', nounce: 'int') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
+        def __init__(self, kind: 'OptionNumber', length: 'int', req_rate: 'int', ttl_diff: 'int', nonce: 'int') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
 class UserTimeout(Option):
@@ -375,30 +391,29 @@ class MPTCPCapable(MPTCP):
 class MPTCPJoin(MPTCP):
     """Data model for TCP ``MP_JOIN`` option."""
 
+    #: Connection type.
+    connection: 'TCP_Flags'
+
 
 class MPTCPJoinSYN(MPTCPJoin):
     """Data model for TCP ``MP_JOIN-SYN`` option."""
 
-    #: Connection type.
-    connection: 'Literal["SYN"]'
     #: Backup path flag.
     backup: 'bool'
     #: Address ID.
     addr_id: 'int'
     #: Receiver's token.
-    token: 'bytes'
+    token: 'int'
     #: Sendder's random number.
-    nounce: 'int'
+    nonce: 'int'
 
     if TYPE_CHECKING:
-        def __init__(self, kind: 'OptionNumber', length: 'int', subtype: 'MPTCPOption', connection: 'Literal["SYN"]', backup: 'bool', addr_id: 'int', token: 'bytes', nounce: 'int') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
+        def __init__(self, kind: 'OptionNumber', length: 'int', subtype: 'MPTCPOption', connection: 'TCP_Flags', backup: 'bool', addr_id: 'int', token: 'int', nonce: 'int') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
 class MPTCPJoinSYNACK(MPTCPJoin):
     """Data model for TCP ``MP_JOIN-SYNACK`` option."""
 
-    #: Connection type.
-    connection: 'Literal["SYN/ACK"]'
     #: Backup path flag.
     backup: 'bool'
     #: Address ID.
@@ -406,47 +421,27 @@ class MPTCPJoinSYNACK(MPTCPJoin):
     #: Sender's truncated HMAC.
     hmac: 'bytes'
     #: Sendder's random number.
-    nounce: 'int'
+    nonce: 'int'
 
     if TYPE_CHECKING:
-        def __init__(self, kind: 'OptionNumber', length: 'int', subtype: 'MPTCPOption', connection: 'Literal["SYN/ACK"]', backup: 'bool', addr_id: 'int', hmac: 'bytes', nounce: 'int') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
+        def __init__(self, kind: 'OptionNumber', length: 'int', subtype: 'MPTCPOption', connection: 'TCP_Flags', backup: 'bool', addr_id: 'int', hmac: 'bytes', nonce: 'int') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
 class MPTCPJoinACK(MPTCPJoin):
     """Data model for TCP ``MP_JOIN-ACK`` option."""
 
-    #: Connection type.
-    connection: 'Literal["ACK"]'
+    #: HMAC value.
     hmac: 'bytes'
 
     if TYPE_CHECKING:
-        def __init__(self, kind: 'OptionNumber', length: 'int', subtype: 'MPTCPOption', connection: 'Literal["ACK"]', hmac: 'bytes') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
-
-
-class MPTCPDSSFlag(Data):
-    """Data model for TCP ``DSS`` option flags."""
-
-    #: ``DATA_FIN`` flag.
-    data_fin: 'bool'
-    #: Data sequence number is 8 octets (if not set, DSN is 4 octets).
-    dsn_oct: 'bool'
-    #: Data Sequence Number (DSN), Subflow Sequence Number (SSN), Data-Level
-    #: Length, and Checksum present.
-    data_pre: 'bool'
-    #: Data ACK is 8 octets (if not set, Data ACK is 4 octets).
-    ack_oct: 'bool'
-    #: Data ACK present.
-    ack_pre: 'bool'
-
-    if TYPE_CHECKING:
-        def __init__(self, data_fin: 'bool', dsn_oct: 'bool', data_pre: 'bool', ack_oct: 'bool', ack_pre: 'bool') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
+        def __init__(self, kind: 'OptionNumber', length: 'int', subtype: 'MPTCPOption', connection: 'TCP_Flags', hmac: 'bytes') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
 class MPTCPDSS(MPTCP):
     """Data model for TCP ``DSS`` option."""
 
-    #: Flags.
-    flags: 'MPTCPDSSFlag'
+    #: ``DATA_FIN`` flag.
+    data_fin: 'bool'
     #: Data ACK.
     ack: 'Optional[int]'
     #: Data sequence number.
@@ -459,7 +454,7 @@ class MPTCPDSS(MPTCP):
     checksum: 'Optional[bytes]'
 
     if TYPE_CHECKING:
-        def __init__(self, kind: 'OptionNumber', length: 'int', subtype: 'MPTCPOption', flags: 'MPTCPDSSFlag', ack: 'Optional[int]', dsn: 'Optional[int]', ssn: 'Optional[int]', dl_len: 'Optional[int]', checksum: 'Optional[bytes]') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
+        def __init__(self, kind: 'OptionNumber', length: 'int', subtype: 'MPTCPOption', data_fin: 'bool', ack: 'Optional[int]', dsn: 'Optional[int]', ssn: 'Optional[int]', dl_len: 'Optional[int]', checksum: 'Optional[bytes]') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
 class MPTCPAddAddress(MPTCP):
@@ -514,7 +509,7 @@ class MPTCPFastclose(MPTCP):
     """Data model for TCP ``MP_FASTCLOSE`` option."""
 
     #: Option receiver's key.
-    rkey: 'bytes'
+    rkey: 'int'
 
     if TYPE_CHECKING:
-        def __init__(self, kind: 'OptionNumber', length: 'int', subtype: 'MPTCPOption', rkey: 'bytes') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
+        def __init__(self, kind: 'OptionNumber', length: 'int', subtype: 'MPTCPOption', rkey: 'int') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin

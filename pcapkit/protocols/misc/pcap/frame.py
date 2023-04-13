@@ -25,13 +25,15 @@ import decimal
 import io
 import sys
 import time
-from typing import TYPE_CHECKING, overload
+from typing import TYPE_CHECKING, cast, overload
 
 from pcapkit.const.reg.linktype import LinkType as Enum_LinkType
 from pcapkit.protocols.data.misc.pcap.frame import Frame as Data_Frame
 from pcapkit.protocols.data.misc.pcap.frame import FrameInfo as Data_FrameInfo
 from pcapkit.protocols.protocol import Protocol
-from pcapkit.utilities.exceptions import StructError, UnsupportedCall
+from pcapkit.protocols.schema.misc.pcap.frame import Frame as Schema_Frame
+from pcapkit.utilities.exceptions import UnsupportedCall
+from pcapkit.utilities.warnings import RegistryWarning, warn
 
 if TYPE_CHECKING:
     from decimal import Decimal
@@ -40,6 +42,7 @@ if TYPE_CHECKING:
     from typing_extensions import Literal
 
     from pcapkit.protocols.data.misc.pcap.header import Header as Data_Header
+    from pcapkit.protocols.schema.schema import Schema
 
 __all__ = ['Frame']
 
@@ -47,7 +50,8 @@ __all__ = ['Frame']
 py37 = ((version_info := sys.version_info).major >= 3 and version_info.minor >= 7)
 
 
-class Frame(Protocol[Data_Frame]):
+class Frame(Protocol[Data_Frame, Schema_Frame],
+            schema=Schema_Frame, data=Data_Frame):
     """Per packet frame header extractor.
 
     This class currently supports parsing of the following protocols, which are
@@ -109,7 +113,7 @@ class Frame(Protocol[Data_Frame]):
     ##########################################################################
 
     @classmethod
-    def register(cls, code: 'Enum_LinkType', module: 'str', class_: 'str') -> 'None':
+    def register(cls, code: 'Enum_LinkType', module: 'str', class_: 'str') -> 'None':  # type: ignore[override]
         r"""Register a new protocol class.
 
         Notes:
@@ -122,6 +126,8 @@ class Frame(Protocol[Data_Frame]):
             class\_: class name
 
         """
+        if code in cls.__proto__:
+            warn(f'protocol {code} already registered, overwriting', RegistryWarning)
         cls.__proto__[code] = (module, class_)
 
     def index(self, name: 'str | Protocol | Type[Protocol]') -> 'int':
@@ -139,33 +145,24 @@ class Frame(Protocol[Data_Frame]):
         """
         return self._protos.index(name)
 
-    def read(self, length: 'Optional[int]' = None, *,
-             _read: 'bool' = True, **kwargs: 'Any') -> 'Data_Frame':
+    def read(self, length: 'Optional[int]' = None, *, _read: 'bool' = True, **kwargs: 'Any') -> 'Data_Frame':
         r"""Read each block after global header.
 
         Args:
-            length: Length of packet data.
+            length: Length of data to be read.
             \_read: If the class is called in a parsing scenario.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
             Data_Frame: Parsed packet data.
 
-        Raises:
-            EOFError: If :attr:`self._file <pcapkit.protocols.protocol.Protocol._file>` reaches EOF.
-
         """
-        try:
-            _temp = self._read_unpack(4, lilendian=True)
-        except StructError as exc:
-            if exc.eof:
-                raise EOFError  # pylint: disable=raise-missing-from
-            raise
+        schema = self.__header__
 
-        _tsss = _temp
-        _tsus = self._read_unpack(4, lilendian=True)
-        _ilen = self._read_unpack(4, lilendian=True)
-        _olen = self._read_unpack(4, lilendian=True)
+        _tsss = schema.ts_sec
+        _tsus = schema.ts_usec
+        _ilen = schema.incl_len
+        _olen = schema.orig_len
 
         if self._nsec:
             _epch = _tsss + decimal.Decimal(_tsus) / 1_000_000_000
@@ -189,16 +186,13 @@ class Frame(Protocol[Data_Frame]):
 
         if not _read:
             # move backward to the beginning of the packet
-            self._file.seek(-self.length, io.SEEK_CUR)
+            self._file.seek(0, io.SEEK_SET)
         else:
             # NOTE: We create a copy of the frame packet data here for parsing
             # scenarios to keep the original packet data intact.
 
-            # move backward to the beginning of the frame
-            self._file.seek(-self.length, io.SEEK_CUR)
-
             #: bytes: Raw packet data.
-            self._data = self._read_fileng(self.length + frame.len)
+            self._data = schema.packet
             #: io.BytesIO: Source packet stream.
             self._file = io.BytesIO(self._data)
 
@@ -207,10 +201,15 @@ class Frame(Protocol[Data_Frame]):
 
         return self._decode_next_layer(frame, self._ghdr.network, frame.len)
 
-    def make(self, *, timestamp: 'Optional[float | Decimal]' = None,  # type: ignore[override] # pylint: disable=arguments-differ
-             ts_sec: 'Optional[int]' = None, ts_usec: 'Optional[int]' = None,
-             incl_len: 'Optional[int]' = None, orig_len: 'Optional[int]' = None,
-             packet: 'bytes', nanosecond: 'bool' = False, **kwargs: 'Any') -> 'bytes':
+    def make(self,
+             timestamp: 'Optional[float | Decimal]' = None,
+             ts_sec: 'Optional[int]' = None,
+             ts_usec: 'Optional[int]' = None,
+             incl_len: 'Optional[int]' = None,
+             orig_len: 'Optional[int]' = None,
+             packet: 'bytes | Protocol | Schema' = b'',
+             nanosecond: 'bool' = False,
+             **kwargs: 'Any') -> 'Schema_Frame':
         """Make frame packet data.
 
         Args:
@@ -234,13 +233,12 @@ class Frame(Protocol[Data_Frame]):
         if orig_len is None:
             orig_len = len(packet)
 
-        # make packet
-        return b'%s%s%s%s%s' % (
-            self._make_pack(ts_sec, size=4, lilendian=True),
-            self._make_pack(ts_usec, size=4, lilendian=True),
-            self._make_pack(incl_len, size=4, lilendian=True),
-            self._make_pack(orig_len, size=4, lilendian=True),
-            packet[:incl_len],
+        return Schema_Frame(
+            ts_sec=ts_sec,
+            ts_usec=ts_usec,
+            incl_len=incl_len,
+            orig_len=orig_len,
+            packet=packet,
         )
 
     ##########################################################################
@@ -248,13 +246,13 @@ class Frame(Protocol[Data_Frame]):
     ##########################################################################
 
     @overload  # type: ignore[override]
-    def __post_init__(self, file: 'IO[bytes]', length: 'Optional[int]' = ..., *,  # pylint: disable=arguments-differ
+    def __post_init__(self, file: 'IO[bytes] | bytes', length: 'Optional[int]' = ..., *,  # pylint: disable=arguments-differ
                       num: 'int', header: 'Data_Header', **kwargs: 'Any') -> 'None': ...
     @overload
     def __post_init__(self, *, num: 'int', header: 'Data_Header',  # pylint: disable=arguments-differ
                       **kwargs: 'Any') -> 'None': ...
 
-    def __post_init__(self, file: 'Optional[IO[bytes]]' = None, length: 'Optional[int]' = None, *,  # pylint: disable=arguments-differ
+    def __post_init__(self, file: 'Optional[IO[bytes] | bytes]' = None, length: 'Optional[int]' = None, *,  # pylint: disable=arguments-differ
                       num: 'int', header: 'Data_Header', **kwargs: 'Any') -> 'None':
         """Initialisation.
 
@@ -282,16 +280,16 @@ class Frame(Protocol[Data_Frame]):
         if file is None:
             _read = False
             #: bytes: Raw packet data.
-            self._data = self.make(**kwargs)
+            self._data = self.pack(**kwargs)
             #: io.BytesIO: Source packet stream.
             self._file = io.BytesIO(self._data)
         else:
             _read = True
             #: io.BytesIO: Source packet stream.
-            self._file = file
+            self._file = io.BytesIO(file) if isinstance(file, bytes) else file
 
         #: pcapkit.corekit.infoclass.Info: Parsed packet data.
-        self._info = self.read(length, _read=_read, **kwargs)
+        self._info = self.unpack(length, _read=_read, **kwargs)
 
     def __length_hint__(self) -> 'Literal[16]':
         """Return an estimated length for the object."""
@@ -320,6 +318,25 @@ class Frame(Protocol[Data_Frame]):
     ##########################################################################
     # Utilities.
     ##########################################################################
+
+    @classmethod
+    def _make_data(cls, data: 'Data_Frame') -> 'dict[str, Any]':  # type: ignore[override]
+        """Create key-value pairs from ``data`` for protocol construction.
+
+        Args:
+            data: protocol data
+
+        Returns:
+            Key-value pairs for protocol construction.
+
+        """
+        return {
+            'ts_src': data.frame_info.ts_sec,
+            'ts_usec': data.frame_info.ts_usec,
+            'incl_len': data.frame_info.incl_len,
+            'orig_len': data.frame_info.orig_len,
+            'packet': cls._make_payload(data),
+        }
 
     def _make_timestamp(self, timestamp: 'Optional[float | Decimal]' = None, ts_sec: 'Optional[int]' = None,
                         ts_usec: 'Optional[int]' = None, nanosecond: 'bool' = False) -> 'tuple[int, int]':
@@ -352,19 +369,20 @@ class Frame(Protocol[Data_Frame]):
         return ts_sec, ts_usec
 
     def _decode_next_layer(self, dict_: 'Data_Frame', proto: 'Optional[int]' = None,
-                           length: 'Optional[int]' = None) -> 'Data_Frame':  # pylint: disable=arguments-differ
+                           length: 'Optional[int]' = None, *, packet: 'Optional[dict[str, Any]]' = None) -> 'Data_Frame':  # pylint: disable=arguments-differ
         r"""Decode next layer protocol.
 
         Arguments:
             dict\_: info buffer
             proto: next layer protocol index
             length: valid (*non-padding*) length
+            packet: packet info (passed from :meth:`self.unpack <pcapkit.protocols.protocol.Protocol.unpack>`)
 
         Returns:
-            dict: current protocol with packet extracted
+            Current protocol with packet extracted.
 
         """
-        next_ = self._import_next_layer(proto, length)  # type: ignore[misc,call-arg]
+        next_ = cast('Protocol', self._import_next_layer(proto, length, packet=packet))  # type: ignore[misc,call-arg,redundant-cast]
         info, chain = next_.info, next_.protochain
 
         # make next layer protocol name
@@ -372,10 +390,12 @@ class Frame(Protocol[Data_Frame]):
         # proto = next_.__class__.__name__
 
         # write info and protocol chain into dict
-        dict_.__update__([
-            (layer, info),
-            ('protocols', chain.chain),
-        ])
+        dict_.__update__({
+            layer: info,
+            'protocols': chain.chain,
+            '__next_type__': type(next_),
+            '__next_name__': layer,
+        })
         self._next = next_  # pylint: disable=attribute-defined-outside-init
         self._protos = chain  # pylint: disable=attribute-defined-outside-init
         return dict_

@@ -45,7 +45,7 @@ class ARP(Data):
     #: Hardware type.
     htype: 'Hardware'
     #: Protocol type.
-    ptype: 'EtherType | str'
+    ptype: 'EtherType'
     #: Hardware address length.
     hlen: 'int'
     #: Protocol address length.
@@ -64,6 +64,6 @@ class ARP(Data):
     len: 'int'
 
     if TYPE_CHECKING:
-        def __init__(self, htype: 'Hardware', ptype: 'EtherType | str', hlen: 'int', plen: 'int',  # pylint: disable=line-too-long,super-init-not-called,unused-argument,multiple-statements
+        def __init__(self, htype: 'Hardware', ptype: 'EtherType', hlen: 'int', plen: 'int',  # pylint: disable=line-too-long,super-init-not-called,unused-argument,multiple-statements
                      oper: 'Operation', sha: 'str', spa: 'str | IPv4Address | IPv6Address',  # pylint: disable=unused-argument
                      tha: 'str', tpa: 'str | IPv4Address | IPv6Address', len: 'int') -> 'None': ...  # pylint: disable=unused-argument,redefined-builtin

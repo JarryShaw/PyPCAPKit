@@ -8,3 +8,5 @@ __all__ = ['Data']
 
 class Data(Info):
     """Base class for data models."""
+
+    __excluded__ = ['__next_name__', '__next_type__']

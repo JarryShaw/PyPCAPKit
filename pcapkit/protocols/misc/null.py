@@ -14,6 +14,7 @@ from typing import TYPE_CHECKING, overload
 
 from pcapkit.protocols.data.misc.null import NoPayload as Data_NoPayload
 from pcapkit.protocols.protocol import Protocol
+from pcapkit.protocols.schema.misc.null import NoPayload as Schema_NoPayload
 from pcapkit.utilities.exceptions import UnsupportedCall
 
 if TYPE_CHECKING:
@@ -24,7 +25,8 @@ if TYPE_CHECKING:
 __all__ = ['NoPayload']
 
 
-class NoPayload(Protocol[Data_NoPayload]):
+class NoPayload(Protocol[Data_NoPayload, Schema_NoPayload],
+                schema=Schema_NoPayload, data=Data_NoPayload):
     """This class implements no-payload protocol."""
 
     ##########################################################################
@@ -71,28 +73,28 @@ class NoPayload(Protocol[Data_NoPayload]):
         """
         return Data_NoPayload()
 
-    def make(self, **kwargs: 'Any') -> 'bytes':
+    def make(self, **kwargs: 'Any') -> 'Schema_NoPayload':
         """Make (construct) packet data.
 
         Args:
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
-            Constructed packet data.
+            Constructed packet schema.
 
         """
-        return b''
+        return Schema_NoPayload()
 
     ##########################################################################
     # Data models.
     ##########################################################################
 
     @overload
-    def __post_init__(self, file: 'IO[bytes]', length: 'Optional[int]' = ..., **kwargs: 'Any') -> 'None': ...
+    def __post_init__(self, file: 'IO[bytes] | bytes', length: 'Optional[int]' = ..., **kwargs: 'Any') -> 'None': ...
     @overload
     def __post_init__(self, **kwargs: 'Any') -> 'None': ...  # pylint: disable=arguments-differ
 
-    def __post_init__(self, file: 'Optional[IO[bytes]]' = None,  # pylint: disable=unused-argument
+    def __post_init__(self, file: 'Optional[IO[bytes] | bytes]' = None,  # pylint: disable=unused-argument
                       length: 'Optional[int]' = None, **kwargs: 'Any') -> 'None':
         """Post initialisation hook.
 
@@ -103,11 +105,11 @@ class NoPayload(Protocol[Data_NoPayload]):
 
         """
         #: bytes: Raw packet data.
-        self._data = bytes()
+        self._data = b''
         #: io.BytesIO: Source data stream.
         self._file = io.BytesIO()
         #: pcapkit.protocols.data.misc.null.NoPayload: Info dict of current instance.
-        self._info = self.read(length, **kwargs)
+        self._info = Data_NoPayload()
 
         #: pcapkit.protocols.null.NoPayload: Payload of current instance.
         self._next = self

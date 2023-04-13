@@ -51,6 +51,11 @@ class Info(Mapping[str, VT], Generic[VT]):
         #: List of builtin methods.
         __builtin__: 'set[str]'
 
+    #: List of additional built-in names.
+    __additional__: 'list[str]' = []
+    #: List of names to be excluded from :obj:`dict` conversion.
+    __excluded__: 'list[str]' = []
+
     def __new__(cls, *args: 'VT', **kwargs: 'VT') -> 'Info':  # pylint: disable=unused-argument
         """Create a new instance.
 
@@ -63,13 +68,12 @@ class Info(Mapping[str, VT], Generic[VT]):
             **kwargs: Arbitrary keyword arguments.
 
         """
-        cls.__map__ = {}
-        cls.__map_reverse__ = {}
-
         temp = ['__map__', '__map_reverse__', '__builtin__']
+        temp.extend(cls.__additional__)
         for obj in cls.mro():
             temp.extend(dir(obj))
         cls.__builtin__ = set(temp)
+        cls.__excluded__.extend(cls.__builtin__)
 
         # NOTE: We only generate ``__init__`` method for subclasses of the
         # ``Info`` class, rather than itself, plus that such class does not
@@ -126,6 +130,13 @@ class Info(Mapping[str, VT], Generic[VT]):
             cls.__init__.__qualname__ = f'{cls.__name__}.__init__'
 
         self = super().__new__(cls)
+
+        # NOTE: We define the ``__map__`` and ``__map_reverse__`` attributes
+        # here under ``self`` to avoid them being considered as class variables
+        # and thus being shared by all instances.
+        super().__setattr__(self, '__map__', {})
+        super().__setattr__(self, '__map_reverse__', {})
+
         return self
 
     def __update__(self, dict_: 'Optional[Mapping[str, VT] | Iterable[tuple[str, VT]]]' = None,
@@ -170,6 +181,9 @@ class Info(Mapping[str, VT], Generic[VT]):
     def __str__(self) -> 'str':
         temp = []  # type: list[str]
         for (key, value) in self.__dict__.items():
+            if key in self.__excluded__:
+                continue
+
             out_key = self.__map_reverse__.get(key, key)
             temp.append(f'{out_key}={value}')
         args = ', '.join(temp)
@@ -178,6 +192,9 @@ class Info(Mapping[str, VT], Generic[VT]):
     def __repr__(self) -> 'str':
         temp = []  # type: list[str]
         for (key, value) in self.__dict__.items():
+            if key in self.__excluded__:
+                continue
+
             out_key = self.__map_reverse__.get(key, key)
             if isinstance(value, Info):
                 temp.append(f'{out_key}={type(value).__name__}(...)')
@@ -237,6 +254,9 @@ class Info(Mapping[str, VT], Generic[VT]):
         """
         dict_ = {}  # type: dict[str, Any]
         for (key, value) in self.__dict__.items():
+            if key in self.__excluded__:
+                continue
+
             out_key = self.__map_reverse__.get(key, key)
             if isinstance(value, Info):
                 dict_[out_key] = value.to_dict()

@@ -181,7 +181,7 @@ Data Structures
    .. autoattribute:: deltatlr
    .. autoattribute:: deltatls
 
-.. autoclass:: pcapkit.protocols.data.internet.hopopt.QuickStartOption(type, action, change, length, func, rate, ttl, nounce)
+.. autoclass:: pcapkit.protocols.data.internet.hopopt.QuickStartOption(type, action, change, length, func, rate, ttl, nonce)
    :no-members:
    :show-inheritance:
 
@@ -191,7 +191,7 @@ Data Structures
    .. autoattribute:: func
    .. autoattribute:: rate
    .. autoattribute:: ttl
-   .. autoattribute:: nounce
+   .. autoattribute:: nonce
 
 .. autoclass:: pcapkit.protocols.data.internet.hopopt.RPLOption(type, action, change, length, flags, id, rank)
    :no-members:
@@ -237,14 +237,14 @@ Data Structures
    .. autoattribute:: max
    .. autoattribute:: verification
 
-.. autoclass:: pcapkit.protocols.data.internet.hopopt.ILNPOption(type, action, change, length, nounce)
+.. autoclass:: pcapkit.protocols.data.internet.hopopt.ILNPOption(type, action, change, length, nonce)
    :no-members:
    :show-inheritance:
 
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. autoattribute:: nounce
+   .. autoattribute:: nonce
 
 .. autoclass:: pcapkit.protocols.data.internet.hopopt.LineIdentificationOption(type, action, change, length, line_id_len, line_id)
    :no-members:

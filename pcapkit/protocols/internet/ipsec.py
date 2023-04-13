@@ -17,7 +17,7 @@ Security (IPsec) protocol family [*]_, eg.
 from typing import TYPE_CHECKING, Generic
 
 from pcapkit.protocols.internet.internet import Internet
-from pcapkit.protocols.protocol import PT
+from pcapkit.protocols.protocol import PT, ST
 
 if TYPE_CHECKING:
     from typing_extensions import Literal
@@ -25,7 +25,7 @@ if TYPE_CHECKING:
 __all__ = ['IPsec']
 
 
-class IPsec(Internet[PT], Generic[PT]):  # pylint: disable=abstract-method
+class IPsec(Internet[PT, ST], Generic[PT, ST]):  # pylint: disable=abstract-method
     """Abstract base class for IPsec protocol family.
 
     - Authentication Header (:class:`~pcapkit.protocols.internet.ah.AH`) [:rfc:`4302`]

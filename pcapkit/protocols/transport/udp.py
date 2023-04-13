@@ -24,17 +24,22 @@ from typing import TYPE_CHECKING
 
 from pcapkit.const.reg.transtype import TransType as Enum_TransType
 from pcapkit.protocols.data.transport.udp import UDP as Data_UDP
+from pcapkit.protocols.schema.transport.udp import UDP as Schema_UDP
 from pcapkit.protocols.transport.transport import Transport
 
 if TYPE_CHECKING:
-    from typing import Any, NoReturn, Optional
+    from typing import Any, Optional
 
     from typing_extensions import Literal
+
+    from pcapkit.protocols.protocol import Protocol
+    from pcapkit.protocols.schema.schema import Schema
 
 __all__ = ['UDP']
 
 
-class UDP(Transport[Data_UDP]):
+class UDP(Transport[Data_UDP, Schema_UDP],
+          schema=Schema_UDP, data=Data_UDP):
     """This class implements User Datagram Protocol.
 
     This class currently supports parsing of the following protocols, which are
@@ -122,32 +127,43 @@ class UDP(Transport[Data_UDP]):
         """
         if length is None:
             length = len(self)
-
-        _srcp = self._read_unpack(2)
-        _dstp = self._read_unpack(2)
-        _tlen = self._read_unpack(2)
-        _csum = self._read_fileng(2)
+        schema = self.__header__
 
         udp = Data_UDP(
-            srcport=_srcp,
-            dstport=_dstp,
-            len=_tlen,
-            checksum=_csum,
+            srcport=schema.srcport,
+            dstport=schema.dstport,
+            len=schema.len,
+            checksum=schema.checksum,
         )
 
         return self._decode_next_layer(udp, (udp.srcport, udp.dstport), udp.len - 8)
 
-    def make(self, **kwargs: 'Any') -> 'NoReturn':
+    def make(self,
+             srcport: 'int' = 0,
+             dstport: 'int' = 0,
+             checksum: 'bytes' = b'\x00\x00',
+             payload: 'bytes | Schema | Protocol' = b'',
+             **kwargs: 'Any') -> 'Schema_UDP':
         """Make (construct) packet data.
 
         Args:
+            srcport: Source port.
+            dstport: Destination port.
+            checksum: Checksum.
+            payload: Payload data.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
             Constructed packet data.
 
         """
-        raise NotImplementedError
+        return Schema_UDP(
+            srcport=srcport,
+            dstport=dstport,
+            len=8 + len(payload),
+            checksum=checksum,
+            payload=payload,
+        )
 
     ##########################################################################
     # Data models.
@@ -168,3 +184,25 @@ class UDP(Transport[Data_UDP]):
 
         """
         return Enum_TransType.UDP  # type: ignore[return-value]
+
+    ##########################################################################
+    # Utilities.
+    ##########################################################################
+
+    @classmethod
+    def _make_data(cls, data: 'Data_UDP') -> 'dict[str, Any]':  # type: ignore[override]
+        """Create key-value pairs from ``data`` for protocol construction.
+
+        Args:
+            data: protocol data
+
+        Returns:
+            Key-value pairs for protocol construction.
+
+        """
+        return {
+            'srcport': data.srcport,
+            'dstport': data.dstport,
+            'checksum': data.checksum,
+            'payload': cls._make_payload(data),
+        }

@@ -36,16 +36,16 @@ __all__ = [
     'HIP_Certificate', 'HIP_Cipher', 'HIP_DITypes', 'HIP_ECDSACurve', 'HIP_ECDSALowCurve',
     'HIP_ESPTransformSuite', 'HIP_Group', 'HIP_HIAlgorithm', 'HIP_HITSuite', 'HIP_NATTraversal',
     'HIP_NotifyMessage', 'HIP_Packet', 'HIP_Parameter', 'HIP_Registration', 'HIP_RegistrationFailure',
-    'HIP_Suite', 'HIP_Transport',
+    'HIP_Suite', 'HIP_Transport', 'HIP_EdDSACurve',
     # HTTP
-    'HTTP_ErrorCode', 'HTTP_Frame', 'HTTP_Setting',
+    'HTTP_ErrorCode', 'HTTP_Frame', 'HTTP_Method', 'HTTP_Setting', 'HTTP_Status',
     # IPv4
     'IPv4_ClassificationLevel', 'IPv4_OptionClass', 'IPv4_OptionNumber', 'IPv4_ProtectionAuthority',
     'IPv4_QSFunction', 'IPv4_RouterAlert', 'IPv4_ToSDelay', 'IPv4_ToSECN', 'IPv4_ToSPrecedence',
     'IPv4_ToSReliability', 'IPv4_ToSThroughput', 'IPv4_TSFlag',
     # IPv6
     'IPv6_ExtensionHeader', 'IPv6_Option', 'IPv6_QSFunction', 'IPv6_RouterAlert', 'IPv6_Routing',
-    'IPv6_SeedID', 'IPv6_SMFDPDMode', 'IPv6_TaggerID',
+    'IPv6_SeedID', 'IPv6_SMFDPDMode', 'IPv6_TaggerID', 'IPv6_OptionAction',
     # IPX
     'IPX_Packet', 'IPX_Socket',
     # L2TP

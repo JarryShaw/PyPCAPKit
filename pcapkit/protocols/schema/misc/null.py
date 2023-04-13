@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
-"""header schema for root protocol"""
+# mypy: disable-error-code=assignment
+"""header schema for empty payload"""
 
 from pcapkit.protocols.schema.schema import Schema
 

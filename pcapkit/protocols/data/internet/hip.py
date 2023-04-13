@@ -7,13 +7,15 @@ from pcapkit.protocols.data.data import Data
 
 if TYPE_CHECKING:
     from datetime import timedelta
-    from ipaddress import IPv4Address, IPv6Address
+    from ipaddress import IPv6Address
+    from typing import Optional
 
     from pcapkit.const.hip.certificate import Certificate
     from pcapkit.const.hip.cipher import Cipher
     from pcapkit.const.hip.di import DITypes
     from pcapkit.const.hip.ecdsa_curve import ECDSACurve
     from pcapkit.const.hip.ecdsa_low_curve import ECDSALowCurve
+    from pcapkit.const.hip.eddsa_curve import EdDSACurve
     from pcapkit.const.hip.esp_transform_suite import ESPTransformSuite
     from pcapkit.const.hip.group import Group
     from pcapkit.const.hip.hi_algorithm import HIAlgorithm
@@ -40,7 +42,7 @@ __all__ = [
     'UnassignedParameter', 'ESPInfoParameter', 'R1CounterParameter',
     'LocatorSetParameter', 'PuzzleParameter', 'SolutionParameter',
     'SEQParameter', 'ACKParameter', 'DHGroupListParameter',
-    'DeffieHellmanParameter', 'HIPTransformParameter', 'HIPCipherParameter',
+    'DiffieHellmanParameter', 'HIPTransformParameter', 'HIPCipherParameter',
     'NATTraversalModeParameter', 'TransactionPacingParameter', 'EncryptedParameter',
     'HostIDParameter', 'HITSuiteListParameter', 'CertParameter',
     'NotificationParameter', 'EchoRequestSignedParameter', 'RegInfoParameter',
@@ -144,10 +146,10 @@ class LocatorData(Data):
     #: SPI.
     spi: 'int'
     #: IP address.
-    ip: 'IPv4Address'
+    ip: 'IPv6Address'
 
     if TYPE_CHECKING:
-        def __init__(self, spi: 'int', ip: 'IPv4Address') -> 'None': ...  # pylint: disable=super-init-not-called,unused-argument,multiple-statements
+        def __init__(self, spi: 'int', ip: 'IPv6Address') -> 'None': ...  # pylint: disable=super-init-not-called,unused-argument,multiple-statements
 
 
 class Locator(Data):
@@ -164,10 +166,10 @@ class Locator(Data):
     #: Locator lifetime.
     lifetime: 'timedelta'
     #: Locator data.
-    locator: 'LocatorData | IPv4Address'
+    locator: 'LocatorData | IPv6Address'
 
     if TYPE_CHECKING:
-        def __init__(self, traffic: 'int', type: 'int', length: 'int', preferred: 'bool', lifetime: 'timedelta', locator: 'LocatorData | IPv4Address') -> 'None': ...  # pylint: disable=super-init-not-called,unused-argument,multiple-statements,redefined-builtin,line-too-long
+        def __init__(self, traffic: 'int', type: 'int', length: 'int', preferred: 'bool', lifetime: 'timedelta', locator: 'LocatorData | IPv6Address') -> 'None': ...  # pylint: disable=super-init-not-called,unused-argument,multiple-statements,redefined-builtin,line-too-long
 
 
 class LocatorSetParameter(Parameter):
@@ -244,18 +246,18 @@ class DHGroupListParameter(Parameter):
         def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', group_id: 'tuple[Group, ...]') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
 
 
-class DeffieHellmanParameter(Parameter):
-    """Data model for HIP ``DEFFIE_HELLMAN`` parameter."""
+class DiffieHellmanParameter(Parameter):
+    """Data model for HIP ``DIFFIE_HELLMAN`` parameter."""
 
     #: Group ID.
     group_id: 'Group'
     #: Public value length.
     pub_len: 'int'
     #: Public value.
-    pub_val: 'bytes'
+    pub_val: 'int'
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', group_id: 'Group', pub_len: 'int', pub_val: 'bytes') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
+        def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', group_id: 'Group', pub_len: 'int', pub_val: 'int') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
 
 
 class HIPTransformParameter(Parameter):
@@ -301,23 +303,29 @@ class TransactionPacingParameter(Parameter):
 class EncryptedParameter(Parameter):
     """Data model for HIP ``ENCRYPTED`` parameter."""
 
-    #: Raw data.
-    raw: 'bytes'
+    #: Cipher ID.
+    cipher: 'Cipher'
+    #: Initialization vector.
+    iv: 'Optional[bytes]'
+    #: Encrypted data.
+    data: 'bytes'
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', raw: 'bytes') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
+        def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int',
+                     cipher: 'Cipher', iv: 'Optional[bytes]', data: 'bytes') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
 
 
 class HostIdentity(Data):
     """Data model for host identity."""
 
     #: Curve type.
-    curve: 'ECDSACurve | ECDSALowCurve'
+    curve: 'ECDSACurve | ECDSALowCurve | EdDSACurve'
     #: Public key.
     pubkey: 'bytes'
 
     if TYPE_CHECKING:
-        def __init__(self, curve: 'ECDSACurve | ECDSALowCurve', pubkey: 'bytes') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
+        def __init__(self, curve: 'ECDSACurve | ECDSALowCurve | EdDSACurve',
+                     pubkey: 'bytes') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
 
 
 class HostIDParameter(Parameter):
@@ -418,36 +426,36 @@ class RegRequestParameter(Parameter):
     """Data model for HIP ``REG_REQUEST`` parameter."""
 
     #: Registration lifetime.
-    lifetime: 'Lifetime'
+    lifetime: 'timedelta'
     #: Registration type.
     reg_type: 'tuple[Registration, ...]'
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', lifetime: 'Lifetime', reg_type: 'tuple[Registration, ...]') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
+        def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', lifetime: 'timedelta', reg_type: 'tuple[Registration, ...]') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
 
 
 class RegResponseParameter(Parameter):
     """Data model for HIP ``REG_RESPONSE`` parameter."""
 
     #: Registration lifetime.
-    lifetime: 'Lifetime'
+    lifetime: 'timedelta'
     #: Registration type.
     reg_type: 'tuple[Registration, ...]'
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', lifetime: 'Lifetime', reg_type: 'tuple[Registration, ...]') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
+        def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', lifetime: 'timedelta', reg_type: 'tuple[Registration, ...]') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
 
 
 class RegFailedParameter(Parameter):
     """Data model for HIP ``REG_FAILED`` parameter."""
 
     #: Registration lifetime.
-    lifetime: 'Lifetime'
+    lifetime: 'timedelta'
     #: Registration failure type.
     reg_type: 'tuple[RegistrationFailure, ...]'
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', lifetime: 'Lifetime', reg_type: 'tuple[RegistrationFailure, ...]') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
+        def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', lifetime: 'timedelta', reg_type: 'tuple[RegistrationFailure, ...]') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
 
 
 class RegFromParameter(Parameter):
@@ -478,10 +486,10 @@ class TransportFormatListParameter(Parameter):
     """Data model for HIP ``TRANSPORT_FORMAT_LIST`` parameter."""
 
     #: Transport format list.
-    tf_type: 'tuple[int, ...]'
+    tf_type: 'tuple[Enum_Parameter, ...]'
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', tf_type: 'tuple[int, ...]') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
+        def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', tf_type: 'tuple[Enum_Parameter, ...]') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
 
 
 class ESPTransformParameter(Parameter):

@@ -1,22 +1,68 @@
 # -*- coding: utf-8 -*-
 """miscellaneous field class"""
 
+import copy
 import io
 from typing import TYPE_CHECKING, TypeVar, cast
 
 from pcapkit.corekit.fields.field import NoValue, _Field
-from pcapkit.utilities.exceptions import NoDefaultValue
+from pcapkit.utilities.exceptions import FieldError, NoDefaultValue
 
-__all__ = ['ConditionalField', 'PayloadField']
+__all__ = [
+    'ConditionalField', 'PayloadField',
+    'SwitchField', 'ForwardMatchField',
+    'NoValueField',
+]
 
 if TYPE_CHECKING:
     from typing import IO, Any, Callable, Optional, Type
 
-    from pcapkit.corekit.fields.field import Field, NoValueType
-    from pcapkit.protocols.protocol import Protocol
+    from pcapkit.protocols.schema.schema import Schema
 
-_TC = TypeVar('_TC', bound='Field')
+_TC = TypeVar('_TC')
+_TS = TypeVar('_TS', bound='Schema')
 _TP = TypeVar('_TP', bound='Protocol')
+_TN = TypeVar('_TN', bound='NoValueType')
+
+
+class NoValueField(_Field[_TN]):
+    """Schema field for no value type (or :obj:`None`)."""
+
+    @property
+    def template(self) -> 'str':
+        """Field template."""
+        return '0s'
+
+    @property
+    def length(self) -> 'int':
+        """Field size."""
+        return 0
+
+    def pack(self, value: 'Optional[_TN]', packet: 'dict[str, Any]') -> 'bytes':
+        """Pack field value into :obj:`bytes`.
+
+        Args:
+            value: field value.
+            packet: packet data.
+
+        Returns:
+            Packed field value.
+
+        """
+        return b''
+
+    def unpack(self, buffer: 'bytes | IO[bytes]', packet: 'dict[str, Any]') -> '_TN':
+        """Unpack field value from :obj:`bytes`.
+
+        Args:
+            buffer: field buffer.
+            packet: packet data.
+
+        Returns:
+            Unpacked field value.
+
+        """
+        return None  # type: ignore[return-value]
 
 
 class ConditionalField(_Field[_TC]):
@@ -71,13 +117,13 @@ class ConditionalField(_Field[_TC]):
         return True
 
     @property
-    def field(self) -> 'Field[_TC]':
+    def field(self) -> '_Field[_TC]':
         """Field instance."""
         return self._field
 
-    def __init__(self, field: 'Field[_TC]',  # pylint: disable=super-init-not-called
+    def __init__(self, field: '_Field[_TC]',  # pylint: disable=super-init-not-called
                  condition: 'Callable[[dict[str, Any]], bool]') -> 'None':
-        self._field = field  # type: Field[_TC]
+        self._field = field  # type: _Field[_TC]
         self._condition = condition
 
     def __call__(self, packet: 'dict[str, Any]') -> 'ConditionalField':
@@ -86,10 +132,15 @@ class ConditionalField(_Field[_TC]):
         Arguments:
             packet: packet data.
 
+        Notes:
+            This method will return a new instance of :class:`ConditionalField`
+            instead of updating the current instance.
+
         """
-        if self._condition(packet):
-            self._field(packet)
-        return self
+        new_self = copy.copy(self)
+        if new_self._condition(packet):
+            new_self._field(packet)
+        return new_self
 
     def pre_process(self, value: '_TC', packet: 'dict[str, Any]') -> 'Any':  # pylint: disable=unused-argument
         """Process field value before construction (packing).
@@ -132,7 +183,7 @@ class ConditionalField(_Field[_TC]):
         """
         return self._field.post_process(value, packet)
 
-    def unpack(self, buffer: 'bytes', packet: 'dict[str, Any]') -> '_TC':
+    def unpack(self, buffer: 'bytes | IO[bytes]', packet: 'dict[str, Any]') -> '_TC':
         """Unpack field value from :obj:`bytes`.
 
         Args:
@@ -164,8 +215,12 @@ class PayloadField(_Field[_TP]):
     """Payload value for protocol fields.
 
     Args:
+        length: field size (in bytes); if a callable is given, it should return
+            an integer value and accept the current packet as its only argument.
         default: field default value.
         protocol: payload protocol.
+        callback: callback function to be called upon
+            :meth:`self.__call__ <pcapkit.corekit.fields.field._Field.__call__>`.
 
     """
 
@@ -187,39 +242,58 @@ class PayloadField(_Field[_TP]):
     @property
     def protocol(self) -> 'Type[_TP]':
         """Payload protocol."""
+        if self._protocol is None:
+            from pcapkit.protocols.misc.raw import Raw  # type: ignore[unreachable] # pylint: disable=import-outside-top-level # isort:skip
+            return Raw
         return self._protocol
 
     @protocol.setter
-    def protocol(self, protocol: 'Type[_TP]') -> 'None':
+    def protocol(self, protocol: 'Type[_TP] | str') -> 'None':
         """Set payload protocol.
 
         Arguments:
             protocol: payload protocol
 
         """
+        if isinstance(protocol, str):
+            from pcapkit.protocols import __proto__  # pylint: disable=import-outside-top-level
+            protocol = cast('Type[_TP]', __proto__.get(protocol))
         self._protocol = protocol
 
-    def __init__(self, name: 'str' = 'payload', default: '_TP | NoValueType' = NoValue,
+    def __init__(self, length: 'int | Callable[[dict[str, Any]], int]' = lambda _: -1,
+                 default: '_TP | NoValueType | bytes' = NoValue,
                  protocol: 'Optional[Type[_TP]]' = None,
-                 length_hint: 'Callable[[dict[str, Any]], Optional[int]]' = lambda x: None) -> 'None':
-        self._name = name
-        self._length_hint = length_hint
+                 callback: 'Callable[[PayloadField[_TP], dict[str, Any]], None]' = lambda *_: None) -> 'None':
+        self._name = '<payload>'
+        self._default = default  # type: ignore[assignment]
+        self._protocol = protocol  # type: ignore[assignment]
+        self._callback = callback
 
-        if protocol is None:
-            from pcapkit.protocols.misc.raw import Raw  # pylint: disable=import-outside-top-level
-            protocol = cast('Type[_TP]', Raw)
-        self._protocol = protocol
+        self._length_callback = None
+        if not isinstance(length, int):
+            self._length_callback, length = length, 0
+        self._length = length
+        self._template = f'{self._length}s' if self._length else '1024s'  # use a reasonable default
 
-        if default is NoValue:
-            from pcapkit.protocols.misc.null import \
-                NoPayload  # pylint: disable=import-outside-top-level
-            default = cast('_TP', NoPayload())
-        self._default = default
+    def __call__(self, packet: 'dict[str, Any]') -> 'PayloadField':
+        """Update field attributes.
 
-        self._length = 0
-        self._template = '0s'
+        Args:
+            packet: packet data.
 
-    def pack(self, value: 'Optional[_TP | bytes]', packet: 'dict[str, Any]') -> 'bytes':
+        Notes:
+            This method will return a new instance of :class:`PayloadField`
+            instead of updating the current instance.
+
+        """
+        new_self = copy.copy(self)
+        new_self._callback(new_self, packet)
+        if new_self._length_callback is not None:
+            new_self._length = new_self._length_callback(packet)
+            new_self._template = f'{new_self._length}s'
+        return new_self
+
+    def pack(self, value: 'Optional[_TP | Schema | bytes]', packet: 'dict[str, Any]') -> 'bytes':
         """Pack field value into :obj:`bytes`.
 
         Args:
@@ -235,56 +309,291 @@ class PayloadField(_Field[_TP]):
                 raise NoDefaultValue(f'Field {self.name} has no default value.')
             value = cast('_TP', self._default)
 
+        from pcapkit.protocols.schema.schema import \
+            Schema  # pylint: disable=import-outside-top-level
         if isinstance(value, bytes):
             return value
-        return value.data
+        if isinstance(value, Schema):
+            return value.pack()
+        return value.data  # type: ignore[union-attr]
 
-    def unpack(self, buffer: 'bytes | IO[bytes]',
-               packet: 'dict[str, Any]', *,
-               length: 'Optional[int]' = None) -> '_TP':
+    def unpack(self, buffer: 'bytes | IO[bytes]', packet: 'dict[str, Any]') -> '_TP':
         """Unpack field value from :obj:`bytes`.
 
         Args:
             buffer: field buffer.
             packet: packet data.
-            length: field length.
+
+        Returns:
+            Unpacked field value.
+
+        """
+        if self._protocol is None:
+            if isinstance(buffer, bytes):  # type: ignore[unreachable]
+                return cast('_TP', buffer)
+            return cast('_TP', buffer.read())
+
+        if isinstance(buffer, bytes):
+            file = io.BytesIO(buffer)  # type: IO[bytes]
+        else:
+            file = buffer
+        return self._protocol(file, self.length)  # type: ignore[abstract]
+
+
+class SwitchField(_Field[_TC]):
+    """Conditional type-switching field for protocol schema."""
+
+    @property
+    def optional(self) -> 'bool':
+        """Field is optional."""
+        return True
+
+    def __init__(self, length: 'int | Callable[[dict[str, Any]], int]' = lambda _: -1,
+                 selector: 'Callable[[dict[str, Any]], _Field[_TC]]' = lambda _: NoValueField()) -> 'None':
+        self._name = '<switch>'
+        self._field = NoValueField()
+        self._selector = selector
+
+    def __call__(self, packet: 'dict[str, Any]') -> 'SwitchField[_TC]':
+        """Call field.
+
+        Args:
+            packet: packet data.
+
+        Returns:
+            New field instance.
+
+        """
+        new_self = copy.copy(self)
+        new_self._field = self._selector(packet)
+        new_self._template = new_self._field.template
+        return new_self
+
+    def pre_process(self, value: '_TC', packet: 'dict[str, Any]') -> 'Any':  # pylint: disable=unused-argument
+        """Process field value before construction (packing).
+
+        Arguments:
+            value: field value.
+            packet: packet data.
+
+        Returns:
+            Processed field value.
+
+        """
+        if self._field is None:
+            return NoValue
+        return self._field.pre_process(value, packet)
+
+    def pack(self, value: 'Optional[_TC]', packet: 'dict[str, Any]') -> 'bytes':
+        """Pack field value into :obj:`bytes`.
+
+        Args:
+            value: field value.
+            packet: packet data.
+
+        Returns:
+            Packed field value.
+
+        """
+        if self._field is None:
+            return b''
+        return self._field.pack(value, packet)
+
+    def post_process(self, value: 'Any', packet: 'dict[str, Any]') -> '_TC':  # pylint: disable=unused-argument
+        """Process field value after parsing (unpacking).
+
+        Args:
+            value: field value.
+            packet: packet data.
+
+        Returns:
+            Processed field value.
+
+        """
+        if self._field is None:
+            return NoValue  # type: ignore[return-value]
+        return self._field.post_process(value, packet)
+
+    def unpack(self, buffer: 'bytes | IO[bytes]', packet: 'dict[str, Any]') -> '_TC':
+        """Unpack field value from :obj:`bytes`.
+
+        Args:
+            buffer: field buffer.
+            packet: packet data.
+
+        Returns:
+            Unpacked field value.
+
+        """
+        if self._field is None:
+            return None  # type: ignore[return-value]
+        return self._field.unpack(buffer, packet)
+
+
+class SchemaField(_Field[_TS]):
+    """Schema field for protocol schema."""
+
+    @property
+    def optional(self) -> 'bool':
+        """Field is optional."""
+        return True
+
+    @property
+    def schema(self) -> 'Type[_TS]':
+        """Field schema."""
+        return self._schema
+
+    def __init__(self, length: 'int | Callable[[dict[str, Any]], int]' = lambda _: -1,
+                 schema: 'Optional[Type[_TS]]' = None,
+                 default: '_TS | NoValueType | bytes' = NoValue,
+                 callback: 'Callable[[SchemaField[_TS], dict[str, Any]], None]' = lambda *_: None) -> 'None':
+        self._name = '<schema>'
+        self._callback = callback
+
+        if schema is None:
+            raise FieldError('Schema field must have a schema.')
+        self._schema = schema
+
+        if isinstance(default, bytes):
+            default = cast('_TS', schema.unpack(default))  # type: ignore[call-arg,misc]
+        self._default = default
+
+        self._length_callback = None
+        if not isinstance(length, int):
+            self._length_callback, length = length, 0
+        self._length = length
+        self._template = f'{self._length}s' if self._length else '1024s'  # use a reasonable default
+
+    def __call__(self, packet: 'dict[str, Any]') -> 'SchemaField':
+        """Update field attributes.
+
+        Args:
+            packet: packet data.
+
+        Notes:
+            This method will return a new instance of :class:`SchemaField`
+            instead of updating the current instance.
+
+        """
+        new_self = copy.copy(self)
+        new_self._callback(new_self, packet)
+        if new_self._length_callback is not None:
+            new_self._length = new_self._length_callback(packet)
+            new_self._template = f'{new_self._length}s'
+        return new_self
+
+    def pack(self, value: 'Optional[_TS | bytes]', packet: 'dict[str, Any]') -> 'bytes':
+        """Pack field value into :obj:`bytes`.
+
+        Args:
+            value: field value.
+            packet: packet data.
+
+        Returns:
+            Packed field value.
+
+        """
+        if value is None:
+            if self._default is NoValue:
+                raise NoDefaultValue(f'Field {self.name} has no default value.')
+            value = cast('_TS', self._default)
+
+        if isinstance(value, bytes):
+            return value
+        return value.pack(packet)
+
+    def unpack(self, buffer: 'bytes | IO[bytes]', packet: 'dict[str, Any]') -> '_TS':
+        """Unpack field value from :obj:`bytes`.
+
+        Args:
+            buffer: field buffer.
+            packet: packet data.
 
         Returns:
             Unpacked field value.
 
         """
         if isinstance(buffer, bytes):
-            if length is None:
-                length = self.test_length(packet, len(buffer))
-
             file = io.BytesIO(buffer)  # type: IO[bytes]
         else:
-            if length is None:
-                current = buffer.tell()
-                default_length = buffer.seek(0, io.SEEK_END) - current
-                buffer.seek(current)
-
-                length = self.test_length(packet, default_length)
             file = buffer
+        return self._schema.unpack(file, self.length, packet)
 
-        return self._protocol(file, length)  # type: ignore[abstract]
 
-    def test_length(self, packet: 'dict[str, Any]', default: 'int') -> 'int':
-        """Get field length hint.
+class ForwardMatchField(_Field[_TC]):
+    """Schema field for non-capturing forward matching."""
 
-        Arguments:
+    @property
+    def name(self) -> 'str':
+        """Field name."""
+        return self._field.name
+
+    @name.setter
+    def name(self, value: 'str') -> 'None':
+        """Set field name."""
+        self._field.name = value
+
+    @property
+    def default(self) -> '_TC | NoValueType':
+        """Field default value."""
+        return self._field.default
+
+    @default.setter
+    def default(self, value: '_TC | NoValueType') -> 'None':
+        """Set field default value."""
+        self._field.default = value
+
+    @default.deleter
+    def default(self) -> 'None':
+        """Delete field default value."""
+        self._field.default = NoValue
+
+    @property
+    def template(self) -> 'str':
+        """Field template."""
+        return self._field.template
+
+    @property
+    def length(self) -> 'int':
+        """Field size."""
+        return self._field.length
+
+    @property
+    def optional(self) -> 'bool':
+        """Field is optional."""
+        return True
+
+    @property
+    def field(self) -> '_Field[_TC]':
+        """Field instance."""
+        return self._field
+
+    def __init__(self, field: '_Field[_TC]') -> 'None':
+        self._name = '<forward_match>'
+        self._field = field
+
+    def pack(self, value: 'Optional[_TC]', packet: 'dict[str, Any]') -> 'bytes':
+        """Pack field value into :obj:`bytes`.
+
+        Args:
+            value: field value.
             packet: packet data.
-            default: default field length.
 
         Returns:
-            Field length hint.
+            Packed field value.
 
         """
-        value = self._length_hint(packet)
-        if value is None:
-            value = default
+        return b''
 
-        self._length = value
-        self._template = f'{value}s'
+    def unpack(self, buffer: 'bytes | IO[bytes]', packet: 'dict[str, Any]') -> '_TC':
+        """Unpack field value from :obj:`bytes`.
 
-        return value
+        Args:
+            buffer: field buffer.
+            packet: packet data.
+
+        Returns:
+            Unpacked field value.
+
+        """
+        return self._field.unpack(buffer, packet)

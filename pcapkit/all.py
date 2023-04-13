@@ -52,11 +52,15 @@ __all__ = [
     'Info',                                                 # Info Class
     'ProtoChain',                                           # ProtoChain
     'VersionInfo',                                          # Version
-    'NumberField', 'IntField', 'UIntField', 'ShortField',   # numeric protocol fields
-    'UShortField', 'LongField', 'ULongField', 'ByteField',
-    'UByteField', 'EnumField',
+    'NumberField', 'Int32Field', 'UInt32Field',             # numeric protocol fields
+    'Int16Field', 'UInt16Field', 'Int64Field', 'UInt64Field',
+    'Int8Field', 'UInt8Field', 'EnumField',
     'BytesField', 'StringField', 'BitField',                # text protocol fields
-    'ConditionalField', 'PayloadField',                     # misc protocol fields
+    'PaddingField',
+    'ConditionalField', 'PayloadField', 'SchemaField',      # misc protocol fields
+    'ForwardMatchField', 'NoValueField',
+    'IPv4Field', 'IPv6Field',                               # IP address protocol fields
+    'ListField', 'OptionField',                             # container protocol fields
 
     # pcapkit.dumpkit
     'PCAPIO',                                               # PCAP Dumper
@@ -77,6 +81,7 @@ __all__ = [
     'register_port', 'register_tcp_port', 'register_udp_port',
     'register_output', 'register_extractor', 'register_traceflow',
     'register_hopopt', 'register_ipv6_opts', 'register_ipv6_route',
+    'register_ipv4', 'register_hip',
     'register_tcp', 'register_mptcp',
     'register_http',
 
@@ -97,8 +102,10 @@ __all__ = [
     'HIP', 'HOPOPT', 'IPv6_Frag', 'IPv6_Opts', 'IPv6_Route', 'MH',
                                                             # IPv6 Extension Header
     'TCP', 'UDP',                                           # Transport Layer
-    'FTP', 'HTTP',                                          # Application Layer
+    'FTP', 'FTP_DATA',                                      # Application Layer
+    'HTTP',
     'Schema', 'schema',                                     # Protocol Schema
+    'Data', 'data',                                         # Protocol Data
 
     # pcapkit.toolkit
     'ipv4_reassembly', 'ipv6_reassembly', 'tcp_reassembly', 'tcp_traceflow',

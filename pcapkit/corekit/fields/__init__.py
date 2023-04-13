@@ -10,23 +10,32 @@ descriptive of the structure of protocol headers.
 
 from pcapkit.corekit.fields.field import Field
 
-from pcapkit.corekit.fields.misc import ConditionalField, PayloadField
-from pcapkit.corekit.fields.numbers import (ByteField, EnumField, IntField, LongField, NumberField,
-                                            ShortField, UByteField, UIntField, ULongField,
-                                            UShortField)
-from pcapkit.corekit.fields.strings import BitField, BytesField, StringField
+from pcapkit.corekit.fields.collections import ListField, OptionField
+from pcapkit.corekit.fields.ipaddress import IPv4Field, IPv6Field
+from pcapkit.corekit.fields.misc import (ConditionalField, ForwardMatchField, NoValueField,
+                                         PayloadField, SchemaField)
+from pcapkit.corekit.fields.numbers import (EnumField, Int8Field, Int16Field, Int32Field,
+                                            Int64Field, NumberField, UInt8Field, UInt16Field,
+                                            UInt32Field, UInt64Field)
+from pcapkit.corekit.fields.strings import BitField, BytesField, PaddingField, StringField
 
 __all__ = [
     'NumberField',
-    'IntField', 'UIntField',
-    'ShortField', 'UShortField',
-    'LongField', 'ULongField',
-    'ByteField', 'UByteField',
+    'Int32Field', 'UInt32Field',
+    'Int16Field', 'UInt16Field',
+    'Int64Field', 'UInt64Field',
+    'Int8Field', 'UInt8Field',
     'EnumField',
 
     'BytesField',
     'StringField',
     'BitField',
+    'PaddingField',
 
-    'ConditionalField', 'PayloadField',
+    'ConditionalField', 'PayloadField', 'SchemaField',
+    'ForwardMatchField', 'NoValueField',
+
+    'ListField', 'OptionField',
+
+    'IPv4Field', 'IPv6Field',
 ]

@@ -35,7 +35,7 @@ class QSFunction(Vendor):
         """Fetch registry data.
 
         Returns:
-            Registry data (:data:`~pcapkit.vendor.ipv4.qs_function.DATA`).
+            Registry data (:data:`~pcapkit.vendor.ipv6.qs_function.DATA`).
 
         """
         return DATA

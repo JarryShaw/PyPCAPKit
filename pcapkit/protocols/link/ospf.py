@@ -32,6 +32,7 @@ as below:
 
 """
 import ipaddress
+import re
 from typing import TYPE_CHECKING
 
 from pcapkit.const.ospf.authentication import Authentication as Enum_Authentication
@@ -40,18 +41,30 @@ from pcapkit.protocols.data.link.ospf import OSPF as Data_OSPF
 from pcapkit.protocols.data.link.ospf import \
     CrytographicAuthentication as Data_CrytographicAuthentication
 from pcapkit.protocols.link.link import Link
-from pcapkit.utilities.exceptions import UnsupportedCall
+from pcapkit.protocols.schema.link.ospf import OSPF as Schema_OSPF
+from pcapkit.protocols.schema.link.ospf import \
+    CrytographicAuthentication as Schema_CrytographicAuthentication
+from pcapkit.utilities.exceptions import ProtocolError, UnsupportedCall
 
 if TYPE_CHECKING:
+    from enum import IntEnum as StdlibEnum
     from ipaddress import IPv4Address
-    from typing import Any, NoReturn, Optional
+    from typing import Any, NoReturn, Optional, Type
 
+    from aenum import IntEnum as AenumEnum
     from typing_extensions import Literal
+
+    from pcapkit.protocols.protocol import Protocol
+    from pcapkit.protocols.schema.schema import Schema
 
 __all__ = ['OSPF']
 
+# Ethernet address pattern
+PAT_MAC_ADDR = re.compile(rb'(?i)(?:[0-9a-f]{2}[:-]){5}[0-9a-f]{2}')
 
-class OSPF(Link[Data_OSPF]):
+
+class OSPF(Link[Data_OSPF, Schema_OSPF],
+           schema=Schema_OSPF, data=Data_OSPF):
     """This class implements Open Shortest Path First."""
 
     ##########################################################################
@@ -113,26 +126,18 @@ class OSPF(Link[Data_OSPF]):
             Parsed packet data.
 
         """
-        if length is None:
-            length = len(self)
-
-        _vers = self._read_unpack(1)
-        _type = self._read_unpack(1)
-        _tlen = self._read_unpack(2)
-        _rtid = self._read_id_numbers()
-        _area = self._read_id_numbers()
-        _csum = self._read_fileng(2)
-        _autp = self._read_unpack(2)
+        schema = self.__schema__
 
         ospf = Data_OSPF(
-            version=_vers,
-            type=Enum_Packet.get(_type),
-            len=_tlen,
-            router_id=_rtid,
-            area_id=_area,
-            chksum=_csum,
-            autype=Enum_Authentication.get(_autp),
+            version=schema.version,
+            type=schema.type,
+            len=schema.length,
+            router_id=schema.router_id,
+            area_id=schema.area_id,
+            chksum=schema.checksum,
+            autype=schema.auth_type,
         )
+        length = schema.length if schema.length else (length or len(self))
 
         if ospf.autype == Enum_Authentication.Cryptographic_authentication:
             ospf.__update__([
@@ -140,21 +145,72 @@ class OSPF(Link[Data_OSPF]):
             ])
         else:
             ospf.__update__([
-                ('auth', self._read_fileng(8)),
+                ('auth', schema.auth_data),
             ])
         return self._decode_next_layer(ospf, length - self.length)
 
-    def make(self, **kwargs: 'Any') -> 'NoReturn':
+    def make(self,
+             version: 'int' = 2,
+             type: 'Enum_Packet | StdlibEnum | AenumEnum | str | int' = Enum_Packet.Hello,
+             type_default: 'Optional[int]' = None,
+             type_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
+             type_reversed: 'bool' = False,
+             router_id: 'IPv4Address | str | bytes | bytearray' = '0.0.0.0',  # nosec: B104
+             area_id: 'IPv4Address | str | bytes | bytearray' = '0.0.0.0',  # nosec: B104
+             checksum: 'bytes' = b'\x00\x00',
+             auth_type: 'Enum_Authentication | StdlibEnum | AenumEnum | str | int' = Enum_Authentication.No_Authentication,
+             auth_type_default: 'Optional[int]' = None,
+             auth_type_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
+             auth_type_reversed: 'bool' = False,
+             auth_data: 'bytes | Schema_CrytographicAuthentication | Data_CrytographicAuthentication' = b'\x00\x00\x00\x00\x00\x00\x00\x00',
+             payload: 'bytes | Protocol | Schema' = b'',
+             **kwargs: 'Any') -> 'Schema_OSPF':
         """Make (construct) packet data.
 
         Args:
+            version: OSPF version number.
+            type: OSPF packet type.
+            type_default: Default value for ``type`` if not specified.
+            type_namespace: Namespace for ``type``.
+            type_reversed: Reverse namespace for ``type``.
+            router_id: Router ID.
+            area_id: Area ID.
+            checksum: Checksum.
+            auth_type: Authentication type.
+            auth_type_default: Default value for ``auth_type`` if not specified.
+            auth_type_namespace: Namespace for ``auth_type``.
+            auth_type_reversed: Reverse namespace for ``auth_type``.
+            auth_data: Authentication data.
+            payload: Payload data.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
-            bytes: Constructed packet data.
+            Constructed packet data.
 
         """
-        raise NotImplementedError
+        type_ = self._make_index(type, type_default, namespace=type_namespace,  # type: ignore[call-overload]
+                                 reversed=type_reversed, pack=False)
+        auth_type_ = self._make_index(auth_type, auth_type_default, namespace=auth_type_namespace,  # type: ignore[call-overload]
+                                      reversed=auth_type_reversed, pack=False)
+
+        if auth_type_ == Enum_Authentication.Cryptographic_authentication:
+            data = self._make_encrypt_auth(auth_data)
+        else:
+            if not isinstance(auth_data, bytes):
+                raise ProtocolError(f'OSPF: invalid type for authentication data: {auth_data!r}')
+            data = auth_data
+
+        return Schema_OSPF(
+            version=version,
+            type=type_,
+            length=24 + len(payload),
+            router_id=router_id,
+            area_id=area_id,
+            checksum=checksum,
+            auth_type=auth_type_,
+            auth_data=data,
+            payload=payload,
+        )
 
     ##########################################################################
     # Data models.
@@ -178,8 +234,33 @@ class OSPF(Link[Data_OSPF]):
     # Utilities.
     ##########################################################################
 
-    def _read_id_numbers(self) -> 'IPv4Address':
+    @classmethod
+    def _make_data(cls, data: 'Data_OSPF') -> 'dict[str, Any]':  # type: ignore[override]
+        """Create key-value pairs from ``data`` for protocol construction.
+
+        Args:
+            data: protocol data
+
+        Returns:
+            Key-value pairs for protocol construction.
+
+        """
+        return {
+            'version': data.version,
+            'type': data.type,
+            'router_id': data.router_id,
+            'area_id': data.area_id,
+            'checksum': data.chksum,
+            'auth_type': data.autype,
+            'auth_data': data.auth,
+            'payload': cls._make_payload(data)
+        }
+
+    def _read_id_numbers(self, id: 'bytes') -> 'IPv4Address':
         """Read router and area IDs.
+
+        Args:
+            id: ID bytes.
 
         Returns:
             Parsed IDs as an IPv4 address.
@@ -187,7 +268,19 @@ class OSPF(Link[Data_OSPF]):
         """
         #_byte = self._read_fileng(4)
         #_addr = '.'.join(str(_) for _ in _byte)
-        return ipaddress.ip_address(self._read_fileng(4))  # type: ignore[return-value]
+        return ipaddress.ip_address(id)  # type: ignore[return-value]
+
+    def _make_id_numbers(self, id: 'IPv4Address | str | bytes | bytearray') -> 'bytes':
+        """Make router and area IDs.
+
+        Args:
+            id: ID.
+
+        Returns:
+            ID bytes.
+
+        """
+        return ipaddress.ip_address(id).packed
 
     def _read_encrypt_auth(self) -> 'Data_CrytographicAuthentication':
         """Read Authentication field when Cryptographic Authentication is employed,
@@ -212,14 +305,37 @@ class OSPF(Link[Data_OSPF]):
             Parsed packet data.
 
         """
-        _resv = self._read_fileng(2)
-        _keys = self._read_unpack(1)
-        _alen = self._read_unpack(1)
-        _seqn = self._read_unpack(4)
+        schema = Schema_CrytographicAuthentication.unpack(
+            self.__header__.auth_data, length=8,
+        )  # type: Schema_CrytographicAuthentication
+        self.__header__.__update__(auth_data=schema)
 
         auth = Data_CrytographicAuthentication(
-            key_id=_keys,
-            len=_alen,
-            seq=_seqn,
+            key_id=schema.key_id,
+            len=schema.len,
+            seq=schema.seq,
         )
         return auth
+
+    def _make_encrypt_auth(self,
+                           auth_data: 'bytes | Schema_CrytographicAuthentication | Data_CrytographicAuthentication'  # pylint: disable=line-too-long
+                           ) -> 'bytes | Schema_CrytographicAuthentication':
+        """Make Authentication field when Cryptographic Authentication is employed.
+
+        Args:
+            auth_type: Authentication type.
+            auth_data: Authentication data.
+
+        Returns:
+            Authentication bytes.
+
+        """
+        if isinstance(auth_data, (Schema_CrytographicAuthentication, bytes)):
+            return auth_data
+        if isinstance(auth_data, Data_CrytographicAuthentication):
+            return Schema_CrytographicAuthentication(
+                key_id=auth_data.key_id,
+                len=auth_data.len,
+                seq=auth_data.seq,
+            )
+        raise ProtocolError(f'OSPF: invalid type for auth_data: {auth_data!r}')

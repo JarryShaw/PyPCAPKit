@@ -32,6 +32,7 @@ from pcapkit.corekit.version import VersionInfo
 from pcapkit.protocols.data.misc.pcap.header import Header as Data_Header
 from pcapkit.protocols.data.misc.pcap.header import MagicNumber as Data_MagicNumber
 from pcapkit.protocols.protocol import Protocol
+from pcapkit.protocols.schema.misc.pcap.header import Header as Schema_Header
 from pcapkit.utilities.exceptions import EndianError, FileError, UnsupportedCall
 
 if TYPE_CHECKING:
@@ -56,7 +57,8 @@ _MAGIC_NUM = {
 }
 
 
-class Header(Protocol[Data_Header]):
+class Header(Protocol[Data_Header, Schema_Header],
+             schema=Schema_Header, data=Data_Header):
     """PCAP file global header extractor."""
 
     ##########################################################################
@@ -75,7 +77,7 @@ class Header(Protocol[Data_Header]):
 
     @property
     def version(self) -> 'VersionInfo':
-        """Version infomation of input PCAP file."""
+        """Version information of input PCAP file."""
         return self._info.version
 
     @property
@@ -129,7 +131,7 @@ class Header(Protocol[Data_Header]):
             * ``a1 b2 3c 4d`` -- Big-endian nano-timestamp PCAP file.
 
         Args:
-            length: Length of packet data.
+            length: Length of data to be read.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
@@ -141,33 +143,23 @@ class Header(Protocol[Data_Header]):
         """
         if TYPE_CHECKING:
             self._byte: 'Literal["big", "little"]'
+        schema = self.__header__
 
-        _magn = self._read_fileng(4)
+        _magn = schema.magic_number
         if _magn == b'\xd4\xc3\xb2\xa1':
-            lilendian = True
             self._nsec = False
             self._byte = 'little'
         elif _magn == b'\xa1\xb2\xc3\xd4':
-            lilendian = False
             self._nsec = False
             self._byte = 'big'
         elif _magn == b'\x4d\x3c\xb2\xa1':
-            lilendian = True
             self._nsec = True
             self._byte = 'little'
         elif _magn == b'\xa1\xb2\x3c\x4d':
-            lilendian = False
             self._nsec = True
             self._byte = 'big'
         else:
             raise FileError(5, 'Unknown file format', self._file.name)  # pylint: disable=no-member
-
-        _vmaj = self._read_unpack(2, lilendian=lilendian)
-        _vmin = self._read_unpack(2, lilendian=lilendian)
-        _zone = self._read_unpack(4, lilendian=lilendian, signed=True)
-        _acts = self._read_unpack(4, lilendian=lilendian)
-        _slen = self._read_unpack(4, lilendian=lilendian)
-        _type = self._read_protos(4)
 
         header = Data_Header(
             magic_number=Data_MagicNumber(
@@ -175,24 +167,30 @@ class Header(Protocol[Data_Header]):
                 byteorder=self._byte,
                 nanosecond=self._nsec,
             ),
-            version=VersionInfo(_vmaj, _vmin),
-            thiszone=_zone,
-            sigfigs=_acts,
-            snaplen=_slen,
-            network=_type,
+            version=VersionInfo(schema.version_major, schema.version_minor),
+            thiszone=schema.thiszone,
+            sigfigs=schema.sigfigs,
+            snaplen=schema.snaplen,
+            network=schema.network,
         )
 
         return header
 
-    def make(self, *, byteorder: 'Literal["big", "little"]' = sys.byteorder,  # pylint: disable=arguments-differ
-             lilendian: 'Optional[bool]' = None, bigendian: 'Optional[bool]' = None,
-             nanosecond: bool = False, version: 'tuple[int, int] | VersionInfo' = (2, 4),
-             version_major: 'Optional[int]' = None, version_minor: 'Optional[int]' = None,
-             thiszone: int = 0, sigfigs: int = 0, snaplen: int = 0x40_000,
+    def make(self,
+             byteorder: 'Literal["big", "little"]' = sys.byteorder,
+             lilendian: 'Optional[bool]' = None,
+             bigendian: 'Optional[bool]' = None,
+             nanosecond: bool = False,
+             version: 'tuple[int, int] | VersionInfo' = (2, 4),
+             version_major: 'Optional[int]' = None,
+             version_minor: 'Optional[int]' = None,
+             thiszone: int = 0, sigfigs: int = 0,
+             snaplen: int = 0x40_000,
              network: 'Enum_LinkType | StdlibEnum | AenumEnum | str | int' = Enum_LinkType.NULL,
              network_default: 'Optional[int]' = None,
              network_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,
-             network_reversed: bool = False, **kwargs: 'Any') -> 'bytes':
+             network_reversed: bool = False,
+             **kwargs: 'Any') -> 'Schema_Header':
         """Make (construct) packet data.
 
         Args:
@@ -216,24 +214,23 @@ class Header(Protocol[Data_Header]):
             Constructed packet data.
 
         """
-        magic_number, lilendian = self._make_magic(                    # make magic number
-            byteorder, lilendian, bigendian, nanosecond)
+        # make magic number
+        magic_number, lilendian = self._make_magic(byteorder, lilendian, bigendian, nanosecond)
 
         if version_major is None:
             version_major = version[0]
         if version_minor is None:
             version_minor = version[1]
 
-        # make packet
-        return b'%s%s%s%s%s%s%s' % (
-            magic_number,
-            self._make_pack(version_major, size=2, lilendian=lilendian),
-            self._make_pack(version_minor, size=2, lilendian=lilendian),
-            self._make_pack(thiszone, size=4, lilendian=lilendian),
-            self._make_pack(sigfigs, size=4, lilendian=lilendian),
-            self._make_pack(snaplen, size=4, lilendian=lilendian),
-            self._make_index(network, network_default, namespace=network_namespace,  # type: ignore[call-overload]
-                             reversed=network_reversed, pack=True, lilendian=lilendian),
+        return Schema_Header(
+            magic_number=magic_number,
+            version_major=version_major,
+            version_minor=version_minor,
+            thiszone=thiszone,
+            sigfigs=sigfigs,
+            snaplen=snaplen,
+            network=self._make_index(network, network_default, namespace=network_namespace,  # type: ignore[call-overload]
+                                     reversed=network_reversed, pack=False),
         )
 
     ##########################################################################
@@ -241,11 +238,11 @@ class Header(Protocol[Data_Header]):
     ##########################################################################
 
     @overload
-    def __post_init__(self, file: 'IO[bytes]', length: 'Optional[int]' = ..., **kwargs: 'Any') -> 'None': ...
+    def __post_init__(self, file: 'IO[bytes] | bytes', length: 'Optional[int]' = ..., **kwargs: 'Any') -> 'None': ...
     @overload
     def __post_init__(self, **kwargs: 'Any') -> 'None': ...  # pylint: disable=arguments-differ
 
-    def __post_init__(self, file: 'Optional[IO[bytes]]' = None,
+    def __post_init__(self, file: 'Optional[IO[bytes] | bytes]' = None,
                       length: 'Optional[int]' = None, **kwargs: 'Any') -> 'None':
         """Post initialisation hook.
 
@@ -259,9 +256,9 @@ class Header(Protocol[Data_Header]):
 
         """
         if file is None:
-            _data = self.make(**kwargs)
+            _data = self.pack(**kwargs)
         else:
-            _data = file.read(operator.length_hint(self))
+            _data = file if isinstance(file, bytes) else file.read(operator.length_hint(self))
 
         #: bytes: Raw packet data.
         self._data = _data
@@ -270,7 +267,7 @@ class Header(Protocol[Data_Header]):
         if file is not None and hasattr(file, 'name'):  # set back source filename
             self._file.name = file.name
         #: pcapkit.corekit.infoclass.Info: Parsed packet data.
-        self._info = self.read()
+        self._info = self.unpack(length, **kwargs)
 
     def __len__(self) -> 'Literal[24]':
         """Total length of corresponding protocol."""
@@ -293,6 +290,27 @@ class Header(Protocol[Data_Header]):
     ##########################################################################
     # Utilities.
     ##########################################################################
+
+    @classmethod
+    def _make_data(cls, data: 'Data_Header') -> 'dict[str, Any]':  # type: ignore[override]
+        """Create key-value pairs from ``data`` for protocol construction.
+
+        Args:
+            data: protocol data
+
+        Returns:
+            Key-value pairs for protocol construction.
+
+        """
+        return {
+            'magic_number': data.magic_number.data,
+            'version_major': data.version.major,
+            'version_minor': data.version.minor,
+            'thiszone': data.thiszone,
+            'sigfigs': data.sigfigs,
+            'snaplen': data.snaplen,
+            'network': data.network,
+        }
 
     def _read_protos(self, size: int) -> 'Enum_LinkType':
         """Read next layer protocol type.

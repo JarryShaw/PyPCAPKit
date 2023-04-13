@@ -11,6 +11,7 @@ if TYPE_CHECKING:
     from typing import Optional
 
     from pcapkit.const.ipv6.option import Option as Enum_Option
+    from pcapkit.const.ipv6.option_action import OptionAction
     from pcapkit.const.ipv6.qs_function import QSFunction
     from pcapkit.const.ipv6.router_alert import RouterAlert
     from pcapkit.const.ipv6.seed_id import SeedID
@@ -24,10 +25,11 @@ __all__ = [
 
     'RPLFlags', 'MPLFlags', 'DFFFlags',
 
+    'SMFDPDOption', 'QuickStartOption',
     'UnassignedOption', 'PadOption', 'TunnelEncapsulationLimitOption',
     'RouterAlertOption', 'CALIPSOOption', 'SMFIdentificationBasedDPDOption',
-    'SMFHashBasedDPDOption', 'PDMOption', 'QuickStartOption',
-    'RPLOption', 'MPLOption', 'ILNPOption',
+    'SMFHashBasedDPDOption', 'PDMOption', 'QuickStartRequestOption',
+    'QuickStartReportOption', 'RPLOption', 'MPLOption', 'ILNPOption',
     'LineIdentificationOption', 'JumboPayloadOption', 'HomeAddressOption',
     'IPDFFOption',
 ]
@@ -39,7 +41,7 @@ class Option(Data):
     #: Option type.
     type: 'Enum_Option'
     #: Unknown option cation.
-    action: 'int'
+    action: 'OptionAction'
     #: Change flag.
     change: 'bool'
     #: Content length.
@@ -111,7 +113,7 @@ class CALIPSOOption(Option):
 
     if TYPE_CHECKING:
         #: Compartment bitmap.
-        cmpt_bitmap: 'tuple[int, ...]'
+        cmpt_bitmap: 'bytes'
 
         def __init__(self, type: 'Enum_Option', action: 'int', change: 'bool', length: 'int', domain: 'int', cmpt_len: 'int', level: 'int', checksum: 'bytes') -> 'None': ...  # pylint: disable=super-init-not-called,unused-argument,redefined-builtin,multiple-statements,line-too-long
 
@@ -121,22 +123,23 @@ class SMFDPDOption(Option):
 
     #: DPD type.
     dpd_type: 'SMFDPDMode'
-    #: TaggerID type.
-    tid_type: 'TaggerID'
+
 
 
 class SMFIdentificationBasedDPDOption(SMFDPDOption):
     """Data model for HOPOPT **I-DPD** (Identification-Based DPD) option."""
 
+    #: TaggerID type.
+    tid_type: 'TaggerID'
     #: TaggerID length.
     tid_len: 'int'
     #: TaggerID.
-    tid: 'Optional[int | IPv4Address | IPv6Address]'
+    tid: 'Optional[bytes | IPv4Address | IPv6Address]'
     #: Identifier.
-    id: 'int'
+    id: 'bytes'
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_Option', action: 'int', change: 'bool', length: 'int', dpd_type: 'SMFDPDMode', tid_type: 'TaggerID', tid_len: 'int', tid: 'Optional[int | IPv4Address | IPv6Address]', id: 'int') -> 'None': ...  # pylint: disable=super-init-not-called,unused-argument,redefined-builtin,multiple-statements,line-too-long
+        def __init__(self, type: 'Enum_Option', action: 'int', change: 'bool', length: 'int', dpd_type: 'SMFDPDMode', tid_type: 'TaggerID', tid_len: 'int', tid: 'Optional[bytes | IPv4Address | IPv6Address]', id: 'bytes') -> 'None': ...  # pylint: disable=super-init-not-called,unused-argument,redefined-builtin,multiple-statements,line-too-long
 
 
 class SMFHashBasedDPDOption(SMFDPDOption):
@@ -146,27 +149,27 @@ class SMFHashBasedDPDOption(SMFDPDOption):
     hav: 'bytes'
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_Option', action: 'int', change: 'bool', length: 'int', dpd_type: 'SMFDPDMode', tid_type: 'TaggerID', hav: 'bytes') -> 'None': ...  # pylint: disable=super-init-not-called,unused-argument,redefined-builtin,multiple-statements,line-too-long
+        def __init__(self, type: 'Enum_Option', action: 'int', change: 'bool', length: 'int', dpd_type: 'SMFDPDMode', hav: 'bytes') -> 'None': ...  # pylint: disable=super-init-not-called,unused-argument,redefined-builtin,multiple-statements,line-too-long
 
 
 class PDMOption(Option):
     """Data model for HOPOPT Performance Diagnostic Metrics (PDM) option."""
 
     #: Scale delta time last received.
-    scaledtlr: 'timedelta'
+    scaledtlr: 'int'
     #: Scale delta time last sent.
-    scaledtls: 'timedelta'
+    scaledtls: 'int'
     #: Packet sequence number this packet.
     psntp: 'int'
     #: Packet sequence number last received.
     psnlr: 'int'
-    #: Delta time last received.
-    deltatlr: 'timedelta'
-    #: Delta time last sent.
-    deltatls: 'timedelta'
+    #: Delta time last received (in attoseconds).
+    deltatlr: 'int'
+    #: Delta time last sent (in attoseconds).
+    deltatls: 'int'
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_Option', action: 'int', change: 'bool', length: 'int', scaledtlr: 'timedelta', scaledtls: 'timedelta', psntp: 'int', psnlr: 'int', deltatlr: 'timedelta', deltatls: 'timedelta') -> 'None': ...  # pylint: disable=super-init-not-called,unused-argument,redefined-builtin,multiple-statements,line-too-long
+        def __init__(self, type: 'Enum_Option', action: 'int', change: 'bool', length: 'int', scaledtlr: 'int', scaledtls: 'int', psntp: 'int', psnlr: 'int', deltatlr: 'int', deltatls: 'int') -> 'None': ...  # pylint: disable=super-init-not-called,unused-argument,redefined-builtin,multiple-statements,line-too-long
 
 
 class QuickStartOption(Option):
@@ -176,13 +179,29 @@ class QuickStartOption(Option):
     func: 'QSFunction'
     #: Rate request/report.
     rate: 'int'
+
+
+class QuickStartRequestOption(QuickStartOption):
+    """Data model for HOPOPT Quick Start request option."""
+
     #: TTL.
-    ttl: 'Optional[timedelta]'
-    #: Nounce.
-    nounce: 'int'
+    ttl: 'timedelta'
+    #: Nonce.
+    nonce: 'int'
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_Option', action: 'int', change: 'bool', length: 'int', func: 'QSFunction', rate: 'int', ttl: 'Optional[timedelta]', nounce: 'int') -> 'None': ...  # pylint: disable=super-init-not-called,unused-argument,redefined-builtin,multiple-statements,line-too-long
+        def __init__(self, type: 'Enum_Option', action: 'int', change: 'bool', length: 'int', func: 'QSFunction', rate: 'int', ttl: 'timedelta',
+                     nonce: 'int') -> 'None': ...  # pylint: disable=super-init-not-called,unused-argument,redefined-builtin,multiple-statements,line-too-long
+
+
+class QuickStartReportOption(QuickStartOption):
+    """Data model for HOPOPT Quick Start report of approved rate option."""
+
+    #: Nonce.
+    nonce: 'int'
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_Option', action: 'int', change: 'bool', length: 'int', func: 'QSFunction', rate: 'int', nonce: 'int') -> 'None': ...
 
 
 class RPLFlags(Data):
@@ -218,11 +237,11 @@ class MPLFlags(Data):
 
     #: Max flag.
     max: 'bool'
-    #: Verification flag.
-    verification: 'bool'
+    #: Non-conformation flag.
+    drop: 'bool'
 
     if TYPE_CHECKING:
-        def __init__(self, max: 'bool', verification: 'bool') -> 'None': ...  # pylint: disable=super-init-not-called,unused-argument,redefined-builtin,multiple-statements,line-too-long
+        def __init__(self, max: 'bool', drop: 'bool') -> 'None': ...  # pylint: disable=super-init-not-called,unused-argument,redefined-builtin,multiple-statements,line-too-long
 
 
 class MPLOption(Option):
@@ -245,10 +264,10 @@ class ILNPOption(Option):
     """Data model for HOPOPT Identifier-Locator Network Protocol (ILNP) Nonce option."""
 
     #: Nonce value.
-    nounce: 'bytes'
+    nonce: 'int'
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_Option', action: 'int', change: 'bool', length: 'int', nounce: 'bytes') -> 'None': ...  # pylint: disable=super-init-not-called,unused-argument,redefined-builtin,multiple-statements,line-too-long
+        def __init__(self, type: 'Enum_Option', action: 'int', change: 'bool', length: 'int', nonce: 'int') -> 'None': ...  # pylint: disable=super-init-not-called,unused-argument,redefined-builtin,multiple-statements,line-too-long
 
 
 class LineIdentificationOption(Option):
@@ -257,20 +276,21 @@ class LineIdentificationOption(Option):
     #: Line ID length.
     line_id_len: 'int'
     #: Line ID.
-    line_id: 'int'
+    line_id: 'bytes'
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_Option', action: 'int', change: 'bool', length: 'int', line_id_len: 'int', line_id: 'int') -> 'None': ...  # pylint: disable=super-init-not-called,unused-argument,redefined-builtin,multiple-statements,line-too-long
+        def __init__(self, type: 'Enum_Option', action: 'int', change: 'bool', length: 'int', line_id_len: 'int', line_id: 'bytes') -> 'None': ...  # pylint: disable=super-init-not-called,unused-argument,redefined-builtin,multiple-statements,line-too-long
 
 
 class JumboPayloadOption(Option):
     """Data model for Jumbo Payload option."""
 
     #: Jumbo payload length.
-    payload_len: 'int'
+    jumbo_len: 'int'
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_Option', action: 'int', change: 'bool', length: 'int', payload_len: 'int') -> 'None': ...  # pylint: disable=super-init-not-called,unused-argument,redefined-builtin,multiple-statements,line-too-long
+        def __init__(self, type: 'Enum_Option', action: 'int', change: 'bool', length: 'int',
+                     jumbo_len: 'int') -> 'None': ...  # pylint: disable=super-init-not-called,unused-argument,redefined-builtin,multiple-statements,line-too-long
 
 
 class HomeAddressOption(Option):

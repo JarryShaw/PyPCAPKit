@@ -15,6 +15,7 @@ from pcapkit.corekit.protochain import ProtoChain
 from pcapkit.protocols.data.misc.raw import Raw as Data_Raw
 from pcapkit.protocols.misc.null import NoPayload
 from pcapkit.protocols.protocol import Protocol
+from pcapkit.protocols.schema.misc.raw import Raw as Schema_Raw
 from pcapkit.utilities.exceptions import UnsupportedCall
 
 if TYPE_CHECKING:
@@ -25,7 +26,8 @@ if TYPE_CHECKING:
 __all__ = ['Raw']
 
 
-class Raw(Protocol[Data_Raw]):
+class Raw(Protocol[Data_Raw, Schema_Raw],
+          schema=Schema_Raw, data=Data_Raw):
     """This class implements universal unknown protocol."""
 
     ##########################################################################
@@ -81,30 +83,33 @@ class Raw(Protocol[Data_Raw]):
 
         return raw
 
-    def make(self, **kwargs: 'Any') -> 'bytes':
+    def make(self,
+             packet: 'bytes' = b'',
+             **kwargs: 'Any') -> 'Schema_Raw':
         """Make raw packet data.
 
         Args:
-            packet (bytes): Raw packet data.
+            packet: Raw packet data.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
-            Constructed packet data.
+            Constructed packet schema.
 
         """
-        packet = kwargs.get('packet', b'')
-        return packet
+        return Schema_Raw(
+            packet=packet
+        )
 
     ##########################################################################
     # Data models.
     ##########################################################################
 
     @overload
-    def __post_init__(self, file: 'IO[bytes]', length: 'Optional[int]' = ..., **kwargs: 'Any') -> 'None': ...
+    def __post_init__(self, file: 'IO[bytes] | bytes', length: 'Optional[int]' = ..., **kwargs: 'Any') -> 'None': ...
     @overload
     def __post_init__(self, **kwargs: 'Any') -> 'None': ...  # pylint: disable=arguments-differ
 
-    def __post_init__(self, file: 'Optional[IO[bytes]]' = None,
+    def __post_init__(self, file: 'Optional[IO[bytes] | bytes]' = None,
                       length: 'Optional[int]' = None, **kwargs: 'Any') -> 'None':
         """Post initialisation hook.
 
@@ -123,19 +128,19 @@ class Raw(Protocol[Data_Raw]):
 
         """
         if file is None:
-            _data = self.make(**kwargs)
+            _data = self.pack(**kwargs)
         else:
-            _data = file.read(length)  # type: ignore[arg-type]
+            _data = file if isinstance(file, bytes) else file.read(length)  # type: ignore[arg-type]
 
         #: bytes: Raw packet data.
         self._data = _data
         #: io.BytesIO: Source packet stream.
         self._file = io.BytesIO(self._data)
         #: pcapkit.protocols.data.misc.raw.Raw: Parsed packet data.
-        self._info = self.read(length, **kwargs)
+        self._info = self.unpack(length, **kwargs)
 
         if self._info.protocol is not None and hasattr(self._info.protocol, 'name'):
-            alias = self._info.protocol.name  # type: ignore[attr-defined]
+            alias = self._info.protocol.name
         else:
             alias = self.alias
 
@@ -153,3 +158,22 @@ class Raw(Protocol[Data_Raw]):
 
         """
         raise UnsupportedCall(f'{cls.__name__!r} object cannot be interpreted as an integer')
+
+    ##########################################################################
+    # Utilities.
+    ##########################################################################
+
+    @classmethod
+    def _make_data(cls, data: 'Data_Raw') -> 'dict[str, Any]':  # type: ignore[override]
+        """Create key-value pairs from ``data`` for protocol construction.
+
+        Args:
+            data: protocol data
+
+        Returns:
+            Key-value pairs for protocol construction.
+
+        """
+        return {
+            'packet': data.packet,
+        }

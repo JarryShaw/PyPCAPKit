@@ -4,8 +4,9 @@
 =========================
 
 :mod:`pcapkit.utilities.decorators` contains several useful
-decorators, including :func:`~pcapkit.utilities.decorators.seekset`
-and :func:`~pcapkit.utilities.decorators.beholder`.
+decorators, including :func:`~pcapkit.utilities.decorators.seekset`,
+:func:`~pcapkit.utilities.decorators.beholder` and
+:func:`~pcapkit.utilities.decorators.prepare`.
 
 """
 import functools
@@ -16,19 +17,22 @@ from typing import TYPE_CHECKING, cast
 from pcapkit.utilities.exceptions import StructError
 
 if TYPE_CHECKING:
-    from typing import Callable, Optional, TypeVar
+    from typing import IO, Any, Callable, Optional, Type, TypeVar
 
     from typing_extensions import Concatenate, ParamSpec
 
     from pcapkit.protocols.protocol import Protocol
+    from pcapkit.protocols.schema.schema import Schema
 
     P = ParamSpec('P')
-    R = TypeVar('R')
+    R_seekset = TypeVar('R_seekset')
+    R_beholder = TypeVar('R_beholder', bound=Protocol)
+    R_prepare = TypeVar('R_prepare', bound=Schema)
 
-__all__ = ['seekset', 'beholder']
+__all__ = ['seekset', 'beholder', 'prepare']
 
 
-def seekset(func: 'Callable[Concatenate[Protocol, P], R]') -> 'Callable[P, R]':
+def seekset(func: 'Callable[Concatenate[Protocol, P], R_seekset]') -> 'Callable[P, R_seekset]':
     """Read file from start then set back to original.
 
     Important:
@@ -51,7 +55,7 @@ def seekset(func: 'Callable[Concatenate[Protocol, P], R]') -> 'Callable[P, R]':
     :meta decorator:
     """
     @functools.wraps(func)
-    def seekcur(*args: 'P.args', **kw: 'P.kwargs') -> 'R':
+    def seekcur(*args: 'P.args', **kw: 'P.kwargs') -> 'R_seekset':
         # extract self object
         self = cast('Protocol', args[0])
 
@@ -68,13 +72,13 @@ def seekset(func: 'Callable[Concatenate[Protocol, P], R]') -> 'Callable[P, R]':
     return seekcur
 
 
-def beholder(func: 'Callable[Concatenate[Protocol, int, Optional[int], P], R]') -> 'Callable[P, R]':
+def beholder(func: 'Callable[Concatenate[Protocol, int, Optional[int], P], R_beholder]') -> 'Callable[P, R_beholder]':
     """Behold extraction procedure.
 
     Important:
         This decorator function is designed for decorating *class methods*.
 
-    This decorate first keep the current offset of
+    This decorator first keep the current offset of
     :attr:`self._file <pcapkit.protocols.protocol.Protocol._file>`, then
     try to call the decorated function. Should any exception raised, it will
     re-parse the :attr:`self._file <pcapkit.protocols.protocol.Protocol._file>`
@@ -92,7 +96,7 @@ def beholder(func: 'Callable[Concatenate[Protocol, int, Optional[int], P], R]') 
     :meta decorator:
     """
     @functools.wraps(func)
-    def behold(*args: 'P.args', **kwargs: 'P.kwargs') -> 'R':
+    def behold(*args: 'P.args', **kwargs: 'P.kwargs') -> 'R_beholder':
         # extract self object & args
         self = cast('Protocol', args[0])
         try:
@@ -101,7 +105,6 @@ def beholder(func: 'Callable[Concatenate[Protocol, int, Optional[int], P], R]') 
             length = None
 
         # record file pointer
-        seek_cur = self._file.tell()
         try:
             # call method
             return func(*args, **kwargs)
@@ -113,9 +116,69 @@ def beholder(func: 'Callable[Concatenate[Protocol, int, Optional[int], P], R]') 
             # error = traceback.format_exc(limit=1).strip().rsplit(os.linesep, maxsplit=1)[-1]
 
             # log error
-            #logger.error(str(exc), exc_info=exc, stack_info=DEVMODE, stacklevel=stacklevel())
+            # logger.error(str(exc), exc_info=exc, stack_info=DEVMODE, stacklevel=stacklevel())
+            # if DEVMODE:
+            #    traceback.print_exc()
 
-            self._file.seek(seek_cur, os.SEEK_SET)
-            next_ = protocol(io.BytesIO(self._read_fileng(length)), length, error=str(exc))
-            return cast('R', next_)
+            file_ = self.__header__.get_payload()
+            next_ = protocol(file_, length, error=str(exc))
+            return cast('R_beholder', next_)
     return behold
+
+
+def prepare(func: 'Callable[Concatenate[Type[Schema], bytes | IO[bytes], Optional[int], Optional[dict[str, Any]], P], R_prepare]') -> 'Callable[P, R_prepare]':
+    """Prepare schema packet data before unpacking.
+
+    Important:
+        This decorate function is designed for decorating the
+        :meth:`Schema.unpack <pcapkit.protocols.schema.schema.Schema.unpack>`
+        *class method*.
+
+    This decorator will revise the parameter list provided to the original
+    :meth:`Schema.unpack <pcapkit.protocols.schema.schema.Schema.unpack>` method
+    and extract necessary information based on the given parameters, then provide
+    the revised version of parameter list to the original method.
+
+    Note:
+        The decorated function should have following signature::
+
+            func(cls, data, length, packet, *args, **kwargs)
+
+    See Also:
+        :meth:`pcapkit.protocols.schema.schema.Schema.unpack`
+
+    :param func: decorated function
+    :meta decorator:
+    """
+    @functools.wraps(func)
+    def unpack(*args: 'P.args', **kwargs: 'P.kwargs') -> 'R_prepare':
+        cls = cast('Type[Schema]', args[0])
+        data = cast('bytes | IO[bytes]', args[1])
+        length = cast('Optional[int]', args[2])
+        packet = cast('Optional[dict[str, Any]]', args[3])
+
+        if isinstance(data, bytes):
+            length = len(data) if length is None else length
+            data = io.BytesIO(data)
+        else:
+            if length is None:
+                current = data.tell()
+                length = data.seek(0, io.SEEK_END) - current
+                data.seek(current)
+
+        if length == 0:
+            raise EOFError
+
+        if packet is None:
+            packet = {}
+        packet['__length__'] = length
+
+        # call the user customised preparation method
+        # then proceed with the unpacking process
+        # and eventually revise the schema data
+        cls.pre_process(packet)
+        schema = func(cls, data, length, packet)
+        ret = cls.post_process(schema, data, length, packet)
+
+        return cast('R_prepare', ret)
+    return unpack

@@ -31,7 +31,7 @@ class HITSuite(IntEnum):
     #: Unassigned
     Unassigned_4 = 4
 
-    #: EdDSA/cSHAKE128 [RFC-ietf-drip-rid-37]
+    #: EdDSA/cSHAKE128 [:rfc:`9374`]
     EdDSA_cSHAKE128 = 5
 
     @staticmethod

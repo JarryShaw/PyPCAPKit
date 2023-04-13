@@ -34,6 +34,7 @@ below:
 
 """
 import ipaddress
+import re
 import sys
 import textwrap
 from typing import TYPE_CHECKING
@@ -45,21 +46,32 @@ from pcapkit.protocols.data.link.arp import ARP as Data_ARP
 from pcapkit.protocols.data.link.arp import Address as Data_Address
 from pcapkit.protocols.data.link.arp import Type as Data_Type
 from pcapkit.protocols.link.link import Link
+from pcapkit.protocols.schema.link.arp import ARP as Schema_ARP
 from pcapkit.utilities.compat import cached_property
+from pcapkit.utilities.exceptions import ProtocolError
 
 if TYPE_CHECKING:
+    from enum import IntEnum as StdlibEnum
     from ipaddress import IPv4Address, IPv6Address
-    from typing import Any, NoReturn, Optional
+    from typing import Any, Optional, Type
 
+    from aenum import IntEnum as AenumEnum
     from typing_extensions import Literal
+
+    from pcapkit.protocols.protocol import Protocol
+    from pcapkit.protocols.schema.schema import Schema
 
 __all__ = ['ARP']
 
 # check Python version
 py38 = ((version_info := sys.version_info).major >= 3 and version_info.minor >= 8)
 
+# Ethernet address pattern
+PAT_MAC_ADDR = re.compile(rb'(?i)(?:[0-9a-f]{2}[:-]){5}[0-9a-f]{2}')
 
-class ARP(Link[Data_ARP]):
+
+class ARP(Link[Data_ARP, Schema_ARP],
+          schema=Schema_ARP, data=Data_ARP):
     """This class implements all protocols in ARP family.
 
     - Address Resolution Protocol (:class:`~pcapkit.protocols.link.arp.ARP`) [:rfc:`826`]
@@ -149,16 +161,17 @@ class ARP(Link[Data_ARP]):
         """
         if length is None:
             length = self.__len__()
+        schema = self.__header__
 
-        _hwty = self._read_unpack(2)
-        _ptty = self._read_unpack(2)
-        _hlen = self._read_unpack(1)
-        _plen = self._read_unpack(1)
-        _oper = self._read_unpack(2)
-        _shwa = self._read_addr_resolve(_hlen, _hwty)
-        _spta = self._read_proto_resolve(_plen, _ptty)
-        _thwa = self._read_addr_resolve(_hlen, _hwty)
-        _tpta = self._read_proto_resolve(_plen, _ptty)
+        _hwty = schema.htype
+        _ptty = schema.ptype
+        _hlen = schema.hlen
+        _plen = schema.plen
+        _oper = schema.oper
+        _shwa = self._read_addr_resolve(schema.sha, _hwty)
+        _spta = self._read_proto_resolve(schema.spa, _ptty)
+        _thwa = self._read_addr_resolve(schema.tha, _hwty)
+        _tpta = self._read_proto_resolve(schema.tpa, _ptty)
 
         if _oper in (5, 6, 7):
             self._acnm = 'DRARP'
@@ -173,15 +186,12 @@ class ARP(Link[Data_ARP]):
             self._acnm = 'ARP'
             self._name = 'Address Resolution Protocol'
 
-        _htype = Enum_Hardware.get(_hwty)
-        _ptype = Enum_EtherType.get(_ptty)
-
         arp = Data_ARP(
-            htype=_htype,
-            ptype=_ptype,
+            htype=_hwty,
+            ptype=_ptty,
             hlen=_hlen,
             plen=_plen,
-            oper=Enum_Operation.get(_oper),
+            oper=_oper,
             sha=_shwa,
             spa=_spta,
             tha=_thwa,
@@ -190,17 +200,74 @@ class ARP(Link[Data_ARP]):
         )
         return self._decode_next_layer(arp, -1, length - arp.len)
 
-    def make(self, **kwargs: 'Any') -> 'NoReturn':
+    def make(self, *,
+             htype: 'Enum_Hardware | StdlibEnum | AenumEnum | str | int' = Enum_Hardware.Ethernet,
+             htype_default: 'Optional[int]' = None,
+             htype_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
+             htype_reversed: 'bool' = False,
+             ptype: 'Enum_EtherType | StdlibEnum | AenumEnum | str | int' = Enum_EtherType.Internet_Protocol_version_4,
+             ptype_default: 'Optional[int]' = None,
+             ptype_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
+             ptype_reversed: 'bool' = False,
+             hlen: 'int' = 6,
+             plen: 'int' = 4,
+             oper: 'Enum_Operation | StdlibEnum | AenumEnum | str | int' = Enum_Operation.REQUEST,
+             oper_default: 'Optional[int]' = None,
+             oper_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
+             oper_reversed: 'bool' = False,
+             sha: 'str | bytes | bytearray' = '00:00:00:00:00:00',
+             spa: 'IPv4Address | IPv6Address | str | bytes | bytearray' = '0.0.0.0',  # nosec: B104
+             tha: 'str | bytes | bytearray' = '00:00:00:00:00:00',
+             tpa: 'IPv4Address | IPv6Address | str | bytes | bytearray' = '0.0.0.0',  # nosec: B104
+             payload: 'bytes | Protocol | Schema' = b'',
+             **kwargs: 'Any') -> 'Schema_ARP':
         """Make (construct) packet data.
 
         Args:
+            htype: Hardware type.
+            htype_default: Default value of hardware type.
+            htype_namespace: Namespace of hardware type.
+            htype_reversed: Reversed flag of hardware type.
+            ptype: Protocol type.
+            ptype_default: Default value of protocol type.
+            ptype_namespace: Namespace of protocol type.
+            ptype_reversed: Reversed flag of protocol type.
+            hlen: Hardware address length.
+            plen: Protocol address length.
+            oper: Operation.
+            oper_default: Default value of operation.
+            oper_namespace: Namespace of operation.
+            oper_reversed: Reversed flag of operation.
+            sha: Sender hardware address.
+            spa: Sender protocol address.
+            tha: Target hardware address.
+            tpa: Target protocol address.
+            payload: Payload.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
             Constructed packet data.
 
         """
-        raise NotImplementedError
+        _htype = self._make_index(htype, htype_default, namespace=htype_namespace,  # type: ignore[call-overload]
+                                  reversed=htype_reversed, pack=False)
+        _ptype = self._make_index(ptype, ptype_default, namespace=ptype_namespace,  # type: ignore[call-overload]
+                                  reversed=ptype_reversed, pack=False)
+        _oper = self._make_index(oper, oper_default, namespace=oper_namespace,  # type: ignore[call-overload]
+                                 reversed=oper_reversed, pack=False)
+
+        return Schema_ARP(
+            htype=_htype,
+            ptype=_ptype,
+            hlen=hlen,
+            plen=plen,
+            oper=_oper,
+            sha=self._make_addr_resolve(sha, _htype),
+            spa=self._make_proto_resolve(spa, _ptype),
+            tha=self._make_addr_resolve(tha, _htype),
+            tpa=self._make_proto_resolve(tpa, _ptype),
+            payload=payload,
+        )
 
     ##########################################################################
     # Data models.
@@ -226,11 +293,35 @@ class ARP(Link[Data_ARP]):
     # Utilities.
     ##########################################################################
 
-    def _read_addr_resolve(self, length: 'int', htype: 'int') -> 'str':
+    @classmethod
+    def _make_data(cls, data: 'Data_ARP') -> 'dict[str, Any]':  # type: ignore[override]
+        """Create key-value pairs from ``data`` for protocol construction.
+
+        Args:
+            data: protocol data
+
+        Returns:
+            Key-value pairs for protocol construction.
+
+        """
+        return {
+            'htype': data.htype,
+            'ptype': data.ptype,
+            'hlen': data.hlen,
+            'plen': data.plen,
+            'oper': data.oper,
+            'sha': data.sha,
+            'spa': data.spa,
+            'tha': data.tha,
+            'tpa': data.tpa,
+            'payload': cls._make_payload(data),
+        }
+
+    def _read_addr_resolve(self, addr: 'bytes', htype: 'int') -> 'str':
         """Resolve headware address according to protocol.
 
         Arguments:
-            length: Hardware address length.
+            addr: Hardware address.
             htype: Hardware type.
 
         Returns:
@@ -238,21 +329,20 @@ class ARP(Link[Data_ARP]):
             returns ``:`` seperated *hex* encoded MAC address.
 
         """
-        if htype == 1:  # Ethernet
-            _byte = self._read_fileng(length)
+        if htype == Enum_Hardware.Ethernet:  # Ethernet
             if py38:
-                _addr = _byte.hex(':')
+                _addr = addr.hex(':')
             else:
-                _addr = ':'.join(textwrap.wrap(_byte.hex(), 2))
+                _addr = ':'.join(textwrap.wrap(addr.hex(), 2))
         else:
-            _addr = self._read_fileng(length).hex()
+            _addr = addr.hex()
         return _addr
 
-    def _read_proto_resolve(self, length: 'int', ptype: 'int') -> 'str | IPv4Address | IPv6Address':
+    def _read_proto_resolve(self, addr: 'bytes', ptype: 'int') -> 'str | IPv4Address | IPv6Address':
         """Resolve protocol address according to protocol.
 
         Arguments:
-            length: Protocol address length.
+            addr: Protocol address.
             ptype: Protocol type.
 
         Returns:
@@ -264,7 +354,51 @@ class ARP(Link[Data_ARP]):
 
         """
         if ptype == Enum_EtherType.Internet_Protocol_version_4:  # IPv4
-            return ipaddress.ip_address(self._read_fileng(length))
+            return ipaddress.ip_address(addr)
         if ptype == Enum_EtherType.Internet_Protocol_version_6:  # IPv6
-            return ipaddress.ip_address(self._read_fileng(length))
-        return self._read_fileng(length).hex()
+            return ipaddress.ip_address(addr)
+        return addr.hex()
+
+    def _make_addr_resolve(self, addr: 'str | bytes', htype: 'int') -> 'bytes':
+        """Resolve headware address according to protocol.
+
+        Arguments:
+            addr: Hardware address.
+
+        Returns:
+            Hardware address. If ``htype`` is ``1``, i.e. MAC address,
+            returns ``:`` seperated *hex* encoded MAC address.
+
+        """
+        _addr = addr.encode() if isinstance(addr, str) else addr
+
+        if htype == Enum_Hardware.Ethernet:
+            if PAT_MAC_ADDR.fullmatch(_addr) is not None:
+                return _addr.replace(b':', b'').replace(b'-', b'')
+            raise ProtocolError(f'Invalid MAC address: {addr!r}')
+        return _addr
+
+    def _make_proto_resolve(self, addr: 'IPv4Address | IPv6Address | str | bytes', ptype: 'int') -> 'bytes':
+        """Resolve protocol address according to protocol.
+
+        Arguments:
+            addr: Protocol address.
+
+        Returns:
+            Protocol address. If ``ptype`` is ``0x0800``, i.e. IPv4 adddress,
+            returns an :class:`~ipaddress.IPv4Address` object; if ``ptype`` is
+            ``0x86dd``, i.e. IPv6 address, returns an :class:`~ipaddress.IPv6Address`
+            object; otherwise, returns a raw :data:`str` representing the
+            protocol address.
+
+        """
+        if ptype == Enum_EtherType.Internet_Protocol_version_4:
+            return ipaddress.IPv4Address(addr).packed
+        if ptype == Enum_EtherType.Internet_Protocol_version_6:
+            return ipaddress.IPv6Address(addr).packed
+
+        if isinstance(addr, str):
+            return addr.encode()
+        if isinstance(addr, (ipaddress.IPv4Address, ipaddress.IPv6Address)):
+            return addr.packed
+        return addr

@@ -882,6 +882,17 @@ class LinkType(IntEnum):
     #: document.
     AUERSWALD_LOG = 296
 
+    #: [``DLT_ZWAVE_TAP``] Z-Wave packets, as specified by ITU-T Recommendation
+    #: G.9959, with a TAP meta-data header.
+    ZWAVE_TAP = 297
+
+    #: [``DLT_SILABS_DEBUG_CHANNEL``] Silicon Labs debug channel protocol, as
+    #: described in the specification.
+    SILABS_DEBUG_CHANNEL = 298
+
+    #: [``DLT_FIRA_UCI``] Ultra-wideband (UWB) controller interface protocol (UCI).
+    FIRA_UCI = 299
+
     @staticmethod
     def get(key: 'int | str', default: 'int' = -1) -> 'LinkType':
         """Backport support for original codes.

@@ -51,7 +51,7 @@
 			<integer>86</integer>
 		</dict>
 		<key>time</key>
-		<date>2017-11-19T07:49:05.471719Z</date>
+		<date>2017-11-19T23:49:05.471719Z</date>
 		<key>number</key>
 		<integer>1</integer>
 		<key>time_epoch</key>
@@ -78,7 +78,7 @@
 				<key>version</key>
 				<integer>6</integer>
 				<key>class</key>
-				<integer>96</integer>
+				<integer>0</integer>
 				<key>label</key>
 				<integer>0</integer>
 				<key>payload</key>
@@ -138,7 +138,7 @@
 			<integer>78</integer>
 		</dict>
 		<key>time</key>
-		<date>2017-11-19T07:49:05.578078Z</date>
+		<date>2017-11-19T23:49:05.578078Z</date>
 		<key>number</key>
 		<integer>2</integer>
 		<key>time_epoch</key>
@@ -165,7 +165,7 @@
 				<key>version</key>
 				<integer>6</integer>
 				<key>class</key>
-				<integer>96</integer>
+				<integer>0</integer>
 				<key>label</key>
 				<integer>0</integer>
 				<key>payload</key>
@@ -225,7 +225,7 @@
 			<integer>54</integer>
 		</dict>
 		<key>time</key>
-		<date>2017-11-19T07:49:09.777804Z</date>
+		<date>2017-11-19T23:49:09.777804Z</date>
 		<key>number</key>
 		<integer>3</integer>
 		<key>time_epoch</key>
@@ -358,6 +358,13 @@
 					<data>fI4=</data>
 					<key>urgent_pointer</key>
 					<integer>0</integer>
+					<key>connection</key>
+					<dict>
+						<key>name</key>
+						<string>Flags::FIN|ACK</string>
+						<key>value</key>
+						<integer>17</integer>
+					</dict>
 					<key>nopayload</key>
 					<dict>
 					</dict>
@@ -381,7 +388,7 @@
 			<integer>54</integer>
 		</dict>
 		<key>time</key>
-		<date>2017-11-19T07:49:09.777868Z</date>
+		<date>2017-11-19T23:49:09.777868Z</date>
 		<key>number</key>
 		<integer>4</integer>
 		<key>time_epoch</key>
@@ -514,6 +521,13 @@
 					<data>+T4=</data>
 					<key>urgent_pointer</key>
 					<integer>0</integer>
+					<key>connection</key>
+					<dict>
+						<key>name</key>
+						<string>Flags::ACK</string>
+						<key>value</key>
+						<integer>16</integer>
+					</dict>
 					<key>nopayload</key>
 					<dict>
 					</dict>
@@ -537,7 +551,7 @@
 			<integer>54</integer>
 		</dict>
 		<key>time</key>
-		<date>2017-11-19T07:49:09.913720Z</date>
+		<date>2017-11-19T23:49:09.913720Z</date>
 		<key>number</key>
 		<integer>5</integer>
 		<key>time_epoch</key>
@@ -670,6 +684,13 @@
 					<data>KvQ=</data>
 					<key>urgent_pointer</key>
 					<integer>0</integer>
+					<key>connection</key>
+					<dict>
+						<key>name</key>
+						<string>Flags::FIN|ACK</string>
+						<key>value</key>
+						<integer>17</integer>
+					</dict>
 					<key>nopayload</key>
 					<dict>
 					</dict>
@@ -693,7 +714,7 @@
 			<integer>159</integer>
 		</dict>
 		<key>time</key>
-		<date>2017-11-19T07:49:11.066835Z</date>
+		<date>2017-11-19T23:49:11.066835Z</date>
 		<key>number</key>
 		<integer>6</integer>
 		<key>time_epoch</key>
@@ -799,8 +820,6 @@
 					<data>Y7E=</data>
 					<key>raw</key>
 					<dict>
-						<key>protocol</key>
-						<integer>5001</integer>
 						<key>packet</key>
 						<data>AQEOAOErg8f5iwBnAAAABgAKVEwtV0RSNjMwMAALAAM2LjAABwABAQAFABFCOC1GOC04My1BNS1GOS00NwAIAAsxOTIuMTY4LjEuMQAJAAp0cGxvZ2luLmNuAAoADlRMLVdEUjYzMDAgNi4wAAwABTEuNy40</data>
 					</dict>

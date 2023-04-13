@@ -19,7 +19,7 @@ import traceback
 from typing import TYPE_CHECKING
 
 from pcapkit.utilities.compat import ModuleNotFoundError  # pylint: disable=redefined-builtin
-from pcapkit.utilities.logging import DEVMODE, logger
+from pcapkit.utilities.logging import DEVMODE, VERBOSE, logger
 
 if TYPE_CHECKING:
     from typing import Any
@@ -33,7 +33,7 @@ __all__ = [
     'DictError', 'ListError', 'TupleError', 'IterableError',        # TypeError
     'IOObjError', 'ProtocolUnbound', 'CallableError',               # TypeError
     'InfoError', 'IPError', 'EnumError', 'ComparisonError',         # TypeError
-    'RegistryError',                                                # TypeError
+    'RegistryError', 'FieldError',                                  # TypeError
     'FormatError', 'UnsupportedCall',                               # AttributeError
     'FileError',                                                    # IOError
     'FileExists',                                                   # FileExistsError
@@ -41,6 +41,7 @@ __all__ = [
     'ProtocolNotFound',                                             # IndexError
     'VersionError', 'IndexNotFound', 'ProtocolError',               # ValueError
     'EndianError', 'KeyExists', 'NoDefaultValue',                   # ValueError
+    'FieldValueError',                                              # ValueError
     'ProtocolNotImplemented', 'VendorNotImplemented',               # NotImplementedError
     'StructError',                                                  # struct.error
     'MissingKeyError', 'FragmentError', 'PacketError',              # KeyError
@@ -97,11 +98,14 @@ class BaseError(Exception):
         # log error
         if not quiet:
             if DEVMODE:
-                logger.error('%s: %s', type(self).__name__, str(self), exc_info=self,
-                             stack_info=True, stacklevel=-stacklevel())
-                # logger.error('%s: %s', type(self).__name__, str(self))
+                logger.error('%s: %s', type(self).__name__, str(self),
+                             exc_info=self if VERBOSE else False,
+                             stack_info=VERBOSE, stacklevel=-stacklevel())
             else:
                 logger.error('%s: %s', type(self).__name__, str(self))
+
+            # logger.error('%s: %s', type(self).__name__, str(self), exc_info=self,
+            #              stack_info=True, stacklevel=-stacklevel())
 
         if not DEVMODE:
             sys.tracebacklimit = 0
@@ -193,6 +197,10 @@ class RegistryError(BaseError, TypeError):
     """The argument(s) must be *registry* type."""
 
 
+class FieldError(BaseError, TypeError):
+    """The argument(s) must be *field* type."""
+
+
 ##############################################################################
 # AttributeError session.
 ##############################################################################
@@ -272,6 +280,10 @@ class KeyExists(BaseError, ValueError):
 
 class NoDefaultValue(BaseError, ValueError):
     """No default value."""
+
+
+class FieldValueError(BaseError, ValueError):
+    """Invalid field value."""
 
 
 ##############################################################################

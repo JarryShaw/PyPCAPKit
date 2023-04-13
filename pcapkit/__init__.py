@@ -74,7 +74,7 @@ from pcapkit.utilities.warnings import DevModeWarning
 if DEVMODE:
     warnings.showwarning('development mode enabled', DevModeWarning,
                          filename=__file__, lineno=0,
-                         line=f"PCAPKIT_DEVMODE={os.environ['PCAPKIT_DEVMODE']}")
+                         line=f"PCAPKIT_DEVMODE={os.environ.get('PCAPKIT_DEVMODE', '1')}")
 else:
     ROOT = os.path.dirname(os.path.realpath(__file__))
     tbtrim.set_trim_rule(lambda filename: ROOT in os.path.realpath(filename),
@@ -106,5 +106,6 @@ __all__ = [
 
     'TCP', 'UDP',                                           # Transport Layer
 
-    'FTP', 'HTTP',                                          # Application Layer
+    'FTP', 'FTP_DATA',                                      # Application Layer
+    'HTTP',
 ]

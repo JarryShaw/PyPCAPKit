@@ -10,8 +10,8 @@ from pcapkit.protocols.data.internet.hip import AckDataParameter as HIP_AckDataP
 from pcapkit.protocols.data.internet.hip import ACKParameter as HIP_ACKParameter
 from pcapkit.protocols.data.internet.hip import CertParameter as HIP_CertParameter
 from pcapkit.protocols.data.internet.hip import Control as HIP_Control
-from pcapkit.protocols.data.internet.hip import DeffieHellmanParameter as HIP_DeffieHellmanParameter
 from pcapkit.protocols.data.internet.hip import DHGroupListParameter as HIP_DHGroupListParameter
+from pcapkit.protocols.data.internet.hip import DiffieHellmanParameter as HIP_DiffieHellmanParameter
 from pcapkit.protocols.data.internet.hip import \
     EchoRequestSignedParameter as HIP_EchoRequestSignedParameter
 from pcapkit.protocols.data.internet.hip import \
@@ -82,7 +82,10 @@ from pcapkit.protocols.data.internet.hopopt import MPLFlags as HOPOPT_MPLFlags
 from pcapkit.protocols.data.internet.hopopt import MPLOption as HOPOPT_MPLOption
 from pcapkit.protocols.data.internet.hopopt import PadOption as HOPOPT_PadOption
 from pcapkit.protocols.data.internet.hopopt import PDMOption as HOPOPT_PDMOption
-from pcapkit.protocols.data.internet.hopopt import QuickStartOption as HOPOPT_QuickStartOption
+from pcapkit.protocols.data.internet.hopopt import \
+    QuickStartReportOption as HOPOPT_QuickStartReportOption
+from pcapkit.protocols.data.internet.hopopt import \
+    QuickStartRequestOption as HOPOPT_QuickStartRequestOption
 from pcapkit.protocols.data.internet.hopopt import RouterAlertOption as HOPOPT_RouterAlertOption
 from pcapkit.protocols.data.internet.hopopt import RPLFlags as HOPOPT_RPLFlags
 from pcapkit.protocols.data.internet.hopopt import RPLOption as HOPOPT_RPLOption
@@ -95,16 +98,20 @@ from pcapkit.protocols.data.internet.hopopt import \
 from pcapkit.protocols.data.internet.hopopt import UnassignedOption as HOPOPT_UnassignedOption
 
 # Internet Protocol version 4
-from pcapkit.protocols.data.internet.ipv4 import IPv4
 from pcapkit.protocols.data.internet.ipv4 import EOOLOption as IPv4_EOOLOption
 from pcapkit.protocols.data.internet.ipv4 import ESECOption as IPv4_ESECOption
 from pcapkit.protocols.data.internet.ipv4 import Flags as IPv4_Flags
+from pcapkit.protocols.data.internet.ipv4 import IPv4
 from pcapkit.protocols.data.internet.ipv4 import LSROption as IPv4_LSROption
 from pcapkit.protocols.data.internet.ipv4 import MTUPOption as IPv4_MTUPOption
 from pcapkit.protocols.data.internet.ipv4 import MTUROption as IPv4_MTUROption
 from pcapkit.protocols.data.internet.ipv4 import NOPOption as IPv4_NOPOption
 from pcapkit.protocols.data.internet.ipv4 import OptionType as IPv4_OptionType
 from pcapkit.protocols.data.internet.ipv4 import QSOption as IPv4_QSOption
+from pcapkit.protocols.data.internet.ipv4 import \
+    QuickStartReportOption as IPv4_QuickStartReportOption
+from pcapkit.protocols.data.internet.ipv4 import \
+    QuickStartRequestOption as IPv4_QuickStartRequestOption
 from pcapkit.protocols.data.internet.ipv4 import RROption as IPv4_RROption
 from pcapkit.protocols.data.internet.ipv4 import RTRALTOption as IPv4_RTRALTOption
 from pcapkit.protocols.data.internet.ipv4 import SECOption as IPv4_SECOption
@@ -115,17 +122,20 @@ from pcapkit.protocols.data.internet.ipv4 import TROption as IPv4_TROption
 from pcapkit.protocols.data.internet.ipv4 import TSOption as IPv4_TSOption
 from pcapkit.protocols.data.internet.ipv4 import UnassignedOption as IPv4_UnassignedOption
 
+# Internet Protocol version 6
+from pcapkit.protocols.data.internet.ipv6 import IPv6
+
 # IPv6 Fragment Header
 from pcapkit.protocols.data.internet.ipv6_frag import IPv6_Frag
 
 # IPv6 Destination Options
-from pcapkit.protocols.data.internet.ipv6_opts import IPv6_Opts
 from pcapkit.protocols.data.internet.ipv6_opts import CALIPSOOption as IPv6_Opts_CALIPSOOption
 from pcapkit.protocols.data.internet.ipv6_opts import DFFFlags as IPv6_Opts_DFFFlags
 from pcapkit.protocols.data.internet.ipv6_opts import \
     HomeAddressOption as IPv6_Opts_HomeAddressOption
 from pcapkit.protocols.data.internet.ipv6_opts import ILNPOption as IPv6_Opts_ILNPOption
 from pcapkit.protocols.data.internet.ipv6_opts import IPDFFOption as IPv6_Opts_IPDFFOption
+from pcapkit.protocols.data.internet.ipv6_opts import IPv6_Opts
 from pcapkit.protocols.data.internet.ipv6_opts import \
     JumboPayloadOption as IPv6_Opts_JumboPayloadOption
 from pcapkit.protocols.data.internet.ipv6_opts import \
@@ -134,7 +144,10 @@ from pcapkit.protocols.data.internet.ipv6_opts import MPLFlags as IPv6_Opts_MPLF
 from pcapkit.protocols.data.internet.ipv6_opts import MPLOption as IPv6_Opts_MPLOption
 from pcapkit.protocols.data.internet.ipv6_opts import PadOption as IPv6_Opts_PadOption
 from pcapkit.protocols.data.internet.ipv6_opts import PDMOption as IPv6_Opts_PDMOption
-from pcapkit.protocols.data.internet.ipv6_opts import QuickStartOption as IPv6_Opts_QuickStartOption
+from pcapkit.protocols.data.internet.ipv6_opts import \
+    QuickStartReportOption as IPv6_Opts_QuickStartReportOption
+from pcapkit.protocols.data.internet.ipv6_opts import \
+    QuickStartRequestOption as IPv6_Opts_QuickStartRequestOption
 from pcapkit.protocols.data.internet.ipv6_opts import \
     RouterAlertOption as IPv6_Opts_RouterAlertOption
 from pcapkit.protocols.data.internet.ipv6_opts import RPLFlags as IPv6_Opts_RPLFlags
@@ -148,15 +161,11 @@ from pcapkit.protocols.data.internet.ipv6_opts import \
 from pcapkit.protocols.data.internet.ipv6_opts import UnassignedOption as IPv6_Opts_UnassignedOption
 
 # IPv6 Routing Header
+from pcapkit.protocols.data.internet.ipv6_route import RPL as IPv6_Route_RPL
 from pcapkit.protocols.data.internet.ipv6_route import IPv6_Route
-from pcapkit.protocols.data.internet.ipv6_route import RoutingType as IPv6_Route_RoutingType
-from pcapkit.protocols.data.internet.ipv6_route import UnknownType as IPv6_Route_UnknownType
 from pcapkit.protocols.data.internet.ipv6_route import SourceRoute as IPv6_Route_SourceRoute
 from pcapkit.protocols.data.internet.ipv6_route import Type2 as IPv6_Route_Type2
-from pcapkit.protocols.data.internet.ipv6_route import RPL as IPv6_Route_RPL
-
-# Internet Protocol version 6
-from pcapkit.protocols.data.internet.ipv6 import IPv6
+from pcapkit.protocols.data.internet.ipv6_route import UnknownType as IPv6_Route_UnknownType
 
 # Internetwork Packet Exchange
 from pcapkit.protocols.data.internet.ipx import IPX
@@ -175,7 +184,7 @@ __all__ = [
     'HIP_UnassignedParameter', 'HIP_ESPInfoParameter', 'HIP_R1CounterParameter',
     'HIP_LocatorSetParameter', 'HIP_PuzzleParameter', 'HIP_SolutionParameter',
     'HIP_SEQParameter', 'HIP_ACKParameter', 'HIP_DHGroupListParameter',
-    'HIP_DeffieHellmanParameter', 'HIP_HIPTransformParameter', 'HIP_HIPCipherParameter',
+    'HIP_DiffieHellmanParameter', 'HIP_HIPTransformParameter', 'HIP_HIPCipherParameter',
     'HIP_NATTraversalModeParameter', 'HIP_TransactionPacingParameter', 'HIP_EncryptedParameter',
     'HIP_HostIDParameter', 'HIP_HITSuiteListParameter', 'HIP_CertParameter',
     'HIP_NotificationParameter', 'HIP_EchoRequestSignedParameter', 'HIP_RegInfoParameter',
@@ -194,8 +203,8 @@ __all__ = [
     'HOPOPT_RPLFlags', 'HOPOPT_MPLFlags', 'HOPOPT_DFFFlags',
     'HOPOPT_UnassignedOption', 'HOPOPT_PadOption', 'HOPOPT_TunnelEncapsulationLimitOption',
     'HOPOPT_RouterAlertOption', 'HOPOPT_CALIPSOOption', 'HOPOPT_SMFIdentificationBasedDPDOption',
-    'HOPOPT_SMFHashBasedDPDOption', 'HOPOPT_PDMOption', 'HOPOPT_QuickStartOption',
-    'HOPOPT_RPLOption', 'HOPOPT_MPLOption', 'HOPOPT_ILNPOption',
+    'HOPOPT_SMFHashBasedDPDOption', 'HOPOPT_PDMOption', 'HOPOPT_QuickStartRequestOption',
+    'HOPOPT_QuickStartReportOption', 'HOPOPT_RPLOption', 'HOPOPT_MPLOption', 'HOPOPT_ILNPOption',
     'HOPOPT_LineIdentificationOption', 'HOPOPT_JumboPayloadOption', 'HOPOPT_HomeAddressOption',
     'HOPOPT_IPDFFOption',
 
@@ -208,6 +217,7 @@ __all__ = [
     'IPv4_ESECOption', 'IPv4_RROption', 'IPv4_SIDOption',
     'IPv4_SSROption', 'IPv4_MTUPOption', 'IPv4_MTUROption',
     'IPv4_TROption', 'IPv4_RTRALTOption', 'IPv4_QSOption',
+    'IPv4_QuickStartRequestOption', 'IPv4_QuickStartReportOption',
 
     # IPv6 Fragment Header
     'IPv6_Frag',
@@ -217,14 +227,13 @@ __all__ = [
     'IPv6_Opts_RPLFlags', 'IPv6_Opts_MPLFlags', 'IPv6_Opts_DFFFlags',
     'IPv6_Opts_UnassignedOption', 'IPv6_Opts_PadOption', 'IPv6_Opts_TunnelEncapsulationLimitOption',
     'IPv6_Opts_RouterAlertOption', 'IPv6_Opts_CALIPSOOption', 'IPv6_Opts_SMFIdentificationBasedDPDOption',
-    'IPv6_Opts_SMFHashBasedDPDOption', 'IPv6_Opts_PDMOption', 'IPv6_Opts_QuickStartOption',
-    'IPv6_Opts_RPLOption', 'IPv6_Opts_MPLOption', 'IPv6_Opts_ILNPOption',
+    'IPv6_Opts_SMFHashBasedDPDOption', 'IPv6_Opts_PDMOption', 'IPv6_Opts_QuickStartRequestOption',
+    'IPv6_Opts_QuickStartReportOption', 'IPv6_Opts_RPLOption', 'IPv6_Opts_MPLOption', 'IPv6_Opts_ILNPOption',
     'IPv6_Opts_LineIdentificationOption', 'IPv6_Opts_JumboPayloadOption', 'IPv6_Opts_HomeAddressOption',
     'IPv6_Opts_IPDFFOption',
 
     # IPv6 Routing Header
     'IPv6_Route',
-    'IPv6_Route_RoutingType',
     'IPv6_Route_UnknownType', 'IPv6_Route_SourceRoute', 'IPv6_Route_Type2', 'IPv6_Route_RPL',
 
     # Internet Protocol version 6

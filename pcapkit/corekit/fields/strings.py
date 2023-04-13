@@ -2,7 +2,7 @@
 """text field class"""
 
 import urllib.parse as urllib_parse
-from typing import TYPE_CHECKING, Any, Dict, Generic, TypeVar
+from typing import TYPE_CHECKING, Any, Dict, Generic, TypeVar, cast
 
 import chardet
 
@@ -12,18 +12,17 @@ __all__ = [
     '_TextField',
     'StringField',
     'BitField',
+    'PaddingField',
 ]
 
 if TYPE_CHECKING:
-    from typing import Any, Callable, Optional
+    from typing import Callable, Optional
 
     from typing_extensions import Literal
 
     from pcapkit.corekit.fields.field import NoValueType
 
-    ConverterFunc = Callable[[int], Any]
-    ReverserFunc = Callable[[Any], int]
-    NamespaceEntry = tuple[int, Optional[int], Optional[ConverterFunc], Optional[ReverserFunc]]
+    NamespaceEntry = tuple[int, int]
 
 _T = TypeVar('_T', 'str', 'bytes', 'dict[str, Any]')
 
@@ -35,23 +34,23 @@ class _TextField(Field[_T], Generic[_T]):
         length: field size (in bytes); if a callable is given, it should return
             an integer value and accept the current packet as its only argument.
         default: field default value, if any.
+        callback: callback function to be called upon
+            :meth:`self.__call__ <pcapkit.corekit.fields.field._Field.__call__>`.
 
     """
 
     def __init__(self, length: 'int | Callable[[dict[str, Any]], int]',
-                 default: '_T | NoValueType' = NoValue) -> 'None':
-        super().__init__(length, default)  # type: ignore[arg-type]
+                 default: '_T | NoValueType' = NoValue,
+                 callback: 'Callable[[_TextField[_T], dict[str, Any]], None]' = lambda *_: None) -> 'None':
+        super().__init__(length, default, callback)  # type: ignore[arg-type]
 
         self._template = f'{self._length}s'
 
     def __call__(self, packet: 'dict[str, Any]') -> '_TextField':
         """Update field attributes."""
-        old_length = self._length
-        super().__call__(packet)
-
-        if old_length != self._length:
-            self._template = f'{self._length}s'
-        return self
+        new_self = cast('_TextField', super().__call__(packet))
+        new_self._template = f'{new_self._length}s'
+        return new_self
 
 
 class BytesField(_TextField[bytes]):
@@ -61,6 +60,8 @@ class BytesField(_TextField[bytes]):
         length: field size (in bytes); if a callable is given, it should return
             an integer value and accept the current packet as its only argument.
         default: field default value, if any.
+        callback: callback function to be called upon
+            :meth:`self.__call__ <pcapkit.corekit.fields.field._Field.__call__>`.
 
     """
 
@@ -83,6 +84,8 @@ class StringField(_TextField[str]):
         unquote: Whether to unquote the decoded string as a URL. Should decoding failed ,
             the method will try again replacing ``'%'`` with ``'\x'`` then decoding the
             ``url`` as ``'utf-8'`` with ``'replace'`` for error handling.
+        callback: callback function to be called upon
+            :meth:`self.__call__ <pcapkit.corekit.fields.field._Field.__call__>`.
 
     .. |chardet| replace:: ``chardet``
     .. _chardet: https://chardet.readthedocs.io
@@ -92,8 +95,9 @@ class StringField(_TextField[str]):
     def __init__(self, length: 'int | Callable[[dict[str, Any]], int]',
                  default: 'str | NoValueType' = NoValue, encoding: 'Optional[str]' = None,
                  errors: 'Literal["strict", "ignore", "replace"]' = 'strict',
-                 unquote: 'bool' = False) -> 'None':
-        super().__init__(length, default)
+                 unquote: 'bool' = False,
+                 callback: 'Callable[[StringField, dict[str, Any]], None]' = lambda *_: None) -> 'None':
+        super().__init__(length, default, callback)  # type: ignore[arg-type]
 
         self._encoding = encoding
         self._errors = errors
@@ -147,16 +151,17 @@ class BitField(_TextField[Dict[str, Any]]):
             an integer value and accept the current packet as its only argument.
         default: field default value, if any.
         namespace: field namespace (a dict mapping field name to a tuple of start index,
-            end index, converter function, which takes the flag value :obj:`int` as
-            its only argument, and reverser function, which takes the converted flag value
-            and returns the original :obj:`int` value).
+            and length of the subfield).
+        callback: callback function to be called upon
+            :meth:`self.__call__ <pcapkit.corekit.fields.field._Field.__call__>`.
 
     """
 
     def __init__(self, length: 'int | Callable[[dict[str, Any]], int]',
                  default: 'dict[str, Any] | NoValueType' = NoValue,
-                 namespace: 'Optional[dict[str, NamespaceEntry]]' = None) -> 'None':
-        super().__init__(length, default)
+                 namespace: 'Optional[dict[str, NamespaceEntry]]' = None,
+                 callback: 'Callable[[BitField, dict[str, Any]], None]' = lambda *_: None) -> 'None':
+        super().__init__(length, default, callback)  # type: ignore[arg-type]
 
         self._namespace = namespace or {}
 
@@ -172,12 +177,9 @@ class BitField(_TextField[Dict[str, Any]]):
 
         """
         buffer = bytearray(self.length * 8)
-        for name, (start, end, _, reverser) in self._namespace.items():
-            end = end or start
-            if reverser is None:
-                buffer[start:end] = f'{value[name]:0{end - start}b}'.encode()
-            else:
-                buffer[start:end] = f'{reverser(value[name]):0{end - start}b}'.encode()
+        for name, (start, len) in self._namespace.items():
+            end = start + len
+            buffer[start:end] = f'{value[name]:0{end - start}b}'.encode()
         return int(b''.join(map(lambda x: b'1' if x else b'0', buffer)), 2).to_bytes(self.length, 'big')
 
     def post_process(self, value: 'bytes', packet: 'dict[str, Any]') -> 'dict[str, Any]':  # pylint: disable=unused-argument
@@ -193,9 +195,20 @@ class BitField(_TextField[Dict[str, Any]]):
         """
         buffer = {}
         binary = ''.join(f'{byte:08b}' for byte in value)
-        for name, (start, end, converter, _) in self._namespace.items():
-            if converter is None:
-                buffer[name] = int(binary[start:end], 2)
-            else:
-                buffer[name] = converter(int(binary[start:end], 2))
+        for name, (start, len) in self._namespace.items():
+            end = start + len
+            buffer[name] = int(binary[start:end], 2)
         return buffer
+
+
+class PaddingField(BytesField):
+    """Bytes value for protocol fields.
+
+    Args:
+        length: field size (in bytes); if a callable is given, it should return
+            an integer value and accept the current packet as its only argument.
+        default: field default value, if any.
+        callback: callback function to be called upon
+            :meth:`self.__call__ <pcapkit.corekit.fields.field._Field.__call__>`.
+
+    """

@@ -2,7 +2,7 @@
 
 export PIPENV_VENV_IN_PROJECT=1
 
-SHELL := /usr/local/bin/bash
+SHELL := /opt/homebrew/bin/bash
 DIR   ?= .
 
 # get version string

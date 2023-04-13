@@ -16,27 +16,28 @@ import contextlib
 from typing import TYPE_CHECKING, Generic
 
 from pcapkit.protocols.application.application import Application
-from pcapkit.protocols.data.application.http import HTTP as Data_HTTP
-from pcapkit.protocols.protocol import PT
+from pcapkit.protocols.protocol import PT, ST
 from pcapkit.utilities.exceptions import ProtocolError
 
 if TYPE_CHECKING:
-    from typing import Any, Optional, Type
+    from typing import Any, Optional
 
     from typing_extensions import Literal
-
-    from pcapkit.protocols.protocol import Protocol
 
 __all__ = ['HTTP']
 
 
-class HTTP(Application[Data_HTTP], Generic[PT]):
+class HTTP(Application[PT, ST], Generic[PT, ST]):
     """This class implements all protocols in HTTP family.
 
     - Hypertext Transfer Protocol (HTTP/1.1) [:rfc:`7230`]
     - Hypertext Transfer Protocol version 2 (HTTP/2) [:rfc:`7540`]
 
     """
+
+    if TYPE_CHECKING:
+        #: Saved subclass protocol data (only for HTTP base class).
+        _http: 'HTTP[PT, ST]'
 
     ##########################################################################
     # Properties.
@@ -69,10 +70,10 @@ class HTTP(Application[Data_HTTP], Generic[PT]):
     @classmethod
     def id(cls) -> 'tuple[Literal["HTTPv1"], Literal["HTTPv2"]]':
         """Index ID of the protocol."""
-        return ('HTTPv1', 'HTTPv2')
+        return ('HTTP', 'HTTPv1', 'HTTPv2')
 
     def read(self, length: 'Optional[int]' = None, *,
-             version: 'Optional[Literal[1, 2]]' = None, **kwargs: 'Any') -> 'Data_HTTP':
+             version: 'Optional[Literal[1, 2]]' = None, **kwargs: 'Any') -> 'PT':
         """Read (parse) packet data.
 
         Args:
@@ -84,9 +85,6 @@ class HTTP(Application[Data_HTTP], Generic[PT]):
             Parsed packet data.
 
         """
-        if TYPE_CHECKING:
-            protocol: 'Type[HTTP]'
-
         if length is None:
             length = len(self)
 
@@ -94,7 +92,7 @@ class HTTP(Application[Data_HTTP], Generic[PT]):
             http = self._guess_version(length, **kwargs)
         else:
             if version == 1:
-                from pcapkit.protocols.application.httpv1 import HTTP as protocol  # type: ignore[no-redef] # isort: skip # pylint: disable=line-too-long,import-outside-toplevel
+                from pcapkit.protocols.application.httpv1 import HTTP as protocol  # isort: skip # pylint: disable=line-too-long,import-outside-toplevel
             elif version == 2:
                 from pcapkit.protocols.application.httpv2 import HTTP as protocol  # type: ignore[no-redef] # isort: skip # pylint: disable=line-too-long,import-outside-toplevel
             else:
@@ -102,11 +100,14 @@ class HTTP(Application[Data_HTTP], Generic[PT]):
 
             http = protocol(self._file, length, **kwargs)
 
-        self._version = http.version  # type: ignore[attr-defined]
+        self._version = http.version
         self._length = http.length
+        self._http = http
         return http.info
 
-    def make(self, *, version: 'Literal[1, 2]', **kwargs: 'Any') -> 'bytes':  # type: ignore[override] # pylint: disable=arguments-differ
+    def make(self,
+             version: 'Literal[1, 2]' = 1,
+             **kwargs: 'Any') -> 'ST':
         """Make (construct) packet data.
 
         Args:
@@ -117,26 +118,39 @@ class HTTP(Application[Data_HTTP], Generic[PT]):
             bytes: Constructed packet data.
 
         """
-        if TYPE_CHECKING:
-            protocol: 'Type[HTTP]'
-
         if version == 1:
-            from pcapkit.protocols.application.httpv1 import HTTP as protocol  # type: ignore[no-redef] # isort: skip # pylint: disable=line-too-long,import-outside-toplevel
+            from pcapkit.protocols.application.httpv1 import HTTP as protocol  # isort: skip # pylint: disable=line-too-long,import-outside-toplevel
         elif version == 2:
             from pcapkit.protocols.application.httpv2 import HTTP as protocol  # type: ignore[no-redef] # isort: skip # pylint: disable=line-too-long,import-outside-toplevel
         else:
             raise ProtocolError(f"invalid HTTP version: {version}")
-
-        http = protocol(**kwargs)
-        self._version = http.version
-        self._length = http.length
-        return http.data
+        return protocol.make(**kwargs)
 
     ##########################################################################
     # Utilities.
     ##########################################################################
 
-    def _guess_version(self, length: 'int', **kwargs: 'Any') -> 'Protocol':
+    @classmethod
+    def _make_data(cls, data: 'PT') -> 'dict[str, Any]':  # type: ignore[override]
+        """Create key-value pairs from ``data`` for protocol construction.
+
+        Args:
+            data: protocol data
+
+        Returns:
+            Key-value pairs for protocol construction.
+
+        """
+        version = data.get('version', 0)
+        if version == 1:
+            from pcapkit.protocols.application.httpv1 import HTTP as protocol
+        elif version == 2:
+            from pcapkit.protocols.application.httpv2 import HTTP as protocol  # type: ignore[no-redef] # isort: skip
+        else:
+            raise ProtocolError(f"invalid HTTP version: {version}")
+        return protocol._make_data(data)  # type: ignore[arg-type]
+
+    def _guess_version(self, length: 'int', **kwargs: 'Any') -> 'HTTP':
         """Guess HTTP version.
 
         Args:
@@ -151,10 +165,10 @@ class HTTP(Application[Data_HTTP], Generic[PT]):
         """
         from pcapkit.protocols.application.httpv1 import HTTP as HTTPv1  # isort: skip # pylint: disable=line-too-long,import-outside-toplevel
         with contextlib.suppress(ProtocolError):
-            return HTTPv1(self._file, length, **kwargs)
+            return HTTPv1(self._data, length, **kwargs)
 
         from pcapkit.protocols.application.httpv2 import HTTP as HTTPv2  # isort: skip # pylint: disable=line-too-long,import-outside-toplevel
         with contextlib.suppress(ProtocolError):
-            return HTTPv2(self._file, length, **kwargs)
+            return HTTPv2(self._data, length, **kwargs)
 
         raise ProtocolError("unknown HTTP version")

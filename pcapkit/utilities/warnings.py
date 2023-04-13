@@ -24,7 +24,7 @@ __all__ = [
     # RuntimeWarning
     'FileWarning', 'LayerWarning', 'ProtocolWarning', 'AttributeWarning',
     'DevModeWarning', 'VendorRequestWarning', 'VendorRuntimeWarning',
-    'UnknownFieldWarning',
+    'UnknownFieldWarning', 'RegistryWarning',
     # ResourceWarning
     'DPKTWarning', 'ScapyWarning', 'PySharkWarning', 'EmojiWarning',
     'VendorWarning',
@@ -117,6 +117,10 @@ class VendorRuntimeWarning(BaseWarning, RuntimeWarning):
 
 class UnknownFieldWarning(BaseWarning, RuntimeWarning):
     """Unknown field."""
+
+
+class RegistryWarning(BaseWarning, RuntimeWarning):
+    """Registry warning."""
 
 
 ##############################################################################

@@ -62,11 +62,11 @@ class ReassemblyData(Info):
     """Data storage for reassembly."""
 
     #: IPv4 reassembled data.
-    ipv4: 'Optional[tuple[IP_Datagram, ...]]'
+    ipv4: 'tuple[IP_Datagram, ...]'
     #: IPv6 reassembled data.
-    ipv6: 'Optional[tuple[IP_Datagram, ...]]'
+    ipv6: 'tuple[IP_Datagram, ...]'
     #: TCP reassembled data.
-    tcp: 'Optional[tuple[TCP_Datagram, ...]]'
+    tcp: 'tuple[TCP_Datagram, ...]'
 
     if TYPE_CHECKING:
         def __init__(self, ipv4: 'Optional[tuple[IP_Datagram, ...]]', ipv6: 'Optional[tuple[IP_Datagram, ...]]', tcp: 'Optional[tuple[TCP_Datagram, ...]]') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long
@@ -464,9 +464,9 @@ class Extractor:
 
         if self._flag_f:
             ofile = self._ofile(f'{self._ofnm}/Global Header.{self._fext}')
-            ofile(self._gbhdr.info, name='Global Header')
+            ofile(self._gbhdr.info.to_dict(), name='Global Header')
         else:
-            self._ofile(self._gbhdr.info, name='Global Header')
+            self._ofile(self._gbhdr.info.to_dict(), name='Global Header')
             ofile = self._ofile
         self._type = ofile.kind
 
@@ -645,10 +645,12 @@ class Extractor:
                         return o.to_dict()
                     if isinstance(o, (ipaddress.IPv4Address, ipaddress.IPv6Address)):
                         return str(o)
-                    if isinstance(o, (enum.IntEnum, aenum.IntEnum)):
+                    if isinstance(o, (enum.Enum, aenum.Enum)):
+                        addon = {key: val for key, val in o.__dict__.items() if not key.startswith('_')}
                         return dict(
                             name=f'{type(o).__name__}::{o.name}',
                             value=o.value,
+                            **addon,
                         )
                     return super().object_hook(o)  # type: ignore[unreachable]
 
@@ -795,9 +797,9 @@ class Extractor:
         if not self._flag_q:
             if self._flag_f:
                 ofile = self._ofile(f'{self._ofnm}/{frnum}.{self._fext}')
-                ofile(frame.info, name=frnum)
+                ofile(frame.info.to_dict(), name=frnum)
             else:
-                self._ofile(frame.info, name=frnum)
+                self._ofile(frame.info.to_dict(), name=frnum)
 
         # record fragments
         if self._ipv4:

@@ -28,7 +28,9 @@ Octets      Bits        Name                    Description
 from typing import TYPE_CHECKING
 
 from pcapkit.const.reg.ethertype import EtherType as Enum_EtherType
+from pcapkit.protocols.data.link.arp import ARP as Data_ARP
 from pcapkit.protocols.link.arp import ARP
+from pcapkit.protocols.schema.link.arp import ARP as Schema_ARP
 
 if TYPE_CHECKING:
     from typing_extensions import Literal
@@ -36,7 +38,7 @@ if TYPE_CHECKING:
 __all__ = ['RARP']
 
 
-class RARP(ARP):  # pylint: disable=abstract-method
+class RARP(ARP, schema=Schema_ARP, data=Data_ARP):  # pylint: disable=abstract-method
     """This class implements Reverse Address Resolution Protocol."""
 
     ##########################################################################
