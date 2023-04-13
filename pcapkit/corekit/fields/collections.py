@@ -133,7 +133,7 @@ class ListField(_Field[list[_TL]]):
             field = self._item_type(packet)
 
             if is_schema:
-                data = cast('Schema', self._item_type).unpack(file, None, packet)  # type: ignore[call-arg,misc]
+                data = cast('SchemaField', self._item_type).unpack(file, packet)  # type: ignore[call-arg,misc]
 
                 length -= len(data)
                 if length < 0:

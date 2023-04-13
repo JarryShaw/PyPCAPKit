@@ -17,8 +17,6 @@ __all__ = [
 if TYPE_CHECKING:
     from typing import IO, Any, Callable, Optional, Type
 
-    from pcapkit.corekit.fields.field import NoValueType
-    from pcapkit.protocols.protocol import Protocol
     from pcapkit.protocols.schema.schema import Schema
 
 _TC = TypeVar('_TC')
@@ -519,7 +517,7 @@ class SchemaField(_Field[_TS]):
             file = io.BytesIO(buffer)  # type: IO[bytes]
         else:
             file = buffer
-        return self._schema(file, self.length, packet)
+        return self._schema.unpack(file, self.length, packet)
 
 
 class ForwardMatchField(_Field[_TC]):
