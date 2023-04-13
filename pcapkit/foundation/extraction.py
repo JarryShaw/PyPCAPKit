@@ -29,7 +29,7 @@ from pcapkit.utilities.warnings import (AttributeWarning, DPKTWarning, EngineWar
                                         warn)
 
 if TYPE_CHECKING:
-    from types import ModuleType
+    from types import ModuleType, TracebackType
     from typing import IO, Any, Callable, DefaultDict, Iterator, Optional, TextIO, Type, Union
 
     from dictdumper.dumper import Dumper
@@ -48,7 +48,7 @@ if TYPE_CHECKING:
     from pcapkit.foundation.traceflow import Index, TraceFlow
     from pcapkit.protocols.protocol import Protocol
 
-    Formats = Literal['pcap', 'json', 'tree', 'plist'] | str
+    Formats = Literal['pcap', 'json', 'tree', 'plist']
     Engines = Literal['default', 'pcapkit', 'dpkt', 'scapy', 'pyshark']
     Layers = Literal['link', 'internet', 'transport', 'application', 'none']
 
@@ -62,11 +62,11 @@ class ReassemblyData(Info):
     """Data storage for reassembly."""
 
     #: IPv4 reassembled data.
-    ipv4: 'Optional[tuple[IP_Datagram, ...]]'
+    ipv4: 'tuple[IP_Datagram, ...]'
     #: IPv6 reassembled data.
-    ipv6: 'Optional[tuple[IP_Datagram, ...]]'
+    ipv6: 'tuple[IP_Datagram, ...]'
     #: TCP reassembled data.
-    tcp: 'Optional[tuple[TCP_Datagram, ...]]'
+    tcp: 'tuple[TCP_Datagram, ...]'
 
     if TYPE_CHECKING:
         def __init__(self, ipv4: 'Optional[tuple[IP_Datagram, ...]]', ipv6: 'Optional[tuple[IP_Datagram, ...]]', tcp: 'Optional[tuple[TCP_Datagram, ...]]') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long
