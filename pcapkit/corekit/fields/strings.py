@@ -2,11 +2,12 @@
 """text field class"""
 
 import urllib.parse as urllib_parse
-from typing import TYPE_CHECKING, Any, Dict, Generic, TypeVar, cast
+from typing import TYPE_CHECKING, Any, Generic, TypeVar, cast
 
 import chardet
 
 from pcapkit.corekit.fields.field import Field, NoValue
+from pcapkit.utilities.compat import Dict
 
 __all__ = [
     '_TextField',

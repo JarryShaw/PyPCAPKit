@@ -17,6 +17,8 @@ __all__ = [
 if TYPE_CHECKING:
     from typing import IO, Any, Callable, Optional, Type
 
+    from pcapkit.corekit.fields.field import NoValueType
+    from pcapkit.protocols.protocol import Protocol
     from pcapkit.protocols.schema.schema import Schema
 
 _TC = TypeVar('_TC')
@@ -349,9 +351,9 @@ class SwitchField(_Field[_TC]):
         return True
 
     def __init__(self, length: 'int | Callable[[dict[str, Any]], int]' = lambda _: -1,
-                 selector: 'Callable[[dict[str, Any]], _Field[_TC]]' = lambda _: NoValueField()) -> 'None':
+                 selector: 'Callable[[dict[str, Any]], _Field[_TC]]' = lambda _: NoValueField()) -> 'None':  # type: ignore[assignment,return-value]
         self._name = '<switch>'
-        self._field = NoValueField()
+        self._field = cast('_Field[_TC]', NoValueField())
         self._selector = selector
 
     def __call__(self, packet: 'dict[str, Any]') -> 'SwitchField[_TC]':
@@ -381,7 +383,7 @@ class SwitchField(_Field[_TC]):
 
         """
         if self._field is None:
-            return NoValue
+            return NoValue  # type: ignore[unreachable]
         return self._field.pre_process(value, packet)
 
     def pack(self, value: 'Optional[_TC]', packet: 'dict[str, Any]') -> 'bytes':
@@ -396,7 +398,7 @@ class SwitchField(_Field[_TC]):
 
         """
         if self._field is None:
-            return b''
+            return b''  # type: ignore[unreachable]
         return self._field.pack(value, packet)
 
     def post_process(self, value: 'Any', packet: 'dict[str, Any]') -> '_TC':  # pylint: disable=unused-argument
@@ -411,7 +413,7 @@ class SwitchField(_Field[_TC]):
 
         """
         if self._field is None:
-            return NoValue  # type: ignore[return-value]
+            return NoValue  # type: ignore[unreachable]
         return self._field.post_process(value, packet)
 
     def unpack(self, buffer: 'bytes | IO[bytes]', packet: 'dict[str, Any]') -> '_TC':
@@ -426,7 +428,7 @@ class SwitchField(_Field[_TC]):
 
         """
         if self._field is None:
-            return None  # type: ignore[return-value]
+            return None  # type: ignore[unreachable]
         return self._field.unpack(buffer, packet)
 
 
@@ -517,7 +519,7 @@ class SchemaField(_Field[_TS]):
             file = io.BytesIO(buffer)  # type: IO[bytes]
         else:
             file = buffer
-        return self._schema.unpack(file, self.length, packet)
+        return cast('_TS', self._schema.unpack(file, self.length, packet))  # type: ignore[call-arg,misc]
 
 
 class ForwardMatchField(_Field[_TC]):

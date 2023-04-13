@@ -14,7 +14,7 @@ __all__ = [
 
     # classes
     'Collection', 'cached_property',
-    'Mapping', 'Tuple',
+    'Mapping', 'Tuple', 'List', 'Dict'
 
     # modules
     'pathlib',
@@ -119,8 +119,10 @@ else:
             return val
 
 if version < (3, 9):
-    from typing import Mapping, Tuple
+    from typing import Dict, List, Mapping, Tuple
 else:
     from collections.abc import Mapping
 
     Tuple = tuple  # type: ignore[assignment]
+    List = list  # type: ignore[misc]
+    Dict = dict  # type: ignore[misc]

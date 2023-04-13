@@ -7,6 +7,7 @@ from typing import TYPE_CHECKING, TypeVar, cast
 
 from pcapkit.corekit.fields.field import _Field
 from pcapkit.corekit.multidict import OrderedMultiDict
+from pcapkit.utilities.compat import List
 from pcapkit.utilities.exceptions import FieldValueError
 
 __all__ = [
@@ -25,7 +26,7 @@ if TYPE_CHECKING:
 _TL = TypeVar('_TL', 'Schema', '_Field', 'bytes')
 
 
-class ListField(_Field[list[_TL]]):
+class ListField(_Field[List[_TL]]):
     """Field list for protocol fields.
 
     Args:
@@ -133,7 +134,7 @@ class ListField(_Field[list[_TL]]):
             field = self._item_type(packet)
 
             if is_schema:
-                data = cast('SchemaField', self._item_type).unpack(file, packet)  # type: ignore[call-arg,misc]
+                data = cast('SchemaField', self._item_type).unpack(file, packet)
 
                 length -= len(data)
                 if length < 0:
@@ -146,7 +147,7 @@ class ListField(_Field[list[_TL]]):
                 buffer = file.read(field.length)
                 data = field.unpack(buffer, packet)
 
-            temp.append(data)  # type: ignore[arg-type]
+            temp.append(data)
         return temp
 
 
