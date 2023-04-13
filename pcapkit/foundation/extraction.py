@@ -29,7 +29,7 @@ from pcapkit.utilities.warnings import (AttributeWarning, DPKTWarning, EngineWar
                                         warn)
 
 if TYPE_CHECKING:
-    from types import ModuleType, TracebackType
+    from types import ModuleType
     from typing import IO, Any, Callable, DefaultDict, Iterator, Optional, TextIO, Type, Union
 
     from dictdumper.dumper import Dumper
@@ -645,10 +645,12 @@ class Extractor:
                         return o.to_dict()
                     if isinstance(o, (ipaddress.IPv4Address, ipaddress.IPv6Address)):
                         return str(o)
-                    if isinstance(o, (enum.IntEnum, aenum.IntEnum)):
+                    if isinstance(o, (enum.Enum, aenum.Enum)):
+                        addon = {key: val for key, val in o.__dict__.items() if not key.startswith('_')}
                         return dict(
                             name=f'{type(o).__name__}::{o.name}',
                             value=o.value,
+                            **addon,
                         )
                     return super().object_hook(o)  # type: ignore[unreachable]
 
