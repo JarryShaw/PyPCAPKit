@@ -21,7 +21,7 @@ Frame 1
   |     |-- ts_usec -> 471719
   |     |-- incl_len -> 86
   |     |-- orig_len -> 86
-  |-- time -> 2017-11-19T07:49:05.471719
+  |-- time -> 2017-11-19T23:49:05.471719
   |-- number -> 1
   |-- time_epoch -> 1511106545.471719
   |-- len -> 86
@@ -34,7 +34,7 @@ Frame 1
   |     |     |-- value -> 34525
   |     |-- ipv6 
   |           |-- version -> 6
-  |           |-- class -> 96
+  |           |-- class -> 0
   |           |-- label -> 0
   |           |-- payload -> 32
   |           |-- next 
@@ -64,7 +64,7 @@ Frame 2
   |     |-- ts_usec -> 578078
   |     |-- incl_len -> 78
   |     |-- orig_len -> 78
-  |-- time -> 2017-11-19T07:49:05.578078
+  |-- time -> 2017-11-19T23:49:05.578078
   |-- number -> 2
   |-- time_epoch -> 1511106545.578078
   |-- len -> 78
@@ -77,7 +77,7 @@ Frame 2
   |     |     |-- value -> 34525
   |     |-- ipv6 
   |           |-- version -> 6
-  |           |-- class -> 96
+  |           |-- class -> 0
   |           |-- label -> 0
   |           |-- payload -> 24
   |           |-- next 
@@ -107,7 +107,7 @@ Frame 3
   |     |-- ts_usec -> 777804
   |     |-- incl_len -> 54
   |     |-- orig_len -> 54
-  |-- time -> 2017-11-19T07:49:09.777804
+  |-- time -> 2017-11-19T23:49:09.777804
   |-- number -> 3
   |-- time_epoch -> 1511106549.777804
   |-- len -> 54
@@ -169,6 +169,9 @@ Frame 3
   |                 |-- window_size -> 31920
   |                 |-- checksum -> 7c 8e
   |                 |-- urgent_pointer -> 0
+  |                 |-- connection 
+  |                 |     |-- name -> Flags::FIN|ACK
+  |                 |     |-- value -> 17
   |                 |-- nopayload  -> NIL
   |-- protocols -> Ethernet:IPv4:TCP
 
@@ -178,7 +181,7 @@ Frame 4
   |     |-- ts_usec -> 777868
   |     |-- incl_len -> 54
   |     |-- orig_len -> 54
-  |-- time -> 2017-11-19T07:49:09.777868
+  |-- time -> 2017-11-19T23:49:09.777868
   |-- number -> 4
   |-- time_epoch -> 1511106549.777868
   |-- len -> 54
@@ -240,6 +243,9 @@ Frame 4
   |                 |-- window_size -> 65535
   |                 |-- checksum -> f9 3e
   |                 |-- urgent_pointer -> 0
+  |                 |-- connection 
+  |                 |     |-- name -> Flags::ACK
+  |                 |     |-- value -> 16
   |                 |-- nopayload  -> NIL
   |-- protocols -> Ethernet:IPv4:TCP
 
@@ -249,7 +255,7 @@ Frame 5
   |     |-- ts_usec -> 913720
   |     |-- incl_len -> 54
   |     |-- orig_len -> 54
-  |-- time -> 2017-11-19T07:49:09.913720
+  |-- time -> 2017-11-19T23:49:09.913720
   |-- number -> 5
   |-- time_epoch -> 1511106549.91372
   |-- len -> 54
@@ -311,6 +317,9 @@ Frame 5
   |                 |-- window_size -> 65535
   |                 |-- checksum -> 2a f4
   |                 |-- urgent_pointer -> 0
+  |                 |-- connection 
+  |                 |     |-- name -> Flags::FIN|ACK
+  |                 |     |-- value -> 17
   |                 |-- nopayload  -> NIL
   |-- protocols -> Ethernet:IPv4:TCP
 
@@ -320,7 +329,7 @@ Frame 6
   |     |-- ts_usec -> 66835
   |     |-- incl_len -> 159
   |     |-- orig_len -> 159
-  |-- time -> 2017-11-19T07:49:11.066835
+  |-- time -> 2017-11-19T23:49:11.066835
   |-- number -> 6
   |-- time_epoch -> 1511106551.066835
   |-- len -> 159
@@ -369,7 +378,7 @@ Frame 6
   |                 |-- len -> 125
   |                 |-- checksum -> 63 b1
   |                 |-- raw 
-  |                       |-- protocol -> 5001
+  |                       |-- protocol -> NIL
   |                       |-- packet 
   |                       |     |--> 01 01 0e 00 e1 2b 83 c7 f9 8b 00 67 00 00 00 06
   |                       |          00 0a 54 4c 2d 57 44 52 36 33 30 30 00 0b 00 03
