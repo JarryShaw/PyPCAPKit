@@ -70,7 +70,7 @@ class HTTP(Application[PT, ST], Generic[PT, ST]):
     @classmethod
     def id(cls) -> 'tuple[Literal["HTTPv1"], Literal["HTTPv2"]]':
         """Index ID of the protocol."""
-        return ('HTTPv1', 'HTTPv2')
+        return ('HTTP', 'HTTPv1', 'HTTPv2')
 
     def read(self, length: 'Optional[int]' = None, *,
              version: 'Optional[Literal[1, 2]]' = None, **kwargs: 'Any') -> 'PT':

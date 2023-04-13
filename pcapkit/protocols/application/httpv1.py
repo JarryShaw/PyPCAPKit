@@ -210,14 +210,14 @@ class HTTP(HTTPBase[Data_HTTP, Schema_HTTP],
         )
 
     @classmethod
-    def id(cls) -> 'tuple[Literal["HTTP"]]':  # type: ignore[override]
+    def id(cls) -> 'tuple[Literal["HTTP"], Literal["HTTPv1"]]':  # type: ignore[override]
         """Index ID of the protocol.
 
         Returns:
             Index ID of the protocol.
 
         """
-        return (cls.__name__,)  # type: ignore[return-value]
+        return (cls.__name__, 'HTTPv1')  # type: ignore[return-value]
 
     ##########################################################################
     # Utilities.
