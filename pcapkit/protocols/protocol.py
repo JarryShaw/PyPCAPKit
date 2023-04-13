@@ -1078,15 +1078,20 @@ class Protocol(Generic[PT, ST], metaclass=abc.ABCMeta):
         if TYPE_CHECKING:
             protocol: 'Type[Protocol]'
 
-        if length is not None and length == 0:
-            from pcapkit.protocols.misc.null import NoPayload as protocol  # type: ignore[no-redef] # isort: skip # pylint: disable=import-outside-toplevel
+        file_ = self.__header__.get_payload()
+        if length is None:
+            length = len(file_)
+
+        if length == 0:
+            from pcapkit.protocols.misc.null import \
+                NoPayload as protocol  # type: ignore[no-redef] # isort: skip # pylint: disable=import-outside-toplevel
         elif self._sigterm:
-            from pcapkit.protocols.misc.raw import Raw as protocol  # type: ignore[no-redef] # isort: skip # pylint: disable=import-outside-toplevel
+            from pcapkit.protocols.misc.raw import \
+                Raw as protocol  # type: ignore[no-redef] # isort: skip # pylint: disable=import-outside-toplevel
         else:
             module, name = self.__proto__[proto]
             protocol = cast('Type[Protocol]', getattr(importlib.import_module(module), name))
 
-        file_ = self.__header__.get_payload()
         next_ = protocol(file_, length, alias=proto, packet=packet,
                          layer=self._exlayer, protocol=self._exproto)  # type: ignore[abstract]
         return next_
