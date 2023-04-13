@@ -19,7 +19,7 @@ import traceback
 from typing import TYPE_CHECKING
 
 from pcapkit.utilities.compat import ModuleNotFoundError  # pylint: disable=redefined-builtin
-from pcapkit.utilities.logging import DEVMODE, logger
+from pcapkit.utilities.logging import DEVMODE, VERBOSE, logger
 
 if TYPE_CHECKING:
     from typing import Any
@@ -98,8 +98,9 @@ class BaseError(Exception):
         # log error
         if not quiet:
             if DEVMODE:
-                logger.error('%s: %s', type(self).__name__, str(self), exc_info=self,
-                             stack_info=True, stacklevel=-stacklevel())
+                logger.error('%s: %s', type(self).__name__, str(self),
+                             exc_info=self if VERBOSE else False,
+                             stack_info=VERBOSE, stacklevel=-stacklevel())
             else:
                 logger.error('%s: %s', type(self).__name__, str(self))
 

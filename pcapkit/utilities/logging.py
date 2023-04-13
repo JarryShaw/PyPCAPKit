@@ -25,6 +25,8 @@ BOOLEAN_STATES = {'1': True, '0': False,
 
 #: Development mode flag.
 DEVMODE = BOOLEAN_STATES.get(os.environ.get('PCAPKIT_DEVMODE', 'false').casefold(), False)
+#: Verbose output flag.
+VERBOSE = BOOLEAN_STATES.get(os.environ.get('PCAPKIT_VERBOSE', 'false').casefold(), False)
 
 ###############################################################################
 # Sphinx Mode
