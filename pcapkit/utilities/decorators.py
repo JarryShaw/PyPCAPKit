@@ -12,9 +12,11 @@ decorators, including :func:`~pcapkit.utilities.decorators.seekset`,
 import functools
 import io
 import os
+import traceback
 from typing import TYPE_CHECKING, cast
 
 from pcapkit.utilities.exceptions import StructError
+from pcapkit.utilities.logging import DEVMODE
 
 if TYPE_CHECKING:
     from typing import IO, Any, Callable, Optional, Type, TypeVar
@@ -118,6 +120,8 @@ def beholder(func: 'Callable[Concatenate[Protocol, int, Optional[int], P], R_beh
 
             # log error
             #logger.error(str(exc), exc_info=exc, stack_info=DEVMODE, stacklevel=stacklevel())
+            if DEVMODE:
+                traceback.print_exc()
 
             self._file.seek(seek_cur, os.SEEK_SET)
             next_ = protocol(io.BytesIO(self._read_fileng(length)), length, error=str(exc))
