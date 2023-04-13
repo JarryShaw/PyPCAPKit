@@ -111,8 +111,8 @@ if TYPE_CHECKING:
     from pcapkit.protocols.schema.internet.hopopt import SMFDPDOption as Schema_SMFDPDOption
 
     Option = OrderedMultiDict[Enum_Option, Data_Option]
-    OptionParser = Callable[['HOPOPT', Schema_Option, NamedArg(Option, 'options')], Data_Option]
-    OptionConstructor = Callable[['HOPOPT', Enum_Option,
+    OptionParser = Callable[[Schema_Option, NamedArg(Option, 'options')], Data_Option]
+    OptionConstructor = Callable[[Enum_Option,
                                   DefaultArg(Optional[Data_Option]), KwArg(Any)], Schema_Option]
 
 __all__ = ['HOPOPT']
@@ -466,7 +466,7 @@ class HOPOPT(Internet[Data_HOPOPT, Schema_HOPOPT],
                             getattr(self, meth_name, self._read_opt_none))
             else:
                 meth = name[0]
-            data = meth(self, schema, options=options)
+            data = meth(schema, options=options)
 
             # record option data
             options.add(dscp, data)
@@ -1228,7 +1228,7 @@ class HOPOPT(Internet[Data_HOPOPT, Schema_HOPOPT],
                     else:
                         meth = name[1]
 
-                    opt = meth(self, code, **args)
+                    opt = meth(code, **args)
                     opt_len = len(opt.pack())
 
                 options_list.append(opt)
@@ -1262,7 +1262,7 @@ class HOPOPT(Internet[Data_HOPOPT, Schema_HOPOPT],
             else:
                 meth = name[1]
 
-            opt = meth(self, code, option)
+            opt = meth(code, option)
             opt_len = len(opt.pack())
 
             options_list.append(opt)

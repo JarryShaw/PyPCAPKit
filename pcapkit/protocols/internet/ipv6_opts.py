@@ -115,8 +115,8 @@ if TYPE_CHECKING:
     from pcapkit.protocols.schema.internet.ipv6_opts import SMFDPDOption as Schema_SMFDPDOption
 
     Option = OrderedMultiDict[Enum_Option, Data_Option]
-    OptionParser = Callable[['IPv6_Opts', Schema_Option, NamedArg(Option, 'options')], Data_Option]
-    OptionConstructor = Callable[['IPv6_Opts', Enum_Option,
+    OptionParser = Callable[[Schema_Option, NamedArg(Option, 'options')], Data_Option]
+    OptionConstructor = Callable[[Enum_Option,
                                   DefaultArg(Optional[Data_Option]), KwArg(Any)], Schema_Option]
 
 __all__ = ['IPv6_Opts']
@@ -477,7 +477,7 @@ class IPv6_Opts(Internet[Data_IPv6_Opts, Schema_IPv6_Opts],
                             getattr(self, meth_name, self._read_opt_none))
             else:
                 meth = name[0]
-            data = meth(self, schema, options=options)
+            data = meth(schema, options=options)
 
             # record option data
             options.add(dscp, data)
@@ -1239,7 +1239,7 @@ class IPv6_Opts(Internet[Data_IPv6_Opts, Schema_IPv6_Opts],
                     else:
                         meth = name[1]
 
-                    opt = meth(self, code, **args)
+                    opt = meth(code, **args)
                     opt_len = len(opt.pack())
 
                 options_list.append(opt)
@@ -1273,7 +1273,7 @@ class IPv6_Opts(Internet[Data_IPv6_Opts, Schema_IPv6_Opts],
             else:
                 meth = name[1]
 
-            opt = meth(self, code, option)
+            opt = meth(code, option)
             opt_len = len(opt.pack())
 
             options_list.append(opt)

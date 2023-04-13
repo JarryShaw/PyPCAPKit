@@ -114,8 +114,8 @@ if TYPE_CHECKING:
     from pcapkit.protocols.schema.internet.ipv4 import Option as Schema_Option
 
     Option = OrderedMultiDict[Enum_OptionNumber, Data_Option]
-    OptionParser = Callable[['IPv4', Schema_Option, NamedArg(Option, 'options')], Data_Option]
-    OptionConstructor = Callable[['IPv4', Enum_OptionNumber, DefaultArg(Optional[Data_Option]),
+    OptionParser = Callable[[Schema_Option, NamedArg(Option, 'options')], Data_Option]
+    OptionConstructor = Callable[[Enum_OptionNumber, DefaultArg(Optional[Data_Option]),
                                   KwArg(Any)], Schema_Option]
 
 __all__ = ['IPv4']
@@ -555,7 +555,7 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
             meth_name = f'_read_opt_{name}'
             meth = cast('OptionParser',
                         getattr(self, meth_name, self._read_opt_unassigned))
-            data = meth(self, schema, options=options)
+            data = meth(schema, options=options)
 
             # record option data
             counter += data.length
@@ -1195,7 +1195,7 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
                     meth = cast('OptionConstructor',
                                 getattr(self, name, self._make_opt_unassigned))
 
-                    data = meth(self, code, **args)
+                    data = meth(code, **args)
                     data_len = len(data.pack())
 
                 options_list.append(data)
@@ -1222,7 +1222,7 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
             meth = cast('OptionConstructor',
                         getattr(self, name, self._make_opt_unassigned))
 
-            data = meth(self, code, option)
+            data = meth(code, option)
             data_len = len(data.pack())
 
             options_list.append(data)

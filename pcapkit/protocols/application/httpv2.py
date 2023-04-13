@@ -80,8 +80,8 @@ if TYPE_CHECKING:
 
     Flags = Schema_FrameType.Flags
 
-    FrameParser = Callable[['HTTP', Schema_FrameType, NamedArg(Schema_HTTP, 'header')], Data_HTTP]
-    FrameConstructor = Callable[['HTTP', Enum_Frame, DefaultArg(Optional[Data_HTTP]),
+    FrameParser = Callable[[Schema_FrameType, NamedArg(Schema_HTTP, 'header')], Data_HTTP]
+    FrameConstructor = Callable[[Enum_Frame, DefaultArg(Optional[Data_HTTP]),
                                  KwArg(Any)], tuple[Schema_FrameType, 'Flags']]
 
 __all__ = ['HTTP']
@@ -226,7 +226,7 @@ class HTTP(HTTPBase[Data_HTTP, Schema_HTTP],
                         getattr(self, meth_name, self._read_http_none))
         else:
             meth = name[0]
-        http = meth(self, schema.frame, header=schema)
+        http = meth(schema.frame, header=schema)
 
         return http
 
@@ -264,9 +264,9 @@ class HTTP(HTTPBase[Data_HTTP, Schema_HTTP],
                 meth = name[1]
 
             if isinstance(frame, dict):
-                frame_val, flags = meth(self, type_val, **frame)
+                frame_val, flags = meth(type_val, **frame)
             else:
-                frame_val, flags = meth(self, type_val, frame)
+                frame_val, flags = meth(type_val, frame)
             length = len(frame_val.pack()) + 9
         elif isinstance(frame, Schema):
             length = len(frame.pack()) + 9

@@ -56,8 +56,8 @@ if TYPE_CHECKING:
     from pcapkit.protocols.protocol import Protocol
     from pcapkit.protocols.schema.internet.ipv6_route import RoutingType as Schema_RoutingType
 
-    TypeParser = Callable[['IPv6_Route', Schema_RoutingType, NamedArg(Schema_IPv6_Route, 'header')], Data_IPv6_Route]
-    TypeConstructor = Callable[['IPv6_Route', Enum_Routing, DefaultArg(Optional[Data_IPv6_Route]),
+    TypeParser = Callable[[Schema_RoutingType, NamedArg(Schema_IPv6_Route, 'header')], Data_IPv6_Route]
+    TypeConstructor = Callable[[Enum_Routing, DefaultArg(Optional[Data_IPv6_Route]),
                                 NamedArg(Optional[IPv6Address], 'dst'), KwArg(Any)], Schema_RoutingType]
 
 __all__ = ['IPv6_Route']
@@ -206,7 +206,7 @@ class IPv6_Route(Internet[Data_IPv6_Route, Schema_IPv6_Route],
                             getattr(self, name, self._read_data_type_none))
         else:
             meth = name[0]
-        ipv6_route = meth(self, schema.data, header=schema)
+        ipv6_route = meth(schema.data, header=schema)
 
         if extension:
             return ipv6_route
@@ -266,9 +266,9 @@ class IPv6_Route(Internet[Data_IPv6_Route, Schema_IPv6_Route],
 
             dst_val = cast('IPv6Address', ipaddress.ip_address(dst)) if dst is not None else None
             if isinstance(data, dict):
-                data_val = meth(self, type_val, dst=dst_val, **data)
+                data_val = meth(type_val, dst=dst_val, **data)
             else:
-                data_val = meth(self, type_val, data, dst=dst_val)
+                data_val = meth(type_val, data, dst=dst_val)
             length = len(data_val.pack())
         elif isinstance(data, Schema):
             length = math.ceil((len(data.pack()) + 4) / 8)

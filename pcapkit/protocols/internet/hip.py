@@ -220,9 +220,9 @@ if TYPE_CHECKING:
     from pcapkit.protocols.schema.internet.hip import Parameter as Schema_Parameter
 
     Parameter = OrderedMultiDict[Enum_Parameter, Data_Parameter]
-    ParameterParser = Callable[['HIP', Schema_Parameter, NamedArg(int, 'version'),
+    ParameterParser = Callable[[Schema_Parameter, NamedArg(int, 'version'),
                                 NamedArg(Parameter, 'options')], Data_Parameter]
-    ParameterConstructor = Callable[['HIP', Enum_Parameter, DefaultArg(Optional[Data_Parameter]),
+    ParameterConstructor = Callable[[Enum_Parameter, DefaultArg(Optional[Data_Parameter]),
                                      NamedArg(int, 'version'), KwArg(Any)], Schema_Parameter]
 
     class Locator(TypedDict):
@@ -680,7 +680,7 @@ class HIP(Internet[Data_HIP, Schema_HIP],
             meth_name = f'_read_param_{dscp.name.lower()}'
             meth = cast('ParameterParser',
                         getattr(self, meth_name, self._read_param_unassigned))
-            data = meth(self, schema, version=version, options=options)
+            data = meth(schema, version=version, options=options)
 
             # record parameter data
             options.add(dscp, data)
@@ -2821,7 +2821,7 @@ class HIP(Internet[Data_HIP, Schema_HIP],
                     meth = cast('ParameterConstructor',
                                 getattr(self, meth_name, self._make_param_unassigned))
 
-                    data = meth(self, code, version=version, **args)  # type: Schema_Parameter
+                    data = meth(code, version=version, **args)  # type: Schema_Parameter
                     data_packed = data.pack()
 
                     parameters_list.append(data)
@@ -2834,7 +2834,7 @@ class HIP(Internet[Data_HIP, Schema_HIP],
             meth = cast('ParameterConstructor',
                         getattr(self, meth_name, self._make_param_unassigned))
 
-            data = meth(self, code, param, version=version)
+            data = meth(code, param, version=version)
             data_packed = data.pack()
 
             parameters_list.append(data)

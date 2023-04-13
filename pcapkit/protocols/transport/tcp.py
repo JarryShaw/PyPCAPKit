@@ -151,11 +151,11 @@ if TYPE_CHECKING:
     from pcapkit.protocols.schema.transport.tcp import Option as Schema_Option
 
     Option = OrderedMultiDict[Enum_Option, Data_Option]
-    OptionParser = Callable[['TCP', Schema_Option, NamedArg(Option, 'options')], Data_Option]
-    MPOptionParser = Callable[['TCP', Schema_MPTCP, NamedArg(Option, 'options')], Data_MPTCP]
-    OptionConstructor = Callable[['TCP', Enum_Option, DefaultArg(Optional[Data_Option]),
+    OptionParser = Callable[[Schema_Option, NamedArg(Option, 'options')], Data_Option]
+    MPOptionParser = Callable[[Schema_MPTCP, NamedArg(Option, 'options')], Data_MPTCP]
+    OptionConstructor = Callable[[Enum_Option, DefaultArg(Optional[Data_Option]),
                                   KwArg(Any)], Schema_Option]
-    MPOptionConstructor = Callable[['TCP', Enum_MPTCPOption, DefaultArg(Optional[Data_MPTCP]),
+    MPOptionConstructor = Callable[[Enum_MPTCPOption, DefaultArg(Optional[Data_MPTCP]),
                                     KwArg(Any)], Schema_MPTCP]
 
 __all__ = ['TCP']
@@ -688,7 +688,7 @@ class TCP(Transport[Data_TCP, Schema_TCP],
                             getattr(self, meth_name, self._read_mode_donone))
             else:
                 meth = name[0]
-            data = meth(self, schema, options=options)
+            data = meth(schema, options=options)
 
             # record option data
             options.add(kind, data)
@@ -1426,7 +1426,7 @@ class TCP(Transport[Data_TCP, Schema_TCP],
         else:
             meth = name[0]
 
-        data = meth(self, schema, options=options)
+        data = meth(schema, options=options)
         return data
 
     def _read_mptcp_unknown(self, schema: 'Schema_MPTCPUnknown', *, options: 'Option') -> 'Data_MPTCPUnknown':  # pylint: disable=unused-argument
@@ -1967,7 +1967,7 @@ class TCP(Transport[Data_TCP, Schema_TCP],
                     else:
                         meth = name[1]
 
-                    data = meth(self, code, **args)
+                    data = meth(code, **args)
                     data_len = len(data.pack())
 
                 options_list.append(data)
@@ -1998,7 +1998,7 @@ class TCP(Transport[Data_TCP, Schema_TCP],
             else:
                 meth = name[1]
 
-            data = meth(self, code, option)
+            data = meth(code, option)
             data_len = len(data.pack())
 
             options_list.append(data)
@@ -2554,7 +2554,7 @@ class TCP(Transport[Data_TCP, Schema_TCP],
         else:
             meth = name[1]
 
-        schema = meth(self, subtype_val, opt, **kwargs)
+        schema = meth(subtype_val, opt, **kwargs)
         return schema
 
     def _make_mptcp_unknown(self, subtype: 'Enum_MPTCPOption', opt: 'Optional[Data_MPTCPUnknown]' = None, *,
