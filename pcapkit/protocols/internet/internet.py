@@ -214,6 +214,7 @@ class Internet(Protocol[PT, ST], Generic[PT, ST]):  # pylint: disable=abstract-m
             module, name = self.__proto__[proto]
             protocol = cast('Type[Protocol]', getattr(importlib.import_module(module), name))
 
-        next_ = protocol(self._file, length, version=version, extension=extension,  # type: ignore[abstract,misc]
+        file_ = self.__header__.get_payload()
+        next_ = protocol(file_, length, version=version, extension=extension,  # type: ignore[abstract,misc]
                          alias=proto, packet=packet, layer=self._exlayer, protocol=self._exproto)
         return next_
