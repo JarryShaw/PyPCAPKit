@@ -85,7 +85,7 @@ class NumberField(Field[int], Generic[_T]):
     def __call__(self, packet: 'dict[str, Any]') -> 'NumberField':
         """Update field attributes."""
         new_self = copy.copy(self)
-        new_self._callback(self, packet)
+        new_self._callback(new_self, packet)
 
         endian = '>' if new_self._byteorder == 'big' else '<'
         struct_fmt = new_self.build_template(new_self._length, new_self._signed)

@@ -27,6 +27,46 @@ _TP = TypeVar('_TP', bound='Protocol')
 _TN = TypeVar('_TN', bound='NoValueType')
 
 
+class NoValueField(_Field[_TN]):
+    """Schema field for no value type (or :obj:`None`)."""
+
+    @property
+    def template(self) -> 'str':
+        """Field template."""
+        return '0s'
+
+    @property
+    def length(self) -> 'int':
+        """Field size."""
+        return 0
+
+    def pack(self, value: 'Optional[_TN]', packet: 'dict[str, Any]') -> 'bytes':
+        """Pack field value into :obj:`bytes`.
+
+        Args:
+            value: field value.
+            packet: packet data.
+
+        Returns:
+            Packed field value.
+
+        """
+        return b''
+
+    def unpack(self, buffer: 'bytes | IO[bytes]', packet: 'dict[str, Any]') -> '_TN':
+        """Unpack field value from :obj:`bytes`.
+
+        Args:
+            buffer: field buffer.
+            packet: packet data.
+
+        Returns:
+            Unpacked field value.
+
+        """
+        return None  # type: ignore[return-value]
+
+
 class ConditionalField(_Field[_TC]):
     """Conditional value for protocol fields.
 
@@ -249,7 +289,7 @@ class PayloadField(_Field[_TP]):
 
         """
         new_self = copy.copy(self)
-        new_self._callback(self, packet)
+        new_self._callback(new_self, packet)
         if new_self._length_callback is not None:
             new_self._length = new_self._length_callback(packet)
             new_self._template = f'{new_self._length}s'
@@ -311,9 +351,9 @@ class SwitchField(_Field[_TC]):
         return True
 
     def __init__(self, length: 'int | Callable[[dict[str, Any]], int]' = lambda _: -1,
-                 selector: 'Callable[[dict[str, Any]], Optional[_Field[_TC]]]' = lambda _: None) -> 'None':
+                 selector: 'Callable[[dict[str, Any]], _Field[_TC]]' = lambda _: NoValueField()) -> 'None':
         self._name = '<switch>'
-        self._field = None  # type: Optional[_Field[_TC]]
+        self._field = NoValueField()
         self._selector = selector
 
     def __call__(self, packet: 'dict[str, Any]') -> 'SwitchField[_TC]':
@@ -328,7 +368,7 @@ class SwitchField(_Field[_TC]):
         """
         new_self = copy.copy(self)
         new_self._field = self._selector(packet)
-        new_self._template = new_self._field.template if new_self._field else '1024s'  # use a reasonable default
+        new_self._template = new_self._field.template
         return new_self
 
     def pre_process(self, value: '_TC', packet: 'dict[str, Any]') -> 'Any':  # pylint: disable=unused-argument
@@ -438,7 +478,7 @@ class SchemaField(_Field[_TS]):
 
         """
         new_self = copy.copy(self)
-        new_self._callback(self, packet)
+        new_self._callback(new_self, packet)
         if new_self._length_callback is not None:
             new_self._length = new_self._length_callback(packet)
             new_self._template = f'{new_self._length}s'
@@ -559,43 +599,3 @@ class ForwardMatchField(_Field[_TC]):
 
         """
         return self._field.unpack(buffer, packet)
-
-
-class NoValueField(_Field[_TN]):
-    """Schema field for no value type (or :obj:`None`)."""
-
-    @property
-    def template(self) -> 'str':
-        """Field template."""
-        return '0s'
-
-    @property
-    def length(self) -> 'int':
-        """Field size."""
-        return 0
-
-    def pack(self, value: 'Optional[_TN]', packet: 'dict[str, Any]') -> 'bytes':
-        """Pack field value into :obj:`bytes`.
-
-        Args:
-            value: field value.
-            packet: packet data.
-
-        Returns:
-            Packed field value.
-
-        """
-        return b''
-
-    def unpack(self, buffer: 'bytes | IO[bytes]', packet: 'dict[str, Any]') -> '_TN':
-        """Unpack field value from :obj:`bytes`.
-
-        Args:
-            buffer: field buffer.
-            packet: packet data.
-
-        Returns:
-            Unpacked field value.
-
-        """
-        return None  # type: ignore[return-value]

@@ -88,8 +88,9 @@ class _Field(Generic[_T], metaclass=abc.ABCMeta):
             packet: packet data.
 
         """
-        self._callback(packet)  # type: ignore[attr-defined]
-        return self
+        new_self = copy.copy(self)
+        new_self._callback(new_self, packet)  # type: ignore[attr-defined]
+        return new_self
 
     def __repr__(self) -> 'str':
         return f'<{self.__class__.__name__} {self.name}>'
@@ -205,7 +206,7 @@ class Field(_Field[_T], Generic[_T]):
 
         """
         new_self = copy.copy(self)
-        new_self._callback(self, packet)
+        new_self._callback(new_self, packet)
         if new_self._length_callback is not None:
             new_self._length = new_self._length_callback(packet)
         return new_self

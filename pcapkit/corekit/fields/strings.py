@@ -48,11 +48,8 @@ class _TextField(Field[_T], Generic[_T]):
 
     def __call__(self, packet: 'dict[str, Any]') -> '_TextField':
         """Update field attributes."""
-        old_length = self._length
         new_self = cast('_TextField', super().__call__(packet))
-
-        if old_length != new_self._length:
-            new_self._template = f'{new_self._length}s'
+        new_self._template = f'{new_self._length}s'
         return new_self
 
 
