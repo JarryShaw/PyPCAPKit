@@ -19,7 +19,7 @@ from pcapkit.utilities.logging import DEVMODE, logger
 from pcapkit.utilities.warnings import RegistryWarning, warn
 
 if TYPE_CHECKING:
-    from typing import Any, Optional, Type
+    from typing import Any, Optional
 
     from typing_extensions import Literal
 
@@ -135,5 +135,10 @@ class Transport(Protocol[PT, ST], Generic[PT, ST]):  # pylint: disable=abstract-
 
         """
         sort_port = sorted(ports)
-        proto = sort_port[0] if sort_port[0] in self.__proto__ else sort_port[1]
+        if sort_port[0] in self.__proto__:
+            proto = sort_port[0]
+        elif sort_port[1] in self.__proto__:
+            proto = sort_port[1]
+        else:
+            proto = None  # type: ignore[assignment]
         return super()._decode_next_layer(dict_, proto, length, packet=packet)
