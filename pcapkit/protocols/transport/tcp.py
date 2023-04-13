@@ -47,11 +47,14 @@ from pcapkit.const.tcp.checksum import Checksum as Enum_Checksum
 from pcapkit.const.tcp.mp_tcp_option import MPTCPOption as Enum_MPTCPOption
 from pcapkit.const.tcp.option import Option as Enum_Option
 from pcapkit.corekit.multidict import OrderedMultiDict
+from pcapkit.protocols.data.transport.tcp import CC as Data_CC
+from pcapkit.protocols.data.transport.tcp import MPTCPDSS as Data_MPTCPDSS
+from pcapkit.protocols.data.transport.tcp import SACK as Data_SACK
+from pcapkit.protocols.data.transport.tcp import TCP as Data_TCP
 from pcapkit.protocols.data.transport.tcp import AlternateChecksumData as Data_AlternateChecksumData
 from pcapkit.protocols.data.transport.tcp import \
     AlternateChecksumRequest as Data_AlternateChecksumRequest
 from pcapkit.protocols.data.transport.tcp import Authentication as Data_Authentication
-from pcapkit.protocols.data.transport.tcp import CC as Data_CC
 from pcapkit.protocols.data.transport.tcp import CCEcho as Data_CCEcho
 from pcapkit.protocols.data.transport.tcp import CCNew as Data_CCNew
 from pcapkit.protocols.data.transport.tcp import Echo as Data_Echo
@@ -59,11 +62,11 @@ from pcapkit.protocols.data.transport.tcp import EchoReply as Data_EchoReply
 from pcapkit.protocols.data.transport.tcp import EndOfOptionList as Data_EndOfOptionList
 from pcapkit.protocols.data.transport.tcp import FastOpenCookie as Data_FastOpenCookie
 from pcapkit.protocols.data.transport.tcp import Flags as Data_Flags
+from pcapkit.protocols.data.transport.tcp import MaximumSegmentSize as Data_MaximumSegmentSize
 from pcapkit.protocols.data.transport.tcp import MD5Signature as Data_MD5Signature
 from pcapkit.protocols.data.transport.tcp import MPTCPAddAddress as Data_MPTCPAddAddress
 from pcapkit.protocols.data.transport.tcp import MPTCPCapable as Data_MPTCPCapable
 from pcapkit.protocols.data.transport.tcp import MPTCPCapableFlag as Data_MPTCPCapableFlag
-from pcapkit.protocols.data.transport.tcp import MPTCPDSS as Data_MPTCPDSS
 from pcapkit.protocols.data.transport.tcp import MPTCPFallback as Data_MPTCPFallback
 from pcapkit.protocols.data.transport.tcp import MPTCPFastclose as Data_MPTCPFastclose
 from pcapkit.protocols.data.transport.tcp import MPTCPJoinACK as Data_MPTCPJoinACK
@@ -72,37 +75,37 @@ from pcapkit.protocols.data.transport.tcp import MPTCPJoinSYNACK as Data_MPTCPJo
 from pcapkit.protocols.data.transport.tcp import MPTCPPriority as Data_MPTCPPriority
 from pcapkit.protocols.data.transport.tcp import MPTCPRemoveAddress as Data_MPTCPRemoveAddress
 from pcapkit.protocols.data.transport.tcp import MPTCPUnknown as Data_MPTCPUnknown
-from pcapkit.protocols.data.transport.tcp import MaximumSegmentSize as Data_MaximumSegmentSize
 from pcapkit.protocols.data.transport.tcp import NoOperation as Data_NoOperation
 from pcapkit.protocols.data.transport.tcp import \
     PartialOrderConnectionPermitted as Data_PartialOrderConnectionPermitted
 from pcapkit.protocols.data.transport.tcp import \
     PartialOrderConnectionProfile as Data_PartialOrderConnectionProfile
 from pcapkit.protocols.data.transport.tcp import QuickStartResponse as Data_QuickStartResponse
-from pcapkit.protocols.data.transport.tcp import SACK as Data_SACK
 from pcapkit.protocols.data.transport.tcp import SACKBlock as Data_SACKBlock
 from pcapkit.protocols.data.transport.tcp import SACKPermitted as Data_SACKPermitted
-from pcapkit.protocols.data.transport.tcp import TCP as Data_TCP
 from pcapkit.protocols.data.transport.tcp import Timestamp as Data_Timestamp
 from pcapkit.protocols.data.transport.tcp import UnassignedOption as Data_UnassignedOption
 from pcapkit.protocols.data.transport.tcp import UserTimeout as Data_UserTimeout
 from pcapkit.protocols.data.transport.tcp import WindowScale as Data_WindowScale
+from pcapkit.protocols.schema.transport.tcp import CC as Schema_CC
+from pcapkit.protocols.schema.transport.tcp import MPTCPDSS as Schema_MPTCPDSS
+from pcapkit.protocols.schema.transport.tcp import SACK as Schema_SACK
+from pcapkit.protocols.schema.transport.tcp import TCP as Schema_TCP
 from pcapkit.protocols.schema.transport.tcp import \
     AlternateChecksumData as Schema_AlternateChecksumData
 from pcapkit.protocols.schema.transport.tcp import \
     AlternateChecksumRequest as Schema_AlternateChecksumRequest
 from pcapkit.protocols.schema.transport.tcp import Authentication as Schema_Authentication
-from pcapkit.protocols.schema.transport.tcp import CC as Schema_CC
 from pcapkit.protocols.schema.transport.tcp import CCEcho as Schema_CCEcho
 from pcapkit.protocols.schema.transport.tcp import CCNew as Schema_CCNew
 from pcapkit.protocols.schema.transport.tcp import Echo as Schema_Echo
 from pcapkit.protocols.schema.transport.tcp import EchoReply as Schema_EchoReply
 from pcapkit.protocols.schema.transport.tcp import EndOfOptionList as Schema_EndOfOptionList
 from pcapkit.protocols.schema.transport.tcp import FastOpenCookie as Schema_FastOpenCookie
+from pcapkit.protocols.schema.transport.tcp import MaximumSegmentSize as Schema_MaximumSegmentSize
 from pcapkit.protocols.schema.transport.tcp import MD5Signature as Schema_MD5Signature
 from pcapkit.protocols.schema.transport.tcp import MPTCPAddAddress as Schema_MPTCPAddAddress
 from pcapkit.protocols.schema.transport.tcp import MPTCPCapable as Schema_MPTCPCapable
-from pcapkit.protocols.schema.transport.tcp import MPTCPDSS as Schema_MPTCPDSS
 from pcapkit.protocols.schema.transport.tcp import MPTCPFallback as Schema_MPTCPFallback
 from pcapkit.protocols.schema.transport.tcp import MPTCPFastclose as Schema_MPTCPFastclose
 from pcapkit.protocols.schema.transport.tcp import MPTCPJoinACK as Schema_MPTCPJoinACK
@@ -111,17 +114,14 @@ from pcapkit.protocols.schema.transport.tcp import MPTCPJoinSYNACK as Schema_MPT
 from pcapkit.protocols.schema.transport.tcp import MPTCPPriority as Schema_MPTCPPriority
 from pcapkit.protocols.schema.transport.tcp import MPTCPRemoveAddress as Schema_MPTCPRemoveAddress
 from pcapkit.protocols.schema.transport.tcp import MPTCPUnknown as Schema_MPTCPUnknown
-from pcapkit.protocols.schema.transport.tcp import MaximumSegmentSize as Schema_MaximumSegmentSize
 from pcapkit.protocols.schema.transport.tcp import NoOperation as Schema_NoOperation
 from pcapkit.protocols.schema.transport.tcp import \
     PartialOrderConnectionPermitted as Schema_PartialOrderConnectionPermitted
 from pcapkit.protocols.schema.transport.tcp import \
     PartialOrderConnectionProfile as Schema_PartialOrderConnectionProfile
 from pcapkit.protocols.schema.transport.tcp import QuickStartResponse as Schema_QuickStartResponse
-from pcapkit.protocols.schema.transport.tcp import SACK as Schema_SACK
 from pcapkit.protocols.schema.transport.tcp import SACKBlock as Schema_SACKBlock
 from pcapkit.protocols.schema.transport.tcp import SACKPermitted as Schema_SACKPermitted
-from pcapkit.protocols.schema.transport.tcp import TCP as Schema_TCP
 from pcapkit.protocols.schema.transport.tcp import Timestamp as Schema_Timestamp
 from pcapkit.protocols.schema.transport.tcp import UnassignedOption as Schema_UnassignedOption
 from pcapkit.protocols.schema.transport.tcp import UserTimeout as Schema_UserTimeout
@@ -131,7 +131,9 @@ from pcapkit.utilities.exceptions import ProtocolError
 from pcapkit.utilities.warnings import RegistryWarning, warn
 
 if TYPE_CHECKING:
+    from datetime import timedelta
     from enum import IntEnum as StdlibEnum
+    from ipaddress import IPv4Address, IPv6Address
     from typing import Any, Callable, DefaultDict, Optional, Type
 
     from aenum import IntEnum as AenumEnum
@@ -141,6 +143,7 @@ if TYPE_CHECKING:
     from pcapkit.protocols.data.transport.tcp import MPTCP as Data_MPTCP
     from pcapkit.protocols.data.transport.tcp import MPTCPJoin as Data_MPTCPJoin
     from pcapkit.protocols.data.transport.tcp import Option as Data_Option
+    from pcapkit.protocols.protocol import Protocol
     from pcapkit.protocols.schema.schema import Schema
     from pcapkit.protocols.schema.transport.tcp import MPTCP as Schema_MPTCP
     from pcapkit.protocols.schema.transport.tcp import Flags as Schema_Flags

@@ -110,11 +110,9 @@ def beholder(func: 'Callable[Concatenate[Protocol, int, Optional[int], P], R_beh
             return func(*args, **kwargs)
         except Exception as exc:
             if isinstance(exc, StructError) and exc.eof:  # pylint: disable=no-member
-                from pcapkit.protocols.misc.null import \
-                    NoPayload as protocol  # isort: skip # pylint: disable=import-outside-toplevel
+                from pcapkit.protocols.misc.null import NoPayload as protocol  # isort: skip # pylint: disable=import-outside-toplevel
             else:
-                from pcapkit.protocols.misc.raw import \
-                    Raw as protocol  # type: ignore[no-redef] # isort: skip # pylint: disable=import-outside-toplevel
+                from pcapkit.protocols.misc.raw import Raw as protocol  # type: ignore[no-redef] # isort: skip # pylint: disable=import-outside-toplevel
             # error = traceback.format_exc(limit=1).strip().rsplit(os.linesep, maxsplit=1)[-1]
 
             # log error

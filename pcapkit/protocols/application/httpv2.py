@@ -30,13 +30,13 @@ from pcapkit.const.http.frame import Frame as Enum_Frame
 from pcapkit.const.http.setting import Setting as Enum_Setting
 from pcapkit.corekit.multidict import OrderedMultiDict
 from pcapkit.protocols.application.http import HTTP as HTTPBase
+from pcapkit.protocols.data.application.httpv2 import HTTP as Data_HTTP
 from pcapkit.protocols.data.application.httpv2 import ContinuationFrame as Data_ContinuationFrame
 from pcapkit.protocols.data.application.httpv2 import \
     ContinuationFrameFlags as Data_ContinuationFrameFlags
 from pcapkit.protocols.data.application.httpv2 import DataFrame as Data_DataFrame
 from pcapkit.protocols.data.application.httpv2 import DataFrameFlags as Data_DataFrameFlags
 from pcapkit.protocols.data.application.httpv2 import GoawayFrame as Data_GoawayFrame
-from pcapkit.protocols.data.application.httpv2 import HTTP as Data_HTTP
 from pcapkit.protocols.data.application.httpv2 import HeadersFrame as Data_HeadersFrame
 from pcapkit.protocols.data.application.httpv2 import HeadersFrameFlags as Data_HeadersFrameFlags
 from pcapkit.protocols.data.application.httpv2 import PingFrame as Data_PingFrame
@@ -50,12 +50,12 @@ from pcapkit.protocols.data.application.httpv2 import SettingsFrame as Data_Sett
 from pcapkit.protocols.data.application.httpv2 import SettingsFrameFlags as Data_SettingsFrameFlags
 from pcapkit.protocols.data.application.httpv2 import UnassignedFrame as Data_UnassignedFrame
 from pcapkit.protocols.data.application.httpv2 import WindowUpdateFrame as Data_WindowUpdateFrame
+from pcapkit.protocols.schema.application.httpv2 import HTTP as Schema_HTTP
 from pcapkit.protocols.schema.application.httpv2 import \
     ContinuationFrame as Schema_ContinuationFrame
 from pcapkit.protocols.schema.application.httpv2 import DataFrame as Schema_DataFrame
 from pcapkit.protocols.schema.application.httpv2 import FrameType as Schema_FrameType
 from pcapkit.protocols.schema.application.httpv2 import GoawayFrame as Schema_GoawayFrame
-from pcapkit.protocols.schema.application.httpv2 import HTTP as Schema_HTTP
 from pcapkit.protocols.schema.application.httpv2 import HeadersFrame as Schema_HeadersFrame
 from pcapkit.protocols.schema.application.httpv2 import PingFrame as Schema_PingFrame
 from pcapkit.protocols.schema.application.httpv2 import PriorityFrame as Schema_PriorityFrame
