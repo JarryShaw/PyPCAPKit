@@ -48,7 +48,7 @@ if TYPE_CHECKING:
     from pcapkit.foundation.traceflow import Index, TraceFlow
     from pcapkit.protocols.protocol import Protocol
 
-    Formats = Literal['pcap', 'json', 'tree', 'plist']
+    Formats = Literal['pcap', 'json', 'tree', 'plist'] | str
     Engines = Literal['default', 'pcapkit', 'dpkt', 'scapy', 'pyshark']
     Layers = Literal['link', 'internet', 'transport', 'application', 'none']
 
