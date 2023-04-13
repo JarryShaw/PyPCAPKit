@@ -123,7 +123,7 @@ class HTTP(Schema):
     })
     #: Frame payload.
     frame: 'FrameType' = SwitchField(
-        length=lambda pkt: pkt['__length__'] - 9,
+        length=lambda pkt: pkt['__length__'],
         selector=http_frame_selector,
     )
 
@@ -191,7 +191,7 @@ class DataFrame(FrameType):
         lambda pkt: pkt['flags']['bit_3'],  # PADDED
     )
     #: Data.
-    data: 'bytes' = BytesField(length=lambda pkt: pkt['__length__'] - (pkt['pad_len'] + 1) if pkt['flags']['bit_3'] else 0)
+    data: 'bytes' = BytesField(length=lambda pkt: pkt['__length__'] - pkt['pad_len'] if pkt['flags']['bit_3'] else 0)
     #: Padding.
     padding: 'bytes' = ConditionalField(
         PaddingField(length=lambda pkt: pkt['pad_len']),
@@ -233,7 +233,7 @@ class HeadersFrame(FrameType):
     )
     #: Header block fragment.
     fragment: 'bytes' = BytesField(length=lambda pkt: (
-        pkt['__length__'] - (pkt['pad_len'] + 1) if pkt['flags']['bit_3'] else 0 - 5 if pkt['flags']['bit_5'] else 0
+        pkt['__length__'] - pkt['pad_len'] if pkt['flags']['bit_3'] else 0
     ))
     #: Padding.
     padding: 'bytes' = ConditionalField(
@@ -320,7 +320,7 @@ class PushPromiseFrame(FrameType):
     })
     #: Header block fragment.
     fragment: 'bytes' = BytesField(length=lambda pkt: (
-        pkt['__length__'] - (pkt['pad_len'] + 1) if pkt['flags']['bit_3'] else 0 - 4
+        pkt['__length__'] - pkt['pad_len'] if pkt['flags']['bit_3'] else 0
     ))
     #: Padding.
     padding: 'bytes' = ConditionalField(
@@ -357,7 +357,7 @@ class GoawayFrame(FrameType):
     #: Error code.
     error: 'Enum_ErrorCode' = EnumField(length=4, namespace=Enum_ErrorCode)
     #: Additional debug data.
-    debug: 'bytes' = BytesField(length=lambda pkt: pkt['__length__'] - 8)
+    debug: 'bytes' = BytesField(length=lambda pkt: pkt['__length__'])
 
     if TYPE_CHECKING:
         def __init__(self, stream: 'StreamID', error: 'Enum_ErrorCode', debug: 'bytes') -> 'None': ...

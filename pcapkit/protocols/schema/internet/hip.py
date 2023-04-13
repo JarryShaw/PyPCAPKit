@@ -550,7 +550,7 @@ class ECDSACurveHostIdentity(HostIdentity):
     #: Algorithm curve type.
     curve: 'Enum_ECDSACurve' = EnumField(length=2, namespace=Enum_ECDSACurve)
     #: Public key.
-    pub_key: 'bytes' = BytesField(length=lambda pkt: pkt['__length__'] - 2)
+    pub_key: 'bytes' = BytesField(length=lambda pkt: pkt['__length__'])
 
     if TYPE_CHECKING:
         def __init__(self, curve: 'Enum_ECDSACurve', pub_key: 'bytes') -> 'None': ...
@@ -562,7 +562,7 @@ class ECDSALowCurveHostIdentity(HostIdentity):
     #: Algorithm curve type.
     curve: 'Enum_ECDSALowCurve' = EnumField(length=2, namespace=Enum_ECDSALowCurve)
     #: Public key.
-    pub_key: 'bytes' = BytesField(length=lambda pkt: pkt['__length__'] - 2)
+    pub_key: 'bytes' = BytesField(length=lambda pkt: pkt['__length__'])
 
     if TYPE_CHECKING:
         def __init__(self, curve: 'Enum_ECDSALowCurve', pub_key: 'bytes') -> 'None': ...
@@ -574,7 +574,7 @@ class EdDSACurveHostIdentity(HostIdentity):
     #: Algorithm curve type.
     curve: 'Enum_EdDSACurve' = EnumField(length=2, namespace=Enum_EdDSACurve)
     #: Public key.
-    pub_key: 'bytes' = BytesField(length=lambda pkt: pkt['__length__'] - 2)
+    pub_key: 'bytes' = BytesField(length=lambda pkt: pkt['__length__'])
 
     if TYPE_CHECKING:
         def __init__(self, curve: 'Enum_EdDSACurve', pub_key: 'bytes') -> 'None': ...
