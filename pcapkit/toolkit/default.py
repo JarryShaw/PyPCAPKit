@@ -10,8 +10,8 @@ flag to indicate if usable for its caller.
 from typing import TYPE_CHECKING, cast
 
 from pcapkit.const.ipv6.extension_header import ExtensionHeader as Enum_ExtensionHeader
-from pcapkit.foundation.reassembly.ip import Packet as IP_Packet
-from pcapkit.foundation.reassembly.tcp import Packet as TCP_Packet
+from pcapkit.foundation.reassembly.data.ip import Packet as IP_Packet
+from pcapkit.foundation.reassembly.data.tcp import Packet as TCP_Packet
 from pcapkit.foundation.traceflow import Packet as TF_Packet
 
 if TYPE_CHECKING:
