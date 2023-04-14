@@ -12,7 +12,7 @@ from typing import TYPE_CHECKING
 
 from pcapkit.corekit.infoclass import Info
 from pcapkit.foundation.extraction import Extractor
-from pcapkit.foundation.reassembly.tcp import TCP_Reassembly
+from pcapkit.foundation.reassembly.tcp import TCP as TCP_Reassembly
 from pcapkit.utilities.exceptions import stacklevel
 from pcapkit.utilities.warnings import EngineWarning, warn
 
@@ -91,7 +91,7 @@ def follow_tcp_stream(fin: 'Optional[str]' = None, verbose: 'bool' = False,     
 
     streams = []  # type: list[Stream]
     frames = extraction.frame
-    for stream in extraction.trace:
+    for stream in extraction.trace.tcp:
         reassembly = TCP_Reassembly(strict=False)
 
         packets = []  # type: list[Frame]

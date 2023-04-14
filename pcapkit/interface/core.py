@@ -10,10 +10,10 @@ import sys
 from typing import TYPE_CHECKING
 
 from pcapkit.foundation.extraction import Extractor
-from pcapkit.foundation.reassembly.ipv4 import IPv4_Reassembly
-from pcapkit.foundation.reassembly.ipv6 import IPv6_Reassembly
-from pcapkit.foundation.reassembly.tcp import TCP_Reassembly
-from pcapkit.foundation.traceflow import TraceFlow
+from pcapkit.foundation.reassembly.ipv4 import IPv4 as IPv4_Reassembly
+from pcapkit.foundation.reassembly.ipv6 import IPv6 as IPv6_Reassembly
+from pcapkit.foundation.reassembly.tcp import TCP as TCP_Reassembly
+from pcapkit.foundation.traceflow.tcp import TCP as TCP_TraceFlow
 from pcapkit.protocols.protocol import Protocol
 from pcapkit.utilities.exceptions import FormatError
 
@@ -143,7 +143,7 @@ def reassemble(protocol: 'str | Type[Protocol]', strict: 'bool' = False) -> 'Rea
 
 def trace(fout: 'Optional[str]', format: 'Optional[str]',  # pylint: disable=redefined-builtin
           byteorder: 'Literal["little", "big"]' = sys.byteorder,
-          nanosecond: bool = False) -> 'TraceFlow':
+          nanosecond: bool = False) -> 'TCP_TraceFlow':
     """Trace TCP flows.
 
     Arguments:
@@ -153,7 +153,7 @@ def trace(fout: 'Optional[str]', format: 'Optional[str]',  # pylint: disable=red
         nanosecond: output nanosecond-resolution file flag
 
     Returns:
-        A :class:`~pcapkit.foundation.traceflow.TraceFlow` object.
+        A :class:`~pcapkit.foundation.traceflow.tcp.TCP_TraceFlow` object.
 
     """
-    return TraceFlow(fout=fout, format=format, byteorder=byteorder, nanosecond=nanosecond)
+    return TCP_TraceFlow(fout=fout, format=format, byteorder=byteorder, nanosecond=nanosecond)

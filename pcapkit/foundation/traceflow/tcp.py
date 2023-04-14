@@ -14,7 +14,7 @@ TCP flows from a series of packets and connections.
 """
 from typing import TYPE_CHECKING, TypeVar, overload, Generic
 
-from pcapkit.foundation.traceflow.data.tcp import Buffer, BufferID, Index, Packet
+from pcapkit.foundation.traceflow.data.tcp import Buffer, BufferID, Index, Packet, IPAddress
 from pcapkit.foundation.traceflow.traceflow import TraceFlow
 from pcapkit.protocols.transport.tcp import TCP as TCP_Protocol
 
@@ -27,10 +27,8 @@ if TYPE_CHECKING:
     from dictdumper.dumper import Dumper
     from typing_extensions import Literal
 
-IPAddress = TypeVar('IPAddress', 'IPv4Address', 'IPv6Address')
 
-
-class TCP(TraceFlow[BufferID, Buffer, Index, Packet], Generic[IPAddress]):
+class TCP(TraceFlow[BufferID, Buffer, Index, Packet[IPAddress]], Generic[IPAddress]):
     """Trace TCP flows."""
 
     ##########################################################################
