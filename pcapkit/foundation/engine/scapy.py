@@ -1,0 +1,154 @@
+# -*- coding: utf-8 -*-
+"""Scapy Support
+===================
+
+This module contains the implementation for `Scapy`_ engine
+support, as is used by :class:`pcapkit.foundation.extraction.Extractor`.
+
+.. _Scapy: https://scapy.net
+
+"""
+import os
+from typing import TYPE_CHECKING, cast
+
+from pcapkit.foundation.engine.engine import Engine
+from pcapkit.utilities.exceptions import stacklevel
+from pcapkit.utilities.warnings import warn, AttributeWarning
+
+__all__ = ['Scapy']
+
+if TYPE_CHECKING:
+    from typing import Iterator
+    from scapy.packet import Packet as ScapyPacket
+    from pcapkit.foundation.extraction import Extractor
+
+
+class Scapy(Engine):
+    """Scapy engine support."""
+
+    ##########################################################################
+    # Properties.
+    ##########################################################################
+
+    @property
+    def name(self) -> 'str':
+        """Engine name."""
+        return 'Scapy'
+
+    @property
+    def module(self) -> 'str':
+        """Engine module name."""
+        return 'scapy.all'
+
+    ##########################################################################
+    # Data models.
+    ##########################################################################
+
+    def __init__(self, extractor: 'Extractor') -> 'None':
+        from scapy import all as scapy_all  # isort:skip
+
+        self._expkg = scapy_all
+        self._extmp = cast('Iterator[ScapyPacket]', None)
+
+        super().__init__(extractor)
+
+    ##########################################################################
+    # Methods.
+    ##########################################################################
+
+    def run(self) -> 'None':
+        """Call :func:`scapy.all.sniff` to extract PCAP files.
+
+        This method assigns :attr:`self._expkg <Scapy._expkg>` as :mod:`scapy.all`
+        and :attr:`self._extmp <Scapy._extmp>` as an iterator from
+        :func:`scapy.all.sniff`.
+
+        Warns:
+            AttributeWarning: If :attr:`self._exlyr <Extractor._exlyr>` and/or
+                :attr:`self._exptl <Extractor._exptl>` is provided as the Scapy
+                engine currently does not support such operations.
+
+        """
+        ext = self._extractor
+
+        if ext._exlyr != 'none' or ext._exptl != 'null':
+            warn("'Extractor(engine=scapy)' does not support protocol and layer threshold; "
+                 f"'layer={ext._exlyr}' and 'protocol={ext._exptl}' ignored",
+                 AttributeWarning, stacklevel=stacklevel())
+
+        # setup verbose handler
+        if ext._flag_v:
+            from pcapkit.toolkit.scapy import packet2chain  # isort:skip
+            ext._vfunc = lambda e, f: print(
+                f'Frame {e._frnum:>3d}: {packet2chain(f)}'  # pylint: disable=protected-access
+            )  # pylint: disable=logging-fstring-interpolation
+
+        # extract global header
+        ext.record_header()
+        ext._ifile.seek(0, os.SEEK_SET)
+
+        # extract & analyse file
+        self._extmp = iter(self._expkg.sniff(offline=ext._ifnm))
+
+    def read_frame(self) -> 'ScapyPacket':
+        """Read frames with Scapy engine.
+
+        Returns:
+            Parsed frame instance.
+
+        See Also:
+            Please refer to :meth:`<PCAP.read_frame> pcapkit.foundation.engine.pcap.PCAP.read_frame`
+            for more operational information.
+
+        """
+        from pcapkit.toolkit.scapy import (ipv4_reassembly, ipv6_reassembly, packet2dict,
+                                           tcp_reassembly, tcp_traceflow)
+        ext = self._extractor
+
+        # fetch Scapy packet
+        packet = next(self._extmp)
+
+        # verbose output
+        ext._frnum += 1
+        ext._vfunc(ext, packet)
+
+        # write plist
+        frnum = f'Frame {ext._frnum}'
+        if not ext._flag_q:
+            info = packet2dict(packet)
+            if ext._flag_f:
+                ofile = ext._ofile(f'{ext._ofnm}/{frnum}.{ext._fext}')
+                ofile(info, name=frnum)
+            else:
+                ext._ofile(info, name=frnum)
+
+        # record fragments
+        if ext._flag_r:
+            if ext._ipv4:
+                data_ipv4 = ipv4_reassembly(packet, count=ext._frnum)
+                if data_ipv4 is not None:
+                    ext._reasm.ipv4(data_ipv4)
+            if ext._ipv6:
+                data_ipv6 = ipv6_reassembly(packet, count=ext._frnum)
+                if data_ipv6 is not None:
+                    ext._reasm.ipv6(data_ipv6)
+            if ext._tcp:
+                data_tcp = tcp_reassembly(packet, count=ext._frnum)
+                if data_tcp is not None:
+                    ext._reasm.tcp(data_tcp)
+
+        # trace flows
+        if ext._flag_t:
+            if ext._tcp:
+                data_tf_tcp = tcp_traceflow(packet, count=ext._frnum)
+                if data_tf_tcp is not None:
+                    ext._trace.tcp(data_tf_tcp)
+
+        # record frames
+        if ext._flag_d:
+            # setattr(packet, 'packet2dict', packet2dict)
+            # setattr(packet, 'packet2chain', packet2chain)
+            ext._frame.append(packet)
+
+        # return frame record
+        return packet

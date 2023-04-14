@@ -1,0 +1,80 @@
+# -*- coding: utf-8 -*-
+"""Base Class
+================
+
+This is the abstract base class implementation for
+all engine support functionality.
+
+"""
+import abc
+from typing import TYPE_CHECKING, Generic, TypeVar
+
+__all__ = ['Engine']
+
+if TYPE_CHECKING:
+    from pcapkit.foundation.extraction import Extractor
+
+T = TypeVar('T')
+
+
+class Engine(Generic[T], metaclass=abc.ABCMeta):
+    """Base class for engine support.
+
+    Args:
+        extractor: :class:`~pcapkit.foundation.extraction.Extractor` instance.
+
+    """
+
+    ##########################################################################
+    # Properties.
+    ##########################################################################
+
+    @abc.abstractmethod
+    @property
+    def name(self) -> 'str':
+        """Engine name."""
+
+    @abc.abstractmethod
+    @property
+    def module(self) -> 'str':
+        """Engine module name."""
+
+    @property
+    def extractor(self) -> 'Extractor':
+        """Extractor instance."""
+        return self._extractor
+
+    ##########################################################################
+    # Data models.
+    ##########################################################################
+
+    def __init__(self, extractor: 'Extractor') -> 'None':
+        self._extractor = extractor
+        self.run()
+
+    def __call__(self) -> 'None':
+        """Start extraction."""
+
+    ##########################################################################
+    # Methods.
+    ##########################################################################
+
+    @abc.abstractmethod
+    def run(self) -> 'None':
+        """Start extraction.
+
+        This method is the entry point for file extraction. It is to be used
+        for preparing the extraction process, such as parsing the file header
+        and setting up the extraction engines.
+
+        """
+
+    @abc.abstractmethod
+    def read_frame(self) -> 'T':
+        """Read frame.
+
+        This method is to be used for reading a frame from the file. It is to
+        read a frame from the file using the prepared engine instance and
+        return the parsed frame.
+
+        """
