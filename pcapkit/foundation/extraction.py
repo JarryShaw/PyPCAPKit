@@ -431,6 +431,28 @@ class Extractor(Generic[P]):
 
         return ifnm, ofnm, fmt, ext, files
 
+    def record_header(self) -> 'None':
+        """Read global header.
+
+        The method will parse the PCAP global header and save the parsed result
+        as :attr:`self._gbhdr <Extractor._gbhdr>`. Information such as PCAP version,
+        data link layer protocol type, nanosecond flag and byteorder will also be
+        save the current :class:`Extractor` instance.
+
+        If TCP flow tracing is enabled, the nanosecond flag and byteorder will
+        be used for the output PCAP file of the traced TCP flows.
+
+        For output, the method will dump the parsed PCAP global header under
+        the name of ``Global Header``.
+
+        """
+        # pylint: disable=attribute-defined-outside-init,protected-access
+        if self._magic in PCAP_Engine.MAGIC_NUMBER:
+            PCAP_Engine(self).run()
+            self._ifile.seek(0, os.SEEK_SET)
+            return
+        raise FormatError(f'unknown PCAP file format: {self._magic!r}')
+
     def record_frames(self) -> 'None':
         """Read packet frames.
 

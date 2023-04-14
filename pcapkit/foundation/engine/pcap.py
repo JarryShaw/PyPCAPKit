@@ -16,6 +16,13 @@ __all__ = ['PCAP']
 class PCAP(Engine[Frame]):
     """PCAP file extraction support."""
 
+    MAGIC_NUMBER = (
+        b'\xa1\xb2\x3c\x4d',
+        b'\xa1\xb2\xc3\xd4',
+        b'\x4d\x3c\xb2\xa1',
+        b'\xd4\xc3\xb2\xa1',
+    )
+
     ##########################################################################
     # Properties.
     ##########################################################################

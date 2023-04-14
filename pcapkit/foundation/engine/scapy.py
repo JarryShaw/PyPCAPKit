@@ -8,7 +8,6 @@ support, as is used by :class:`pcapkit.foundation.extraction.Extractor`.
 .. _Scapy: https://scapy.net
 
 """
-import os
 from typing import TYPE_CHECKING, cast
 
 from pcapkit.foundation.engine.engine import Engine
@@ -84,8 +83,7 @@ class Scapy(Engine['ScapyPacket']):
             )  # pylint: disable=logging-fstring-interpolation
 
         # extract global header
-        #ext.record_header()
-        #ext._ifile.seek(0, os.SEEK_SET)
+        ext.record_header()
 
         # extract & analyse file
         self._extmp = iter(self._expkg.sniff(offline=ext._ifnm))

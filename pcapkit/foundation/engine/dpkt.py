@@ -8,7 +8,6 @@ support, as is used by :class:`pcapkit.foundation.extraction.Extractor`.
 .. _DPKT: https://dpkt.readthedocs.io
 
 """
-import os
 from typing import TYPE_CHECKING, cast
 
 from pcapkit.foundation.engine.engine import Engine
@@ -85,8 +84,7 @@ class DPKT(Engine['DPKTPacket']):
             )  # pylint: disable=logging-fstring-interpolation
 
         # extract global header
-        #ext.record_header()
-        #ext._ifile.seek(0, os.SEEK_SET)
+        ext.record_header()
 
         if ext._dlink == Enum_LinkType.ETHERNET:
             pkg = dpkt.ethernet.Ethernet
