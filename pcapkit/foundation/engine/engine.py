@@ -50,7 +50,6 @@ class Engine(Generic[T], metaclass=abc.ABCMeta):
 
     def __init__(self, extractor: 'Extractor') -> 'None':
         self._extractor = extractor
-        self.run()
 
     def __call__(self) -> 'None':
         """Start extraction."""

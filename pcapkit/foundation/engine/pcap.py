@@ -103,7 +103,7 @@ class PCAP(Engine[Frame]):
         ext._frnum += 1
 
         # verbose output
-        ext._vfunc(self, frame)
+        ext._vfunc(ext, frame)
 
         # write plist
         frnum = f'Frame {ext._frnum}'
