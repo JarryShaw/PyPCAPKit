@@ -28,7 +28,7 @@ from pcapkit.utilities.warnings import (EngineWarning, FormatWarning,
                                         warn)
 from pcapkit.foundation.traceflow import TraceFlowManager
 from pcapkit.foundation.reassembly import ReassemblyManager
-from pcapkit.dumpkit.compat import object_hook as dumpkit_object_hook, default as dumpkit_default, _append_fallback as dumpkit_append_fallback
+from pcapkit.dumpkit.common import object_hook as dumpkit_object_hook, default as dumpkit_default, _append_fallback as dumpkit_append_fallback
 
 if TYPE_CHECKING:
     from types import ModuleType, TracebackType

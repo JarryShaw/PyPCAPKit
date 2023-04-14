@@ -2,9 +2,10 @@
 """Dump Utilities
 ====================
 
-:mod:`pcapkit.dumpkit.compat` is the collection of utility functions
-for :mod:`pcapkit.dumpkit` implementation, which is generally the
-customised hooks for :class:`dictdumper.Dumper` classes.
+:mod:`pcapkit.dumpkit.compat` is the collection of common utility
+functions for :mod:`pcapkit.dumpkit` implementation, which is
+generally the customised hooks for :class:`dictdumper.Dumper`
+classes.
 
 """
 import datetime

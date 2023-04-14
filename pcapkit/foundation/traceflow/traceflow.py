@@ -17,7 +17,7 @@ from typing import TYPE_CHECKING, TypeVar, overload, Generic
 from pcapkit.corekit.infoclass import Info
 from pcapkit.utilities.exceptions import FileExists, stacklevel
 from pcapkit.utilities.warnings import FileWarning, FormatWarning, warn
-from pcapkit.dumpkit.compat import object_hook as dumpkit_object_hook, default as dumpkit_default, _append_fallback as dumpkit_append_fallback
+from pcapkit.dumpkit.common import object_hook as dumpkit_object_hook, default as dumpkit_default, _append_fallback as dumpkit_append_fallback
 
 __all__ = ['TraceFlow']
 
