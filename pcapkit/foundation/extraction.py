@@ -27,6 +27,8 @@ from pcapkit.utilities.exceptions import (CallableError, FileNotFound, FormatErr
 from pcapkit.utilities.logging import logger
 from pcapkit.utilities.warnings import (AttributeWarning, DPKTWarning, EngineWarning, FormatWarning,
                                         warn)
+from pcapkit.foundation.traceflow import TraceFlowManager
+from pcapkit.foundation.reassembly import ReassemblyManager
 
 if TYPE_CHECKING:
     from types import ModuleType, TracebackType
@@ -39,13 +41,8 @@ if TYPE_CHECKING:
     from typing_extensions import Literal
 
     from pcapkit.corekit.version import VersionInfo
-    from pcapkit.foundation.reassembly.ip import Datagram as IP_Datagram
-    from pcapkit.foundation.reassembly.ipv4 import IPv4_Reassembly
-    from pcapkit.foundation.reassembly.ipv6 import IPv6_Reassembly
-    from pcapkit.foundation.reassembly.reassembly import Reassembly
-    from pcapkit.foundation.reassembly.tcp import Datagram as TCP_Datagram
-    from pcapkit.foundation.reassembly.tcp import TCP_Reassembly
-    from pcapkit.foundation.traceflow import Index, TraceFlow
+    from pcapkit.foundation.reassembly.data import ReassemblyData
+    from pcapkit.foundation.traceflow.data import TraceFlowData
     from pcapkit.protocols.protocol import Protocol
 
     Formats = Literal['pcap', 'json', 'tree', 'plist']
@@ -56,20 +53,6 @@ if TYPE_CHECKING:
     VerboseHandler = Callable[['Extractor', Union[Frame, ScapyPacket, DPKTPacket, PySharkPacket]], Any]
 
 __all__ = ['Extractor']
-
-
-class ReassemblyData(Info):
-    """Data storage for reassembly."""
-
-    #: IPv4 reassembled data.
-    ipv4: 'tuple[IP_Datagram, ...]'
-    #: IPv6 reassembled data.
-    ipv6: 'tuple[IP_Datagram, ...]'
-    #: TCP reassembled data.
-    tcp: 'tuple[TCP_Datagram, ...]'
-
-    if TYPE_CHECKING:
-        def __init__(self, ipv4: 'Optional[tuple[IP_Datagram, ...]]', ipv6: 'Optional[tuple[IP_Datagram, ...]]', tcp: 'Optional[tuple[TCP_Datagram, ...]]') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long
 
 
 class Extractor:
@@ -111,9 +94,9 @@ class Extractor:
     _frame: 'list[Frame | ScapyPacket | DPKTPacket]'
 
     #: Frame record for reassembly.
-    _reasm: 'list[Optional[Reassembly]]'
+    _reasm: 'ReassemblyManager'
     #: Flow tracer.
-    _trace: 'Optional[TraceFlow]'
+    _trace: 'TraceFlowManager'
 
     #: IPv4 reassembly flag.
     _ipv4: 'bool'
@@ -251,24 +234,19 @@ class Extractor:
 
         """
         data = ReassemblyData(
-            ipv4=tuple(cast('IPv4_Reassembly', self._reasm[0]).datagram) if self._ipv4 else None,
-            ipv6=tuple(cast('IPv6_Reassembly', self._reasm[1]).datagram) if self._ipv6 else None,
-            tcp=tuple(cast('TCP_Reassembly', self._reasm[2]).datagram) if self._tcp else None,
+            ipv4=tuple(self._reasm.ipv4.datagram) if self._ipv4 else None,
+            ipv6=tuple(self._reasm.ipv6.datagram) if self._ipv6 else None,
+            tcp=tuple(self._reasm.tcp.datagram) if self._tcp else None,
         )
         return data
 
     @property
-    def trace(self) -> 'tuple[Index, ...]':
-        """Index table for traced flow.
-
-        Raises:
-            UnsupportedCall: If :attr:`self._flag_t <pcapkit.foundation.extraction.Extractor._flag_t>`
-                is :data:`True`, as TCP flow tracing is disabled.
-
-        """
-        if self._flag_t:
-            return cast('TraceFlow', self._trace).index
-        raise UnsupportedCall("'Extractor(trace=False)' object has no attribute 'trace'")
+    def trace(self) -> 'TraceFlowData':
+        """Index table for traced flow."""
+        data = TraceFlowData(
+            tcp=tuple(self._trace.tcp.index) if self._tcp else None,
+        )
+        return data
 
     @property
     def engine(self) -> 'Engines':
@@ -499,9 +477,10 @@ class Extractor:
                  auto: 'bool' = True, extension: 'bool' = True, store: 'bool' = True,                                           # internal settings # pylint: disable=line-too-long
                  files: 'bool' = False, nofile: 'bool' = False, verbose: 'bool | VerboseHandler' = False,                       # output settings # pylint: disable=line-too-long
                  engine: 'Optional[Engines]' = None, layer: 'Optional[Layers]' = None, protocol: 'Optional[Protocols]' = None,  # extraction settings # pylint: disable=line-too-long
-                 ip: 'bool' = False, ipv4: 'bool' = False, ipv6: 'bool' = False, tcp: 'bool' = False, strict: 'bool' = True,    # reassembly settings # pylint: disable=line-too-long
+                 reassembly: 'bool' = False, strict: 'bool' = True,                                                             # reassembly settings # pylint: disable=line-too-long
                  trace: 'bool' = False, trace_fout: 'Optional[str]' = None, trace_format: 'Optional[Formats]' = None,           # trace settings # pylint: disable=line-too-long
-                 trace_byteorder: 'Literal["big", "little"]' = sys.byteorder, trace_nanosecond: 'bool' = False) -> 'None':      # trace settings # pylint: disable=line-too-long
+                 trace_byteorder: 'Literal["big", "little"]' = sys.byteorder, trace_nanosecond: 'bool' = False,                 # trace settings # pylint: disable=line-too-long
+                 ip: 'bool' = False, ipv4: 'bool' = False, ipv6: 'bool' = False, tcp: 'bool' = False) -> 'None':
         """Initialise PCAP Reader.
 
         Args:
@@ -523,10 +502,7 @@ class Extractor:
             layer: extract til which layer
             protocol: extract til which protocol
 
-            ip: if record data for IPv4 & IPv6 reassembly
-            ipv4: if perform IPv4 reassembly
-            ipv6: if perform IPv6 reassembly
-            tcp: if perform TCP reassembly
+            reassembly: if perform reassembly
             strict: if set strict flag for reassembly
 
             trace: if trace TCP traffic flows
@@ -534,6 +510,11 @@ class Extractor:
             trace_format: output file format of flow tracer
             trace_byteorder: output file byte order
             trace_nanosecond: output nanosecond-resolution file flag
+
+            ip: if record data for IPv4 & IPv6 reassembly
+            ipv4: if perform IPv4 reassembly
+            ipv6: if perform IPv6 reassembly
+            tcp: if perform TCP reassembly and/or flow tracing
 
         Warns:
             FormatWarning: Warns under following circumstances:
@@ -555,13 +536,14 @@ class Extractor:
         self._ofnm = ofnm  # output file name
         self._fext = oext  # output file extension
 
-        self._flag_a = auto    # auto extract flag
-        self._flag_d = store   # store data flag
-        self._flag_e = False   # EOF flag
-        self._flag_f = files   # split file flag
-        self._flag_q = nofile  # no output flag
-        self._flag_t = trace   # trace flag
-        self._flag_v = False   # verbose flag
+        self._flag_a = auto        # auto extract flag
+        self._flag_d = store       # store data flag
+        self._flag_e = False       # EOF flag
+        self._flag_f = files       # split file flag
+        self._flag_q = nofile      # no output flag
+        self._flag_r = reassembly  # reassembly flag
+        self._flag_t = trace       # trace flag
+        self._flag_v = False       # verbose flag
 
         # verbose callback function
         if isinstance(verbose, bool):
@@ -579,9 +561,6 @@ class Extractor:
         self._frnum = 0   # frame number
         self._frame = []  # frame record
 
-        self._reasm = [None for _ in range(3)]  # frame record for reassembly (IPv4 / IPv6 / TCP)
-        self._trace = None                      # flow tracer
-
         self._ipv4 = ipv4 or ip  # IPv4 Reassembly
         self._ipv6 = ipv6 or ip  # IPv6 Reassembly
         self._tcp = tcp          # TCP Reassembly
@@ -590,24 +569,29 @@ class Extractor:
         self._exlyr = cast('Layers', (layer or 'none').lower())       # extract til layer
         self._exeng = cast('Engines', (engine or 'default').lower())  # extract using engine
 
-        if self._ipv4:
-            from pcapkit.foundation.reassembly.ipv4 import IPv4_Reassembly
-            self._reasm[0] = IPv4_Reassembly(strict=strict)
-        if self._ipv6:
-            from pcapkit.foundation.reassembly.ipv6 import IPv6_Reassembly
-            self._reasm[1] = IPv6_Reassembly(strict=strict)
-        if self._tcp:
-            from pcapkit.foundation.reassembly.tcp import TCP_Reassembly
-            self._reasm[2] = TCP_Reassembly(strict=strict)
+        if reassembly:
+            from pcapkit.foundation.reassembly.ipv4 import IPv4 as IPv4_Reassembly
+            from pcapkit.foundation.reassembly.ipv6 import IPv6 as IPv6_Reassembly
+            from pcapkit.foundation.reassembly.tcp import TCP as TCP_Reassembly
+
+            self._reasm = ReassemblyManager(
+                ipv4=IPv4_Reassembly(strict=strict) if self._ipv4 else None,
+                ipv6=IPv6_Reassembly(strict=strict) if self._ipv6 else None,
+                tcp=TCP_Reassembly(strict=strict) if self._tcp else None,
+            )
 
         if trace:
-            from pcapkit.foundation.traceflow import TraceFlow  # isort: skip
+            from pcapkit.foundation.traceflow.tcp import TCP as TCP_TraceFlow  # isort: skip
+
             if self._exeng in ('pyshark',) and trace_format in ('pcap',):
                 warn(f"'Extractor(engine={self._exeng})' does not support 'trace_format={trace_format}'; "
                      "using 'trace_format=None' instead", FormatWarning, stacklevel=stacklevel())
                 trace_format = None
-            self._trace = TraceFlow(fout=trace_fout, format=trace_format,
-                                    byteorder=trace_byteorder, nanosecond=trace_nanosecond)
+
+            self._trace = TraceFlowManager(
+                tcp=TCP_TraceFlow(fout=trace_fout, format=trace_format, byteorder=trace_byteorder,
+                                  nanosecond=trace_nanosecond) if self._tcp else None,
+            )
 
         self._ifile = open(ifnm, 'rb')  # input file # pylint: disable=unspecified-encoding,consider-using-with
         if not self._flag_q:
@@ -802,24 +786,26 @@ class Extractor:
                 self._ofile(frame.info.to_dict(), name=frnum)
 
         # record fragments
-        if self._ipv4:
-            data_ipv4 = ipv4_reassembly(frame)
-            if data_ipv4 is not None:
-                cast('IPv4_Reassembly', self._reasm[0])(data_ipv4)
-        if self._ipv6:
-            data_ipv6 = ipv6_reassembly(frame)
-            if data_ipv6 is not None:
-                cast('IPv6_Reassembly', self._reasm[1])(data_ipv6)
-        if self._tcp:
-            data_tcp = tcp_reassembly(frame)
-            if data_tcp is not None:
-                cast('TCP_Reassembly', self._reasm[2])(data_tcp)
+        if self._flag_r:
+            if self._ipv4:
+                data_ipv4 = ipv4_reassembly(frame)
+                if data_ipv4 is not None:
+                    self._reasm.ipv4(data_ipv4)
+            if self._ipv6:
+                data_ipv6 = ipv6_reassembly(frame)
+                if data_ipv6 is not None:
+                    self._reasm.ipv6(data_ipv6)
+            if self._tcp:
+                data_tcp = tcp_reassembly(frame)
+                if data_tcp is not None:
+                    self._reasm.tcp(data_tcp)
 
         # trace flows
         if self._flag_t:
-            data_tf = tcp_traceflow(frame, data_link=self._dlink)
-            if data_tf is not None:
-                cast('TraceFlow', self._trace)(data_tf)
+            if self._tcp:
+                data_tf_tcp = tcp_traceflow(frame, data_link=self._dlink)
+                if data_tf_tcp is not None:
+                    self._trace.tcp(data_tf_tcp)
 
         # record frames
         if self._flag_d:
@@ -898,24 +884,26 @@ class Extractor:
                 self._ofile(info, name=frnum)
 
         # record fragments
-        if self._ipv4:
-            data_ipv4 = ipv4_reassembly(packet, count=self._frnum)
-            if data_ipv4 is not None:
-                cast('IPv4_Reassembly', self._reasm[0])(data_ipv4)
-        if self._ipv6:
-            data_ipv6 = ipv6_reassembly(packet, count=self._frnum)
-            if data_ipv6 is not None:
-                cast('IPv6_Reassembly', self._reasm[1])(data_ipv6)
-        if self._tcp:
-            data_tcp = tcp_reassembly(packet, count=self._frnum)
-            if data_tcp is not None:
-                cast('TCP_Reassembly', self._reasm[2])(data_tcp)
+        if self._flag_r:
+            if self._ipv4:
+                data_ipv4 = ipv4_reassembly(packet, count=self._frnum)
+                if data_ipv4 is not None:
+                    self._reasm.ipv4(data_ipv4)
+            if self._ipv6:
+                data_ipv6 = ipv6_reassembly(packet, count=self._frnum)
+                if data_ipv6 is not None:
+                    self._reasm.ipv6(data_ipv6)
+            if self._tcp:
+                data_tcp = tcp_reassembly(packet, count=self._frnum)
+                if data_tcp is not None:
+                    self._reasm.tcp(data_tcp)
 
         # trace flows
         if self._flag_t:
-            data_tf = tcp_traceflow(packet, count=self._frnum)
-            if data_tf is not None:
-                cast('TraceFlow', self._trace)(data_tf)
+            if self._tcp:
+                data_tf_tcp = tcp_traceflow(packet, count=self._frnum)
+                if data_tf_tcp is not None:
+                    self._trace.tcp(data_tf_tcp)
 
         # record frames
         if self._flag_d:
@@ -1023,24 +1011,26 @@ class Extractor:
                 self._ofile(info, name=frnum)
 
         # record fragments
-        if self._ipv4:
-            data_ipv4 = ipv4_reassembly(packet, count=self._frnum)
-            if data_ipv4 is not None:
-                cast('IPv4_Reassembly', self._reasm[0])(data_ipv4)
-        if self._ipv6:
-            data_ipv6 = ipv6_reassembly(packet, count=self._frnum)
-            if data_ipv6 is not None:
-                cast('IPv6_Reassembly', self._reasm[1])(data_ipv6)
-        if self._tcp:
-            data_tcp = tcp_reassembly(packet, count=self._frnum)
-            if data_tcp is not None:
-                cast('TCP_Reassembly', self._reasm[2])(data_tcp)
+        if self._flag_r:
+            if self._ipv4:
+                data_ipv4 = ipv4_reassembly(packet, count=self._frnum)
+                if data_ipv4 is not None:
+                    self._reasm.ipv4(data_ipv4)
+            if self._ipv6:
+                data_ipv6 = ipv6_reassembly(packet, count=self._frnum)
+                if data_ipv6 is not None:
+                    self._reasm.ipv6(data_ipv6)
+            if self._tcp:
+                data_tcp = tcp_reassembly(packet, count=self._frnum)
+                if data_tcp is not None:
+                    self._reasm.tcp(data_tcp)
 
         # trace flows
         if self._flag_t:
-            data_tf = tcp_traceflow(packet, timestamp, data_link=self._dlink, count=self._frnum)
-            if data_tf is not None:
-                cast('TraceFlow', self._trace)(data_tf)
+            if self._tcp:
+                data_tf_tcp = tcp_traceflow(packet, timestamp, data_link=self._dlink, count=self._frnum)
+                if data_tf_tcp is not None:
+                    self._trace.tcp(data_tf_tcp)
 
         # record frames
         if self._flag_d:
@@ -1071,14 +1061,14 @@ class Extractor:
 
         """
         if self._exlyr != 'none' or self._exptl != 'null':
-            warn("'Extractor(engine=pyshark)' does not support protocol and layer threshold; "
+            warn("'Extractor(engine='pyshark')' does not support protocol and layer threshold; "
                  f"'layer={self._exlyr}' and 'protocol={self._exptl}' ignored",
                  AttributeWarning, stacklevel=stacklevel())
 
-        if (self._ipv4 or self._ipv6 or self._tcp):
-            self._ipv4 = self._ipv6 = self._tcp = False
-            self._reasm = [None, None, None]
-            warn("'Extractor(engine=pyshark)' object dose not support reassembly; "
+        if self._flag_r and (self._ipv4 or self._ipv6 or self._tcp):
+            self._flag_r = False
+            self._reasm = ReassemblyManager(ipv4=None, ipv6=None, tcp=None)
+            warn("'Extractor(engine='pyshark')' object dose not support reassembly; "
                  f"so 'ipv4={self._ipv4}', 'ipv6={self._ipv6}' and 'tcp={self._tcp}' will be ignored",
                  AttributeWarning, stacklevel=stacklevel())
 
@@ -1126,9 +1116,10 @@ class Extractor:
 
         # trace flows
         if self._flag_t:
-            data_tf = tcp_traceflow(packet)
-            if data_tf is not None:
-                cast('TraceFlow', self._trace)(data_tf)
+            if self._tcp:
+                data_tf_tcp = tcp_traceflow(packet)
+                if data_tf_tcp is not None:
+                    self._trace.tcp(data_tf_tcp)
 
         # record frames
         if self._flag_d:
