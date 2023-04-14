@@ -100,7 +100,7 @@ class PyShark(Engine['PySharkPacket']):
         #ext._ifile.seek(0, os.SEEK_SET)
 
         # extract & analyse file
-        ext._extmp = iter(self._expkg.FileCapture(ext._ifnm, keep_packets=False))
+        self._extmp = iter(self._expkg.FileCapture(ext._ifnm, keep_packets=False))
 
     def read_frame(self) -> 'PySharkPacket':
         """Read frames with PyShark engine.
@@ -116,7 +116,7 @@ class PyShark(Engine['PySharkPacket']):
         ext = self._extractor
 
         # fetch PyShark packet
-        packet = cast('PySharkPacket', next(ext._extmp))  # type: ignore[call-overload]
+        packet = cast('PySharkPacket', next(self._extmp))
 
         # verbose output
         ext._frnum = int(packet.number)
