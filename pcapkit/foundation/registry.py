@@ -11,6 +11,7 @@ from typing import TYPE_CHECKING
 
 from dictdumper import Dumper
 
+from pcapkit.foundation.engine import Engine
 from pcapkit.foundation.extraction import Extractor
 from pcapkit.foundation.traceflow import TraceFlow
 from pcapkit.protocols import __proto__ as protocol_registry
@@ -69,7 +70,9 @@ __all__ = [
     'register_ethertype', 'register_transtype',
     'register_port', 'register_tcp_port', 'register_udp_port',
 
-    'register_output', 'register_extractor', 'register_traceflow',
+    'register_output',
+    'register_extractor_dumper', 'register_extractor_engine',
+    'register_traceflow',
 
     'register_hopopt', 'register_ipv6_opts', 'register_ipv6_route',
     'register_ipv4', 'register_hip',
@@ -105,7 +108,7 @@ def register_protocol(protocol: 'Type[Protocol]') -> 'None':
 ###############################################################################
 
 
-def register_extractor(format: 'str', module: 'str', class_: 'str', ext: 'str') -> 'None':  # pylint: disable=redefined-builtin
+def register_extractor_dumper(format: 'str', module: 'str', class_: 'str', ext: 'str') -> 'None':  # pylint: disable=redefined-builtin
     r"""Registered a new dumper class.
 
     Notes:
@@ -126,8 +129,37 @@ def register_extractor(format: 'str', module: 'str', class_: 'str', ext: 'str') 
     if not issubclass(dumper, Dumper):
         raise RegistryError('dumper must be a Dumper subclass')
 
-    Extractor.register(format, module, class_, ext)
-    logger.info('registered extractor output: %s', format)
+    Extractor.register_dumper(format, module, class_, ext)
+    logger.info('registered extractor output dumper: %s', format)
+
+
+###############################################################################
+# pcapkit.foundation.extraction.Extractor.__engine__
+###############################################################################
+
+
+def register_extractor_engine(engine: 'str', module: 'str', class_: 'str') -> 'None':  # pylint: disable=redefined-builtin
+    r"""Registered a new engine class.
+
+    Notes:
+        The full qualified class name of the new engine class
+        should be as ``{module}.{class_}``.
+
+    The function will register the given engine class to the
+    :data:`pcapkit.foundation.extraction.Extractor.__engine__` registry.
+
+    Arguments:
+        engine: engine name
+        module: module name
+        class\_: class name
+
+    """
+    engine_cls = getattr(importlib.import_module(module), class_)
+    if not issubclass(engine_cls, Engine):
+        raise RegistryError('engine must be a Engine subclass')
+
+    Extractor.register_engine(engine, module, class_)
+    logger.info('registered extractor engine: %s', engine)
 
 
 ###############################################################################
@@ -543,7 +575,7 @@ def register_output(format: 'str', module: 'str', class_: 'str', ext: 'str') -> 
     if not issubclass(dumper, Dumper):
         raise RegistryError('dumper must be a Dumper subclass')
 
-    Extractor.register(format, module, class_, ext)
+    Extractor.register_dumper(format, module, class_, ext)
     TraceFlow.register(format, module, class_, ext)
     logger.info('registered output format: %s', dumper.__name__)
 

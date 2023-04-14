@@ -26,7 +26,9 @@ __all__ = [
     'register_ethertype', 'register_transtype',
     'register_port', 'register_tcp_port', 'register_udp_port',
 
-    'register_output', 'register_extractor', 'register_traceflow',
+    'register_output',
+    'register_extractor_dumper', 'register_extractor_engine',
+    'register_traceflow',
 
     'register_hopopt', 'register_ipv6_opts', 'register_ipv6_route',
     'register_ipv4', 'register_hip',

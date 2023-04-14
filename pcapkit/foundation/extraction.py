@@ -157,13 +157,13 @@ class Extractor(Generic[P]):
         },
     )  # type: DefaultDict[str, tuple[str, str, str | None]]
 
-    #: dict[Engines, tuple[str, str]]: Engine mapping for extracting frames.
+    #: dict[str, tuple[str, str]]: Engine mapping for extracting frames.
     #: The values should be a tuple representing the module name and class name.
     __engine__ = {
         'scapy': ('pcapkit.foundation.engine.scapy', 'Scapy'),
         'dpkt': ('pcapkit.foundation.engine.dpkt', 'DPKT'),
         'pyshark': ('pcapkit.foundation.engine.pyshark', 'PyShark'),
-    }  # type: dict[Engines, tuple[str, str]]
+    }  # type: dict[str, tuple[str, str]]
 
     ##########################################################################
     # Properties.
@@ -270,7 +270,7 @@ class Extractor(Generic[P]):
     ##########################################################################
 
     @classmethod
-    def register(cls, format: 'str', module: 'str', class_: 'str', ext: 'str') -> 'None':  # pylint: disable=redefined-builtin
+    def register_dumper(cls, format: 'str', module: 'str', class_: 'str', ext: 'str') -> 'None':
         r"""Register a new dumper class.
 
         Notes:
@@ -285,6 +285,22 @@ class Extractor(Generic[P]):
 
         """
         cls.__output__[format] = (module, class_, ext)
+
+    @classmethod
+    def register_engine(cls, engine: 'str', module: 'str', class_: 'str') -> 'None':
+        r"""Register a new extraction engine.
+
+        Notes:
+            The full qualified class name of the new extraction engine
+            should be as ``{module}.{class_}``.
+
+        Arguments:
+            engine: engine name
+            module: module name
+            class\_: class name
+
+        """
+        cls.__engine__[engine] = (module, class_)
 
     def run(self) -> 'None':  # pylint: disable=inconsistent-return-statements
         """Start extraction.
