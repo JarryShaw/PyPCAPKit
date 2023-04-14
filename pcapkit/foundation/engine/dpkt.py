@@ -24,20 +24,20 @@ if TYPE_CHECKING:
     from pcapkit.foundation.extraction import Extractor
 
 
-class DPKT(Engine):
+class DPKT(Engine['DPKTPacket']):
     """DPKT engine support."""
 
     ##########################################################################
     # Properties.
     ##########################################################################
 
-    @property
-    def name(self) -> 'str':
+    @classmethod
+    def name(cls) -> 'str':
         """Engine name."""
         return 'DPKT'
 
-    @property
-    def module(self) -> 'str':
+    @classmethod
+    def module(cls) -> 'str':
         """Engine module name."""
         return 'dpkt'
 
@@ -85,8 +85,8 @@ class DPKT(Engine):
             )  # pylint: disable=logging-fstring-interpolation
 
         # extract global header
-        ext.record_header()
-        ext._ifile.seek(0, os.SEEK_SET)
+        #ext.record_header()
+        #ext._ifile.seek(0, os.SEEK_SET)
 
         if ext._dlink == Enum_LinkType.ETHERNET:
             pkg = dpkt.ethernet.Ethernet

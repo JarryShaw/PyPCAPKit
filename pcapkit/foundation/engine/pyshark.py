@@ -24,20 +24,20 @@ if TYPE_CHECKING:
     from pcapkit.foundation.extraction import Extractor
 
 
-class PyShark(Engine):
+class PyShark(Engine['PySharkPacket']):
     """PyShark engine support."""
 
     ##########################################################################
     # Properties.
     ##########################################################################
 
-    @property
-    def name(self) -> 'str':
+    @classmethod
+    def name(cls) -> 'str':
         """Engine name."""
         return 'PyShark'
 
-    @property
-    def module(self) -> 'str':
+    @classmethod
+    def module(cls) -> 'str':
         """Engine module name."""
         return 'pyshark'
 

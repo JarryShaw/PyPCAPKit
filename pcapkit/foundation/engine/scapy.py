@@ -23,20 +23,20 @@ if TYPE_CHECKING:
     from pcapkit.foundation.extraction import Extractor
 
 
-class Scapy(Engine):
+class Scapy(Engine['ScapyPacket']):
     """Scapy engine support."""
 
     ##########################################################################
     # Properties.
     ##########################################################################
 
-    @property
-    def name(self) -> 'str':
+    @classmethod
+    def name(cls) -> 'str':
         """Engine name."""
         return 'Scapy'
 
-    @property
-    def module(self) -> 'str':
+    @classmethod
+    def module(cls) -> 'str':
         """Engine module name."""
         return 'scapy.all'
 
@@ -84,8 +84,8 @@ class Scapy(Engine):
             )  # pylint: disable=logging-fstring-interpolation
 
         # extract global header
-        ext.record_header()
-        ext._ifile.seek(0, os.SEEK_SET)
+        #ext.record_header()
+        #ext._ifile.seek(0, os.SEEK_SET)
 
         # extract & analyse file
         self._extmp = iter(self._expkg.sniff(offline=ext._ifnm))

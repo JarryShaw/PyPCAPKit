@@ -20,13 +20,13 @@ class PCAP(Engine[Frame]):
     # Properties.
     ##########################################################################
 
-    @property
-    def name(self) -> 'str':
+    @classmethod
+    def name(cls) -> 'str':
         """Engine name."""
         return 'PCAP'
 
-    @property
-    def module(self) -> 'str':
+    @classmethod
+    def module(cls) -> 'str':
         """Engine module name."""
         return 'pcapkit.foundation.engine.pcap'
 
@@ -62,7 +62,7 @@ class PCAP(Engine[Frame]):
         ext._dlink = ext._gbhdr.protocol
         ext._nnsec = ext._gbhdr.nanosecond
 
-        if ext._trace is not None:
+        if ext._flag_t:
             ext._trace._endian = ext._gbhdr.byteorder
             ext._trace._nnsecd = ext._gbhdr.nanosecond
 

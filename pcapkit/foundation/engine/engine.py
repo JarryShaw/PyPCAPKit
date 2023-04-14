@@ -29,14 +29,14 @@ class Engine(Generic[T], metaclass=abc.ABCMeta):
     # Properties.
     ##########################################################################
 
+    @classmethod
     @abc.abstractmethod
-    @property
-    def name(self) -> 'str':
+    def name(cls) -> 'str':
         """Engine name."""
 
+    @classmethod
     @abc.abstractmethod
-    @property
-    def module(self) -> 'str':
+    def module(cls) -> 'str':
         """Engine module name."""
 
     @property

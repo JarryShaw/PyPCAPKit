@@ -16,23 +16,24 @@ import collections
 import importlib
 import os
 import sys
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING, Generic, TypeVar, cast
 
 from pcapkit.const.reg.linktype import LinkType as Enum_LinkType
 from pcapkit.corekit.infoclass import Info
 from pcapkit.protocols.misc.pcap.frame import Frame
 from pcapkit.protocols.misc.pcap.header import Header
+from pcapkit.foundation.engine.pcap import PCAP as PCAP_Engine
 from pcapkit.utilities.exceptions import (CallableError, FileNotFound, FormatError, IterableError,
                                           UnsupportedCall, stacklevel)
 from pcapkit.utilities.logging import logger
-from pcapkit.utilities.warnings import (AttributeWarning, DPKTWarning, EngineWarning, FormatWarning,
+from pcapkit.utilities.warnings import (EngineWarning, FormatWarning,
                                         warn)
 from pcapkit.foundation.traceflow import TraceFlowManager
 from pcapkit.foundation.reassembly import ReassemblyManager
 
 if TYPE_CHECKING:
     from types import ModuleType, TracebackType
-    from typing import IO, Any, Callable, DefaultDict, Iterator, Optional, TextIO, Type, Union
+    from typing import IO, Any, Callable, DefaultDict, Optional, TextIO, Type, Union
 
     from dictdumper.dumper import Dumper
     from dpkt.dpkt import Packet as DPKTPacket
@@ -44,6 +45,7 @@ if TYPE_CHECKING:
     from pcapkit.foundation.reassembly.data import ReassemblyData
     from pcapkit.foundation.traceflow.data import TraceFlowData
     from pcapkit.protocols.protocol import Protocol
+    from pcapkit.foundation.engine.engine import Engine
 
     Formats = Literal['pcap', 'json', 'tree', 'plist']
     Engines = Literal['default', 'pcapkit', 'dpkt', 'scapy', 'pyshark']
@@ -54,8 +56,10 @@ if TYPE_CHECKING:
 
 __all__ = ['Extractor']
 
+P = TypeVar('P')
 
-class Extractor:
+
+class Extractor(Generic[P]):
     """Extractor for PCAP files.
 
     Notes:
@@ -109,18 +113,18 @@ class Extractor:
     _exptl: 'Protocols'
     #: Extract til layer.
     _exlyr: 'Layers'
-    #: Extract using engine.
-    _exeng: 'Engines'
-    #: Extract module instance.
-    _expkg: 'Any'
-    #: Extract iterator instance.
-    _extmp: 'Any'
+    #: Extraction engine name.
+    _exnam: 'Engines'
+    #: Extraction engine instance.
+    _exeng: 'Engine[P]'
 
     #: Input file object.
     _ifile: 'IO[bytes]'
     #: Output file object.
     _ofile: 'Dumper | Type[Dumper]'
 
+    #: Magic number.
+    _magic: 'bytes'
     #: Global header.
     _gbhdr: 'Header'
     #: Version info.
@@ -150,8 +154,16 @@ class Extractor:
             'tree': ('dictdumper', 'Tree', '.txt'),
             'text': ('dictdumper', 'Text', '.txt'),
             'txt': ('dictdumper', 'Tree', '.txt'),
-        }
+        },
     )  # type: DefaultDict[str, tuple[str, str, str | None]]
+
+    #: dict[Engines, tuple[str, str]]: Engine mapping for extracting frames.
+    #: The values should be a tuple representing the module name and class name.
+    __engine__ = {
+        'scapy': ('pcapkit.foundation.engine.scapy', 'Scapy'),
+        'dpkt': ('pcapkit.foundation.engine.dpkt', 'DPKT'),
+        'pyshark': ('pcapkit.foundation.engine.pyshark', 'PyShark'),
+    }  # type: dict[Engines, tuple[str, str]]
 
     ##########################################################################
     # Properties.
@@ -162,12 +174,12 @@ class Extractor:
         """Version of input PCAP file.
 
         Raises:
-            UnsupportedCall: If :attr:`self._exeng <pcapkit.foundation.extraction.Extractor._exeng>`
+            UnsupportedCall: If :attr:`self._exnam <pcapkit.foundation.extraction.Extractor._exnam>`
                 is ``'scapy'`` or ``'pyshark'``, as such engines does not reserve such information.
 
         """
-        if self._exeng in ('scapy', 'pyshark'):
-            raise UnsupportedCall(f"'Extractor(engine={self._exeng})' object has no attribute 'info'")
+        if self._exnam in ('scapy', 'pyshark'):
+            raise UnsupportedCall(f"'Extractor(engine={self._exnam})' object has no attribute 'info'")
         return self._vinfo
 
     @property
@@ -249,7 +261,7 @@ class Extractor:
         return data
 
     @property
-    def engine(self) -> 'Engines':
+    def engine(self) -> 'Engine':
         """PCAP extraction engine."""
         return self._exeng
 
@@ -295,25 +307,32 @@ class Extractor:
                 dependency not installed, or supplied engine unknown.
 
         """
-        if self._exeng == 'dpkt':
-            engine = self.import_test('dpkt', name='DPKT')
-            if engine is not None:
-                return self._run_dpkt(engine)
-        elif self._exeng == 'scapy':
-            engine = self.import_test('scapy.all', name='Scapy')
-            if engine is not None:
-                return self._run_scapy(engine)
-        elif self._exeng == 'pyshark':
-            engine = self.import_test('pyshark', name='PyShark')
-            if engine is not None:
-                return self._run_pyshark(engine)
-        elif self._exeng not in ('default', 'pcapkit'):
-            warn(f'unsupported extraction engine: {self._exeng}; '
-                 'using default engine instead', EngineWarning, stacklevel=stacklevel())
-            self._exeng = 'default'  # using default/pcapkit engine
+        if self._exnam in self.__engine__:  # check if engine is supported
+            mod, cls = self.__engine__[self._exnam]
+            eng = cast('Type[Engine]', getattr(importlib.import_module(mod), cls))
 
-        self.record_header()  # read PCAP global header
-        self.record_frames()  # read frames
+            if self.import_test(eng.module(), name=eng.name()) is not None:
+                self._exeng = eng(self)
+                self._exeng.run()
+
+                # start iteration
+                self.record_frames()
+                return
+
+            warn(f'engine {eng.name()} (`{eng.module()}`) is not installed; '
+                 'using default engine instead', EngineWarning, stacklevel=stacklevel())
+            self._exnam = 'default'  # using default/pcapkit engine
+
+        if self._exnam not in ('default', 'pcapkit'):
+            warn(f'unsupported extraction engine: {self._exnam}; '
+                 'using default engine instead', EngineWarning, stacklevel=stacklevel())
+            self._exnam = 'default'  # using default/pcapkit engine
+
+        self._exeng = cast('Engine[P]', PCAP_Engine(self))
+        self._exeng.run()
+
+        # start iteration
+        self.record_frames()
 
     @staticmethod
     def import_test(engine: 'str', *, name: 'Optional[str]' = None) -> 'Optional[ModuleType]':
@@ -412,42 +431,6 @@ class Extractor:
 
         return ifnm, ofnm, fmt, ext, files
 
-    def record_header(self) -> 'None':
-        """Read global header.
-
-        The method will parse the PCAP global header and save the parsed result
-        as :attr:`self._gbhdr <Extractor._gbhdr>`. Information such as PCAP version,
-        data link layer protocol type, nanosecond flag and byteorder will also be
-        save the current :class:`Extractor` instance.
-
-        If TCP flow tracing is enabled, the nanosecond flag and byteorder will
-        be used for the output PCAP file of the traced TCP flows.
-
-        For output, the method will dump the parsed PCAP global header under
-        the name of ``Global Header``.
-
-        """
-        # pylint: disable=attribute-defined-outside-init,protected-access
-        self._gbhdr = Header(self._ifile)
-        self._vinfo = self._gbhdr.version
-        self._dlink = self._gbhdr.protocol
-        self._nnsec = self._gbhdr.nanosecond
-
-        if self._flag_t:
-            self._trace._endian = self._gbhdr.byteorder
-            self._trace._nnsecd = self._gbhdr.nanosecond
-
-        if self._flag_q:
-            return
-
-        if self._flag_f:
-            ofile = self._ofile(f'{self._ofnm}/Global Header.{self._fext}')
-            ofile(self._gbhdr.info.to_dict(), name='Global Header')
-        else:
-            self._ofile(self._gbhdr.info.to_dict(), name='Global Header')
-            ofile = self._ofile
-        self._type = ofile.kind
-
     def record_frames(self) -> 'None':
         """Read packet frames.
 
@@ -462,7 +445,7 @@ class Extractor:
         if self._flag_a:
             while True:
                 try:
-                    self._read_frame()
+                    self._exeng.read_frame()
                 except (EOFError, StopIteration):
                     # quit when EOF
                     break
@@ -567,7 +550,7 @@ class Extractor:
 
         self._exptl = protocol or 'null'                              # extract til protocol
         self._exlyr = cast('Layers', (layer or 'none').lower())       # extract til layer
-        self._exeng = cast('Engines', (engine or 'default').lower())  # extract using engine
+        self._exnam = cast('Engines', (engine or 'default').lower())  # extract using engine
 
         if reassembly:
             from pcapkit.foundation.reassembly.ipv4 import IPv4 as IPv4_Reassembly
@@ -583,8 +566,8 @@ class Extractor:
         if trace:
             from pcapkit.foundation.traceflow.tcp import TCP as TCP_TraceFlow  # isort: skip
 
-            if self._exeng in ('pyshark',) and trace_format in ('pcap',):
-                warn(f"'Extractor(engine={self._exeng})' does not support 'trace_format={trace_format}'; "
+            if self._exnam in ('pyshark',) and trace_format in ('pcap',):
+                warn(f"'Extractor(engine={self._exnam})' does not support 'trace_format={trace_format}'; "
                      "using 'trace_format=None' instead", FormatWarning, stacklevel=stacklevel())
                 trace_format = None
 
@@ -656,6 +639,9 @@ class Extractor:
 
             self._ofile = DictDumper if self._flag_f else DictDumper(ofnm)  # output file
 
+        self._magic = self._ifile.read(4)  # magic number
+        self._ifile.seek(0, os.SEEK_SET)
+
         self.run()    # start extraction
 
     def __iter__(self) -> 'Extractor':
@@ -670,7 +656,7 @@ class Extractor:
             return self
         raise IterableError("'Extractor(auto=True)' object is not iterable")
 
-    def __next__(self) -> 'Frame | ScapyPacket | DPKTPacket':
+    def __next__(self) -> 'P':
         """Iterate and parse next PCAP frame.
 
         It will call :meth:`_read_frame` to parse next PCAP frame internally,
@@ -678,12 +664,12 @@ class Extractor:
 
         """
         try:
-            return self._read_frame()
+            return self._exeng.read_frame()
         except (EOFError, StopIteration):
             self._cleanup()
             raise StopIteration  # pylint: disable=raise-missing-from
 
-    def __call__(self) -> 'Frame | ScapyPacket | DPKTPacket':
+    def __call__(self) -> 'P':
         """Works as a simple wrapper for the iteration protocol.
 
         Raises:
@@ -693,7 +679,7 @@ class Extractor:
         """
         if not self._flag_a:
             try:
-                return self._read_frame()
+                return self._exeng.read_frame()
             except (EOFError, StopIteration) as error:
                 self._cleanup()
                 raise error
@@ -726,405 +712,3 @@ class Extractor:
         self._extmp = None
         self._flag_e = True
         self._ifile.close()
-
-    def _read_frame(self) -> 'Frame | ScapyPacket | DPKTPacket':
-        """Headquarters for frame reader.
-
-        This method is a dispatcher for parsing frames.
-
-        * For Scapy engine, calls :meth:`_scapy_read_frame`.
-        * For DPKT engine, calls :meth:`_dpkt_read_frame`.
-        * For PyShark engine, calls :meth:`_pyshark_read_frame`.
-        * For default (PyPCAPKit) engine, calls :meth:`_default_read_frame`.
-
-        Returns:
-            The parsed frame instance.
-
-        """
-        if self._exeng == 'scapy':
-            return self._scapy_read_frame()
-        if self._exeng == 'dpkt':
-            return self._dpkt_read_frame()
-        if self._exeng == 'pyshark':
-            return self._pyshark_read_frame()
-        return self._default_read_frame()
-
-    def _default_read_frame(self) -> 'Frame':
-        """Read frames with default engine.
-
-        This method performs following operations:
-
-        - extract frames and each layer of packets;
-        - make :class:`~pcapkit.corekit.infoclass.Info` object out of frame properties;
-        - write to output file with corresponding dumper;
-        - reassemble IP and/or TCP datagram;
-        - trace TCP flows if any;
-        - record frame :class:`~pcapkit.corekit.infoclass.Info` object to frame storage.
-
-        Returns:
-            Parsed frame instance.
-
-        """
-        from pcapkit.toolkit.default import (ipv4_reassembly, ipv6_reassembly, tcp_reassembly,
-                                             tcp_traceflow)
-
-        # read frame header
-        frame = Frame(self._ifile, num=self._frnum+1, header=self._gbhdr.info,
-                      layer=self._exlyr, protocol=self._exptl, nanosecond=self._nnsec)
-        self._frnum += 1
-
-        # verbose output
-        self._vfunc(self, frame)
-
-        # write plist
-        frnum = f'Frame {self._frnum}'
-        if not self._flag_q:
-            if self._flag_f:
-                ofile = self._ofile(f'{self._ofnm}/{frnum}.{self._fext}')
-                ofile(frame.info.to_dict(), name=frnum)
-            else:
-                self._ofile(frame.info.to_dict(), name=frnum)
-
-        # record fragments
-        if self._flag_r:
-            if self._ipv4:
-                data_ipv4 = ipv4_reassembly(frame)
-                if data_ipv4 is not None:
-                    self._reasm.ipv4(data_ipv4)
-            if self._ipv6:
-                data_ipv6 = ipv6_reassembly(frame)
-                if data_ipv6 is not None:
-                    self._reasm.ipv6(data_ipv6)
-            if self._tcp:
-                data_tcp = tcp_reassembly(frame)
-                if data_tcp is not None:
-                    self._reasm.tcp(data_tcp)
-
-        # trace flows
-        if self._flag_t:
-            if self._tcp:
-                data_tf_tcp = tcp_traceflow(frame, data_link=self._dlink)
-                if data_tf_tcp is not None:
-                    self._trace.tcp(data_tf_tcp)
-
-        # record frames
-        if self._flag_d:
-            self._frame.append(frame)
-
-        # return frame record
-        return frame
-
-    def _run_scapy(self, scapy_all: 'ModuleType') -> 'None':
-        """Call :func:`scapy.all.sniff` to extract PCAP files.
-
-        This method assigns :attr:`self._expkg <Extractor._expkg>` as :mod:`scapy.all`
-        and :attr:`self._extmp <Extractor._extmp>` as an iterator from
-        :func:`scapy.all.sniff`.
-
-        Args:
-            scapy_all: The :mod:`scapy.all` module.
-
-        Warns:
-            AttributeWarning: If :attr:`self._exlyr <Extractor._exlyr>` and/or
-                :attr:`self._exptl <Extractor._exptl>` is provided as the Scapy
-                engine currently does not support such operations.
-
-        """
-        if self._exlyr != 'none' or self._exptl != 'null':
-            warn("'Extractor(engine=scapy)' does not support protocol and layer threshold; "
-                 f"'layer={self._exlyr}' and 'protocol={self._exptl}' ignored",
-                 AttributeWarning, stacklevel=stacklevel())
-
-        # setup verbose handler
-        if self._flag_v:
-            from pcapkit.toolkit.scapy import packet2chain  # isort:skip
-            self._vfunc = lambda e, f: print(
-                f'Frame {e._frnum:>3d}: {packet2chain(f)}'  # pylint: disable=protected-access
-            )  # pylint: disable=logging-fstring-interpolation
-
-        # extract global header
-        self.record_header()
-        self._ifile.seek(0, os.SEEK_SET)
-
-        # extract & analyse file
-        self._expkg = scapy_all
-        self._extmp = iter(scapy_all.sniff(offline=self._ifnm))  # type: Iterator[ScapyPacket]
-
-        # start iteration
-        self.record_frames()
-
-    def _scapy_read_frame(self) -> 'ScapyPacket':
-        """Read frames with Scapy engine.
-
-        Returns:
-            Parsed frame instance.
-
-        See Also:
-            Please refer to :meth:`_default_read_frame` for more operational information.
-
-        """
-        from pcapkit.toolkit.scapy import (ipv4_reassembly, ipv6_reassembly, packet2dict,
-                                           tcp_reassembly, tcp_traceflow)
-
-        # fetch Scapy packet
-        packet = next(self._extmp)
-
-        # verbose output
-        self._frnum += 1
-        self._vfunc(self, packet)
-
-        # write plist
-        frnum = f'Frame {self._frnum}'
-        if not self._flag_q:
-            info = packet2dict(packet)
-            if self._flag_f:
-                ofile = self._ofile(f'{self._ofnm}/{frnum}.{self._fext}')
-                ofile(info, name=frnum)
-            else:
-                self._ofile(info, name=frnum)
-
-        # record fragments
-        if self._flag_r:
-            if self._ipv4:
-                data_ipv4 = ipv4_reassembly(packet, count=self._frnum)
-                if data_ipv4 is not None:
-                    self._reasm.ipv4(data_ipv4)
-            if self._ipv6:
-                data_ipv6 = ipv6_reassembly(packet, count=self._frnum)
-                if data_ipv6 is not None:
-                    self._reasm.ipv6(data_ipv6)
-            if self._tcp:
-                data_tcp = tcp_reassembly(packet, count=self._frnum)
-                if data_tcp is not None:
-                    self._reasm.tcp(data_tcp)
-
-        # trace flows
-        if self._flag_t:
-            if self._tcp:
-                data_tf_tcp = tcp_traceflow(packet, count=self._frnum)
-                if data_tf_tcp is not None:
-                    self._trace.tcp(data_tf_tcp)
-
-        # record frames
-        if self._flag_d:
-            # setattr(packet, 'packet2dict', packet2dict)
-            # setattr(packet, 'packet2chain', packet2chain)
-            self._frame.append(packet)
-
-        # return frame record
-        return packet
-
-    def _run_dpkt(self, dpkt: 'ModuleType') -> 'None':
-        """Call :class:`dpkt.pcap.Reader` to extract PCAP files.
-
-        This method assigns :attr:`self._expkg <Extractor._expkg>` as :mod:`dpkt` and
-        :attr:`self._extmp <Extractor._extmp>` as an iterator from :class:`dpkt.pcap.Reader`.
-
-        Args:
-            dpkt: The :mod:`dpkt` module.
-
-        Warns:
-            AttributeWarning: If :attr:`self._exlyr <Extractor._exlyr>` and/or
-                :attr:`self._exptl <Extractor._exptl>` is provided as the DPKT
-                engine currently does not support such operations.
-
-        """
-        if TYPE_CHECKING:
-            import dpkt  # type: ignore[no-redef]
-
-        if self._exlyr != 'none' or self._exptl != 'null':
-            warn("'Extractor(engine=dpkt)' does not support protocol and layer threshold; "
-                 f"'layer={self._exlyr}' and 'protocol={self._exptl}' ignored",
-                 AttributeWarning, stacklevel=stacklevel())
-
-        # setup verbose handler
-        if self._flag_v:
-            from pcapkit.toolkit.dpkt import packet2chain  # isort:skip
-            self._vfunc = lambda e, f: print(
-                f'Frame {e._frnum:>3d}: {packet2chain(f)}'  # pylint: disable=protected-access
-            )  # pylint: disable=logging-fstring-interpolation
-
-        # extract global header
-        self.record_header()
-        self._ifile.seek(0, os.SEEK_SET)
-
-        if self._dlink == Enum_LinkType.ETHERNET:
-            pkg = dpkt.ethernet.Ethernet
-        elif self._dlink.value == Enum_LinkType.IPV4:
-            pkg = dpkt.ip.IP
-        elif self._dlink.value == Enum_LinkType.IPV6:
-            pkg = dpkt.ip6.IP6
-        else:
-            warn('unrecognised link layer protocol; all analysis functions ignored',
-                 DPKTWarning, stacklevel=stacklevel())
-
-            class RawPacket(dpkt.dpkt.Packet):  # type: ignore[name-defined]
-                """Raw packet."""
-
-                def __len__(self) -> 'int':
-                    return len(self.data)
-
-                def __bytes__(self) -> 'bytes':
-                    return self.data
-
-                def unpack(self, buf: 'bytes') -> 'None':
-                    self.data = buf
-
-            pkg = RawPacket
-
-        # extract & analyse file
-        self._expkg = pkg
-        self._extmp = iter(dpkt.pcap.Reader(self._ifile))  # type: Iterator[tuple[float, DPKTPacket]]
-
-        # start iteration
-        self.record_frames()
-
-    def _dpkt_read_frame(self) -> 'DPKTPacket':
-        """Read frames with DPKT engine.
-
-        Returns:
-            dpkt.dpkt.Packet: Parsed frame instance.
-
-        See Also:
-            Please refer to :meth:`_default_read_frame` for more operational information.
-
-        """
-        from pcapkit.toolkit.dpkt import (ipv4_reassembly, ipv6_reassembly, packet2dict,
-                                          tcp_reassembly, tcp_traceflow)
-
-        # fetch DPKT packet
-        timestamp, pkt = cast('tuple[float, bytes]', next(self._extmp))
-        packet = self._expkg(pkt)  # type: DPKTPacket
-
-        # verbose output
-        self._frnum += 1
-        self._vfunc(self, packet)
-
-        # write plist
-        frnum = f'Frame {self._frnum}'
-        if not self._flag_q:
-            info = packet2dict(packet, timestamp, data_link=self._dlink)
-            if self._flag_f:
-                ofile = self._ofile(f'{self._ofnm}/{frnum}.{self._fext}')
-                ofile(info, name=frnum)
-            else:
-                self._ofile(info, name=frnum)
-
-        # record fragments
-        if self._flag_r:
-            if self._ipv4:
-                data_ipv4 = ipv4_reassembly(packet, count=self._frnum)
-                if data_ipv4 is not None:
-                    self._reasm.ipv4(data_ipv4)
-            if self._ipv6:
-                data_ipv6 = ipv6_reassembly(packet, count=self._frnum)
-                if data_ipv6 is not None:
-                    self._reasm.ipv6(data_ipv6)
-            if self._tcp:
-                data_tcp = tcp_reassembly(packet, count=self._frnum)
-                if data_tcp is not None:
-                    self._reasm.tcp(data_tcp)
-
-        # trace flows
-        if self._flag_t:
-            if self._tcp:
-                data_tf_tcp = tcp_traceflow(packet, timestamp, data_link=self._dlink, count=self._frnum)
-                if data_tf_tcp is not None:
-                    self._trace.tcp(data_tf_tcp)
-
-        # record frames
-        if self._flag_d:
-            # setattr(packet, 'packet2dict', packet2dict)
-            # setattr(packet, 'packet2chain', packet2chain)
-            self._frame.append(packet)
-
-        # return frame record
-        return packet
-
-    def _run_pyshark(self, pyshark: 'ModuleType') -> 'None':
-        """Call :class:`pyshark.FileCapture` to extract PCAP files.
-
-        This method assigns :attr:`self._expkg <Extractor._expkg>` as :mod:`pyshark` and
-        :attr:`self._extmp <Extractor._extmp>` as an iterator from :class:`pyshark.FileCapture`.
-
-        Args:
-            pyshark (types.ModuleType): The :mod:`pyshark` module.
-
-        Warns:
-            AttributeWarning: Warns under following circumstances:
-
-                * if :attr:`self._exlyr <Extractor._exlyr>` and/or
-                  :attr:`self._exptl <Extractor._exptl>` is provided as the
-                  PyShark engine currently does not support such operations.
-                * if reassembly is enabled, as the PyShark engine currently
-                  does not support such operation.
-
-        """
-        if self._exlyr != 'none' or self._exptl != 'null':
-            warn("'Extractor(engine='pyshark')' does not support protocol and layer threshold; "
-                 f"'layer={self._exlyr}' and 'protocol={self._exptl}' ignored",
-                 AttributeWarning, stacklevel=stacklevel())
-
-        if self._flag_r and (self._ipv4 or self._ipv6 or self._tcp):
-            self._flag_r = False
-            self._reasm = ReassemblyManager(ipv4=None, ipv6=None, tcp=None)
-            warn("'Extractor(engine='pyshark')' object dose not support reassembly; "
-                 f"so 'ipv4={self._ipv4}', 'ipv6={self._ipv6}' and 'tcp={self._tcp}' will be ignored",
-                 AttributeWarning, stacklevel=stacklevel())
-
-        # setup verbose handler
-        if self._flag_v:
-            self._vfunc = lambda e, f: print(
-                f'Frame {e._frnum:>3d}: {f.frame_info.protocols}'  # pylint: disable=protected-access
-            )  # pylint: disable=logging-fstring-interpolation
-
-        # extract & analyse file
-        self._expkg = pyshark
-        self._extmp = iter(pyshark.FileCapture(self._ifnm, keep_packets=False))
-
-        # start iteration
-        self.record_frames()
-
-    def _pyshark_read_frame(self) -> 'PySharkPacket':
-        """Read frames with PyShark engine.
-
-        Returns:
-            Parsed frame instance.
-
-        See Also:
-            Please refer to :meth:`_default_read_frame` for more operational information.
-
-        """
-        from pcapkit.toolkit.pyshark import packet2dict, tcp_traceflow
-
-        # fetch PyShark packet
-        packet = cast('PySharkPacket', next(self._extmp))
-
-        # verbose output
-        self._frnum = int(packet.number)
-        self._vfunc(self, packet)
-
-        # write plist
-        frnum = f'Frame {self._frnum}'
-        if not self._flag_q:
-            info = packet2dict(packet)
-            if self._flag_f:
-                ofile = self._ofile(f'{self._ofnm}/{frnum}.{self._fext}')
-                ofile(info, name=frnum)
-            else:
-                self._ofile(info, name=frnum)
-
-        # trace flows
-        if self._flag_t:
-            if self._tcp:
-                data_tf_tcp = tcp_traceflow(packet)
-                if data_tf_tcp is not None:
-                    self._trace.tcp(data_tf_tcp)
-
-        # record frames
-        if self._flag_d:
-            # setattr(packet, 'packet2dict', packet2dict)
-            self._frame.append(packet)
-
-        # return frame record
-        return packet
