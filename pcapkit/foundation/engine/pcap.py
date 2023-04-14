@@ -7,8 +7,8 @@ support, as is used by :class:`pcapkit.foundation.extraction.Extractor`.
 
 """
 from pcapkit.foundation.engine.engine import Engine
-from pcapkit.protocols.misc.pcap.header import Header
 from pcapkit.protocols.misc.pcap.frame import Frame
+from pcapkit.protocols.misc.pcap.header import Header
 
 __all__ = ['PCAP']
 

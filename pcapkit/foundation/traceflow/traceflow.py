@@ -12,12 +12,14 @@ import collections
 import importlib
 import os
 import sys
-from typing import TYPE_CHECKING, TypeVar, overload, Generic
+from typing import TYPE_CHECKING, Generic, TypeVar, overload
 
 from pcapkit.corekit.infoclass import Info
+from pcapkit.dumpkit.common import _append_fallback as dumpkit_append_fallback
+from pcapkit.dumpkit.common import default as dumpkit_default
+from pcapkit.dumpkit.common import object_hook as dumpkit_object_hook
 from pcapkit.utilities.exceptions import FileExists, stacklevel
 from pcapkit.utilities.warnings import FileWarning, FormatWarning, warn
-from pcapkit.dumpkit.common import object_hook as dumpkit_object_hook, default as dumpkit_default, _append_fallback as dumpkit_append_fallback
 
 __all__ = ['TraceFlow']
 

@@ -24,9 +24,8 @@ __all__ = ['object_hook', 'default', '_append_fallback']
 if TYPE_CHECKING:
     from typing import Any, TextIO
 
-    from typing_extensions import Literal
-
     from dictdumper.dumper import Dumper
+    from typing_extensions import Literal
 
 
 def object_hook(self: 'Dumper', o: 'Any') -> 'Any':

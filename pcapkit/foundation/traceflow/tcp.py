@@ -12,16 +12,15 @@ TCP flows from a series of packets and connections.
    `@gousaiyang <https://github.com/gousaiyang>`__.
 
 """
-from typing import TYPE_CHECKING, TypeVar, overload, Generic
+from typing import TYPE_CHECKING, Generic, overload
 
-from pcapkit.foundation.traceflow.data.tcp import Buffer, BufferID, Index, Packet, IPAddress
+from pcapkit.foundation.traceflow.data.tcp import Buffer, BufferID, Index, IPAddress, Packet
 from pcapkit.foundation.traceflow.traceflow import TraceFlow
 from pcapkit.protocols.transport.tcp import TCP as TCP_Protocol
 
 __all__ = ['TCP']
 
 if TYPE_CHECKING:
-    from ipaddress import IPv4Address, IPv6Address
     from typing import Type
 
     from dictdumper.dumper import Dumper

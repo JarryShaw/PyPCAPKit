@@ -10,16 +10,18 @@ support, as is used by :class:`pcapkit.foundation.extraction.Extractor`.
 """
 from typing import TYPE_CHECKING, cast
 
+from pcapkit.const.reg.linktype import LinkType as Enum_LinkType
 from pcapkit.foundation.engine.engine import Engine
 from pcapkit.utilities.exceptions import stacklevel
-from pcapkit.utilities.warnings import warn, AttributeWarning, DPKTWarning
-from pcapkit.const.reg.linktype import LinkType as Enum_LinkType
+from pcapkit.utilities.warnings import AttributeWarning, DPKTWarning, warn
 
 __all__ = ['DPKT']
 
 if TYPE_CHECKING:
     from typing import Iterator
+
     from dpkt.dpkt import Packet as DPKTPacket
+
     from pcapkit.foundation.extraction import Extractor
 
 

@@ -12,13 +12,15 @@ from typing import TYPE_CHECKING, cast
 
 from pcapkit.foundation.engine.engine import Engine
 from pcapkit.utilities.exceptions import stacklevel
-from pcapkit.utilities.warnings import warn, AttributeWarning
+from pcapkit.utilities.warnings import AttributeWarning, warn
 
 __all__ = ['Scapy']
 
 if TYPE_CHECKING:
     from typing import Iterator
+
     from scapy.packet import Packet as ScapyPacket
+
     from pcapkit.foundation.extraction import Extractor
 
 

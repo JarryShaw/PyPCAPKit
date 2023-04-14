@@ -19,16 +19,17 @@ import sys
 from typing import TYPE_CHECKING, Generic, TypeVar, cast
 
 from pcapkit.const.reg.linktype import LinkType as Enum_LinkType
+from pcapkit.dumpkit.common import _append_fallback as dumpkit_append_fallback
+from pcapkit.dumpkit.common import default as dumpkit_default
+from pcapkit.dumpkit.common import object_hook as dumpkit_object_hook
+from pcapkit.foundation.engine.pcap import PCAP as PCAP_Engine
+from pcapkit.foundation.reassembly import ReassemblyManager
+from pcapkit.foundation.traceflow import TraceFlowManager
 from pcapkit.protocols.misc.pcap.frame import Frame
 from pcapkit.protocols.misc.pcap.header import Header
-from pcapkit.foundation.engine.pcap import PCAP as PCAP_Engine
 from pcapkit.utilities.exceptions import (CallableError, FileNotFound, FormatError, IterableError,
                                           UnsupportedCall, stacklevel)
-from pcapkit.utilities.warnings import (EngineWarning, FormatWarning,
-                                        warn)
-from pcapkit.foundation.traceflow import TraceFlowManager
-from pcapkit.foundation.reassembly import ReassemblyManager
-from pcapkit.dumpkit.common import object_hook as dumpkit_object_hook, default as dumpkit_default, _append_fallback as dumpkit_append_fallback
+from pcapkit.utilities.warnings import EngineWarning, FormatWarning, warn
 
 if TYPE_CHECKING:
     from types import ModuleType, TracebackType
@@ -41,10 +42,10 @@ if TYPE_CHECKING:
     from typing_extensions import Literal
 
     from pcapkit.corekit.version import VersionInfo
+    from pcapkit.foundation.engine.engine import Engine
     from pcapkit.foundation.reassembly.data import ReassemblyData
     from pcapkit.foundation.traceflow.data import TraceFlowData
     from pcapkit.protocols.protocol import Protocol
-    from pcapkit.foundation.engine.engine import Engine
 
     Formats = Literal['pcap', 'json', 'tree', 'plist']
     Engines = Literal['default', 'pcapkit', 'dpkt', 'scapy', 'pyshark']

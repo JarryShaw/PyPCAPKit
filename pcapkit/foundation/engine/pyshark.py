@@ -12,15 +12,17 @@ support, as is used by :class:`pcapkit.foundation.extraction.Extractor`.
 from typing import TYPE_CHECKING, cast
 
 from pcapkit.foundation.engine.engine import Engine
-from pcapkit.utilities.exceptions import stacklevel
-from pcapkit.utilities.warnings import warn, AttributeWarning
 from pcapkit.foundation.reassembly import ReassemblyManager
+from pcapkit.utilities.exceptions import stacklevel
+from pcapkit.utilities.warnings import AttributeWarning, warn
 
 __all__ = ['PyShark']
 
 if TYPE_CHECKING:
     from typing import Iterator
+
     from pyshark.packet.packet import Packet as PySharkPacket
+
     from pcapkit.foundation.extraction import Extractor
 
 
