@@ -20,6 +20,8 @@ if TYPE_CHECKING:
     from pcapkit.protocols.protocol import Protocol
 
 AT = TypeVar('AT', 'IPv4Address', 'IPv6Address')
+
+#: Buffer ID.
 BufferID = Tuple[AT, AT, int, 'TransType']
 
 

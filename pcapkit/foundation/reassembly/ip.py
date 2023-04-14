@@ -3,7 +3,7 @@
 ============================
 
 :mod:`pcapkit.foundation.reassembly.ip` contains
-:class:`~pcapkit.foundation.reassembly.ip.IP_Reassembly`
+:class:`~pcapkit.foundation.reassembly.ip.IP`
 only, which reconstructs fragmented IP packets back to
 origin. The following algorithm implement is based on IP
 reassembly procedure introduced in :rfc:`791`, using
@@ -20,10 +20,10 @@ from pcapkit.foundation.reassembly.reassembly import Reassembly
 if TYPE_CHECKING:
     from pcapkit.const.reg.transtype import TransType
 
-__all__ = ['IP_Reassembly']
+__all__ = ['IP']
 
 
-class IP_Reassembly(Reassembly[Packet[AT], Datagram[AT], BufferID, Buffer[AT]], Generic[AT]):  # pylint: disable=abstract-method
+class IP(Reassembly[Packet[AT], Datagram[AT], BufferID, Buffer[AT]], Generic[AT]):  # pylint: disable=abstract-method
     """Reassembly for IP payload.
 
     Important:

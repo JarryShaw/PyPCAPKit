@@ -20,6 +20,8 @@ if TYPE_CHECKING:
     from pcapkit.protocols.protocol import Protocol
 
 IPAddress = TypeVar('IPAddress', 'IPv4Address', 'IPv6Address')
+
+#: Buffer ID.
 BufferID = Tuple[IPAddress, int, IPAddress, int]
 
 

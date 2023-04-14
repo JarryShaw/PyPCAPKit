@@ -24,3 +24,24 @@ __all__ = [
     'TCP_Packet', 'TCP_DatagramID', 'TCP_Datagram', 'TCP_Buffer',
     'TCP_Fragment', 'TCP_HoleDiscriptor', 'TCP_BufferID',
 ]
+
+from typing import TYPE_CHECKING
+
+from pcapkit.corekit.infoclass import Info
+
+if TYPE_CHECKING:
+    from typing import Optional
+
+
+class ReassemblyData(Info):
+    """Data storage for reassembly."""
+
+    #: IPv4 reassembled data.
+    ipv4: 'tuple[IP_Datagram, ...]'
+    #: IPv6 reassembled data.
+    ipv6: 'tuple[IP_Datagram, ...]'
+    #: TCP reassembled data.
+    tcp: 'tuple[TCP_Datagram, ...]'
+
+    if TYPE_CHECKING:
+        def __init__(self, ipv4: 'Optional[tuple[IP_Datagram, ...]]', ipv6: 'Optional[tuple[IP_Datagram, ...]]', tcp: 'Optional[tuple[TCP_Datagram, ...]]') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long

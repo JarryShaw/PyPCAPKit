@@ -3,15 +3,15 @@
 ==============================
 
 :mod:`pcapkit.foundation.reassembly.ipv6` contains
-:class:`~pcapkit.foundation.reassembly.ipv6.IPv6_Reassembly`
+:class:`~pcapkit.foundation.reassembly.ipv6.IPv6`
 only, which reconstructs fragmented IPv6 packets back to
 origin. Please refer to :doc:`ip` for more information.
 
 """
 from typing import TYPE_CHECKING
 
-from pcapkit.foundation.reassembly.ip import IP_Reassembly
-from pcapkit.protocols.internet.ipv6 import IPv6
+from pcapkit.foundation.reassembly.ip import IP
+from pcapkit.protocols.internet.ipv6 import IPv6 as IPv6_Protocol
 
 if TYPE_CHECKING:
     from ipaddress import IPv6Address
@@ -19,16 +19,16 @@ if TYPE_CHECKING:
 
     from typing_extensions import Literal
 
-__all__ = ['IPv6_Reassembly']
+__all__ = ['IPv6']
 
 
-class IPv6_Reassembly(IP_Reassembly['IPv6Address']):
+class IPv6(IP['IPv6Address']):
     """Reassembly for IPv6 payload.
 
     Example:
-        >>> from pcapkit.reassembly import IPv6_Reassembly
+        >>> from pcapkit.reassembly import IPv6
         # Initialise instance:
-        >>> ipv6_reassembly = IPv6_Reassembly()
+        >>> ipv6_reassembly = IPv6()
         # Call reassembly:
         >>> ipv6_reassembly(packet_dict)
         # Fetch result:
@@ -45,6 +45,6 @@ class IPv6_Reassembly(IP_Reassembly['IPv6Address']):
         return 'Internet Protocol version 6'
 
     @property
-    def protocol(self) -> 'Type[IPv6]':
+    def protocol(self) -> 'Type[IPv6_Protocol]':
         """Protocol of current reassembly object."""
-        return IPv6
+        return IPv6_Protocol

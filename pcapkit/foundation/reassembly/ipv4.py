@@ -3,15 +3,15 @@
 ==============================
 
 :mod:`pcapkit.foundation.reassembly.ipv4` contains
-:class:`~pcapkit.foundation.reassembly.ipv4.IPv4_Reassembly`
+:class:`~pcapkit.foundation.reassembly.ipv4.IPv4`
 only, which reconstructs fragmented IPv4 packets back to
 origin. Please refer to :doc:`ip` for more information.
 
 """
 from typing import TYPE_CHECKING
 
-from pcapkit.foundation.reassembly.ip import IP_Reassembly
-from pcapkit.protocols.internet.ipv4 import IPv4
+from pcapkit.foundation.reassembly.ip import IP
+from pcapkit.protocols.internet.ipv4 import IPv4 as IPv4_Protocol
 
 if TYPE_CHECKING:
     from ipaddress import IPv4Address
@@ -19,16 +19,16 @@ if TYPE_CHECKING:
 
     from typing_extensions import Literal
 
-__all__ = ['IPv4_Reassembly']
+__all__ = ['IPv4']
 
 
-class IPv4_Reassembly(IP_Reassembly['IPv4Address']):
+class IPv4(IP['IPv4Address']):
     """Reassembly for IPv4 payload.
 
     Example:
-        >>> from pcapkit.reassembly import IPv4_Reassembly
+        >>> from pcapkit.reassembly import IPv4
         # Initialise instance:
-        >>> ipv4_reassembly = IPv4_Reassembly()
+        >>> ipv4_reassembly = IPv4()
         # Call reassembly:
         >>> ipv4_reassembly(packet_dict)
         # Fetch result:
@@ -45,6 +45,6 @@ class IPv4_Reassembly(IP_Reassembly['IPv4Address']):
         return 'Internet Protocol version 4'
 
     @property
-    def protocol(self) -> 'Type[IPv4]':
+    def protocol(self) -> 'Type[IPv4_Protocol]':
         """Protocol of current reassembly object."""
-        return IPv4
+        return IPv4_Protocol

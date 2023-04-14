@@ -13,23 +13,23 @@ from typing import TYPE_CHECKING
 from pcapkit.foundation.reassembly.data.tcp import (Buffer, BufferID, Datagram, DatagramID,
                                                     Fragment, HoleDiscriptor, Packet)
 from pcapkit.foundation.reassembly.reassembly import Reassembly
-from pcapkit.protocols.transport.tcp import TCP
+from pcapkit.protocols.transport.tcp import TCP as TCP_Protocol
 
 if TYPE_CHECKING:
     from typing import Type
 
     from typing_extensions import Literal
 
-__all__ = ['TCP_Reassembly']
+__all__ = ['TCP']
 
 
-class TCP_Reassembly(Reassembly[Packet, Datagram, BufferID, Buffer]):
+class TCP(Reassembly[Packet, Datagram, BufferID, Buffer]):
     """Reassembly for TCP payload.
 
     Example:
-        >>> from pcapkit.reassembly import TCP_Reassembly
+        >>> from pcapkit.reassembly import TCP
         # Initialise instance:
-        >>> tcp_reassembly = TCP_Reassembly()
+        >>> tcp_reassembly = TCP()
         # Call reassembly:
         >>> tcp_reassembly(packet_dict)
         # Fetch result:
@@ -46,9 +46,9 @@ class TCP_Reassembly(Reassembly[Packet, Datagram, BufferID, Buffer]):
         return 'Transmission Control Protocol'
 
     @property
-    def protocol(self) -> 'Type[TCP]':
+    def protocol(self) -> 'Type[TCP_Protocol]':
         """Protocol of current reassembly object."""
-        return TCP
+        return TCP_Protocol
 
     ##########################################################################
     # Methods.
