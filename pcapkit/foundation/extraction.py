@@ -433,7 +433,7 @@ class Extractor:
         self._dlink = self._gbhdr.protocol
         self._nnsec = self._gbhdr.nanosecond
 
-        if self._trace is not None:
+        if self._flag_t:
             self._trace._endian = self._gbhdr.byteorder
             self._trace._nnsecd = self._gbhdr.nanosecond
 
