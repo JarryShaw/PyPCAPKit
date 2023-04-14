@@ -19,21 +19,20 @@ import sys
 from typing import TYPE_CHECKING, Generic, TypeVar, cast
 
 from pcapkit.const.reg.linktype import LinkType as Enum_LinkType
-from pcapkit.corekit.infoclass import Info
 from pcapkit.protocols.misc.pcap.frame import Frame
 from pcapkit.protocols.misc.pcap.header import Header
 from pcapkit.foundation.engine.pcap import PCAP as PCAP_Engine
 from pcapkit.utilities.exceptions import (CallableError, FileNotFound, FormatError, IterableError,
                                           UnsupportedCall, stacklevel)
-from pcapkit.utilities.logging import logger
 from pcapkit.utilities.warnings import (EngineWarning, FormatWarning,
                                         warn)
 from pcapkit.foundation.traceflow import TraceFlowManager
 from pcapkit.foundation.reassembly import ReassemblyManager
+from pcapkit.dumpkit.compat import object_hook as dumpkit_object_hook, default as dumpkit_default, _append_fallback as dumpkit_append_fallback
 
 if TYPE_CHECKING:
     from types import ModuleType, TracebackType
-    from typing import IO, Any, Callable, DefaultDict, Optional, TextIO, Type, Union
+    from typing import IO, Any, Callable, DefaultDict, Optional, Type, Union
 
     from dictdumper.dumper import Dumper
     from dpkt.dpkt import Packet as DPKTPacket
@@ -609,55 +608,9 @@ class Extractor(Generic[P]):
             class DictDumper(output):  # type: ignore[valid-type,misc]
                 """Customised :class:`~dictdumper.dumper.Dumper` object."""
 
-                def object_hook(self, o: 'Any') -> 'Any':
-                    """Convert content for function call.
-
-                    Args:
-                        o: object to convert
-
-                    Returns:
-                        Converted object.
-
-                    """
-                    import datetime
-                    import decimal
-                    import enum
-                    import ipaddress
-
-                    import aenum
-
-                    if isinstance(o, decimal.Decimal):
-                        return str(o)
-                    if isinstance(o, datetime.timedelta):
-                        return o.total_seconds()
-                    if isinstance(o, Info):
-                        return o.to_dict()
-                    if isinstance(o, (ipaddress.IPv4Address, ipaddress.IPv6Address)):
-                        return str(o)
-                    if isinstance(o, (enum.Enum, aenum.Enum)):
-                        addon = {key: val for key, val in o.__dict__.items() if not key.startswith('_')}
-                        return dict(
-                            name=f'{type(o).__name__}::{o.name}',
-                            value=o.value,
-                            **addon,
-                        )
-                    return super().object_hook(o)  # type: ignore[unreachable]
-
-                def default(self, o: 'Any') -> 'Literal["fallback"]':  # pylint: disable=unused-argument
-                    """Check content type for function call."""
-                    return 'fallback'
-
-                def _append_fallback(self, value: 'Any', file: 'TextIO') -> 'None':
-                    if hasattr(value, '__slots__'):
-                        new_value = {key: getattr(value, key) for key in value.__slots__}
-                    elif hasattr(value, '__dict__'):
-                        new_value = vars(value)
-                    else:
-                        logger.warning('unsupported object type: %s', type(value))
-                        new_value = str(value)  # type: ignore[assignment]
-
-                    func = self._encode_func(new_value)
-                    func(new_value, file)
+                object_hook = dumpkit_object_hook
+                default = dumpkit_default
+                _append_fallback = dumpkit_append_fallback
 
             self._ofile = DictDumper if self._flag_f else DictDumper(ofnm)  # output file
 
@@ -730,7 +683,5 @@ class Extractor(Generic[P]):
 
         """
         # pylint: disable=attribute-defined-outside-init
-        self._expkg = None
-        self._extmp = None
         self._flag_e = True
         self._ifile.close()

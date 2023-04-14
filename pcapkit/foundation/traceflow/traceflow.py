@@ -16,13 +16,13 @@ from typing import TYPE_CHECKING, TypeVar, overload, Generic
 
 from pcapkit.corekit.infoclass import Info
 from pcapkit.utilities.exceptions import FileExists, stacklevel
-from pcapkit.utilities.logging import logger
 from pcapkit.utilities.warnings import FileWarning, FormatWarning, warn
+from pcapkit.dumpkit.compat import object_hook as dumpkit_object_hook, default as dumpkit_default, _append_fallback as dumpkit_append_fallback
 
 __all__ = ['TraceFlow']
 
 if TYPE_CHECKING:
-    from typing import Any, DefaultDict, Optional, TextIO, Type
+    from typing import Any, DefaultDict, Optional, Type
 
     from dictdumper.dumper import Dumper
     from typing_extensions import Literal
@@ -140,53 +140,9 @@ class TraceFlow(Generic[BufferID, Buffer, Index, Packet], metaclass=abc.ABCMeta)
         class DictDumper(output):  # type: ignore[valid-type,misc]
             """Customised :class:`~dictdumper.dumper.Dumper` object."""
 
-            def object_hook(self, o: 'Any') -> 'Any':
-                """Convert content for function call.
-
-                Args:
-                    o: object to convert
-
-                Returns:
-                    Converted object.
-
-                """
-                import datetime
-                import decimal
-                import enum
-                import ipaddress
-
-                import aenum
-
-                if isinstance(o, decimal.Decimal):
-                    return str(o)
-                if isinstance(o, datetime.timedelta):
-                    return o.total_seconds()
-                if isinstance(o, Info):
-                    return o.to_dict()
-                if isinstance(o, (ipaddress.IPv4Address, ipaddress.IPv6Address)):
-                    return str(o)
-                if isinstance(o, (enum.IntEnum, aenum.IntEnum)):
-                    return dict(
-                        name=f'{type(o).__name__}::{o.name}',
-                        value=o.value,
-                    )
-                return super().object_hook(o)  # type: ignore[unreachable]
-
-            def default(self, o: 'Any') -> 'Literal["fallback"]':  # pylint: disable=unused-argument
-                """Check content type for function call."""
-                return 'fallback'
-
-            def _append_fallback(self, value: 'Any', file: 'TextIO') -> 'None':
-                if hasattr(value, '__slots__'):
-                    new_value = {key: getattr(value, key) for key in value.__slots__}
-                elif hasattr(value, '__dict__'):
-                    new_value = vars(value)
-                else:
-                    logger.warning('unsupported object type: %s', type(value))
-                    new_value = str(value)  # type: ignore[assignment]
-
-                func = self._encode_func(new_value)
-                func(new_value, file)
+            object_hook = dumpkit_object_hook
+            default = dumpkit_default
+            _append_fallback = dumpkit_append_fallback
 
         return DictDumper, ext
 
