@@ -5,19 +5,20 @@
 
 :mod:`pcapkit.foundation` is a collection of foundations for
 :mod:`pcapkit`, including PCAP file extraction tool
-:class:`~pcapkit.foundation.extraction.Extrator`, TCP flow tracer
-:class:`~pcapkit.foundation.tractflow.TraceFlow`, registry management
+:class:`~pcapkit.foundation.extraction.Extrator`, flow tracing
+:mod:`~pcapkit.foundation.tractflow`, registry management
 APIs for :mod:`pcapkit`, and TCP/IP reassembly implementations.
 
 """
 from pcapkit.foundation.extraction import Extractor
 from pcapkit.foundation.reassembly import *
 from pcapkit.foundation.registry import *
-from pcapkit.foundation.traceflow import TraceFlow
+from pcapkit.foundation.traceflow import *
 
 __all__ = [
-    'Extractor', 'TraceFlow',
+    'Extractor',
     'IPv4_Reassembly', 'IPv6_Reassembly', 'TCP_Reassembly',
+    'TCP_TraceFlow',
 
     'register_protocol',
 

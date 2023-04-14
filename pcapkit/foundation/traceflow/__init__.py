@@ -1,0 +1,36 @@
+# -*- coding: utf-8 -*-
+# pylint: disable=unused-import
+"""Trace Flows
+=================
+
+:mod:`pcapkit.traceflow` implements flow tracing functions for
+:mod:`pcapkit` package.
+
+"""
+# Base Class for TraceFlow
+from pcapkit.foundation.traceflow.traceflow import TraceFlow
+
+# TCP Flow Tracing
+from pcapkit.foundation.traceflow.tcp import TCP as TCP_TraceFlow
+
+__all__ = [
+    'TCP_TraceFlow',
+]
+
+
+from typing import TYPE_CHECKING
+
+from pcapkit.corekit.infoclass import Info
+
+if TYPE_CHECKING:
+    from typing import Optional
+
+
+class TraceFlowManager(Info):
+    """TraceFlow Manager."""
+
+    #: TCP reassembly.
+    tcp: 'TCP_TraceFlow'
+
+    if TYPE_CHECKING:
+        def __init__(self, tcp: 'Optional[TCP_TraceFlow]') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long

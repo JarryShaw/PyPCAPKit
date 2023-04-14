@@ -1,132 +1,42 @@
 # -*- coding: utf-8 -*-
-# pylint: disable=import-outside-toplevel
-"""Trace TCP Flows
-=====================
+"""Base Class
+================
 
-:mod:`pcapkit.foundation.traceflow` is the interface to trace
-TCP flows from a series of packets and connections.
-
-.. note::
-
-   This was implemented as the demand of my mate
-   `@gousaiyang <https://github.com/gousaiyang>`__.
+:mod:`pcapkit.foundation.traceflow.traceflow` contains
+:class:`~pcapkit.foundation.traceflow.traceflow.TraceFlow` only,
+which is an abstract base class for all flow tracing classes.
 
 """
+import abc
 import collections
 import importlib
 import os
 import sys
-from typing import TYPE_CHECKING, Generic, TypeVar, overload
+from typing import TYPE_CHECKING, TypeVar, overload, Generic
 
 from pcapkit.corekit.infoclass import Info
-from pcapkit.utilities.compat import Tuple
 from pcapkit.utilities.exceptions import FileExists, stacklevel
 from pcapkit.utilities.logging import logger
 from pcapkit.utilities.warnings import FileWarning, FormatWarning, warn
 
+__all__ = ['TraceFlow']
+
 if TYPE_CHECKING:
-    from ipaddress import IPv4Address, IPv6Address
     from typing import Any, DefaultDict, Optional, TextIO, Type
 
     from dictdumper.dumper import Dumper
     from typing_extensions import Literal
 
-    from pcapkit.const.reg.linktype import LinkType as Enum_LinkType
-    from pcapkit.protocols.data.misc.pcap.frame import Frame as Data_Frame
+    from pcapkit.protocols.protocol import Protocol
 
-__all__ = ['TraceFlow']
-
-IPAddress = TypeVar('IPAddress', 'IPv4Address', 'IPv6Address')
-
-###############################################################################
-# Data Models
-###############################################################################
-
-BufferID = Tuple[IPAddress, int, IPAddress, int]
+BufferID = TypeVar('BufferID')
+Buffer = TypeVar('Buffer', bound='Info')
+Index = TypeVar('Index', bound='Info')
+Packet = TypeVar('Packet', bound='Info')
 
 
-class Packet(Info, Generic[IPAddress]):
-    """Data structure for **TCP flow tracing**.
-
-    See Also:
-        * :meth:`pcapkit.foundation.traceflow.TraceFlow.dump`
-        * :term:`trace.packet`
-
-    """
-
-    #: Data link type from global header.
-    protocol: 'Enum_LinkType'
-    #: Frame number.
-    index: 'int'
-    #: Extracted frame info.
-    frame: 'Data_Frame | dict[str, Any]'
-    #: TCP synchronise (SYN) flag.
-    syn: 'bool'
-    #: TCP finish (FIN) flag.
-    fin: 'bool'
-    #: Source IP.
-    src: 'IPAddress'
-    #: Destination IP.
-    dst: 'IPAddress'
-    #: TCP source port.
-    srcport: 'int'
-    #: TCP destination port.
-    dstport: 'int'
-    #: Frame timestamp.
-    timestamp: 'float'
-
-    if TYPE_CHECKING:
-        def __init__(self, protocol: 'Enum_LinkType', index: 'int', frame: 'Data_Frame | dict[str, Any]', syn: 'bool', fin: 'bool', src: 'IPAddress', dst: 'IPAddress', srcport: 'int', dstport: 'int', timestamp: 'float') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long
-
-
-class Buffer(Info):
-    """Data structure for **TCP flow tracing**.
-
-    See Also:
-        * :attr:`pcapkit.foundation.traceflow.TraceFlow.index`
-        * :term:`trace.buffer`
-
-    """
-
-    #: Output dumper object.
-    fpout: 'Dumper'
-    #: List of frame index.
-    index: 'list[int]'
-    #: Flow label generated from ``BUFID``.
-    label: 'str'
-
-    if TYPE_CHECKING:
-        def __init__(self, fpout: 'Dumper', index: 'list[int]', label: 'str') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements
-
-
-class Index(Info):
-    """Data structure for **TCP flow tracing**.
-
-    See Also:
-        * element from :attr:`pcapkit.foundation.traceflow.TraceFlow.index`
-          *tuple*
-        * :term:`trace.index`
-
-    """
-
-    #: Output filename if exists.
-    fpout: 'Optional[str]'
-    #: Tuple of frame index.
-    index: 'tuple[int, ...]'
-    #: Flow label generated from ``BUFID``.
-    label: 'str'
-
-    if TYPE_CHECKING:
-        def __init__(self, fpout: 'Optional[str]', index: 'tuple[int, ...]', label: 'str') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements
-
-
-###############################################################################
-# Algorithm Implementation
-###############################################################################
-
-
-class TraceFlow:
-    """Trace TCP flows."""
+class TraceFlow(Generic[BufferID, Buffer, Index, Packet], metaclass=abc.ABCMeta):
+    """Base flow tracing class."""
 
     # Internal data storage for cached properties.
     __cached__: 'dict[str, Any]'
@@ -155,6 +65,16 @@ class TraceFlow:
     ##########################################################################
     # Properties.
     ##########################################################################
+
+    @property
+    @abc.abstractmethod
+    def name(self) -> 'str':
+        """Protocol name of current reassembly object."""
+
+    @property
+    @abc.abstractmethod
+    def protocol(self) -> 'Type[Protocol]':
+        """Protocol of current reassembly object."""
 
     @property
     def index(self) -> 'tuple[Index, ...]':
@@ -270,24 +190,21 @@ class TraceFlow:
 
         return DictDumper, ext
 
+    @abc.abstractmethod
     def dump(self, packet: 'Packet') -> 'None':
         """Dump frame to output files.
 
         Arguments:
-            packet (Dict[str, Any]): a flow packet (:term:`trace.packet`)
+            packet: a flow packet (:term:`trace.packet`)
 
         """
-        # fetch flow label
-        output = self.trace(packet, output=True)
-
-        # dump files
-        output(packet.frame, name=f'Frame {packet.index}')  # pylint: disable=not-callable
 
     @overload
     def trace(self, packet: 'Packet', *, output: 'Literal[True]' = ...) -> 'Dumper': ...
     @overload
     def trace(self, packet: 'Packet', *, output: 'Literal[False]' = ...) -> 'str': ...
 
+    @abc.abstractmethod
     def trace(self, packet: 'Packet', *, output: 'bool' = False) -> 'Dumper | str':
         """Trace packets.
 
@@ -301,57 +218,9 @@ class TraceFlow:
             the output file named after the flow label; otherwise, returns the
             flow label itself.
 
-        Notes:
-            The flow label is formatted as following:
-
-            .. code-block:: python
-
-               f'{packet.src}_{packet.srcport}-{packet.dst}_{info.dstport}-{packet.timestamp}'
-
         """
-        # clear cache
-        self.__cached__['submit'] = None
 
-        # Buffer Identifier
-        BUFID = (packet.src, packet.srcport, packet.dst, packet.dstport)  # type: BufferID
-        # SYN = packet.syn  # Synchronise Flag (Establishment)
-        FIN = packet.fin  # Finish Flag (Termination)
-
-        # # when SYN is set, reset buffer of this seesion
-        # if SYN and BUFID in self._buffer:
-        #     temp = self._buffer.pop(BUFID)
-        #     temp['fpout'] = (self._fproot, self._fdpext)
-        #     temp['index'] = tuple(temp['index'])
-        #     self._stream.append(Info(temp))
-
-        # initialise buffer with BUFID
-        if BUFID not in self._buffer:
-            label = f'{packet.src}_{packet.srcport}-{packet.dst}_{packet.dstport}-{packet.timestamp}'
-            self._buffer[BUFID] = Buffer(
-                fpout=self._foutio(fname=f'{self._fproot}/{label}{self._fdpext or ""}', protocol=packet.protocol,
-                                   byteorder=self._endian, nanosecond=self._nnsecd),
-                index=[],
-                label=label,
-            )
-
-        # trace frame record
-        self._buffer[BUFID].index.append(packet.index)
-        fpout = self._buffer[BUFID].fpout
-        label = self._buffer[BUFID].label
-
-        # when FIN is set, submit buffer of this session
-        if FIN:
-            buf = self._buffer.pop(BUFID)
-            # fpout, label = buf['fpout'], buf['label']
-            self._stream.append(Index(
-                fpout=f'{self._fproot}/{label}{self._fdpext}' if self._fdpext is not None else None,
-                index=tuple(buf.index),
-                label=label,
-            ))
-
-        # return label or output object
-        return fpout if output else label
-
+    @abc.abstractmethod
     def submit(self) -> 'tuple[Index, ...]':
         """Submit traced TCP flows.
 
@@ -359,19 +228,6 @@ class TraceFlow:
             Traced TCP flow (:term:`trace.index`).
 
         """
-        if (cached := self.__cached__.get('submit')) is not None:
-            return cached
-
-        ret = []  # type: list[Index]
-        for buf in self._buffer.values():
-            ret.append(Index(fpout=f"{self._fproot}/{buf.label}{self._fdpext}" if self._fdpext else None,
-                             index=tuple(buf.index),
-                             label=buf.label,))
-        ret.extend(self._stream)
-        ret_submit = tuple(ret)
-
-        self.__cached__['submit'] = ret_submit
-        return ret_submit
 
     ##########################################################################
     # Data models.
