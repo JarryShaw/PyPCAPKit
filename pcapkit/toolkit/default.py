@@ -12,7 +12,7 @@ from typing import TYPE_CHECKING, cast
 from pcapkit.const.ipv6.extension_header import ExtensionHeader as Enum_ExtensionHeader
 from pcapkit.foundation.reassembly.data.ip import Packet as IP_Packet
 from pcapkit.foundation.reassembly.data.tcp import Packet as TCP_Packet
-from pcapkit.foundation.traceflow import Packet as TF_Packet
+from pcapkit.foundation.traceflow.data.tcp import Packet as TF_TCP_Packet
 
 if TYPE_CHECKING:
     from ipaddress import IPv4Address, IPv6Address
@@ -44,7 +44,7 @@ def ipv4_reassembly(frame: 'Frame') -> 'IP_Packet[IPv4Address] | None':
           reassembly (c.f. :term:`ipv4.packet`) will be returned; otherwise, returns :data:`None`.
 
     See Also:
-        :class:`pcapkit.foundation.reassembly.ipv4.IPv4Reassembly`
+        :class:`pcapkit.foundation.reassembly.ipv4.IPv4`
 
     """
     if 'IPv4' in frame:
@@ -89,7 +89,7 @@ def ipv6_reassembly(frame: 'Frame') -> 'IP_Packet[IPv6Address] | None':
           reassembly (:term:`ipv6.packet`) will be returned; otherwise, returns :data:`None`.
 
     See Also:
-        :class:`pcapkit.foundation.reassembly.ipv6.IPv6Reassembly`
+        :class:`pcapkit.foundation.reassembly.ipv6.IPv6`
 
     """
     if 'IPv6' in frame:
@@ -135,7 +135,7 @@ def tcp_reassembly(frame: 'Frame') -> 'TCP_Packet | None':
           reassembly (:term:`tcp.packet`) will be returned; otherwise, returns :data:`None`.
 
     See Also:
-        :class:`pcapkit.foundation.reassembly.tcp.TCPReassembly`
+        :class:`pcapkit.foundation.reassembly.tcp.TCP`
 
     """
     if 'TCP' in frame:
@@ -168,7 +168,7 @@ def tcp_reassembly(frame: 'Frame') -> 'TCP_Packet | None':
     return None
 
 
-def tcp_traceflow(frame: 'Frame', *, data_link: 'LinkType') -> 'TF_Packet | None':
+def tcp_traceflow(frame: 'Frame', *, data_link: 'LinkType') -> 'TF_TCP_Packet | None':
     """Trace packet flow for TCP.
 
     Args:
@@ -184,7 +184,7 @@ def tcp_traceflow(frame: 'Frame', *, data_link: 'LinkType') -> 'TF_Packet | None
           flow tracing (:term:`trace.packet`) will be returned; otherwise, returns :data:`None`.
 
     See Also:
-        :class:`pcapkit.foundation.traceflow.TraceFlow`
+        :class:`pcapkit.foundation.traceflow.tcp.TraceFlow`
 
     """
     if 'TCP' in frame:
@@ -193,7 +193,7 @@ def tcp_traceflow(frame: 'Frame', *, data_link: 'LinkType') -> 'TF_Packet | None
         tcp = cast('TCP', frame['TCP'])
         tcp_info = tcp.info
 
-        data = TF_Packet(  # type: ignore[type-var]
+        data = TF_TCP_Packet(  # type: ignore[type-var]
             protocol=data_link,                      # data link type from global header
             index=frame.info.number,                 # frame number
             frame=frame.info,                        # extracted frame info

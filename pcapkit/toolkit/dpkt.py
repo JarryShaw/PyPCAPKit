@@ -14,9 +14,9 @@ import ipaddress
 from typing import TYPE_CHECKING, cast
 
 from pcapkit.const.reg.transtype import TransType as Enum_TransType
-from pcapkit.foundation.reassembly.ip import Packet as IP_Packet
-from pcapkit.foundation.reassembly.tcp import Packet as TCP_Packet
-from pcapkit.foundation.traceflow import Packet as TF_Packet
+from pcapkit.foundation.reassembly.data.ip import Packet as IP_Packet
+from pcapkit.foundation.reassembly.data.tcp import Packet as TCP_Packet
+from pcapkit.foundation.traceflow.data.tcp import Packet as TF_TCP_Packet
 
 if TYPE_CHECKING:
     from ipaddress import IPv4Address, IPv6Address
@@ -124,7 +124,7 @@ def ipv4_reassembly(packet: 'Packet', *, count: 'int' = -1) -> 'IP_Packet[IPv4Ad
           reassembly (:term:`ipv4.packet`) will be returned; otherwise, returns :data:`None`.
 
     See Also:
-        :class:`pcapkit.foundation.reassembly.ipv4.IPv4Reassembly`
+        :class:`pcapkit.foundation.reassembly.ipv4.IPv4`
 
     """
     ipv4 = getattr(packet, 'ip', None)  # type: Optional[IP]
@@ -170,7 +170,7 @@ def ipv6_reassembly(packet: 'Packet', *, count: 'int' = -1) -> 'IP_Packet[IPv6Ad
           reassembly (:term:`ipv6.packet`) will be returned; otherwise, returns :data:`None`.
 
     See Also:
-        :class:`pcapkit.foundation.reassembly.ipv6.IPv6Reassembly`
+        :class:`pcapkit.foundation.reassembly.ipv6.IPv6`
 
     """
     ipv6 = getattr(packet, 'ip6', None)  # type: Optional[IP6]
@@ -217,7 +217,7 @@ def tcp_reassembly(packet: 'Packet', *, count: 'int' = -1) -> 'TCP_Packet | None
           reassembly (:term:`tcp.packet`) will be returned; otherwise, returns :data:`None`.
 
     See Also:
-        :class:`pcapkit.foundation.reassembly.tcp.TCPReassembly`
+        :class:`pcapkit.foundation.reassembly.tcp.TCP`
 
     """
     if hasattr(packet, 'ip'):
@@ -256,7 +256,7 @@ def tcp_reassembly(packet: 'Packet', *, count: 'int' = -1) -> 'TCP_Packet | None
 
 
 def tcp_traceflow(packet: 'Packet', timestamp: 'float', *,
-                  data_link: 'Enum_LinkType', count: 'int' = -1) -> 'TF_Packet | None':
+                  data_link: 'Enum_LinkType', count: 'int' = -1) -> 'TF_TCP_Packet | None':
     """Trace packet flow for TCP.
 
     Args:
@@ -274,7 +274,7 @@ def tcp_traceflow(packet: 'Packet', timestamp: 'float', *,
           flow tracing (:term:`trace.packet`) will be returned; otherwise, returns :data:`None`.
 
     See Also:
-        :class:`pcapkit.foundation.traceflow.TraceFlow`
+        :class:`pcapkit.foundation.traceflow.tcp.TCP`
 
     """
     if hasattr(packet, 'ip'):
@@ -288,7 +288,7 @@ def tcp_traceflow(packet: 'Packet', timestamp: 'float', *,
     if tcp is not None:
         flags = bin(tcp.flags)[2:].zfill(8)
 
-        data = TF_Packet(  # type: ignore[type-var]
+        data = TF_TCP_Packet(  # type: ignore[type-var]
             protocol=data_link,                                         # data link type from global header
             index=count,                                                # frame number
             frame=packet2dict(packet, timestamp, data_link=data_link),  # extracted packet

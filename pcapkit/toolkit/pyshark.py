@@ -14,7 +14,7 @@ import ipaddress
 from typing import TYPE_CHECKING, cast
 
 from pcapkit.const.reg.linktype import LinkType as Enum_LinkType
-from pcapkit.foundation.traceflow import Packet as TF_Packet
+from pcapkit.foundation.traceflow.data.tcp import Packet as TF_TCP_Packet
 
 if TYPE_CHECKING:
     from typing import Any
@@ -49,7 +49,7 @@ def packet2dict(packet: 'Packet') -> 'dict[str, Any]':
     return dict_
 
 
-def tcp_traceflow(packet: 'Packet') -> 'TF_Packet | None':
+def tcp_traceflow(packet: 'Packet') -> 'TF_TCP_Packet | None':
     """Trace packet flow for TCP.
 
     Args:
@@ -64,7 +64,7 @@ def tcp_traceflow(packet: 'Packet') -> 'TF_Packet | None':
           flow tracing (:term:`trace.packet`) will be returned; otherwise, returns :data:`None`.
 
     See Also:
-        :class:`~pcapkit.foundation.traceflow.TraceFlow`
+        :class:`~pcapkit.foundation.traceflow.tcp.TCP`
 
     """
     if 'IP' in packet:
@@ -77,7 +77,7 @@ def tcp_traceflow(packet: 'Packet') -> 'TF_Packet | None':
     if 'TCP' in packet:
         tcp = cast('Packet', packet.tcp)
 
-        data = TF_Packet(  # type: ignore[type-var]
+        data = TF_TCP_Packet(  # type: ignore[type-var]
             protocol=Enum_LinkType.get(packet.layers[0].layer_name.upper()),  # data link type from global header
             index=int(packet.number),                                            # frame number
             frame=packet2dict(packet),                                           # extracted packet

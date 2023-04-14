@@ -20,9 +20,9 @@ from typing import TYPE_CHECKING, cast
 
 from pcapkit.const.reg.linktype import LinkType as Enum_LinkType
 from pcapkit.const.reg.transtype import TransType as Enum_TransType
-from pcapkit.foundation.reassembly.ip import Packet as IP_Packet
-from pcapkit.foundation.reassembly.tcp import Packet as TCP_Packet
-from pcapkit.foundation.traceflow import Packet as TF_Packet
+from pcapkit.foundation.reassembly.data.ip import Packet as IP_Packet
+from pcapkit.foundation.reassembly.data.tcp import Packet as TCP_Packet
+from pcapkit.foundation.traceflow.data.tcp import Packet as TF_TCP_Packet
 from pcapkit.utilities.compat import ModuleNotFoundError  # pylint: disable=redefined-builtin
 from pcapkit.utilities.exceptions import ModuleNotFound, stacklevel
 from pcapkit.utilities.warnings import ScapyWarning, warn
@@ -118,7 +118,7 @@ def ipv4_reassembly(packet: 'Packet', *, count: 'int' = -1) -> 'IP_Packet[IPv4Ad
           reassembly (:term:`ipv4.packet`) will be returned; otherwise, returns :data:`None`.
 
     See Also:
-        :class:`pcapkit.foundation.reassembly.ipv4.IPv4Reassembly`
+        :class:`pcapkit.foundation.reassembly.ipv4.IPv4`
 
     """
     if 'IP' in packet:
@@ -167,7 +167,7 @@ def ipv6_reassembly(packet: 'Packet', *, count: 'int' = -1) -> 'IP_Packet[IPv6Ad
         ModuleNotFound: If `Scapy`_ is not installed.
 
     See Also:
-        :class:`pcapkit.foundation.reassembly.ipv6.IPv6Reassembly`
+        :class:`pcapkit.foundation.reassembly.ipv6.IPv6`
 
     """
     if scapy_all is None:
@@ -216,7 +216,7 @@ def tcp_reassembly(packet: 'Packet', *, count: 'int' = -1) -> 'TCP_Packet | None
           reassembly (:term:`tcp.packet`) will be returned; otherwise, returns :data:`None`.
 
     See Also:
-        :class:`pcapkit.foundation.reassembly.tcp.TCPReassembly`
+        :class:`pcapkit.foundation.reassembly.tcp.TCP`
 
     """
     if 'IP' in packet:
@@ -253,7 +253,7 @@ def tcp_reassembly(packet: 'Packet', *, count: 'int' = -1) -> 'TCP_Packet | None
     return None
 
 
-def tcp_traceflow(packet: 'Packet', *, count: 'int' = -1) -> 'TF_Packet | None':
+def tcp_traceflow(packet: 'Packet', *, count: 'int' = -1) -> 'TF_TCP_Packet | None':
     """Trace packet flow for TCP.
 
     Args:
@@ -269,14 +269,14 @@ def tcp_traceflow(packet: 'Packet', *, count: 'int' = -1) -> 'TF_Packet | None':
           flow tracing (:term:`trace.packet`) will be returned; otherwise, returns :data:`None`.
 
     See Also:
-        :class:`pcapkit.foundation.traceflow.TraceFlow`
+        :class:`pcapkit.foundation.traceflow.tcp.TCP`
 
     """
     if 'TCP' in packet:
         ip = cast('IP', packet['IP']) if 'IP' in packet else cast('IPv6', packet['IPv6'])
         tcp = cast('TCP', packet['TCP'])
 
-        data = TF_Packet(  # type: ignore[type-var]
+        data = TF_TCP_Packet(  # type: ignore[type-var]
             protocol=Enum_LinkType.get(packet.name.upper()),  # data link type from global header
             index=count,                                         # frame number
             frame=packet2dict(packet),                           # extracted packet
