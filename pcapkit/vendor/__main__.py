@@ -85,4 +85,4 @@ def main() -> 'int':
 
 
 if __name__ == '__main__':
-    sys.exit(main())  # type: ignore[arg-type]
+    sys.exit(main())
