@@ -9,7 +9,7 @@ import warnings
 from typing import TYPE_CHECKING
 
 from pcapkit.utilities.exceptions import stacklevel as stacklevel_calculator
-from pcapkit.utilities.logging import DEVMODE, logger
+from pcapkit.utilities.logging import DEVMODE, VERBOSE, logger
 
 if TYPE_CHECKING:
     from typing import Any, Optional, Type, Union
@@ -57,7 +57,8 @@ class BaseWarning(UserWarning):
     def __init__(self, *args: 'Any', **kwargs: 'Any') -> 'None':  # pylint: disable=useless-super-delegation
         # log warning
         if DEVMODE:
-            logger.warning(str(self), exc_info=self)
+            logger.warning(str(self), exc_info=self, stack_info=VERBOSE,
+                           stacklevel=stacklevel_calculator())
         else:
             logger.warning(str(self))
 
