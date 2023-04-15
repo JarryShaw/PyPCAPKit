@@ -11,6 +11,9 @@ automatically generated from the :mod:`pcapkit.vendor` module.
 # IANA registration
 from pcapkit.const.reg import *
 
+# Miscellanous
+from pcapkit.const.pcapng import *
+
 # per protocol
 from pcapkit.const.arp import *
 from pcapkit.const.ftp import *
@@ -58,4 +61,6 @@ __all__ = [
     'TCP_Checksum', 'TCP_Option',
     # VLAN
     'VLAN_PriorityLevel',
+    # PCAPNG
+    'PCAPNG_BlockType',
 ]

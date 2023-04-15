@@ -33,6 +33,9 @@ from pcapkit.vendor.default import Vendor
 # IANA registration
 from pcapkit.vendor.reg import *
 
+# Miscellanous
+from pcapkit.vendor.pcapng import *
+
 # per protocol
 from pcapkit.vendor.arp import *
 from pcapkit.vendor.ftp import *
@@ -80,4 +83,6 @@ __all__ = [
     'TCP_Checksum', 'TCP_Option', 'TCP_MPTCPOption',
     # VLAN
     'VLAN_PriorityLevel',
+    # PCAPNG
+    'PCAPNG_BlockType',
 ]
