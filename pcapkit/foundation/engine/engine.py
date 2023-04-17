@@ -77,3 +77,11 @@ class Engine(Generic[T], metaclass=abc.ABCMeta):
         return the parsed frame.
 
         """
+
+    def close(self) -> 'None':
+        """Close engine.
+
+        This method is to be used for closing the engine instance. It is to
+        close the engine instance after the extraction process is finished.
+
+        """

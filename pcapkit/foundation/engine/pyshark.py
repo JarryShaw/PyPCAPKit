@@ -19,8 +19,7 @@ from pcapkit.utilities.warnings import AttributeWarning, warn
 __all__ = ['PyShark']
 
 if TYPE_CHECKING:
-    from typing import Iterator
-
+    from pyshark.capture.file_capture import FileCapture
     from pyshark.packet.packet import Packet as PySharkPacket
 
     from pcapkit.foundation.extraction import Extractor
@@ -51,7 +50,7 @@ class PyShark(Engine['PySharkPacket']):
         import pyshark  # isort:skip
 
         self._expkg = pyshark
-        self._extmp = cast('Iterator[PySharkPacket]', None)
+        self._extmp = cast('FileCapture', None)
 
         super().__init__(extractor)
 
@@ -100,7 +99,7 @@ class PyShark(Engine['PySharkPacket']):
         #ext._ifile.seek(0, os.SEEK_SET)
 
         # extract & analyse file
-        self._extmp = iter(self._expkg.FileCapture(ext._ifnm, keep_packets=False))
+        self._extmp = self._expkg.FileCapture(ext._ifnm, keep_packets=False)
 
     def read_frame(self) -> 'PySharkPacket':
         """Read frames with PyShark engine.
@@ -116,7 +115,7 @@ class PyShark(Engine['PySharkPacket']):
         ext = self._extractor
 
         # fetch PyShark packet
-        packet = cast('PySharkPacket', next(self._extmp))
+        packet = cast('PySharkPacket', self._extmp.next())
 
         # verbose output
         ext._frnum = int(packet.number)
@@ -146,3 +145,12 @@ class PyShark(Engine['PySharkPacket']):
 
         # return frame record
         return packet
+
+    def close(self) -> 'None':
+        """Close engine.
+
+        This method is to be used for closing the engine instance. It is to
+        close the engine instance after the extraction process is finished.
+
+        """
+        self._extmp.close()

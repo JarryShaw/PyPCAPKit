@@ -702,3 +702,4 @@ class Extractor(Generic[P]):
         # pylint: disable=attribute-defined-outside-init
         self._flag_e = True
         self._ifile.close()
+        self._exeng.close()
