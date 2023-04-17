@@ -61,5 +61,6 @@ class StatusCode(IntEnum):
             #: Unassigned
             extend_enum(cls, 'Unassigned_%d' % value, value)
             return cls(value)
+        #: Unspecified in the IANA registry
         extend_enum(cls, 'Unassigned_%d' % value, value)
         return cls(value)
