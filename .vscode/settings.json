@@ -59,6 +59,7 @@
         "dscp",
         "dsfield",
         "DSMI",
+        "DSMIP",
         "dsmipv",
         "dsnf",
         "dsta",

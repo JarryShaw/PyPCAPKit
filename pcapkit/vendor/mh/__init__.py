@@ -53,6 +53,16 @@ enumerations include:
      - Handover Initiate Status Codes [*]_
    * - :class:`MH_HandoverACKStatus <pcapkit.vendor.mh.handover_ack_status.HandoverACKStatus>`
      - Handover Acknowledge Status Codes [*]_
+   * - :class:`MH_FlowIDStatus <pcapkit.vendor.mh.flow_id_status.FlowIDStatus>`
+     - Flow Identification Mobility Option Status Codes [*]_
+   * - :class:`MH_FlowIDSuboption <pcapkit.vendor.mh.flow_id_suboption.FlowIDSuboption>`
+     - Flow Identification Sub-Options [*]_
+   * - :class:`MH_TrafficSelector <pcapkit.vendor.mh.traffic_selector.TrafficSelector>`
+     - Traffic Selector Format [*]_
+   * - :class:`MH_MNGroupID <pcapkit.vendor.mh.mn_group_id.MNGroupID>`
+     - Mobile Node Group Identifier Type Registry [*]_
+   * - :class:`MH_DSMIP6TLSPacket <pcapkit.vendor.mh.dsmip6_tls_packet.DSMIP6TLSPacket>`
+     - DSMIP6-TLS Packet Types Registry [*]_
 
 .. [*] https://www.iana.org/assignments/mobility-parameters/mobility-parameters.xhtml#mobility-parameters-1
 .. [*] https://www.iana.org/assignments/mobility-parameters/mobility-parameters.xhtml#mobility-parameters-2
@@ -76,6 +86,11 @@ enumerations include:
 .. [*] https://www.iana.org/assignments/mobility-parameters/mobility-parameters.xhtml#handover-acknowledge-flags
 .. [*] https://www.iana.org/assignments/mobility-parameters/mobility-parameters.xhtml#handover-initiate-status
 .. [*] https://www.iana.org/assignments/mobility-parameters/mobility-parameters.xhtml#handover-acknowledge-status
+.. [*] https://www.iana.org/assignments/mobility-parameters/mobility-parameters.xhtml#flow-id
+.. [*] https://www.iana.org/assignments/mobility-parameters/mobility-parameters.xhtml#flow-id-suboptions
+.. [*] https://www.iana.org/assignments/mobility-parameters/mobility-parameters.xhtml#traffic-selector
+.. [*] https://www.iana.org/assignments/mobility-parameters/mobility-parameters.xhtml#mobile-node-group-id-type
+.. [*] https://www.iana.org/assignments/mobility-parameters/mobility-parameters.xhtml#dsmip6-tls-packet-types
 
 """
 
@@ -101,6 +116,11 @@ from pcapkit.vendor.mh.handover_initiate_flag import HandoverInitiateFlag as MH_
 from pcapkit.vendor.mh.handover_ack_flag import HandoverACKFlag as MH_HandoverACKFlag
 from pcapkit.vendor.mh.handover_ack_status import HandoverACKStatus as MH_HandoverACKStatus
 from pcapkit.vendor.mh.handover_ack_status import HandoverACKStatus as MH_HandoverACKStatus
+from pcapkit.vendor.mh.flow_id_status import FlowIDStatus as MH_FlowIDStatus
+from pcapkit.vendor.mh.flow_id_suboption import FlowIDSuboption as MH_FlowIDSuboption
+from pcapkit.vendor.mh.traffic_selector import TrafficSelector as MH_TrafficSelector
+from pcapkit.vendor.mh.mn_group_id import MNGroupID as MH_MNGroupID
+from pcapkit.vendor.mh.dsmip6_tls_packet import DSMIP6TLSPacket as MH_DSMIP6TLSPacket
 
 __all__ = [
     'MH_Packet', 'MH_Option', 'MH_DNSStatusCode', 'MH_ACKStatusCode',
@@ -110,4 +130,6 @@ __all__ = [
     'MH_BindingRevocation', 'MH_RevocationTrigger', 'MH_RevocationStatusCode',
     'MH_HomeAddressReply', 'MH_DHCPSupportMode', 'MH_HandoverInitiateFlag',
     'MH_HandoverACKFlag', 'MH_HandoverACKStatus', 'MH_HandoverACKStatus',
+    'MH_FlowIDStatus', 'MH_FlowIDSuboption', 'MH_TrafficSelector',
+    'MH_MNGroupID', 'MH_DSMIP6TLSPacket',
 ]
