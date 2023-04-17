@@ -58,6 +58,8 @@
         "dport",
         "dscp",
         "dsfield",
+        "DSMI",
+        "dsmipv",
         "dsnf",
         "dsta",
         "dstm",
