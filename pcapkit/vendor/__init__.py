@@ -76,7 +76,19 @@ __all__ = [
     # L2TP
     'L2TP_Type',
     # MH
-    'MH_Packet',
+    'MH_Packet', 'MH_Option', 'MH_DNSStatusCode', 'MH_ACKStatusCode',
+    'MH_MNIDSubtype', 'MH_StatusCode', 'MH_EnumeratingAlgorithm',
+    'MH_AuthSubtype', 'MH_HandoffType', 'MH_AccessType',
+    'MH_BindingUpdateFlag', 'MH_BindingACKFlag', 'MH_DSMIPv6HomeAddress',
+    'MH_BindingRevocation', 'MH_RevocationTrigger', 'MH_RevocationStatusCode',
+    'MH_HomeAddressReply', 'MH_DHCPSupportMode', 'MH_HandoverInitiateFlag',
+    'MH_HandoverACKFlag', 'MH_HandoverACKStatus', 'MH_HandoverACKStatus',
+    'MH_FlowIDStatus', 'MH_FlowIDSuboption', 'MH_TrafficSelector',
+    'MH_MNGroupID', 'MH_DSMIP6TLSPacket', 'MH_ANISuboption', 'MH_OperatorID',
+    'MH_UpdateNotificationReason', 'MH_UpdateNotificationACKStatus',
+    'MH_FlowBindingType', 'MH_FlowBindingIndicationTrigger',
+    'MH_FlowBindingACKStatus', 'MH_FlowBindingAction', 'MH_QoSAttribute',
+    'MH_LMAControlledMAGSuboption',
     # OSPF
     'OSPF_Authentication', 'OSPF_Packet',
     # TCP

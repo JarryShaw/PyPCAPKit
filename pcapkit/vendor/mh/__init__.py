@@ -73,6 +73,16 @@ enumerations include:
      - Update Notification Acknowledgement Status Registry [*]_
    * - :class:`MH_FlowBindingType <pcapkit.vendor.mh.fb_type.FlowBindingType>`
      - Flow Binding Type [*]_
+   * - :class:`MH_FlowBindingIndicationTrigger <pcapkit.vendor.mh.fb_indication_trigger.FlowBindingIndicationTrigger>`
+     - Flow Binding Indication Triggers [*]_
+   * - :class:`MH_FlowBindingACKStatus <pcapkit.vendor.mh.fb_ack_status.FlowBindingACKStatus>`
+     - Flow Binding Acknowledgement Status Codes [*]_
+   * - :class:`MH_FlowBindingAction <pcapkit.vendor.mh.fb_action.FlowBindingAction>`
+     - Flow Binding Action Values [*]_
+   * - :class:`MH_QoSAttribute <pcapkit.vendor.mh.qos_attribute.QoSAttribute>`
+     - Quality-of-Service Attribute Registry [*]_
+   * - :class:`MH_LMAControlledMAGSuboption <pcapkit.vendor.mh.lma_mag_suboption.LMAControlledMAGSuboption>`
+     - LMA-Controlled MAG Parameters Sub-Option Type Values [*]_
 
 .. [*] https://www.iana.org/assignments/mobility-parameters/mobility-parameters.xhtml#mobility-parameters-1
 .. [*] https://www.iana.org/assignments/mobility-parameters/mobility-parameters.xhtml#mobility-parameters-2
@@ -106,41 +116,53 @@ enumerations include:
 .. [*] https://www.iana.org/assignments/mobility-parameters/mobility-parameters.xhtml#upn-reasons
 .. [*] https://www.iana.org/assignments/mobility-parameters/mobility-parameters.xhtml#upa-status
 .. [*] https://www.iana.org/assignments/mobility-parameters/mobility-parameters.xhtml#flow-binding-type
+.. [*] https://www.iana.org/assignments/mobility-parameters/mobility-parameters.xhtml#flow-binding-indication-triggers
+.. [*] https://www.iana.org/assignments/mobility-parameters/mobility-parameters.xhtml#flow-binding-ack-status
+.. [*] https://www.iana.org/assignments/mobility-parameters/mobility-parameters.xhtml#flow-binding-action
+.. [*] https://www.iana.org/assignments/mobility-parameters/mobility-parameters.xhtml#qos-attribute
+.. [*] https://www.iana.org/assignments/mobility-parameters/mobility-parameters.xhtml#lma-controlled-mag-parameters-sub-option-type
 
 """
 
-from pcapkit.vendor.mh.packet import Packet as MH_Packet
-from pcapkit.vendor.mh.option import Option as MH_Option
-from pcapkit.vendor.mh.dns_status_code import DNSStatusCode as MH_DNSStatusCode
-from pcapkit.vendor.mh.ack_status_code import ACKStatusCode as MH_ACKStatusCode
-from pcapkit.vendor.mh.mn_id_subtype import MNIDSubtype as MH_MNIDSubtype
-from pcapkit.vendor.mh.status_code import StatusCode as MH_StatusCode
-from pcapkit.vendor.mh.enumerating_algorithm import EnumeratingAlgorithm as MH_EnumeratingAlgorithm
-from pcapkit.vendor.mh.auth_subtype import AuthSubtype as MH_AuthSubtype
-from pcapkit.vendor.mh.handoff_type import HandoffType as MH_HandoffType
 from pcapkit.vendor.mh.access_type import AccessType as MH_AccessType
-from pcapkit.vendor.mh.binding_update_flag import BindingUpdateFlag as MH_BindingUpdateFlag
+from pcapkit.vendor.mh.ack_status_code import ACKStatusCode as MH_ACKStatusCode
+from pcapkit.vendor.mh.ani_suboption import ANISuboption as MH_ANISuboption
+from pcapkit.vendor.mh.auth_subtype import AuthSubtype as MH_AuthSubtype
 from pcapkit.vendor.mh.binding_ack_flag import BindingACKFlag as MH_BindingACKFlag
-from pcapkit.vendor.mh.dsmipv6_home_address import DSMIPv6HomeAddress as MH_DSMIPv6HomeAddress
 from pcapkit.vendor.mh.binding_revocation import BindingRevocation as MH_BindingRevocation
-from pcapkit.vendor.mh.revocation_trigger import RevocationTrigger as MH_RevocationTrigger
-from pcapkit.vendor.mh.revocation_status_code import RevocationStatusCode as MH_RevocationStatusCode
-from pcapkit.vendor.mh.home_address_reply import HomeAddressReply as MH_HomeAddressReply
+from pcapkit.vendor.mh.binding_update_flag import BindingUpdateFlag as MH_BindingUpdateFlag
 from pcapkit.vendor.mh.dhcp_support_mode import DHCPSupportMode as MH_DHCPSupportMode
-from pcapkit.vendor.mh.handover_initiate_flag import HandoverInitiateFlag as MH_HandoverInitiateFlag
-from pcapkit.vendor.mh.handover_ack_flag import HandoverACKFlag as MH_HandoverACKFlag
-from pcapkit.vendor.mh.handover_ack_status import HandoverACKStatus as MH_HandoverACKStatus
-from pcapkit.vendor.mh.handover_ack_status import HandoverACKStatus as MH_HandoverACKStatus
+from pcapkit.vendor.mh.dns_status_code import DNSStatusCode as MH_DNSStatusCode
+from pcapkit.vendor.mh.dsmip6_tls_packet import DSMIP6TLSPacket as MH_DSMIP6TLSPacket
+from pcapkit.vendor.mh.dsmipv6_home_address import DSMIPv6HomeAddress as MH_DSMIPv6HomeAddress
+from pcapkit.vendor.mh.enumerating_algorithm import EnumeratingAlgorithm as MH_EnumeratingAlgorithm
+from pcapkit.vendor.mh.fb_ack_status import FlowBindingACKStatus as MH_FlowBindingACKStatus
+from pcapkit.vendor.mh.fb_action import FlowBindingAction as MH_FlowBindingAction
+from pcapkit.vendor.mh.fb_indication_trigger import \
+    FlowBindingIndicationTrigger as MH_FlowBindingIndicationTrigger
+from pcapkit.vendor.mh.fb_type import FlowBindingType as MH_FlowBindingType
 from pcapkit.vendor.mh.flow_id_status import FlowIDStatus as MH_FlowIDStatus
 from pcapkit.vendor.mh.flow_id_suboption import FlowIDSuboption as MH_FlowIDSuboption
-from pcapkit.vendor.mh.traffic_selector import TrafficSelector as MH_TrafficSelector
+from pcapkit.vendor.mh.handoff_type import HandoffType as MH_HandoffType
+from pcapkit.vendor.mh.handover_ack_flag import HandoverACKFlag as MH_HandoverACKFlag
+from pcapkit.vendor.mh.handover_ack_status import HandoverACKStatus as MH_HandoverACKStatus
+from pcapkit.vendor.mh.handover_initiate_flag import HandoverInitiateFlag as MH_HandoverInitiateFlag
+from pcapkit.vendor.mh.home_address_reply import HomeAddressReply as MH_HomeAddressReply
+from pcapkit.vendor.mh.lma_mag_suboption import \
+    LMAControlledMAGSuboption as MH_LMAControlledMAGSuboption
 from pcapkit.vendor.mh.mn_group_id import MNGroupID as MH_MNGroupID
-from pcapkit.vendor.mh.dsmip6_tls_packet import DSMIP6TLSPacket as MH_DSMIP6TLSPacket
-from pcapkit.vendor.mh.ani_suboption import ANISuboption as MH_ANISuboption
+from pcapkit.vendor.mh.mn_id_subtype import MNIDSubtype as MH_MNIDSubtype
 from pcapkit.vendor.mh.operator_id import OperatorID as MH_OperatorID
+from pcapkit.vendor.mh.option import Option as MH_Option
+from pcapkit.vendor.mh.packet import Packet as MH_Packet
+from pcapkit.vendor.mh.qos_attribute import QoSAttribute as MH_QoSAttribute
+from pcapkit.vendor.mh.revocation_status_code import RevocationStatusCode as MH_RevocationStatusCode
+from pcapkit.vendor.mh.revocation_trigger import RevocationTrigger as MH_RevocationTrigger
+from pcapkit.vendor.mh.status_code import StatusCode as MH_StatusCode
+from pcapkit.vendor.mh.traffic_selector import TrafficSelector as MH_TrafficSelector
+from pcapkit.vendor.mh.upa_status import \
+    UpdateNotificationACKStatus as MH_UpdateNotificationACKStatus
 from pcapkit.vendor.mh.upn_reason import UpdateNotificationReason as MH_UpdateNotificationReason
-from pcapkit.vendor.mh.upa_status import UpdateNotificationACKStatus as MH_UpdateNotificationACKStatus
-from pcapkit.vendor.mh.fb_type import FlowBindingType as MH_FlowBindingType
 
 __all__ = [
     'MH_Packet', 'MH_Option', 'MH_DNSStatusCode', 'MH_ACKStatusCode',
@@ -153,5 +175,7 @@ __all__ = [
     'MH_FlowIDStatus', 'MH_FlowIDSuboption', 'MH_TrafficSelector',
     'MH_MNGroupID', 'MH_DSMIP6TLSPacket', 'MH_ANISuboption', 'MH_OperatorID',
     'MH_UpdateNotificationReason', 'MH_UpdateNotificationACKStatus',
-    'MH_FlowBindingType',
+    'MH_FlowBindingType', 'MH_FlowBindingIndicationTrigger',
+    'MH_FlowBindingACKStatus', 'MH_FlowBindingAction', 'MH_QoSAttribute',
+    'MH_LMAControlledMAGSuboption',
 ]
