@@ -41,11 +41,6 @@ More over, :class:`~pcapkit.protocols.internet.mh.MH` requires some help to
 implement all the *message data* types, you can find more information in the
 specific file.
 
-Also, for the existing protocols, I am looking for a helping hand to implement
-the construction features, as defined in the :meth:`Protocol.make <pcapkit.protocols.protocol.Protocol.make>`
-method. You can find some reference from the PCAP's :class:`~pcapkit.protocols.misc.pcap.Frame`
-header class.
-
 `PCAPNG`_ Support
 -----------------
 
@@ -57,55 +52,6 @@ If you are to help with it, please refer to the implementation of PCAP format
 support in :mod:`pcapkit.protocols.misc.pcap` module.
 
 .. _PCAPNG: https://wiki.wireshark.org/Development/PcapNg
-
-Maybe Even Faster?
-------------------
-
-Based on my recent benchmarking, PyPCAPKit's builtin default engine is *only* 4
-times slower than Scapy and 10 times to DPKT. Considering the general overhead
-and verbose features provided by PyPCAPKit's builtin default engine, such
-performance difference is acceptable.
-
-However, there might still be a way to further accelerate the protocol
-implementation -- merge and concatenation ``_read_xxxxxx`` methods within one
-single :meth:`file.read`, such that we shall decrease the overall number of IO
-calls and reduce the duplicated :func:`struct.unpack` calls, etc. I am not yet
-confident about the performance improvement, but this is the most efficient way
-to accelerate PyPCAPKit at the moment, inspired from the implementation of
-Scapy and DPKT themselves.
-
-Specifically, as the following code from :meth:`pcapkit.protocols.misc.pcap.Frame.read`,
-
-.. code-block:: python
-
-   _tsus = self._read_unpack(4, lilendian=True)
-   _ilen = self._read_unpack(4, lilendian=True)
-   _olen = self._read_unpack(4, lilendian=True)
-
-we might be able to rewrite it as
-
-.. code-block:: python
-
-   _tsus, _ilen, _olen = self._read_fields(unpack(4, lilendian=True), unpack(4, lilendian=True), unpack(4, lilendian=True))
-
-and the PoC of ``_read_fields`` would be something like
-
-.. code-block:: python
-
-   def _read_fields(self, *fields: 'Field') -> 'tuple[Any, ...]':
-       # built template
-       fmt = ''.join(field.template for field in fields)
-       len = sum([field.length for field in fields])
-
-       # read from buffer & do unpack
-       buf = self._file.read(fmt)
-       tmp = struct.unpack(fmt, buf)
-
-       # do post-processing based on field-specific implementations
-       ret = []
-       for field, val in itertools.chain(fields, tmp):
-            ret.append(field.post_process(val))
-       return ret
 
 Logging Integration
 -------------------

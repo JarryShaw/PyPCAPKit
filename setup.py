@@ -3,6 +3,8 @@
 import subprocess  # nosec
 import sys
 
+import setuptools
+
 # version string
 __version__ = '0.16.3'
 
@@ -23,62 +25,7 @@ attrs = dict(
     url='https://github.com/JarryShaw/PyPCAPKit',
     download_url='https://github.com/JarryShaw/PyPCAPKit/archive/v%s.tar.gz' % __version__,  # pylint: disable=consider-using-f-string
     # py_modules
-    packages=[
-        'pcapkit',
-        'pcapkit.const',
-        'pcapkit.const.arp',
-        'pcapkit.const.ftp',
-        'pcapkit.const.hip',
-        'pcapkit.const.http',
-        'pcapkit.const.ipv4',
-        'pcapkit.const.ipv6',
-        'pcapkit.const.ipx',
-        'pcapkit.const.l2tp',
-        'pcapkit.const.mh',
-        'pcapkit.const.ospf',
-        'pcapkit.const.reg',
-        'pcapkit.const.tcp',
-        'pcapkit.const.vlan',
-        'pcapkit.corekit',
-        'pcapkit.corekit.fields',
-        'pcapkit.dumpkit',
-        'pcapkit.foundation',
-        'pcapkit.foundation.reassembly',
-        'pcapkit.interface',
-        'pcapkit.protocols',
-        'pcapkit.protocols.link',
-        'pcapkit.protocols.internet',
-        'pcapkit.protocols.transport',
-        'pcapkit.protocols.application',
-        'pcapkit.protocols.misc',
-        'pcapkit.protocols.misc.pcap',
-        'pcapkit.protocols.data',
-        'pcapkit.protocols.data.link',
-        'pcapkit.protocols.data.internet',
-        'pcapkit.protocols.data.misc',
-        'pcapkit.protocols.data.misc.pcap',
-        'pcapkit.protocols.schema',
-        #'pcapkit.protocols.schema.link',
-        #'pcapkit.protocols.schema.internet',
-        'pcapkit.protocols.schema.misc',
-        #'pcapkit.protocols.schema.misc.pcap',
-        'pcapkit.toolkit',
-        'pcapkit.utilities',
-        'pcapkit.vendor',
-        'pcapkit.vendor.arp',
-        'pcapkit.vendor.ftp',
-        'pcapkit.vendor.hip',
-        'pcapkit.vendor.http',
-        'pcapkit.vendor.ipv4',
-        'pcapkit.vendor.ipv6',
-        'pcapkit.vendor.ipx',
-        'pcapkit.vendor.l2tp',
-        'pcapkit.vendor.mh',
-        'pcapkit.vendor.ospf',
-        'pcapkit.vendor.reg',
-        'pcapkit.vendor.tcp',
-        'pcapkit.vendor.vlan',
-    ],
+    packages=setuptools.find_packages(),
     # scripts
     # ext_modules
     classifiers=[
@@ -97,6 +44,7 @@ attrs = dict(
         'Programming Language :: Python :: 3.8',
         'Programming Language :: Python :: 3.9',
         'Programming Language :: Python :: 3.10',
+        'Programming Language :: Python :: 3.11',
         'Programming Language :: Python :: 3 :: Only',
         'Programming Language :: Python :: Implementation',
         'Programming Language :: Python :: Implementation :: CPython',
@@ -212,7 +160,7 @@ try:
     version_info = sys.version_info[:2]
 
     attrs.update(dict(
-        include_package_data=True,  # type: ignore
+        include_package_data=True,
         # libraries
         # headers
         # ext_package
@@ -221,7 +169,7 @@ try:
         # fullname
         long_description_content_type='text/x-rst',
         python_requires='>=3.6',
-        zip_safe=True,  # type: ignore
+        zip_safe=True,
     ))
 
 
