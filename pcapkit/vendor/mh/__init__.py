@@ -63,6 +63,16 @@ enumerations include:
      - Mobile Node Group Identifier Type Registry [*]_
    * - :class:`MH_DSMIP6TLSPacket <pcapkit.vendor.mh.dsmip6_tls_packet.DSMIP6TLSPacket>`
      - DSMIP6-TLS Packet Types Registry [*]_
+   * - :class:`MH_ANISuboption <pcapkit.vendor.mh.ani_suboption.ANISuboption>`
+     - Access Network Information (ANI) Sub-Option Type Values [*]_
+   * - :class:`MH_OperatorID <pcapkit.vendor.mh.operator_id.OperatorID>`
+     - Operator-Identifier Type Registry [*]_
+   * - :class:`MH_UpdateNotificationReason <pcapkit.vendor.mh.upn_reason.UpdateNotificationReason>`
+     - Update Notification Reasons Registry [*]_
+   * - :class:`MH_UpdateNotificationACKStatus <pcapkit.vendor.mh.upa_status.UpdateNotificationACKStatus>`
+     - Update Notification Acknowledgement Status Registry [*]_
+   * - :class:`MH_FlowBindingType <pcapkit.vendor.mh.fb_type.FlowBindingType>`
+     - Flow Binding Type [*]_
 
 .. [*] https://www.iana.org/assignments/mobility-parameters/mobility-parameters.xhtml#mobility-parameters-1
 .. [*] https://www.iana.org/assignments/mobility-parameters/mobility-parameters.xhtml#mobility-parameters-2
@@ -91,6 +101,11 @@ enumerations include:
 .. [*] https://www.iana.org/assignments/mobility-parameters/mobility-parameters.xhtml#traffic-selector
 .. [*] https://www.iana.org/assignments/mobility-parameters/mobility-parameters.xhtml#mobile-node-group-id-type
 .. [*] https://www.iana.org/assignments/mobility-parameters/mobility-parameters.xhtml#dsmip6-tls-packet-types
+.. [*] https://www.iana.org/assignments/mobility-parameters/mobility-parameters.xhtml#ani
+.. [*] https://www.iana.org/assignments/mobility-parameters/mobility-parameters.xhtml#op-id
+.. [*] https://www.iana.org/assignments/mobility-parameters/mobility-parameters.xhtml#upn-reasons
+.. [*] https://www.iana.org/assignments/mobility-parameters/mobility-parameters.xhtml#upa-status
+.. [*] https://www.iana.org/assignments/mobility-parameters/mobility-parameters.xhtml#flow-binding-type
 
 """
 
@@ -121,6 +136,11 @@ from pcapkit.vendor.mh.flow_id_suboption import FlowIDSuboption as MH_FlowIDSubo
 from pcapkit.vendor.mh.traffic_selector import TrafficSelector as MH_TrafficSelector
 from pcapkit.vendor.mh.mn_group_id import MNGroupID as MH_MNGroupID
 from pcapkit.vendor.mh.dsmip6_tls_packet import DSMIP6TLSPacket as MH_DSMIP6TLSPacket
+from pcapkit.vendor.mh.ani_suboption import ANISuboption as MH_ANISuboption
+from pcapkit.vendor.mh.operator_id import OperatorID as MH_OperatorID
+from pcapkit.vendor.mh.upn_reason import UpdateNotificationReason as MH_UpdateNotificationReason
+from pcapkit.vendor.mh.upa_status import UpdateNotificationACKStatus as MH_UpdateNotificationACKStatus
+from pcapkit.vendor.mh.fb_type import FlowBindingType as MH_FlowBindingType
 
 __all__ = [
     'MH_Packet', 'MH_Option', 'MH_DNSStatusCode', 'MH_ACKStatusCode',
@@ -131,5 +151,7 @@ __all__ = [
     'MH_HomeAddressReply', 'MH_DHCPSupportMode', 'MH_HandoverInitiateFlag',
     'MH_HandoverACKFlag', 'MH_HandoverACKStatus', 'MH_HandoverACKStatus',
     'MH_FlowIDStatus', 'MH_FlowIDSuboption', 'MH_TrafficSelector',
-    'MH_MNGroupID', 'MH_DSMIP6TLSPacket',
+    'MH_MNGroupID', 'MH_DSMIP6TLSPacket', 'MH_ANISuboption', 'MH_OperatorID',
+    'MH_UpdateNotificationReason', 'MH_UpdateNotificationACKStatus',
+    'MH_FlowBindingType',
 ]
