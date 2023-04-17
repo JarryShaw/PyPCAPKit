@@ -71,7 +71,7 @@ class EdDSACurve(Vendor):
                 # enum.append(f'{pres.ljust(76)}{sufs}')
                 enum.append(f'{sufs}\n    {pres}')
             except ValueError:
-                start, stop = item[0].split('-')
+                start, stop = item[2].split('-')
 
                 miss.append(f'if {start} <= value <= {stop}:')
                 miss.append(f'    #: {desc}')

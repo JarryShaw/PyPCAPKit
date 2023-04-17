@@ -380,13 +380,18 @@ class Vendor(metaclass=abc.ABCMeta):
 
         try:
             page = requests.get(self.LINK)
+            if not page.ok or not page.text:
+                raise requests.exceptions.RequestException
         except requests.RequestException as err:
             warn('Connection failed; retry with proxies (if any)...', VendorRequestWarning, stacklevel=2)
             try:
                 proxies = get_proxies() or None
                 if proxies is None:
                     raise requests.RequestException from err
+
                 page = requests.get(self.LINK, proxies=proxies)
+                if not page.ok or not page.text:
+                    raise requests.exceptions.RequestException from err
             except requests.RequestException:
                 warn('Connection failed; retry with manual intervene...', VendorRequestWarning, stacklevel=2)
                 with tempfile.TemporaryDirectory(suffix='-tempdir',

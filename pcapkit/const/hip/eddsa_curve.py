@@ -16,7 +16,7 @@ __all__ = ['EdDSACurve']
 class EdDSACurve(IntEnum):
     """[EdDSACurve] EdDSA Curve Label"""
 
-    #: RESERVED [:rfc:`8032`]
+    #: RESERVED [:rfc:`9374`]
     RESERVED_0 = 0
 
     #: EdDSA25519 [:rfc:`8032`]
@@ -56,7 +56,7 @@ class EdDSACurve(IntEnum):
         """
         if not (isinstance(value, int) and 0 <= value <= 65535):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))
-        if 3 <= value <= 65535:
+        if 5 <= value <= 65535:
             #: Unassigned
             extend_enum(cls, 'Unassigned_%d' % value, value)
             return cls(value)

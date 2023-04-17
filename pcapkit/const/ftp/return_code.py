@@ -265,6 +265,5 @@ class ReturnCode(IntEnum):
         """
         if not (isinstance(value, int) and 100 <= value <= 659):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))
-
         extend_enum(cls, 'CODE_%s' % value, value)
         return cls(value)
