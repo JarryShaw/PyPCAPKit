@@ -1,4 +1,4 @@
-.PHONY: clean const date dist release pipenv pypi update
+.PHONY: clean const date dist release pipenv pypi update docs
 
 export PIPENV_VENV_IN_PROJECT=1
 

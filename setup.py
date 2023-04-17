@@ -12,6 +12,10 @@ __version__ = '0.16.3'
 with open('README.rst', encoding='utf-8') as file:
     long_description = file.read()
 
+###############################################################################
+# general configuration
+###############################################################################
+
 # setup attributes
 attrs = dict(
     name='pypcapkit',
@@ -122,8 +126,12 @@ attrs = dict(
         'f2format; python_version < "3.6"',
         'bpc-walrus; python_version < "3.8"',
         'pathlib2>=2.3.2; python_version == "3.4"',
-    ]
+    ],
 )
+
+###############################################################################
+# pybpc integration
+###############################################################################
 
 
 def refactor() -> 'None':
@@ -149,91 +157,49 @@ def refactor() -> 'None':
             sys.exit(error.returncode)
 
 
-try:
-    from setuptools import setup
-    from setuptools.command.bdist_egg import bdist_egg as _bdist_egg
-    from setuptools.command.build_py import build_py as _build_py
-    from setuptools.command.develop import develop as _develop
-    from setuptools.command.install import install as _install
-    from setuptools.command.sdist import sdist as _sdist
+###############################################################################
+# setuptools commands
+###############################################################################
 
-    version_info = sys.version_info[:2]
+from setuptools import setup
+from setuptools.command.bdist_egg import bdist_egg as _bdist_egg
+from setuptools.command.build_py import build_py as _build_py
+from setuptools.command.develop import develop as _develop
+from setuptools.command.install import install as _install
+from setuptools.command.sdist import sdist as _sdist
 
-    attrs.update(dict(
-        include_package_data=True,
-        # libraries
-        # headers
-        # ext_package
-        # include_dirs
-        # password
-        # fullname
-        long_description_content_type='text/x-rst',
-        python_requires='>=3.6',
-        zip_safe=True,
-    ))
+version_info = sys.version_info[:2]
 
-
-    class bdist_egg(_bdist_egg):
-        """Add on-distribution backport code conversion."""
-
-        def run(self) -> 'None':
-            """Run command."""
-            refactor()
-            _bdist_egg.run(self)
+attrs.update(dict(
+    include_package_data=True,
+    # libraries
+    # headers
+    # ext_package
+    # include_dirs
+    # password
+    # fullname
+    long_description_content_type='text/x-rst',
+    python_requires='>=3.6',
+    zip_safe=True,
+))
 
 
-    class develop(_develop):
-        """Add on-develop backport code conversion."""
+class bdist_egg(_bdist_egg):
+    """Add on-distribution backport code conversion."""
 
-        def run(self) -> 'None':
-            """Run command."""
-            refactor()
-            _develop.run(self)
-
-
-    cmdclass = {
-        'bdist_egg': bdist_egg,
-        'develop': develop,
-    }
-
-except ImportError:
-    from distutils.core import setup  # pylint: disable=deprecated-module
-    from distutils.command.bdist import bdist as _bdist  # pylint: disable=deprecated-module
-    from distutils.command.build_py import build_py as _build_py  # pylint: disable=deprecated-module
-    from distutils.command.install import install as _install  # pylint: disable=deprecated-module
-    from distutils.command.sdist import sdist as _sdist  # pylint: disable=deprecated-module
+    def run(self) -> 'None':
+        """Run command."""
+        refactor()
+        _bdist_egg.run(self)
 
 
-    class bdist(_bdist):
-        """Add on-distribution backport code conversion."""
+class develop(_develop):
+    """Add on-develop backport code conversion."""
 
-        def run(self) -> 'None':
-            """Run command."""
-            refactor()
-            _bdist.run(self)
-
-
-    cmdclass = {
-        'bdist': bdist,
-    }
-
-
-try:
-    from wheel.bdist_wheel import bdist_wheel as _bdist_wheel
-
-
-    class bdist_wheel(_bdist_wheel):
-        """Add on-wheel backport code conversion."""
-
-        def run(self) -> 'None':
-            """Run command."""
-            refactor()
-            _bdist_wheel.run(self)
-
-
-    cmdclass['bdist_wheel'] = bdist_wheel
-except ImportError:
-    pass
+    def run(self) -> 'None':
+        """Run command."""
+        refactor()
+        _develop.run(self)
 
 
 class build_py(_build_py):
@@ -259,6 +225,36 @@ class sdist(_sdist):
         refactor()
         _sdist.run(self)
 
+
+cmdclass = {
+    'bdist_egg': bdist_egg,
+    'develop': develop,
+}
+
+###############################################################################
+# wheel commands
+###############################################################################
+
+try:
+    from wheel.bdist_wheel import bdist_wheel as _bdist_wheel
+
+
+    class bdist_wheel(_bdist_wheel):
+        """Add on-wheel backport code conversion."""
+
+        def run(self) -> 'None':
+            """Run command."""
+            refactor()
+            _bdist_wheel.run(self)
+
+
+    cmdclass['bdist_wheel'] = bdist_wheel
+except ImportError:
+    pass
+
+###############################################################################
+# final setup
+###############################################################################
 
 # set-up script for pip distribution
 setup(cmdclass={
