@@ -5,9 +5,10 @@
 from typing import TYPE_CHECKING
 
 from pcapkit.const.pcapng.block_type import BlockType as Enum_BlockType
-from pcapkit.corekit.fields.numbers import UInt8Field, UInt16Field, UInt32Field, UInt64Field, EnumField
-from pcapkit.corekit.fields.strings import BytesField, PaddingField, BitField
 from pcapkit.corekit.fields.misc import PayloadField
+from pcapkit.corekit.fields.numbers import (EnumField, UInt8Field, UInt16Field, UInt32Field,
+                                            UInt64Field)
+from pcapkit.corekit.fields.strings import BitField, BytesField, PaddingField
 from pcapkit.protocols.schema.schema import Schema
 
 __all__ = [
