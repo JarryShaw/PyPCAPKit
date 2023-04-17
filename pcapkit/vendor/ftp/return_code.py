@@ -111,7 +111,6 @@ class {NAME}(IntEnum):
         """
         if not ({FLAG}):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))
-
         extend_enum(cls, 'CODE_%s' % value, value)
         return cls(value)
 '''  # type: Callable[[str, str, str, str, str], str]
