@@ -4,17 +4,17 @@
 ======================================================================
 
 This module contains the constant enumeration for **Dual Stack MIPv6 (DSMIPv6) IPv4 Home Address Option Status Codes**,
-which is automatically generated from :class:`pcapkit.vendor.mh.dsmipv6_status_code.DSMIPv6StatusCode`.
+which is automatically generated from :class:`pcapkit.vendor.mh.dsmipv6_home_address.DSMIPv6HomeAddress`.
 
 """
 
 from aenum import IntEnum, extend_enum
 
-__all__ = ['DSMIPv6StatusCode']
+__all__ = ['DSMIPv6HomeAddress']
 
 
-class DSMIPv6StatusCode(IntEnum):
-    """[DSMIPv6StatusCode] Dual Stack MIPv6 (DSMIPv6) IPv4 Home Address Option Status Codes"""
+class DSMIPv6HomeAddress(IntEnum):
+    """[DSMIPv6HomeAddress] Dual Stack MIPv6 (DSMIPv6) IPv4 Home Address Option Status Codes"""
 
     #: Success [:rfc:`5555`]
     Success = 0
@@ -38,7 +38,7 @@ class DSMIPv6StatusCode(IntEnum):
     Prefix_allocation_unauthorized = 133
 
     @staticmethod
-    def get(key: 'int | str', default: 'int' = -1) -> 'DSMIPv6StatusCode':
+    def get(key: 'int | str', default: 'int' = -1) -> 'DSMIPv6HomeAddress':
         """Backport support for original codes.
 
         Args:
@@ -47,13 +47,13 @@ class DSMIPv6StatusCode(IntEnum):
 
         """
         if isinstance(key, int):
-            return DSMIPv6StatusCode(key)
-        if key not in DSMIPv6StatusCode._member_map_:  # pylint: disable=no-member
-            extend_enum(DSMIPv6StatusCode, key, default)
-        return DSMIPv6StatusCode[key]  # type: ignore[misc]
+            return DSMIPv6HomeAddress(key)
+        if key not in DSMIPv6HomeAddress._member_map_:  # pylint: disable=no-member
+            extend_enum(DSMIPv6HomeAddress, key, default)
+        return DSMIPv6HomeAddress[key]  # type: ignore[misc]
 
     @classmethod
-    def _missing_(cls, value: 'int') -> 'DSMIPv6StatusCode':
+    def _missing_(cls, value: 'int') -> 'DSMIPv6HomeAddress':
         """Lookup function used when value is not found.
 
         Args:

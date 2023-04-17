@@ -3,7 +3,7 @@
 ======================================================================
 
 This module contains the vendor crawler for **Dual Stack MIPv6 (DSMIPv6) IPv4 Home Address Option Status Codes**,
-which is automatically generating :class:`pcapkit.const.mh.dsmipv6_status_code.DSMIPv6StatusCode`.
+which is automatically generating :class:`pcapkit.const.mh.dsmipv6_home_address.DSMIPv6HomeAddress`.
 
 """
 
@@ -13,10 +13,10 @@ import sys
 
 from pcapkit.vendor.default import Vendor
 
-__all__ = ['DSMIPv6StatusCode']
+__all__ = ['DSMIPv6HomeAddress']
 
 
-class DSMIPv6StatusCode(Vendor):
+class DSMIPv6HomeAddress(Vendor):
     """Dual Stack MIPv6 (DSMIPv6) IPv4 Home Address Option Status Codes"""
 
     #: Value limit checker.
@@ -83,4 +83,4 @@ class DSMIPv6StatusCode(Vendor):
 
 
 if __name__ == '__main__':
-    sys.exit(DSMIPv6StatusCode())  # type: ignore[arg-type]
+    sys.exit(DSMIPv6HomeAddress())  # type: ignore[arg-type]
