@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
-"""Binding Acknowledgment Flags
-==================================
+"""Handover Acknowledge Flags
+================================
 
-This module contains the vendor crawler for **Binding Acknowledgment Flags**,
-which is automatically generating :class:`pcapkit.const.mh.binding_ack.BindingACKFlag`.
+This module contains the vendor crawler for **Handover Acknowledge Flags**,
+which is automatically generating :class:`pcapkit.const.mh.handover_ack_flag.HandoverACKFlag`.
 
 """
 
@@ -14,7 +14,7 @@ from typing import TYPE_CHECKING
 
 from pcapkit.vendor.default import Vendor
 
-__all__ = ['BindingACKFlag']
+__all__ = ['HandoverACKFlag']
 
 if TYPE_CHECKING:
     from typing import Callable
@@ -68,13 +68,13 @@ class {NAME}(IntFlag):
 '''  # type: Callable[[str, str, str, str, str], str]
 
 
-class BindingACKFlag(Vendor):
-    """Binding Acknowledgment Flags"""
+class HandoverACKFlag(Vendor):
+    """Handover Acknowledge Flags"""
 
     #: Value limit checker.
     FLAG = 'isinstance(value, int) and 0 <= value <= 0xFF'
     #: Link to registry.
-    LINK = 'https://www.iana.org/assignments/mobility-parameters/mobility-parameters-12.csv'
+    LINK = 'https://www.iana.org/assignments/mobility-parameters/handover-acknowledge-flags.csv'
 
     def process(self, data: 'list[str]') -> 'list[str]':  # type: ignore[override] # pylint: disable=arguments-differ,arguments-renamed
         """Process CSV data.
@@ -91,8 +91,9 @@ class BindingACKFlag(Vendor):
 
         enum = []  # type: list[str]
         for item in reader:
-            long = item[0]
-            rfcs = item[2]
+            name = item[0]
+            dscp = item[2]
+            rfcs = item[3]
 
             temp = []  # type: list[str]
             for rfc in filter(None, re.split(r'\[|\]', rfcs)):
@@ -103,16 +104,10 @@ class BindingACKFlag(Vendor):
                     temp.append(f'[{rfc}]'.replace('_', ' '))
             tmp1 = f" {''.join(temp)}" if rfcs else ''
 
-            split = long.split(' (', 1)
-            if len(split) == 2:
-                name = split[0]
-                cmmt = f" ({split[1]}"
-            else:
-                name, cmmt = long, ''
-            desc = self.wrap_comment(f'{name}{cmmt}{tmp1}')
+            desc = self.wrap_comment(f'{dscp}{tmp1}')
 
             code, code_val = item[1], int(item[1], base=16)
-            renm = self.rename(name, code, original=long)
+            renm = self.rename(name, code)
 
             pres = f"{renm} = 0x{code_val:02x}"
             sufs = f'#: {desc}'
@@ -140,4 +135,4 @@ class BindingACKFlag(Vendor):
 
 
 if __name__ == '__main__':
-    sys.exit(BindingACKFlag())  # type: ignore[arg-type]
+    sys.exit(HandoverACKFlag())  # type: ignore[arg-type]

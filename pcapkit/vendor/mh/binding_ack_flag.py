@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
-"""Binding Update Flags
-==========================
+"""Binding Acknowledgment Flags
+==================================
 
-This module contains the vendor crawler for **Binding Update Flags**,
-which is automatically generating :class:`pcapkit.const.mh.binding_update.BindingUpdateFlag`.
+This module contains the vendor crawler for **Binding Acknowledgment Flags**,
+which is automatically generating :class:`pcapkit.const.mh.binding_ack_flag.BindingACKFlag`.
 
 """
 
@@ -14,10 +14,11 @@ from typing import TYPE_CHECKING
 
 from pcapkit.vendor.default import Vendor
 
-__all__ = ['BindingUpdateFlag']
+__all__ = ['BindingACKFlag']
 
 if TYPE_CHECKING:
     from typing import Callable
+
 
 LINE = lambda NAME, DOCS, FLAG, ENUM, MODL: f'''\
 # -*- coding: utf-8 -*-
@@ -67,13 +68,13 @@ class {NAME}(IntFlag):
 '''  # type: Callable[[str, str, str, str, str], str]
 
 
-class BindingUpdateFlag(Vendor):
-    """Binding Update Flags"""
+class BindingACKFlag(Vendor):
+    """Binding Acknowledgment Flags"""
 
     #: Value limit checker.
-    FLAG = 'isinstance(value, int) and 0 <= value <= 0xFFFF'
+    FLAG = 'isinstance(value, int) and 0 <= value <= 0xFF'
     #: Link to registry.
-    LINK = 'https://www.iana.org/assignments/mobility-parameters/mobility-parameters-11.csv'
+    LINK = 'https://www.iana.org/assignments/mobility-parameters/mobility-parameters-12.csv'
 
     def process(self, data: 'list[str]') -> 'list[str]':  # type: ignore[override] # pylint: disable=arguments-differ,arguments-renamed
         """Process CSV data.
@@ -113,7 +114,7 @@ class BindingUpdateFlag(Vendor):
             code, code_val = item[1], int(item[1], base=16)
             renm = self.rename(name, code, original=long)
 
-            pres = f"{renm} = 0x{code_val:04x}"
+            pres = f"{renm} = 0x{code_val:02x}"
             sufs = f'#: {desc}'
 
             # if len(pres) > 74:
@@ -139,4 +140,4 @@ class BindingUpdateFlag(Vendor):
 
 
 if __name__ == '__main__':
-    sys.exit(BindingUpdateFlag())  # type: ignore[arg-type]
+    sys.exit(BindingACKFlag())  # type: ignore[arg-type]

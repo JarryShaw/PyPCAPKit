@@ -29,9 +29,9 @@ enumerations include:
      - Handoff Indicator Option Type Values [*]_
    * - :class:`MH_AccessType <pcapkit.vendor.mh.access_type.AccessType>`
      - Access Technology Type Option Type Values [*]_
-   * - :class:`MH_BindingUpdateFlag <pcapkit.vendor.mh.binding_update.BindingUpdateFlag>`
+   * - :class:`MH_BindingUpdateFlag <pcapkit.vendor.mh.binding_update_flag.BindingUpdateFlag>`
      - Binding Update Flags [*]_
-   * - :class:`MH_BindingACKFlag <pcapkit.vendor.mh.binding_ack.BindingACKFlag>`
+   * - :class:`MH_BindingACKFlag <pcapkit.vendor.mh.binding_ack_flag.BindingACKFlag>`
      - Binding Acknowledgment Flags [*]_
    * - :class:`MH_DSMIPv6HomeAddress <pcapkit.vendor.mh.dsmipv6_home_address.DSMIPv6HomeAddress>`
      - Dual Stack MIPv6 (DSMIPv6) IPv4 Home Address Option Status Codes [*]_
@@ -43,6 +43,16 @@ enumerations include:
      - Binding Revocation Acknowledgement Status Codes [*]_
    * - :class:`MH_HomeAddressReply <pcapkit.vendor.mh.home_address_reply.HomeAddressReply>`
      - IPv4 Home Address Reply Status Codes [*]_
+   * - :class:`MH_DHCPSupportMode <pcapkit.vendor.mh.dhcp_support_mode.DHCPSupportMode>`
+     - IPv4 DHCP Support Mode Flags [*]_
+   * - :class:`MH_HandoverInitiateFlag <pcapkit.vendor.mh.handover_initiate_flag.HandoverInitiateFlag>`
+     - Handover Initiate Flags [*]_
+   * - :class:`MH_HandoverACKFlag <pcapkit.vendor.mh.handover_ack_flag.HandoverACKFlag>`
+     - Handover Acknowledge Flags [*]_
+   * - :class:`MH_HandoverACKStatus <pcapkit.vendor.mh.handover_ack_status.HandoverACKStatus>`
+     - Handover Initiate Status Codes [*]_
+   * - :class:`MH_HandoverACKStatus <pcapkit.vendor.mh.handover_ack_status.HandoverACKStatus>`
+     - Handover Acknowledge Status Codes [*]_
 
 .. [*] https://www.iana.org/assignments/mobility-parameters/mobility-parameters.xhtml#mobility-parameters-1
 .. [*] https://www.iana.org/assignments/mobility-parameters/mobility-parameters.xhtml#mobility-parameters-2
@@ -61,6 +71,11 @@ enumerations include:
 .. [*] https://www.iana.org/assignments/mobility-parameters/mobility-parameters.xhtml#revocation-trigger-values
 .. [*] https://www.iana.org/assignments/mobility-parameters/mobility-parameters.xhtml#binding-revocation-status-codes
 .. [*] https://www.iana.org/assignments/mobility-parameters/mobility-parameters.xhtml#home-address-reply
+.. [*] https://www.iana.org/assignments/mobility-parameters/mobility-parameters.xhtml#dhcp-support-mode
+.. [*] https://www.iana.org/assignments/mobility-parameters/mobility-parameters.xhtml#handover-initiate-flags
+.. [*] https://www.iana.org/assignments/mobility-parameters/mobility-parameters.xhtml#handover-acknowledge-flags
+.. [*] https://www.iana.org/assignments/mobility-parameters/mobility-parameters.xhtml#handover-initiate-status
+.. [*] https://www.iana.org/assignments/mobility-parameters/mobility-parameters.xhtml#handover-acknowledge-status
 
 """
 
@@ -74,13 +89,18 @@ from pcapkit.vendor.mh.enumerating_algorithm import EnumeratingAlgorithm as MH_E
 from pcapkit.vendor.mh.auth_subtype import AuthSubtype as MH_AuthSubtype
 from pcapkit.vendor.mh.handoff_type import HandoffType as MH_HandoffType
 from pcapkit.vendor.mh.access_type import AccessType as MH_AccessType
-from pcapkit.vendor.mh.binding_update import BindingUpdateFlag as MH_BindingUpdateFlag
-from pcapkit.vendor.mh.binding_ack import BindingACKFlag as MH_BindingACKFlag
+from pcapkit.vendor.mh.binding_update_flag import BindingUpdateFlag as MH_BindingUpdateFlag
+from pcapkit.vendor.mh.binding_ack_flag import BindingACKFlag as MH_BindingACKFlag
 from pcapkit.vendor.mh.dsmipv6_home_address import DSMIPv6HomeAddress as MH_DSMIPv6HomeAddress
 from pcapkit.vendor.mh.binding_revocation import BindingRevocation as MH_BindingRevocation
 from pcapkit.vendor.mh.revocation_trigger import RevocationTrigger as MH_RevocationTrigger
 from pcapkit.vendor.mh.revocation_status_code import RevocationStatusCode as MH_RevocationStatusCode
 from pcapkit.vendor.mh.home_address_reply import HomeAddressReply as MH_HomeAddressReply
+from pcapkit.vendor.mh.dhcp_support_mode import DHCPSupportMode as MH_DHCPSupportMode
+from pcapkit.vendor.mh.handover_initiate_flag import HandoverInitiateFlag as MH_HandoverInitiateFlag
+from pcapkit.vendor.mh.handover_ack_flag import HandoverACKFlag as MH_HandoverACKFlag
+from pcapkit.vendor.mh.handover_ack_status import HandoverACKStatus as MH_HandoverACKStatus
+from pcapkit.vendor.mh.handover_ack_status import HandoverACKStatus as MH_HandoverACKStatus
 
 __all__ = [
     'MH_Packet', 'MH_Option', 'MH_DNSStatusCode', 'MH_ACKStatusCode',
@@ -88,5 +108,6 @@ __all__ = [
     'MH_AuthSubtype', 'MH_HandoffType', 'MH_AccessType',
     'MH_BindingUpdateFlag', 'MH_BindingACKFlag', 'MH_DSMIPv6HomeAddress',
     'MH_BindingRevocation', 'MH_RevocationTrigger', 'MH_RevocationStatusCode',
-    'MH_HomeAddressReply',
+    'MH_HomeAddressReply', 'MH_DHCPSupportMode', 'MH_HandoverInitiateFlag',
+    'MH_HandoverACKFlag', 'MH_HandoverACKStatus', 'MH_HandoverACKStatus',
 ]
