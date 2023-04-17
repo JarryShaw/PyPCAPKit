@@ -62,7 +62,7 @@ dist-upload:
 dist: dist-update dist-build dist-upload
 
 docs:
-	PCAPKIT_SPHINX=1 pipenv run $(MAKE) -C doc/sphinx html
+	PCAPKIT_SPHINX=1 pipenv run $(MAKE) -C docs html
 
 pypi:
 	DIR=release $(MAKE) dist-prep dist

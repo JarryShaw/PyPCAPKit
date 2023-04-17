@@ -354,7 +354,7 @@
         "wght",
         "Xcode"
     ],
-    "esbonio.sphinx.confDir": "${workspaceFolder}/doc/sphinx/source",
+    "esbonio.sphinx.confDir": "${workspaceFolder}/docs/source",
     "C_Cpp.errorSquiggles": "Enabled",
     "restructuredtext.preview.name": "sphinx",
     "esbonio.sphinx.forceFullBuild": false,

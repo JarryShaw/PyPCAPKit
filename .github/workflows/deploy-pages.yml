@@ -28,17 +28,17 @@ jobs:
           brew link --force --overwrite python@3.11
 
           python3.11 -m pip install -U pip setuptools wheel
-          python3.11 -m pip install -r doc/sphinx/requirements.txt
+          python3.11 -m pip install -r docs/requirements.txt
           python3.11 -m pip install .[all]
-          make -C doc/sphinx html
+          make -C docs html
 
           # disable Jekyll
-          touch doc/sphinx/build/html/.nojekyll
+          touch docs/build/html/.nojekyll
 
       - name: Deploy 🚀
         uses: JamesIves/github-pages-deploy-action@v4
         with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           BRANCH: gh-pages # The branch the action should deploy to.
-          FOLDER: doc/sphinx/build/html # The folder the action should deploy.
+          FOLDER: docs/build/html # The folder the action should deploy.
           CLEAN: true # Automatically remove deleted files from the deploy branch
