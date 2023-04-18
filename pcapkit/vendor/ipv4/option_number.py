@@ -2,6 +2,8 @@
 """IP Option Numbers
 =======================
 
+.. module:: pcapkit.vendor.ipv4.option_number
+
 This module contains the vendor crawler for **IP Option Numbers**,
 which is automatically generating :class:`pcapkit.const.ipv4.option_number.OptionNumber`.
 

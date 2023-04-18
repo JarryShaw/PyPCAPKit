@@ -2,6 +2,8 @@
 """L2TP Type
 ===============
 
+.. module:: pcapkit.vendor.l2tp.type
+
 This module contains the vendor crawler for **L2TP Type**,
 which is automatically generating :class:`pcapkit.const.l2tp.type.Type`.
 

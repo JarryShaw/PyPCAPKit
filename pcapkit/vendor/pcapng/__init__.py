@@ -3,6 +3,8 @@
 """:class:`~pcapkit.protocols.misc.pcapng.PCAPNG` Vendor Crawler
 ===================================================================
 
+.. module:: pcapkit.vendor.pcapng
+
 This module contains all vendor crawlers of
 :class:`~pcapkit.protocols.misc.pcapng.PCAPNG` implementations. Available
 crawlers include:

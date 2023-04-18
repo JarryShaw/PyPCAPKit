@@ -2,6 +2,8 @@
 """Flow Binding Indication Triggers
 ======================================
 
+.. module:: pcapkit.vendor.mh.fb_indication_trigger
+
 This module contains the vendor crawler for **Flow Binding Indication Triggers**,
 which is automatically generating :class:`pcapkit.const.mh.fb_indication_trigger.FlowBindingIndicationTrigger`.
 

@@ -3,6 +3,8 @@
 """Protocol Type Registry Vendor Crawlers
 ============================================
 
+.. module:: pcapkit.vendor.reg
+
 This module contains all vendor crawlers of protocol type registry
 implementations. Available enumerations include:
 

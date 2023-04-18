@@ -3,6 +3,8 @@
 """:class:`~pcapkit.protocols.internet.mh.MH` Vendor Crawlers
 ================================================================
 
+.. module:: pcapkit.vendor.mh
+
 This module contains all vendor crawlers of
 :class:`~pcapkit.protocols.internet.mh.MH` implementations. Available
 enumerations include:

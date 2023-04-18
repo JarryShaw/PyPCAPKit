@@ -2,6 +2,8 @@
 """HTTP Status Code
 ======================
 
+.. module:: pcapkit.vendor.http.status_code
+
 This module contains the vendor crawler for **HTTP Status Code**,
 which is automatically generating :class:`pcapkit.const.http.status_code.StatusCode`.
 

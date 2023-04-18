@@ -2,6 +2,8 @@
 """Mobile Node Group Identifier Type Registry
 ================================================
 
+.. module:: pcapkit.vendor.mh.mh_group_id
+
 This module contains the vendor crawler for **Mobile Node Group Identifier Type Registry**,
 which is automatically generating :class:`pcapkit.const.mh.mn_group_id.MNGroupID`.
 

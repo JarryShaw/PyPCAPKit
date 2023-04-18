@@ -2,6 +2,8 @@
 """IPv6 Routing Types
 ========================
 
+.. module:: pcapkit.vendor.ipv6.routing
+
 This module contains the vendor crawler for **IPv6 Routing Types**,
 which is automatically generating :class:`pcapkit.const.ipv6.routing.Routing`.
 

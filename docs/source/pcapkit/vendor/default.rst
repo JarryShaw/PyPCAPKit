@@ -6,25 +6,12 @@ Base Crawler
 :mod:`pcapkit.vendor.default` contains :class:`~pcapkit.vendor.default.Vendor`
 only, which is the base meta class for all vendor crawlers.
 
-Vendor Crawler
---------------
-
 .. autoclass:: pcapkit.vendor.default.Vendor
-   :undoc-members:
+   :no-members:
    :show-inheritance:
 
-   .. automethod:: __new__
-   .. automethod:: __init__
-
-   .. automethod:: wrap_comment
-   .. automethod:: safe_name
-   .. automethod:: rename
-   .. automethod:: process
-   .. automethod:: count
-   .. automethod:: context
-   .. automethod:: request
-
-   .. automethod:: _request
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
 
    .. autoattribute:: NAME
    .. autoattribute:: DOCS
@@ -33,8 +20,19 @@ Vendor Crawler
    .. autoattribute:: LINK
       :no-value:
 
-Crawler Template
-----------------
+   .. automethod:: count
+   .. automethod:: process
+   .. automethod:: context
+
+   .. automethod:: wrap_comment
+   .. automethod:: safe_name
+   .. automethod:: rename
+
+   .. automethod:: request
+   .. automethod:: _request
+
+Auxiliary Functions
+-------------------
 
 .. function:: pcapkit.vendor.default.LINE(NAME, DOCS, FLAG, ENUM, MISS, MODL)
 
@@ -47,8 +45,5 @@ Crawler Template
    :param str MISS: missing value handler (default value)
    :param str MODL: module name of the constant enumeration class
    :rtype: str
-
-Crawler Proxy
--------------
 
 .. autofunction:: pcapkit.vendor.default.get_proxies

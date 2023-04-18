@@ -2,6 +2,8 @@
 """HIP Packet Types
 ======================
 
+.. module:: pcapkit.const.hip.packet
+
 This module contains the vendor crawler for **HIP Packet Types**,
 which is automatically generating :class:`pcapkit.const.hip.packet.Packet`.
 

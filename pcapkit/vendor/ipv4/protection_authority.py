@@ -2,6 +2,8 @@
 """Protection Authority Bit Assignments
 ==========================================
 
+.. module:: pcapkit.vendor.ipv4.protection_authority
+
 This module contains the vendor crawler for **Protection Authority Bit Assignments**,
 which is automatically generating :class:`pcapkit.const.ipv4.protection_authority.ProtectionAuthority`.
 

@@ -2,6 +2,8 @@
 """Update Notification Reasons Registry
 ==========================================
 
+.. module:: pcapkit.vendor.mh.upn_reason
+
 This module contains the vendor crawler for **Update Notification Reasons Registry**,
 which is automatically generating :class:`pcapkit.const.mh.upn_reason.UpdateNotificationReason`.
 

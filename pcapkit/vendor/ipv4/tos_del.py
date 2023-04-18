@@ -2,6 +2,8 @@
 """ToS (DS Field) Delay
 ==========================
 
+.. module:: pcapkit.vendor.ipv4.tos_del
+
 This module contains the vendor crawler for **ToS (DS Field) Delay**,
 which is automatically generating :class:`pcapkit.const.ipv4.tos_del.ToSDelay`.
 

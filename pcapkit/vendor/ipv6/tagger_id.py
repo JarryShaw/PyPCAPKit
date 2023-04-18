@@ -2,6 +2,8 @@
 """TaggerID Types
 ====================
 
+.. module:: pcapkit.vendor.ipv6.tagger_id
+
 This module contains the vendor crawler for **TaggerID Types**,
 which is automatically generating :class:`pcapkit.const.ipv6.tagger_id.TaggerID`.
 

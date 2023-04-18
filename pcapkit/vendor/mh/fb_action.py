@@ -2,6 +2,8 @@
 """Flow Binding Action Values
 ================================
 
+.. module:: pcapkit.vendor.mh.fb_action
+
 This module contains the vendor crawler for **Flow Binding Action Values**,
 which is automatically generating :class:`pcapkit.const.mh.fb_action.FlowBindingAction`.
 

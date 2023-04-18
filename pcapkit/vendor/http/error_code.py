@@ -2,6 +2,8 @@
 """HTTP/2 Error Code
 =======================
 
+.. module:: pcapkit.vendor.http.error_code
+
 This module contains the vendor crawler for **HTTP/2 Error Code**,
 which is automatically generating :class:`pcapkit.const.http.error_code.ErrorCode`.
 

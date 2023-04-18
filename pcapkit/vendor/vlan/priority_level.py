@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
-"""Priority levels defined in IEEE 802.1p.
-=============================================
+"""Priority levels defined in IEEE 802.1p
+============================================
 
-This module contains the vendor crawler for **Priority levels defined in IEEE 802.1p.**,
+.. module:: pcapkit.vendor.vlan.priority_level
+
+This module contains the vendor crawler for **Priority levels defined in IEEE 802.1p**,
 which is automatically generating :class:`pcapkit.const.vlan.priority_level.PriorityLevel`.
 
 """
@@ -25,7 +27,7 @@ __all__ = ['PriorityLevel']
 
 
 class PriorityLevel(Vendor):
-    """Priority levels defined in IEEE 802.1p."""
+    """Priority levels defined in IEEE 802.1p"""
 
     #: Value limit checker.
     FLAG = 'isinstance(value, int) and 0b000 <= value <= 0b111'

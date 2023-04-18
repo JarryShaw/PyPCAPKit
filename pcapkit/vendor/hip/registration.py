@@ -2,6 +2,8 @@
 """Registration Types
 ========================
 
+.. module:: pcapkit.const.hip.registration
+
 This module contains the vendor crawler for **Registration Types**,
 which is automatically generating :class:`pcapkit.const.hip.registration.Registration`.
 

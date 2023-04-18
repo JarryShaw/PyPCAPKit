@@ -2,6 +2,8 @@
 """TCP Option Kind Numbers
 =============================
 
+.. module:: pcapkit.vendor.tcp.option
+
 This module contains the vendor crawler for **TCP Option Kind Numbers**,
 which is automatically generating :class:`pcapkit.const.tcp.option.Option`.
 

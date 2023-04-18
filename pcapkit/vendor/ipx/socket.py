@@ -3,6 +3,8 @@
 """Socket Types
 ==================
 
+.. module:: pcapkit.vendor.ipx.socket
+
 This module contains the vendor crawler for **Socket Types**,
 which is automatically generating :class:`pcapkit.const.ipx.socket.Socket`.
 

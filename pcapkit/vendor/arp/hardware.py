@@ -2,6 +2,8 @@
 """Hardware Types
 ====================
 
+.. module:: pcapkit.vendor.arp.hardware
+
 This module contains the vendor crawler for **Hardware Types**,
 which is automatically generating :class:`pcapkit.const.arp.hardware.Hardware`.
 

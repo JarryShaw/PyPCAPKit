@@ -3,6 +3,8 @@
 """IPX Packet Types
 ======================
 
+.. module:: pcapkit.vendor.ipx.packet
+
 This module contains the vendor crawler for **IPX Packet Types**,
 which is automatically generating :class:`pcapkit.const.ipx.packet.Packet`.
 

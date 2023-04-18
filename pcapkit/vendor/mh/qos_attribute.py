@@ -2,6 +2,8 @@
 """Quality-of-Service Attribute Registry
 ===========================================
 
+.. module:: pcapkit.vendor.mh.qos_attribute
+
 This module contains the vendor crawler for **Quality-of-Service Attribute Registry**,
 which is automatically generating :class:`pcapkit.const.mh.qos_attribute.QoSAttribute`.
 

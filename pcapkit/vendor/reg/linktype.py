@@ -2,6 +2,8 @@
 """Link-Layer Header Type Values
 ===================================
 
+.. module:: pcapkit.vendor.reg.linktype
+
 This module contains the vendor crawler for **Link-Layer Header Type Values**,
 which is automatically generating :class:`pcapkit.const.reg.linktype.LinkType`.
 

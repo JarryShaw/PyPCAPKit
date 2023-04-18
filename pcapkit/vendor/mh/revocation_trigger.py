@@ -2,6 +2,8 @@
 """Revocation Trigger Values
 ===============================
 
+.. module:: pcapkit.vendor.mh.revocation_trigger
+
 This module contains the vendor crawler for **Revocation Trigger Values**,
 which is automatically generating :class:`pcapkit.const.mh.revocation_trigger.RevocationTrigger`.
 

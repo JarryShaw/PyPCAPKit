@@ -2,6 +2,8 @@
 """Option Classes
 ====================
 
+.. module:: pcapkit.vendor.ipv4.option_class
+
 This module contains the vendor crawler for **Option Classes**,
 which is automatically generating :class:`pcapkit.const.ipv4.option_class.OptionClass`.
 

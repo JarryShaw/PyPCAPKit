@@ -2,6 +2,8 @@
 """Ethertype IEEE 802 Numbers
 ================================
 
+.. module:: pcapkit.vendor.reg.ethertype
+
 This module contains the vendor crawler for **Ethertype IEEE 802 Numbers**,
 which is automatically generating :class:`pcapkit.const.reg.ethertype.EtherType`.
 

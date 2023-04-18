@@ -2,6 +2,8 @@
 """Destination Options and Hop-by-Hop Options
 ================================================
 
+.. module:: pcapkit.vendor.ipv6.option
+
 This module contains the vendor crawler for **Destination Options and Hop-by-Hop Options**,
 which is automatically generating :class:`pcapkit.const.ipv6.option.Option`.
 

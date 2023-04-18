@@ -2,6 +2,8 @@
 """HTTP/2 Frame Type
 =======================
 
+.. module:: pcapkit.vendor.http.frame
+
 This module contains the vendor crawler for **HTTP/2 Frame Type**,
 which is automatically generating :class:`pcapkit.const.http.frame.Frame`.
 

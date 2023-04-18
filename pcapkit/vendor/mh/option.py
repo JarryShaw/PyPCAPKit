@@ -2,6 +2,8 @@
 """Mobility Options
 ======================
 
+.. module:: pcapkit.vendor.mh.option
+
 This module contains the vendor crawler for **Mobility Options**,
 which is automatically generating :class:`pcapkit.const.mh.option.Option`.
 

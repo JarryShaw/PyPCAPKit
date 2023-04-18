@@ -2,6 +2,8 @@
 """TS Flag
 =============
 
+.. module:: pcapkit.vendor.ipv4.ts_flag
+
 This module contains the vendor crawler for **TS Flag**,
 which is automatically generating :class:`pcapkit.const.ipv4.ts_flag.TSFlag`.
 

@@ -2,6 +2,8 @@
 """Option Actions
 ====================
 
+.. module:: pcapkit.vendor.ipv6.option_action
+
 This module contains the vendor crawler for **Option Actions**,
 which is automatically generating :class:`pcapkit.const.ipv6.option_action.OptionAction`.
 

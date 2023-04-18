@@ -2,6 +2,8 @@
 """Binding Revocation Acknowledgement Status Codes
 =====================================================
 
+.. module:: pcapkit.vendor.mh.revocation_status_code
+
 This module contains the vendor crawler for **Binding Revocation Acknowledgement Status Codes**,
 which is automatically generating :class:`pcapkit.const.mh.revocation_status_code.RevocationStatusCode`.
 

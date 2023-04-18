@@ -2,6 +2,8 @@
 """Classification Level Encodings
 ====================================
 
+.. module:: pcapkit.vendor.ipv4.classification_level
+
 This module contains the vendor crawler for **Classification Level Encodings**,
 which is automatically generating :class:`pcapkit.const.ipv4.classification_level.ClassificationLevel`.
 

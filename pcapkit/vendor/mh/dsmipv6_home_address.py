@@ -2,6 +2,8 @@
 """Dual Stack MIPv6 (DSMIPv6) IPv4 Home Address Option Status Codes
 ======================================================================
 
+.. module:: pcapkit.vendor.mh.dsmipv6_home_address
+
 This module contains the vendor crawler for **Dual Stack MIPv6 (DSMIPv6) IPv4 Home Address Option Status Codes**,
 which is automatically generating :class:`pcapkit.const.mh.dsmipv6_home_address.DSMIPv6HomeAddress`.
 

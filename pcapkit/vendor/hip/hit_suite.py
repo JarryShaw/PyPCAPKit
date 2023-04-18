@@ -2,6 +2,8 @@
 """HIT Suite ID
 ==================
 
+.. module:: pcapkit.const.hip.hit_suite
+
 This module contains the vendor crawler for **HIT Suite ID**,
 which is automatically generating :class:`pcapkit.const.hip.hit_suite.HITSuite`.
 

@@ -2,6 +2,8 @@
 """Flow Identification Sub-Options
 =====================================
 
+.. module:: pcapkit.vendor.mh.flow_id_suboption
+
 This module contains the vendor crawler for **Flow Identification Sub-Options**,
 which is automatically generating :class:`pcapkit.const.mh.flow_id_suboption.FlowIDSuboption`.
 

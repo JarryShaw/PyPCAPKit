@@ -2,6 +2,8 @@
 """ToS (DS Field) Reliability
 ================================
 
+.. module:: pcapkit.vendor.ipv4.tos_rel
+
 This module contains the vendor crawler for **ToS (DS Field) Reliability**,
 which is automatically generating :class:`pcapkit.const.ipv4.tos_rel.ToSReliability`.
 

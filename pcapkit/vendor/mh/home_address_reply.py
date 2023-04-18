@@ -2,6 +2,8 @@
 """IPv4 Home Address Reply Status Codes
 ==========================================
 
+.. module:: pcapkit.vendor.mh.home_address_reply
+
 This module contains the vendor crawler for **IPv4 Home Address Reply Status Codes**,
 which is automatically generating :class:`pcapkit.const.mh.home_address_reply.HomeAddressReply`.
 

@@ -2,6 +2,8 @@
 """Multipath TCP options
 ===========================
 
+.. module:: pcapkit.vendor.tcp.mp_tcp_option
+
 This module contains the vendor crawler for **Multipath TCP options**,
 which is automatically generating :class:`pcapkit.const.tcp.mp_tcp_option.MPTCPOption`.
 

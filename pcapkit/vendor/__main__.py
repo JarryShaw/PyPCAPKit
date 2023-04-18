@@ -2,6 +2,8 @@
 """Command Line Tool
 =======================
 
+.. module:: pcapkit.vendor.__main__
+
 :mod:`pcapkit.vendor.__main__` is a command line tool for updating
 constant enumerations.
 

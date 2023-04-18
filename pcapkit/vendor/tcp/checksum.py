@@ -2,6 +2,8 @@
 """TCP Checksum
 ==================
 
+.. module:: pcapkit.vendor.tcp.checksum
+
 This module contains the vendor crawler for **TCP Checksum**,
 which is automatically generating :class:`pcapkit.const.tcp.checksum.Checksum`.
 

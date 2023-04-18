@@ -2,6 +2,8 @@
 """Binding Update Flags
 ==========================
 
+.. module:: pcapkit.vendor.mh.binding_update_flag
+
 This module contains the vendor crawler for **Binding Update Flags**,
 which is automatically generating :class:`pcapkit.const.mh.binding_update_flag.BindingUpdateFlag`.
 

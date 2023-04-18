@@ -2,6 +2,8 @@
 """OSPF Packet Types
 =======================
 
+.. module:: pcapkit.vendor.ospf.packet
+
 This module contains the vendor crawler for **OSPF Packet Types**,
 which is automatically generating :class:`pcapkit.const.ospf.packet.Packet`.
 

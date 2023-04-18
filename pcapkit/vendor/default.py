@@ -2,6 +2,8 @@
 """Base Crawler
 ==================
 
+.. module:: pcapkit.vendor.default
+
 :mod:`pcapkit.vendor.default` contains :class:`~pcapkit.vendor.default.Vendor`
 only, which is the base meta class for all vendor crawlers.
 

@@ -2,6 +2,8 @@
 """Update Notification Acknowledgement Status Registry
 =========================================================
 
+.. module:: pcapkit.vendor.mh.upa_status
+
 This module contains the vendor crawler for **Update Notification Acknowledgement Status Registry**,
 which is automatically generating :class:`pcapkit.const.mh.upa_status.UpdateNotificationACKStatus`.
 

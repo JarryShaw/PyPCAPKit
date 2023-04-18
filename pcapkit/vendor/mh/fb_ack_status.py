@@ -2,6 +2,8 @@
 """Flow Binding Acknowledgement Status Codes
 ===============================================
 
+.. module:: pcapkit.vendor.mh.fb_ack_status
+
 This module contains the vendor crawler for **Flow Binding Acknowledgement Status Codes**,
 which is automatically generating :class:`pcapkit.const.mh.fb_ack_status.FlowBindingACKStatus`.
 

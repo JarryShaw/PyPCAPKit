@@ -2,6 +2,8 @@
 """Block Types
 =================
 
+.. module:: pcapkit.vendor.pcapng.block_type
+
 This module contains the vendor crawler for **Block Types**,
 which is automatically generating :class:`pcapkit.const.pcapng.block_type.BlockType`.
 

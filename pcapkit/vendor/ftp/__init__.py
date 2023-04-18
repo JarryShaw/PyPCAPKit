@@ -3,6 +3,8 @@
 """:class:`~pcapkit.protocols.application.ftp.FTP` Vendor Crawler
 ====================================================================
 
+.. module:: pcapkit.vendor.ftp
+
 This module contains all vendor crawlers of
 :class:`~pcapkit.protocols.application.ftp.FTP` implementations. Available
 crawlers include:

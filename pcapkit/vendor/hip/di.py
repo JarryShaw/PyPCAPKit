@@ -2,6 +2,8 @@
 """DI-Types
 ==============
 
+.. module:: pcapkit.const.hip.di
+
 This module contains the vendor crawler for **DI-Types**,
 which is automatically generating :class:`pcapkit.const.hip.di.DITypes`.
 

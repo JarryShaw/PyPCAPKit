@@ -2,6 +2,8 @@
 """Seed-ID Types
 ===================
 
+.. module:: pcapkit.vendor.ipv6.seed_id
+
 This module contains the vendor crawler for **Seed-ID Types**,
 which is automatically generating :class:`pcapkit.const.ipv6.seed_id.SeedID`.
 

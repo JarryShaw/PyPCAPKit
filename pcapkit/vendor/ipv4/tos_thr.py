@@ -2,6 +2,8 @@
 """ToS (DS Field) Throughput
 ===============================
 
+.. module:: pcapkit.vendor.ipv4.tos_thr
+
 This module contains the vendor crawler for **ToS (DS Field) Throughput**,
 which is automatically generating :class:`pcapkit.const.ipv4.tos_thr.ToSThroughput`.
 

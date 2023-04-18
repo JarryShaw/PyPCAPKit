@@ -2,6 +2,8 @@
 """Status Codes
 ==================
 
+.. module:: pcapkit.vendor.mh.status_code
+
 This module contains the vendor crawler for **Status Codes**,
 which is automatically generating :class:`pcapkit.const.mh.dns_status_code.StatusCode`.
 

@@ -2,6 +2,8 @@
 """HIP Transport Modes
 =========================
 
+.. module:: pcapkit.const.hip.transport
+
 This module contains the vendor crawler for **HIP Transport Modes**,
 which is automatically generating :class:`pcapkit.const.hip.transport.Transport`.
 

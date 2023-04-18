@@ -2,6 +2,8 @@
 """ToS (DS Field) Precedence
 ===============================
 
+.. module:: pcapkit.vendor.ipv4.tos_pre
+
 This module contains the vendor crawler for **ToS (DS Field) Precedence**,
 which is automatically generating :class:`pcapkit.const.ipv4.tos_pre.ToSPrecedence`.
 

@@ -2,6 +2,8 @@
 """Mobility Header Types - for the MH Type field in the Mobility Header
 ==========================================================================
 
+.. module:: pcapkit.vendor.mh.packet
+
 This module contains the vendor crawler for **Mobility Header Types - for the MH Type field in the Mobility Header**,
 which is automatically generating :class:`pcapkit.const.mh.packet.Packet`.
 

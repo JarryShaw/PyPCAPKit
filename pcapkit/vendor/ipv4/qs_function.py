@@ -2,6 +2,8 @@
 """QS Functions
 ==================
 
+.. module:: pcapkit.vendor.ipv4.qs_function
+
 This module contains the vendor crawler for **QS Functions**,
 which is automatically generating :class:`pcapkit.const.ipv4.qs_function.QSFunction`.
 

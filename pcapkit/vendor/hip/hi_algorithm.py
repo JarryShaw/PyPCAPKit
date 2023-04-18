@@ -2,6 +2,8 @@
 """HI Algorithm
 ==================
 
+.. module:: pcapkit.const.hip.hi_algorithm
+
 This module contains the vendor crawler for **HI Algorithm**,
 which is automatically generating :class:`pcapkit.const.hip.hi_algorithm.HIAlgorithm`.
 

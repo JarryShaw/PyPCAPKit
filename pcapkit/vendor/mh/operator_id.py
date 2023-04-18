@@ -2,6 +2,8 @@
 """Operator-Identifier Type Registry
 =======================================
 
+.. module:: pcapkit.vendor.mh.operator_id
+
 This module contains the vendor crawler for **Operator-Identifier Type Registry**,
 which is automatically generating :class:`pcapkit.const.mh.operator_id.OperatorID`.
 

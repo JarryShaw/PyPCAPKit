@@ -2,6 +2,8 @@
 """Subtype Field of the MN-HA and MN-AAA Authentication Mobility Options
 ==========================================================================
 
+.. module:: pcapkit.vendor.mh.auth_subtype
+
 This module contains the vendor crawler for **Subtype Field of the MN-HA and MN-AAA Authentication Mobility Options**,
 which is automatically generating :class:`pcapkit.const.mh.auth_subtype.AuthSubtype`.
 

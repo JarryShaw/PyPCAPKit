@@ -2,6 +2,8 @@
 """Binding Acknowledgment Flags
 ==================================
 
+.. module:: pcapkit.vendor.mh.binding_ack_flag
+
 This module contains the vendor crawler for **Binding Acknowledgment Flags**,
 which is automatically generating :class:`pcapkit.const.mh.binding_ack_flag.BindingACKFlag`.
 

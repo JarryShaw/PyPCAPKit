@@ -2,6 +2,8 @@
 """HTTP/2 Settings
 =====================
 
+.. module:: pcapkit.vendor.http.setting
+
 This module contains the vendor crawler for **HTTP/2 Settings**,
 which is automatically generating :class:`pcapkit.const.http.setting.Setting`.
 

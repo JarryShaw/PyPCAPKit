@@ -3,6 +3,8 @@
 """:class:`~pcapkit.protocols.transport.tcp.TCP` Vendor Crawlers
 ===================================================================
 
+.. module:: pcapkit.vendor.tcp
+
 This module contains all vendor crawlers of
 :class:`~pcapkit.protocols.transport.tcp.TCP` implementations. Available
 enumerations include:

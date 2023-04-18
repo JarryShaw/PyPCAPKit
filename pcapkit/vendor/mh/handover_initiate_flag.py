@@ -2,6 +2,8 @@
 """Handover Initiate Flags
 =============================
 
+.. module:: pcapkit.vendor.mh.handover_initiate_flag
+
 This module contains the vendor crawler for **Handover Initiate Flags**,
 which is automatically generating :class:`pcapkit.const.mh.handover_initiate_flag.HandoverInitiateFlag`.
 

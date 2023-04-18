@@ -1,11 +1,12 @@
+===================================================================
 :class:`~pcapkit.protocols.transport.tcp.TCP` Vendor Crawlers
-=============================================================
+===================================================================
 
 .. module:: pcapkit.vendor.tcp
 
 This module contains all vendor crawlers of
 :class:`~pcapkit.protocols.transport.tcp.TCP` implementations. Available
-enumerations include:
+vendor crawlers include:
 
 .. list-table::
 
@@ -16,33 +17,39 @@ enumerations include:
    * - :class:`TCP_Option <pcapkit.vendor.tcp.option.Option>`
      - TCP Option Kind Numbers
 
-.. automodule:: pcapkit.vendor.tcp.checksum
-   :no-members:
+TCP Checksum
+============
+
+.. module:: pcapkit.vendor.tcp.checksum
+
+This module contains the vendor crawler for **TCP Checksum**,
+which is automatically generating :class:`pcapkit.const.tcp.checksum.Checksum`.
 
 .. autoclass:: pcapkit.vendor.tcp.checksum.Checksum
-   :noindex:
-   :members: FLAG
+   :members: FLAG, LINK
    :show-inheritance:
 
-.. autodata:: pcapkit.vendor.tcp.checksum.DATA
-   :no-value:
+Multipath TCP options
+=====================
 
-.. automodule:: pcapkit.vendor.tcp.mp_tcp_option
-   :no-members:
+.. module:: pcapkit.vendor.tcp.mp_tcp_option
+
+This module contains the vendor crawler for **Multipath TCP options**,
+which is automatically generating :class:`pcapkit.const.tcp.mp_tcp_option.MPTCPOption`.
 
 .. autoclass:: pcapkit.vendor.tcp.mp_tcp_option.MPTCPOption
-   :noindex:
-   :members: FLAG
+   :members: FLAG, LINK
    :show-inheritance:
 
-.. autodata:: pcapkit.vendor.tcp.mp_tcp_option.DATA
-   :no-value:
+TCP Option Kind Numbers
+=======================
 
-.. automodule:: pcapkit.vendor.tcp.option
-   :no-members:
+.. module:: pcapkit.vendor.tcp.option
+
+This module contains the vendor crawler for **TCP Option Kind Numbers**,
+which is automatically generating :class:`pcapkit.const.tcp.option.Option`.
 
 .. autoclass:: pcapkit.vendor.tcp.option.Option
-   :noindex:
    :members: FLAG, LINK
    :show-inheritance:
 

@@ -2,6 +2,8 @@
 """Enumerating Algorithms
 ============================
 
+.. module:: pcapkit.vendor.mh.enumerating_algorithm
+
 This module contains the vendor crawler for **Enumerating Algorithms**,
 which is automatically generating :class:`pcapkit.const.mh.enumerating_algorithm.EnumeratingAlgorithm`.
 

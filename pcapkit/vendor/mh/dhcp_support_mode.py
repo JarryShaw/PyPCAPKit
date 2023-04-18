@@ -2,6 +2,8 @@
 """IPv4 DHCP Support Mode Flags
 ==================================
 
+.. module:: pcapkit.vendor.mh.dhcp_support_mode
+
 This module contains the vendor crawler for **IPv4 DHCP Support Mode Flags**,
 which is automatically generating :class:`pcapkit.const.mh.dhcp_support_mode.DHCPSupportMode`.
 

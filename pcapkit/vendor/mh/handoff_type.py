@@ -2,6 +2,8 @@
 """Handoff Indicator Option Type Values
 ===============================================
 
+.. module:: pcapkit.vendor.mh.handoff_type
+
 This module contains the vendor crawler for **Handoff Indicator Option Type Values**,
 which is automatically generating :class:`pcapkit.const.mh.handoff_type.HandoffType`.
 

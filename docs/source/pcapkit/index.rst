@@ -33,8 +33,20 @@ schema definitions as well as various customisable interfaces.
    const/index
    vendor/index
 
-.. automodule:: pcapkit.__main__
-   :no-members:
+Command Line Tool
+=================
+
+.. module:: pcapkit.__main__
+
+.. important::
+
+   This module requires ``emoji`` package to be installed.
+
+:mod:`pcapkit.__main__` was originally the module file of
+|jspcapy|_, which is now deprecated and merged with :mod:`pcapkit`.
+
+.. |jspcapy| replace:: ``jspcapy``
+.. _jspcapy: https://github.com/JarryShaw/jspcapy
 
 .. code-block:: text
 
@@ -79,5 +91,31 @@ schema definitions as well as various customisable interfaces.
      -L LAYER, --layer LAYER
                            Indicate extract frames until which layer.
 
-.. automodule:: pcapkit.all
-   :no-members:
+Library Index
+=============
+
+.. module:: pcapkit.all
+
+:mod:`pcapkit` has defined various and numerous functions
+and classes, which have different features and purposes.
+To make a simple index for this library, :mod:`pcapkit.all`
+contains all things from :mod:`pcapkit`.
+
+Environment Variables
+=====================
+
+.. envvar:: PCAPKIT_DEVMODE
+
+   If set to ``1``, :mod:`pcapkit` will run in development mode.
+
+.. envvar:: PCAPKIT_VERBOSE
+
+   If set to ``1``, :mod:`pcapkit` will run with verbose output.
+
+.. envvar:: PCAPKIT_HTTP_PROXY
+
+   HTTP proxy address for :mod:`pcapkit.vendor` crawlers.
+
+.. envvar:: PCAPKIT_HTTPS_PROXY
+
+   HTTPS proxy address for :mod:`pcapkit.vendor` crawlers.

@@ -2,6 +2,8 @@
 :class:`~pcapkit.protocols.internet.ipv4.IPv4` Constant Enumerations
 ====================================================================
 
+.. module:: pcapkit.const.ipv4
+
 This module contains all constant enumerations of
 :class:`~pcapkit.protocols.internet.ipv4.IPv4` implementations. Available
 enumerations include:

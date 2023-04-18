@@ -2,6 +2,8 @@
 """Handover Acknowledge Flags
 ================================
 
+.. module:: pcapkit.vendor.mh.handover_ack_flag
+
 This module contains the vendor crawler for **Handover Acknowledge Flags**,
 which is automatically generating :class:`pcapkit.const.mh.handover_ack_flag.HandoverACKFlag`.
 

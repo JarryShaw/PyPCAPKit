@@ -3,6 +3,8 @@
 """:class:`~pcapkit.protocols.link.l2tp.L2TP` Vendor Crawlers
 ================================================================
 
+.. module:: pcapkit.vendor.l2tp
+
 This module contains all vendor crawlers of
 :class:`~pcapkit.protocols.link.l2tp.L2TP` implementations. Available
 enumerations include:

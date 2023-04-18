@@ -4,7 +4,6 @@
 
 .. module:: pcapkit.const.http
 
-
 This module contains all constant enumerations of
 :class:`~pcapkit.protocols.application.http.HTTP` implementations. Available
 enumerations include:
@@ -32,6 +31,7 @@ which is automatically generated from :class:`pcapkit.vendor.http.error_code.Err
 
 .. autoclass:: pcapkit.const.http.error_code.ErrorCode
    :members:
+   :undoc-members:
    :show-inheritance:
 
 HTTP/2 Frame Type

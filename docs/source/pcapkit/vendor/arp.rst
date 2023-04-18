@@ -1,3 +1,4 @@
+========================================================
 :class:`~pcapkit.protocols.link.arp.ARP` Vendor Crawlers
 ========================================================
 
@@ -14,19 +15,27 @@ vendor crawlers include:
    * - :class:`ARP_Operation <pcapkit.vendor.arp.operation.Operation>`
      - Operation Codes [*]_
 
-.. automodule:: pcapkit.vendor.arp.hardware
-   :no-members:
+Hardware Types
+==============
+
+.. module:: pcapkit.vendor.arp.hardware
+
+This module contains the vendor crawler for **Hardware Types**,
+which is automatically generating :class:`pcapkit.const.arp.hardware.Hardware`.
 
 .. autoclass:: pcapkit.vendor.arp.hardware.Hardware
-   :noindex:
    :members: FLAG, LINK
    :show-inheritance:
 
-.. automodule:: pcapkit.vendor.arp.operation
-   :no-members:
+Operation Codes
+===============
+
+.. module:: pcapkit.vendor.arp.operation
+
+This module contains the vendor crawler for **Operation Codes**,
+which is automatically generating :class:`pcapkit.const.arp.operation.Operation`.
 
 .. autoclass:: pcapkit.vendor.arp.operation.Operation
-   :noindex:
    :members: FLAG, LINK
    :show-inheritance:
 

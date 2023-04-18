@@ -2,6 +2,8 @@
 """DSMIP6-TLS Packet Types Registry
 ======================================
 
+.. module:: pcapkit.vendor.mh.dsmip6_tls_packet
+
 This module contains the vendor crawler for **DSMIP6-TLS Packet Types Registry**,
 which is automatically generating :class:`pcapkit.const.mh.dsmip6_tls_packet.DSMIP6TLSPacket`.
 

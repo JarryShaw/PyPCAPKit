@@ -2,6 +2,8 @@
 """FTP Server Return Code
 ============================
 
+.. module:: pcapkit.vendor.ftp.return_code
+
 This module contains the vendor crawler for **FTP Server Return Code**,
 which is automatically generating :class:`pcapkit.const.ftp.return_code.ReturnCode`.
 

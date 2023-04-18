@@ -2,6 +2,8 @@
 """IPv6 Router Alert Option Values
 =====================================
 
+.. module:: pcapkit.vendor.ipv6.router_alert
+
 This module contains the vendor crawler for **IPv6 Router Alert Option Values**,
 which is automatically generating :class:`pcapkit.const.ipv6.router_alert.RouterAlert`.
 

@@ -2,6 +2,8 @@
 """Binding Revocation Type
 =============================
 
+.. module:: pcapkit.vendor.mh.binding_revocation
+
 This module contains the vendor crawler for **Binding Revocation Type**,
 which is automatically generating :class:`pcapkit.const.mh.binding_revocation.BindingRevocation`.
 

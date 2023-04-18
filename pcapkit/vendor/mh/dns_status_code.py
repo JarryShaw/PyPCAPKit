@@ -2,6 +2,8 @@
 """Status Codes (DNS Update Mobility Option)
 ===============================================
 
+.. module:: pcapkit.vendor.mh.dns_status_code
+
 This module contains the vendor crawler for **Status Codes (DNS Update Mobility Option)**,
 which is automatically generating :class:`pcapkit.const.mh.dns_status_code.DNSStatusCode`.
 

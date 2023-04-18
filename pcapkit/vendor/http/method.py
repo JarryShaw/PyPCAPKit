@@ -2,6 +2,8 @@
 """HTTP Method
 =================
 
+.. module:: pcapkit.vendor.http.method
+
 This module contains the vendor crawler for **HTTP Method**,
 which is automatically generating :class:`pcapkit.const.http.method.Method`.
 

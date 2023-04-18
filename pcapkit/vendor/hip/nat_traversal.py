@@ -2,6 +2,8 @@
 """HIP NAT Traversal Modes
 =============================
 
+.. module:: pcapkit.const.hip.nat_traversal
+
 This module contains the vendor crawler for **HIP NAT Traversal Modes**,
 which is automatically generating :class:`pcapkit.const.hip.nat_traversal.NATTraversal`.
 

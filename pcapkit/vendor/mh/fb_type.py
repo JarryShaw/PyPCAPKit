@@ -2,6 +2,8 @@
 """Flow Binding Type
 =======================
 
+.. module:: pcapkit.vendor.mh.fb_type
+
 This module contains the vendor crawler for **Flow Binding Type**,
 which is automatically generating :class:`pcapkit.const.mh.fb_type.FlowBindingType`.
 

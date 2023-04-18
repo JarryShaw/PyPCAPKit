@@ -2,6 +2,8 @@
 """FTP Command
 =================
 
+.. module:: pcapkit.vendor.ftp.command
+
 This module contains the vendor crawler for **FTP Command**,
 which is automatically generating :class:`pcapkit.const.ftp.command.Command`.
 

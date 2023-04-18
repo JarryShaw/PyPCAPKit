@@ -2,6 +2,8 @@
 """Transport Layer Protocol Numbers
 ======================================
 
+.. module:: pcapkit.vendor.reg.transtype
+
 This module contains the vendor crawler for **Transport Layer Protocol Numbers**,
 which is automatically generating :class:`pcapkit.const.reg.transtype.TransType`.
 

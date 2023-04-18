@@ -3,6 +3,8 @@
 """Pseudo Home Address Acknowledgement Status Codes
 ======================================================
 
+.. module:: pcapkit.vendor.mh.ack_status_code
+
 This module contains the vendor crawler for **Pseudo Home Address Acknowledgement Status Codes**,
 which is automatically generating :class:`pcapkit.const.mh.ack_status_code.ACKStatusCode`.
 

@@ -2,6 +2,8 @@
 """Authentication Types
 ==========================
 
+.. module:: pcapkit.vendor.ospf.authentication
+
 This module contains the vendor crawler for **Authentication Types**,
 which is automatically generating :class:`pcapkit.const.ospf.authentication.Authentication`.
 
