@@ -16,9 +16,6 @@ implements datagram reassembly of IP and TCP packets.
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. automethod:: __init__
-   .. automethod:: __call__
-
    .. autoproperty:: name
    .. autoproperty:: count
    .. autoproperty:: datagram
@@ -31,4 +28,13 @@ implements datagram reassembly of IP and TCP packets.
    .. automethod:: run
 
    .. autoattribute:: _buffer
+      :no-value:
    .. autoattribute:: _dtgram
+      :no-value:
+
+   .. autoattribute:: _strflg
+      :no-value:
+   .. autoattribute:: _newflg
+      :no-value:
+
+   .. automethod:: __call__

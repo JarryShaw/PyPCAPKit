@@ -2,6 +2,8 @@
 """PCAP Support
 ==================
 
+.. module:: pcapkit.foundation.engine.pcap
+
 This module contains the implementation for PCAP file extraction
 support, as is used by :class:`pcapkit.foundation.extraction.Extractor`.
 
@@ -14,7 +16,12 @@ __all__ = ['PCAP']
 
 
 class PCAP(Engine[Frame]):
-    """PCAP file extraction support."""
+    """PCAP file extraction support.
+
+    Args:
+        extractor: :class:`~pcapkit.foundation.extraction.Extractor` instance.
+
+    """
 
     MAGIC_NUMBER = (
         b'\xa1\xb2\x3c\x4d',

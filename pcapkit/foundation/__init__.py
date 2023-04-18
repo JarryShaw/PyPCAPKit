@@ -3,6 +3,8 @@
 """Library Foundation
 ========================
 
+.. module:: pcapkit.foundation
+
 :mod:`pcapkit.foundation` is a collection of foundations for
 :mod:`pcapkit`, including PCAP file extraction tool
 :class:`~pcapkit.foundation.extraction.Extrator`, flow tracing

@@ -2,6 +2,8 @@
 """Base Class
 ================
 
+.. module:: pcapkit.foundation.traceflow.traceflow
+
 :mod:`pcapkit.foundation.traceflow.traceflow` contains
 :class:`~pcapkit.foundation.traceflow.traceflow.TraceFlow` only,
 which is an abstract base class for all flow tracing classes.
@@ -38,7 +40,17 @@ Packet = TypeVar('Packet', bound='Info')
 
 
 class TraceFlow(Generic[BufferID, Buffer, Index, Packet], metaclass=abc.ABCMeta):
-    """Base flow tracing class."""
+    """Base flow tracing class.
+
+    Arguments:
+        fout: output path
+        format: output format
+        byteorder: output file byte order
+        nanosecond: output nanosecond-resolution file flag
+        *args: Arbitrary positional arguments.
+        **kwargs: Arbitrary keyword arguments.
+
+    """
 
     # Internal data storage for cached properties.
     __cached__: 'dict[str, Any]'
@@ -153,7 +165,7 @@ class TraceFlow(Generic[BufferID, Buffer, Index, Packet], metaclass=abc.ABCMeta)
         """Dump frame to output files.
 
         Arguments:
-            packet: a flow packet (:term:`trace.packet`)
+            packet: a flow packet (:term:`trace.tcp.packet`)
 
         """
 
@@ -167,7 +179,7 @@ class TraceFlow(Generic[BufferID, Buffer, Index, Packet], metaclass=abc.ABCMeta)
         """Trace packets.
 
         Arguments:
-            packet: a flow packet (:term:`trace.packet`)
+            packet: a flow packet (:term:`trace.tcp.packet`)
             output: flag if has formatted dumper
 
         Returns:
@@ -183,7 +195,7 @@ class TraceFlow(Generic[BufferID, Buffer, Index, Packet], metaclass=abc.ABCMeta)
         """Submit traced TCP flows.
 
         Returns:
-            Traced TCP flow (:term:`trace.index`).
+            Traced TCP flow (:term:`trace.tcp.index`).
 
         """
 
@@ -220,9 +232,9 @@ class TraceFlow(Generic[BufferID, Buffer, Index, Packet], metaclass=abc.ABCMeta)
         #: str: Output root path.
         self._fproot = fout
 
-        #: dict[BufferID, Buffer]: Buffer field (:term:`trace.buffer`).
+        #: dict[BufferID, Buffer]: Buffer field (:term:`trace.tcp.buffer`).
         self._buffer = {}  # type: dict[BufferID, Buffer]
-        #: list[Index]: Stream index (:term:`trace.index`).
+        #: list[Index]: Stream index (:term:`trace.tcp.index`).
         self._stream = []  # type: list[Index]
 
         #: Literal['little', 'big']: Output file byte order.
@@ -241,7 +253,7 @@ class TraceFlow(Generic[BufferID, Buffer, Index, Packet], metaclass=abc.ABCMeta)
         """Dump frame to output files.
 
         Arguments:
-            packet: a flow packet (:term:`trace.packet`)
+            packet: a flow packet (:term:`trace.tcp.packet`)
 
         """
         # trace frame record

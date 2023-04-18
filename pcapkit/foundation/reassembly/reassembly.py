@@ -2,6 +2,8 @@
 """Base Class
 ================
 
+.. module:: pcapkit.foundation.reassembly.reassembly
+
 :mod:`pcapkit.foundation.reassembly.reassembly` contains
 :class:`~pcapkit.foundation.reassembly.reassembly.Reassembly` only,
 which is an abstract base class for all reassembly classes,
@@ -38,6 +40,7 @@ class Reassembly(Generic[PT, DT, IT, BT], metaclass=abc.ABCMeta):
             implemented) when submit
 
     """
+
     _strflg: 'bool'
     _newflg: 'bool'
 

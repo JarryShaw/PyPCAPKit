@@ -41,7 +41,7 @@ def ipv4_reassembly(frame: 'Frame') -> 'IP_Packet[IPv4Address] | None':
           the **DF** (:attr:`IPv4.flags.df <pcapkit.protocols.internet.ipv4.Data_IPv4_Flags.df>`)
           flag is :data:`False`.
         * If the ``frame`` can be reassembled, then the :obj:`dict` mapping of data for IPv4
-          reassembly (c.f. :term:`ipv4.packet`) will be returned; otherwise, returns :data:`None`.
+          reassembly (c.f. :term:`reasm.ipv4.packet`) will be returned; otherwise, returns :data:`None`.
 
     See Also:
         :class:`pcapkit.foundation.reassembly.ipv4.IPv4`
@@ -181,7 +181,7 @@ def tcp_traceflow(frame: 'Frame', *, data_link: 'LinkType') -> 'TF_TCP_Packet | 
         * If the ``packet`` can be used for TCP flow tracing. A frame can be reassembled
           if it contains TCP layer (:class:`pcapkit.protocols.transport.tcp.TCP`).
         * If the ``frame`` can be reassembled, then the :obj:`dict` mapping of data for TCP
-          flow tracing (:term:`trace.packet`) will be returned; otherwise, returns :data:`None`.
+          flow tracing (:term:`trace.tcp.packet`) will be returned; otherwise, returns :data:`None`.
 
     See Also:
         :class:`pcapkit.foundation.traceflow.tcp.TraceFlow`

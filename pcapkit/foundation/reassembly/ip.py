@@ -2,6 +2,8 @@
 """IP Datagram Reassembly
 ============================
 
+.. module:: pcapkit.foundation.reassembly.ip
+
 :mod:`pcapkit.foundation.reassembly.ip` contains
 :class:`~pcapkit.foundation.reassembly.ip.IP`
 only, which reconstructs fragmented IP packets back to
@@ -25,6 +27,12 @@ __all__ = ['IP']
 
 class IP(Reassembly[Packet[AT], Datagram[AT], BufferID, Buffer[AT]], Generic[AT]):  # pylint: disable=abstract-method
     """Reassembly for IP payload.
+
+    Args:
+        strict: if return all datagrams (including those not
+            implemented) when submit
+        *args: Arbitrary positional arguments.
+        **kwargs: Arbitrary keyword arguments.
 
     Important:
         This class is not intended to be instantiated directly,

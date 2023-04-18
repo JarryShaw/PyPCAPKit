@@ -3,6 +3,8 @@
 """Extractor for PCAP Files
 ==============================
 
+.. module:: pcapkit.foundation.extraction
+
 :mod:`pcapkit.foundation.extraction` contains
 :class:`~pcapkit.foundation.extraction.Extractor` only,
 which synthesises file I/O and protocol analysis,
@@ -240,7 +242,7 @@ class Extractor(Generic[P]):
     def reassembly(self) -> 'ReassemblyData':
         """Frame record for reassembly.
 
-        * ``ipv4`` -- tuple of TCP payload fragment (:term:`ipv4.datagram`)
+        * ``ipv4`` -- tuple of TCP payload fragment (:term:`reasm.ipv4.datagram`)
         * ``ipv6`` -- tuple of TCP payload fragment (:term:`ipv6.datagram`)
         * ``tcp`` -- tuple of TCP payload fragment (:term:`tcp.datagram`)
 
@@ -472,8 +474,10 @@ class Extractor(Generic[P]):
     def record_frames(self) -> 'None':
         """Read packet frames.
 
-        The method calls :meth:`_read_frame` to parse each frame from the input
-        PCAP file; and calls :meth:`_cleanup` upon complision.
+        The method calls :meth:`self._exeng.read_frame <pcapkit.foundation.engine.engine.Engin.read_frame>`
+        to parse each frame from the input PCAP file; and
+        performs cleanup by calling :meth:`self._exeng.close <pcapkit.foundation.engine.engine.Engin.close>`
+        upon completion of the parsing process.
 
         Notes:
             Under non-auto mode, i.e. :attr:`self._flag_a <Extractor._flag_a>` is
@@ -685,6 +689,7 @@ class Extractor(Generic[P]):
                  traceback: 'TracebackType | None') -> 'None':  # pylint: disable=unused-argument
         """Close the input file when exits."""
         self._ifile.close()
+        self._exeng.close()
 
     ##########################################################################
     # Utilities.

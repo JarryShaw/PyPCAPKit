@@ -28,7 +28,7 @@ class Packet(Info, Generic[IPAddress]):
 
     See Also:
         * :meth:`pcapkit.foundation.traceflow.TraceFlow.dump`
-        * :term:`trace.packet`
+        * :term:`trace.tcp.packet`
 
     """
 
@@ -63,7 +63,7 @@ class Buffer(Info):
 
     See Also:
         * :attr:`pcapkit.foundation.traceflow.TraceFlow.index`
-        * :term:`trace.buffer`
+        * :term:`trace.tcp.buffer`
 
     """
 
@@ -85,7 +85,7 @@ class Index(Info):
     See Also:
         * element from :attr:`pcapkit.foundation.traceflow.TraceFlow.index`
           *tuple*
-        * :term:`trace.index`
+        * :term:`trace.tcp.index`
 
     """
 

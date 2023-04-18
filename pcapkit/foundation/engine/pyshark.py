@@ -2,6 +2,8 @@
 """PyShark Support
 =====================
 
+.. module:: pcapkit.foundation.engine.pyshark
+
 This module contains the implementation for `PyShark`_ engine
 support, as is used by :class:`pcapkit.foundation.extraction.Extractor`.
 
@@ -26,7 +28,12 @@ if TYPE_CHECKING:
 
 
 class PyShark(Engine['PySharkPacket']):
-    """PyShark engine support."""
+    """PyShark engine support.
+
+    Args:
+        extractor: :class:`~pcapkit.foundation.extraction.Extractor` instance.
+
+    """
 
     ##########################################################################
     # Properties.

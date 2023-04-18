@@ -2,6 +2,8 @@
 """Scapy Support
 ===================
 
+.. module:: pcapkit.foundation.engine.scapy
+
 This module contains the implementation for `Scapy`_ engine
 support, as is used by :class:`pcapkit.foundation.extraction.Extractor`.
 
@@ -25,7 +27,12 @@ if TYPE_CHECKING:
 
 
 class Scapy(Engine['ScapyPacket']):
-    """Scapy engine support."""
+    """Scapy engine support.
+
+    Args:
+        extractor: :class:`~pcapkit.foundation.extraction.Extractor` instance.
+
+    """
 
     ##########################################################################
     # Properties.

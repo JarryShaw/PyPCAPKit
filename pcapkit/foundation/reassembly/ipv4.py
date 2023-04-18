@@ -2,6 +2,8 @@
 """IPv4 Datagram Reassembly
 ==============================
 
+.. module:: pcapkit.foundation.reassembly.ipv4
+
 :mod:`pcapkit.foundation.reassembly.ipv4` contains
 :class:`~pcapkit.foundation.reassembly.ipv4.IPv4`
 only, which reconstructs fragmented IPv4 packets back to
@@ -24,6 +26,12 @@ __all__ = ['IPv4']
 
 class IPv4(IP['IPv4Address']):
     """Reassembly for IPv4 payload.
+
+    Args:
+        strict: if return all datagrams (including those not
+            implemented) when submit
+        *args: Arbitrary positional arguments.
+        **kwargs: Arbitrary keyword arguments.
 
     Example:
         >>> from pcapkit.reassembly import IPv4

@@ -3,13 +3,10 @@
 """Trace TCP Flows
 =====================
 
-:mod:`pcapkit.foundation.traceflow` is the interface to trace
+.. module:: pcapkit.foundation.traceflow.tcp
+
+:mod:`pcapkit.foundation.traceflow.tcp` is the interface to trace
 TCP flows from a series of packets and connections.
-
-.. note::
-
-   This was implemented as the demand of my mate
-   `@gousaiyang <https://github.com/gousaiyang>`__.
 
 """
 from typing import TYPE_CHECKING, Generic, overload
@@ -28,7 +25,17 @@ if TYPE_CHECKING:
 
 
 class TCP(TraceFlow[BufferID, Buffer, Index, Packet[IPAddress]], Generic[IPAddress]):
-    """Trace TCP flows."""
+    """Trace TCP flows.
+
+    Args:
+        fout: output path
+        format: output format
+        byteorder: output file byte order
+        nanosecond: output nanosecond-resolution file flag
+        *args: Arbitrary positional arguments.
+        **kwargs: Arbitrary keyword arguments.
+
+    """
 
     ##########################################################################
     # Methods.
@@ -52,7 +59,7 @@ class TCP(TraceFlow[BufferID, Buffer, Index, Packet[IPAddress]], Generic[IPAddre
         """Dump frame to output files.
 
         Arguments:
-            packet (Dict[str, Any]): a flow packet (:term:`trace.packet`)
+            packet: a flow packet (:term:`trace.tcp.packet`)
 
         """
         # fetch flow label
@@ -70,7 +77,7 @@ class TCP(TraceFlow[BufferID, Buffer, Index, Packet[IPAddress]], Generic[IPAddre
         """Trace packets.
 
         Arguments:
-            packet: a flow packet (:term:`trace.packet`)
+            packet: a flow packet (:term:`trace.tcp.packet`)
             output: flag if has formatted dumper
 
         Returns:
@@ -134,7 +141,7 @@ class TCP(TraceFlow[BufferID, Buffer, Index, Packet[IPAddress]], Generic[IPAddre
         """Submit traced TCP flows.
 
         Returns:
-            Traced TCP flow (:term:`trace.index`).
+            Traced TCP flow (:term:`trace.tcp.index`).
 
         """
         if (cached := self.__cached__.get('submit')) is not None:

@@ -12,9 +12,6 @@ origin. Please refer to :doc:`ip` for more information.
    :no-members:
    :show-inheritance:
 
-   :param \*args: Arbitrary positional arguments.
-   :param \*\*kwargs: Arbitrary keyword arguments.
-
    .. autoproperty:: name
    .. autoproperty:: protocol
 
@@ -23,7 +20,7 @@ Terminology
 
 .. glossary::
 
-   ipv4.packet
+   reasm.ipv4.packet
        Data structure for **IPv4 datagram reassembly**
        (:meth:`IPv4.reassembly <pcapkit.foundation.reassembly.reassembly.Reassembly.reassembly>`)
        is as following:
@@ -46,7 +43,7 @@ Terminology
             payload = ipv4.payload,         # raw bytearray type payload
           )
 
-   ipv4.datagram
+   reasm.ipv4.datagram
        Data structure for **reassembled IPv4 datagram** (element from
        :attr:`IPv4.datagram <pcapkit.foundation.reassembly.reassembly.Reassembly.datagram>`
        *tuple*) is as following:
@@ -82,7 +79,7 @@ Terminology
            |     |--> 'packet' : (None)
            |--> (Info) data ...
 
-   ipv4.buffer
+   reasm.ipv4.buffer
        Data structure for internal buffering when performing reassembly algorithms
        (:attr:`IPv4._buffer <pcapkit.foundation.reassembly.reassembly.Reassembly._buffer>`)
        is as following:

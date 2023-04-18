@@ -2,6 +2,8 @@
 """IPv6 Datagram Reassembly
 ==============================
 
+.. module:: pcapkit.foundation.reassembly.ipv6
+
 :mod:`pcapkit.foundation.reassembly.ipv6` contains
 :class:`~pcapkit.foundation.reassembly.ipv6.IPv6`
 only, which reconstructs fragmented IPv6 packets back to
@@ -24,6 +26,12 @@ __all__ = ['IPv6']
 
 class IPv6(IP['IPv6Address']):
     """Reassembly for IPv6 payload.
+
+    Args:
+        strict: if return all datagrams (including those not
+            implemented) when submit
+        *args: Arbitrary positional arguments.
+        **kwargs: Arbitrary keyword arguments.
 
     Example:
         >>> from pcapkit.reassembly import IPv6

@@ -2,6 +2,8 @@
 """Engine Support
 ====================
 
+.. module:: pcapkit.foundation.engine
+
 :mod:`pcapkit.foundation.engine` is a collection of engines
 support for :mod:`pcapkit`, including but not limited to the
 built-in PCAP and PCAP-NG file support, :mod:`Scapy <scapy`,

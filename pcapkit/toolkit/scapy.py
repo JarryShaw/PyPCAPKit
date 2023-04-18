@@ -115,7 +115,7 @@ def ipv4_reassembly(packet: 'Packet', *, count: 'int' = -1) -> 'IP_Packet[IPv4Ad
           if it contains IPv4 layer (:class:`scapy.layers.inet.IP`) and the **DF**
           (:attr:`scapy.layers.inet.IP.flags.DF`) flag is ``False``.
         * If the ``packet`` can be reassembled, then the :obj:`dict` mapping of data for IPv4
-          reassembly (:term:`ipv4.packet`) will be returned; otherwise, returns :data:`None`.
+          reassembly (:term:`reasm.ipv4.packet`) will be returned; otherwise, returns :data:`None`.
 
     See Also:
         :class:`pcapkit.foundation.reassembly.ipv4.IPv4`
@@ -266,7 +266,7 @@ def tcp_traceflow(packet: 'Packet', *, count: 'int' = -1) -> 'TF_TCP_Packet | No
         * If the ``packet`` can be used for TCP flow tracing. A packet can be reassembled
           if it contains TCP layer (:class:`scapy.layers.inet.TCP`).
         * If the ``packet`` can be reassembled, then the :obj:`dict` mapping of data for TCP
-          flow tracing (:term:`trace.packet`) will be returned; otherwise, returns :data:`None`.
+          flow tracing (:term:`trace.tcp.packet`) will be returned; otherwise, returns :data:`None`.
 
     See Also:
         :class:`pcapkit.foundation.traceflow.tcp.TCP`

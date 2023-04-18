@@ -12,9 +12,6 @@ origin. Please refer to :doc:`ip` for more information.
    :no-members:
    :show-inheritance:
 
-   :param \*args: Arbitrary positional arguments.
-   :param \*\*kwargs: Arbitrary keyword arguments.
-
    .. autoproperty:: name
    .. autoproperty:: protocol
 
@@ -23,7 +20,7 @@ Terminology
 
 .. glossary::
 
-   ipv6.packet
+   reasm.ipv6.packet
        Data structure for **IPv6 datagram reassembly**
        (:meth:`IPv6.reassembly <pcapkit.foundation.reassembly.reassembly.Reassembly.reassembly>`)
        is as following:
@@ -46,7 +43,7 @@ Terminology
             payload = ipv6.payload,         # raw bytearray type payload after IPv6-Frag
           )
 
-   ipv6.datagram
+   reasm.ipv6.datagram
        Data structure for **reassembled IPv6 datagram** (element from
        :attr:`IPv6.datagram <pcapkit.foundation.reassembly.reassembly.Reassembly.datagram>`
        *tuple*) is as following:
@@ -81,7 +78,7 @@ Terminology
            |     |--> 'packet' : (None)
            |--> (Info) data ...
 
-   ipv6.buffer
+   reasm.ipv6.buffer
        Data structure for internal buffering when performing reassembly algorithms
        (:attr:`IPv6._buffer <pcapkit.foundation.reassembly.reassembly.Reassembly._buffer>`)
        is as following:

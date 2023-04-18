@@ -2,6 +2,8 @@
 """Registry Management
 =========================
 
+.. module:: pcapkit.foundation.registry
+
 This module provides the registry management for :mod:`pcapkit`, as the module
 contains various registry points.
 
@@ -561,7 +563,7 @@ def register_output(format: 'str', module: 'str', class_: 'str', ext: 'str') -> 
     :data:`pcapkit.foundation.extraction.Extractor.__output__` registry.
 
     See Also:
-        * :func:`pcapkit.foundation.registry.register_extractor`
+        * :func:`pcapkit.foundation.registry.register_extractor_dumper`
         * :func:`pcapkit.foundation.registry.register_traceflow`
 
     Arguments:

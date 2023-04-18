@@ -1,45 +1,28 @@
 Trace TCP Flows
 ===============
 
-.. module:: pcapkit.foundation.traceflow
+.. module:: pcapkit.foundation.traceflow.tcp
 
-:mod:`pcapkit.foundation.traceflow` is the interface to trace
+:mod:`pcapkit.foundation.traceflow.tcp` is the interface to trace
 TCP flows from a series of packets and connections.
-
-.. note::
-
-   This was implemented as the demand of my mate
-   `@gousaiyang <https://github.com/gousaiyang>`__
 
 .. autoclass:: pcapkit.foundation.traceflow.TraceFlow
    :no-members:
    :show-inheritance:
 
-   :param \*args: Arbitrary positional arguments.
-   :param \*\*kwargs: Arbitrary keyword arguments.
-
-   .. automethod:: __init__
-   .. automethod:: __call__
-
-   .. autoproperty:: index
+   .. autoproperty:: name
+   .. autoproperty:: protocol
 
    .. automethod:: dump
    .. automethod:: trace
    .. automethod:: submit
-
-   .. automethod:: register
-   .. automethod:: make_fout
-
-   .. autoattribute:: __output__
-      :no-value:
-   .. autoattribute:: _buffer
 
 Terminology
 -----------
 
 .. glossary::
 
-   trace.packet
+   trace.tcp.packet
        Data structure for **TCP flow tracing**
        (:meth:`TraceFlow.dump <pcapkit.foundation.traceflow.TraceFlow.dump>`)
        is as following:
@@ -59,9 +42,9 @@ Terminology
               timestamp=frame.info.time_epoch,        # frame timestamp
           )
 
-       .. seealso:: :class:`pcapkit.foundation.traceflow.Packet`
+       .. seealso:: :class:`pcapkit.foundation.traceflow.data.tcp.Packet`
 
-   trace.buffer
+   trace.tcp.buffer
        Data structure for internal buffering when performing flow tracing algorithms
        (:attr:`TraceFlow._buffer <pcapkit.foundation.traceflow.TraceFlow._buffer>`)
        is as following:
@@ -80,9 +63,9 @@ Terminology
            |                        |--> 'label': (str) flow label generated from ``BUFID``
            |--> (tuple) BUFID ...
 
-       .. seealso:: :class:`pcapkit.foundation.traceflow.Buffer`
+       .. seealso:: :class:`pcapkit.foundation.traceflow.data.tcp.Buffer`
 
-   trace.index
+   trace.tcp.index
        Data structure for **TCP flow tracing** (element from
        :attr:`TraceFlow.index <pcapkit.foundation.traceflow.TraceFlow.index>`
        *tuple*) is as following:
@@ -97,53 +80,32 @@ Terminology
            |     |--> 'label': (str) flow label generated from ``BUFID``
            |--> (Info) data ...
 
-       .. seealso:: :class:`pcapkit.foundation.traceflow.Index`
+       .. seealso:: :class:`pcapkit.foundation.traceflow.data.tcp.Index`
 
 Data Structures
 ---------------
 
-.. data:: pcapkit.foundation.traceflow.data.tcp.BufferID
-   :type: tuple[IPAddress, int, IPAddress, int]
+.. module:: pcapkit.foundation.traceflow.data.tcp
 
-   Buffer ID is a tuple of source IP, source port, destination IP, and
-   destination port.
-
-.. autoclass:: pcapkit.foundation.traceflow.data.tcp.Packet(protocol, index, frame, syn, fin, src, dst, srcport, dstport, timestamp)
-   :no-members:
+.. autoclass:: pcapkit.foundation.traceflow.data.tcp.Packet
+   :members:
    :show-inheritance:
 
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. autoattribute:: protocol
-   .. autoattribute:: index
-   .. autoattribute:: frame
-   .. autoattribute:: syn
-   .. autoattribute:: fin
-   .. autoattribute:: src
-   .. autoattribute:: dst
-   .. autoattribute:: srcport
-   .. autoattribute:: dstport
-   .. autoattribute:: timestamp
+.. autodata:: pcapkit.foundation.traceflow.data.tcp.BufferID
 
-.. autoclass:: pcapkit.foundation.traceflow.data.tcp.Buffer(fpout, index, label)
-   :no-members:
+.. autoclass:: pcapkit.foundation.traceflow.data.tcp.Buffer
+   :members:
    :show-inheritance:
 
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. autoattribute:: fpout
-   .. autoattribute:: index
-   .. autoattribute:: label
-
-.. autoclass:: pcapkit.foundation.traceflow.data.tcp.Index(fpout, index, label)
-   :no-members:
+.. autoclass:: pcapkit.foundation.traceflow.data.tcp.Index
+   :members:
    :show-inheritance:
 
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
-
-   .. autoattribute:: fpout
-   .. autoattribute:: index
-   .. autoattribute:: label

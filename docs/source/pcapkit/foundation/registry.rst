@@ -7,22 +7,6 @@ This module (:mod:`pcapkit.foundation.registry`) provides the registry
 management for :mod:`pcapkit`, as the module contains various registry
 points.
 
-Auxiliary Methods
------------------
-
-.. autofunction:: pcapkit.foundation.registry.register_output
-
-.. autofunction:: pcapkit.foundation.registry.register_linktype
-
-.. autofunction:: pcapkit.foundation.registry.register_port
-
-Dumper Registries
------------------
-
-.. autofunction:: pcapkit.foundation.registry.register_extractor_output
-
-.. autofunction:: pcapkit.foundation.registry.register_traceflow
-
 Protocol Registries
 -------------------
 
@@ -61,3 +45,27 @@ Application Layer Registries
 ----------------------------
 
 .. autofunction:: pcapkit.foundation.registry.register_http
+
+Miscellaneous Registries
+------------------------
+
+Engine Registries
+~~~~~~~~~~~~~~~~~
+
+.. autofunction:: pcapkit.foundation.registry.register_extractor_engine
+
+Dumper Registries
+~~~~~~~~~~~~~~~~~
+
+.. autofunction:: pcapkit.foundation.registry.register_extractor_dumper
+
+.. autofunction:: pcapkit.foundation.registry.register_traceflow
+
+Auxiliary Methods
+~~~~~~~~~~~~~~~~~
+
+.. autofunction:: pcapkit.foundation.registry.register_output
+
+.. autofunction:: pcapkit.foundation.registry.register_linktype
+
+.. autofunction:: pcapkit.foundation.registry.register_port

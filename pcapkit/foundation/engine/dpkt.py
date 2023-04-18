@@ -2,6 +2,8 @@
 """DPKT Support
 ==================
 
+.. module:: pcapkit.foundation.engine.dpkt
+
 This module contains the implementation for `DPKT`_ engine
 support, as is used by :class:`pcapkit.foundation.extraction.Extractor`.
 
@@ -26,7 +28,12 @@ if TYPE_CHECKING:
 
 
 class DPKT(Engine['DPKTPacket']):
-    """DPKT engine support."""
+    """DPKT engine support.
+
+    Args:
+        extractor: :class:`~pcapkit.foundation.extraction.Extractor` instance.
+
+    """
 
     ##########################################################################
     # Properties.

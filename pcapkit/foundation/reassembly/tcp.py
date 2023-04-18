@@ -2,6 +2,8 @@
 """TCP Datagram Reassembly
 =============================
 
+.. module:: pcapkit.foundation.reassembly.tcp
+
 :mod:`pcapkit.foundation.reassembly.tcp` contains
 :class:`~pcapkit.foundation.reassembly.reassembly.Reassembly` only,
 which reconstructs fragmented TCP packets back to origin.
@@ -25,6 +27,12 @@ __all__ = ['TCP']
 
 class TCP(Reassembly[Packet, Datagram, BufferID, Buffer]):
     """Reassembly for TCP payload.
+
+    Args:
+        strict: if return all datagrams (including those not
+            implemented) when submit
+        *args: Arbitrary positional arguments.
+        **kwargs: Arbitrary keyword arguments.
 
     Example:
         >>> from pcapkit.reassembly import TCP

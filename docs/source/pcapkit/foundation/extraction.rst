@@ -33,10 +33,7 @@ extracts parametres from a PCAP file.
    :param layer: extract til which layer
    :param protocol: extract til which protocol
 
-   :param ip: if record data for IPv4 & IPv6 reassembly
-   :param ipv4: if perform IPv4 reassembly
-   :param ipv6: if perform IPv6 reassembly
-   :param tcp: if perform TCP reassembly
+   :param reassembly: if perform reassembly
    :param strict: if set strict flag for reassembly
 
    :param trace: if trace TCP traffic flows
@@ -45,10 +42,10 @@ extracts parametres from a PCAP file.
    :param trace_byteorder: output file byte order
    :param trace_nanosecond: output nanosecond-resolution file flag
 
-   .. automethod:: __init__
-   .. automethod:: __iter__
-   .. automethod:: __next__
-   .. automethod:: __call__
+   :param ip: if record data for IPv4 & IPv6 reassembly
+   :param ipv4: if perform IPv4 reassembly
+   :param ipv6: if perform IPv6 reassembly
+   :param tcp: if perform TCP reassembly and/or flow tracing
 
    .. autoproperty:: info
    .. autoproperty:: length
@@ -61,52 +58,42 @@ extracts parametres from a PCAP file.
    .. autoproperty:: trace
    .. autoproperty:: engine
 
+   .. automethod:: register_dumper
+   .. automethod:: register_engine
+
    .. automethod:: run
    .. automethod:: record_header
    .. automethod:: record_frames
 
-   .. automethod:: register_output
-   .. automethod:: register_engine
-   .. automethod:: make_name
+   .. autoattribute:: _frnum
+   .. autoattribute:: _reasm
+   .. autoattribute:: _trace
 
-   .. automethod:: _cleanup
+   .. autoattribute:: _ifile
+   .. autoattribute:: _ofile
+
+   .. autoattribute:: _exnam
+   .. autoattribute:: _exeng
 
    .. autoattribute:: _flag_a
    .. autoattribute:: _flag_d
    .. autoattribute:: _flag_e
-   .. .. autoattribute:: _flag_f
    .. autoattribute:: _flag_q
    .. autoattribute:: _flag_t
-   .. .. autoattribute:: _flag_v
+   .. autoattribute:: _flag_v
 
-   .. autoattribute:: _exptl
-   .. autoattribute:: _exlyr
-   .. autoattribute:: _exeng
-   .. autoattribute:: _expkg
-   .. autoattribute:: _extmp
-
-   .. autoattribute:: _gbhdr
-   .. .. autoattribute:: _vinfo
-   .. .. autoattribute:: _dlink
-   .. .. autoattribute:: _nnsec
-   .. .. autoattribute:: _type
+   .. autoattribute:: _ipv4
+   .. autoattribute:: _ipv6
+   .. autoattribute:: _tcp
 
    .. autoattribute:: __output__
       :no-value:
+   .. autoattribute:: __engine__
+      :no-value:
 
-Data Structures
----------------
-
-.. autoclass:: pcapkit.foundation.extraction.ReassemblyData(ipv4, ipv6, tcp)
-   :show-inheritance:
-   :no-special-members: __init__
-
-   :param \*args: Arbitrary positional arguments.
-   :param \*\*kwargs: Arbitrary keyword arguments.
-
-   .. autoattribute:: ipv4
-   .. autoattribute:: ipv6
-   .. autoattribute:: tcp
+   .. automethod:: __iter__
+   .. automethod:: __next__
+   .. automethod:: __call__
 
 .. |pypcap| replace:: ``pypcap``
 .. _pypcap: https://pypcap.readthedocs.io/en/latest/

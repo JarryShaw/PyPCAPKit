@@ -2,6 +2,8 @@
 """Base Class
 ================
 
+.. module:: pcapkit.foundation.engine.engine
+
 This is the abstract base class implementation for
 all engine support functionality.
 
@@ -52,7 +54,13 @@ class Engine(Generic[T], metaclass=abc.ABCMeta):
         self._extractor = extractor
 
     def __call__(self) -> 'None':
-        """Start extraction."""
+        """Start extraction.
+
+        This method will directly call :meth:`run` to start the
+        extraction process.
+
+        """
+        self.run()
 
     ##########################################################################
     # Methods.
