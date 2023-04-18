@@ -3,6 +3,8 @@
 """:class:`~pcapkit.protocols.link.ospf.OSPF` Constant Enumerations
 ======================================================================
 
+.. module:: pcapkit.const.ospf
+
 This module contains all constant enumerations of
 :class:`~pcapkit.protocols.link.ospf.OSPF` implementations. Available
 enumerations include:

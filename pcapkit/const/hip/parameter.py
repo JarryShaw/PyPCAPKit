@@ -3,7 +3,7 @@
 """HIP Parameter Types
 =========================
 
-.. module:: pcapkit.vendor.hip.parameter
+.. module:: pcapkit.const.hip.parameter
 
 This module contains the constant enumeration for **HIP Parameter Types**,
 which is automatically generated from :class:`pcapkit.vendor.hip.parameter.Parameter`.

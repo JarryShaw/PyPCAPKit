@@ -3,7 +3,7 @@
 """Handoff Indicator Option Type Values
 ==========================================
 
-.. module:: pcapkit.vendor.mh.handoff_type
+.. module:: pcapkit.const.mh.handoff_type
 
 This module contains the constant enumeration for **Handoff Indicator Option Type Values**,
 which is automatically generated from :class:`pcapkit.vendor.mh.handoff_type.HandoffType`.

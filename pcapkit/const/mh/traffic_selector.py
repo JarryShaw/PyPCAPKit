@@ -3,7 +3,7 @@
 """Traffic Selector Format
 =============================
 
-.. module:: pcapkit.vendor.mh.traffic_selector
+.. module:: pcapkit.const.mh.traffic_selector
 
 This module contains the constant enumeration for **Traffic Selector Format**,
 which is automatically generated from :class:`pcapkit.vendor.mh.traffic_selector.TrafficSelector`.

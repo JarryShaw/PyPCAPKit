@@ -3,7 +3,7 @@
 """Flow Binding Type
 =======================
 
-.. module:: pcapkit.vendor.mh.fb_type
+.. module:: pcapkit.const.mh.fb_type
 
 This module contains the constant enumeration for **Flow Binding Type**,
 which is automatically generated from :class:`pcapkit.vendor.mh.fb_type.FlowBindingType`.

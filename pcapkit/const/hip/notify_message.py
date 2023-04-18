@@ -3,7 +3,7 @@
 """Notify Message Types
 ==========================
 
-.. module:: pcapkit.vendor.hip.notify_message
+.. module:: pcapkit.const.hip.notify_message
 
 This module contains the constant enumeration for **Notify Message Types**,
 which is automatically generated from :class:`pcapkit.vendor.hip.notify_message.NotifyMessage`.

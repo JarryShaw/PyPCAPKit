@@ -3,7 +3,7 @@
 """Flow Identification Sub-Options
 =====================================
 
-.. module:: pcapkit.vendor.mh.flow_id_suboption
+.. module:: pcapkit.const.mh.flow_id_suboption
 
 This module contains the constant enumeration for **Flow Identification Sub-Options**,
 which is automatically generated from :class:`pcapkit.vendor.mh.flow_id_suboption.FlowIDSuboption`.

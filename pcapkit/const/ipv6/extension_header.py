@@ -3,7 +3,7 @@
 """IPv6 Extension Header Types
 =================================
 
-.. module:: pcapkit.vendor.ipv6.extension_header
+.. module:: pcapkit.const.ipv6.extension_header
 
 This module contains the constant enumeration for **IPv6 Extension Header Types**,
 which is automatically generated from :class:`pcapkit.vendor.ipv6.extension_header.ExtensionHeader`.

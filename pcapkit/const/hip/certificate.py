@@ -3,7 +3,7 @@
 """HIP Certificate Types
 ===========================
 
-.. module:: pcapkit.vendor.hip.certificate
+.. module:: pcapkit.const.hip.certificate
 
 This module contains the constant enumeration for **HIP Certificate Types**,
 which is automatically generated from :class:`pcapkit.vendor.hip.certificate.Certificate`.

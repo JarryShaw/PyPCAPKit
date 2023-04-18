@@ -3,7 +3,7 @@
 """IPX Packet Types
 ======================
 
-.. module:: pcapkit.vendor.ipx.packet
+.. module:: pcapkit.const.ipx.packet
 
 This module contains the constant enumeration for **IPX Packet Types**,
 which is automatically generated from :class:`pcapkit.vendor.ipx.packet.Packet`.

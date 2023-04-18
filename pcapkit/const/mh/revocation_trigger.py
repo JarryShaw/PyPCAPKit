@@ -3,7 +3,7 @@
 """Revocation Trigger Values
 ===============================
 
-.. module:: pcapkit.vendor.mh.revocation_trigger
+.. module:: pcapkit.const.mh.revocation_trigger
 
 This module contains the constant enumeration for **Revocation Trigger Values**,
 which is automatically generated from :class:`pcapkit.vendor.mh.revocation_trigger.RevocationTrigger`.

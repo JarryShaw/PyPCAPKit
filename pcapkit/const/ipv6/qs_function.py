@@ -3,7 +3,7 @@
 """QS Functions
 ==================
 
-.. module:: pcapkit.vendor.ipv6.qs_function
+.. module:: pcapkit.const.ipv6.qs_function
 
 This module contains the constant enumeration for **QS Functions**,
 which is automatically generated from :class:`pcapkit.vendor.ipv6.qs_function.QSFunction`.

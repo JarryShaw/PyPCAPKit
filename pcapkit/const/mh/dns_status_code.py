@@ -3,7 +3,7 @@
 """Status Codes (DNS Update Mobility Option)
 ===============================================
 
-.. module:: pcapkit.vendor.mh.dns_status_code
+.. module:: pcapkit.const.mh.dns_status_code
 
 This module contains the constant enumeration for **Status Codes (DNS Update Mobility Option)**,
 which is automatically generated from :class:`pcapkit.vendor.mh.dns_status_code.DNSStatusCode`.

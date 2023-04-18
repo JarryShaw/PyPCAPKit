@@ -3,7 +3,7 @@
 """HTTP Method
 =================
 
-.. module:: pcapkit.vendor.http.method
+.. module:: pcapkit.const.http.method
 
 This module contains the constant enumeration for **HTTP Method**,
 which is automatically generated from :class:`pcapkit.vendor.http.method.Method`.

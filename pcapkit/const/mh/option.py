@@ -3,7 +3,7 @@
 """Mobility Options
 ======================
 
-.. module:: pcapkit.vendor.mh.option
+.. module:: pcapkit.const.mh.option
 
 This module contains the constant enumeration for **Mobility Options**,
 which is automatically generated from :class:`pcapkit.vendor.mh.option.Option`.

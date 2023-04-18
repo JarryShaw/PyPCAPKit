@@ -3,7 +3,7 @@
 """HTTP Status Code
 ======================
 
-.. module:: pcapkit.vendor.http.status_code
+.. module:: pcapkit.const.http.status_code
 
 This module contains the constant enumeration for **HTTP Status Code**,
 which is automatically generated from :class:`pcapkit.vendor.http.status_code.StatusCode`.

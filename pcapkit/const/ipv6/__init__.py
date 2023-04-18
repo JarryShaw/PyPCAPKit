@@ -3,6 +3,8 @@
 """:class:`~pcapkit.protocols.internet.ipv6.IPv6` Constant Enumerations
 ===========================================================================
 
+.. module:: pcapkit.const.ipv6
+
 This module contains all constant enumerations of
 :class:`~pcapkit.protocols.internet.ipv6.IPv6` implementations. Available
 enumerations include:

@@ -3,7 +3,7 @@
 """Handover Acknowledge Flags
 ================================
 
-.. module:: pcapkit.vendor.mh.handover_ack_flag
+.. module:: pcapkit.const.mh.handover_ack_flag
 
 This module contains the constant enumeration for **Handover Acknowledge Flags**,
 which is automatically generated from :class:`pcapkit.vendor.mh.handover_ack_flag.HandoverACKFlag`.

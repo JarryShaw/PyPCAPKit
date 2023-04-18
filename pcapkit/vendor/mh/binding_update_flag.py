@@ -25,7 +25,7 @@ LINE = lambda NAME, DOCS, FLAG, ENUM, MODL: f'''\
 """{(name := DOCS.split(' [', maxsplit=1)[0])}
 {'=' * (len(name) + 6)}
 
-.. module:: {MODL}
+.. module:: {MODL.replace('vendor', 'const')}
 
 This module contains the constant enumeration for **{name}**,
 which is automatically generated from :class:`{MODL}.{NAME}`.

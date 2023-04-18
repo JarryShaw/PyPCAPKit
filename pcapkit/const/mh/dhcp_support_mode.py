@@ -3,7 +3,7 @@
 """IPv4 DHCP Support Mode Flags
 ==================================
 
-.. module:: pcapkit.vendor.mh.dhcp_support_mode
+.. module:: pcapkit.const.mh.dhcp_support_mode
 
 This module contains the constant enumeration for **IPv4 DHCP Support Mode Flags**,
 which is automatically generated from :class:`pcapkit.vendor.mh.dhcp_support_mode.DHCPSupportMode`.

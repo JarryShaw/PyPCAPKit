@@ -3,7 +3,7 @@
 """Binding Update Flags
 ==========================
 
-.. module:: pcapkit.vendor.mh.binding_update_flag
+.. module:: pcapkit.const.mh.binding_update_flag
 
 This module contains the constant enumeration for **Binding Update Flags**,
 which is automatically generated from :class:`pcapkit.vendor.mh.binding_update_flag.BindingUpdateFlag`.

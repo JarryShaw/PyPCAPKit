@@ -3,7 +3,7 @@
 """HIP Transport Modes
 =========================
 
-.. module:: pcapkit.vendor.hip.transport
+.. module:: pcapkit.const.hip.transport
 
 This module contains the constant enumeration for **HIP Transport Modes**,
 which is automatically generated from :class:`pcapkit.vendor.hip.transport.Transport`.

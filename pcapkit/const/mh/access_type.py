@@ -3,7 +3,7 @@
 """Access Technology Type Option Type Values
 ===============================================
 
-.. module:: pcapkit.vendor.mh.access_type
+.. module:: pcapkit.const.mh.access_type
 
 This module contains the constant enumeration for **Access Technology Type Option Type Values**,
 which is automatically generated from :class:`pcapkit.vendor.mh.access_type.AccessType`.

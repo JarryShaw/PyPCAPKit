@@ -3,7 +3,7 @@
 """HTTP/2 Frame Type
 =======================
 
-.. module:: pcapkit.vendor.http.frame
+.. module:: pcapkit.const.http.frame
 
 This module contains the constant enumeration for **HTTP/2 Frame Type**,
 which is automatically generated from :class:`pcapkit.vendor.http.frame.Frame`.

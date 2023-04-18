@@ -3,7 +3,7 @@
 """LMA-Controlled MAG Parameters Sub-Option Type Values
 ==========================================================
 
-.. module:: pcapkit.vendor.mh.lma_mag_suboption
+.. module:: pcapkit.const.mh.lma_mag_suboption
 
 This module contains the constant enumeration for **LMA-Controlled MAG Parameters Sub-Option Type Values**,
 which is automatically generated from :class:`pcapkit.vendor.mh.lma_mag_suboption.LMAControlledMAGSuboption`.

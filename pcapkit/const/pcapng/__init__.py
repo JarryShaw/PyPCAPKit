@@ -3,13 +3,15 @@
 """:class:`~pcapkit.protocols.misc.pcapng.PCAPNG` Constant Enumerations
 ==========================================================================
 
+.. module:: pcapkit.const.pcapng
+
 This module contains all constant enumerations of
 :class:`~pcapkit.protocols.misc.pcapng.PCAPNG` implementations. Available
 enumerations include:
 
 .. list-table::
 
-   * - :class:`BlockType <pcapkit.vendor.pcapng.block_type.BlockType>`
+   * - :class:`BlockType <pcapkit.const.pcapng.block_type.BlockType>`
      - Block Types [*]_
 
 .. [*] https://www.ietf.org/staging/draft-tuexen-opsawg-pcapng-02.html

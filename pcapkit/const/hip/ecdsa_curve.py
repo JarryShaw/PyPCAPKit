@@ -3,7 +3,7 @@
 """ECDSA Curve Label
 =======================
 
-.. module:: pcapkit.vendor.hip.ecdsa_curve
+.. module:: pcapkit.const.hip.ecdsa_curve
 
 This module contains the constant enumeration for **ECDSA Curve Label**,
 which is automatically generated from :class:`pcapkit.vendor.hip.ecdsa_curve.ECDSACurve`.

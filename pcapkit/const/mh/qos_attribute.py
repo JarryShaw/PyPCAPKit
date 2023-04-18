@@ -3,7 +3,7 @@
 """Quality-of-Service Attribute Registry
 ===========================================
 
-.. module:: pcapkit.vendor.mh.qos_attribute
+.. module:: pcapkit.const.mh.qos_attribute
 
 This module contains the constant enumeration for **Quality-of-Service Attribute Registry**,
 which is automatically generated from :class:`pcapkit.vendor.mh.qos_attribute.QoSAttribute`.

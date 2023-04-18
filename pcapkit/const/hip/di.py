@@ -3,7 +3,7 @@
 """DI-Types
 ==============
 
-.. module:: pcapkit.vendor.hip.di
+.. module:: pcapkit.const.hip.di
 
 This module contains the constant enumeration for **DI-Types**,
 which is automatically generated from :class:`pcapkit.vendor.hip.di.DITypes`.

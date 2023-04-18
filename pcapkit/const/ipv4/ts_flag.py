@@ -3,7 +3,7 @@
 """TS Flag
 =============
 
-.. module:: pcapkit.vendor.ipv4.ts_flag
+.. module:: pcapkit.const.ipv4.ts_flag
 
 This module contains the constant enumeration for **TS Flag**,
 which is automatically generated from :class:`pcapkit.vendor.ipv4.ts_flag.TSFlag`.

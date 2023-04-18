@@ -3,7 +3,7 @@
 """Handover Acknowledge Status Codes
 =======================================
 
-.. module:: pcapkit.vendor.mh.handover_ack_status
+.. module:: pcapkit.const.mh.handover_ack_status
 
 This module contains the constant enumeration for **Handover Acknowledge Status Codes**,
 which is automatically generated from :class:`pcapkit.vendor.mh.handover_ack_status.HandoverACKStatus`.

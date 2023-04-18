@@ -3,7 +3,7 @@
 """Registration Failure Types
 ================================
 
-.. module:: pcapkit.vendor.hip.registration_failure
+.. module:: pcapkit.const.hip.registration_failure
 
 This module contains the constant enumeration for **Registration Failure Types**,
 which is automatically generated from :class:`pcapkit.vendor.hip.registration_failure.RegistrationFailure`.

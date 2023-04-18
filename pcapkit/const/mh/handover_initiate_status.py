@@ -3,6 +3,8 @@
 """Handover Initiate Status Codes
 ====================================
 
+.. module:: pcapkit.const.mh.handover_initiate_status
+
 This module contains the constant enumeration for **Handover Initiate Status Codes**,
 which is automatically generated from :class:`pcapkit.vendor.mh.handover_initiate_status.HandoverInitiateStatus`.
 

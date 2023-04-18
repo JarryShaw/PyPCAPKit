@@ -3,7 +3,7 @@
 """Destination Options and Hop-by-Hop Options
 ================================================
 
-.. module:: pcapkit.vendor.ipv6.option
+.. module:: pcapkit.const.ipv6.option
 
 This module contains the constant enumeration for **Destination Options and Hop-by-Hop Options**,
 which is automatically generated from :class:`pcapkit.vendor.ipv6.option.Option`.

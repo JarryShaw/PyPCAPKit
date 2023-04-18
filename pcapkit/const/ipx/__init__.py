@@ -3,6 +3,8 @@
 """:class:`~pcapkit.protocols.internet.ipx.IPX` Constant Enumerations
 ========================================================================
 
+.. module:: pcapkit.const.ipx
+
 This module contains all constant enumerations of
 :class:`~pcapkit.protocols.internet.ipx.IPX` implementations. Available
 enumerations include:

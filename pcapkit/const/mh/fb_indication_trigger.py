@@ -3,7 +3,7 @@
 """Flow Binding Indication Triggers
 ======================================
 
-.. module:: pcapkit.vendor.mh.fb_indication_trigger
+.. module:: pcapkit.const.mh.fb_indication_trigger
 
 This module contains the constant enumeration for **Flow Binding Indication Triggers**,
 which is automatically generated from :class:`pcapkit.vendor.mh.fb_indication_trigger.FlowBindingIndicationTrigger`.

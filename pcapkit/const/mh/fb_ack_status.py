@@ -3,7 +3,7 @@
 """Flow Binding Acknowledgement Status Codes
 ===============================================
 
-.. module:: pcapkit.vendor.mh.fb_ack_status
+.. module:: pcapkit.const.mh.fb_ack_status
 
 This module contains the constant enumeration for **Flow Binding Acknowledgement Status Codes**,
 which is automatically generated from :class:`pcapkit.vendor.mh.fb_ack_status.FlowBindingACKStatus`.

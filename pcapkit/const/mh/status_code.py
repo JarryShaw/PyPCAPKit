@@ -3,7 +3,7 @@
 """Status Codes
 ==================
 
-.. module:: pcapkit.vendor.mh.status_code
+.. module:: pcapkit.const.mh.status_code
 
 This module contains the constant enumeration for **Status Codes**,
 which is automatically generated from :class:`pcapkit.vendor.mh.status_code.StatusCode`.

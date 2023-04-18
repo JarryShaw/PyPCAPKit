@@ -3,7 +3,7 @@
 """Link-Layer Header Type Values
 ===================================
 
-.. module:: pcapkit.vendor.reg.linktype
+.. module:: pcapkit.const.reg.linktype
 
 This module contains the constant enumeration for **Link-Layer Header Type Values**,
 which is automatically generated from :class:`pcapkit.vendor.reg.linktype.LinkType`.

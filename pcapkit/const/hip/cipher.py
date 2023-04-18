@@ -3,7 +3,7 @@
 """Cipher IDs
 ================
 
-.. module:: pcapkit.vendor.hip.cipher
+.. module:: pcapkit.const.hip.cipher
 
 This module contains the constant enumeration for **Cipher IDs**,
 which is automatically generated from :class:`pcapkit.vendor.hip.cipher.Cipher`.

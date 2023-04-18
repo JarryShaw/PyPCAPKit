@@ -3,7 +3,7 @@
 """Binding Revocation Acknowledgement Status Codes
 =====================================================
 
-.. module:: pcapkit.vendor.mh.revocation_status_code
+.. module:: pcapkit.const.mh.revocation_status_code
 
 This module contains the constant enumeration for **Binding Revocation Acknowledgement Status Codes**,
 which is automatically generated from :class:`pcapkit.vendor.mh.revocation_status_code.RevocationStatusCode`.

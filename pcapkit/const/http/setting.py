@@ -3,7 +3,7 @@
 """HTTP/2 Settings
 =====================
 
-.. module:: pcapkit.vendor.http.setting
+.. module:: pcapkit.const.http.setting
 
 This module contains the constant enumeration for **HTTP/2 Settings**,
 which is automatically generated from :class:`pcapkit.vendor.http.setting.Setting`.

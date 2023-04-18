@@ -3,7 +3,7 @@
 """ToS ECN Field
 ===================
 
-.. module:: pcapkit.vendor.ipv4.tos_ecn
+.. module:: pcapkit.const.ipv4.tos_ecn
 
 This module contains the constant enumeration for **ToS ECN Field**,
 which is automatically generated from :class:`pcapkit.vendor.ipv4.tos_ecn.ToSECN`.

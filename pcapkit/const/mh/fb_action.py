@@ -3,7 +3,7 @@
 """Flow Binding Action Values
 ================================
 
-.. module:: pcapkit.vendor.mh.fb_action
+.. module:: pcapkit.const.mh.fb_action
 
 This module contains the constant enumeration for **Flow Binding Action Values**,
 which is automatically generated from :class:`pcapkit.vendor.mh.fb_action.FlowBindingAction`.

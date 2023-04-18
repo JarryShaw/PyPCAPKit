@@ -3,7 +3,7 @@
 """DSMIP6-TLS Packet Types Registry
 ======================================
 
-.. module:: pcapkit.vendor.mh.dsmip6_tls_packet
+.. module:: pcapkit.const.mh.dsmip6_tls_packet
 
 This module contains the constant enumeration for **DSMIP6-TLS Packet Types Registry**,
 which is automatically generated from :class:`pcapkit.vendor.mh.dsmip6_tls_packet.DSMIP6TLSPacket`.

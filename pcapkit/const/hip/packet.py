@@ -3,7 +3,7 @@
 """HIP Packet Types
 ======================
 
-.. module:: pcapkit.vendor.hip.packet
+.. module:: pcapkit.const.hip.packet
 
 This module contains the constant enumeration for **HIP Packet Types**,
 which is automatically generated from :class:`pcapkit.vendor.hip.packet.Packet`.

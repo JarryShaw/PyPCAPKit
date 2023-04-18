@@ -3,6 +3,8 @@
 """:class:`~pcapkit.protocols.application.http.HTTP` Constant Enumerations
 =============================================================================
 
+.. module:: pcapkit.const.http
+
 This module contains all constant enumerations of
 :class:`~pcapkit.protocols.application.http.HTTP` implementations. Available
 enumerations include:

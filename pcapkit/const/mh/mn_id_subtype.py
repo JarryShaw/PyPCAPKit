@@ -3,7 +3,7 @@
 """Mobile Node Identifier Option Subtypes
 ============================================
 
-.. module:: pcapkit.vendor.mh.mn_id_subtype
+.. module:: pcapkit.const.mh.mn_id_subtype
 
 This module contains the constant enumeration for **Mobile Node Identifier Option Subtypes**,
 which is automatically generated from :class:`pcapkit.vendor.mh.mn_id_subtype.MNIDSubtype`.

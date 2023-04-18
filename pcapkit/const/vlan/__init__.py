@@ -3,6 +3,8 @@
 """:class:`~pcapkit.protocols.link.vlan.VLAN` Constant Enumerations
 ======================================================================
 
+.. module:: pcapkit.const.vlan
+
 This module contains all constant enumerations of
 :class:`~pcapkit.protocols.link.vlan.VLAN` implementations. Available
 enumerations include:

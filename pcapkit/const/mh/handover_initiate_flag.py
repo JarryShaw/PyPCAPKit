@@ -3,7 +3,7 @@
 """Handover Initiate Flags
 =============================
 
-.. module:: pcapkit.vendor.mh.handover_initiate_flag
+.. module:: pcapkit.const.mh.handover_initiate_flag
 
 This module contains the constant enumeration for **Handover Initiate Flags**,
 which is automatically generated from :class:`pcapkit.vendor.mh.handover_initiate_flag.HandoverInitiateFlag`.

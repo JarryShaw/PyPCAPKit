@@ -3,7 +3,7 @@
 """Group IDs
 ===============
 
-.. module:: pcapkit.vendor.hip.group
+.. module:: pcapkit.const.hip.group
 
 This module contains the constant enumeration for **Group IDs**,
 which is automatically generated from :class:`pcapkit.vendor.hip.group.Group`.

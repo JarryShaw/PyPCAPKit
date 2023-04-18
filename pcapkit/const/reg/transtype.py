@@ -3,7 +3,7 @@
 """Transport Layer Protocol Numbers
 ======================================
 
-.. module:: pcapkit.vendor.reg.transtype
+.. module:: pcapkit.const.reg.transtype
 
 This module contains the constant enumeration for **Transport Layer Protocol Numbers**,
 which is automatically generated from :class:`pcapkit.vendor.reg.transtype.TransType`.

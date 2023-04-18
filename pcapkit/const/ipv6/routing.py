@@ -3,7 +3,7 @@
 """IPv6 Routing Types
 ========================
 
-.. module:: pcapkit.vendor.ipv6.routing
+.. module:: pcapkit.const.ipv6.routing
 
 This module contains the constant enumeration for **IPv6 Routing Types**,
 which is automatically generated from :class:`pcapkit.vendor.ipv6.routing.Routing`.

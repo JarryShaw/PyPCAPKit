@@ -3,7 +3,7 @@
 """Binding Revocation Type
 =============================
 
-.. module:: pcapkit.vendor.mh.binding_revocation
+.. module:: pcapkit.const.mh.binding_revocation
 
 This module contains the constant enumeration for **Binding Revocation Type**,
 which is automatically generated from :class:`pcapkit.vendor.mh.binding_revocation.BindingRevocation`.

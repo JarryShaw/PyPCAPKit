@@ -3,7 +3,7 @@
 """ToS (DS Field) Delay
 ==========================
 
-.. module:: pcapkit.vendor.ipv4.tos_del
+.. module:: pcapkit.const.ipv4.tos_del
 
 This module contains the constant enumeration for **ToS (DS Field) Delay**,
 which is automatically generated from :class:`pcapkit.vendor.ipv4.tos_del.ToSDelay`.

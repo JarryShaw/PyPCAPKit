@@ -3,7 +3,7 @@
 """Block Types
 =================
 
-.. module:: pcapkit.vendor.pcapng.block_type
+.. module:: pcapkit.const.pcapng.block_type
 
 This module contains the constant enumeration for **Block Types**,
 which is automatically generated from :class:`pcapkit.vendor.pcapng.block_type.BlockType`.

@@ -3,7 +3,7 @@
 """Option Classes
 ====================
 
-.. module:: pcapkit.vendor.ipv4.option_class
+.. module:: pcapkit.const.ipv4.option_class
 
 This module contains the constant enumeration for **Option Classes**,
 which is automatically generated from :class:`pcapkit.vendor.ipv4.option_class.OptionClass`.

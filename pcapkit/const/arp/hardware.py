@@ -3,7 +3,7 @@
 """Hardware Types
 ====================
 
-.. module:: pcapkit.vendor.arp.hardware
+.. module:: pcapkit.const.arp.hardware
 
 This module contains the constant enumeration for **Hardware Types**,
 which is automatically generated from :class:`pcapkit.vendor.arp.hardware.Hardware`.

@@ -3,7 +3,7 @@
 """FTP Command
 =================
 
-.. module:: pcapkit.vendor.ftp.command
+.. module:: pcapkit.const.ftp.command
 
 This module contains the constant enumeration for **FTP Command**,
 which is automatically generated from :class:`pcapkit.vendor.ftp.command.Command`.

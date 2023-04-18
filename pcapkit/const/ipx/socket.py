@@ -3,7 +3,7 @@
 """Socket Types
 ==================
 
-.. module:: pcapkit.vendor.ipx.socket
+.. module:: pcapkit.const.ipx.socket
 
 This module contains the constant enumeration for **Socket Types**,
 which is automatically generated from :class:`pcapkit.vendor.ipx.socket.Socket`.

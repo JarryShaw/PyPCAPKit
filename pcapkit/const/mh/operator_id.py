@@ -3,7 +3,7 @@
 """Operator-Identifier Type Registry
 =======================================
 
-.. module:: pcapkit.vendor.mh.operator_id
+.. module:: pcapkit.const.mh.operator_id
 
 This module contains the constant enumeration for **Operator-Identifier Type Registry**,
 which is automatically generated from :class:`pcapkit.vendor.mh.operator_id.OperatorID`.

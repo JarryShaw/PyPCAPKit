@@ -3,6 +3,8 @@
 """Protocol Type Registry Constant Enumerations
 ==================================================
 
+.. module:: pcapkit.const.reg
+
 This module contains all constant enumerations of protocol type registry
 implementations. Available enumerations include:
 

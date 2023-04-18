@@ -3,7 +3,7 @@
 """HTTP/2 Error Code
 =======================
 
-.. module:: pcapkit.vendor.http.error_code
+.. module:: pcapkit.const.http.error_code
 
 This module contains the constant enumeration for **HTTP/2 Error Code**,
 which is automatically generated from :class:`pcapkit.vendor.http.error_code.ErrorCode`.

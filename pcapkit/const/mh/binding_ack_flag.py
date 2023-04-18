@@ -3,7 +3,7 @@
 """Binding Acknowledgment Flags
 ==================================
 
-.. module:: pcapkit.vendor.mh.binding_ack_flag
+.. module:: pcapkit.const.mh.binding_ack_flag
 
 This module contains the constant enumeration for **Binding Acknowledgment Flags**,
 which is automatically generated from :class:`pcapkit.vendor.mh.binding_ack_flag.BindingACKFlag`.

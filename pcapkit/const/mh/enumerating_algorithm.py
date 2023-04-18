@@ -3,7 +3,7 @@
 """Enumerating Algorithms
 ============================
 
-.. module:: pcapkit.vendor.mh.enumerating_algorithm
+.. module:: pcapkit.const.mh.enumerating_algorithm
 
 This module contains the constant enumeration for **Enumerating Algorithms**,
 which is automatically generated from :class:`pcapkit.vendor.mh.enumerating_algorithm.EnumeratingAlgorithm`.
