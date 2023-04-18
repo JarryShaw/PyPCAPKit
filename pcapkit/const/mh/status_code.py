@@ -3,6 +3,8 @@
 """Status Codes
 ==================
 
+.. module:: pcapkit.vendor.mh.status_code
+
 This module contains the constant enumeration for **Status Codes**,
 which is automatically generated from :class:`pcapkit.vendor.mh.status_code.StatusCode`.
 
@@ -36,6 +38,7 @@ class StatusCode(IntEnum):
             key: Key to get enum item.
             default: Default value if not found.
 
+        :meta private:
         """
         if isinstance(key, int):
             return StatusCode(key)

@@ -3,6 +3,8 @@
 """ToS (DS Field) Throughput
 ===============================
 
+.. module:: pcapkit.vendor.ipv4.tos_thr
+
 This module contains the constant enumeration for **ToS (DS Field) Throughput**,
 which is automatically generated from :class:`pcapkit.vendor.ipv4.tos_thr.ToSThroughput`.
 
@@ -28,6 +30,7 @@ class ToSThroughput(IntEnum):
             key: Key to get enum item.
             default: Default value if not found.
 
+        :meta private:
         """
         if isinstance(key, int):
             return ToSThroughput(key)

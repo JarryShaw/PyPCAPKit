@@ -3,6 +3,8 @@
 """IPv4 Router Alert Option Values
 =====================================
 
+.. module:: pcapkit.vendor.ipv4.router_alert
+
 This module contains the constant enumeration for **IPv4 Router Alert Option Values**,
 which is automatically generated from :class:`pcapkit.vendor.ipv4.router_alert.RouterAlert`.
 
@@ -222,6 +224,7 @@ class RouterAlert(IntEnum):
             key: Key to get enum item.
             default: Default value if not found.
 
+        :meta private:
         """
         if isinstance(key, int):
             return RouterAlert(key)

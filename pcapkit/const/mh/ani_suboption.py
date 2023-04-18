@@ -3,6 +3,8 @@
 """Access Network Information (ANI) Sub-Option Type Values
 =============================================================
 
+.. module:: pcapkit.vendor.mh.ani_suboption
+
 This module contains the constant enumeration for **Access Network Information (ANI) Sub-Option Type Values**,
 which is automatically generated from :class:`pcapkit.vendor.mh.ani_suboption.ANISuboption`.
 
@@ -48,6 +50,7 @@ class ANISuboption(IntEnum):
             key: Key to get enum item.
             default: Default value if not found.
 
+        :meta private:
         """
         if isinstance(key, int):
             return ANISuboption(key)

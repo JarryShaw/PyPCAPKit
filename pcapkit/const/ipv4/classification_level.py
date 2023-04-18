@@ -3,6 +3,8 @@
 """Classification Level Encodings
 ====================================
 
+.. module:: pcapkit.vendor.ipv4.classification_level
+
 This module contains the constant enumeration for **Classification Level Encodings**,
 which is automatically generated from :class:`pcapkit.vendor.ipv4.classification_level.ClassificationLevel`.
 
@@ -40,6 +42,7 @@ class ClassificationLevel(IntEnum):
             key: Key to get enum item.
             default: Default value if not found.
 
+        :meta private:
         """
         if isinstance(key, int):
             return ClassificationLevel(key)

@@ -3,6 +3,8 @@
 """Subtype Field of the MN-HA and MN-AAA Authentication Mobility Options
 ===========================================================================
 
+.. module:: pcapkit.vendor.mh.auth_subtype
+
 This module contains the constant enumeration for **Subtype Field of the MN-HA and MN-AAA Authentication Mobility Options**,
 which is automatically generated from :class:`pcapkit.vendor.mh.auth_subtype.AuthSubtype`.
 
@@ -30,6 +32,7 @@ class AuthSubtype(IntEnum):
             key: Key to get enum item.
             default: Default value if not found.
 
+        :meta private:
         """
         if isinstance(key, int):
             return AuthSubtype(key)

@@ -3,6 +3,8 @@
 """Operation Codes
 =====================
 
+.. module:: pcapkit.vendor.arp.operation
+
 This module contains the constant enumeration for **Operation Codes**,
 which is automatically generated from :class:`pcapkit.vendor.arp.operation.Operation`.
 
@@ -105,6 +107,7 @@ class Operation(IntEnum):
             key: Key to get enum item.
             default: Default value if not found.
 
+        :meta private:
         """
         if isinstance(key, int):
             return Operation(key)

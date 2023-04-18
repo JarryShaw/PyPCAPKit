@@ -3,6 +3,8 @@
 """TaggerID Types
 ====================
 
+.. module:: pcapkit.vendor.ipv6.tagger_id
+
 This module contains the constant enumeration for **TaggerID Types**,
 which is automatically generated from :class:`pcapkit.vendor.ipv6.tagger_id.TaggerID`.
 
@@ -36,6 +38,7 @@ class TaggerID(IntEnum):
             key: Key to get enum item.
             default: Default value if not found.
 
+        :meta private:
         """
         if isinstance(key, int):
             return TaggerID(key)

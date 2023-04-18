@@ -3,6 +3,8 @@
 """Traffic Selector Format
 =============================
 
+.. module:: pcapkit.vendor.mh.traffic_selector
+
 This module contains the constant enumeration for **Traffic Selector Format**,
 which is automatically generated from :class:`pcapkit.vendor.mh.traffic_selector.TrafficSelector`.
 
@@ -33,6 +35,7 @@ class TrafficSelector(IntEnum):
             key: Key to get enum item.
             default: Default value if not found.
 
+        :meta private:
         """
         if isinstance(key, int):
             return TrafficSelector(key)

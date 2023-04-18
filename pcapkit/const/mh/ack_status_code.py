@@ -3,6 +3,8 @@
 """Pseudo Home Address Acknowledgement Status Codes
 ======================================================
 
+.. module:: pcapkit.vendor.mh.ack_status_code
+
 This module contains the constant enumeration for **Pseudo Home Address Acknowledgement Status Codes**,
 which is automatically generated from :class:`pcapkit.vendor.mh.ack_status_code.ACKStatusCode`.
 
@@ -42,6 +44,7 @@ class ACKStatusCode(IntEnum):
             key: Key to get enum item.
             default: Default value if not found.
 
+        :meta private:
         """
         if isinstance(key, int):
             return ACKStatusCode(key)

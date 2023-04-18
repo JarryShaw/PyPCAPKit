@@ -3,6 +3,8 @@
 """DI-Types
 ==============
 
+.. module:: pcapkit.vendor.hip.di
+
 This module contains the constant enumeration for **DI-Types**,
 which is automatically generated from :class:`pcapkit.vendor.hip.di.DITypes`.
 
@@ -33,6 +35,7 @@ class DITypes(IntEnum):
             key: Key to get enum item.
             default: Default value if not found.
 
+        :meta private:
         """
         if isinstance(key, int):
             return DITypes(key)

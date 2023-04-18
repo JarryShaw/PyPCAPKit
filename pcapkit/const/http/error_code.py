@@ -3,6 +3,8 @@
 """HTTP/2 Error Code
 =======================
 
+.. module:: pcapkit.vendor.http.error_code
+
 This module contains the constant enumeration for **HTTP/2 Error Code**,
 which is automatically generated from :class:`pcapkit.vendor.http.error_code.ErrorCode`.
 
@@ -68,6 +70,7 @@ class ErrorCode(IntEnum):
             key: Key to get enum item.
             default: Default value if not found.
 
+        :meta private:
         """
         if isinstance(key, int):
             return ErrorCode(key)

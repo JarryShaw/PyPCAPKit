@@ -3,6 +3,8 @@
 """FTP Command
 =================
 
+.. module:: pcapkit.vendor.ftp.command
+
 This module contains the constant enumeration for **FTP Command**,
 which is automatically generated from :class:`pcapkit.vendor.ftp.command.Command`.
 
@@ -231,6 +233,7 @@ class Command(StrEnum):
             key: Key to get enum item.
             default: Default value if not found.
 
+        :meta private:
         """
         if key not in Command._member_map_:  # pylint: disable=no-member
             extend_enum(Command, key.upper(), default if default is not None else key)

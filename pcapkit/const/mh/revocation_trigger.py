@@ -3,6 +3,8 @@
 """Revocation Trigger Values
 ===============================
 
+.. module:: pcapkit.vendor.mh.revocation_trigger
+
 This module contains the constant enumeration for **Revocation Trigger Values**,
 which is automatically generated from :class:`pcapkit.vendor.mh.revocation_trigger.RevocationTrigger`.
 
@@ -54,6 +56,7 @@ class RevocationTrigger(IntEnum):
             key: Key to get enum item.
             default: Default value if not found.
 
+        :meta private:
         """
         if isinstance(key, int):
             return RevocationTrigger(key)

@@ -3,6 +3,8 @@
 """HTTP Status Code
 ======================
 
+.. module:: pcapkit.vendor.http.status_code
+
 This module contains the constant enumeration for **HTTP Status Code**,
 which is automatically generated from :class:`pcapkit.vendor.http.status_code.StatusCode`.
 
@@ -237,6 +239,7 @@ class StatusCode(IntEnum):
             key: Key to get enum item.
             default: Default value if not found.
 
+        :meta private:
         """
         if isinstance(key, int):
             return StatusCode(key)

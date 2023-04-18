@@ -3,6 +3,8 @@
 """IPv6 Extension Header Types
 =================================
 
+.. module:: pcapkit.vendor.ipv6.extension_header
+
 This module contains the constant enumeration for **IPv6 Extension Header Types**,
 which is automatically generated from :class:`pcapkit.vendor.ipv6.extension_header.ExtensionHeader`.
 
@@ -51,7 +53,14 @@ class ExtensionHeader(IntEnum):
 
     @staticmethod
     def get(key: 'int | str', default: 'int' = -1) -> 'ExtensionHeader':
-        """Backport support for original codes."""
+        """Backport support for original codes.
+
+        Args:
+            key: Key to get enum item.
+            default: Default value if not found.
+
+        :meta private:
+        """
         if isinstance(key, int):
             return ExtensionHeader(key)
         return ExtensionHeader[key]  # type: ignore[misc]

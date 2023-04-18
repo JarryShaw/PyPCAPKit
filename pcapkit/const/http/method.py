@@ -3,6 +3,8 @@
 """HTTP Method
 =================
 
+.. module:: pcapkit.vendor.http.method
+
 This module contains the constant enumeration for **HTTP Method**,
 which is automatically generated from :class:`pcapkit.vendor.http.method.Method`.
 
@@ -161,6 +163,7 @@ class Method(StrEnum):
             key: Key to get enum item.
             default: Default value if not found.
 
+        :meta private:
         """
         if key not in Method._member_map_:  # pylint: disable=no-member
             extend_enum(Method, key.upper(), default if default is not None else key)

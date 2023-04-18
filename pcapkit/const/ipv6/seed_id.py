@@ -3,6 +3,8 @@
 """Seed-ID Types
 ===================
 
+.. module:: pcapkit.vendor.ipv6.seed_id
+
 This module contains the constant enumeration for **Seed-ID Types**,
 which is automatically generated from :class:`pcapkit.vendor.ipv6.seed_id.SeedID`.
 
@@ -32,6 +34,7 @@ class SeedID(IntEnum):
             key: Key to get enum item.
             default: Default value if not found.
 
+        :meta private:
         """
         if isinstance(key, int):
             return SeedID(key)

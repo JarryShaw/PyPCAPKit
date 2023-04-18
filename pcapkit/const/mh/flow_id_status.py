@@ -3,6 +3,8 @@
 """Flow Identification Mobility Option Status Codes
 ======================================================
 
+.. module:: pcapkit.vendor.mh.flow_id_status
+
 This module contains the constant enumeration for **Flow Identification Mobility Option Status Codes**,
 which is automatically generated from :class:`pcapkit.vendor.mh.flow_id_status.FlowIDStatus`.
 
@@ -45,6 +47,7 @@ class FlowIDStatus(IntEnum):
             key: Key to get enum item.
             default: Default value if not found.
 
+        :meta private:
         """
         if isinstance(key, int):
             return FlowIDStatus(key)

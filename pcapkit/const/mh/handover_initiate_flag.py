@@ -3,6 +3,8 @@
 """Handover Initiate Flags
 =============================
 
+.. module:: pcapkit.vendor.mh.handover_initiate_flag
+
 This module contains the constant enumeration for **Handover Initiate Flags**,
 which is automatically generated from :class:`pcapkit.vendor.mh.handover_initiate_flag.HandoverInitiateFlag`.
 
@@ -36,6 +38,7 @@ class HandoverInitiateFlag(IntFlag):
             key: Key to get enum item.
             default: Default value if not found.
 
+        :meta private:
         """
         if isinstance(key, int):
             return HandoverInitiateFlag(key)

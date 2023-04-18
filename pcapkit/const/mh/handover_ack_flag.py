@@ -3,6 +3,8 @@
 """Handover Acknowledge Flags
 ================================
 
+.. module:: pcapkit.vendor.mh.handover_ack_flag
+
 This module contains the constant enumeration for **Handover Acknowledge Flags**,
 which is automatically generated from :class:`pcapkit.vendor.mh.handover_ack_flag.HandoverACKFlag`.
 
@@ -33,6 +35,7 @@ class HandoverACKFlag(IntFlag):
             key: Key to get enum item.
             default: Default value if not found.
 
+        :meta private:
         """
         if isinstance(key, int):
             return HandoverACKFlag(key)

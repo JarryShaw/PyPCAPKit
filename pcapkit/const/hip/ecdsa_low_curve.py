@@ -3,6 +3,8 @@
 """ECDSA_LOW Curve Label
 ===========================
 
+.. module:: pcapkit.vendor.hip.ecdsa_low_curve
+
 This module contains the constant enumeration for **ECDSA_LOW Curve Label**,
 which is automatically generated from :class:`pcapkit.vendor.hip.ecdsa_low_curve.ECDSALowCurve`.
 
@@ -30,6 +32,7 @@ class ECDSALowCurve(IntEnum):
             key: Key to get enum item.
             default: Default value if not found.
 
+        :meta private:
         """
         if isinstance(key, int):
             return ECDSALowCurve(key)

@@ -3,6 +3,8 @@
 """Mobility Options
 ======================
 
+.. module:: pcapkit.vendor.mh.option
+
 This module contains the constant enumeration for **Mobility Options**,
 which is automatically generated from :class:`pcapkit.vendor.mh.option.Option`.
 
@@ -237,6 +239,7 @@ class Option(IntEnum):
             key: Key to get enum item.
             default: Default value if not found.
 
+        :meta private:
         """
         if isinstance(key, int):
             return Option(key)

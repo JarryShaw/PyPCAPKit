@@ -3,6 +3,8 @@
 """LMA-Controlled MAG Parameters Sub-Option Type Values
 ==========================================================
 
+.. module:: pcapkit.vendor.mh.lma_mag_suboption
+
 This module contains the constant enumeration for **LMA-Controlled MAG Parameters Sub-Option Type Values**,
 which is automatically generated from :class:`pcapkit.vendor.mh.lma_mag_suboption.LMAControlledMAGSuboption`.
 
@@ -33,6 +35,7 @@ class LMAControlledMAGSuboption(IntEnum):
             key: Key to get enum item.
             default: Default value if not found.
 
+        :meta private:
         """
         if isinstance(key, int):
             return LMAControlledMAGSuboption(key)

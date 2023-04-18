@@ -3,6 +3,8 @@
 """Suite IDs
 ===============
 
+.. module:: pcapkit.vendor.hip.suite
+
 This module contains the constant enumeration for **Suite IDs**,
 which is automatically generated from :class:`pcapkit.vendor.hip.suite.Suite`.
 
@@ -45,6 +47,7 @@ class Suite(IntEnum):
             key: Key to get enum item.
             default: Default value if not found.
 
+        :meta private:
         """
         if isinstance(key, int):
             return Suite(key)

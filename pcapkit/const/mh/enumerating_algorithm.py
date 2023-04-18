@@ -3,6 +3,8 @@
 """Enumerating Algorithms
 ============================
 
+.. module:: pcapkit.vendor.mh.enumerating_algorithm
+
 This module contains the constant enumeration for **Enumerating Algorithms**,
 which is automatically generated from :class:`pcapkit.vendor.mh.enumerating_algorithm.EnumeratingAlgorithm`.
 
@@ -33,6 +35,7 @@ class EnumeratingAlgorithm(IntEnum):
             key: Key to get enum item.
             default: Default value if not found.
 
+        :meta private:
         """
         if isinstance(key, int):
             return EnumeratingAlgorithm(key)

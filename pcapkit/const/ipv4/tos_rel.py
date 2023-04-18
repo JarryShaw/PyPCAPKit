@@ -3,6 +3,8 @@
 """ToS (DS Field) Reliability
 ================================
 
+.. module:: pcapkit.vendor.ipv4.tos_rel
+
 This module contains the constant enumeration for **ToS (DS Field) Reliability**,
 which is automatically generated from :class:`pcapkit.vendor.ipv4.tos_rel.ToSReliability`.
 
@@ -28,6 +30,7 @@ class ToSReliability(IntEnum):
             key: Key to get enum item.
             default: Default value if not found.
 
+        :meta private:
         """
         if isinstance(key, int):
             return ToSReliability(key)

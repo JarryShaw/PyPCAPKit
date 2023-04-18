@@ -3,6 +3,8 @@
 """Handoff Indicator Option Type Values
 ==========================================
 
+.. module:: pcapkit.vendor.mh.handoff_type
+
 This module contains the constant enumeration for **Handoff Indicator Option Type Values**,
 which is automatically generated from :class:`pcapkit.vendor.mh.handoff_type.HandoffType`.
 
@@ -45,6 +47,7 @@ class HandoffType(IntEnum):
             key: Key to get enum item.
             default: Default value if not found.
 
+        :meta private:
         """
         if isinstance(key, int):
             return HandoffType(key)

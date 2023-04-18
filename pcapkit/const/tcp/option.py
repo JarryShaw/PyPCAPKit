@@ -3,6 +3,8 @@
 """TCP Option Kind Numbers
 =============================
 
+.. module:: pcapkit.vendor.tcp.option
+
 This module contains the constant enumeration for **TCP Option Kind Numbers**,
 which is automatically generated from :class:`pcapkit.vendor.tcp.option.Option`.
 
@@ -164,6 +166,7 @@ class Option(IntEnum):
             key: Key to get enum item.
             default: Default value if not found.
 
+        :meta private:
         """
         if isinstance(key, int):
             return Option(key)

@@ -3,6 +3,8 @@
 """Flow Identification Sub-Options
 =====================================
 
+.. module:: pcapkit.vendor.mh.flow_id_suboption
+
 This module contains the constant enumeration for **Flow Identification Sub-Options**,
 which is automatically generated from :class:`pcapkit.vendor.mh.flow_id_suboption.FlowIDSuboption`.
 
@@ -42,6 +44,7 @@ class FlowIDSuboption(IntEnum):
             key: Key to get enum item.
             default: Default value if not found.
 
+        :meta private:
         """
         if isinstance(key, int):
             return FlowIDSuboption(key)

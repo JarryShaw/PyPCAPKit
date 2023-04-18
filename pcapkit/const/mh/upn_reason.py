@@ -3,6 +3,8 @@
 """Update Notification Reasons Registry
 ==========================================
 
+.. module:: pcapkit.vendor.mh.upn_reason
+
 This module contains the constant enumeration for **Update Notification Reasons Registry**,
 which is automatically generated from :class:`pcapkit.vendor.mh.upn_reason.UpdateNotificationReason`.
 
@@ -54,6 +56,7 @@ class UpdateNotificationReason(IntEnum):
             key: Key to get enum item.
             default: Default value if not found.
 
+        :meta private:
         """
         if isinstance(key, int):
             return UpdateNotificationReason(key)

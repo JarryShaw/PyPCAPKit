@@ -3,6 +3,8 @@
 """QS Functions
 ==================
 
+.. module:: pcapkit.vendor.ipv4.qs_function
+
 This module contains the constant enumeration for **QS Functions**,
 which is automatically generated from :class:`pcapkit.vendor.ipv4.qs_function.QSFunction`.
 
@@ -28,6 +30,7 @@ class QSFunction(IntEnum):
             key: Key to get enum item.
             default: Default value if not found.
 
+        :meta private:
         """
         if isinstance(key, int):
             return QSFunction(key)

@@ -3,6 +3,8 @@
 """HIT Suite ID
 ==================
 
+.. module:: pcapkit.vendor.hip.hit_suite
+
 This module contains the constant enumeration for **HIT Suite ID**,
 which is automatically generated from :class:`pcapkit.vendor.hip.hit_suite.HITSuite`.
 
@@ -42,6 +44,7 @@ class HITSuite(IntEnum):
             key: Key to get enum item.
             default: Default value if not found.
 
+        :meta private:
         """
         if isinstance(key, int):
             return HITSuite(key)

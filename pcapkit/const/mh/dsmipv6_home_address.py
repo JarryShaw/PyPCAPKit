@@ -3,6 +3,8 @@
 """Dual Stack MIPv6 (DSMIPv6) IPv4 Home Address Option Status Codes
 ======================================================================
 
+.. module:: pcapkit.vendor.mh.dsmipv6_home_address
+
 This module contains the constant enumeration for **Dual Stack MIPv6 (DSMIPv6) IPv4 Home Address Option Status Codes**,
 which is automatically generated from :class:`pcapkit.vendor.mh.dsmipv6_home_address.DSMIPv6HomeAddress`.
 
@@ -45,6 +47,7 @@ class DSMIPv6HomeAddress(IntEnum):
             key: Key to get enum item.
             default: Default value if not found.
 
+        :meta private:
         """
         if isinstance(key, int):
             return DSMIPv6HomeAddress(key)

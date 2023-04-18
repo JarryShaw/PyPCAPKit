@@ -3,6 +3,8 @@
 """HIP Packet Types
 ======================
 
+.. module:: pcapkit.vendor.hip.packet
+
 This module contains the constant enumeration for **HIP Packet Types**,
 which is automatically generated from :class:`pcapkit.vendor.hip.packet.Packet`.
 
@@ -57,6 +59,7 @@ class Packet(IntEnum):
             key: Key to get enum item.
             default: Default value if not found.
 
+        :meta private:
         """
         if isinstance(key, int):
             return Packet(key)

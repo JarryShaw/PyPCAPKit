@@ -3,6 +3,8 @@
 """IPv6 Routing Types
 ========================
 
+.. module:: pcapkit.vendor.ipv6.routing
+
 This module contains the constant enumeration for **IPv6 Routing Types**,
 which is automatically generated from :class:`pcapkit.vendor.ipv6.routing.Routing`.
 
@@ -56,6 +58,7 @@ class Routing(IntEnum):
             key: Key to get enum item.
             default: Default value if not found.
 
+        :meta private:
         """
         if isinstance(key, int):
             return Routing(key)

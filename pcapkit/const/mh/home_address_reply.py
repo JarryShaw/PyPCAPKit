@@ -3,6 +3,8 @@
 """IPv4 Home Address Reply Status Codes
 ==========================================
 
+.. module:: pcapkit.vendor.mh.home_address_reply
+
 This module contains the constant enumeration for **IPv4 Home Address Reply Status Codes**,
 which is automatically generated from :class:`pcapkit.vendor.mh.home_address_reply.HomeAddressReply`.
 
@@ -42,6 +44,7 @@ class HomeAddressReply(IntEnum):
             key: Key to get enum item.
             default: Default value if not found.
 
+        :meta private:
         """
         if isinstance(key, int):
             return HomeAddressReply(key)

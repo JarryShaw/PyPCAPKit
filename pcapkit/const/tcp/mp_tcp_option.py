@@ -3,6 +3,8 @@
 """Multipath TCP options
 ===========================
 
+.. module:: pcapkit.vendor.tcp.mp_tcp_option
+
 This module contains the constant enumeration for **Multipath TCP options**,
 which is automatically generated from :class:`pcapkit.vendor.tcp.mp_tcp_option.MPTCPOption`.
 
@@ -40,6 +42,7 @@ class MPTCPOption(IntEnum):
             key: Key to get enum item.
             default: Default value if not found.
 
+        :meta private:
         """
         if isinstance(key, int):
             return MPTCPOption(key)

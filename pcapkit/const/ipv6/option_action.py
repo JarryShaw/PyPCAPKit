@@ -3,6 +3,8 @@
 """Option Actions
 ====================
 
+.. module:: pcapkit.vendor.ipv6.option_action
+
 This module contains the constant enumeration for **Option Actions**,
 which is automatically generated from :class:`pcapkit.vendor.ipv6.option_action.OptionAction`.
 
@@ -32,6 +34,7 @@ class OptionAction(IntEnum):
             key: Key to get enum item.
             default: Default value if not found.
 
+        :meta private:
         """
         if isinstance(key, int):
             return OptionAction(key)

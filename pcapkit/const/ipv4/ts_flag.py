@@ -3,6 +3,8 @@
 """TS Flag
 =============
 
+.. module:: pcapkit.vendor.ipv4.ts_flag
+
 This module contains the constant enumeration for **TS Flag**,
 which is automatically generated from :class:`pcapkit.vendor.ipv4.ts_flag.TSFlag`.
 
@@ -30,6 +32,7 @@ class TSFlag(IntEnum):
             key: Key to get enum item.
             default: Default value if not found.
 
+        :meta private:
         """
         if isinstance(key, int):
             return TSFlag(key)

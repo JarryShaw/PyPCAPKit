@@ -3,6 +3,8 @@
 """Mobile Node Group Identifier Type Registry
 ================================================
 
+.. module:: pcapkit.vendor.mh.mn_group_id
+
 This module contains the constant enumeration for **Mobile Node Group Identifier Type Registry**,
 which is automatically generated from :class:`pcapkit.vendor.mh.mn_group_id.MNGroupID`.
 
@@ -33,6 +35,7 @@ class MNGroupID(IntEnum):
             key: Key to get enum item.
             default: Default value if not found.
 
+        :meta private:
         """
         if isinstance(key, int):
             return MNGroupID(key)

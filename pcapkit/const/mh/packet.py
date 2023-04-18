@@ -3,6 +3,8 @@
 """Mobility Header Types - for the MH Type field in the Mobility Header
 ==========================================================================
 
+.. module:: pcapkit.vendor.mh.packet
+
 This module contains the constant enumeration for **Mobility Header Types - for the MH Type field in the Mobility Header**,
 which is automatically generated from :class:`pcapkit.vendor.mh.packet.Packet`.
 
@@ -96,6 +98,7 @@ class Packet(IntEnum):
             key: Key to get enum item.
             default: Default value if not found.
 
+        :meta private:
         """
         if isinstance(key, int):
             return Packet(key)

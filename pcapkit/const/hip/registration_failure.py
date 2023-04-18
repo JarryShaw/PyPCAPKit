@@ -3,6 +3,8 @@
 """Registration Failure Types
 ================================
 
+.. module:: pcapkit.vendor.hip.registration_failure
+
 This module contains the constant enumeration for **Registration Failure Types**,
 which is automatically generated from :class:`pcapkit.vendor.hip.registration_failure.RegistrationFailure`.
 
@@ -55,6 +57,7 @@ class RegistrationFailure(IntEnum):
             key: Key to get enum item.
             default: Default value if not found.
 
+        :meta private:
         """
         if isinstance(key, int):
             return RegistrationFailure(key)

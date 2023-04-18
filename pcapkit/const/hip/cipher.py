@@ -3,6 +3,8 @@
 """Cipher IDs
 ================
 
+.. module:: pcapkit.vendor.hip.cipher
+
 This module contains the constant enumeration for **Cipher IDs**,
 which is automatically generated from :class:`pcapkit.vendor.hip.cipher.Cipher`.
 
@@ -39,6 +41,7 @@ class Cipher(IntEnum):
             key: Key to get enum item.
             default: Default value if not found.
 
+        :meta private:
         """
         if isinstance(key, int):
             return Cipher(key)

@@ -3,6 +3,8 @@
 """OSPF Packet Types
 =======================
 
+.. module:: pcapkit.vendor.ospf.packet
+
 This module contains the constant enumeration for **OSPF Packet Types**,
 which is automatically generated from :class:`pcapkit.vendor.ospf.packet.Packet`.
 
@@ -42,6 +44,7 @@ class Packet(IntEnum):
             key: Key to get enum item.
             default: Default value if not found.
 
+        :meta private:
         """
         if isinstance(key, int):
             return Packet(key)

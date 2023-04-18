@@ -3,6 +3,8 @@
 """HI Algorithm
 ==================
 
+.. module:: pcapkit.vendor.hip.hi_algorithm
+
 This module contains the constant enumeration for **HI Algorithm**,
 which is automatically generated from :class:`pcapkit.vendor.hip.hi_algorithm.HIAlgorithm`.
 
@@ -57,6 +59,7 @@ class HIAlgorithm(IntEnum):
             key: Key to get enum item.
             default: Default value if not found.
 
+        :meta private:
         """
         if isinstance(key, int):
             return HIAlgorithm(key)

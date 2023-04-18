@@ -3,6 +3,8 @@
 """Authentication Types
 ==========================
 
+.. module:: pcapkit.vendor.ospf.authentication
+
 This module contains the constant enumeration for **Authentication Types**,
 which is automatically generated from :class:`pcapkit.vendor.ospf.authentication.Authentication`.
 
@@ -36,6 +38,7 @@ class Authentication(IntEnum):
             key: Key to get enum item.
             default: Default value if not found.
 
+        :meta private:
         """
         if isinstance(key, int):
             return Authentication(key)

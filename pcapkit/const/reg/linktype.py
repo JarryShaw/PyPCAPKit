@@ -3,6 +3,8 @@
 """Link-Layer Header Type Values
 ===================================
 
+.. module:: pcapkit.vendor.reg.linktype
+
 This module contains the constant enumeration for **Link-Layer Header Type Values**,
 which is automatically generated from :class:`pcapkit.vendor.reg.linktype.LinkType`.
 
@@ -901,6 +903,7 @@ class LinkType(IntEnum):
             key: Key to get enum item.
             default: Default value if not found.
 
+        :meta private:
         """
         if isinstance(key, int):
             return LinkType(key)

@@ -3,6 +3,8 @@
 """HIP NAT Traversal Modes
 =============================
 
+.. module:: pcapkit.vendor.hip.nat_traversal
+
 This module contains the constant enumeration for **HIP NAT Traversal Modes**,
 which is automatically generated from :class:`pcapkit.vendor.hip.nat_traversal.NATTraversal`.
 
@@ -36,6 +38,7 @@ class NATTraversal(IntEnum):
             key: Key to get enum item.
             default: Default value if not found.
 
+        :meta private:
         """
         if isinstance(key, int):
             return NATTraversal(key)

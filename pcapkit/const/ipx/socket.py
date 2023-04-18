@@ -3,6 +3,8 @@
 """Socket Types
 ==================
 
+.. module:: pcapkit.vendor.ipx.socket
+
 This module contains the constant enumeration for **Socket Types**,
 which is automatically generated from :class:`pcapkit.vendor.ipx.socket.Socket`.
 
@@ -66,6 +68,7 @@ class Socket(IntEnum):
             key: Key to get enum item.
             default: Default value if not found.
 
+        :meta private:
         """
         if isinstance(key, int):
             return Socket(key)

@@ -3,6 +3,8 @@
 """Priority levels defined in IEEE 802.1p.
 =============================================
 
+.. module:: pcapkit.vendor.vlan.priority_level
+
 This module contains the constant enumeration for **Priority levels defined in IEEE 802.1p.**,
 which is automatically generated from :class:`pcapkit.vendor.vlan.priority_level.PriorityLevel`.
 
@@ -48,6 +50,7 @@ class PriorityLevel(IntEnum):
             key: Key to get enum item.
             default: Default value if not found.
 
+        :meta private:
         """
         if isinstance(key, int):
             return PriorityLevel(key)

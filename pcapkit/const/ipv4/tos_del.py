@@ -3,6 +3,8 @@
 """ToS (DS Field) Delay
 ==========================
 
+.. module:: pcapkit.vendor.ipv4.tos_del
+
 This module contains the constant enumeration for **ToS (DS Field) Delay**,
 which is automatically generated from :class:`pcapkit.vendor.ipv4.tos_del.ToSDelay`.
 
@@ -28,6 +30,7 @@ class ToSDelay(IntEnum):
             key: Key to get enum item.
             default: Default value if not found.
 
+        :meta private:
         """
         if isinstance(key, int):
             return ToSDelay(key)

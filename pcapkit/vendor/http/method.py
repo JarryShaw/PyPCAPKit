@@ -25,6 +25,8 @@ LINE = lambda NAME, DOCS, ENUM, MODL: f'''\
 """{(name := DOCS.split(' [', maxsplit=1)[0])}
 {'=' * (len(name) + 6)}
 
+.. module:: {MODL}
+
 This module contains the constant enumeration for **{name}**,
 which is automatically generated from :class:`{MODL}.{NAME}`.
 
@@ -67,6 +69,7 @@ class {NAME}(StrEnum):
             key: Key to get enum item.
             default: Default value if not found.
 
+        :meta private:
         """
         if key not in {NAME}._member_map_:  # pylint: disable=no-member
             extend_enum({NAME}, key.upper(), default if default is not None else key)

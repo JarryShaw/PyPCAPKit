@@ -3,6 +3,8 @@
 """IP Option Numbers
 =======================
 
+.. module:: pcapkit.vendor.ipv4.option_number
+
 This module contains the constant enumeration for **IP Option Numbers**,
 which is automatically generated from :class:`pcapkit.vendor.ipv4.option_number.OptionNumber`.
 
@@ -114,6 +116,7 @@ class OptionNumber(IntEnum):
             key: Key to get enum item.
             default: Default value if not found.
 
+        :meta private:
         """
         if isinstance(key, int):
             return OptionNumber(key)

@@ -27,6 +27,8 @@ LINE = lambda NAME, DOCS, ENUM, MODL: f'''\
 """{(name := DOCS.split(' [', maxsplit=1)[0])}
 {'=' * (len(name) + 6)}
 
+.. module:: {MODL}
+
 This module contains the constant enumeration for **{name}**,
 which is automatically generated from :class:`{MODL}.{NAME}`.
 
@@ -44,7 +46,14 @@ class {NAME}(IntEnum):
 
     @staticmethod
     def get(key: 'int | str', default: 'int' = -1) -> '{NAME}':
-        """Backport support for original codes."""
+        """Backport support for original codes.
+
+        Args:
+            key: Key to get enum item.
+            default: Default value if not found.
+
+        :meta private:
+        """
         if isinstance(key, int):
             return {NAME}(key)
         return {NAME}[key]  # type: ignore[misc]

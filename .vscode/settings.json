@@ -264,6 +264,7 @@
         "SDEL",
         "SECN",
         "Secr",
+        "sectnum",
         "seqn",
         "Serv",
         "sessionid",
@@ -352,7 +353,8 @@
         "vmin",
         "werkzeug",
         "wght",
-        "Xcode"
+        "Xcode",
+        "xform"
     ],
     "esbonio.sphinx.confDir": "${workspaceFolder}/docs/source",
     "C_Cpp.errorSquiggles": "Enabled",

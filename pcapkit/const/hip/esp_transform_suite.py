@@ -3,6 +3,8 @@
 """ESP Transform Suite IDs
 =============================
 
+.. module:: pcapkit.vendor.hip.esp_transform_suite
+
 This module contains the constant enumeration for **ESP Transform Suite IDs**,
 which is automatically generated from :class:`pcapkit.vendor.hip.esp_transform_suite.ESPTransformSuite`.
 
@@ -72,6 +74,7 @@ class ESPTransformSuite(IntEnum):
             key: Key to get enum item.
             default: Default value if not found.
 
+        :meta private:
         """
         if isinstance(key, int):
             return ESPTransformSuite(key)

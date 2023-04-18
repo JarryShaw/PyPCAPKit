@@ -3,6 +3,8 @@
 """Protection Authority Bit Assignments
 ==========================================
 
+.. module:: pcapkit.vendor.ipv4.protection_authority
+
 This module contains the constant enumeration for **Protection Authority Bit Assignments**,
 which is automatically generated from :class:`pcapkit.vendor.ipv4.protection_authority.ProtectionAuthority`.
 
@@ -40,6 +42,7 @@ class ProtectionAuthority(IntEnum):
             key: Key to get enum item.
             default: Default value if not found.
 
+        :meta private:
         """
         if isinstance(key, int):
             return ProtectionAuthority(key)

@@ -3,6 +3,8 @@
 """Binding Revocation Type
 =============================
 
+.. module:: pcapkit.vendor.mh.binding_revocation
+
 This module contains the constant enumeration for **Binding Revocation Type**,
 which is automatically generated from :class:`pcapkit.vendor.mh.binding_revocation.BindingRevocation`.
 
@@ -33,6 +35,7 @@ class BindingRevocation(IntEnum):
             key: Key to get enum item.
             default: Default value if not found.
 
+        :meta private:
         """
         if isinstance(key, int):
             return BindingRevocation(key)

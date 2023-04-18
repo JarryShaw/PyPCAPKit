@@ -3,6 +3,8 @@
 """Binding Revocation Acknowledgement Status Codes
 =====================================================
 
+.. module:: pcapkit.vendor.mh.revocation_status_code
+
 This module contains the constant enumeration for **Binding Revocation Acknowledgement Status Codes**,
 which is automatically generated from :class:`pcapkit.vendor.mh.revocation_status_code.RevocationStatusCode`.
 
@@ -36,6 +38,7 @@ class RevocationStatusCode(IntEnum):
             key: Key to get enum item.
             default: Default value if not found.
 
+        :meta private:
         """
         if isinstance(key, int):
             return RevocationStatusCode(key)

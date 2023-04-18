@@ -3,6 +3,8 @@
 """L2TP Type
 ===============
 
+.. module:: pcapkit.vendor.l2tp.type
+
 This module contains the constant enumeration for **L2TP Type**,
 which is automatically generated from :class:`pcapkit.vendor.l2tp.type.Type`.
 
@@ -28,6 +30,7 @@ class Type(IntEnum):
             key: Key to get enum item.
             default: Default value if not found.
 
+        :meta private:
         """
         if isinstance(key, int):
             return Type(key)

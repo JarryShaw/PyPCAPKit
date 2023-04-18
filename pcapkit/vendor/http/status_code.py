@@ -26,6 +26,8 @@ LINE = lambda NAME, DOCS, FLAG, ENUM, MISS, MODL: f'''\
 """{(name := DOCS.split(' [', maxsplit=1)[0])}
 {'=' * (len(name) + 6)}
 
+.. module:: {MODL}
+
 This module contains the constant enumeration for **{name}**,
 which is automatically generated from :class:`{MODL}.{NAME}`.
 
@@ -63,6 +65,7 @@ class {NAME}(IntEnum):
             key: Key to get enum item.
             default: Default value if not found.
 
+        :meta private:
         """
         if isinstance(key, int):
             return {NAME}(key)

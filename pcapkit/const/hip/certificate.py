@@ -3,6 +3,8 @@
 """HIP Certificate Types
 ===========================
 
+.. module:: pcapkit.vendor.hip.certificate
+
 This module contains the constant enumeration for **HIP Certificate Types**,
 which is automatically generated from :class:`pcapkit.vendor.hip.certificate.Certificate`.
 
@@ -51,6 +53,7 @@ class Certificate(IntEnum):
             key: Key to get enum item.
             default: Default value if not found.
 
+        :meta private:
         """
         if isinstance(key, int):
             return Certificate(key)

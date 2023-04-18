@@ -3,6 +3,8 @@
 """HTTP/2 Frame Type
 =======================
 
+.. module:: pcapkit.vendor.http.frame
+
 This module contains the constant enumeration for **HTTP/2 Frame Type**,
 which is automatically generated from :class:`pcapkit.vendor.http.frame.Frame`.
 
@@ -66,6 +68,7 @@ class Frame(IntEnum):
             key: Key to get enum item.
             default: Default value if not found.
 
+        :meta private:
         """
         if isinstance(key, int):
             return Frame(key)

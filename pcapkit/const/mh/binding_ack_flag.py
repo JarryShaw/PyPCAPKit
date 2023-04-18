@@ -3,6 +3,8 @@
 """Binding Acknowledgment Flags
 ==================================
 
+.. module:: pcapkit.vendor.mh.binding_ack_flag
+
 This module contains the constant enumeration for **Binding Acknowledgment Flags**,
 which is automatically generated from :class:`pcapkit.vendor.mh.binding_ack_flag.BindingACKFlag`.
 
@@ -45,6 +47,7 @@ class BindingACKFlag(IntFlag):
             key: Key to get enum item.
             default: Default value if not found.
 
+        :meta private:
         """
         if isinstance(key, int):
             return BindingACKFlag(key)

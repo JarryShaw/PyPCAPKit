@@ -3,6 +3,8 @@
 """Ethertype IEEE 802 Numbers
 ================================
 
+.. module:: pcapkit.vendor.reg.ethertype
+
 This module contains the constant enumeration for **Ethertype IEEE 802 Numbers**,
 which is automatically generated from :class:`pcapkit.vendor.reg.ethertype.EtherType`.
 
@@ -516,6 +518,7 @@ class EtherType(IntEnum):
             key: Key to get enum item.
             default: Default value if not found.
 
+        :meta private:
         """
         if isinstance(key, int):
             return EtherType(key)

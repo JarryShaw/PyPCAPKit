@@ -3,6 +3,8 @@
 """Block Types
 =================
 
+.. module:: pcapkit.vendor.pcapng.block_type
+
 This module contains the constant enumeration for **Block Types**,
 which is automatically generated from :class:`pcapkit.vendor.pcapng.block_type.BlockType`.
 
@@ -114,6 +116,7 @@ class BlockType(IntEnum):
             key: Key to get enum item.
             default: Default value if not found.
 
+        :meta private:
         """
         if isinstance(key, int):
             return BlockType(key)

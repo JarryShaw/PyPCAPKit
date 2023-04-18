@@ -3,6 +3,8 @@
 """Flow Binding Acknowledgement Status Codes
 ===============================================
 
+.. module:: pcapkit.vendor.mh.fb_ack_status
+
 This module contains the constant enumeration for **Flow Binding Acknowledgement Status Codes**,
 which is automatically generated from :class:`pcapkit.vendor.mh.fb_ack_status.FlowBindingACKStatus`.
 
@@ -33,6 +35,7 @@ class FlowBindingACKStatus(IntEnum):
             key: Key to get enum item.
             default: Default value if not found.
 
+        :meta private:
         """
         if isinstance(key, int):
             return FlowBindingACKStatus(key)

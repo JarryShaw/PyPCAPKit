@@ -3,6 +3,8 @@
 """Binding Update Flags
 ==========================
 
+.. module:: pcapkit.vendor.mh.binding_update_flag
+
 This module contains the constant enumeration for **Binding Update Flags**,
 which is automatically generated from :class:`pcapkit.vendor.mh.binding_update_flag.BindingUpdateFlag`.
 
@@ -60,6 +62,7 @@ class BindingUpdateFlag(IntFlag):
             key: Key to get enum item.
             default: Default value if not found.
 
+        :meta private:
         """
         if isinstance(key, int):
             return BindingUpdateFlag(key)

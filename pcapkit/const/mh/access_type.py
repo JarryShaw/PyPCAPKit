@@ -3,6 +3,8 @@
 """Access Technology Type Option Type Values
 ===============================================
 
+.. module:: pcapkit.vendor.mh.access_type
+
 This module contains the constant enumeration for **Access Technology Type Option Type Values**,
 which is automatically generated from :class:`pcapkit.vendor.mh.access_type.AccessType`.
 
@@ -66,6 +68,7 @@ class AccessType(IntEnum):
             key: Key to get enum item.
             default: Default value if not found.
 
+        :meta private:
         """
         if isinstance(key, int):
             return AccessType(key)

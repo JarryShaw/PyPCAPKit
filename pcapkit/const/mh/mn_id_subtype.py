@@ -3,6 +3,8 @@
 """Mobile Node Identifier Option Subtypes
 ============================================
 
+.. module:: pcapkit.vendor.mh.mn_id_subtype
+
 This module contains the constant enumeration for **Mobile Node Identifier Option Subtypes**,
 which is automatically generated from :class:`pcapkit.vendor.mh.mn_id_subtype.MNIDSubtype`.
 
@@ -48,6 +50,7 @@ class MNIDSubtype(IntEnum):
             key: Key to get enum item.
             default: Default value if not found.
 
+        :meta private:
         """
         if isinstance(key, int):
             return MNIDSubtype(key)

@@ -3,6 +3,8 @@
 """Registration Types
 ========================
 
+.. module:: pcapkit.vendor.hip.registration
+
 This module contains the constant enumeration for **Registration Types**,
 which is automatically generated from :class:`pcapkit.vendor.hip.registration.Registration`.
 
@@ -39,6 +41,7 @@ class Registration(IntEnum):
             key: Key to get enum item.
             default: Default value if not found.
 
+        :meta private:
         """
         if isinstance(key, int):
             return Registration(key)

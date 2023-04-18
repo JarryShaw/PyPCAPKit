@@ -3,6 +3,8 @@
 """TCP Checksum
 ==================
 
+.. module:: pcapkit.vendor.tcp.checksum
+
 This module contains the constant enumeration for **TCP Checksum**,
 which is automatically generated from :class:`pcapkit.vendor.tcp.checksum.Checksum`.
 
@@ -32,6 +34,7 @@ class Checksum(IntEnum):
             key: Key to get enum item.
             default: Default value if not found.
 
+        :meta private:
         """
         if isinstance(key, int):
             return Checksum(key)

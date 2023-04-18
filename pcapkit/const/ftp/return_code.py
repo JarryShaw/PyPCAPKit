@@ -3,6 +3,8 @@
 """FTP Server Return Code
 ============================
 
+.. module:: pcapkit.vendor.ftp.return_code
+
 This module contains the constant enumeration for **FTP Server Return Code**,
 which is automatically generated from :class:`pcapkit.vendor.ftp.return_code.ReturnCode`.
 
@@ -248,6 +250,7 @@ class ReturnCode(IntEnum):
             key: Key to get enum item.
             default: Default value if not found.
 
+        :meta private:
         """
         if isinstance(key, int):
             return ReturnCode(key)

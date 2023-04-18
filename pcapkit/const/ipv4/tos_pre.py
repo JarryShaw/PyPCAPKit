@@ -3,6 +3,8 @@
 """ToS (DS Field) Precedence
 ===============================
 
+.. module:: pcapkit.vendor.ipv4.tos_pre
+
 This module contains the constant enumeration for **ToS (DS Field) Precedence**,
 which is automatically generated from :class:`pcapkit.vendor.ipv4.tos_pre.ToSPrecedence`.
 
@@ -40,6 +42,7 @@ class ToSPrecedence(IntEnum):
             key: Key to get enum item.
             default: Default value if not found.
 
+        :meta private:
         """
         if isinstance(key, int):
             return ToSPrecedence(key)

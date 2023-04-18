@@ -3,6 +3,8 @@
 """Notify Message Types
 ==========================
 
+.. module:: pcapkit.vendor.hip.notify_message
+
 This module contains the constant enumeration for **Notify Message Types**,
 which is automatically generated from :class:`pcapkit.vendor.hip.notify_message.NotifyMessage`.
 
@@ -138,6 +140,7 @@ class NotifyMessage(IntEnum):
             key: Key to get enum item.
             default: Default value if not found.
 
+        :meta private:
         """
         if isinstance(key, int):
             return NotifyMessage(key)

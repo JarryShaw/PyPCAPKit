@@ -3,6 +3,8 @@
 """Flow Binding Type
 =======================
 
+.. module:: pcapkit.vendor.mh.fb_type
+
 This module contains the constant enumeration for **Flow Binding Type**,
 which is automatically generated from :class:`pcapkit.vendor.mh.fb_type.FlowBindingType`.
 
@@ -33,6 +35,7 @@ class FlowBindingType(IntEnum):
             key: Key to get enum item.
             default: Default value if not found.
 
+        :meta private:
         """
         if isinstance(key, int):
             return FlowBindingType(key)

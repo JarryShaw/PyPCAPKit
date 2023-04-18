@@ -3,6 +3,8 @@
 """Update Notification Acknowledgement Status Registry
 =========================================================
 
+.. module:: pcapkit.vendor.mh.upa_status
+
 This module contains the constant enumeration for **Update Notification Acknowledgement Status Registry**,
 which is automatically generated from :class:`pcapkit.vendor.mh.upa_status.UpdateNotificationACKStatus`.
 
@@ -42,6 +44,7 @@ class UpdateNotificationACKStatus(IntEnum):
             key: Key to get enum item.
             default: Default value if not found.
 
+        :meta private:
         """
         if isinstance(key, int):
             return UpdateNotificationACKStatus(key)

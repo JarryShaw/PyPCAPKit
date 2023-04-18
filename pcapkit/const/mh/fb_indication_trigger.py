@@ -3,6 +3,8 @@
 """Flow Binding Indication Triggers
 ======================================
 
+.. module:: pcapkit.vendor.mh.fb_indication_trigger
+
 This module contains the constant enumeration for **Flow Binding Indication Triggers**,
 which is automatically generated from :class:`pcapkit.vendor.mh.fb_indication_trigger.FlowBindingIndicationTrigger`.
 
@@ -36,6 +38,7 @@ class FlowBindingIndicationTrigger(IntEnum):
             key: Key to get enum item.
             default: Default value if not found.
 
+        :meta private:
         """
         if isinstance(key, int):
             return FlowBindingIndicationTrigger(key)

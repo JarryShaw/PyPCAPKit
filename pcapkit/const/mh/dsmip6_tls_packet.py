@@ -3,6 +3,8 @@
 """DSMIP6-TLS Packet Types Registry
 ======================================
 
+.. module:: pcapkit.vendor.mh.dsmip6_tls_packet
+
 This module contains the constant enumeration for **DSMIP6-TLS Packet Types Registry**,
 which is automatically generated from :class:`pcapkit.vendor.mh.dsmip6_tls_packet.DSMIP6TLSPacket`.
 
@@ -33,6 +35,7 @@ class DSMIP6TLSPacket(IntEnum):
             key: Key to get enum item.
             default: Default value if not found.
 
+        :meta private:
         """
         if isinstance(key, int):
             return DSMIP6TLSPacket(key)

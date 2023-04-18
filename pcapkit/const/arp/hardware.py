@@ -3,6 +3,8 @@
 """Hardware Types
 ====================
 
+.. module:: pcapkit.vendor.arp.hardware
+
 This module contains the constant enumeration for **Hardware Types**,
 which is automatically generated from :class:`pcapkit.vendor.arp.hardware.Hardware`.
 
@@ -152,6 +154,7 @@ class Hardware(IntEnum):
             key: Key to get enum item.
             default: Default value if not found.
 
+        :meta private:
         """
         if isinstance(key, int):
             return Hardware(key)

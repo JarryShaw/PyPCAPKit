@@ -3,6 +3,8 @@
 """HIP Transport Modes
 =========================
 
+.. module:: pcapkit.vendor.hip.transport
+
 This module contains the constant enumeration for **HIP Transport Modes**,
 which is automatically generated from :class:`pcapkit.vendor.hip.transport.Transport`.
 
@@ -36,6 +38,7 @@ class Transport(IntEnum):
             key: Key to get enum item.
             default: Default value if not found.
 
+        :meta private:
         """
         if isinstance(key, int):
             return Transport(key)

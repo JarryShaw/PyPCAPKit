@@ -3,6 +3,8 @@
 """Destination Options and Hop-by-Hop Options
 ================================================
 
+.. module:: pcapkit.vendor.ipv6.option
+
 This module contains the constant enumeration for **Destination Options and Hop-by-Hop Options**,
 which is automatically generated from :class:`pcapkit.vendor.ipv6.option.Option`.
 
@@ -118,6 +120,7 @@ class Option(IntEnum):
             key: Key to get enum item.
             default: Default value if not found.
 
+        :meta private:
         """
         if isinstance(key, int):
             return Option(key)
