@@ -85,10 +85,12 @@ Engine Comparison
 -----------------
 
 Due to the general overhead of ``pcapkit``, its extraction procedure takes
-around *0.0008* seconds per packet, which is already impressive but not enough
-comparing to other popular extration engines availbale on the market. Thus
-``pcapkit`` introduced alternative extractionengines to accelerate this
-procedure. By now ``pcapkit`` supports `Scapy`_, `DPKT`_, and `PyShark`_.
+around *0.96* milliseconds per packet, which is already impressive but not enough
+comparing to other popular extration engines availbale on the market, given the
+fact that ``pcapkit`` is a **comprehensive** packet processing module.
+
+Additionally, ``pcapkit`` introduced alternative extractionengines to accelerate
+this procedure. By now ``pcapkit`` supports `Scapy`_, `DPKT`_, and `PyShark`_.
 
 Test Environment
 ~~~~~~~~~~~~~~~~
@@ -96,27 +98,23 @@ Test Environment
 .. list-table::
 
    * - Operating System
-     - macOS Monterey
-   * - Processor Name
-     - Intel Core i7
-   * - Processor Speed
-     - 2.6 GHz
-   * - Total Number of Cores
-     - 6
+     - macOS Ventura 13.4 Beta (22F5037d)
+   * - Chip
+     - Apple M2 Pro
    * - Memory
      - 16 GB
 
 Test Results
 ~~~~~~~~~~~~
 
-============= =================================
-Engine        Performance (seconds per packet)
-============= =================================
-``dpkt``      0.00006832083066304525
-``scapy``     0.0002489296595255534
-``pcapkit``   0.0008274253209431966
-``pyshark``   0.039607704480489093
-============= =================================
+============= ===========================
+Engine        Performance (ms per packet)
+============= ===========================
+``dpkt``      0.048088_922256
+``scapy``     0.127444_444444
+``pcapkit``   0.964180_847514
+``pyshark``   23.665003_003003
+============= ===========================
 
 ------------
 Installation
