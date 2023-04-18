@@ -6,3 +6,6 @@ sphinx-autodoc-typehints==1.23.4
 
 # typing-extensions
 typing_extensions==4.5.0
+
+# sphinx-book-theme
+sphinx-book-theme==1.0.1
