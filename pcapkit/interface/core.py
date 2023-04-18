@@ -1,5 +1,8 @@
 # -*- coding: utf-8 -*-
-"""core user interface
+"""Core Interface
+====================
+
+.. module:: pcapkit.interface.core
 
 :mod:`pcapkit.interface.core` defines core user-oriented
 interfaces, variables, and etc., which wraps around the
@@ -23,6 +26,7 @@ if TYPE_CHECKING:
     from typing_extensions import Literal
 
     from pcapkit.foundation.reassembly.reassembly import Reassembly
+    from pcapkit.foundation.traceflow.traceflow import TraceFlow
     from pcapkit.protocols.misc.pcap.frame import Frame
 
     Formats = Literal['pcap', 'json', 'tree', 'plist']
@@ -59,13 +63,15 @@ PCAPKit = 'default'
 PyShark = 'pyshark'
 
 
-def extract(fin: 'Optional[str]' = None, fout: 'Optional[str]' = None, format: 'Optional[Formats]' = None,                                  # basic settings  # pylint: disable=redefined-builtin
-            auto: 'bool' = True, extension: 'bool' = True, store: 'bool' = True,                                                            # internal settings # pylint: disable=line-too-long
-            files: 'bool' = False, nofile: 'bool' = False, verbose: 'bool | VerboseHandler' = False,                                        # output settings # pylint: disable=line-too-long
-            engine: 'Optional[Engines]' = None, layer: 'Optional[Layers | Type[Protocol]]' = None, protocol: 'Optional[Protocols]' = None,  # extraction settings # pylint: disable=line-too-long
-            ip: 'bool' = False, ipv4: 'bool' = False, ipv6: 'bool' = False, tcp: 'bool' = False, strict: 'bool' = True,                     # reassembly settings # pylint: disable=line-too-long
-            trace: 'bool' = False, trace_fout: 'Optional[str]' = None, trace_format: 'Optional[Formats]' = None,                            # trace settings # pylint: disable=line-too-long,redefined-outer-name
-            trace_byteorder: 'Literal["big", "little"]' = sys.byteorder, trace_nanosecond: 'bool' = False) -> 'Extractor':                  # trace settings # pylint: disable=line-too-long
+def extract(fin: 'Optional[str]' = None, fout: 'Optional[str]' = None, format: 'Optional[Formats]' = None,                 # basic settings # pylint: disable=redefined-builtin
+            auto: 'bool' = True, extension: 'bool' = True, store: 'bool' = True,                                           # internal settings # pylint: disable=line-too-long
+            files: 'bool' = False, nofile: 'bool' = False, verbose: 'bool | VerboseHandler' = False,                       # output settings # pylint: disable=line-too-long
+            engine: 'Optional[Engines]' = None, layer: 'Optional[Layers] | Type[Protocol]' = None,                         # extraction settings # pylint: disable=line-too-long
+            protocol: 'Optional[Protocols]' = None,                                                                        # extraction settings # pylint: disable=line-too-long
+            reassembly: 'bool' = False, strict: 'bool' = True,                                                             # reassembly settings # pylint: disable=line-too-long
+            trace: 'bool' = False, trace_fout: 'Optional[str]' = None, trace_format: 'Optional[Formats]' = None,           # trace settings # pylint: disable=line-too-long
+            trace_byteorder: 'Literal["big", "little"]' = sys.byteorder, trace_nanosecond: 'bool' = False,                 # trace settings # pylint: disable=line-too-long
+            ip: 'bool' = False, ipv4: 'bool' = False, ipv6: 'bool' = False, tcp: 'bool' = False) -> 'Extractor':
     """Extract a PCAP file.
 
     Arguments:
@@ -87,10 +93,7 @@ def extract(fin: 'Optional[str]' = None, fout: 'Optional[str]' = None, format: '
         layer: extract til which layer
         protocol: extract til which protocol
 
-        ip: if record data for IPv4 & IPv6 reassembly
-        ipv4: if perform IPv4 reassembly
-        ipv6: if perform IPv6 reassembly
-        tcp: if perform TCP reassembly
+        reassembly: if perform reassembly
         strict: if set strict flag for reassembly
 
         trace: if trace TCP traffic flows
@@ -98,6 +101,11 @@ def extract(fin: 'Optional[str]' = None, fout: 'Optional[str]' = None, format: '
         trace_format: output file format of flow tracer
         trace_byteorder: output file byte order
         trace_nanosecond: output nanosecond-resolution file flag
+
+        ip: if record data for IPv4 & IPv6 reassembly
+        ipv4: if perform IPv4 reassembly
+        ipv6: if perform IPv6 reassembly
+        tcp: if perform TCP reassembly and/or flow tracing
 
     Returns:
         An :class:`~pcapkit.foundation.extraction.Extractor` object.
@@ -110,7 +118,7 @@ def extract(fin: 'Optional[str]' = None, fout: 'Optional[str]' = None, format: '
                      store=store, files=files, nofile=nofile,
                      auto=auto, verbose=verbose, extension=extension,
                      engine=engine, layer=layer, protocol=protocol,  # type: ignore[arg-type]
-                     ip=ip, ipv4=ipv4, ipv6=ipv6, tcp=tcp, strict=strict,
+                     ip=ip, ipv4=ipv4, ipv6=ipv6, tcp=tcp, strict=strict, reassembly=reassembly,
                      trace=trace, trace_fout=trace_fout, trace_format=trace_format,
                      trace_byteorder=trace_byteorder, trace_nanosecond=trace_nanosecond)
 
@@ -141,19 +149,29 @@ def reassemble(protocol: 'str | Type[Protocol]', strict: 'bool' = False) -> 'Rea
     raise FormatError(f'Unsupported reassembly protocol: {protocol}')
 
 
-def trace(fout: 'Optional[str]', format: 'Optional[str]',  # pylint: disable=redefined-builtin
+def trace(protocol: 'str | Type[Protocol]', fout: 'Optional[str]',
+          format: 'Optional[str]',  # pylint: disable=redefined-builtin
           byteorder: 'Literal["little", "big"]' = sys.byteorder,
-          nanosecond: bool = False) -> 'TCP_TraceFlow':
-    """Trace TCP flows.
+          nanosecond: bool = False) -> 'TraceFlow':
+    """Trace flows.
 
     Arguments:
+        protocol: protocol to be reassembled
         fout: output path
         format: output format
         byteorder: output file byte order
         nanosecond: output nanosecond-resolution file flag
 
     Returns:
-        A :class:`~pcapkit.foundation.traceflow.tcp.TCP_TraceFlow` object.
+        A :class:`~pcapkit.foundation.traceflow.traceflow.TraceFlow` object.
+
+    Raises:
+        FormatError: If ``protocol`` is **NOT** TCP.
 
     """
-    return TCP_TraceFlow(fout=fout, format=format, byteorder=byteorder, nanosecond=nanosecond)
+    if isinstance(protocol, type) and issubclass(protocol, Protocol):
+        protocol = protocol.id()[0]
+
+    if protocol == 'TCP':
+        return TCP_TraceFlow(fout=fout, format=format, byteorder=byteorder, nanosecond=nanosecond)
+    raise FormatError(f'Unsupported flow tracing protocol: {protocol}')

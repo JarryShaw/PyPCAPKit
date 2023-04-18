@@ -2,6 +2,8 @@
 """Auxiliary Interface
 =========================
 
+.. module:: pcapkit.interface.misc
+
 :mod:`pcapkit.interface.misc` contains miscellaneous
 user interface functions, classes, etc., which are
 generally provided per user's requests.
@@ -78,12 +80,12 @@ def follow_tcp_stream(fin: 'Optional[str]' = None, verbose: 'bool' = False,     
                            store=True, files=False, nofile=True, verbose=verbose, engine=engine,
                            layer=None, protocol=None, ip=False, ipv4=False, ipv6=False, tcp=False,
                            strict=False, trace=True, trace_fout=fout, trace_format=format,
-                           trace_byteorder=byteorder, trace_nanosecond=nanosecond)
+                           trace_byteorder=byteorder, trace_nanosecond=nanosecond)  # type: ignore[var-annotated]
 
     fallback = False
-    if extraction.engine == 'dpkt':
+    if extraction.engine == 'dpkt':  # type: ignore[comparison-overlap]
         from pcapkit.toolkit.dpkt import tcp_reassembly  # pylint: disable=import-outside-toplevel
-    elif extraction.engine == 'scapy':
+    elif extraction.engine == 'scapy':  # type: ignore[comparison-overlap]
         from pcapkit.toolkit.scapy import tcp_reassembly  # type: ignore[no-redef] # isort: skip # pylint: disable=import-outside-toplevel
     else:
         from pcapkit.toolkit.default import tcp_reassembly  # type: ignore[no-redef] # isort: skip # pylint: disable=import-outside-toplevel

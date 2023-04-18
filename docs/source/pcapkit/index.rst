@@ -32,7 +32,6 @@ schema definitions as well as various customisable interfaces.
    utilities/index
    const/index
    vendor/index
-   self
 
 .. automodule:: pcapkit.__main__
    :no-members:
