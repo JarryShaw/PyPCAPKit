@@ -1,3 +1,4 @@
+================================================================
 :class:`~pcapkit.protocols.link.ospf.OSPF` Constant Enumerations
 ================================================================
 
@@ -14,24 +15,30 @@ enumerations include:
    * - :class:`OSPF_Packet <pcapkit.const.ospf.packet.Packet>`
      - OSPF Packet Types [*]_
 
-.. automodule:: pcapkit.const.ospf.authentication
-   :no-members:
+Authentication Types
+====================
+
+.. module:: pcapkit.const.ospf.authentication
+
+This module contains the constant enumeration for **Authentication Types**,
+which is automatically generated from :class:`pcapkit.vendor.ospf.authentication.Authentication`.
 
 .. autoclass:: pcapkit.const.ospf.authentication.Authentication
    :members:
    :undoc-members:
-   :private-members:
-   :exclude-members: get, _missing_
    :show-inheritance:
 
-.. automodule:: pcapkit.const.ospf.packet
-   :no-members:
+OSPF Packet Types
+=================
+
+.. module:: pcapkit.const.ospf.packet
+
+This module contains the constant enumeration for **OSPF Packet Types**,
+which is automatically generated from :class:`pcapkit.vendor.ospf.packet.Packet`.
 
 .. autoclass:: pcapkit.const.ospf.packet.Packet
    :members:
    :undoc-members:
-   :private-members:
-   :exclude-members: get, _missing_
    :show-inheritance:
 
 .. raw:: html

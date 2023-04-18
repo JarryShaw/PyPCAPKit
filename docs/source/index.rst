@@ -3,6 +3,7 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
+======================================
 PyPCAPKit - Stream PCAP File Extractor
 ======================================
 
@@ -15,6 +16,10 @@ output report formats.
 
    The whole project supports **Python 3.6** or later.
 
+.. .. contents::
+..    :depth: 2
+..    :local:
+
 .. toctree::
    :maxdepth: 2
 
@@ -22,9 +27,8 @@ output report formats.
    demo
    pep
 
------
 About
------
+=====
 
 :mod:`PyPCAPKit <pcapkit>` is an independent open source library, using only
 :mod:`DictDumper <dictdumper>` as its formatted output dumper.
@@ -47,6 +51,7 @@ Unlike popular PCAP file extractors, such as :mod:`Scapy <scapy>`,
 **streaming** strategy to read input files. That is to read frame by frame,
 decrease occupation on memory, as well as enhance efficiency in some way.
 
+----------------
 Module Structure
 ----------------
 
@@ -91,50 +96,44 @@ In :mod:`pcapkit`, all files can be described as following eight parts.
   Constant enumerations used in :mod:`pcapkit` for protocol
   family extraction and representation.
 
+-----------------
 Engine Comparison
 -----------------
 
 Due to the general overhead of :mod:`pcapkit`, its extraction procedure takes
-around *0.0008* seconds per packet, which is already impressive but not enough
-comparing to other popular extration engines availbale on the market. Thus
-:mod:`pcapkit` introduced alternative extractionengines to accelerate this
-procedure. By now :mod:`pcapkit` supports `Scapy`_, `DPKT`_, and `PyShark`_.
+around *0.96* milliseconds per packet, which is already impressive but not enough
+comparing to other popular extration engines availbale on the market, given the
+fact that :mod:`pcapkit` is a **comprehensive** packet processing module.
+
+Additionally, :mod:`pcapkit` introduced alternative extractionengines to accelerate
+this procedure. By now :mod:`pcapkit` supports `Scapy`_, `DPKT`_, and `PyShark`_.
 
 Test Environment
-~~~~~~~~~~~~~~~~
+----------------
 
 .. list-table::
 
    * - Operating System
-     - macOS Monterey
-   * - Processor Name
-     - Intel Core i7
-   * - Processor Speed
-     - 2.6 GHz
-   * - Total Number of Cores
-     - 6
+     - macOS Ventura 13.4 Beta (22F5037d)
+   * - Chip
+     - Apple M2 Pro
    * - Memory
      - 16 GB
 
 Test Results
-~~~~~~~~~~~~
-
-============= =================================
-Engine        Performance (seconds per packet)
-============= =================================
-``dpkt``      0.00006832083066304525
-``scapy``     0.0002489296595255534
-``pcapkit``   0.0008274253209431966
-``pyshark``   0.039607704480489093
-============= =================================
-
-.. raw:: html
-
-   <br />
-
 ------------
+
+============= ===========================
+Engine        Performance (ms per packet)
+============= ===========================
+``dpkt``      0.048088_922256
+``scapy``     0.127444_444444
+``pcapkit``   0.964180_847514
+``pyshark``   23.665003_003003
+============= ===========================
+
 Installation
-------------
+============
 
 .. note::
 
@@ -180,6 +179,7 @@ For CLI usage, you will need to install the optional packages:
    # or explicitly...
    pip install pypcapkit emoji
 
+==================
 Indices and tables
 ==================
 

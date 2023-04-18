@@ -1,3 +1,4 @@
+================================================================
 :class:`~pcapkit.protocols.link.l2tp.L2TP` Constant Enumerations
 ================================================================
 
@@ -12,12 +13,15 @@ enumerations include:
    * - :class:`L2TP_Type <pcapkit.const.l2tp.type.Type>`
      - L2TP Types
 
-.. automodule:: pcapkit.const.l2tp.type
-   :no-members:
+L2TP Type
+=========
+
+.. module:: pcapkit.const.l2tp.type
+
+This module contains the constant enumeration for **L2TP Type**,
+which is automatically generated from :class:`pcapkit.vendor.l2tp.type.Type`.
 
 .. autoclass:: pcapkit.const.l2tp.type.Type
    :members:
    :undoc-members:
-   :private-members:
-   :exclude-members: get, _missing_
    :show-inheritance:

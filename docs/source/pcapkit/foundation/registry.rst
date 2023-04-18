@@ -19,7 +19,7 @@ Auxiliary Methods
 Dumper Registries
 -----------------
 
-.. autofunction:: pcapkit.foundation.registry.register_extractor
+.. autofunction:: pcapkit.foundation.registry.register_extractor_output
 
 .. autofunction:: pcapkit.foundation.registry.register_traceflow
 

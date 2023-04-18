@@ -1,3 +1,4 @@
+===================================================================
 :class:`~pcapkit.protocols.transport.tcp.TCP` Constant Enumerations
 ===================================================================
 
@@ -11,39 +12,48 @@ enumerations include:
 
    * - :class:`TCP_Checksum <pcapkit.const.tcp.checksum.Checksum>`
      - TCP Checksum [*]_
-   * - :class:`TCP_MPTCPOption <pcapkit.vendor.tcp.mp_tcp_option.MPTCPOption>`
+   * - :class:`TCP_MPTCPOption <pcapkit.const.tcp.mp_tcp_option.MPTCPOption>`
      - Multipath TCP options [*]_
-   * - :class:`TCP_Option <pcapkit.vendor.tcp.option.Option>`
+   * - :class:`TCP_Option <pcapkit.const.tcp.option.Option>`
      - TCP Option Kind Numbers
 
-.. automodule:: pcapkit.const.tcp.checksum
-   :no-members:
+TCP Checksum
+============
+
+.. module:: pcapkit.const.tcp.checksum
+
+This module contains the constant enumeration for **TCP Checksum**,
+which is automatically generated from :class:`pcapkit.vendor.tcp.checksum.Checksum`.
 
 .. autoclass:: pcapkit.const.tcp.checksum.Checksum
    :members:
    :undoc-members:
-   :private-members:
-   :exclude-members: get, _missing_
    :show-inheritance:
 
-.. automodule:: pcapkit.const.tcp.mp_tcp_option
-   :no-members:
+Multipath TCP options
+=====================
+
+.. module:: pcapkit.const.tcp.mp_tcp_option
+
+This module contains the constant enumeration for **Multipath TCP options**,
+which is automatically generated from :class:`pcapkit.vendor.tcp.mp_tcp_option.MPTCPOption`.
 
 .. autoclass:: pcapkit.const.tcp.mp_tcp_option.MPTCPOption
    :members:
    :undoc-members:
-   :private-members:
-   :exclude-members: get, _missing_
    :show-inheritance:
 
-.. automodule:: pcapkit.const.tcp.option
-   :no-members:
+TCP Option Kind Numbers
+=======================
+
+.. module:: pcapkit.const.tcp.option
+
+This module contains the constant enumeration for **TCP Option Kind Numbers**,
+which is automatically generated from :class:`pcapkit.vendor.tcp.option.Option`.
 
 .. autoclass:: pcapkit.const.tcp.option.Option
    :members:
    :undoc-members:
-   :private-members:
-   :exclude-members: get, _missing_
    :show-inheritance:
 
 .. raw:: html

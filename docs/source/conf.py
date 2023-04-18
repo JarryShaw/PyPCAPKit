@@ -51,6 +51,7 @@ extensions = [
     'sphinx.ext.napoleon',
     'sphinx.ext.todo',
     'sphinx_autodoc_typehints',
+    'sphinx_book_theme',
 ]
 
 intersphinx_mapping = {
@@ -68,7 +69,7 @@ autodoc_default_options = {
     'member-order': 'bysource',
     # 'special-members': '__init__',
     # 'undoc-members': True,
-    'exclude-members': '__weakref__, _abc_impl, _unbound_fields, _wtforms_meta, _meta, _schema',
+    'exclude-members': '__weakref__, _abc_impl, _unbound_fields, _wtforms_meta, _meta, _schema, _missing_',
     'ignore-module-all': True,
     # 'private-members': True,
     'show-inheritance': True,
@@ -117,6 +118,7 @@ exclude_patterns = []  # type: list[str]
 # a list of builtin themes.
 #
 html_theme = 'alabaster'
+#html_theme = 'sphinx_book_theme'
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
@@ -136,7 +138,11 @@ html_theme_options = {
     #'note_bg': '#FFF59C',
     #'travis_button': True,
     #'codecov_button': True,
+
+    "repository_url": "https://github.com/jarryshaw/pypcapkit",
+    "use_repository_button": True,
 }
+html_title = "PyPCAPKit - A Pure Python Comprehensive Packet Processing Toolit"
 
 
 def maybe_skip_member(app: 'Sphinx', what: str, name: str,  # pylint: disable=unused-argument

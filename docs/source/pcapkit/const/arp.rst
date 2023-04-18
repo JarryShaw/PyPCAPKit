@@ -1,3 +1,4 @@
+==============================================================
 :class:`~pcapkit.protocols.link.arp.ARP` Constant Enumerations
 ==============================================================
 
@@ -14,23 +15,30 @@ enumerations include:
    * - :class:`ARP_Operation <pcapkit.const.arp.operation.Operation>`
      - Operation Codes [*]_
 
-.. automodule:: pcapkit.const.arp.hardware
-   :no-members:
+Hardware Types
+==============
+
+.. module:: pcapkit.const.arp.hardware
+
+This module contains the constant enumeration for **Hardware Types**,
+which is automatically generated from :class:`pcapkit.vendor.arp.hardware.Hardware`.
 
 .. autoclass:: pcapkit.const.arp.hardware.Hardware
    :members:
    :undoc-members:
-   :exclude-members: get, _missing_
    :show-inheritance:
 
-.. automodule:: pcapkit.const.arp.operation
-   :no-members:
+Operation Codes
+===============
+
+.. module:: pcapkit.const.arp.operation
+
+This module contains the constant enumeration for **Operation Codes**,
+which is automatically generated from :class:`pcapkit.vendor.arp.operation.Operation`.
 
 .. autoclass:: pcapkit.const.arp.operation.Operation
    :members:
    :undoc-members:
-   :private-members:
-   :exclude-members: get, _missing_
    :show-inheritance:
 
 .. raw:: html

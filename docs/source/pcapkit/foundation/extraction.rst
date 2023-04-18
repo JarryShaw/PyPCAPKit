@@ -65,19 +65,11 @@ extracts parametres from a PCAP file.
    .. automethod:: record_header
    .. automethod:: record_frames
 
-   .. automethod:: register
+   .. automethod:: register_output
+   .. automethod:: register_engine
    .. automethod:: make_name
 
-   .. automethod:: _read_frame
    .. automethod:: _cleanup
-
-   .. automethod:: _default_read_frame
-   .. automethod:: _run_scapy
-   .. automethod:: _scapy_read_frame
-   .. automethod:: _run_dpkt
-   .. automethod:: _dpkt_read_frame
-   .. automethod:: _run_pyshark
-   .. automethod:: _pyshark_read_frame
 
    .. autoattribute:: _flag_a
    .. autoattribute:: _flag_d

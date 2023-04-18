@@ -9,11 +9,12 @@ Module Documentation
 
 .. _DictDumper: https://dictdumper.jarryshaw.me
 
-Unlike popular PCAP file extractors, such as `Scapy`_,
-`DPKT`_, `PyShark`_, and etc, :mod:`pcapkit` uses streaming
-strategy to read input files. That is to read frame by
-frame, decrease occupation on memory, as well as enhance
-efficiency in some way.
+Unlike popular PCAP file extractors, such as `Scapy`_, `DPKT`_,
+`PyShark`_, and etc, :mod:`pcapkit` tends to provide comprehensive
+support to all protocols, including but not limited to their
+parameters and/or options, etc. Therefore, :mod:`pcapkit` contains
+enumeration registries used by protocols, independent protocol
+schema definitions as well as various customisable interfaces.
 
 .. _Scapy: https://scapy.net
 .. _DPKT: https://dpkt.readthedocs.io
@@ -31,6 +32,7 @@ efficiency in some way.
    utilities/index
    const/index
    vendor/index
+   self
 
 .. automodule:: pcapkit.__main__
    :no-members:

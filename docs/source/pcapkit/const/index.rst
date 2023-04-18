@@ -14,6 +14,14 @@ Protocol Numbers
 
    reg
 
+Miscellanous
+------------
+
+.. toctree::
+   :maxdepth: 2
+
+   pcapng
+
 Link Layer
 ----------
 

@@ -4,11 +4,11 @@ IPv6 Datagram Reassembly
 .. module:: pcapkit.foundation.reassembly.ipv6
 
 :mod:`pcapkit.foundation.reassembly.ipv6` contains
-:class:`~pcapkit.foundation.reassembly.ipv6.IPv6_Reassembly`
+:class:`~pcapkit.foundation.reassembly.ipv6.IPv6`
 only, which reconstructs fragmented IPv6 packets back to
 origin. Please refer to :doc:`ip` for more information.
 
-.. autoclass:: pcapkit.foundation.reassembly.ipv6.IPv6_Reassembly
+.. autoclass:: pcapkit.foundation.reassembly.ipv6.IPv6
    :no-members:
    :show-inheritance:
 
@@ -25,7 +25,7 @@ Terminology
 
    ipv6.packet
        Data structure for **IPv6 datagram reassembly**
-       (:meth:`IPv6_Reassembly.reassembly <pcapkit.foundation.reassembly.reassembly.Reassembly.reassembly>`)
+       (:meth:`IPv6.reassembly <pcapkit.foundation.reassembly.reassembly.Reassembly.reassembly>`)
        is as following:
 
        .. code-block:: python
@@ -48,7 +48,7 @@ Terminology
 
    ipv6.datagram
        Data structure for **reassembled IPv6 datagram** (element from
-       :attr:`IPv6_Reassembly.datagram <pcapkit.foundation.reassembly.reassembly.Reassembly.datagram>`
+       :attr:`IPv6.datagram <pcapkit.foundation.reassembly.reassembly.Reassembly.datagram>`
        *tuple*) is as following:
 
        .. code-block:: text
@@ -83,7 +83,7 @@ Terminology
 
    ipv6.buffer
        Data structure for internal buffering when performing reassembly algorithms
-       (:attr:`IPv6_Reassembly._buffer <pcapkit.foundation.reassembly.reassembly.Reassembly._buffer>`)
+       (:attr:`IPv6._buffer <pcapkit.foundation.reassembly.reassembly.Reassembly._buffer>`)
        is as following:
 
        .. code-block:: text

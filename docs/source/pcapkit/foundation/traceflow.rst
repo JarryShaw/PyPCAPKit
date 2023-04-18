@@ -102,13 +102,13 @@ Terminology
 Data Structures
 ---------------
 
-.. data:: pcapkit.foundation.traceflow.BufferID
+.. data:: pcapkit.foundation.traceflow.data.tcp.BufferID
    :type: tuple[IPAddress, int, IPAddress, int]
 
    Buffer ID is a tuple of source IP, source port, destination IP, and
    destination port.
 
-.. autoclass:: pcapkit.foundation.traceflow.Packet(protocol, index, frame, syn, fin, src, dst, srcport, dstport, timestamp)
+.. autoclass:: pcapkit.foundation.traceflow.data.tcp.Packet(protocol, index, frame, syn, fin, src, dst, srcport, dstport, timestamp)
    :no-members:
    :show-inheritance:
 
@@ -126,7 +126,7 @@ Data Structures
    .. autoattribute:: dstport
    .. autoattribute:: timestamp
 
-.. autoclass:: pcapkit.foundation.traceflow.Buffer(fpout, index, label)
+.. autoclass:: pcapkit.foundation.traceflow.data.tcp.Buffer(fpout, index, label)
    :no-members:
    :show-inheritance:
 
@@ -137,7 +137,7 @@ Data Structures
    .. autoattribute:: index
    .. autoattribute:: label
 
-.. autoclass:: pcapkit.foundation.traceflow.Index(fpout, index, label)
+.. autoclass:: pcapkit.foundation.traceflow.data.tcp.Index(fpout, index, label)
    :no-members:
    :show-inheritance:
 

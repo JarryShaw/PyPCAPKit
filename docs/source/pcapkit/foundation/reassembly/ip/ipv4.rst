@@ -4,11 +4,11 @@ IPv4 Datagram Reassembly
 .. module:: pcapkit.foundation.reassembly.ipv4
 
 :mod:`pcapkit.foundation.reassembly.ipv4` contains
-:class:`~pcapkit.foundation.reassembly.ipv4.IPv4_Reassembly`
+:class:`~pcapkit.foundation.reassembly.ipv4.IPv4`
 only, which reconstructs fragmented IPv4 packets back to
 origin. Please refer to :doc:`ip` for more information.
 
-.. autoclass:: pcapkit.foundation.reassembly.ipv4.IPv4_Reassembly
+.. autoclass:: pcapkit.foundation.reassembly.ipv4.IPv4
    :no-members:
    :show-inheritance:
 
@@ -25,7 +25,7 @@ Terminology
 
    ipv4.packet
        Data structure for **IPv4 datagram reassembly**
-       (:meth:`IPv4_Reassembly.reassembly <pcapkit.foundation.reassembly.reassembly.Reassembly.reassembly>`)
+       (:meth:`IPv4.reassembly <pcapkit.foundation.reassembly.reassembly.Reassembly.reassembly>`)
        is as following:
 
        .. code-block:: python
@@ -48,7 +48,7 @@ Terminology
 
    ipv4.datagram
        Data structure for **reassembled IPv4 datagram** (element from
-       :attr:`IPv4_Reassembly.datagram <pcapkit.foundation.reassembly.reassembly.Reassembly.datagram>`
+       :attr:`IPv4.datagram <pcapkit.foundation.reassembly.reassembly.Reassembly.datagram>`
        *tuple*) is as following:
 
        .. code-block:: text
@@ -84,7 +84,7 @@ Terminology
 
    ipv4.buffer
        Data structure for internal buffering when performing reassembly algorithms
-       (:attr:`IPv4_Reassembly._buffer <pcapkit.foundation.reassembly.reassembly.Reassembly._buffer>`)
+       (:attr:`IPv4._buffer <pcapkit.foundation.reassembly.reassembly.Reassembly._buffer>`)
        is as following:
 
        .. code-block:: text

@@ -7,7 +7,7 @@ Implementation
 :class:`~pcapkit.foundation.reassembly.reassembly.Reassembly` only,
 which reconstructs fragmented TCP packets back to origin.
 
-.. autoclass:: pcapkit.foundation.reassembly.tcp.TCP_Reassembly
+.. autoclass:: pcapkit.foundation.reassembly.tcp.TCP
    :no-members:
    :show-inheritance:
 
@@ -27,7 +27,7 @@ Terminology
 
    tcp.packet
        Data structure for **TCP datagram reassembly**
-       (:meth:`TCP_Reassembly.reassembly <pcapkit.foundation.reassembly.reassembly.Reassembly.reassembly>`)
+       (:meth:`TCP.reassembly <pcapkit.foundation.reassembly.reassembly.Reassembly.reassembly>`)
        is as following:
 
        .. code-block:: python
@@ -54,7 +54,7 @@ Terminology
 
    tcp.datagram
        Data structure for **reassembled TCP datagram** (element from
-       :attr:`TCP_Reassembly.datagram <pcapkit.foundation.reassembly.reassembly.Reassembly.datagram>`
+       :attr:`TCP.datagram <pcapkit.foundation.reassembly.reassembly.Reassembly.datagram>`
        *tuple*) is as following:
 
        .. code-block:: text
@@ -98,7 +98,7 @@ Terminology
 
    tcp.buffer
        Data structure for internal buffering when performing reassembly algorithms
-       (:attr:`TCP_Reassembly._buffer <pcapkit.foundation.reassembly.reassembly.Reassembly._buffer>`)
+       (:attr:`TCP._buffer <pcapkit.foundation.reassembly.reassembly.Reassembly._buffer>`)
        is as following:
 
        .. code-block:: text

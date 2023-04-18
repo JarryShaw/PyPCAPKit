@@ -4,11 +4,11 @@ Base Class
 .. module:: pcapkit.foundation.reassembly.ip
 
 :mod:`pcapkit.foundation.reassembly.ip` contains
-:class:`~pcapkit.foundation.reassembly.ip.IP_Reassembly`
+:class:`~pcapkit.foundation.reassembly.ip.IP`
 only, which reconstructs fragmented IP packets back to
 origin.
 
-.. autoclass:: pcapkit.foundation.reassembly.ip.IP_Reassembly
+.. autoclass:: pcapkit.foundation.reassembly.ip.IP
    :no-members:
    :show-inheritance:
 
