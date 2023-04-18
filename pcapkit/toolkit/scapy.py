@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
-""":mod:`Scapy <scapy>` Tools
-================================
+"""Scapy Tools
+=================
+
+.. module:: pcapkit.toolkit.scapy
 
 :mod:`pcapkit.toolkit.scapy` contains all you need for
 :mod:`pcapkit` handy usage with `Scapy`_ engine. All reforming

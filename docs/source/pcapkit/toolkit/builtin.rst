@@ -1,5 +1,9 @@
-:mod:`PyPCAPKit <pcapkit>` Tools
-================================
+================
+Built-in Support
+================
+
+PyPCAPKit Tools
+===============
 
 .. module:: pcapkit.toolkit.default
 
@@ -8,6 +12,9 @@
 flag to indicate if usable for its caller.
 
 .. autofunction:: pcapkit.toolkit.default.ipv4_reassembly
+
 .. autofunction:: pcapkit.toolkit.default.ipv6_reassembly
+
 .. autofunction:: pcapkit.toolkit.default.tcp_reassembly
+
 .. autofunction:: pcapkit.toolkit.default.tcp_traceflow

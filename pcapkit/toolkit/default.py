@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
-""":mod:`PyPCAPKit <pcapkit>` Tools
-======================================
+"""PyPCAPKit Tools
+=====================
+
+.. module:: pcapkit.toolkit.default
 
 :mod:`pcapkit.toolkit.default` contains all you need for
 :mod:`pcapkit` handy usage. All functions returns with a
@@ -184,7 +186,7 @@ def tcp_traceflow(frame: 'Frame', *, data_link: 'LinkType') -> 'TF_TCP_Packet | 
           flow tracing (:term:`trace.tcp.packet`) will be returned; otherwise, returns :data:`None`.
 
     See Also:
-        :class:`pcapkit.foundation.traceflow.tcp.TraceFlow`
+        :class:`pcapkit.foundation.traceflow.tcp.TCP`
 
     """
     if 'TCP' in frame:

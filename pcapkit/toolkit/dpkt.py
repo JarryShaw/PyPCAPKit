@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
-""":mod:`DPKT <dpkt>` Tools
-==============================
+"""DPKT Tools
+================
+
+.. module:: pcapkit.toolkit.dpkt
 
 :mod:`pcapkit.toolkit.dpkt` contains all you need for
 :mod:`pcapkit` handy usage with `DPKT`_ engine. All reforming
