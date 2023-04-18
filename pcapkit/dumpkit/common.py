@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
-"""Dump Utilities
-====================
+"""Common Utilities
+======================
 
-:mod:`pcapkit.dumpkit.compat` is the collection of common utility
+.. module:: pcapkit.dumpkit.common
+
+:mod:`pcapkit.dumpkit.common` is the collection of common utility
 functions for :mod:`pcapkit.dumpkit` implementation, which is
 generally the customised hooks for :class:`dictdumper.Dumper`
 classes.
@@ -32,13 +34,13 @@ def object_hook(self: 'Dumper', o: 'Any') -> 'Any':
     """Convert content for function call.
 
     Args:
+        self: Dumper instance.
         o: object to convert
 
     Returns:
         Converted object.
 
     """
-
     if isinstance(o, decimal.Decimal):
         return str(o)
     if isinstance(o, datetime.timedelta):
@@ -58,11 +60,40 @@ def object_hook(self: 'Dumper', o: 'Any') -> 'Any':
 
 
 def default(self: 'Dumper', o: 'Any') -> 'Literal["fallback"]':  # pylint: disable=unused-argument
-    """Check content type for function call."""
+    """Check content type for function call.
+
+    Args:
+        self: Dumper instance.
+        o: Object to check.
+
+    Returns:
+        Fallback string.
+
+    Notes:
+        This function is a fallback for :meth:`dictdumper.dumper.Dumper.default`.
+        It will be called when :meth:`dictdumper.dumper.Dumper.default` fails
+        to find a suitable function for dumping and it should pair with
+        :func:`pcapkit.dumpkit.common._append_fallback` for use.
+
+    """
     return 'fallback'
 
 
 def _append_fallback(self: 'Dumper', value: 'Any', file: 'TextIO') -> 'None':
+    """Fallback function for dumping.
+
+    Args:
+        self: Dumper instance.
+        value: Value to dump.
+        file: File object to write.
+
+    Notes:
+        This function is a fallback for :meth:`dictdumper.dumper.Dumper.default`.
+        It will be called when :meth:`dictdumper.dumper.Dumper.default` fails
+        to find a suitable function for dumping and it should pair with
+        :func:`pcapkit.dumpkit.common.default` for use.
+
+    """
     if hasattr(value, '__slots__'):
         new_value = {key: getattr(value, key) for key in value.__slots__}
     elif hasattr(value, '__dict__'):

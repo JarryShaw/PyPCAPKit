@@ -18,6 +18,3 @@ specifically for PCAP format, which is alike those described in
    :param \*\*kwargs: arbitrary keyword arguments
 
    .. autoproperty:: kind
-
-   .. .. automethod:: _dump_header
-   .. .. automethod:: _append_value
