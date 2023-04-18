@@ -26,6 +26,7 @@ coverage = "*"
 codecov = "*"
 sphinx = "*"
 sphinx-autodoc-typehints = "*"
+sphinx-book-theme = "*"
 rstcheck = {extras = ["sphinx","toml"],version = "*"}
 esbonio = "*"
 vermin = "*"
