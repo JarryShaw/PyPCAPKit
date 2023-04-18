@@ -3,6 +3,8 @@
 """Decorator Functions
 =========================
 
+.. module:: pcapkit.utilities.decorators
+
 :mod:`pcapkit.utilities.decorators` contains several useful
 decorators, including :func:`~pcapkit.utilities.decorators.seekset`,
 :func:`~pcapkit.utilities.decorators.beholder` and

@@ -2,6 +2,8 @@
 """User Defined Warnings
 ===========================
 
+.. module:: pcapkit.utilities.warnings
+
 :mod:`pcapkit.warnings` refined built-in warnings.
 
 """

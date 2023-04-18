@@ -2,6 +2,8 @@
 """User Defined Exceptions
 =============================
 
+.. module:: pcapkit.utilities.exceptions
+
 :mod:`pcapkit.exceptions` refined built-in exceptions.
 Make it possible to show only user error stack infomation [*]_,
 when exception raised on user's operation.

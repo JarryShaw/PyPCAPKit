@@ -5,14 +5,15 @@ User Defined Warnings
 
 :mod:`pcapkit.warnings` refined built-in warnings.
 
-.. autofunction:: pcapkit.utilities.warnings.warn
-
 .. autoexception:: pcapkit.utilities.warnings.BaseWarning
    :no-members:
    :show-inheritance:
 
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
+
+:exc:`ImportWarning` Category
+-----------------------------
 
 .. autoexception:: pcapkit.utilities.warnings.FormatWarning
    :no-members:
@@ -34,6 +35,9 @@ User Defined Warnings
 
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
+
+:exc:`RuntimeWarning` Category
+------------------------------
 
 .. autoexception:: pcapkit.utilities.warnings.FileWarning
    :no-members:
@@ -83,6 +87,23 @@ User Defined Warnings
 
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
+
+.. autoexception:: pcapkit.utilities.warnings.UnknownFieldWarning
+   :no-members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
+.. autoexception:: pcapkit.utilities.warnings.RegistryWarning
+   :no-members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
+:exc:`ResourceWarning` Category
+-------------------------------
 
 .. autoexception:: pcapkit.utilities.warnings.DPKTWarning
    :no-members:
