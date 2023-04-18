@@ -7,15 +7,16 @@ Version Info
 like class :class:`~pcapkit.corekit.version.VersionInfo`,
 which is originally designed alike :class:`sys.version_info`.
 
-.. autodata:: pcapkit.corekit.version.VersionInfo
-   :no-value:
+.. autoclass:: pcapkit.corekit.version.VersionInfo
+   :no-members:
+   :show-inheritance:
 
-   .. attribute:: major
+   .. property:: major
       :type: int
 
       Major version number.
 
-   .. attribute:: minor
+   .. property:: minor
       :type: int
 
       Minor version number.

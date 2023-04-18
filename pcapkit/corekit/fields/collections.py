@@ -30,10 +30,10 @@ class ListField(_Field[List[_TL]]):
     """Field list for protocol fields.
 
     Args:
-        length: field size (in bytes); if a callable is given, it should return
+        length: Field size (in bytes); if a callable is given, it should return
             an integer value and accept the current packet as its only argument.
-        item_type: field type of the contained items.
-        callback: callback function to be called upon
+        item_type: Field type of the contained items.
+        callback: Callback function to be called upon
             :meth:`self.__call__ <pcapkit.corekit.fields.field._Field.__call__>`.
 
     This field is used to represent a list of fields, as in the case of lists of
@@ -63,7 +63,10 @@ class ListField(_Field[List[_TL]]):
         """Update field attributes.
 
         Args:
-            packet: packet data.
+            packet: Packet data.
+
+        Returns:
+            Updated field instance.
 
         Notes:
             This method will return a new instance of :class:`ListField`
@@ -81,8 +84,8 @@ class ListField(_Field[List[_TL]]):
         """Pack field value into :obj:`bytes`.
 
         Args:
-            value: field value.
-            packet: packet data.
+            value: Field value.
+            packet: Packet data.
 
         Returns:
             Packed field value.
@@ -110,8 +113,8 @@ class ListField(_Field[List[_TL]]):
         """Unpack field value from :obj:`bytes`.
 
         Args:
-            buffer: field buffer.
-            packet: packet data.
+            buffer: Field buffer.
+            packet: Packet data.
 
         Returns:
             Unpacked field value.
@@ -155,15 +158,15 @@ class OptionField(ListField):
     """Field list for protocol options.
 
     Args:
-        length: field size (in bytes); if a callable is given, it should return
+        length: Field size (in bytes); if a callable is given, it should return
             an integer value and accept the current packet as its only argument.
-        base_schema: base schema for option fields.
-        type_name: name of the option type field.
-        registry: option registry, as in a mapping from option types (enumeration
+        base_schema: Base schema for option fields.
+        type_name: Name of the option type field.
+        registry: Option registry, as in a mapping from option types (enumeration
             values) to option schemas, with the default value being the unknown
             option schema.
-        eool: enumeration of the EOOL (end-of-option-list, or equivalent) option
-        callback: callback function to be called upon
+        eool: Enumeration of the EOOL (end-of-option-list, or equivalent) option
+        callback: Callback function to be called upon
             :meth:`self.__call__ <pcapkit.corekit.fields.field._Field.__call__>`.
 
     This field is used to represent a list of fields, as in the case of lists of
@@ -217,8 +220,8 @@ class OptionField(ListField):
         """Unpack field value from :obj:`bytes`.
 
         Args:
-            buffer: field buffer.
-            packet: packet data.
+            buffer: Field buffer.
+            packet: Packet data.
 
         Returns:
             Unpacked field value.

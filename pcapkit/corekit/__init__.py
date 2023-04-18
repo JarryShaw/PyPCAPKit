@@ -3,6 +3,8 @@
 """Core Utilities
 ====================
 
+.. module:: pcapkit.corekit
+
 :mod:`pcapkit.corekit` is the collection of core utilities
 for :mod:`pcapkit` implementation, including :obj:`dict` like
 class :class:`~pcapkit.corekit.infoclass.Info`,

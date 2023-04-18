@@ -22,6 +22,8 @@ collection class :class:`~pcapkit.corekit.protochain.ProtoChain`.
    .. automethod:: index
    .. automethod:: count
 
-   .. automethod:: __init__
    .. automethod:: __str__
    .. automethod:: __repr__
+
+   .. automethod:: __add__
+   .. automethod:: __contains__

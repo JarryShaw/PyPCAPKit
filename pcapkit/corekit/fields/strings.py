@@ -32,10 +32,10 @@ class _TextField(Field[_T], Generic[_T]):
     """Internal text value for protocol fields.
 
     Args:
-        length: field size (in bytes); if a callable is given, it should return
+        length: Field size (in bytes); if a callable is given, it should return
             an integer value and accept the current packet as its only argument.
-        default: field default value, if any.
-        callback: callback function to be called upon
+        default: Field default value, if any.
+        callback: Callback function to be called upon
             :meth:`self.__call__ <pcapkit.corekit.fields.field._Field.__call__>`.
 
     """
@@ -48,7 +48,19 @@ class _TextField(Field[_T], Generic[_T]):
         self._template = f'{self._length}s'
 
     def __call__(self, packet: 'dict[str, Any]') -> '_TextField':
-        """Update field attributes."""
+        """Update field attributes.
+
+        Args:
+            packet: Packet data.
+
+        Returns:
+            New instance of :class:`_TextField`.
+
+        Notes:
+            This method will return a new instance of :class:`_TextField` instead of
+            updating the current instance.
+
+        """
         new_self = cast('_TextField', super().__call__(packet))
         new_self._template = f'{new_self._length}s'
         return new_self
@@ -58,10 +70,10 @@ class BytesField(_TextField[bytes]):
     """Bytes value for protocol fields.
 
     Args:
-        length: field size (in bytes); if a callable is given, it should return
+        length: Field size (in bytes); if a callable is given, it should return
             an integer value and accept the current packet as its only argument.
-        default: field default value, if any.
-        callback: callback function to be called upon
+        default: Field default value, if any.
+        callback: Callback function to be called upon
             :meth:`self.__call__ <pcapkit.corekit.fields.field._Field.__call__>`.
 
     """
@@ -71,9 +83,9 @@ class StringField(_TextField[str]):
     r"""String value for protocol fields.
 
     Args:
-        length: field size (in bytes); if a callable is given, it should return
+        length: Field size (in bytes); if a callable is given, it should return
             an integer value and accept the current packet as its only argument.
-        default: field default value, if any.
+        default: Field default value, if any.
         encoding: The encoding with which to decode the :obj:`bytes`.
             If not provided, :mod:`pcapkit` will first try detecting its encoding
             using |chardet|_. The fallback encoding would is **UTF-8**.
@@ -85,7 +97,7 @@ class StringField(_TextField[str]):
         unquote: Whether to unquote the decoded string as a URL. Should decoding failed ,
             the method will try again replacing ``'%'`` with ``'\x'`` then decoding the
             ``url`` as ``'utf-8'`` with ``'replace'`` for error handling.
-        callback: callback function to be called upon
+        callback: Callback function to be called upon
             :meth:`self.__call__ <pcapkit.corekit.fields.field._Field.__call__>`.
 
     .. |chardet| replace:: ``chardet``
@@ -108,8 +120,8 @@ class StringField(_TextField[str]):
         """Process field value before construction (packing).
 
         Arguments:
-            value: field value
-            packet: packet data
+            value: Field value.
+            packet: Packet data.
 
         Returns:
             Processed field value.
@@ -123,8 +135,8 @@ class StringField(_TextField[str]):
         """Process field value after parsing (unpacked).
 
         Arguments:
-            value: field value
-            packet: packet data
+            value: Field value.
+            packet: Packet data.
 
         Returns:
             Processed field value.
@@ -148,12 +160,12 @@ class BitField(_TextField[Dict[str, Any]]):
     """Bit value for protocol fields.
 
     Args:
-        length: field size (in bytes); if a callable is given, it should return
+        length: Field size (in bytes); if a callable is given, it should return
             an integer value and accept the current packet as its only argument.
-        default: field default value, if any.
-        namespace: field namespace (a dict mapping field name to a tuple of start index,
+        default: Field default value, if any.
+        namespace: Field namespace (a dict mapping field name to a tuple of start index,
             and length of the subfield).
-        callback: callback function to be called upon
+        callback: Callback function to be called upon
             :meth:`self.__call__ <pcapkit.corekit.fields.field._Field.__call__>`.
 
     """
@@ -170,8 +182,8 @@ class BitField(_TextField[Dict[str, Any]]):
         """Process field value before construction (packing).
 
         Arguments:
-            value: field value
-            packet: packet data
+            value: Field value.
+            packet: Packet data.
 
         Returns:
             Processed field value.
@@ -187,8 +199,8 @@ class BitField(_TextField[Dict[str, Any]]):
         """Process field value after parsing (unpacked).
 
         Arguments:
-            value: field value
-            packet: packet data
+            value: Field value.
+            packet: Packet data.
 
         Returns:
             Processed field value.
@@ -206,10 +218,10 @@ class PaddingField(BytesField):
     """Bytes value for protocol fields.
 
     Args:
-        length: field size (in bytes); if a callable is given, it should return
+        length: Field size (in bytes); if a callable is given, it should return
             an integer value and accept the current packet as its only argument.
-        default: field default value, if any.
-        callback: callback function to be called upon
+        default: Field default value, if any.
+        callback: Callback function to be called upon
             :meth:`self.__call__ <pcapkit.corekit.fields.field._Field.__call__>`.
 
     """

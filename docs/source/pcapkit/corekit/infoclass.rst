@@ -10,13 +10,12 @@ in :pep:`557`.
 
 .. autoclass:: pcapkit.corekit.infoclass.Info
    :members:
-   :private-members:
    :show-inheritance:
 
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. autoattribute:: __map__
+   .. autoattribute:: __additional__
       :no-value:
-   .. autoattribute:: __map_reverse__
+   .. autoattribute:: __excluded__
       :no-value:

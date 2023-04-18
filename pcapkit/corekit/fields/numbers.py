@@ -35,13 +35,13 @@ class NumberField(Field[int], Generic[_T]):
     """Numerical value for protocol fields.
 
     Args:
-        length: field size (in bytes); if a callable is given, it should return
+        length: Field size (in bytes); if a callable is given, it should return
             an integer value and accept the current packet as its only argument.
-        default: field default value, if any.
-        signed: whether the field is signed.
-        byteorder: field byte order.
-        bit_length: field bit length.
-        callback: callback function to be called upon
+        default: Field default value, if any.
+        signed: Whether the field is signed.
+        byteorder: Field byte order.
+        bit_length: Field bit length.
+        callback: Callback function to be called upon
             :meth:`self.__call__ <pcapkit.corekit.fields.field._Field.__call__>`.
 
     """
@@ -83,7 +83,19 @@ class NumberField(Field[int], Generic[_T]):
         self._template = f'{endian}{struct_fmt}'
 
     def __call__(self, packet: 'dict[str, Any]') -> 'NumberField':
-        """Update field attributes."""
+        """Update field attributes.
+
+        Args:
+            packet: Packet data.
+
+        Returns:
+            New instance of :class:`NumberField`.
+
+        Notes:
+            This method will return a new instance of :class:`NumberField` instead of
+            updating the current instance.
+
+        """
         new_self = copy.copy(self)
         new_self._callback(new_self, packet)
 
@@ -97,8 +109,8 @@ class NumberField(Field[int], Generic[_T]):
         """Build template for field.
 
         Arguments:
-            length: field size (in bytes)
-            signed: whether the field is signed
+            length: Field size (in bytes)
+            signed: Whether the field is signed
 
         Returns:
             Template for field.
@@ -121,8 +133,8 @@ class NumberField(Field[int], Generic[_T]):
         """Process field value before construction (packing).
 
         Arguments:
-            value: field value.
-            packet: packet data.
+            value: Field value.
+            packet: Packet data.
 
         Returns:
             Processed field value.
@@ -139,8 +151,8 @@ class NumberField(Field[int], Generic[_T]):
         """Process field value after parsing (unpacked).
 
         Args:
-            value: field value.
-            packet: packet data.
+            value: Field value.
+            packet: Packet data.
 
         Returns:
             Processed field value.
@@ -157,12 +169,12 @@ class Int32Field(NumberField):
     """Integer value for protocol fields.
 
     Args:
-        length: field size (in bytes).
-        default: field default value, if any.
-        signed: whether the field is signed.
-        byteorder: field byte order.
-        bit_length: field bit length.
-        callback: callback function to be called upon
+        length: Field size (in bytes).
+        default: Field default value, if any.
+        signed: Whether the field is signed.
+        byteorder: Field byte order.
+        bit_length: Field bit length.
+        callback: Callback function to be called upon
             :meth:`self.__call__ <pcapkit.corekit.fields.field._Field.__call__>`.
 
     """
@@ -176,12 +188,12 @@ class UInt32Field(NumberField):
     """Unsigned integer value for protocol fields.
 
     Args:
-        length: field size (in bytes).
-        default: field default value, if any.
-        signed: whether the field is signed.
-        byteorder: field byte order.
-        bit_length: field bit length.
-        callback: callback function to be called upon
+        length: Field size (in bytes).
+        default: Field default value, if any.
+        signed: Whether the field is signed.
+        byteorder: Field byte order.
+        bit_length: Field bit length.
+        callback: Callback function to be called upon
             :meth:`self.__call__ <pcapkit.corekit.fields.field._Field.__call__>`.
 
     """
@@ -195,12 +207,12 @@ class Int16Field(NumberField):
     """Short integer value for protocol fields.
 
     Args:
-        length: field size (in bytes).
-        default: field default value, if any.
-        signed: whether the field is signed.
-        byteorder: field byte order.
-        bit_length: field bit length.
-        callback: callback function to be called upon
+        length: Field size (in bytes).
+        default: Field default value, if any.
+        signed: Whether the field is signed.
+        byteorder: Field byte order.
+        bit_length: Field bit length.
+        callback: Callback function to be called upon
             :meth:`self.__call__ <pcapkit.corekit.fields.field._Field.__call__>`.
 
     """
@@ -214,12 +226,12 @@ class UInt16Field(NumberField):
     """Unsigned short integer value for protocol fields.
 
     Args:
-        length: field size (in bytes).
-        default: field default value, if any.
-        signed: whether the field is signed.
-        byteorder: field byte order.
-        bit_length: field bit length.
-        callback: callback function to be called upon
+        length: Field size (in bytes).
+        default: Field default value, if any.
+        signed: Whether the field is signed.
+        byteorder: Field byte order.
+        bit_length: Field bit length.
+        callback: Callback function to be called upon
             :meth:`self.__call__ <pcapkit.corekit.fields.field._Field.__call__>`.
 
     """
@@ -233,12 +245,12 @@ class Int64Field(NumberField):
     """Long integer value for protocol fields.
 
     Args:
-        length: field size (in bytes).
-        default: field default value, if any.
-        signed: whether the field is signed.
-        byteorder: field byte order.
-        bit_length: field bit length.
-        callback: callback function to be called upon
+        length: Field size (in bytes).
+        default: Field default value, if any.
+        signed: Whether the field is signed.
+        byteorder: Field byte order.
+        bit_length: Field bit length.
+        callback: Callback function to be called upon
             :meth:`self.__call__ <pcapkit.corekit.fields.field._Field.__call__>`.
 
     """
@@ -252,12 +264,12 @@ class UInt64Field(NumberField):
     """Unsigned long integer value for protocol fields.
 
     Args:
-        length: field size (in bytes).
-        default: field default value, if any.
-        signed: whether the field is signed.
-        byteorder: field byte order.
-        bit_length: field bit length.
-        callback: callback function to be called upon
+        length: Field size (in bytes).
+        default: Field default value, if any.
+        signed: Whether the field is signed.
+        byteorder: Field byte order.
+        bit_length: Field bit length.
+        callback: Callback function to be called upon
             :meth:`self.__call__ <pcapkit.corekit.fields.field._Field.__call__>`.
 
     """
@@ -271,12 +283,12 @@ class Int8Field(NumberField):
     """Byte value for protocol fields.
 
     Args:
-        length: field size (in bytes).
-        default: field default value, if any.
-        signed: whether the field is signed.
-        byteorder: field byte order.
-        bit_length: field bit length.
-        callback: callback function to be called upon
+        length: Field size (in bytes).
+        default: Field default value, if any.
+        signed: Whether the field is signed.
+        byteorder: Field byte order.
+        bit_length: Field bit length.
+        callback: Callback function to be called upon
             :meth:`self.__call__ <pcapkit.corekit.fields.field._Field.__call__>`.
 
     """
@@ -290,12 +302,12 @@ class UInt8Field(NumberField):
     """Unsigned byte value for protocol fields.
 
     Args:
-        length: field size (in bytes).
-        default: field default value, if any.
-        signed: whether the field is signed.
-        byteorder: field byte order.
-        bit_length: field bit length.
-        callback: callback function to be called upon
+        length: Field size (in bytes).
+        default: Field default value, if any.
+        signed: Whether the field is signed.
+        byteorder: Field byte order.
+        bit_length: Field bit length.
+        callback: Callback function to be called upon
             :meth:`self.__call__ <pcapkit.corekit.fields.field._Field.__call__>`.
 
     """
@@ -309,14 +321,14 @@ class EnumField(NumberField[enum.IntEnum | aenum.IntEnum]):
     """Enumerated value for protocol fields.
 
     Args:
-        length: field size (in bytes); if a callable is given, it should return
+        length: Field size (in bytes); if a callable is given, it should return
             an integer value and accept the current packet as its only argument.
-        default: field default value, if any.
-        signed: whether the field is signed.
-        byteorder: field byte order.
-        bit_length: field bit length.
-        namespace: field namespace (a :class:`enum.IntEnum` class).
-        callback: callback function to be called upon
+        default: Field default value, if any.
+        signed: Whether the field is signed.
+        byteorder: Field byte order.
+        bit_length: Field bit length.
+        namespace: Field namespace (a :class:`enum.IntEnum` class).
+        callback: Callback function to be called upon
             :meth:`self.__call__ <pcapkit.corekit.fields.field._Field.__call__>`.
 
     """
@@ -335,8 +347,8 @@ class EnumField(NumberField[enum.IntEnum | aenum.IntEnum]):
         """Process field value after parsing (unpacked).
 
         Args:
-            value: field value.
-            packet: packet data.
+            value: Field value.
+            packet: Packet data.
 
         Returns:
             Processed field value.

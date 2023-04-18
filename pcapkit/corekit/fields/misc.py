@@ -44,8 +44,8 @@ class NoValueField(_Field[_TN]):
         """Pack field value into :obj:`bytes`.
 
         Args:
-            value: field value.
-            packet: packet data.
+            value: Field value.
+            packet: Packet data.
 
         Returns:
             Packed field value.
@@ -57,8 +57,8 @@ class NoValueField(_Field[_TN]):
         """Unpack field value from :obj:`bytes`.
 
         Args:
-            buffer: field buffer.
-            packet: packet data.
+            buffer: Field buffer.
+            packet: Packet data.
 
         Returns:
             Unpacked field value.
@@ -71,8 +71,8 @@ class ConditionalField(_Field[_TC]):
     """Conditional value for protocol fields.
 
     Args:
-        field: field instance.
-        condition: field condition function (this function should return a bool
+        field: Field instance.
+        condition: Field condition function (this function should return a bool
             value and accept the current packet :class:`pcapkit.corekit.infoclass.Info`
             as its only argument).
 
@@ -132,7 +132,10 @@ class ConditionalField(_Field[_TC]):
         """Update field attributes.
 
         Arguments:
-            packet: packet data.
+            packet: Packet data.
+
+        Returns:
+            Updated field instance.
 
         Notes:
             This method will return a new instance of :class:`ConditionalField`
@@ -148,8 +151,8 @@ class ConditionalField(_Field[_TC]):
         """Process field value before construction (packing).
 
         Arguments:
-            value: field value.
-            packet: packet data.
+            value: Field value.
+            packet: Packet data.
 
         Returns:
             Processed field value.
@@ -161,8 +164,8 @@ class ConditionalField(_Field[_TC]):
         """Pack field value into :obj:`bytes`.
 
         Args:
-            value: field value.
-            packet: packet data.
+            value: Field value.
+            packet: Packet data.
 
         Returns:
             Packed field value.
@@ -176,8 +179,8 @@ class ConditionalField(_Field[_TC]):
         """Process field value after parsing (unpacking).
 
         Args:
-            value: field value.
-            packet: packet data.
+            value: Field value.
+            packet: Packet data.
 
         Returns:
             Processed field value.
@@ -189,8 +192,8 @@ class ConditionalField(_Field[_TC]):
         """Unpack field value from :obj:`bytes`.
 
         Args:
-            buffer: field buffer.
-            packet: packet data.
+            buffer: Field buffer.
+            packet: Packet data.
 
         Returns:
             Unpacked field value.
@@ -204,10 +207,10 @@ class ConditionalField(_Field[_TC]):
         """Test field condition.
 
         Arguments:
-            packet: current packet
+            packet: Current packet.
 
         Returns:
-            bool: test result
+            bool: Test result.
 
         """
         return self._condition(packet)
@@ -217,11 +220,11 @@ class PayloadField(_Field[_TP]):
     """Payload value for protocol fields.
 
     Args:
-        length: field size (in bytes); if a callable is given, it should return
+        length: Field size (in bytes); if a callable is given, it should return
             an integer value and accept the current packet as its only argument.
-        default: field default value.
-        protocol: payload protocol.
-        callback: callback function to be called upon
+        default: Field default value.
+        protocol: Payload protocol.
+        callback: Callback function to be called upon
             :meth:`self.__call__ <pcapkit.corekit.fields.field._Field.__call__>`.
 
     """
@@ -254,7 +257,7 @@ class PayloadField(_Field[_TP]):
         """Set payload protocol.
 
         Arguments:
-            protocol: payload protocol
+            protocol: Payload protocol.
 
         """
         if isinstance(protocol, str):
@@ -281,7 +284,10 @@ class PayloadField(_Field[_TP]):
         """Update field attributes.
 
         Args:
-            packet: packet data.
+            packet: Packet data.
+
+        Returns:
+            Updated field instance.
 
         Notes:
             This method will return a new instance of :class:`PayloadField`
@@ -299,8 +305,8 @@ class PayloadField(_Field[_TP]):
         """Pack field value into :obj:`bytes`.
 
         Args:
-            value: field value.
-            packet: packet data.
+            value: Field value.
+            packet: Packet data.
 
         Returns:
             Packed field value.
@@ -323,8 +329,8 @@ class PayloadField(_Field[_TP]):
         """Unpack field value from :obj:`bytes`.
 
         Args:
-            buffer: field buffer.
-            packet: packet data.
+            buffer: Field buffer.
+            packet: Packet data.
 
         Returns:
             Unpacked field value.
@@ -360,10 +366,14 @@ class SwitchField(_Field[_TC]):
         """Call field.
 
         Args:
-            packet: packet data.
+            packet: Packet data.
 
         Returns:
             New field instance.
+
+        Notes:
+            This method will return a new instance of :class:`SwitchField`
+            instead of updating the current instance.
 
         """
         new_self = copy.copy(self)
@@ -375,8 +385,8 @@ class SwitchField(_Field[_TC]):
         """Process field value before construction (packing).
 
         Arguments:
-            value: field value.
-            packet: packet data.
+            value: Field value.
+            packet: Packet data.
 
         Returns:
             Processed field value.
@@ -390,8 +400,8 @@ class SwitchField(_Field[_TC]):
         """Pack field value into :obj:`bytes`.
 
         Args:
-            value: field value.
-            packet: packet data.
+            value: Field value.
+            packet: Packet data.
 
         Returns:
             Packed field value.
@@ -405,8 +415,8 @@ class SwitchField(_Field[_TC]):
         """Process field value after parsing (unpacking).
 
         Args:
-            value: field value.
-            packet: packet data.
+            value: Field value.
+            packet: Packet data.
 
         Returns:
             Processed field value.
@@ -420,8 +430,8 @@ class SwitchField(_Field[_TC]):
         """Unpack field value from :obj:`bytes`.
 
         Args:
-            buffer: field buffer.
-            packet: packet data.
+            buffer: Field buffer.
+            packet: Packet data.
 
         Returns:
             Unpacked field value.
@@ -470,7 +480,10 @@ class SchemaField(_Field[_TS]):
         """Update field attributes.
 
         Args:
-            packet: packet data.
+            packet: Packet data.
+
+        Returns:
+            New field instance.
 
         Notes:
             This method will return a new instance of :class:`SchemaField`
@@ -488,8 +501,8 @@ class SchemaField(_Field[_TS]):
         """Pack field value into :obj:`bytes`.
 
         Args:
-            value: field value.
-            packet: packet data.
+            value: Field value.
+            packet: Packet data.
 
         Returns:
             Packed field value.
@@ -508,8 +521,8 @@ class SchemaField(_Field[_TS]):
         """Unpack field value from :obj:`bytes`.
 
         Args:
-            buffer: field buffer.
-            packet: packet data.
+            buffer: Field buffer.
+            packet: Packet data.
 
         Returns:
             Unpacked field value.
@@ -523,7 +536,12 @@ class SchemaField(_Field[_TS]):
 
 
 class ForwardMatchField(_Field[_TC]):
-    """Schema field for non-capturing forward matching."""
+    """Schema field for non-capturing forward matching.
+
+    Args:
+        field: Field to forward match.
+
+    """
 
     @property
     def name(self) -> 'str':
@@ -578,8 +596,8 @@ class ForwardMatchField(_Field[_TC]):
         """Pack field value into :obj:`bytes`.
 
         Args:
-            value: field value.
-            packet: packet data.
+            value: Field value.
+            packet: Packet data.
 
         Returns:
             Packed field value.
@@ -591,8 +609,8 @@ class ForwardMatchField(_Field[_TC]):
         """Unpack field value from :obj:`bytes`.
 
         Args:
-            buffer: field buffer.
-            packet: packet data.
+            buffer: Field buffer.
+            packet: Packet data.
 
         Returns:
             Unpacked field value.

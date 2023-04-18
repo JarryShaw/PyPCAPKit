@@ -2,6 +2,8 @@
 """Protocol Chain
 ====================
 
+.. module:: pcapkit.corekit.protochain
+
 :mod:`pcapkit.corekit.protochain` contains special protocol
 collection class :class:`~pcapkit.corekit.protochain.ProtoChain`.
 
@@ -176,7 +178,15 @@ class ProtoChain(collections.abc.Sequence):
         return ':'.join(map(lambda p: p[0], self.__data__))
 
     def __contains__(self, name: 'str | Protocol | Type[Protocol]') -> 'bool':  # type: ignore[override]
-        """Returns if ``name`` is in the chain."""
+        """Returns if ``name`` is in the chain.
+
+        Args:
+            name: Name to search.
+
+        Returns:
+            Whether ``name`` is in the chain.
+
+        """
         from pcapkit.protocols.protocol import Protocol  # pylint: disable=import-outside-toplevel
         comp = Protocol.expand_comp(name)
 

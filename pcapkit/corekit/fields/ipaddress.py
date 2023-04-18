@@ -29,8 +29,10 @@ class _IPField(Field[_T]):
     """Internal IP address value for protocol fields.
 
     Args:
-        default: field default value, if any.
-        callback: callback function to be called upon
+        length: Field size (in bytes); if a callable is given, it should return
+            an integer value and accept the current packet as its only argument.
+        default: Field default value, if any.
+        callback: Callback function to be called upon
             :meth:`self.__call__ <pcapkit.corekit.fields.field._Field.__call__>`.
 
     """
@@ -44,8 +46,8 @@ class _IPField(Field[_T]):
         """Process field value before packing.
 
         Args:
-            value: field value.
-            packet: packet data.
+            value: Field value.
+            packet: Packet data.
 
         Returns:
             Processed field value.
@@ -64,8 +66,8 @@ class _IPField(Field[_T]):
         """Process field value after parsing (unpacking).
 
         Args:
-            value: field value.
-            packet: packet data.
+            value: Field value.
+            packet: Packet data.
 
         Returns:
             Processed field value.
@@ -81,8 +83,8 @@ class IPv4Field(_IPField[ipaddress.IPv4Address]):
     """IPv4 address value for protocol fields.
 
     Args:
-        default: field default value, if any.
-        callback: callback function to be called upon
+        default: Field default value, if any.
+        callback: Callback function to be called upon
             :meth:`self.__call__ <pcapkit.corekit.fields.field._Field.__call__>`.
 
     """
@@ -103,8 +105,8 @@ class IPv6Field(_IPField[ipaddress.IPv6Address]):
     """IPv6 address value for protocol fields.
 
     Args:
-        default: field default value, if any.
-        callback: callback function to be called upon
+        default: Field default value, if any.
+        callback: Callback function to be called upon
             :meth:`self.__call__ <pcapkit.corekit.fields.field._Field.__call__>`.
 
     """

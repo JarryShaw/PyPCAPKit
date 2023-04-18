@@ -29,7 +29,7 @@ class NoValueType:
         return False
 
 
-#: Default value for :attr:`_Field.default`.
+#: NoValueType: Default value for :attr:`_Field.default`.
 NoValue = NoValueType()
 
 
@@ -85,7 +85,7 @@ class _Field(Generic[_T], metaclass=abc.ABCMeta):
         """Update field attributes.
 
         Arguments:
-            packet: packet data.
+            packet: Packet data.
 
         """
         new_self = copy.copy(self)
@@ -99,8 +99,8 @@ class _Field(Generic[_T], metaclass=abc.ABCMeta):
         """Process field value before construction (packing).
 
         Arguments:
-            value: field value.
-            packet: packet data.
+            value: Field value.
+            packet: Packet data.
 
         Returns:
             Processed field value.
@@ -112,8 +112,8 @@ class _Field(Generic[_T], metaclass=abc.ABCMeta):
         """Pack field value into :obj:`bytes`.
 
         Args:
-            value: field value.
-            packet: packet data.
+            value: Field value.
+            packet: Packet data.
 
         Returns:
             Packed field value.
@@ -131,8 +131,8 @@ class _Field(Generic[_T], metaclass=abc.ABCMeta):
         """Process field value after parsing (unpacking).
 
         Args:
-            value: field value.
-            packet: packet data.
+            value: Field value.
+            packet: Packet data.
 
         Returns:
             Processed field value.
@@ -144,8 +144,8 @@ class _Field(Generic[_T], metaclass=abc.ABCMeta):
         """Unpack field value from :obj:`bytes`.
 
         Args:
-            buffer: field buffer.
-            packet: packet data.
+            buffer: Field buffer.
+            packet: Packet data.
 
         Returns:
             Unpacked field value.
@@ -161,10 +161,10 @@ class Field(_Field[_T], Generic[_T]):
     """Base class for protocol fields.
 
     Args:
-        length: field size (in bytes); if a callable is given, it should return
+        length: Field size (in bytes); if a callable is given, it should return
             an integer value and accept the current packet as its only argument.
-        default: field default value, if any.
-        callback: callback function to be called upon
+        default: Field default value, if any.
+        callback: Callback function to be called upon
             :meth:`self.__call__ <pcapkit.corekit.fields.field._Field.__call__>`.
 
     """
@@ -198,7 +198,10 @@ class Field(_Field[_T], Generic[_T]):
         """Update field attributes.
 
         Args:
-            packet: packet data.
+            packet: Packet data.
+
+        Returns:
+            New instance of :class:`Field`.
 
         Notes:
             This method will return a new instance of :class:`Field` instead of
