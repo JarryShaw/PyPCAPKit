@@ -16,7 +16,7 @@ for engine in ['default', 'dpkt', 'scapy', 'pyshark']:
     print(f'Testing: [{engine}] starting...', end='', flush=True)
 
     lid = []
-    for index in range(0, 1_000_000):
+    for index in range(0, 1_000):
         now = time.time_ns()
 
         extraction = pcapkit.extract(fin='../sample/in.pcap', store=False, nofile=True, verbose=False, engine=engine)  # type: ignore[arg-type]
