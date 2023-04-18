@@ -3,6 +3,8 @@
 """Stream PCAP File Extractor
 ================================
 
+.. module:: pcapkit
+
 :mod:`pcapkit` is an independent open source library, using only
 `DictDumper`_ as its formatted output dumper.
 

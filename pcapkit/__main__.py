@@ -2,6 +2,8 @@
 """Command Line Tool
 =======================
 
+.. module:: pcapkit.__main__
+
 .. important::
 
    This module requires ``emoji`` package to be installed.
@@ -103,7 +105,7 @@ def main() -> 'int':
                           files=args.files, format=fmt,
                           layer=args.layer, protocol=args.protocol,
                           engine=args.engine, extension=args.auto_extension,
-                          verbose=args.verbose)
+                          verbose=args.verbose)  # type: ignore[var-annotated]
 
     if args.verbose:
         try:

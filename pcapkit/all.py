@@ -3,6 +3,8 @@
 """Library Index
 ===================
 
+.. module:: pcapkit.all
+
 :mod:`pcapkit` has defined various and numerous functions
 and classes, which have different features and purposes.
 To make a simple index for this library, :mod:`pcapkit.all`
