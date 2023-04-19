@@ -29,7 +29,7 @@ jobs:
 
           python3.11 -m pip install -U pip setuptools wheel
           python3.11 -m pip install -r docs/requirements.txt
-          python3.11 -m pip install .[all]
+          python3.11 -m pip install -e .[all]
           make -C docs html
 
           # disable Jekyll
