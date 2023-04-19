@@ -13,7 +13,7 @@ from typing import TYPE_CHECKING
 
 from dictdumper import Dumper
 
-from pcapkit.foundation.engine import Engine
+from pcapkit.foundation.engines import Engine
 from pcapkit.foundation.extraction import Extractor
 from pcapkit.foundation.traceflow import TraceFlow
 from pcapkit.protocols import __proto__ as protocol_registry

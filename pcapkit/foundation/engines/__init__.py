@@ -2,9 +2,9 @@
 """Engine Support
 ====================
 
-.. module:: pcapkit.foundation.engine
+.. module:: pcapkit.foundation.engines
 
-:mod:`pcapkit.foundation.engine` is a collection of engines
+:mod:`pcapkit.foundation.engines` is a collection of engines
 support for :mod:`pcapkit`, including but not limited to the
 built-in PCAP and PCAP-NG file support, :mod:`Scapy <scapy`,
 :mod:`PyShark <pyshark>`, :mod:`DPKT <dpkt>` 3rd party engine
@@ -12,15 +12,15 @@ support.
 
 """
 # Base class
-from pcapkit.foundation.engine.engine import Engine
+from pcapkit.foundation.engines.engine import Engine
 
 # Built-in engines
-from pcapkit.foundation.engine.pcap import PCAP
+from pcapkit.foundation.engines.pcap import PCAP
 
 # 3rd party engines
-from pcapkit.foundation.engine.scapy import Scapy
-from pcapkit.foundation.engine.dpkt import DPKT
-from pcapkit.foundation.engine.pyshark import PyShark
+from pcapkit.foundation.engines.scapy import Scapy
+from pcapkit.foundation.engines.dpkt import DPKT
+from pcapkit.foundation.engines.pyshark import PyShark
 
 __all__ = [
     'PCAP',

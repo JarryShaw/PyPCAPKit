@@ -24,7 +24,7 @@ from pcapkit.const.reg.linktype import LinkType as Enum_LinkType
 from pcapkit.dumpkit.common import _append_fallback as dumpkit_append_fallback
 from pcapkit.dumpkit.common import default as dumpkit_default
 from pcapkit.dumpkit.common import object_hook as dumpkit_object_hook
-from pcapkit.foundation.engine.pcap import PCAP as PCAP_Engine
+from pcapkit.foundation.engines.pcap import PCAP as PCAP_Engine
 from pcapkit.foundation.reassembly import ReassemblyManager
 from pcapkit.foundation.traceflow import TraceFlowManager
 from pcapkit.protocols.misc.pcap.frame import Frame
@@ -44,7 +44,7 @@ if TYPE_CHECKING:
     from typing_extensions import Literal
 
     from pcapkit.corekit.version import VersionInfo
-    from pcapkit.foundation.engine.engine import Engine
+    from pcapkit.foundation.engines.engine import Engine
     from pcapkit.foundation.reassembly.data import ReassemblyData
     from pcapkit.foundation.traceflow.data import TraceFlowData
     from pcapkit.protocols.protocol import Protocol

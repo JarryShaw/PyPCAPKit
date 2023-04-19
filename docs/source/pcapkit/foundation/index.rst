@@ -16,4 +16,4 @@ APIs for :mod:`pcapkit`, and TCP/IP reassembly implementations.
    reassembly/index
    traceflow/index
    registry
-   engine/index
+   engines/index

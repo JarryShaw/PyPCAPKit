@@ -2,7 +2,7 @@
 """DPKT Support
 ==================
 
-.. module:: pcapkit.foundation.engine.dpkt
+.. module:: pcapkit.foundation.engines.dpkt
 
 This module contains the implementation for `DPKT`_ engine
 support, as is used by :class:`pcapkit.foundation.extraction.Extractor`.
@@ -13,7 +13,7 @@ support, as is used by :class:`pcapkit.foundation.extraction.Extractor`.
 from typing import TYPE_CHECKING, cast
 
 from pcapkit.const.reg.linktype import LinkType as Enum_LinkType
-from pcapkit.foundation.engine.engine import Engine
+from pcapkit.foundation.engines.engine import Engine
 from pcapkit.utilities.exceptions import stacklevel
 from pcapkit.utilities.warnings import AttributeWarning, DPKTWarning, warn
 
