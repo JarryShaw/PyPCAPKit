@@ -10,8 +10,6 @@ if TYPE_CHECKING:
     from ipaddress import IPv4Address, IPv6Address
     from typing import Optional, Union
 
-    from typing_extensions import Literal
-
     from pcapkit.const.tcp.checksum import Checksum
     from pcapkit.const.tcp.mp_tcp_option import MPTCPOption
     from pcapkit.const.tcp.option import Option as OptionNumber

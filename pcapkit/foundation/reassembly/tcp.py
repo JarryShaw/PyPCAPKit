@@ -66,7 +66,7 @@ class TCP(Reassembly[Packet, Datagram, BufferID, Buffer]):
         """Reassembly procedure.
 
         Arguments:
-            info: :term:`info <tcp.packet>` dict of packets to be reassembled
+            info: :term:`info <reasm.tcp.packet>` dict of packets to be reassembled
 
         """
         # clear cache
@@ -187,11 +187,11 @@ class TCP(Reassembly[Packet, Datagram, BufferID, Buffer]):
         """Submit reassembled payload.
 
         Arguments:
-            buf: :term:`buffer <tcp.buffer>` dict of reassembled packets
+            buf: :term:`buffer <reasm.tcp.buffer>` dict of reassembled packets
             bufid: buffer identifier
 
         Returns:
-            Reassembled :term:`packets <tcp.datagram>`.
+            Reassembled :term:`packets <reasm.tcp.datagram>`.
 
         """
         datagram = []  # type: list[Datagram] # reassembled datagram

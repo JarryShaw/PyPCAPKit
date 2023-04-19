@@ -24,12 +24,7 @@ which is a base class for transport layer protocols, eg.
    .. automethod:: _decode_next_layer
 
    .. autoattribute:: __layer__
-   .. attribute:: __proto__
-      :type: DefaultDict[int, tuple[str, str]]
-
-      Protocol index mapping for decoding next layer,
-      c.f. :meth:`self._decode_next_layer <pcapkit.protocols.transport.transport.Transport._decode_next_layer>`
-      & :meth:`self._import_next_layer <pcapkit.protocols.protocol.Protocol._import_next_layer>`.
+   .. autoattribute:: __proto__
 
       .. important::
 

@@ -2,7 +2,6 @@ TCP - Transmission Control Protocol
 ===================================
 
 .. module:: pcapkit.protocols.transport.tcp
-.. module:: pcapkit.protocols.data.transport.tcp
 
 :mod:`pcapkit.protocols.transport.tcp` contains
 :class:`~pcapkit.protocols.transport.tcp.TCP` only,
@@ -34,10 +33,6 @@ Octets      Bits        Name                    Description
   20        160   ``tcp.opt``               TCP Options (if data offset > 5)
 ======= ========= ========================= =======================================
 
-.. raw:: html
-
-   <br />
-
 .. autoclass:: pcapkit.protocols.transport.tcp.TCP
    :no-members:
    :show-inheritance:
@@ -45,17 +40,19 @@ Octets      Bits        Name                    Description
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. automethod:: __index__
-
    .. autoproperty:: name
    .. autoproperty:: length
    .. autoproperty:: src
    .. autoproperty:: dst
+   .. autoproperty:: connection
+
+   .. automethod:: register_option
+   .. automethod:: register_mp_option
 
    .. automethod:: read
    .. automethod:: make
-   .. automethod:: register_option
-   .. automethod:: register_mp_option
+
+   .. automethod:: _make_data
 
    .. automethod:: _read_tcp_options
    .. automethod:: _read_mode_donone
@@ -96,6 +93,45 @@ Octets      Bits        Name                    Description
    .. automethod:: _read_join_synack
    .. automethod:: _read_join_ack
 
+   .. automethod:: _make_tcp_options
+   .. automethod:: _make_mode_donone
+   .. automethod:: _make_mode_eool
+   .. automethod:: _make_mode_nop
+   .. automethod:: _make_mode_mss
+   .. automethod:: _make_mode_ws
+   .. automethod:: _make_mode_sackpmt
+   .. automethod:: _make_mode_sack
+   .. automethod:: _make_mode_echo
+   .. automethod:: _make_mode_echore
+   .. automethod:: _make_mode_ts
+   .. automethod:: _make_mode_poc
+   .. automethod:: _make_mode_pocsp
+   .. automethod:: _make_mode_cc
+   .. automethod:: _make_mode_ccnew
+   .. automethod:: _make_mode_ccecho
+   .. automethod:: _make_mode_chkreq
+   .. automethod:: _make_mode_chksum
+   .. automethod:: _make_mode_sig
+   .. automethod:: _make_mode_qs
+   .. automethod:: _make_mode_timeout
+   .. automethod:: _make_mode_ao
+   .. automethod:: _make_mode_mp
+   .. automethod:: _make_mode_fastopen
+
+   .. automethod:: _make_mptcp_unknown
+   .. automethod:: _make_mptcp_capable
+   .. automethod:: _make_mptcp_join
+   .. automethod:: _make_mptcp_dss
+   .. automethod:: _make_mptcp_addaddr
+   .. automethod:: _make_mptcp_remove
+   .. automethod:: _make_mptcp_prio
+   .. automethod:: _make_mptcp_fail
+   .. automethod:: _make_mptcp_fastclose
+
+   .. automethod:: _make_join_syn
+   .. automethod:: _make_join_synack
+   .. automethod:: _make_join_ack
+
    .. autoattribute:: __proto__
       :no-value:
    .. autoattribute:: __option__
@@ -103,56 +139,157 @@ Octets      Bits        Name                    Description
    .. autoattribute:: __mp_option__
       :no-value:
 
-Data Structures
----------------
+   .. automethod:: __index__
 
-.. autoclass:: pcapkit.protocols.data.transport.tcp.TCP(srcport, dstport, seq, ack, hdr_len, flags, window_size, checksum, urgent_pointer)
-   :no-members:
+Connection Flags
+----------------
+
+.. autoclass:: pcapkit.protocols.transport.tcp.Flags
+   :members:
    :show-inheritance:
 
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. autoattribute:: srcport
-   .. autoattribute:: dstport
-   .. autoattribute:: seq
-   .. autoattribute:: ack
-   .. autoattribute:: hdr_len
-   .. autoattribute:: flags
-   .. autoattribute:: window_size
-   .. autoattribute:: checksum
-   .. autoattribute:: urgent_pointer
+Header Schemas
+--------------
 
-   .. autoattribute:: options
+.. module:: pcapkit.protocols.schema.transport.tcp
 
-.. autoclass:: pcapkit.protocols.data.transport.tcp.Flags(ns, cwr, ece, urg, ack, psh, rst, syn, fin)
-   :no-members:
+.. autoclass:: pcapkit.protocols.schema.transport.tcp.TCP
+   :members:
    :show-inheritance:
 
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. autoattribute:: ns
-   .. autoattribute:: cwr
-   .. autoattribute:: ece
-   .. autoattribute:: urg
-   .. autoattribute:: ack
-   .. autoattribute:: psh
-   .. autoattribute:: rst
-   .. autoattribute:: syn
-   .. autoattribute:: fin
-
-.. autoclass:: pcapkit.protocols.data.transport.tcp.Option(kind, length)
-   :no-members:
+.. autoclass:: pcapkit.protocols.schema.transport.tcp.Flags
+   :members:
    :show-inheritance:
 
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. autoattribute:: kind
-   .. autoattribute:: length
+.. autoclass:: pcapkit.protocols.schema.transport.tcp.Option
+   :members:
+   :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.data.transport.tcp.UnassignedOption(kind, length, data)
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
+.. autoclass:: pcapkit.protocols.schema.transport.tcp.UnassignedOption
+   :members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
+.. autoclass:: pcapkit.protocols.schema.transport.tcp.EndOfOptionList
+   :members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
+.. autoclass:: pcapkit.protocols.schema.transport.tcp.NoOperation
+   :members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
+.. autoclass:: pcapkit.protocols.schema.transport.tcp.MaximumSegmentSize
+   :members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
+.. autoclass:: pcapkit.protocols.schema.transport.tcp.WindowScale
+   :members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
+.. autoclass:: pcapkit.protocols.schema.transport.tcp.SACKPermitted
+   :members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
+.. autoclass:: pcapkit.protocols.schema.transport.tcp.SACK
+   :members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
+.. autoclass:: pcapkit.protocols.schema.transport.tcp.Echo
+   :members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
+.. autoclass:: pcapkit.protocols.schema.transport.tcp.EchoReply
+   :members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
+.. autoclass:: pcapkit.protocols.schema.transport.tcp.Timestamp
+   :members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
+.. autoclass:: pcapkit.protocols.schema.transport.tcp.PartialOrderConnectionPermitted
+   :members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
+.. autoclass:: pcapkit.protocols.schema.transport.tcp.PartialOrderConnectionProfile
+   :members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
+.. autoclass:: pcapkit.protocols.schema.transport.tcp.CC
+   :members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
+.. autoclass:: pcapkit.protocols.schema.transport.tcp.CCNew
+   :members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
+.. autoclass:: pcapkit.protocols.schema.transport.tcp.CCEcho
+   :members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
+.. autoclass:: pcapkit.protocols.schema.transport.tcp.AlternateChecksumRequest
+   :members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
+.. autoclass:: pcapkit.protocols.schema.transport.tcp.AlternateChecksumData(kind, length, data)
    :no-members:
    :show-inheritance:
 
@@ -161,134 +298,386 @@ Data Structures
 
    .. autoattribute:: data
 
-.. autoclass:: pcapkit.protocols.data.transport.tcp.EndOfOptionList(kind, length)
+.. autoclass:: pcapkit.protocols.schema.transport.tcp.MD5Signature(kind, length, digest)
    :no-members:
    :show-inheritance:
 
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
-.. autoclass:: pcapkit.protocols.data.transport.tcp.NoOperation(kind, length)
-   :no-members:
+   .. autoattribute:: digest
+
+.. autoclass:: pcapkit.protocols.schema.transport.tcp.QuickStartResponse
+   :members:
    :show-inheritance:
 
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
-.. autoclass:: pcapkit.protocols.data.transport.tcp.MaximumSegmentSize(kind, length, mss)
-   :no-members:
+.. autoclass:: pcapkit.protocols.schema.transport.tcp.UserTimeout
+   :members:
    :show-inheritance:
 
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. autoattribute:: mss
-
-.. autoclass:: pcapkit.protocols.data.transport.tcp.WindowScale(kind, length, shift)
-   :no-members:
+.. autoclass:: pcapkit.protocols.schema.transport.tcp.Authentication
+   :members:
    :show-inheritance:
 
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. autoattribute:: shift
-
-.. autoclass:: pcapkit.protocols.data.transport.tcp.SACKPermitted(kind, length)
-   :no-members:
+.. autoclass:: pcapkit.protocols.schema.transport.tcp.FastOpenCookie
+   :members:
    :show-inheritance:
 
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
-.. autoclass:: pcapkit.protocols.data.transport.tcp.SACK(kind, length, sack)
-   :no-members:
+.. autoclass:: pcapkit.protocols.schema.transport.tcp.MPTCP
+   :members:
    :show-inheritance:
 
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. autoattribute:: sack
-
-.. autoclass:: pcapkit.protocols.data.transport.tcp.Echo(kind, length, data)
-   :no-members:
+.. autoclass:: pcapkit.protocols.schema.transport.tcp.MPTCPUnknown
+   :members:
    :show-inheritance:
 
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. autoattribute:: data
-
-.. autoclass:: pcapkit.protocols.data.transport.tcp.EchoReply(kind, length, data)
-   :no-members:
+.. autoclass:: pcapkit.protocols.schema.transport.tcp.MPTCPCapable
+   :members:
    :show-inheritance:
 
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. autoattribute:: data
-
-.. autoclass:: pcapkit.protocols.data.transport.tcp.Timestamp(kind, length, timestamp, echo)
-   :no-members:
+.. autoclass:: pcapkit.protocols.schema.transport.tcp.MPTCPJoin
+   :members:
    :show-inheritance:
 
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. autoattribute:: timestamp
-   .. autoattribute:: echo
-
-.. autoclass:: pcapkit.protocols.data.transport.tcp.PartialOrderConnectionPermitted(kind, length)
-   :no-members:
+.. autoclass:: pcapkit.protocols.schema.transport.tcp.MPTCPJoinSYN
+   :members:
    :show-inheritance:
 
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
-.. autoclass:: pcapkit.protocols.data.transport.tcp.PartialOrderConnectionProfile(kind, length, start, end)
-   :no-members:
+.. autoclass:: pcapkit.protocols.schema.transport.tcp.MPTCPJoinSYNACK
+   :members:
    :show-inheritance:
 
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. autoattribute:: start
-   .. autoattribute:: end
-
-.. autoclass:: pcapkit.protocols.data.transport.tcp.CC(kind, length, cc)
-   :no-members:
+.. autoclass:: pcapkit.protocols.schema.transport.tcp.MPTCPJoinACK
+   :members:
    :show-inheritance:
 
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. autoattribute:: cc
-
-.. autoclass:: pcapkit.protocols.data.transport.tcp.CCNew(kind, length, cc)
-   :no-members:
+.. autoclass:: pcapkit.protocols.schema.transport.tcp.MPTCPDSS
+   :members:
    :show-inheritance:
 
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. autoattribute:: cc
-
-.. autoclass:: pcapkit.protocols.data.transport.tcp.CCEcho(kind, length, cc)
-   :no-members:
+.. autoclass:: pcapkit.protocols.schema.transport.tcp.MPTCPAddAddress
+   :members:
    :show-inheritance:
 
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. autoattribute:: cc
-
-.. autoclass:: pcapkit.protocols.data.transport.tcp.AlternateChecksumRequest(kind, length, chksum)
-   :no-members:
+.. autoclass:: pcapkit.protocols.schema.transport.tcp.MPTCPRemoveAddress
+   :members:
    :show-inheritance:
 
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. autoattribute:: chksum
+.. autoclass:: pcapkit.protocols.schema.transport.tcp.MPTCPPriority
+   :members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
+.. autoclass:: pcapkit.protocols.schema.transport.tcp.MPTCPFallback
+   :members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
+.. autoclass:: pcapkit.protocols.schema.transport.tcp.MPTCPFastclose
+   :members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
+Type Stubs
+~~~~~~~~~~
+
+.. autoclass:: pcapkit.protocols.schema.transport.tcp.OffsetFlag
+   :members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
+.. autoclass:: pcapkit.protocols.schema.transport.tcp.Flags
+   :members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
+.. autoclass:: pcapkit.protocols.schema.transport.tcp.POCProfile
+   :members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
+.. autoclass:: pcapkit.protocols.schema.transport.tcp.QuickStartFlags
+   :members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
+.. autoclass:: pcapkit.protocols.schema.transport.tcp.QuickStartNonce
+   :members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
+.. autoclass:: pcapkit.protocols.schema.transport.tcp.TimeoutInfo
+   :members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
+.. autoclass:: pcapkit.protocols.schema.transport.tcp.MPTCPSubtypeTest
+   :members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
+.. autoclass:: pcapkit.protocols.schema.transport.tcp.MPTCPSubtypeUnknown
+   :members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
+.. autoclass:: pcapkit.protocols.schema.transport.tcp.MPTCPSubtypeCapable
+   :members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
+.. autoclass:: pcapkit.protocols.schema.transport.tcp.MPTCPCapableFlags
+   :members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
+.. autoclass:: pcapkit.protocols.schema.transport.tcp.MPTCPSubtypeJoin
+   :members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
+.. autoclass:: pcapkit.protocols.schema.transport.tcp.MPTCPSubtype
+   :members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
+.. autoclass:: pcapkit.protocols.schema.transport.tcp.MPTCPDSSFlags
+   :members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
+.. autoclass:: pcapkit.protocols.schema.transport.tcp.MPTCPSubtypeAddAddress
+   :members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
+.. autoclass:: pcapkit.protocols.schema.transport.tcp.MPTCPSubtypePriority
+   :members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
+Auxiliary Functions
+~~~~~~~~~~~~~~~~~~~
+
+.. autofunction:: pcapkit.protocols.schema.transport.tcp.mptcp_data_selector
+.. autofunction:: pcapkit.protocols.schema.transport.tcp.mptcp_add_address_length
+.. autofunction:: pcapkit.protocols.schema.transport.tcp.mptcp_add_address_selector
+
+Data Models
+-----------
+
+.. module:: pcapkit.protocols.data.transport.tcp
+
+.. autoclass:: pcapkit.protocols.data.transport.tcp.TCP
+   :members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
+.. autoclass:: pcapkit.protocols.data.transport.tcp.Flags
+   :members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
+.. autoclass:: pcapkit.protocols.data.transport.tcp.Option
+   :members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
+.. autoclass:: pcapkit.protocols.data.transport.tcp.UnassignedOption
+   :members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
+.. autoclass:: pcapkit.protocols.data.transport.tcp.EndOfOptionList
+   :members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
+.. autoclass:: pcapkit.protocols.data.transport.tcp.NoOperation
+   :members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
+.. autoclass:: pcapkit.protocols.data.transport.tcp.MaximumSegmentSize
+   :members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
+.. autoclass:: pcapkit.protocols.data.transport.tcp.WindowScale
+   :members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
+.. autoclass:: pcapkit.protocols.data.transport.tcp.SACKPermitted
+   :members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
+.. autoclass:: pcapkit.protocols.data.transport.tcp.SACK
+   :members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
+.. autoclass:: pcapkit.protocols.data.transport.tcp.Echo
+   :members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
+.. autoclass:: pcapkit.protocols.data.transport.tcp.EchoReply
+   :members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
+.. autoclass:: pcapkit.protocols.data.transport.tcp.Timestamp
+   :members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
+.. autoclass:: pcapkit.protocols.data.transport.tcp.PartialOrderConnectionPermitted
+   :members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
+.. autoclass:: pcapkit.protocols.data.transport.tcp.PartialOrderConnectionProfile
+   :members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
+.. autoclass:: pcapkit.protocols.data.transport.tcp.CC
+   :members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
+.. autoclass:: pcapkit.protocols.data.transport.tcp.CCNew
+   :members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
+.. autoclass:: pcapkit.protocols.data.transport.tcp.CCEcho
+   :members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
+.. autoclass:: pcapkit.protocols.data.transport.tcp.AlternateChecksumRequest
+   :members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
 
 .. autoclass:: pcapkit.protocols.data.transport.tcp.AlternateChecksumData(kind, length, data)
    :no-members:
@@ -308,206 +697,124 @@ Data Structures
 
    .. autoattribute:: digest
 
-.. autoclass:: pcapkit.protocols.data.transport.tcp.QuickStartResponse(kind, length, req_rate, ttl_diff, nonce)
-   :no-members:
+.. autoclass:: pcapkit.protocols.data.transport.tcp.QuickStartResponse
+   :members:
    :show-inheritance:
 
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. autoattribute:: req_rate
-   .. autoattribute:: ttl_diff
-   .. autoattribute:: nonce
-
-.. autoclass:: pcapkit.protocols.data.transport.tcp.UserTimeout(kind, length, timeout)
-   :no-members:
+.. autoclass:: pcapkit.protocols.data.transport.tcp.UserTimeout
+   :members:
    :show-inheritance:
 
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. autoattribute:: timeout
-
-.. autoclass:: pcapkit.protocols.data.transport.tcp.Authentication(kind, length, key_id, next_key_id, mac)
-   :no-members:
+.. autoclass:: pcapkit.protocols.data.transport.tcp.Authentication
+   :members:
    :show-inheritance:
 
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. autoattribute:: key_id
-   .. autoattribute:: next_key_id
-   .. autoattribute:: mac
-
-.. autoclass:: pcapkit.protocols.data.transport.tcp.FastOpenCookie(kind, length, cookie)
-   :no-members:
+.. autoclass:: pcapkit.protocols.data.transport.tcp.FastOpenCookie
+   :members:
    :show-inheritance:
 
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. autoattribute:: cookie
-
-.. autoclass:: pcapkit.protocols.data.transport.tcp.MPTCP(kind, length, subtype)
-   :no-members:
+.. autoclass:: pcapkit.protocols.data.transport.tcp.MPTCP
+   :members:
    :show-inheritance:
 
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. autoattribute:: subtype
-
-.. autoclass:: pcapkit.protocols.data.transport.tcp.MPTCPUnknown(kind, length, subtype, data)
-   :no-members:
+.. autoclass:: pcapkit.protocols.data.transport.tcp.MPTCPUnknown
+   :members:
    :show-inheritance:
 
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. autoattribute:: data
-
-.. autoclass:: pcapkit.protocols.data.transport.tcp.MPTCPCapable(kind, length, subtype, version, flags, skey, rkey)
-   :no-members:
+.. autoclass:: pcapkit.protocols.data.transport.tcp.MPTCPCapable
+   :members:
    :show-inheritance:
 
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. autoattribute:: version
-   .. autoattribute:: flags
-   .. autoattribute:: skey
-   .. autoattribute:: rkey
-
-.. autoclass:: pcapkit.protocols.data.transport.tcp.MPTCPCapableFlag(req, ext, hsa)
-   :no-members:
+.. autoclass:: pcapkit.protocols.data.transport.tcp.MPTCPJoin
+   :members:
    :show-inheritance:
 
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. autoattribute:: req
-   .. autoattribute:: ext
-   .. autoattribute:: hsa
-
-.. autoclass:: pcapkit.protocols.data.transport.tcp.MPTCPJoin(kind, length, subtype)
-   :no-members:
+.. autoclass:: pcapkit.protocols.data.transport.tcp.MPTCPJoinSYN
+   :members:
    :show-inheritance:
 
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
-.. autoclass:: pcapkit.protocols.data.transport.tcp.MPTCPJoinSYN(kind, length, subtype, connection, backup, addr_id, token, nonce)
-   :no-members:
+.. autoclass:: pcapkit.protocols.data.transport.tcp.MPTCPJoinSYNACK
+   :members:
    :show-inheritance:
 
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. autoattribute:: connection
-   .. autoattribute:: backup
-   .. autoattribute:: addr_id
-   .. autoattribute:: token
-   .. autoattribute:: nonce
-
-.. autoclass:: pcapkit.protocols.data.transport.tcp.MPTCPJoinSYNACK(kind, length, subtype, connection, backup, addr_id, hmac, nonce)
-   :no-members:
+.. autoclass:: pcapkit.protocols.data.transport.tcp.MPTCPJoinACK
+   :members:
    :show-inheritance:
 
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. autoattribute:: connection
-   .. autoattribute:: backup
-   .. autoattribute:: addr_id
-   .. autoattribute:: hmac
-   .. autoattribute:: nonce
-
-.. autoclass:: pcapkit.protocols.data.transport.tcp.MPTCPJoinACK(kind, length, subtype, connection, hmac)
-   :no-members:
+.. autoclass:: pcapkit.protocols.data.transport.tcp.MPTCPDSS
+   :members:
    :show-inheritance:
 
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. autoattribute:: connection
-   .. autoattribute:: hmac
-
-.. autoclass:: pcapkit.protocols.data.transport.tcp.MPTCPDSS(kind, length, subtype, flags, ack, dsn, ssn, dl_len, checksum)
-   :no-members:
+.. autoclass:: pcapkit.protocols.data.transport.tcp.MPTCPAddAddress
+   :members:
    :show-inheritance:
 
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. autoattribute:: flags
-   .. autoattribute:: ack
-   .. autoattribute:: dsn
-   .. autoattribute:: ssn
-   .. autoattribute:: dl_len
-   .. autoattribute:: checksum
-
-.. autoclass:: pcapkit.protocols.data.transport.tcp.MPTCPDSSFlag(data_fin, dsn_oct, data_pre, ack_oct, ack_pre)
-   :no-members:
+.. autoclass:: pcapkit.protocols.data.transport.tcp.MPTCPRemoveAddress
+   :members:
    :show-inheritance:
 
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. autoattribute:: data_fin
-   .. autoattribute:: dsn_oct
-   .. autoattribute:: data_pre
-   .. autoattribute:: ack_oct
-   .. autoattribute:: ack_pre
-
-.. autoclass:: pcapkit.protocols.data.transport.tcp.MPTCPAddAddress(kind, length, subtype, version, addr_id, addr, port)
-   :no-members:
+.. autoclass:: pcapkit.protocols.data.transport.tcp.MPTCPPriority
+   :members:
    :show-inheritance:
 
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. autoattribute:: version
-   .. autoattribute:: addr_id
-   .. autoattribute:: addr
-   .. autoattribute:: port
-
-.. autoclass:: pcapkit.protocols.data.transport.tcp.MPTCPRemoveAddress(kind, length, subtype, addr_id)
-   :no-members:
+.. autoclass:: pcapkit.protocols.data.transport.tcp.MPTCPFallback
+   :members:
    :show-inheritance:
 
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. autoattribute:: addr_id
-
-.. autoclass:: pcapkit.protocols.data.transport.tcp.MPTCPPriority(kind, length, subtype, backup, addr_id)
-   :no-members:
+.. autoclass:: pcapkit.protocols.data.transport.tcp.MPTCPFastclose
+   :members:
    :show-inheritance:
 
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
-
-   .. autoattribute:: backup
-   .. autoattribute:: addr_id
-
-.. autoclass:: pcapkit.protocols.data.transport.tcp.MPTCPFallback(kind, length, subtype, dsn)
-   :no-members:
-   :show-inheritance:
-
-   :param \*args: Arbitrary positional arguments.
-   :param \*\*kwargs: Arbitrary keyword arguments.
-
-   .. autoattribute:: dsn
-
-.. autoclass:: pcapkit.protocols.data.transport.tcp.MPTCPFastclose(kind, length, subtype, rkey)
-   :no-members:
-   :show-inheritance:
-
-   :param \*args: Arbitrary positional arguments.
-   :param \*\*kwargs: Arbitrary keyword arguments.
-
-   .. autoattribute:: rkey
-
 
 .. raw:: html
 

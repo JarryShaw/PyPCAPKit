@@ -17,6 +17,7 @@ from pcapkit.corekit.fields.numbers import (EnumField, NumberField, UInt8Field, 
 from pcapkit.corekit.fields.strings import BitField, BytesField, PaddingField
 from pcapkit.protocols.schema.schema import Schema
 from pcapkit.utilities.exceptions import FieldError
+from pcapkit.utilities.logging import SPHINX_TYPE_CHECKING
 
 __all__ = [
     'TCP',
@@ -40,10 +41,13 @@ if TYPE_CHECKING:
     from ipaddress import IPv4Address, IPv6Address
     from typing import IO, Any, Optional
 
-    from typing_extensions import Literal, TypedDict
+    from typing_extensions import Literal
 
     from pcapkit.corekit.fields.field import _Field as Field
     from pcapkit.protocols.protocol import Protocol
+
+if SPHINX_TYPE_CHECKING:
+    from typing_extensions import TypedDict
 
     class OffsetFlag(TypedDict):
         """TCP offset field flag."""

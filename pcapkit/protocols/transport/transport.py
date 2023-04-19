@@ -2,6 +2,8 @@
 """Base Protocol
 ===================
 
+.. module:: pcapkit.protocols.transport.transport
+
 :mod:`pcapkit.protocols.transport.transport` contains
 :class:`~pcapkit.protocols.transport.transport.Transport`,
 which is a base class for transport layer protocols, eg.
@@ -19,7 +21,7 @@ from pcapkit.utilities.logging import DEVMODE, logger
 from pcapkit.utilities.warnings import RegistryWarning, warn
 
 if TYPE_CHECKING:
-    from typing import Any, Optional
+    from typing import Any, Optional, Type, DefaultDict
 
     from typing_extensions import Literal
 
@@ -28,6 +30,12 @@ __all__ = ['Transport']
 
 class Transport(Protocol[PT, ST], Generic[PT, ST]):  # pylint: disable=abstract-method
     """Abstract base class for transport layer protocol family."""
+
+    if TYPE_CHECKING:
+        #: Protocol index mapping for decoding next layer,
+        #: c.f. :meth:`self._decode_next_layer <pcapkit.protocols.transport.transport.Transport._decode_next_layer>`
+        #: & :meth:`self._import_next_layer <pcapkit.protocols.protocol.Protocol._import_next_layer>`.
+        __proto__: 'DefaultDict[int, tuple[str, str]]'
 
     ##########################################################################
     # Defaults.
@@ -140,5 +148,5 @@ class Transport(Protocol[PT, ST], Generic[PT, ST]):  # pylint: disable=abstract-
         elif sort_port[1] in self.__proto__:
             proto = sort_port[1]
         else:
-            proto = None  # type: ignore[assignment]
-        return super()._decode_next_layer(dict_, proto, length, packet=packet)
+            proto = None
+        return super()._decode_next_layer(dict_, proto, length, packet=packet)  # type: ignore[arg-type]

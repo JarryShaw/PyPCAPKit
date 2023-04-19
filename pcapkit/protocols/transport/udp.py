@@ -2,6 +2,8 @@
 """UDP - User Datagram Protocol
 ==================================
 
+.. module:: pcapkit.protocols.transport.udp
+
 :mod:`pcapkit.protocols.transport.udp` contains
 :class:`~pcapkit.protocols.transport.udp.UDP` only,
 which implements extractor for User Datagram Protocol

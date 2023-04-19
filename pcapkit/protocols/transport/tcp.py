@@ -2,6 +2,8 @@
 """TCP - Transmission Control Protocol
 =========================================
 
+.. module:: pcapkit.protocols.transport.tcp
+
 :mod:`pcapkit.protocols.transport.tcp` contains
 :class:`~pcapkit.protocols.transport.tcp.TCP` only,
 which implements extractor for Transmission Control
@@ -2452,6 +2454,45 @@ class TCP(Transport[Data_TCP, Schema_TCP],
             digest=digest,
         )
 
+    def _make_mode_qs(self, code: 'Enum_Option', opt: 'Optional[Data_QuickStartResponse]' = None, *,
+                      rate: 'int' = 0,
+                      diff: 'timedelta | int' = 0,
+                      nonce: 'int' = 0,
+                      **kwargs: 'Any') -> 'Schema_QuickStartResponse':
+        """Make TCP quick start response option.
+
+        Args:
+            code: option code
+            opt: option data
+            rate: rate (in kbps)
+            diff: time to live (in seconds) difference
+            nonce: nonce value
+            **kwargs: arbitrary keyword arguments
+
+        Returns:
+            Constructed option schema.
+
+        """
+        if opt is not None:
+            rate = opt.req_rate
+            diff = opt.ttl_diff
+            nonce = opt.nonce
+
+        rate_val = math.floor(math.log2(rate * 1000 / 40000)) if rate > 0 else 0
+        diff_val = diff if isinstance(diff, int) else math.floor(diff.total_seconds())
+
+        return Schema_QuickStartResponse(
+            kind=code,
+            length=8,
+            flags={
+                'rate': rate_val,
+            },
+            diff=diff_val,
+            nonce={
+                'nonce': nonce,
+            },
+        )
+
     def _make_mode_timeout(self, code: 'Enum_Option', opt: 'Optional[Data_UserTimeout]' = None, *,
                            timeout: 'timedelta | int' = 0,
                            **kwargs: 'Any') -> 'Schema_UserTimeout':
@@ -2824,7 +2865,7 @@ class TCP(Transport[Data_TCP, Schema_TCP],
             checksum=checksum,
         )
 
-    def _make_mptcp_add_addr(self, subtype: 'Enum_MPTCPOption', opt: 'Optional[Data_MPTCPAddAddress]' = None, *,
+    def _make_mptcp_addaddr(self, subtype: 'Enum_MPTCPOption', opt: 'Optional[Data_MPTCPAddAddress]' = None, *,
                              addr_id: 'int' = 0,
                              addr: 'IPv4Address | IPv6Address | int | bytes | str' = '0.0.0.0',  # nosec: B104
                              port: 'Optional[int]' = None,
@@ -2892,7 +2933,7 @@ class TCP(Transport[Data_TCP, Schema_TCP],
             addr_id=addr_id_list,
         )
 
-    def _make_mptcp_priority(self, subtype: 'Enum_MPTCPOption', opt: 'Optional[Data_MPTCPPriority]' = None, *,
+    def _make_mptcp_prio(self, subtype: 'Enum_MPTCPOption', opt: 'Optional[Data_MPTCPPriority]' = None, *,
                              backup: 'bool' = False,
                              addr_id: 'Optional[int]' = None,
                              **kwargs: 'Any') -> 'Schema_MPTCPPriority':
