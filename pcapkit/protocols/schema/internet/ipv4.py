@@ -21,14 +21,13 @@ from pcapkit.corekit.fields.numbers import EnumField, UInt8Field, UInt16Field, U
 from pcapkit.corekit.fields.strings import BitField, BytesField, PaddingField
 from pcapkit.protocols.schema.schema import Schema
 from pcapkit.utilities.exceptions import FieldValueError
+from pcapkit.utilities.logging import SPHINX_TYPE_CHECKING
 from pcapkit.utilities.warnings import ProtocolWarning, warn
 
 __all__ = [
     'IPv4',
 
-    'ToSField', 'Flags',
-    'OptionType',
-
+    'Option',
     'UnassignedOption', 'EOOLOption', 'NOPOption',
     'SECOption', 'LSROption', 'TSOption',
     'ESECOption', 'RROption', 'SIDOption',
@@ -42,11 +41,12 @@ if TYPE_CHECKING:
     from ipaddress import IPv4Address
     from typing import IO, Any, Optional
 
-    from typing_extensions import TypedDict
-
     from pcapkit.corekit.fields.field import _Field as Field
     from pcapkit.corekit.multidict import OrderedMultiDict
     from pcapkit.protocols.protocol import Protocol
+
+if SPHINX_TYPE_CHECKING:
+    from typing_extensions import TypedDict
 
     class VerIHLField(TypedDict):
         """Version and header length field."""

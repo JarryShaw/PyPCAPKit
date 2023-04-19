@@ -2,6 +2,8 @@
 """HIP - Host Identity Protocol
 ==================================
 
+.. module:: pcapkit.protocols.internet.hip
+
 :mod:`pcapkit.protocols.internet.hip` contains
 :class:`~pcapkit.protocols.internet.hip.HIP` only,
 which implements extractor for Host Identity
@@ -31,8 +33,9 @@ Octets      Bits        Name                    Description
 import datetime
 import ipaddress
 import math
-import struct
 from typing import TYPE_CHECKING, cast, overload
+
+from typing_extensions import TypedDict
 
 from pcapkit.const.hip.certificate import Certificate as Enum_Certificate
 from pcapkit.const.hip.cipher import Cipher as Enum_Cipher
@@ -205,7 +208,7 @@ if TYPE_CHECKING:
 
     from aenum import IntEnum as AenumEnum
     from mypy_extensions import DefaultArg, KwArg, NamedArg
-    from typing_extensions import Literal, NotRequired, TypedDict
+    from typing_extensions import Literal, NotRequired
 
     from pcapkit.const.hip.esp_transform_suite import ESPTransformSuite as Enum_ESPTransformSuite
     from pcapkit.const.hip.nat_traversal import NATTraversal as Enum_NATTraversal
@@ -225,23 +228,24 @@ if TYPE_CHECKING:
     ParameterConstructor = Callable[[Enum_Parameter, DefaultArg(Optional[Data_Parameter]),
                                      NamedArg(int, 'version'), KwArg(Any)], Schema_Parameter]
 
-    class Locator(TypedDict):
-        """Locator dictionary type."""
-
-        #: Traffic type.
-        traffic: int
-        #: Locator type.
-        type: int
-        #: Preferred flag.
-        preferred: bool
-        #: Lifetime.
-        lifetime: timedelta | int
-        #: IP address.
-        ip: IPv6Address | bytes | int | str
-        #: SPI.
-        spi: NotRequired[int]
-
 __all__ = ['HIP']
+
+
+class Locator(TypedDict):
+    """Locator dictionary type."""
+
+    #: Traffic type.
+    traffic: 'int'
+    #: Locator type.
+    type: 'int'
+    #: Preferred flag.
+    preferred: 'bool'
+    #: Lifetime.
+    lifetime: 'timedelta | int'
+    #: IP address.
+    ip: 'IPv6Address | bytes | int | str'
+    #: SPI.
+    spi: 'NotRequired[int]'
 
 
 class HIP(Internet[Data_HIP, Schema_HIP],

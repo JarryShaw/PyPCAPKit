@@ -2,6 +2,8 @@
 """IPX - Internetwork Packet Exchange
 ========================================
 
+.. module:: pcapkit.protocols.internet.ipx
+
 :mod:`pcapkit.protocols.internet.ipx` contains
 :class:`~pcapkit.protocols.internet.ipx.IPX` only,
 which implements extractor for Internetwork Packet

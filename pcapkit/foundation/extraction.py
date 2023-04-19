@@ -243,8 +243,8 @@ class Extractor(Generic[P]):
         """Frame record for reassembly.
 
         * ``ipv4`` -- tuple of TCP payload fragment (:term:`reasm.ipv4.datagram`)
-        * ``ipv6`` -- tuple of TCP payload fragment (:term:`ipv6.datagram`)
-        * ``tcp`` -- tuple of TCP payload fragment (:term:`tcp.datagram`)
+        * ``ipv6`` -- tuple of TCP payload fragment (:term:`reasm.ipv6.datagram`)
+        * ``tcp`` -- tuple of TCP payload fragment (:term:`reasm.tcp.datagram`)
 
         """
         data = ReassemblyData(

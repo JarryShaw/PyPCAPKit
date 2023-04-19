@@ -2,6 +2,8 @@
 """IPv6 - Internet Protocol version 6
 ========================================
 
+.. module:: pcapkit.protocols.internet.ipv6
+
 :mod:`pcapkit.protocols.internet.ipv6` contains
 :class:`~pcapkit.protocols.internet.ipv6.IPv6` only,
 which implements extractor for Internet Protocol
@@ -38,7 +40,7 @@ from pcapkit.protocols.schema.internet.ipv6 import IPv6 as Schema_IPv6
 if TYPE_CHECKING:
     from enum import IntEnum as StdlibEnum
     from ipaddress import IPv6Address
-    from typing import IO, Any, NoReturn, Optional, Type
+    from typing import Any, Optional, Type
 
     from aenum import IntEnum as AenumEnum
     from typing_extensions import Literal

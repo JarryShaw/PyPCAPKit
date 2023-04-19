@@ -15,12 +15,10 @@ __all__ = ['L2TP']
 if TYPE_CHECKING:
     from typing import Optional
 
-    from typing_extensions import Literal
-
     from pcapkit.protocols.protocol import Protocol
 
 if SPHINX_TYPE_CHECKING:
-    from typing_extensions import TypedDict
+    from typing_extensions import Literal, TypedDict
 
     class FlagsType(TypedDict):
         """Flags of L2TP packet."""

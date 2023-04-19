@@ -26,7 +26,7 @@ BufferID = Tuple[AT, AT, int, 'TransType']
 
 
 class Packet(Info, Generic[AT]):
-    """Data model for :term:`reasm.ipv4.packet` / :term:`ipv6.packet`."""
+    """Data model for :term:`reasm.ipv4.packet` / :term:`reasm.ipv6.packet`."""
 
     #: Buffer ID.
     bufid: 'BufferID'
@@ -50,7 +50,7 @@ class Packet(Info, Generic[AT]):
 
 
 class DatagramID(Info, Generic[AT]):
-    """Data model for :term:`reasm.ipv4.datagram` / :term:`ipv6.datagram` original packet identifier."""
+    """Data model for :term:`reasm.ipv4.datagram` / :term:`reasm.ipv6.datagram` original packet identifier."""
 
     #: Source address.
     src: 'AT'
@@ -66,7 +66,7 @@ class DatagramID(Info, Generic[AT]):
 
 
 class Datagram(Info, Generic[AT]):
-    """Data model for :term:`reasm.ipv4.datagram` / :term:`ipv6.datagram`."""
+    """Data model for :term:`reasm.ipv4.datagram` / :term:`reasm.ipv6.datagram`."""
 
     #: Completed flag.
     completed: 'bool'
@@ -92,7 +92,7 @@ class Datagram(Info, Generic[AT]):
 
 
 class Buffer(Info, Generic[AT]):
-    """Data model for :term:`reasm.ipv4.buffer` / :term:`ipv6.buffer`."""
+    """Data model for :term:`reasm.ipv4.buffer` / :term:`reasm.ipv6.buffer`."""
 
     #: Total data length.
     TDL: 'int'

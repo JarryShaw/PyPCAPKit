@@ -2,6 +2,8 @@
 """AH - Authentication Header
 ================================
 
+.. module:: pcapkit.protocols.internet.ah
+
 :mod:`pcapkit.protocols.internet.ah` contains
 :class:`~pcapkit.protocols.internet.AH` only,
 which implements extractor for Authentication
@@ -28,7 +30,7 @@ from pcapkit.const.reg.transtype import TransType as Enum_TransType
 from pcapkit.protocols.data.internet.ah import AH as Data_AH
 from pcapkit.protocols.internet.ipsec import IPsec
 from pcapkit.protocols.schema.internet.ah import AH as Schema_AH
-from pcapkit.utilities.exceptions import ProtocolError, UnsupportedCall, VersionError
+from pcapkit.utilities.exceptions import UnsupportedCall
 
 if TYPE_CHECKING:
     from enum import IntEnum as StdlibEnum

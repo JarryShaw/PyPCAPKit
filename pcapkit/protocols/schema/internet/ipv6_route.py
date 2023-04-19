@@ -13,6 +13,7 @@ from pcapkit.corekit.fields.misc import PayloadField, SchemaField, SwitchField
 from pcapkit.corekit.fields.numbers import EnumField, UInt8Field
 from pcapkit.corekit.fields.strings import BitField, BytesField, PaddingField
 from pcapkit.protocols.schema.schema import Schema
+from pcapkit.utilities.logging import SPHINX_TYPE_CHECKING
 
 __all__ = [
     'IPv6_Route',
@@ -25,10 +26,11 @@ if TYPE_CHECKING:
     from ipaddress import IPv6Address
     from typing import IO, Any, Optional
 
-    from typing_extensions import TypedDict
-
     from pcapkit.corekit.fields.field import _Field as Field
     from pcapkit.protocols.protocol import Protocol
+
+if SPHINX_TYPE_CHECKING:
+    from typing_extensions import TypedDict
 
     class PadInfo(TypedDict):
         """Padding length and reserved."""

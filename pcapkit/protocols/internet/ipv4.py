@@ -2,6 +2,8 @@
 """IPv4 - Internet Protocol version 4
 ========================================
 
+.. module:: pcapkit.protocols.internet.ipv4
+
 :mod:`pcapkit.protocols.internet.ipv4` contains
 :class:`~pcapkit.protocols.internet.ipv4.IPv4` only,
 which implements extractor for Internet Protocol

@@ -2,6 +2,8 @@
 """Base Protocol
 ===================
 
+.. module:: pcapkit.protocols.internet.internet
+
 :mod:`pcapkit.protocols.internet.internet` contains :class:`~pcapkit.protocols.internet.internet.Internet`,
 which is a base class for internet layer protocols, eg. :class:`~pcapkit.protocols.internet.ah.AH`,
 :class:`~pcapkit.protocols.internet.ipsec.IPsec`, :class:`~pcapkit.protocols.internet.ipv4.IPv4`,

@@ -31,6 +31,7 @@ from pcapkit.corekit.fields.numbers import (EnumField, NumberField, UInt8Field, 
 from pcapkit.corekit.fields.strings import BitField, BytesField, PaddingField
 from pcapkit.protocols.schema.schema import Schema
 from pcapkit.utilities.exceptions import FieldValueError
+from pcapkit.utilities.logging import SPHINX_TYPE_CHECKING
 from pcapkit.utilities.warnings import ProtocolWarning, warn
 
 __all__ = [
@@ -61,12 +62,13 @@ if TYPE_CHECKING:
     from ipaddress import IPv6Address
     from typing import IO, Any, Optional
 
-    from typing_extensions import Literal, TypedDict
-
     from pcapkit.corekit.fields.field import _Field as Field
     from pcapkit.protocols.data.internet.hip import EncryptedParameter as Data_EncryptedParameter
     from pcapkit.protocols.data.internet.hip import HIPCipherParameter as Data_HIPCipherParameter
     from pcapkit.protocols.protocol import Protocol
+
+if SPHINX_TYPE_CHECKING:
+    from typing_extensions import Literal, TypedDict
 
     class PacketType(TypedDict):
         """Packet type."""

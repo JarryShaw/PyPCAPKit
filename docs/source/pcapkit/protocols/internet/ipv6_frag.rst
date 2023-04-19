@@ -2,7 +2,6 @@ IPv6-Frag - Fragment Header for IPv6
 ====================================
 
 .. module:: pcapkit.protocols.internet.ipv6_frag
-.. module:: pcapkit.protocols.data.internet.ipv6_frag
 
 :mod:`pcapkit.protocols.internet.ipv6_frag` contains
 :class:`~pcapkit.protocols.internet.ipv6_frag.IPv6_Frag`
@@ -21,19 +20,12 @@ Octets      Bits        Name                    Description
   4          32   ``frag.id``                 Identification
 ======= ========= ==================== =======================
 
-.. raw:: html
-
-   <br />
-
 .. autoclass:: pcapkit.protocols.internet.ipv6_frag.IPv6_Frag
    :no-members:
    :show-inheritance:
 
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
-
-   .. automethod:: __post_init__
-   .. automethod:: __index__
 
    .. autoproperty:: name
    .. autoproperty:: alias
@@ -45,20 +37,34 @@ Octets      Bits        Name                    Description
    .. automethod:: read
    .. automethod:: make
 
-Data Structures
----------------
+   .. automethod:: _make_data
 
-.. autoclass:: pcapkit.protocols.data.internet.ipv6_frag.IPv6_Frag(next, offset, mf, id)
-   :no-members:
+   .. automethod:: __post_init__
+   .. automethod:: __index__
+
+Header Schemas
+--------------
+
+.. module:: pcapkit.protocols.schema.internet.ipv6_frag
+
+.. autoclass:: pcapkit.protocols.schema.internet.ipv6_frag.IPv6_Frag
+   :members:
    :show-inheritance:
 
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. autoattribute:: next
-   .. autoattribute:: offset
-   .. autoattribute:: mf
-   .. autoattribute:: id
+Data Models
+-----------
+
+.. module:: pcapkit.protocols.data.internet.ipv6_frag
+
+.. autoclass:: pcapkit.protocols.data.internet.ipv6_frag.IPv6_Frag
+   :members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
 
 .. raw:: html
 

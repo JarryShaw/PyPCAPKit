@@ -2,6 +2,8 @@
 """IPv6-Route - Routing Header for IPv6
 ==========================================
 
+.. module:: pcapkit.protocols.internet.ipv6_route
+
 :mod:`pcapkit.protocols.internet.ipv6_route` contains
 :class:`~pcapkit.protocols.internet.ipv6_route.IPv6_Route`
 only, which implements extractor for Routing Header for IPv6

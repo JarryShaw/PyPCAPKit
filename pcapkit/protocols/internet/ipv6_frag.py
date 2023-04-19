@@ -2,6 +2,8 @@
 """IPv6-Frag - Fragment Header for IPv6
 ==========================================
 
+.. module:: pcapkit.protocols.internet.ipv6_frag
+
 :mod:`pcapkit.protocols.internet.ipv6_frag` contains
 :class:`~pcapkit.protocols.internet.ipv6_frag.IPv6_Frag`
 only, which implements extractor for Fragment Header for

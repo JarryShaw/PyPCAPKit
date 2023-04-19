@@ -2,6 +2,8 @@
 """HOPOPT - IPv6 Hop-by-Hop Options
 ======================================
 
+.. module:: pcapkit.protocols.internet.hopopt
+
 :mod:`pcapkit.protocols.internet.hopopt` contains
 :class:`~pcapkit.protocols.internet.hopopt.HOPOPT`
 only, which implements extractor for IPv6 Hop-by-Hop

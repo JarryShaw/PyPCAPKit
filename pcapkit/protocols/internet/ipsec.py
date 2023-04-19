@@ -2,6 +2,8 @@
 """IPsec - Internet Protocol Security
 ========================================
 
+.. module:: pcapkit.protocols.internet.ipsec
+
 :mod:`pcapkit.protocols.internet.ipsec` contains
 :class:`~pcapkit.protocols.internet.ipsec.IPsec`
 only, which is a base class for Internet Protocol

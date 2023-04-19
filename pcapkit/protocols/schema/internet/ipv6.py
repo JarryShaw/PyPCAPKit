@@ -10,15 +10,17 @@ from pcapkit.corekit.fields.misc import PayloadField
 from pcapkit.corekit.fields.numbers import EnumField, UInt8Field, UInt16Field
 from pcapkit.corekit.fields.strings import BitField
 from pcapkit.protocols.schema.schema import Schema
+from pcapkit.utilities.logging import SPHINX_TYPE_CHECKING
 
 __all__ = ['IPv6']
 
 if TYPE_CHECKING:
     from ipaddress import IPv6Address
 
-    from typing_extensions import TypedDict
-
     from pcapkit.protocols.protocol import Protocol
+
+if SPHINX_TYPE_CHECKING:
+    from typing_extensions import TypedDict
 
     #: Version, traffic class and flow label.
     IPv6Hextet = TypedDict('IPv6Hextet', {

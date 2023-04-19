@@ -2,6 +2,8 @@
 """IPv6-Opts - Destination Options for IPv6
 ==============================================
 
+.. module:: pcapkit.protocols.internet.hopopt
+
 :mod:`pcapkit.protocols.internet.ipv6_opts` contains
 :class:`~pcapkit.protocols.internet.ipv6_opts.IPv6_Opts`
 only, which implements extractor for Destination Options

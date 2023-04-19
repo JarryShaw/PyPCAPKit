@@ -3,6 +3,7 @@ Internet Layer Protocols
 
 .. module:: pcapkit.protocols.internet
 .. module:: pcapkit.protocols.data.internet
+.. module:: pcapkit.protocols.schema.internet
 
 :mod:`pcapkit.protocols.internet` is collection of all protocols in
 internet layer, with detailed implementation and methods.
