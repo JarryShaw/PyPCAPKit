@@ -4,8 +4,6 @@
 =====================
 
 .. module:: pcapkit.protocols
-.. module:: pcapkit.protocols.data
-.. module:: pcapkit.protocols.schema
 
 :mod:`pcapkit.protocols` is collection of all protocol families,
 with detailed implementation and methods.

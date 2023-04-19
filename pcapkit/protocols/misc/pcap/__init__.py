@@ -4,8 +4,6 @@
 =======================
 
 .. module:: pcapkit.protocols.misc.pcap
-.. module:: pcapkit.protocols.data.misc.pcap
-.. module:: pcapkit.protocols.schema.misc.pcap
 
 :mod:`pcapkit.protocols.misc.pcap` contains header descriptions for
 PCAP files, including global header

@@ -71,8 +71,8 @@ Header Schemas
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
-Data Structures
----------------
+Data Models
+-----------
 
 .. module:: pcapkit.protocols.data.misc.pcap.header
 
@@ -147,8 +147,8 @@ Header Schemas
    :param \*\*kwargs: Arbitrary keyword arguments.
 
 
-Data Structures
----------------
+Data Models
+-----------
 
 .. module:: pcapkit.protocols.data.misc.pcap.frame
 
