@@ -2,6 +2,8 @@
 """Raw Packet Data
 =====================
 
+.. module:: pcapkit.protocols.misc.raw
+
 :mod:`pcapkit.protocols.misc.raw` contains
 :class:`~pcapkit.protocols.misc.raw.Raw` only, which implements
 extractor for unknown protocol, and constructs a

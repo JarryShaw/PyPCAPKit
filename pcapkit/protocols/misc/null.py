@@ -2,6 +2,8 @@
 """No-Payload Packet
 =======================
 
+.. module:: pcapkit.protocols.misc.null
+
 :mod:`pcapkit.protocols.null` contains
 :class:`~pcapkit.protocols.null.NoPayload` only, which
 implements a :class:`~pcapkit.protocols.protocol.Protocol` like

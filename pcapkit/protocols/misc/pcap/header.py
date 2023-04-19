@@ -2,6 +2,8 @@
 """Global Header
 ===================
 
+.. module:: pcapkit.protocols.misc.pcap.header
+
 :mod:`pcapkit.protocols.misc.pcap.header` contains
 :class:`~pcapkit.protocols.misc.pcap.Header` only,
 which implements extractor for global headers [*]_

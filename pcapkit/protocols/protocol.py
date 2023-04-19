@@ -2,6 +2,8 @@
 """Root Protocol
 ===================
 
+.. module:: pcapkit.protocols.protocol
+
 :mod:`pcapkit.protocols.protocol` contains
 :class:`~pcapkit.protocols.protocol.Protocol` only, which is
 an abstract base class for all protocol family, with pre-defined

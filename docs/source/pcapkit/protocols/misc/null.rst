@@ -2,7 +2,6 @@ No-Payload Packet
 =================
 
 .. module:: pcapkit.protocols.misc.null
-.. module:: pcapkit.protocols.data.misc.null
 
 :mod:`pcapkit.protocols.null` contains
 :class:`~pcapkit.protocols.null.NoPayload` only, which
@@ -17,9 +16,6 @@ object whose payload is recursively
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. automethod:: __post_init__
-   .. automethod:: __index__
-
    .. autoproperty:: name
    .. autoproperty:: length
    .. autoproperty:: protocol
@@ -27,12 +23,29 @@ object whose payload is recursively
    .. automethod:: read
    .. automethod:: make
 
+   .. automethod:: __post_init__
+   .. automethod:: __index__
+
+Header Schemas
+--------------
+
+.. module:: pcapkit.protocols.schema.misc.null
+
+.. autoclass:: pcapkit.protocols.schema.misc.null.NoPayload
+   :members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
 Data Structures
 ---------------
 
-.. autoclass:: pcapkit.protocols.data.misc.null.NoPayload()
-   :no-members:
+.. module:: pcapkit.protocols.data.misc.null
+
+.. autoclass:: pcapkit.protocols.data.misc.null.NoPayload
+   :members:
    :show-inheritance:
 
-   .. :param \*args: Arbitrary positional arguments.
-   .. :param \*\*kwargs: Arbitrary keyword arguments.
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.

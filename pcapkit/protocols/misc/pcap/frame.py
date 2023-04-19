@@ -2,6 +2,8 @@
 """Frame Header
 ==================
 
+.. module:: pcapkit.protocols.misc.pcap.frame
+
 :mod:`pcapkit.protocols.misc.pcap.frame` contains
 :class:`~pcapkit.protocols.misc.pcap.frame.Frame` only,
 which implements extractor for frame headers [*]_ of PCAP,
