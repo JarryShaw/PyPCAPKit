@@ -8,15 +8,19 @@ from pcapkit.corekit.fields.misc import ConditionalField, PayloadField
 from pcapkit.corekit.fields.numbers import UInt16Field
 from pcapkit.corekit.fields.strings import BitField, PaddingField
 from pcapkit.protocols.schema.schema import Schema
+from pcapkit.utilities.logging import SPHINX_TYPE_CHECKING
 
 __all__ = ['L2TP']
 
 if TYPE_CHECKING:
     from typing import Optional
 
-    from typing_extensions import Literal, TypedDict
+    from typing_extensions import Literal
 
     from pcapkit.protocols.protocol import Protocol
+
+if SPHINX_TYPE_CHECKING:
+    from typing_extensions import TypedDict
 
     class FlagsType(TypedDict):
         """Flags of L2TP packet."""

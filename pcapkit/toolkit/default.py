@@ -88,7 +88,7 @@ def ipv6_reassembly(frame: 'Frame') -> 'IP_Packet[IPv6Address] | None':
           IPv6 Fragment header (:rfc:`2460#section-4.5`,
           :class:`pcapkit.protocols.internet.ipv6_frag.IPv6_Frag`).
         * If the ``frame`` can be reassembled, then the :obj:`dict` mapping of data for IPv6
-          reassembly (:term:`ipv6.packet`) will be returned; otherwise, returns :data:`None`.
+          reassembly (:term:`reasm.ipv6.packet`) will be returned; otherwise, returns :data:`None`.
 
     See Also:
         :class:`pcapkit.foundation.reassembly.ipv6.IPv6`
@@ -134,7 +134,7 @@ def tcp_reassembly(frame: 'Frame') -> 'TCP_Packet | None':
         * If the ``frame`` can be used for TCP reassembly. A frame can be reassembled
           if it contains TCP layer (:class:`pcapkit.protocols.transport.tcp.TCP`).
         * If the ``frame`` can be reassembled, then the :obj:`dict` mapping of data for TCP
-          reassembly (:term:`tcp.packet`) will be returned; otherwise, returns :data:`None`.
+          reassembly (:term:`reasm.tcp.packet`) will be returned; otherwise, returns :data:`None`.
 
     See Also:
         :class:`pcapkit.foundation.reassembly.tcp.TCP`

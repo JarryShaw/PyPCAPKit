@@ -15,7 +15,7 @@ from pcapkit.protocols.schema.schema import Schema
 __all__ = ['ARP']
 
 if TYPE_CHECKING:
-    pass
+    from pcapkit.protocols.protocol import Protocol
 
 
 class ARP(Schema):

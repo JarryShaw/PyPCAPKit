@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING
 from pcapkit.const.ospf.authentication import Authentication as Enum_Authentication
 from pcapkit.const.ospf.packet import Packet as Enum_Packet
 from pcapkit.corekit.fields.ipaddress import IPv4Field
-from pcapkit.corekit.fields.misc import PayloadField, SwitchField, SchemaField
+from pcapkit.corekit.fields.misc import PayloadField, SchemaField, SwitchField
 from pcapkit.corekit.fields.numbers import EnumField, UInt8Field, UInt16Field, UInt32Field
 from pcapkit.corekit.fields.strings import BytesField, PaddingField
 from pcapkit.protocols.schema.schema import Schema
@@ -18,8 +18,8 @@ if TYPE_CHECKING:
     from ipaddress import IPv4Address
     from typing import Any
 
-    from pcapkit.protocols.protocol import Protocol
     from pcapkit.corekit.fields.field import _Field as Field
+    from pcapkit.protocols.protocol import Protocol
 
 
 def ospf_auth_data_selector(pkt: 'dict[str, Any]') -> 'Field':

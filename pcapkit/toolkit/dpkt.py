@@ -169,7 +169,7 @@ def ipv6_reassembly(packet: 'Packet', *, count: 'int' = -1) -> 'IP_Packet[IPv6Ad
           if it contains IPv6 layer (:class:`dpkt.ip6.IP6`) and IPv6 Fragment header
           (:rfc:`2460#section-4.5`, :class:`dpkt.ip6.IP6FragmentHeader`).
         * If the ``packet`` can be reassembled, then the :obj:`dict` mapping of data for IPv6
-          reassembly (:term:`ipv6.packet`) will be returned; otherwise, returns :data:`None`.
+          reassembly (:term:`reasm.ipv6.packet`) will be returned; otherwise, returns :data:`None`.
 
     See Also:
         :class:`pcapkit.foundation.reassembly.ipv6.IPv6`
@@ -216,7 +216,7 @@ def tcp_reassembly(packet: 'Packet', *, count: 'int' = -1) -> 'TCP_Packet | None
         * If the ``packet`` can be used for TCP reassembly. A packet can be reassembled
           if it contains TCP layer (:class:`dpkt.tcp.TCP`).
         * If the ``packet`` can be reassembled, then the :obj:`dict` mapping of data for TCP
-          reassembly (:term:`tcp.packet`) will be returned; otherwise, returns :data:`None`.
+          reassembly (:term:`reasm.tcp.packet`) will be returned; otherwise, returns :data:`None`.
 
     See Also:
         :class:`pcapkit.foundation.reassembly.tcp.TCP`

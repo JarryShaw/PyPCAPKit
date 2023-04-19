@@ -254,3 +254,6 @@ bandit:
 
 profile:
 	$(MAKE) -C test profile
+
+docs-clean:
+	rm -rf docs/build/html

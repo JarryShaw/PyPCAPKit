@@ -76,6 +76,11 @@ Header Schemas
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
+Auxiliary Functions
+~~~~~~~~~~~~~~~~~~~
+
+.. autofunction:: pcapkit.protocols.schema.link.ospf.ospf_auth_data_selector
+
 Data Models
 -----------
 

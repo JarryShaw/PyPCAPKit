@@ -53,6 +53,11 @@ Header Schemas
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
+Auxiliary Functions
+~~~~~~~~~~~~~~~~~~~
+
+.. autofunction:: pcapkit.protocols.schema.link.ethernet.callback_payload
+
 Data Models
 -----------
 

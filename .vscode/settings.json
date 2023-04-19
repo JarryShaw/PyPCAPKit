@@ -361,5 +361,6 @@
     "restructuredtext.preview.name": "sphinx",
     "esbonio.sphinx.forceFullBuild": false,
     "esbonio.sphinx.numJobs": 0,
-    "restructuredtext.trace": "off"
+    "restructuredtext.trace": "off",
+    "restructuredtext.linter.run": "off"
 }
