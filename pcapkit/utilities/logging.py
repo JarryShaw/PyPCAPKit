@@ -34,7 +34,7 @@ VERBOSE = BOOLEAN_STATES.get(os.environ.get('PCAPKIT_VERBOSE', 'false').casefold
 # Sphinx Mode
 ###############################################################################
 
-# NOTE: This is a workaround for TYPE_CHECKING in Sphinx.
+#: This is a workaround for :data:`~typing.TYPE_CHECKING` in Sphinx.
 SPHINX_TYPE_CHECKING = BOOLEAN_STATES.get(os.environ.get('PCAPKIT_SPHINX', 'false').casefold(), False)
 
 ###############################################################################

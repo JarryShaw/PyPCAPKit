@@ -41,7 +41,7 @@ Environment Variables
 .. autodata:: pcapkit.utilities.logging.DEVMODE
    :no-value:
 
-   .. note::
+   .. seealso::
 
       This variable can be configured through the environment variable
       :envvar:`PCAPKIT_DEVMODE`.
@@ -49,10 +49,18 @@ Environment Variables
 .. autodata:: pcapkit.utilities.logging.VERBOSE
    :no-value:
 
-   .. note::
+   .. seealso::
 
       This variable can be configured through the environment variable
       :envvar:`PCAPKIT_VERBOSE`.
+
+.. autodata:: pcapkit.utilities.logging.SPHINX_TYPE_CHECKING
+   :no-value:
+
+   .. seealso::
+
+      This variable can be configured through the environment variable
+      :envvar:`PCAPKIT_SPHINX`.
 
 Decorator Functions
 ===================

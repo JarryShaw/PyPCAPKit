@@ -87,12 +87,21 @@ class _Field(Generic[_T], metaclass=abc.ABCMeta):
         Arguments:
             packet: Packet data.
 
+        Returns:
+            Updated field instance.
+
+        Notes:
+            This method will return a new instance of :class:`_Field` instead of
+            updating the current instance.
+
         """
         new_self = copy.copy(self)
         new_self._callback(new_self, packet)  # type: ignore[attr-defined]
         return new_self
 
     def __repr__(self) -> 'str':
+        if not self.name.isidentifier():
+            return f'<{self.__class__.__name__}>'
         return f'<{self.__class__.__name__} {self.name}>'
 
     def pre_process(self, value: '_T', packet: 'dict[str, Any]') -> 'Any':  # pylint: disable=unused-argument

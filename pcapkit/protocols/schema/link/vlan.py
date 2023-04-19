@@ -10,23 +10,23 @@ from pcapkit.corekit.fields.misc import PayloadField
 from pcapkit.corekit.fields.numbers import EnumField, UInt8Field, UInt16Field
 from pcapkit.corekit.fields.strings import BitField
 from pcapkit.protocols.schema.schema import Schema
+from typing_extensions import TypedDict
 
 __all__ = ['VLAN', 'TCI']
 
 if TYPE_CHECKING:
-    from typing_extensions import TypedDict
-
     from pcapkit.protocols.protocol import Protocol
 
-    class TCIType(TypedDict):
-        """Type of 802.1Q Customer VLAN Tag Type tag control information."""
 
-        #: Priority code point.
-        pcp: int
-        #: Drop eligible indicator.
-        dei: int
-        #: VLAN identifier.
-        vid: int
+class TCIType(TypedDict):
+    """Type of 802.1Q Customer VLAN Tag Type tag control information."""
+
+    #: Priority code point.
+    pcp: 'int'
+    #: Drop eligible indicator.
+    dei: 'int'
+    #: VLAN identifier.
+    vid: 'int'
 
 
 class TCI(Schema[int]):

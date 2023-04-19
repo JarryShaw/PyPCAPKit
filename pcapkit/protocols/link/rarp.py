@@ -2,6 +2,8 @@
 """RARP/DRARP - (Dynamic) Reverse Address Resolution Protocol
 ================================================================
 
+.. module:: pcapkit.protocols.link.rarp
+
 :mod:`pcapkit.protocols.link.rarp` contains
 :class:`~pcapkit.protocols.link.rarp.RARP` only,
 which implements extractor for (Dynamic) Reverse

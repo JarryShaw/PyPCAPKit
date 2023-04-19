@@ -2,7 +2,6 @@ L2TP - Layer Two Tunnelling Protocol
 ====================================
 
 .. module:: pcapkit.protocols.link.l2tp
-.. module:: pcapkit.protocols.data.link.l2tp
 
 :mod:`pcapkit.protocols.link.l2tp` contains
 :class:`~pcapkit.protocols.link.l2tp.L2TP` only,
@@ -48,18 +47,12 @@ as below:
     12        96 ``l2tp.offset``       Offset Size (optional by ``offset``)
    ======= ===== ===================== ==========================================
 
-.. raw:: html
-
-   <br />
-
 .. autoclass:: pcapkit.protocols.link.l2tp.L2TP
-   :no-members:
+   :members:
    :show-inheritance:
 
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
-
-   .. automethod:: __index__
 
    .. autoproperty:: name
    .. autoproperty:: length
@@ -68,39 +61,40 @@ as below:
    .. automethod:: read
    .. automethod:: make
 
-Data Structures
----------------
+   .. automethod:: _make_data
 
-.. autoclass:: pcapkit.protocols.data.link.l2tp.L2TP(flags, version, length, tunnelid, sessionid, ns, nr, offset)
-   :no-members:
+   .. automethod:: __index__
+
+Header Schemas
+--------------
+
+.. module:: pcapkit.protocols.schema.link.l2tp
+
+.. autoclass:: pcapkit.protocols.schema.link.l2tp.L2TP
+   :members:
    :show-inheritance:
 
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. autoattribute:: flags
-   .. autoattribute:: version
-   .. autoattribute:: length
-   .. autoattribute:: tunnelid
-   .. autoattribute:: sessionid
-   .. autoattribute:: ns
-   .. autoattribute:: nr
-   .. autoattribute:: offset
+Data Models
+-----------
 
-   .. autoattribute:: hdr_len
+.. module:: pcapkit.protocols.data.link.l2tp
 
-.. autoclass:: pcapkit.protocols.data.link.l2tp.Flags(type, len, seq, offset, prio)
-   :no-members:
+.. autoclass:: pcapkit.protocols.data.link.l2tp.L2TP
+   :members:
    :show-inheritance:
 
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. autoattribute:: type
-   .. autoattribute:: len
-   .. autoattribute:: seq
-   .. autoattribute:: offset
-   .. autoattribute:: prio
+.. autoclass:: pcapkit.protocols.data.link.l2tp.Flags
+   :members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
 
 .. raw:: html
 

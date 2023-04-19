@@ -21,10 +21,8 @@ with detailed implementation and methods.
 Protocol Registry
 -----------------
 
-.. data:: pcapkit.protocols.__proto__
-   :type: dict[str, Type[Protocol]]
-
-   Protocol registry.
+.. autodata:: pcapkit.protocols.__proto__
+   :no-value:
 
    .. seealso::
 
@@ -61,4 +59,9 @@ Data Model
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. autodata:: __excluded__
+   .. autoattribute:: __excluded__
+
+      .. seealso::
+
+         Please refer to :func:`Protocol._decode_next_layer <pcapkit.protocols.protocol.Protocol._decode_next_layer>`
+         for more information with the inserted names to be excluded.

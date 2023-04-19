@@ -2,38 +2,42 @@
 """OSPF - Open Shortest Path First
 =====================================
 
+.. module:: pcapkit.protocols.link.ospf
+
 :mod:`pcapkit.protocols.link.ospf` contains
 :class:`~pcapkit.protocols.link.ospf.OSPF` only,
 which implements extractor for Open Shortest Path
 First (OSPF) [*]_, whose structure is described
 as below:
 
-+========+=======+====================+=================================+
-| Octets | Bits  | Name               | Description                     |
-+========+=======+====================+=================================+
-| 0      |     0 | ``ospf.version``   | Version Number                  |
-+--------+-------+--------------------+---------------------------------+
-| 0      |     0 | ``ospf.type``      | Type                            |
-+--------+-------+--------------------+---------------------------------+
-| 0      |     1 | ``ospf.len``       | Packet Length (header included) |
-+--------+-------+--------------------+---------------------------------+
-| 0      |     2 | ``ospf.router_id`` | Router ID                       |
-+--------+-------+--------------------+---------------------------------+
-| 0      |     4 | ``ospf.area_id``   | Area ID                         |
-+--------+-------+--------------------+---------------------------------+
-| 0      |     6 | ``ospf.chksum``    | Checksum                        |
-+--------+-------+--------------------+---------------------------------+
-| 0      |     7 | ``ospf.autype``    | Authentication Type             |
-+--------+-------+--------------------+---------------------------------+
-| 1      |     8 | ``ospf.auth``      | Authentication                  |
-+--------+-------+--------------------+---------------------------------+
+.. table::
+
+   ====== ===== ================== ===============================
+   Octets Bits  Name               Description
+   ====== ===== ================== ===============================
+   0          0 ``ospf.version``   Version Number
+   ------ ----- ------------------ -------------------------------
+   0          0 ``ospf.type``      Type
+   ------ ----- ------------------ -------------------------------
+   0          1 ``ospf.len``       Packet Length (header included)
+   ------ ----- ------------------ -------------------------------
+   0          2 ``ospf.router_id`` Router ID
+   ------ ----- ------------------ -------------------------------
+   0          4 ``ospf.area_id``   Area ID
+   ------ ----- ------------------ -------------------------------
+   0          6 ``ospf.chksum``    Checksum
+   ------ ----- ------------------ -------------------------------
+   0          7 ``ospf.autype``    Authentication Type
+   ------ ----- ------------------ -------------------------------
+   1          8 ``ospf.auth``      Authentication
+   ====== ===== ================== ===============================
 
 .. [*] https://en.wikipedia.org/wiki/Open_Shortest_Path_First
 
 """
 import ipaddress
 import re
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 from pcapkit.const.ospf.authentication import Authentication as Enum_Authentication
 from pcapkit.const.ospf.packet import Packet as Enum_Packet
@@ -141,11 +145,13 @@ class OSPF(Link[Data_OSPF, Schema_OSPF],
 
         if ospf.autype == Enum_Authentication.Cryptographic_authentication:
             ospf.__update__([
-                ('auth', self._read_encrypt_auth()),
+                ('auth', self._read_encrypt_auth(
+                    cast('Schema_CrytographicAuthentication', schema.auth_data),
+                )),
             ])
         else:
             ospf.__update__([
-                ('auth', schema.auth_data),
+                ('auth', cast('bytes', schema.auth_data)),
             ])
         return self._decode_next_layer(ospf, length - self.length)
 
@@ -282,7 +288,7 @@ class OSPF(Link[Data_OSPF, Schema_OSPF],
         """
         return ipaddress.ip_address(id).packed
 
-    def _read_encrypt_auth(self) -> 'Data_CrytographicAuthentication':
+    def _read_encrypt_auth(self, schema: 'Schema_CrytographicAuthentication') -> 'Data_CrytographicAuthentication':
         """Read Authentication field when Cryptographic Authentication is employed,
         i.e. :attr:`~OSPF.autype` is ``2``.
 
@@ -299,17 +305,12 @@ class OSPF(Link[Data_OSPF, Schema_OSPF],
            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
-            length: packet length
+            schema: parsed authentication data
 
         Returns:
             Parsed packet data.
 
         """
-        schema = Schema_CrytographicAuthentication.unpack(
-            self.__header__.auth_data, length=8,
-        )  # type: Schema_CrytographicAuthentication
-        self.__header__.__update__(auth_data=schema)
-
         auth = Data_CrytographicAuthentication(
             key_id=schema.key_id,
             len=schema.len,

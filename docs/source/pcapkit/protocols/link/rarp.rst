@@ -24,10 +24,6 @@ Octets      Bits        Name                    Description
   24        192   ``rarp.tpa``              Target Protocol Address
 ====== ========= ========================= =========================
 
-.. raw:: html
-
-   <br />
-
 .. autoclass:: pcapkit.protocols.link.rarp.RARP
    :no-members:
    :show-inheritance:
@@ -35,9 +31,9 @@ Octets      Bits        Name                    Description
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. automethod:: __index__
-
    .. automethod:: id
+
+   .. automethod:: __index__
 
 .. currentmodule:: pcapkit.protocols.link
 .. class:: DRARP

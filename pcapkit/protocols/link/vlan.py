@@ -2,6 +2,8 @@
 """VLAN - 802.1Q Customer VLAN Tag Type
 ==========================================
 
+.. module:: pcapkit.protocols.link.vlan
+
 :mod:`pcapkit.protocols.link.vlan` contains
 :class:`~pcapkit.protocols.link.vlan.VLAN`
 only, which implements extractor for 802.1Q
@@ -140,6 +142,18 @@ class VLAN(Link[Data_VLAN, Schema_VLAN],
         """Make (construct) packet data.
 
         Args:
+            tci: TCI field.
+            pcp: Priority Code Point (PCP) field.
+            pcp_default: Default value of PCP field.
+            pcp_namespace: Namespace of PCP field.
+            pcp_reversed: Reversed flag of PCP field.
+            dei: Drop Eligible Indicator (DEI) field.
+            vid: VLAN Identifier (VID) field.
+            type: EtherType field.
+            type_default: Default value of EtherType field.
+            type_namespace: Namespace of EtherType field.
+            type_reversed: Reversed flag of EtherType field.
+            payload: Payload field.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:

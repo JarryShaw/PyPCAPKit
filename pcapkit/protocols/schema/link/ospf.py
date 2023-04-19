@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING
 from pcapkit.const.ospf.authentication import Authentication as Enum_Authentication
 from pcapkit.const.ospf.packet import Packet as Enum_Packet
 from pcapkit.corekit.fields.ipaddress import IPv4Field
-from pcapkit.corekit.fields.misc import PayloadField
+from pcapkit.corekit.fields.misc import PayloadField, SwitchField, SchemaField
 from pcapkit.corekit.fields.numbers import EnumField, UInt8Field, UInt16Field, UInt32Field
 from pcapkit.corekit.fields.strings import BytesField, PaddingField
 from pcapkit.protocols.schema.schema import Schema
@@ -16,8 +16,27 @@ __all__ = ['OSPF', 'CrytographicAuthentication']
 
 if TYPE_CHECKING:
     from ipaddress import IPv4Address
+    from typing import Any
 
     from pcapkit.protocols.protocol import Protocol
+    from pcapkit.corekit.fields.field import _Field as Field
+
+
+def ospf_auth_data_selector(pkt: 'dict[str, Any]') -> 'Field':
+    """Selector function for :attr:`OSPF.auth_data` field.
+
+    Args:
+        pkt: Packet data.
+
+    Returns:
+        * If :attr:`OSPF.auth_type` is 2, a :class:`~pcapkit.corekit.fields.misc.SchemaField`
+          wrapped :class:`~pcapkit.protocols.schema.link.ospf.CrytographicAuthentication` instance.
+        * Otherwise, a :class:`~pcapkit.corekit.fields.strings.BytesField` instance.
+
+    """
+    if pkt['auth_type'] == Enum_Authentication.Cryptographic_authentication:
+        return SchemaField(length=8, schema=CrytographicAuthentication)
+    return BytesField(length=8)
 
 
 class CrytographicAuthentication(Schema):
@@ -54,7 +73,10 @@ class OSPF(Schema):
     #: Authentication type.
     auth_type: 'Enum_Authentication' = EnumField(length=2, namespace=Enum_Authentication)
     #: Authentication data.
-    auth_data: 'bytes' = BytesField(length=8)
+    auth_data: 'bytes | CrytographicAuthentication' = SwitchField(
+        length=8,
+        selector=ospf_auth_data_selector,
+    )
     #: Payload.
     payload: 'bytes' = PayloadField()
 

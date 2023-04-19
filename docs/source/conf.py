@@ -7,6 +7,7 @@
 import datetime
 import importlib
 import logging
+import os
 import sys
 import typing
 from typing import TYPE_CHECKING
@@ -14,6 +15,8 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from typing import Any, Dict, List
     from sphinx.application import Sphinx
+
+os.environ['PCAPKIT_SPHINX'] = '1'
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)

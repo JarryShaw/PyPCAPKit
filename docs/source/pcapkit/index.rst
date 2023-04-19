@@ -108,9 +108,17 @@ Environment Variables
 
    If set to ``1``, :mod:`pcapkit` will run in development mode.
 
+   .. seealso::
+
+      :data:`pcapkit.utilities.logging.DEVMODE`
+
 .. envvar:: PCAPKIT_VERBOSE
 
    If set to ``1``, :mod:`pcapkit` will run with verbose output.
+
+   .. seealso::
+
+      :data:`pcapkit.utilities.logging.VERBOSE`
 
 .. envvar:: PCAPKIT_HTTP_PROXY
 
@@ -119,3 +127,12 @@ Environment Variables
 .. envvar:: PCAPKIT_HTTPS_PROXY
 
    HTTPS proxy address for :mod:`pcapkit.vendor` crawlers.
+
+.. envvar:: PCAPKIT_SPHINX
+
+   If set to ``1``, :mod:`pcapkit` will run with Sphinx additional
+   typing hints and docstrings support.
+
+   .. seealso::
+
+      :data:`pcapkit.utilities.logging.SPHINX_TYPE_CHECKING`

@@ -63,7 +63,7 @@ __all__ = [
     'HTTP', 'HTTPv1', 'HTTPv2',
 ]
 
-# protocol registry
+#: dict[str, Type[Protocol]]: Protocol registry.
 __proto__ = {}  # type: dict[str, Type[Protocol]]
 for name in __all__:
     __proto__[name.upper()] = globals()[name]
