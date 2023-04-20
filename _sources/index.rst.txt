@@ -7,10 +7,11 @@
 PyPCAPKit - Comprehensive Network Packet Analysis Library
 =========================================================
 
-The :mod:`PyPCAPKit <pcapkit>` project is an open source Python program focus
-on `PCAP`_ parsing and analysis, which works as a stream PCAP file extractor.
-With support of :mod:`DictDumper <dictdumper>`, it shall support multiple
-output report formats.
+The PyPCAPKit project is an open source Python program focus
+on `PCAP`_ parsing and analysis, which works as a network
+packet extraction, construction and analysis library. With
+support of `DictDumper`_, it shall support multiple output
+report formats.
 
 .. important::
 
@@ -191,3 +192,4 @@ Indices and tables
 .. _Scapy: https://scapy.net
 .. _DPKT: https://dpkt.readthedocs.io
 .. _PyShark: https://kiminewt.github.io/pyshark
+.. _DictDumper: https://github.com/JarryShaw/DictDumper
