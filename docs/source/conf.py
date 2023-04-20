@@ -146,7 +146,7 @@ html_theme_options = {
     # 'travis_button': True,
     # 'codecov_button': True,
 
-    "sidebar_hide_name": True,
+    "sidebar_hide_name": False,
     "navigation_with_keys": True,
     "top_of_page_button": "edit",  # None
 
