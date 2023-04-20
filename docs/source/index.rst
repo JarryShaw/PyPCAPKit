@@ -3,9 +3,9 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-======================================
-PyPCAPKit - Stream PCAP File Extractor
-======================================
+=========================================================
+PyPCAPKit - Comprehensive Network Packet Analysis Library
+=========================================================
 
 The :mod:`PyPCAPKit <pcapkit>` project is an open source Python program focus
 on `PCAP`_ parsing and analysis, which works as a stream PCAP file extractor.

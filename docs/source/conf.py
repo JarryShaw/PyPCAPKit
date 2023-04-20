@@ -53,8 +53,12 @@ extensions = [
     'sphinx.ext.autodoc', 'sphinx.ext.autodoc.typehints',
     'sphinx.ext.napoleon',
     'sphinx.ext.todo',
+
     'sphinx_autodoc_typehints',
-    'sphinx_book_theme',
+
+    "sphinxext.opengraph",
+
+    'sphinx_copybutton',
 ]
 
 intersphinx_mapping = {
@@ -120,8 +124,8 @@ exclude_patterns = []  # type: list[str]
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-html_theme = 'alabaster'
-#html_theme = 'sphinx_book_theme'
+#html_theme = 'alabaster'
+html_theme = 'furo'
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
@@ -132,20 +136,27 @@ html_static_path = ['_static']
 # further.  For a list of options available for each theme, see the
 # documentation.
 html_theme_options = {
-    'show_powered_by': False,
-    'github_user': 'JarryShaw',
-    'github_repo': 'PyPCAPKit',
-    'github_banner': True,
-    'github_type': 'star',
-    #'show_related': False,
-    #'note_bg': '#FFF59C',
-    #'travis_button': True,
-    #'codecov_button': True,
+    #'show_powered_by': False,
+    #'github_user': 'JarryShaw',
+    #'github_repo': 'PyPCAPKit',
+    #'github_banner': True,
+    #'github_type': 'star',
+    # 'show_related': False,
+    # 'note_bg': '#FFF59C',
+    # 'travis_button': True,
+    # 'codecov_button': True,
 
-    "repository_url": "https://github.com/jarryshaw/pypcapkit",
-    "use_repository_button": True,
+    "sidebar_hide_name": True,
+    "navigation_with_keys": True,
+    "top_of_page_button": "edit",  # None
+
+    "source_repository": "https://github.com/JarryShaw/PyPCAPKit/",
+    "source_branch": "master",
+    "source_directory": "docs/",
 }
-html_title = "PyPCAPKit - A Pure Python Comprehensive Packet Processing Toolit"
+html_title = "PyPCAPKit"
+
+ogp_site_url = "https://pypcapkit.jarryshaw.me/"
 
 
 def maybe_skip_member(app: 'Sphinx', what: str, name: str,  # pylint: disable=unused-argument

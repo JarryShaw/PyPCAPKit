@@ -1,5 +1,5 @@
-PyPCAPKit - Stream PCAP File Extractor
-======================================
+PyPCAPKit - Comprehensive Network Packet Analysis Library
+=========================================================
 
    For any technical and/or maintenance information,
    please kindly refer to the |docs|_.
