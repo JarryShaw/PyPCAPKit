@@ -1,3 +1,4 @@
+==============
 Dump Utilities
 ==============
 
@@ -12,3 +13,17 @@ in :mod:`dictdumper`.
 
    null
    pcap
+
+Common Utilities
+================
+
+.. module:: pcapkit.dumpkit.common
+
+:mod:`pcapkit.dumpkit.common` is the collection of common utility
+functions for :mod:`pcapkit.dumpkit` implementation, which is
+generally the customised hooks for :class:`dictdumper.Dumper`
+classes.
+
+.. autofunction:: pcapkit.dumpkit.common.object_hook
+.. autofunction:: pcapkit.dumpkit.common.default
+.. autofunction:: pcapkit.dumpkit.common._append_fallback

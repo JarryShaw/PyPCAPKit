@@ -1,57 +1,378 @@
+<!doctype html>
+<html class="no-js" lang="en">
+  <head><meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1"/>
+    <meta name="color-scheme" content="light dark"><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+<meta property="og:title" content="Base Class" />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://pypcapkit.jarryshaw.me/pcapkit/foundation/reassembly/ip/ip.html" />
+<meta property="og:site_name" content="PyPCAPKit" />
+<meta property="og:description" content="pcapkit.foundation.reassembly.ip contains IP only, which reconstructs fragmented IP packets back to origin. The following algorithm implement is based on IP reassembly procedure introduced in RFC 7..." />
+<meta property="og:image:width" content="1146" />
+<meta property="og:image:height" content="600" />
+<meta property="og:image" content="https://pypcapkit.jarryshaw.me/_images/social_previews/summary_pcapkit_foundation_reassembly_ip_ip_7e4489d0.png" />
+<meta property="og:image:alt" content="pcapkit.foundation.reassembly.ip contains IP only, which reconstructs fragmented IP packets back to origin. The following algorithm implement is based on IP..." />
+<meta name="description" content="pcapkit.foundation.reassembly.ip contains IP only, which reconstructs fragmented IP packets back to origin. The following algorithm implement is based on IP reassembly procedure introduced in RFC 7..." />
+<meta name="twitter:card" content="summary_large_image" />
+<link rel="index" title="Index" href="../../../../genindex.html" /><link rel="search" title="Search" href="../../../../search.html" /><link rel="next" title="IPv4 Datagram Reassembly" href="ipv4.html" /><link rel="prev" title="IP Datagram Reassembly" href="index.html" />
 
-<!DOCTYPE html>
+    <!-- Generated with Sphinx 6.1.3 and Furo 2023.03.27 -->
+        <title>Base Class - PyPCAPKit</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/styles/furo.css?digest=fad236701ea90a88636c2a8c73b44ae642ed2a53" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/copybutton.css" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/styles/furo-extensions.css?digest=30d1aed668e5c3a91c3e3bf6a60b675221979f0e" />
+    
+    
 
-<html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
-    <title>Base Class &#8212; PyPCAPKit 0.16.3 documentation</title>
-    <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../../../../_static/alabaster.css" />
-    <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
-    <script src="../../../../_static/doctools.js"></script>
-    <script src="../../../../_static/sphinx_highlight.js"></script>
-    <link rel="index" title="Index" href="../../../../genindex.html" />
-    <link rel="search" title="Search" href="../../../../search.html" />
-    <link rel="next" title="IPv4 Datagram Reassembly" href="ipv4.html" />
-    <link rel="prev" title="Algorithm" href="algorithm.html" />
-   
-  <link rel="stylesheet" href="../../../../_static/custom.css" type="text/css" />
+<style>
+  body {
+    --color-code-background: #f8f8f8;
+  --color-code-foreground: black;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-half" viewBox="0 0 24 24">
+    <title>Auto light/dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-shadow">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M13 12h5" />
+      <path d="M13 15h4" />
+      <path d="M13 18h1" />
+      <path d="M13 9h4" />
+      <path d="M13 6h1" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc">
+<label class="overlay sidebar-overlay" for="__navigation">
+  <div class="visually-hidden">Hide navigation sidebar</div>
+</label>
+<label class="overlay toc-overlay" for="__toc">
+  <div class="visually-hidden">Hide table of contents sidebar</div>
+</label>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <div class="visually-hidden">Toggle site navigation sidebar</div>
+        <i class="icon"><svg><use href="#svg-menu"></use></svg></i>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="../../../../index.html"><div class="brand">PyPCAPKit</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle">
+          <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+          <svg class="theme-icon-when-auto"><use href="#svg-sun-half"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
+        <div class="visually-hidden">Toggle table of contents sidebar</div>
+        <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="../../../../index.html">
   
   
-  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
-
-  </head><body>
   
+</a><form class="sidebar-search-container" method="get" action="../../../../search.html" role="search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <ul class="current">
+<li class="toctree-l1 current has-children"><a class="reference internal" href="../../../index.html">Module Documentation</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../../interface/index.html">User Interface</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../interface/core.html">Core Interface</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../interface/misc.html">Auxiliary Interface</a></li>
+</ul>
+</li>
+<li class="toctree-l2 current has-children"><a class="reference internal" href="../../index.html">Library Foundation</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="../../extraction.html">Extractor for PCAP Files</a></li>
+<li class="toctree-l3 current has-children"><a class="reference internal" href="../index.html">Fragmented Packets Reassembly</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="../reassembly.html">Base Class</a></li>
+<li class="toctree-l4 current has-children"><a class="reference internal" href="index.html">IP Datagram Reassembly</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" role="switch" type="checkbox"/><label for="toctree-checkbox-5"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
+<li class="toctree-l5 current current-page"><a class="current reference internal" href="#">Base Class</a></li>
+<li class="toctree-l5"><a class="reference internal" href="ipv4.html">IPv4 Datagram Reassembly</a></li>
+<li class="toctree-l5"><a class="reference internal" href="ipv6.html">IPv6 Datagram Reassembly</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../tcp.html">TCP Datagram Reassembly</a></li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../traceflow/index.html">Trace Flows</a><input class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" role="switch" type="checkbox"/><label for="toctree-checkbox-6"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../traceflow/traceflow.html">Base Class</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../traceflow/tcp.html">Trace TCP Flows</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../registry.html">Registry Management</a></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../engines/index.html">Engine Support</a><input class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" role="switch" type="checkbox"/><label for="toctree-checkbox-7"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../engines/engine.html">Base Class</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../engines/builtin.html">Built-in Engines</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../engines/3rdparty.html">3rd-Party Engines</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../../protocols/index.html">Protocol Family</a><input class="toctree-checkbox" id="toctree-checkbox-8" name="toctree-checkbox-8" role="switch" type="checkbox"/><label for="toctree-checkbox-8"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../protocols/protocol.html">Root Protocol</a></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../../protocols/misc/index.html">Auxiliary Protocols</a><input class="toctree-checkbox" id="toctree-checkbox-9" name="toctree-checkbox-9" role="switch" type="checkbox"/><label for="toctree-checkbox-9"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../protocols/misc/pcap.html">PCAP File Headers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../protocols/misc/raw.html">Raw Packet Data</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../protocols/misc/null.html">No-Payload Packet</a></li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../../protocols/link/index.html">Link Layer Protocols</a><input class="toctree-checkbox" id="toctree-checkbox-10" name="toctree-checkbox-10" role="switch" type="checkbox"/><label for="toctree-checkbox-10"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../protocols/link/link.html">Base Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../protocols/link/ethernet.html">Ethernet Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../protocols/link/arp.html">ARP/InARP - (Inverse) Address Resolution Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../protocols/link/rarp.html">RARP/DRARP - (Dynamic) Reverse Address Resolution Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../protocols/link/l2tp.html">L2TP - Layer Two Tunnelling Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../protocols/link/ospf.html">OSPF - Open Shortest Path First</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../protocols/link/vlan.html">VLAN - 802.1Q Customer VLAN Tag Type</a></li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../../protocols/internet/index.html">Internet Layer Protocols</a><input class="toctree-checkbox" id="toctree-checkbox-11" name="toctree-checkbox-11" role="switch" type="checkbox"/><label for="toctree-checkbox-11"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../protocols/internet/internet.html">Base Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../protocols/internet/ip.html">IP - Internet Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../protocols/internet/ipv4.html">IPv4 - Internet Protocol version 4</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../protocols/internet/ipv6.html">IPv6 - Internet Protocol version 6</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../protocols/internet/ipv6_frag.html">IPv6-Frag - Fragment Header for IPv6</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../protocols/internet/ipv6_opts.html">IPv6-Opts - Destination Options for IPv6</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../protocols/internet/ipv6_route.html">IPv6-Route - Routing Header for IPv6</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../protocols/internet/hopopt.html">HOPOPT - IPv6 Hop-by-Hop Options</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../protocols/internet/ipsec.html">IPsec - Internet Protocol Security</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../protocols/internet/ah.html">AH - Authentication Header</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../protocols/internet/hip.html">HIP - Host Identity Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../protocols/internet/mh.html">MH - Mobility Header</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../protocols/internet/ipx.html">IPX - Internetwork Packet Exchange</a></li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../../protocols/transport/index.html">Transport Layer Protocols</a><input class="toctree-checkbox" id="toctree-checkbox-12" name="toctree-checkbox-12" role="switch" type="checkbox"/><label for="toctree-checkbox-12"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../protocols/transport/transport.html">Base Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../protocols/transport/tcp.html">TCP - Transmission Control Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../protocols/transport/udp.html">UDP - User Datagram Protocol</a></li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../../protocols/application/index.html">Application Layer Protocols</a><input class="toctree-checkbox" id="toctree-checkbox-13" name="toctree-checkbox-13" role="switch" type="checkbox"/><label for="toctree-checkbox-13"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../protocols/application/application.html">Base Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../protocols/application/http.html">HTTP - Hypertext Transfer Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../protocols/application/httpv1.html">HTTP/1.* - Hypertext Transfer Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../protocols/application/httpv2.html">HTTP/2 - Hypertext Transfer Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../protocols/application/ftp.html">FTP - File Transfer Protocol</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../../corekit/index.html">Core Utilities</a><input class="toctree-checkbox" id="toctree-checkbox-14" name="toctree-checkbox-14" role="switch" type="checkbox"/><label for="toctree-checkbox-14"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../corekit/fields.html">Protocol Fields</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../corekit/infoclass.html">Info Class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../corekit/multidict.html">Multi-Mapping Dictionary</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../corekit/protochain.html">Protocol Chain</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../corekit/version.html">Version Info</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../../toolkit/index.html">Compatibility Tools</a><input class="toctree-checkbox" id="toctree-checkbox-15" name="toctree-checkbox-15" role="switch" type="checkbox"/><label for="toctree-checkbox-15"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../toolkit/builtin.html">Built-in Support</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../toolkit/3rdparty.html">3rd-Party Support</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../../dumpkit/index.html">Dump Utilities</a><input class="toctree-checkbox" id="toctree-checkbox-16" name="toctree-checkbox-16" role="switch" type="checkbox"/><label for="toctree-checkbox-16"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../dumpkit/null.html">Null Dumper</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../dumpkit/pcap.html">PCAP Dumper</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../../utilities/index.html">Module Utilities</a><input class="toctree-checkbox" id="toctree-checkbox-17" name="toctree-checkbox-17" role="switch" type="checkbox"/><label for="toctree-checkbox-17"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../utilities/exceptions.html">User Defined Exceptions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../utilities/warnings.html">User Defined Warnings</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../../const/index.html">Constant Enumerations</a><input class="toctree-checkbox" id="toctree-checkbox-18" name="toctree-checkbox-18" role="switch" type="checkbox"/><label for="toctree-checkbox-18"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../const/reg.html">Protocol Type Registry Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../const/pcapng.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">PCAPNG</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../const/arp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">ARP</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../const/l2tp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">L2TP</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../const/ospf.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../const/vlan.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">VLAN</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../const/hip.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HIP</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../const/ipv4.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv4</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../const/ipv6.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../const/ipx.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPX</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../const/mh.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">MH</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../const/tcp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../const/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../const/http.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTTP</span></code> Constant Enumerations</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../../vendor/index.html">Vendor Crawlers</a><input class="toctree-checkbox" id="toctree-checkbox-19" name="toctree-checkbox-19" role="switch" type="checkbox"/><label for="toctree-checkbox-19"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../vendor/default.html">Base Crawler</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../vendor/reg.html">Protocol Type Registry Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../vendor/pcapng.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">PCAPNG</span></code> Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../vendor/arp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">ARP</span></code> Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../vendor/l2tp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">L2TP</span></code> Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../vendor/ospf.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code> Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../vendor/vlan.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">VLAN</span></code> Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../vendor/hip.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HIP</span></code> Vendor Crawler</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../vendor/ipv4.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv4</span></code> Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../vendor/ipv6.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6</span></code> Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../vendor/ipx.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPX</span></code> Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../vendor/mh.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">MH</span></code> Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../vendor/tcp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code> Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../vendor/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawler</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../vendor/http.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTTP</span></code> Vendor Crawler</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../demo.html">How to …</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../pep.html">Help Wanted</a></li>
+</ul>
 
-    <div class="document">
-      <div class="documentwrapper">
-        <div class="bodywrapper">
-          
-
-          <div class="body" role="main">
-            
-  <section id="module-pcapkit.foundation.reassembly.ip">
-<span id="base-class"></span><h1>Base Class<a class="headerlink" href="#module-pcapkit.foundation.reassembly.ip" title="Permalink to this heading">¶</a></h1>
-<p><a class="reference internal" href="#module-pcapkit.foundation.reassembly.ip" title="pcapkit.foundation.reassembly.ip"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.foundation.reassembly.ip</span></code></a> contains
-<a class="reference internal" href="#pcapkit.foundation.reassembly.ip.IP_Reassembly" title="pcapkit.foundation.reassembly.ip.IP_Reassembly"><code class="xref py py-class docutils literal notranslate"><span class="pre">IP_Reassembly</span></code></a>
-only, which reconstructs fragmented IP packets back to
-origin.</p>
-<dl class="py class">
-<dt class="sig sig-object py" id="pcapkit.foundation.reassembly.ip.IP_Reassembly">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.foundation.reassembly.ip.</span></span><span class="sig-name descname"><span class="pre">IP_Reassembly</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">strict</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/pcapkit/foundation/reassembly/ip.html#IP_Reassembly"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.reassembly.ip.IP_Reassembly" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="../reassembly.html#pcapkit.foundation.reassembly.reassembly.Reassembly" title="pcapkit.foundation.reassembly.reassembly.Reassembly"><code class="xref py py-class docutils literal notranslate"><span class="pre">Reassembly</span></code></a>[<a class="reference internal" href="#pcapkit.foundation.reassembly.ip.Packet" title="pcapkit.foundation.reassembly.ip.Packet"><code class="xref py py-class docutils literal notranslate"><span class="pre">Packet</span></code></a>[<code class="xref py py-obj docutils literal notranslate"><span class="pre">AT</span></code>], <a class="reference internal" href="#pcapkit.foundation.reassembly.ip.Datagram" title="pcapkit.foundation.reassembly.ip.Datagram"><code class="xref py py-class docutils literal notranslate"><span class="pre">Datagram</span></code></a>[<code class="xref py py-obj docutils literal notranslate"><span class="pre">AT</span></code>], <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code></a>[<code class="xref py py-obj docutils literal notranslate"><span class="pre">AT</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">AT</span></code>, int, TransType], <a class="reference internal" href="#pcapkit.foundation.reassembly.ip.Buffer" title="pcapkit.foundation.reassembly.ip.Buffer"><code class="xref py py-class docutils literal notranslate"><span class="pre">Buffer</span></code></a>[<code class="xref py py-obj docutils literal notranslate"><span class="pre">AT</span></code>]], <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Generic" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Generic</span></code></a>[<code class="xref py py-obj docutils literal notranslate"><span class="pre">AT</span></code>]</p>
-<p>Reassembly for IP payload.</p>
-<div class="admonition important">
-<p class="admonition-title">Important</p>
-<p>This class is not intended to be instantiated directly,
-but rather used as a base class for the protocol-aware
-reassembly classes.</p>
 </div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          <div class="edit-this-page">
+  <a class="muted-link" href="https://github.com/JarryShaw/PyPCAPKit/edit/master/docs/source/pcapkit/foundation/reassembly/ip/ip.rst" title="Edit this page">
+    <svg aria-hidden="true" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+      <path d="M4 20h4l10.5 -10.5a1.5 1.5 0 0 0 -4 -4l-10.5 10.5v4" />
+      <line x1="13.5" y1="6.5" x2="17.5" y2="10.5" />
+    </svg>
+    <span class="visually-hidden">Edit this page</span>
+  </a>
+</div><div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle">
+              <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+              <svg class="theme-icon-when-auto"><use href="#svg-sun-half"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
+            <div class="visually-hidden">Toggle table of contents sidebar</div>
+            <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+          </label>
+        </div>
+        <article role="main">
+          <section id="module-pcapkit.foundation.reassembly.ip">
+<span id="base-class"></span><h1>Base Class<a class="headerlink" href="#module-pcapkit.foundation.reassembly.ip" title="Permalink to this heading">#</a></h1>
+<p><a class="reference internal" href="#module-pcapkit.foundation.reassembly.ip" title="pcapkit.foundation.reassembly.ip"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.foundation.reassembly.ip</span></code></a> contains
+<a class="reference internal" href="#pcapkit.foundation.reassembly.ip.IP" title="pcapkit.foundation.reassembly.ip.IP"><code class="xref py py-class docutils literal notranslate"><span class="pre">IP</span></code></a>
+only, which reconstructs fragmented IP packets back to
+origin. The following algorithm implement is based on IP
+reassembly procedure introduced in <span class="target" id="index-0"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc791.html"><strong>RFC 791</strong></a>, using
+<code class="docutils literal notranslate"><span class="pre">RCVBT</span></code> (fragment receivedbit table). Though another
+algorithm is explained in <span class="target" id="index-1"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc815.html"><strong>RFC 815</strong></a>, replacing <code class="docutils literal notranslate"><span class="pre">RCVBT</span></code>,
+however, this implement still used the elder one.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="pcapkit.foundation.reassembly.ip.IP">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.foundation.reassembly.ip.</span></span><span class="sig-name descname"><span class="pre">IP</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">strict</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/pcapkit/foundation/reassembly/ip.html#IP"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.reassembly.ip.IP" title="Permalink to this definition">#</a></dt>
+<dd><p>Bases: <a class="reference internal" href="../reassembly.html#pcapkit.foundation.reassembly.reassembly.Reassembly" title="pcapkit.foundation.reassembly.reassembly.Reassembly"><code class="xref py py-class docutils literal notranslate"><span class="pre">Reassembly</span></code></a>[<a class="reference internal" href="#pcapkit.foundation.reassembly.data.ip.Packet" title="pcapkit.foundation.reassembly.data.ip.Packet"><code class="xref py py-class docutils literal notranslate"><span class="pre">Packet</span></code></a>[<code class="xref py py-obj docutils literal notranslate"><span class="pre">AT</span></code>], <a class="reference internal" href="#pcapkit.foundation.reassembly.data.ip.Datagram" title="pcapkit.foundation.reassembly.data.ip.Datagram"><code class="xref py py-class docutils literal notranslate"><span class="pre">Datagram</span></code></a>[<code class="xref py py-obj docutils literal notranslate"><span class="pre">AT</span></code>], <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code></a>[<code class="xref py py-obj docutils literal notranslate"><span class="pre">AT</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">AT</span></code>, <a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>, TransType], <a class="reference internal" href="#pcapkit.foundation.reassembly.data.ip.Buffer" title="pcapkit.foundation.reassembly.data.ip.Buffer"><code class="xref py py-class docutils literal notranslate"><span class="pre">Buffer</span></code></a>[<code class="xref py py-obj docutils literal notranslate"><span class="pre">AT</span></code>]], <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Generic" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Generic</span></code></a>[<code class="xref py py-obj docutils literal notranslate"><span class="pre">AT</span></code>]</p>
+<p>Reassembly for IP payload.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
+<li><p><strong>strict</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a>) – if return all datagrams (including those not
+implemented) when submit</p></li>
 <li><p><strong>*args</strong> (<em>Any</em>) – Arbitrary positional arguments.</p></li>
 <li><p><strong>**kwargs</strong> (<em>Any</em>) – Arbitrary keyword arguments.</p></li>
 </ul>
@@ -60,13 +381,19 @@ reassembly classes.</p>
 <dd class="field-even"><p><a class="reference internal" href="../reassembly.html#pcapkit.foundation.reassembly.reassembly.Reassembly" title="pcapkit.foundation.reassembly.reassembly.Reassembly">Reassembly</a>[PT, DT, IT, BT]</p>
 </dd>
 </dl>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p>This class is not intended to be instantiated directly,
+but rather used as a base class for the protocol-aware
+reassembly classes.</p>
+</div>
 <dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.foundation.reassembly.ip.IP_Reassembly.reassembly">
-<span class="sig-name descname"><span class="pre">reassembly</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">info</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/pcapkit/foundation/reassembly/ip.html#IP_Reassembly.reassembly"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.reassembly.ip.IP_Reassembly.reassembly" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.foundation.reassembly.ip.IP.reassembly">
+<span class="sig-name descname"><span class="pre">reassembly</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">info</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/pcapkit/foundation/reassembly/ip.html#IP.reassembly"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.reassembly.ip.IP.reassembly" title="Permalink to this definition">#</a></dt>
 <dd><p>Reassembly procedure.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>info</strong> (<a class="reference internal" href="#pcapkit.foundation.reassembly.ip.Packet" title="pcapkit.foundation.reassembly.ip.Packet"><code class="xref py py-class docutils literal notranslate"><span class="pre">Packet</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.TypeVar" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">TypeVar</span></code></a>(<code class="docutils literal notranslate"><span class="pre">AT</span></code>, IPv4Address, IPv6Address)]) – info dict of packets to be reassembled</p>
+<dd class="field-odd"><p><strong>info</strong> (<a class="reference internal" href="#pcapkit.foundation.reassembly.data.ip.Packet" title="pcapkit.foundation.reassembly.data.ip.Packet"><code class="xref py py-class docutils literal notranslate"><span class="pre">Packet</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.TypeVar" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">TypeVar</span></code></a>(<code class="docutils literal notranslate"><span class="pre">AT</span></code>, IPv4Address, IPv6Address)]) – info dict of packets to be reassembled</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></p>
@@ -75,19 +402,19 @@ reassembly classes.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.foundation.reassembly.ip.IP_Reassembly.submit">
-<span class="sig-name descname"><span class="pre">submit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">buf</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bufid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">checked</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/pcapkit/foundation/reassembly/ip.html#IP_Reassembly.submit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.reassembly.ip.IP_Reassembly.submit" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.foundation.reassembly.ip.IP.submit">
+<span class="sig-name descname"><span class="pre">submit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">buf</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bufid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">checked</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/pcapkit/foundation/reassembly/ip.html#IP.submit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.reassembly.ip.IP.submit" title="Permalink to this definition">#</a></dt>
 <dd><p>Submit reassembled payload.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>buf</strong> (<a class="reference internal" href="#pcapkit.foundation.reassembly.ip.Buffer" title="pcapkit.foundation.reassembly.ip.Buffer"><code class="xref py py-class docutils literal notranslate"><span class="pre">Buffer</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.TypeVar" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">TypeVar</span></code></a>(<code class="docutils literal notranslate"><span class="pre">AT</span></code>, IPv4Address, IPv6Address)]) – buffer dict of reassembled packets</p></li>
+<li><p><strong>buf</strong> (<a class="reference internal" href="#pcapkit.foundation.reassembly.data.ip.Buffer" title="pcapkit.foundation.reassembly.data.ip.Buffer"><code class="xref py py-class docutils literal notranslate"><span class="pre">Buffer</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.TypeVar" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">TypeVar</span></code></a>(<code class="docutils literal notranslate"><span class="pre">AT</span></code>, IPv4Address, IPv6Address)]) – buffer dict of reassembled packets</p></li>
 <li><p><strong>bufid</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.TypeVar" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">TypeVar</span></code></a>(<code class="docutils literal notranslate"><span class="pre">AT</span></code>, IPv4Address, IPv6Address), <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.TypeVar" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">TypeVar</span></code></a>(<code class="docutils literal notranslate"><span class="pre">AT</span></code>, IPv4Address, IPv6Address), <a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>, <a class="reference internal" href="../../../const/reg.html#pcapkit.const.reg.transtype.TransType" title="pcapkit.const.reg.transtype.TransType"><code class="xref py py-class docutils literal notranslate"><span class="pre">TransType</span></code></a>]) – buffer identifier</p></li>
 <li><p><strong>checked</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a>) – buffer consistency checked flag</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code></a>[<a class="reference internal" href="#pcapkit.foundation.reassembly.ip.Datagram" title="pcapkit.foundation.reassembly.ip.Datagram"><code class="xref py py-class docutils literal notranslate"><span class="pre">Datagram</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.TypeVar" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">TypeVar</span></code></a>(<code class="docutils literal notranslate"><span class="pre">AT</span></code>, IPv4Address, IPv6Address)]]</p>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code></a>[<a class="reference internal" href="#pcapkit.foundation.reassembly.data.ip.Datagram" title="pcapkit.foundation.reassembly.data.ip.Datagram"><code class="xref py py-class docutils literal notranslate"><span class="pre">Datagram</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.TypeVar" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">TypeVar</span></code></a>(<code class="docutils literal notranslate"><span class="pre">AT</span></code>, IPv4Address, IPv6Address)]]</p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Reassembled packets.</p>
@@ -97,13 +424,13 @@ reassembly classes.</p>
 
 </dd></dl>
 
-<section id="data-structures">
-<h2>Data Structures<a class="headerlink" href="#data-structures" title="Permalink to this heading">¶</a></h2>
+<section id="module-pcapkit.foundation.reassembly.data.ip">
+<span id="data-models"></span><h2>Data Models<a class="headerlink" href="#module-pcapkit.foundation.reassembly.data.ip" title="Permalink to this heading">#</a></h2>
 <dl class="py class">
-<dt class="sig sig-object py" id="pcapkit.foundation.reassembly.ip.Packet">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.foundation.reassembly.ip.</span></span><span class="sig-name descname"><span class="pre">Packet</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dict_</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/pcapkit/foundation/reassembly/ip.html#Packet"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.reassembly.ip.Packet" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.foundation.reassembly.data.ip.Packet">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.foundation.reassembly.data.ip.</span></span><span class="sig-name descname"><span class="pre">Packet</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dict_</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/pcapkit/foundation/reassembly/data/ip.html#Packet"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.reassembly.data.ip.Packet" title="Permalink to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference internal" href="../../../corekit/infoclass.html#pcapkit.corekit.infoclass.Info" title="pcapkit.corekit.infoclass.Info"><code class="xref py py-class docutils literal notranslate"><span class="pre">Info</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Generic" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Generic</span></code></a>[<code class="xref py py-obj docutils literal notranslate"><span class="pre">AT</span></code>]</p>
-<p>Data model for <a class="reference internal" href="ipv4.html#term-ipv4.packet"><span class="xref std std-term">ipv4.packet</span></a> / <a class="reference internal" href="ipv6.html#term-ipv6.packet"><span class="xref std std-term">ipv6.packet</span></a>.</p>
+<p>Data model for <a class="reference internal" href="ipv4.html#term-reasm.ipv4.packet"><span class="xref std std-term">reasm.ipv4.packet</span></a> / <a class="reference internal" href="ipv6.html#term-reasm.ipv6.packet"><span class="xref std std-term">reasm.ipv6.packet</span></a>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -116,60 +443,67 @@ reassembly classes.</p>
 </dd>
 </dl>
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.foundation.reassembly.ip.Packet.bufid">
-<span class="sig-name descname"><span class="pre">bufid</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code></a><span class="pre">[</span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.TypeVar" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">TypeVar</span></code></a><span class="pre">(</span><code class="docutils literal notranslate"><span class="pre">AT</span></code><span class="pre">,</span> <span class="pre">IPv4Address,</span> <span class="pre">IPv6Address),</span> <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.TypeVar" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">TypeVar</span></code></a><span class="pre">(</span><code class="docutils literal notranslate"><span class="pre">AT</span></code><span class="pre">,</span> <span class="pre">IPv4Address,</span> <span class="pre">IPv6Address),</span> <a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a><span class="pre">,</span> <a class="reference internal" href="../../../const/reg.html#pcapkit.const.reg.transtype.TransType" title="pcapkit.const.reg.transtype.TransType"><code class="xref py py-class docutils literal notranslate"><span class="pre">TransType</span></code></a><span class="pre">]</span></em><a class="headerlink" href="#pcapkit.foundation.reassembly.ip.Packet.bufid" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.foundation.reassembly.data.ip.Packet.bufid">
+<span class="sig-name descname"><span class="pre">bufid</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">BufferID</span></em><a class="headerlink" href="#pcapkit.foundation.reassembly.data.ip.Packet.bufid" title="Permalink to this definition">#</a></dt>
 <dd><p>Buffer ID.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.foundation.reassembly.ip.Packet.num">
-<span class="sig-name descname"><span class="pre">num</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></em><a class="headerlink" href="#pcapkit.foundation.reassembly.ip.Packet.num" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.foundation.reassembly.data.ip.Packet.num">
+<span class="sig-name descname"><span class="pre">num</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#pcapkit.foundation.reassembly.data.ip.Packet.num" title="Permalink to this definition">#</a></dt>
 <dd><p>Original packet range number.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.foundation.reassembly.ip.Packet.fo">
-<span class="sig-name descname"><span class="pre">fo</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></em><a class="headerlink" href="#pcapkit.foundation.reassembly.ip.Packet.fo" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.foundation.reassembly.data.ip.Packet.fo">
+<span class="sig-name descname"><span class="pre">fo</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#pcapkit.foundation.reassembly.data.ip.Packet.fo" title="Permalink to this definition">#</a></dt>
 <dd><p>Fragment offset.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.foundation.reassembly.ip.Packet.ihl">
-<span class="sig-name descname"><span class="pre">ihl</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></em><a class="headerlink" href="#pcapkit.foundation.reassembly.ip.Packet.ihl" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.foundation.reassembly.data.ip.Packet.ihl">
+<span class="sig-name descname"><span class="pre">ihl</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#pcapkit.foundation.reassembly.data.ip.Packet.ihl" title="Permalink to this definition">#</a></dt>
 <dd><p>Internet header length.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.foundation.reassembly.ip.Packet.mf">
-<span class="sig-name descname"><span class="pre">mf</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></em><a class="headerlink" href="#pcapkit.foundation.reassembly.ip.Packet.mf" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.foundation.reassembly.data.ip.Packet.mf">
+<span class="sig-name descname"><span class="pre">mf</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#pcapkit.foundation.reassembly.data.ip.Packet.mf" title="Permalink to this definition">#</a></dt>
 <dd><p>More fragments flag.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.foundation.reassembly.ip.Packet.tl">
-<span class="sig-name descname"><span class="pre">tl</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></em><a class="headerlink" href="#pcapkit.foundation.reassembly.ip.Packet.tl" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.foundation.reassembly.data.ip.Packet.tl">
+<span class="sig-name descname"><span class="pre">tl</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#pcapkit.foundation.reassembly.data.ip.Packet.tl" title="Permalink to this definition">#</a></dt>
 <dd><p>Total length, header included.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.foundation.reassembly.ip.Packet.header">
-<span class="sig-name descname"><span class="pre">header</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a></em><a class="headerlink" href="#pcapkit.foundation.reassembly.ip.Packet.header" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.foundation.reassembly.data.ip.Packet.header">
+<span class="sig-name descname"><span class="pre">header</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bytes</span></em><a class="headerlink" href="#pcapkit.foundation.reassembly.data.ip.Packet.header" title="Permalink to this definition">#</a></dt>
 <dd><p>Raw <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bytes</span></code></a> type header.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.foundation.reassembly.ip.Packet.payload">
-<span class="sig-name descname"><span class="pre">payload</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytearray" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytearray</span></code></a></em><a class="headerlink" href="#pcapkit.foundation.reassembly.ip.Packet.payload" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.foundation.reassembly.data.ip.Packet.payload">
+<span class="sig-name descname"><span class="pre">payload</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bytearray</span></em><a class="headerlink" href="#pcapkit.foundation.reassembly.data.ip.Packet.payload" title="Permalink to this definition">#</a></dt>
 <dd><p>Raw <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytearray" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bytearray</span></code></a> type payload.</p>
 </dd></dl>
 
 </dd></dl>
 
+<dl class="py data">
+<dt class="sig sig-object py" id="pcapkit.foundation.reassembly.data.ip.BufferID">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.foundation.reassembly.data.ip.</span></span><span class="sig-name descname"><span class="pre">BufferID</span></span><a class="headerlink" href="#pcapkit.foundation.reassembly.data.ip.BufferID" title="Permalink to this definition">#</a></dt>
+<dd><p>Buffer ID.</p>
+<p>alias of <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code></a>[<code class="xref py py-obj docutils literal notranslate"><span class="pre">AT</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">AT</span></code>, <a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>, TransType]</p>
+</dd></dl>
+
 <dl class="py class">
-<dt class="sig sig-object py" id="pcapkit.foundation.reassembly.ip.DatagramID">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.foundation.reassembly.ip.</span></span><span class="sig-name descname"><span class="pre">DatagramID</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dict_</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/pcapkit/foundation/reassembly/ip.html#DatagramID"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.reassembly.ip.DatagramID" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.foundation.reassembly.data.ip.Buffer">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.foundation.reassembly.data.ip.</span></span><span class="sig-name descname"><span class="pre">Buffer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dict_</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/pcapkit/foundation/reassembly/data/ip.html#Buffer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.reassembly.data.ip.Buffer" title="Permalink to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference internal" href="../../../corekit/infoclass.html#pcapkit.corekit.infoclass.Info" title="pcapkit.corekit.infoclass.Info"><code class="xref py py-class docutils literal notranslate"><span class="pre">Info</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Generic" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Generic</span></code></a>[<code class="xref py py-obj docutils literal notranslate"><span class="pre">AT</span></code>]</p>
-<p>Data model for <a class="reference internal" href="ipv4.html#term-ipv4.datagram"><span class="xref std std-term">ipv4.datagram</span></a> / <a class="reference internal" href="ipv6.html#term-ipv6.datagram"><span class="xref std std-term">ipv6.datagram</span></a> original packet identifier.</p>
+<p>Data model for <a class="reference internal" href="ipv4.html#term-reasm.ipv4.buffer"><span class="xref std std-term">reasm.ipv4.buffer</span></a> / <a class="reference internal" href="ipv6.html#term-reasm.ipv6.buffer"><span class="xref std std-term">reasm.ipv6.buffer</span></a>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -182,36 +516,84 @@ reassembly classes.</p>
 </dd>
 </dl>
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.foundation.reassembly.ip.DatagramID.src">
-<span class="sig-name descname"><span class="pre">src</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.TypeVar" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">TypeVar</span></code></a><span class="pre">(</span><code class="docutils literal notranslate"><span class="pre">AT</span></code><span class="pre">,</span> <span class="pre">IPv4Address,</span> <span class="pre">IPv6Address)</span></em><a class="headerlink" href="#pcapkit.foundation.reassembly.ip.DatagramID.src" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.foundation.reassembly.data.ip.Buffer.TDL">
+<span class="sig-name descname"><span class="pre">TDL</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></em><a class="headerlink" href="#pcapkit.foundation.reassembly.data.ip.Buffer.TDL" title="Permalink to this definition">#</a></dt>
+<dd><p>Total data length.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.foundation.reassembly.data.ip.Buffer.RCVBT">
+<span class="sig-name descname"><span class="pre">RCVBT</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytearray" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytearray</span></code></a></em><a class="headerlink" href="#pcapkit.foundation.reassembly.data.ip.Buffer.RCVBT" title="Permalink to this definition">#</a></dt>
+<dd><p>Fragment received bit table.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.foundation.reassembly.data.ip.Buffer.index">
+<span class="sig-name descname"><span class="pre">index</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code></a><span class="pre">[</span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a><span class="pre">]</span></em><a class="headerlink" href="#pcapkit.foundation.reassembly.data.ip.Buffer.index" title="Permalink to this definition">#</a></dt>
+<dd><p>List of reassembled packets.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.foundation.reassembly.data.ip.Buffer.header">
+<span class="sig-name descname"><span class="pre">header</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a></em><a class="headerlink" href="#pcapkit.foundation.reassembly.data.ip.Buffer.header" title="Permalink to this definition">#</a></dt>
+<dd><p>Header buffer.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.foundation.reassembly.data.ip.Buffer.datagram">
+<span class="sig-name descname"><span class="pre">datagram</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytearray" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytearray</span></code></a></em><a class="headerlink" href="#pcapkit.foundation.reassembly.data.ip.Buffer.datagram" title="Permalink to this definition">#</a></dt>
+<dd><p>Data buffer, holes set to <code class="docutils literal notranslate"><span class="pre">b'\x00'</span></code>.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pcapkit.foundation.reassembly.data.ip.DatagramID">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.foundation.reassembly.data.ip.</span></span><span class="sig-name descname"><span class="pre">DatagramID</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dict_</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/pcapkit/foundation/reassembly/data/ip.html#DatagramID"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.reassembly.data.ip.DatagramID" title="Permalink to this definition">#</a></dt>
+<dd><p>Bases: <a class="reference internal" href="../../../corekit/infoclass.html#pcapkit.corekit.infoclass.Info" title="pcapkit.corekit.infoclass.Info"><code class="xref py py-class docutils literal notranslate"><span class="pre">Info</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Generic" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Generic</span></code></a>[<code class="xref py py-obj docutils literal notranslate"><span class="pre">AT</span></code>]</p>
+<p>Data model for <a class="reference internal" href="ipv4.html#term-reasm.ipv4.datagram"><span class="xref std std-term">reasm.ipv4.datagram</span></a> / <a class="reference internal" href="ipv6.html#term-reasm.ipv6.datagram"><span class="xref std std-term">reasm.ipv6.datagram</span></a> original packet identifier.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>*args</strong> (<em>VT</em>) – Arbitrary positional arguments.</p></li>
+<li><p><strong>**kwargs</strong> (<em>VT</em>) – Arbitrary keyword arguments.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="../../../corekit/infoclass.html#pcapkit.corekit.infoclass.Info" title="pcapkit.corekit.infoclass.Info">Info</a></p>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.foundation.reassembly.data.ip.DatagramID.src">
+<span class="sig-name descname"><span class="pre">src</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">AT</span></em><a class="headerlink" href="#pcapkit.foundation.reassembly.data.ip.DatagramID.src" title="Permalink to this definition">#</a></dt>
 <dd><p>Source address.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.foundation.reassembly.ip.DatagramID.dst">
-<span class="sig-name descname"><span class="pre">dst</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.TypeVar" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">TypeVar</span></code></a><span class="pre">(</span><code class="docutils literal notranslate"><span class="pre">AT</span></code><span class="pre">,</span> <span class="pre">IPv4Address,</span> <span class="pre">IPv6Address)</span></em><a class="headerlink" href="#pcapkit.foundation.reassembly.ip.DatagramID.dst" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.foundation.reassembly.data.ip.DatagramID.dst">
+<span class="sig-name descname"><span class="pre">dst</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">AT</span></em><a class="headerlink" href="#pcapkit.foundation.reassembly.data.ip.DatagramID.dst" title="Permalink to this definition">#</a></dt>
 <dd><p>Destination address.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.foundation.reassembly.ip.DatagramID.id">
-<span class="sig-name descname"><span class="pre">id</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></em><a class="headerlink" href="#pcapkit.foundation.reassembly.ip.DatagramID.id" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.foundation.reassembly.data.ip.DatagramID.id">
+<span class="sig-name descname"><span class="pre">id</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#pcapkit.foundation.reassembly.data.ip.DatagramID.id" title="Permalink to this definition">#</a></dt>
 <dd><p>IP protocol identifier.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.foundation.reassembly.ip.DatagramID.proto">
-<span class="sig-name descname"><span class="pre">proto</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="../../../const/reg.html#pcapkit.const.reg.transtype.TransType" title="pcapkit.const.reg.transtype.TransType"><code class="xref py py-class docutils literal notranslate"><span class="pre">TransType</span></code></a></em><a class="headerlink" href="#pcapkit.foundation.reassembly.ip.DatagramID.proto" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.foundation.reassembly.data.ip.DatagramID.proto">
+<span class="sig-name descname"><span class="pre">proto</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">TransType</span></em><a class="headerlink" href="#pcapkit.foundation.reassembly.data.ip.DatagramID.proto" title="Permalink to this definition">#</a></dt>
 <dd><p>Payload protocol type.</p>
 </dd></dl>
 
 </dd></dl>
 
 <dl class="py class">
-<dt class="sig sig-object py" id="pcapkit.foundation.reassembly.ip.Datagram">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.foundation.reassembly.ip.</span></span><span class="sig-name descname"><span class="pre">Datagram</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dict_</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/pcapkit/foundation/reassembly/ip.html#Datagram"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.reassembly.ip.Datagram" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.foundation.reassembly.data.ip.Datagram">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.foundation.reassembly.data.ip.</span></span><span class="sig-name descname"><span class="pre">Datagram</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dict_</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/pcapkit/foundation/reassembly/data/ip.html#Datagram"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.reassembly.data.ip.Datagram" title="Permalink to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference internal" href="../../../corekit/infoclass.html#pcapkit.corekit.infoclass.Info" title="pcapkit.corekit.infoclass.Info"><code class="xref py py-class docutils literal notranslate"><span class="pre">Info</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Generic" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Generic</span></code></a>[<code class="xref py py-obj docutils literal notranslate"><span class="pre">AT</span></code>]</p>
-<p>Data model for <a class="reference internal" href="ipv4.html#term-ipv4.datagram"><span class="xref std std-term">ipv4.datagram</span></a> / <a class="reference internal" href="ipv6.html#term-ipv6.datagram"><span class="xref std std-term">ipv6.datagram</span></a>.</p>
+<p>Data model for <a class="reference internal" href="ipv4.html#term-reasm.ipv4.datagram"><span class="xref std std-term">reasm.ipv4.datagram</span></a> / <a class="reference internal" href="ipv6.html#term-reasm.ipv6.datagram"><span class="xref std std-term">reasm.ipv6.datagram</span></a>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -224,190 +606,162 @@ reassembly classes.</p>
 </dd>
 </dl>
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.foundation.reassembly.ip.Datagram.completed">
-<span class="sig-name descname"><span class="pre">completed</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></em><a class="headerlink" href="#pcapkit.foundation.reassembly.ip.Datagram.completed" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.foundation.reassembly.data.ip.Datagram.completed">
+<span class="sig-name descname"><span class="pre">completed</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#pcapkit.foundation.reassembly.data.ip.Datagram.completed" title="Permalink to this definition">#</a></dt>
 <dd><p>Completed flag.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.foundation.reassembly.ip.Datagram.id">
-<span class="sig-name descname"><span class="pre">id</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#pcapkit.foundation.reassembly.ip.DatagramID" title="pcapkit.foundation.reassembly.ip.DatagramID"><code class="xref py py-class docutils literal notranslate"><span class="pre">DatagramID</span></code></a><span class="pre">[</span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.TypeVar" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">TypeVar</span></code></a><span class="pre">(</span><code class="docutils literal notranslate"><span class="pre">AT</span></code><span class="pre">,</span> <span class="pre">IPv4Address,</span> <span class="pre">IPv6Address)]</span></em><a class="headerlink" href="#pcapkit.foundation.reassembly.ip.Datagram.id" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.foundation.reassembly.data.ip.Datagram.id">
+<span class="sig-name descname"><span class="pre">id</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">DatagramID[AT]</span></em><a class="headerlink" href="#pcapkit.foundation.reassembly.data.ip.Datagram.id" title="Permalink to this definition">#</a></dt>
 <dd><p>Original packet identifier.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.foundation.reassembly.ip.Datagram.index">
-<span class="sig-name descname"><span class="pre">index</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code></a><span class="pre">[</span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a><span class="pre">,</span> <a class="reference external" href="https://docs.python.org/3/library/constants.html#Ellipsis" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">...</span></code></a><span class="pre">]</span></em><a class="headerlink" href="#pcapkit.foundation.reassembly.ip.Datagram.index" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.foundation.reassembly.data.ip.Datagram.index">
+<span class="sig-name descname"><span class="pre">index</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">tuple[int,</span> <span class="pre">...]</span></em><a class="headerlink" href="#pcapkit.foundation.reassembly.data.ip.Datagram.index" title="Permalink to this definition">#</a></dt>
 <dd><p>Packet numbers.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.foundation.reassembly.ip.Datagram.header">
-<span class="sig-name descname"><span class="pre">header</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a></em><a class="headerlink" href="#pcapkit.foundation.reassembly.ip.Datagram.header" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.foundation.reassembly.data.ip.Datagram.header">
+<span class="sig-name descname"><span class="pre">header</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bytes</span></em><a class="headerlink" href="#pcapkit.foundation.reassembly.data.ip.Datagram.header" title="Permalink to this definition">#</a></dt>
 <dd><p>Initial IP header.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.foundation.reassembly.ip.Datagram.payload">
-<span class="sig-name descname"><span class="pre">payload</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a> <span class="pre">|</span> <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code></a><span class="pre">[</span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a><span class="pre">,</span> <a class="reference external" href="https://docs.python.org/3/library/constants.html#Ellipsis" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">...</span></code></a><span class="pre">]</span></em><a class="headerlink" href="#pcapkit.foundation.reassembly.ip.Datagram.payload" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.foundation.reassembly.data.ip.Datagram.payload">
+<span class="sig-name descname"><span class="pre">payload</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bytes</span> <span class="pre">|</span> <span class="pre">tuple[bytes,</span> <span class="pre">...]</span></em><a class="headerlink" href="#pcapkit.foundation.reassembly.data.ip.Datagram.payload" title="Permalink to this definition">#</a></dt>
 <dd><p>Reassembled IP payload.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.foundation.reassembly.ip.Datagram.packet">
-<span class="sig-name descname"><span class="pre">packet</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a><span class="pre">[</span><a class="reference internal" href="../../../protocols/protocol.html#pcapkit.protocols.protocol.Protocol" title="pcapkit.protocols.protocol.Protocol"><code class="xref py py-class docutils literal notranslate"><span class="pre">Protocol</span></code></a><span class="pre">]</span></em><a class="headerlink" href="#pcapkit.foundation.reassembly.ip.Datagram.packet" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.foundation.reassembly.data.ip.Datagram.packet">
+<span class="sig-name descname"><span class="pre">packet</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional[Protocol]</span></em><a class="headerlink" href="#pcapkit.foundation.reassembly.data.ip.Datagram.packet" title="Permalink to this definition">#</a></dt>
 <dd><p>Parsed IP payload.</p>
 </dd></dl>
 
 </dd></dl>
 
-<dl class="py class">
-<dt class="sig sig-object py" id="pcapkit.foundation.reassembly.ip.Buffer">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.foundation.reassembly.ip.</span></span><span class="sig-name descname"><span class="pre">Buffer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dict_</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/pcapkit/foundation/reassembly/ip.html#Buffer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.reassembly.ip.Buffer" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="../../../corekit/infoclass.html#pcapkit.corekit.infoclass.Info" title="pcapkit.corekit.infoclass.Info"><code class="xref py py-class docutils literal notranslate"><span class="pre">Info</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Generic" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Generic</span></code></a>[<code class="xref py py-obj docutils literal notranslate"><span class="pre">AT</span></code>]</p>
-<p>Data model for <a class="reference internal" href="ipv4.html#term-ipv4.buffer"><span class="xref std std-term">ipv4.buffer</span></a> / <a class="reference internal" href="ipv6.html#term-ipv6.buffer"><span class="xref std std-term">ipv6.buffer</span></a>.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>*args</strong> (<em>VT</em>) – Arbitrary positional arguments.</p></li>
-<li><p><strong>**kwargs</strong> (<em>VT</em>) – Arbitrary keyword arguments.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference internal" href="../../../corekit/infoclass.html#pcapkit.corekit.infoclass.Info" title="pcapkit.corekit.infoclass.Info">Info</a></p>
-</dd>
-</dl>
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.foundation.reassembly.ip.Buffer.TDL">
-<span class="sig-name descname"><span class="pre">TDL</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></em><a class="headerlink" href="#pcapkit.foundation.reassembly.ip.Buffer.TDL" title="Permalink to this definition">¶</a></dt>
-<dd><p>Total data length.</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.foundation.reassembly.ip.Buffer.RCVBT">
-<span class="sig-name descname"><span class="pre">RCVBT</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytearray" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytearray</span></code></a></em><a class="headerlink" href="#pcapkit.foundation.reassembly.ip.Buffer.RCVBT" title="Permalink to this definition">¶</a></dt>
-<dd><p>Fragment received bit table.</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.foundation.reassembly.ip.Buffer.index">
-<span class="sig-name descname"><span class="pre">index</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code></a><span class="pre">[</span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a><span class="pre">]</span></em><a class="headerlink" href="#pcapkit.foundation.reassembly.ip.Buffer.index" title="Permalink to this definition">¶</a></dt>
-<dd><p>List of reassembled packets.</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.foundation.reassembly.ip.Buffer.header">
-<span class="sig-name descname"><span class="pre">header</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a></em><a class="headerlink" href="#pcapkit.foundation.reassembly.ip.Buffer.header" title="Permalink to this definition">¶</a></dt>
-<dd><p>Header buffer.</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.foundation.reassembly.ip.Buffer.datagram">
-<span class="sig-name descname"><span class="pre">datagram</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytearray" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytearray</span></code></a></em><a class="headerlink" href="#pcapkit.foundation.reassembly.ip.Buffer.datagram" title="Permalink to this definition">¶</a></dt>
-<dd><p>Data buffer, holes set to <code class="docutils literal notranslate"><span class="pre">b'\x00'</span></code>.</p>
-</dd></dl>
-
-</dd></dl>
-
 </section>
 </section>
 
-
-          </div>
-          
-        </div>
+        </article>
       </div>
-      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
-        <div class="sphinxsidebarwrapper">
-<h1 class="logo"><a href="../../../../index.html">PyPCAPKit</a></h1>
-
-
-
-
-
-
-<p>
-<iframe src="https://ghbtns.com/github-btn.html?user=JarryShaw&repo=PyPCAPKit&type=star&count=true&size=large&v=2"
-  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
-</p>
-
-
-
-
-
-<h3>Navigation</h3>
-<ul class="current">
-<li class="toctree-l1 current"><a class="reference internal" href="../../../index.html">Module Documentation</a><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="../../../interface/index.html">User Interface</a></li>
-<li class="toctree-l2 current"><a class="reference internal" href="../../index.html">Library Foundation</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../../protocols/index.html">Protocol Family</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../../corekit/index.html">Core Utilities</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../../toolkit/index.html">Compatibility Tools</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../../dumpkit/index.html">Dump Utilities</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../../utilities/index.html">Utility Functions &amp; Classes</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../../const/index.html">Constant Enumerations</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../../vendor/index.html">Vendor Crawlers</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../../index.html#command-line-tool">Command Line Tool</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../../index.html#library-index">Library Index</a></li>
+      <footer>
+        
+        <div class="related-pages">
+          <a class="next-page" href="ipv4.html">
+              <div class="page-info">
+                <div class="context">
+                  <span>Next</span>
+                </div>
+                <div class="title">IPv4 Datagram Reassembly</div>
+              </div>
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+            </a>
+          <a class="prev-page" href="index.html">
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+              <div class="page-info">
+                <div class="context">
+                  <span>Previous</span>
+                </div>
+                
+                <div class="title">IP Datagram Reassembly</div>
+                
+              </div>
+            </a>
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; 2017-2023, Jarry Shaw
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer">
+      
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">Base Class</a><ul>
+<li><a class="reference internal" href="#pcapkit.foundation.reassembly.ip.IP"><code class="docutils literal notranslate"><span class="pre">IP</span></code></a><ul>
+<li><a class="reference internal" href="#pcapkit.foundation.reassembly.ip.IP.reassembly"><code class="docutils literal notranslate"><span class="pre">IP.reassembly()</span></code></a></li>
+<li><a class="reference internal" href="#pcapkit.foundation.reassembly.ip.IP.submit"><code class="docutils literal notranslate"><span class="pre">IP.submit()</span></code></a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../demo.html">How to …</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../pep.html">Help Wanted</a></li>
+<li><a class="reference internal" href="#module-pcapkit.foundation.reassembly.data.ip">Data Models</a><ul>
+<li><a class="reference internal" href="#pcapkit.foundation.reassembly.data.ip.Packet"><code class="docutils literal notranslate"><span class="pre">Packet</span></code></a><ul>
+<li><a class="reference internal" href="#pcapkit.foundation.reassembly.data.ip.Packet.bufid"><code class="docutils literal notranslate"><span class="pre">Packet.bufid</span></code></a></li>
+<li><a class="reference internal" href="#pcapkit.foundation.reassembly.data.ip.Packet.num"><code class="docutils literal notranslate"><span class="pre">Packet.num</span></code></a></li>
+<li><a class="reference internal" href="#pcapkit.foundation.reassembly.data.ip.Packet.fo"><code class="docutils literal notranslate"><span class="pre">Packet.fo</span></code></a></li>
+<li><a class="reference internal" href="#pcapkit.foundation.reassembly.data.ip.Packet.ihl"><code class="docutils literal notranslate"><span class="pre">Packet.ihl</span></code></a></li>
+<li><a class="reference internal" href="#pcapkit.foundation.reassembly.data.ip.Packet.mf"><code class="docutils literal notranslate"><span class="pre">Packet.mf</span></code></a></li>
+<li><a class="reference internal" href="#pcapkit.foundation.reassembly.data.ip.Packet.tl"><code class="docutils literal notranslate"><span class="pre">Packet.tl</span></code></a></li>
+<li><a class="reference internal" href="#pcapkit.foundation.reassembly.data.ip.Packet.header"><code class="docutils literal notranslate"><span class="pre">Packet.header</span></code></a></li>
+<li><a class="reference internal" href="#pcapkit.foundation.reassembly.data.ip.Packet.payload"><code class="docutils literal notranslate"><span class="pre">Packet.payload</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#pcapkit.foundation.reassembly.data.ip.BufferID"><code class="docutils literal notranslate"><span class="pre">BufferID</span></code></a></li>
+<li><a class="reference internal" href="#pcapkit.foundation.reassembly.data.ip.Buffer"><code class="docutils literal notranslate"><span class="pre">Buffer</span></code></a><ul>
+<li><a class="reference internal" href="#pcapkit.foundation.reassembly.data.ip.Buffer.TDL"><code class="docutils literal notranslate"><span class="pre">Buffer.TDL</span></code></a></li>
+<li><a class="reference internal" href="#pcapkit.foundation.reassembly.data.ip.Buffer.RCVBT"><code class="docutils literal notranslate"><span class="pre">Buffer.RCVBT</span></code></a></li>
+<li><a class="reference internal" href="#pcapkit.foundation.reassembly.data.ip.Buffer.index"><code class="docutils literal notranslate"><span class="pre">Buffer.index</span></code></a></li>
+<li><a class="reference internal" href="#pcapkit.foundation.reassembly.data.ip.Buffer.header"><code class="docutils literal notranslate"><span class="pre">Buffer.header</span></code></a></li>
+<li><a class="reference internal" href="#pcapkit.foundation.reassembly.data.ip.Buffer.datagram"><code class="docutils literal notranslate"><span class="pre">Buffer.datagram</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#pcapkit.foundation.reassembly.data.ip.DatagramID"><code class="docutils literal notranslate"><span class="pre">DatagramID</span></code></a><ul>
+<li><a class="reference internal" href="#pcapkit.foundation.reassembly.data.ip.DatagramID.src"><code class="docutils literal notranslate"><span class="pre">DatagramID.src</span></code></a></li>
+<li><a class="reference internal" href="#pcapkit.foundation.reassembly.data.ip.DatagramID.dst"><code class="docutils literal notranslate"><span class="pre">DatagramID.dst</span></code></a></li>
+<li><a class="reference internal" href="#pcapkit.foundation.reassembly.data.ip.DatagramID.id"><code class="docutils literal notranslate"><span class="pre">DatagramID.id</span></code></a></li>
+<li><a class="reference internal" href="#pcapkit.foundation.reassembly.data.ip.DatagramID.proto"><code class="docutils literal notranslate"><span class="pre">DatagramID.proto</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#pcapkit.foundation.reassembly.data.ip.Datagram"><code class="docutils literal notranslate"><span class="pre">Datagram</span></code></a><ul>
+<li><a class="reference internal" href="#pcapkit.foundation.reassembly.data.ip.Datagram.completed"><code class="docutils literal notranslate"><span class="pre">Datagram.completed</span></code></a></li>
+<li><a class="reference internal" href="#pcapkit.foundation.reassembly.data.ip.Datagram.id"><code class="docutils literal notranslate"><span class="pre">Datagram.id</span></code></a></li>
+<li><a class="reference internal" href="#pcapkit.foundation.reassembly.data.ip.Datagram.index"><code class="docutils literal notranslate"><span class="pre">Datagram.index</span></code></a></li>
+<li><a class="reference internal" href="#pcapkit.foundation.reassembly.data.ip.Datagram.header"><code class="docutils literal notranslate"><span class="pre">Datagram.header</span></code></a></li>
+<li><a class="reference internal" href="#pcapkit.foundation.reassembly.data.ip.Datagram.payload"><code class="docutils literal notranslate"><span class="pre">Datagram.payload</span></code></a></li>
+<li><a class="reference internal" href="#pcapkit.foundation.reassembly.data.ip.Datagram.packet"><code class="docutils literal notranslate"><span class="pre">Datagram.packet</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
 </ul>
 
-<div class="relations">
-<h3>Related Topics</h3>
-<ul>
-  <li><a href="../../../../index.html">Documentation overview</a><ul>
-  <li><a href="../../../index.html">Module Documentation</a><ul>
-  <li><a href="../../index.html">Library Foundation</a><ul>
-  <li><a href="../index.html">Fragmented Packets Reassembly</a><ul>
-  <li><a href="index.html">IP Datagram Reassembly</a><ul>
-      <li>Previous: <a href="algorithm.html" title="previous chapter">Algorithm</a></li>
-      <li>Next: <a href="ipv4.html" title="next chapter">IPv4 Datagram Reassembly</a></li>
-  </ul></li>
-  </ul></li>
-  </ul></li>
-  </ul></li>
-  </ul></li>
-</ul>
-</div>
-<div id="searchbox" style="display: none" role="search">
-  <h3 id="searchlabel">Quick search</h3>
-    <div class="searchformwrapper">
-    <form class="search" action="../../../../search.html" method="get">
-      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
-      <input type="submit" value="Go" />
-    </form>
-    </div>
-</div>
-<script>document.getElementById('searchbox').style.display = "block"</script>
-
-
-
-
-
-
-
-
+          </div>
         </div>
       </div>
-      <div class="clearer"></div>
-    </div>
-    <div class="footer">
-      &copy;2017-2023, Jarry Shaw.
       
-      |
-      <a href="../../../../_sources/pcapkit/foundation/reassembly/ip/ip.rst.txt"
-          rel="nofollow">Page source</a>
-    </div>
-
-    
-    <a href="https://github.com/JarryShaw/PyPCAPKit" class="github">
-        <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"  class="github"/>
-    </a>
-    
-
-    
-  </body>
+      
+    </aside>
+  </div>
+</div><script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
+    <script src="../../../../_static/doctools.js"></script>
+    <script src="../../../../_static/sphinx_highlight.js"></script>
+    <script src="../../../../_static/scripts/furo.js"></script>
+    <script src="../../../../_static/clipboard.min.js"></script>
+    <script src="../../../../_static/copybutton.js"></script>
+    </body>
 </html>

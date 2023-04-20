@@ -2,7 +2,6 @@ IPv6-Route - Routing Header for IPv6
 ====================================
 
 .. module:: pcapkit.protocols.internet.ipv6_route
-.. module:: pcapkit.protocols.data.internet.ipv6_route
 
 :mod:`pcapkit.protocols.internet.ipv6_route` contains
 :class:`~pcapkit.protocols.internet.ipv6_route.IPv6_Route`
@@ -19,19 +18,12 @@ Octets      Bits        Name                    Description
   4          32   ``route.data``            Type-Specific Data
 ======= ========= ==================== ===============================
 
-.. raw:: html
-
-   <br />
-
 .. autoclass:: pcapkit.protocols.internet.ipv6_route.IPv6_Route
    :no-members:
    :show-inheritance:
 
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
-
-   .. automethod:: __post_init__
-   .. automethod:: __index__
 
    .. autoproperty:: name
    .. autoproperty:: alias
@@ -40,75 +32,127 @@ Octets      Bits        Name                    Description
    .. autoproperty:: protocol
    .. autoproperty:: protochain
 
+   .. automethod:: register_routing
+
    .. automethod:: read
    .. automethod:: make
-   .. automethod:: register_routing
+
+   .. automethod:: _make_data
 
    .. automethod:: _read_data_type_none
    .. automethod:: _read_data_type_src
    .. automethod:: _read_data_type_2
    .. automethod:: _read_data_type_rpl
 
-Data Structures
----------------
+   .. automethod:: _make_data_type_none
+   .. automethod:: _make_data_type_src
+   .. automethod:: _make_data_type_2
+   .. automethod:: _make_data_type_rpl
 
-.. autoclass:: pcapkit.protocols.data.internet.ipv6_route.IPv6_Route(next, length, type, seg_left)
-   :no-members:
+   .. automethod:: __post_init__
+   .. automethod:: __index__
+
+Header Schemas
+--------------
+
+.. module:: pcapkit.protocols.schema.internet.ipv6_route
+
+.. autoclass:: pcapkit.protocols.schema.internet.ipv6_route.IPv6_Route
+   :members:
    :show-inheritance:
 
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. autoattribute:: next
-   .. autoattribute:: length
-   .. autoattribute:: type
-   .. autoattribute:: seg_left
-
-.. autoclass:: pcapkit.protocols.data.internet.ipv6_route.RoutingType()
-   :no-members:
+.. autoclass:: pcapkit.protocols.schema.internet.ipv6_route.RoutingType
+   :members:
    :show-inheritance:
 
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
-.. autoclass:: pcapkit.protocols.data.internet.ipv6_route.UnknownType(data)
-   :no-members:
+.. autoclass:: pcapkit.protocols.schema.internet.ipv6_route.UnknownType
+   :members:
    :show-inheritance:
 
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. autoattribute:: data
-
-.. autoclass:: pcapkit.protocols.data.internet.ipv6_route.SourceRoute(ip)
-   :no-members:
+.. autoclass:: pcapkit.protocols.schema.internet.ipv6_route.SourceRoute
+   :members:
    :show-inheritance:
 
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. autoattribute:: ip
-
-.. autoclass:: pcapkit.protocols.data.internet.ipv6_route.Type2(ip)
-   :no-members:
+.. autoclass:: pcapkit.protocols.schema.internet.ipv6_route.Type2
+   :members:
    :show-inheritance:
 
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. autoattribute:: ip
-
-.. autoclass:: pcapkit.protocols.data.internet.ipv6_route.RPL(cmpr_i, cmpr_e, pad, ip)
-   :no-members:
+.. autoclass:: pcapkit.protocols.schema.internet.ipv6_route.RPL
+   :members:
    :show-inheritance:
 
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. autoattribute:: cmpr_i
-   .. autoattribute:: cmpr_e
-   .. autoattribute:: pad
-   .. autoattribute:: ip
+Type Stubs
+~~~~~~~~~~
+
+.. autoclass:: pcapkit.protocols.schema.internet.ipv6_route.PadInfo
+   :members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
+Auxiliary Functions
+~~~~~~~~~~~~~~~~~~~
+
+.. autofunction:: pcapkit.protocols.schema.internet.ipv6_route.ipv6_route_data_selector
+
+Data Models
+-----------
+
+.. module:: pcapkit.protocols.data.internet.ipv6_route
+
+.. autoclass:: pcapkit.protocols.data.internet.ipv6_route.IPv6_Route
+   :members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
+.. autoclass:: pcapkit.protocols.data.internet.ipv6_route.UnknownType
+   :members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
+.. autoclass:: pcapkit.protocols.data.internet.ipv6_route.SourceRoute
+   :members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
+.. autoclass:: pcapkit.protocols.data.internet.ipv6_route.Type2
+   :members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
+.. autoclass:: pcapkit.protocols.data.internet.ipv6_route.RPL
+   :members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
 
 .. raw:: html
 

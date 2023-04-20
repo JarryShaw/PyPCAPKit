@@ -1,3 +1,4 @@
+==================================================================
 :class:`~pcapkit.protocols.internet.ipx.IPX` Constant Enumerations
 ==================================================================
 
@@ -14,24 +15,30 @@ enumerations include:
    * - :class:`IPX_Socket <pcapkit.const.ipx.socket.Socket>`
      - IPX Socket Types [*]_
 
-.. automodule:: pcapkit.const.ipx.packet
-   :no-members:
+IPX Packet Types
+================
+
+.. module:: pcapkit.const.ipx.packet
+
+This module contains the constant enumeration for **IPX Packet Types**,
+which is automatically generated from :class:`pcapkit.vendor.ipx.packet.Packet`.
 
 .. autoclass:: pcapkit.const.ipx.packet.Packet
    :members:
    :undoc-members:
-   :private-members:
-   :exclude-members: get, _missing_
    :show-inheritance:
 
-.. automodule:: pcapkit.const.ipx.socket
-   :no-members:
+Socket Types
+============
+
+.. module:: pcapkit.const.ipx.socket
+
+This module contains the constant enumeration for **Socket Types**,
+which is automatically generated from :class:`pcapkit.vendor.ipx.socket.Socket`.
 
 .. autoclass:: pcapkit.const.ipx.socket.Socket
    :members:
    :undoc-members:
-   :private-members:
-   :exclude-members: get, _missing_
    :show-inheritance:
 
 .. raw:: html

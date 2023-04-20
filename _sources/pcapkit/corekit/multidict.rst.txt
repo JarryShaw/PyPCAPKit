@@ -9,13 +9,11 @@ is inspired and based on the `Werkzeug`_ project.
 
 .. _Werkzeug: https://werkzeug.palletsprojects.com/
 
-
 .. autoclass:: pcapkit.corekit.multidict.MultiDict
    :no-members:
    :no-special-members: __init__
    :show-inheritance:
 
-   .. automethod:: __setitem__
    .. automethod:: add
    .. automethod:: get
    .. automethod:: getlist

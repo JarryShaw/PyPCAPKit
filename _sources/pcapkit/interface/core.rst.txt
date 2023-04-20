@@ -1,5 +1,5 @@
-Core User Interface
-===================
+Core Interface
+==============
 
 .. module:: pcapkit.interface.core
 
@@ -7,23 +7,17 @@ Core User Interface
 interfaces, variables, and etc., which wraps around the
 foundation classes from :mod:`pcapkit.foundation`.
 
-PCAP Extration
---------------
-
 .. autofunction:: pcapkit.interface.core.extract
-
-Payload Reassembly
-------------------
 
 .. autofunction:: pcapkit.interface.core.reassemble
 
-TCP Flow Tracing
-----------------
-
 .. autofunction:: pcapkit.interface.core.trace
 
+Miscellaneous Constants
+-----------------------
+
 Output File Formats
--------------------
+~~~~~~~~~~~~~~~~~~~
 
 .. data:: pcapkit.interface.core.TREE
    :value: 'tree'
@@ -38,7 +32,7 @@ Output File Formats
    :value: 'pcap'
 
 Layer Thresholds
-----------------
+~~~~~~~~~~~~~~~~
 
 .. data:: pcapkit.interface.core.RAW
    :value: 'none'
@@ -56,7 +50,7 @@ Layer Thresholds
    :value: 'application'
 
 Extration Engines
------------------
+~~~~~~~~~~~~~~~~~
 
 .. data:: pcapkit.interface.core.DPKT
    :value: 'dpkt'

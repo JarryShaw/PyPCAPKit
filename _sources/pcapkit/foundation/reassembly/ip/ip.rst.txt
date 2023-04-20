@@ -4,74 +4,52 @@ Base Class
 .. module:: pcapkit.foundation.reassembly.ip
 
 :mod:`pcapkit.foundation.reassembly.ip` contains
-:class:`~pcapkit.foundation.reassembly.ip.IP_Reassembly`
+:class:`~pcapkit.foundation.reassembly.ip.IP`
 only, which reconstructs fragmented IP packets back to
-origin.
+origin. The following algorithm implement is based on IP
+reassembly procedure introduced in :rfc:`791`, using
+``RCVBT`` (fragment receivedbit table). Though another
+algorithm is explained in :rfc:`815`, replacing ``RCVBT``,
+however, this implement still used the elder one.
 
-.. autoclass:: pcapkit.foundation.reassembly.ip.IP_Reassembly
+.. autoclass:: pcapkit.foundation.reassembly.ip.IP
    :no-members:
    :show-inheritance:
-
-   :param \*args: Arbitrary positional arguments.
-   :param \*\*kwargs: Arbitrary keyword arguments.
 
    .. automethod:: reassembly
    .. automethod:: submit
 
-Data Structures
----------------
+Data Models
+-----------
 
-.. autoclass:: pcapkit.foundation.reassembly.ip.Packet
-   :no-members:
+.. module:: pcapkit.foundation.reassembly.data.ip
+
+.. autoclass:: pcapkit.foundation.reassembly.data.ip.Packet
+   :members:
    :show-inheritance:
 
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. autoattribute:: bufid
-   .. autoattribute:: num
-   .. autoattribute:: fo
-   .. autoattribute:: ihl
-   .. autoattribute:: mf
-   .. autoattribute:: tl
-   .. autoattribute:: header
-   .. autoattribute:: payload
+.. autodata:: pcapkit.foundation.reassembly.data.ip.BufferID
 
-.. autoclass:: pcapkit.foundation.reassembly.ip.DatagramID
-   :no-members:
+.. autoclass:: pcapkit.foundation.reassembly.data.ip.Buffer
+   :members:
    :show-inheritance:
 
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. autoattribute:: src
-   .. autoattribute:: dst
-   .. autoattribute:: id
-   .. autoattribute:: proto
-
-.. autoclass:: pcapkit.foundation.reassembly.ip.Datagram
-   :no-members:
+.. autoclass:: pcapkit.foundation.reassembly.data.ip.DatagramID
+   :members:
    :show-inheritance:
 
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. autoattribute:: completed
-   .. autoattribute:: id
-   .. autoattribute:: index
-   .. autoattribute:: header
-   .. autoattribute:: payload
-   .. autoattribute:: packet
-
-.. autoclass:: pcapkit.foundation.reassembly.ip.Buffer
-   :no-members:
+.. autoclass:: pcapkit.foundation.reassembly.data.ip.Datagram
+   :members:
    :show-inheritance:
 
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
-
-   .. autoattribute:: TDL
-   .. autoattribute:: RCVBT
-   .. autoattribute:: index
-   .. autoattribute:: header
-   .. autoattribute:: datagram

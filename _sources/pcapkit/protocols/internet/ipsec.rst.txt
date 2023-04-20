@@ -2,7 +2,6 @@ IPsec - Internet Protocol Security
 ==================================
 
 .. module:: pcapkit.protocols.internet.ipsec
-.. module:: pcapkit.protocols.data.internet.ipsec
 
 :mod:`pcapkit.protocols.internet.ipsec` contains
 :class:`~pcapkit.protocols.internet.ipsec.IPsec`

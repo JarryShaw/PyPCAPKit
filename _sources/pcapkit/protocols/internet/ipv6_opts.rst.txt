@@ -2,7 +2,6 @@ IPv6-Opts - Destination Options for IPv6
 ========================================
 
 .. module:: pcapkit.protocols.internet.ipv6_opts
-.. module:: pcapkit.protocols.data.internet.ipv6_opts
 
 :mod:`pcapkit.protocols.internet.ipv6_opts` contains
 :class:`~pcapkit.protocols.internet.ipv6_opts.IPv6_Opts`
@@ -18,10 +17,6 @@ Octets      Bits        Name                    Description
   2          16   ``opt.options``           Options
 ======= ========= =================== =================================
 
-.. raw:: html
-
-   <br />
-
 .. autoclass:: pcapkit.protocols.internet.ipv6_opts.IPv6_Opts
    :no-members:
    :show-inheritance:
@@ -29,22 +24,20 @@ Octets      Bits        Name                    Description
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. automethod:: __post_init__
-   .. automethod:: __index__
-
    .. autoproperty:: name
    .. autoproperty:: length
    .. autoproperty:: payload
    .. autoproperty:: protocol
    .. autoproperty:: protochain
 
-   .. automethod:: read
-   .. automethod:: make
    .. automethod:: register_option
 
-   .. automethod:: _read_opt_type
-   .. automethod:: _read_ipv6_opts
+   .. automethod:: read
+   .. automethod:: make
 
+   .. automethod:: _make_data
+
+   .. automethod:: _read_ipv6_opts
    .. automethod:: _read_opt_none
    .. automethod:: _read_opt_pad
    .. automethod:: _read_opt_tun
@@ -61,236 +54,414 @@ Octets      Bits        Name                    Description
    .. automethod:: _read_opt_home
    .. automethod:: _read_opt_ip_dff
 
-Data Structures
----------------
+   .. automethod:: _make_ipv6_opts
+   .. automethod:: _make_opt_none
+   .. automethod:: _make_opt_pad
+   .. automethod:: _make_opt_tun
+   .. automethod:: _make_opt_ra
+   .. automethod:: _make_opt_calipso
+   .. automethod:: _make_opt_smf_dpd
+   .. automethod:: _make_opt_pdm
+   .. automethod:: _make_opt_qs
+   .. automethod:: _make_opt_rpl
+   .. automethod:: _make_opt_mpl
+   .. automethod:: _make_opt_ilnp
+   .. automethod:: _make_opt_lio
+   .. automethod:: _make_opt_jumbo
+   .. automethod:: _make_opt_home
+   .. automethod:: _make_opt_ip_dff
 
-.. autoclass:: pcapkit.protocols.data.internet.ipv6_opts.IPv6_Opts(next, length, options)
-   :no-members:
+   .. autoattribute:: __option__
+      :no-value:
+
+   .. automethod:: __post_init__
+   .. automethod:: __index__
+
+Header Schemas
+--------------
+
+.. module:: pcapkit.protocols.schema.internet.ipv6_opts
+
+.. autoclass:: pcapkit.protocols.schema.internet.ipv6_opts.IPv6_Opts
+   :members:
    :show-inheritance:
 
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. autoattribute:: next
-   .. autoattribute:: length
-   .. autoattribute:: options
-
-.. autoclass:: pcapkit.protocols.data.internet.ipv6_opts.Option(type, action, change, length)
-   :no-members:
+.. autoclass:: pcapkit.protocols.schema.internet.ipv6_opts.Option
+   :members:
    :show-inheritance:
 
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. autoattribute:: type
-   .. autoattribute:: action
-   .. autoattribute:: change
-   .. autoattribute:: length
-
-.. autoclass:: pcapkit.protocols.data.internet.ipv6_opts.UnassignedOption(type, action, change, length, data)
-   :no-members:
+.. autoclass:: pcapkit.protocols.schema.internet.ipv6_opts.UnassignedOption
+   :members:
    :show-inheritance:
 
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. autoattribute:: data
-
-.. autoclass:: pcapkit.protocols.data.internet.ipv6_opts.PadOption(type, action, change, length)
-   :no-members:
+.. autoclass:: pcapkit.protocols.schema.internet.ipv6_opts.PadOption
+   :members:
    :show-inheritance:
 
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
-.. autoclass:: pcapkit.protocols.data.internet.ipv6_opts.TunnelEncapsulationLimitOption(type, action, change, length, limit)
-   :no-members:
+.. autoclass:: pcapkit.protocols.schema.internet.ipv6_opts.TunnelEncapsulationLimitOption
+   :members:
    :show-inheritance:
 
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. autoattribute:: limit
-
-.. autoclass:: pcapkit.protocols.data.internet.ipv6_opts.RouterAlertOption(type, action, change, length, value)
-   :no-members:
+.. autoclass:: pcapkit.protocols.schema.internet.ipv6_opts.RouterAlertOption
+   :members:
    :show-inheritance:
 
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. autoattribute:: value
-
-.. autoclass:: pcapkit.protocols.data.internet.ipv6_opts.CALIPSOOption(type, action, change, length, domain, cmpt_len, level, checksum)
-   :no-members:
+.. autoclass:: pcapkit.protocols.schema.internet.ipv6_opts.CALIPSOOption
+   :members:
    :show-inheritance:
 
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. autoattribute:: domain
-   .. autoattribute:: cmpt_len
-   .. autoattribute:: level
-   .. autoattribute:: checksum
-   .. autoattribute:: cmpt_bitmap
-
-.. autoclass:: pcapkit.protocols.data.internet.ipv6_opts.SMFDPDOption(type, action, change, length, dpd_type, tid_type)
-   :no-members:
+.. autoclass:: pcapkit.protocols.schema.internet.ipv6_opts.SMFDPDOption
+   :members:
    :show-inheritance:
 
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. autoattribute:: dpd_type
-   .. autoattribute:: tid_type
-
-.. autoclass:: pcapkit.protocols.data.internet.ipv6_opts.SMFIdentificationBasedDPDOption(type, action, change, length, pdm_type, tid_type, tid_len, tid, id)
-   :no-members:
+.. autoclass:: pcapkit.protocols.schema.internet.ipv6_opts.SMFIdentificationBasedDPDOption
+   :members:
    :show-inheritance:
 
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. autoattribute:: tid_len
-   .. autoattribute:: tid
-   .. autoattribute:: id
-
-.. autoclass:: pcapkit.protocols.data.internet.ipv6_opts.SMFHashBasedDPDOption(type, action, change, length, pdm_type, tid_type, hav)
-   :no-members:
+.. autoclass:: pcapkit.protocols.schema.internet.ipv6_opts.SMFHashBasedDPDOption
+   :members:
    :show-inheritance:
 
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. autoattribute:: hav
-
-.. autoclass:: pcapkit.protocols.data.internet.ipv6_opts.PDMOption(type, action, change, length, scaledtlr, scaledtls, psntp, psnlr, deltatlr, deltatls)
-   :no-members:
+.. autoclass:: pcapkit.protocols.schema.internet.ipv6_opts.PDMOption
+   :members:
    :show-inheritance:
 
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. autoattribute:: scaledtlr
-   .. autoattribute:: scaledtls
-   .. autoattribute:: psntp
-   .. autoattribute:: psnlr
-   .. autoattribute:: deltatlr
-   .. autoattribute:: deltatls
-
-.. autoclass:: pcapkit.protocols.data.internet.ipv6_opts.QuickStartOption(type, action, change, length, func, rate, ttl, nounce)
-   :no-members:
+.. autoclass:: pcapkit.protocols.schema.internet.ipv6_opts.QuickStartOption
+   :members:
    :show-inheritance:
 
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. autoattribute:: func
-   .. autoattribute:: rate
-   .. autoattribute:: ttl
-   .. autoattribute:: nounce
-
-.. autoclass:: pcapkit.protocols.data.internet.ipv6_opts.RPLOption(type, action, change, length, flags, id, rank)
-   :no-members:
+.. autoclass:: pcapkit.protocols.schema.internet.ipv6_opts.RPLOption
+   :members:
    :show-inheritance:
 
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. autoattribute:: flags
-   .. autoattribute:: id
-   .. autoattribute:: rank
-
-.. autoclass:: pcapkit.protocols.data.internet.ipv6_opts.RPLFlags(down, rank_err, fwd_err)
-   :no-members:
+.. autoclass:: pcapkit.protocols.schema.internet.ipv6_opts.RPLFlags
+   :members:
    :show-inheritance:
 
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. autoattribute:: down
-   .. autoattribute:: rank_err
-   .. autoattribute:: fwd_err
-
-.. autoclass:: pcapkit.protocols.data.internet.ipv6_opts.MPLOption(type, action, change, length, seed_type, flags, seq, seed_id)
-   :no-members:
+.. autoclass:: pcapkit.protocols.schema.internet.ipv6_opts.MPLOption
+   :members:
    :show-inheritance:
 
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. autoattribute:: seed_type
-   .. autoattribute:: flags
-   .. autoattribute:: seq
-   .. autoattribute:: seed_id
-
-.. autoclass:: pcapkit.protocols.data.internet.ipv6_opts.MPLFlags(max, verification)
-   :no-members:
+.. autoclass:: pcapkit.protocols.schema.internet.ipv6_opts.MPLFlags
+   :members:
    :show-inheritance:
 
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. autoattribute:: max
-   .. autoattribute:: verification
-
-.. autoclass:: pcapkit.protocols.data.internet.ipv6_opts.ILNPOption(type, action, change, length, nounce)
-   :no-members:
+.. autoclass:: pcapkit.protocols.schema.internet.ipv6_opts.ILNPOption
+   :members:
    :show-inheritance:
 
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. autoattribute:: nounce
-
-.. autoclass:: pcapkit.protocols.data.internet.ipv6_opts.LineIdentificationOption(type, action, change, length, line_id_len, line_id)
-   :no-members:
+.. autoclass:: pcapkit.protocols.schema.internet.ipv6_opts.LineIdentificationOption
+   :members:
    :show-inheritance:
 
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. autoattribute:: line_id_len
-   .. autoattribute:: line_id
-
-.. autoclass:: pcapkit.protocols.data.internet.ipv6_opts.JumboPayloadOption(type, action, change, length, payload_len)
-   :no-members:
+.. autoclass:: pcapkit.protocols.schema.internet.ipv6_opts.JumboPayloadOption
+   :members:
    :show-inheritance:
 
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. autoattribute:: payload_len
-
-.. autoclass:: pcapkit.protocols.data.internet.ipv6_opts.HomeAddressOption(type, action, change, length, address)
-   :no-members:
+.. autoclass:: pcapkit.protocols.schema.internet.ipv6_opts.HomeAddressOption
+   :members:
    :show-inheritance:
 
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. autoattribute:: address
-
-.. autoclass:: pcapkit.protocols.data.internet.ipv6_opts.IPDFFOption(type, action, change, length, version, flags, seq)
-   :no-members:
+.. autoclass:: pcapkit.protocols.schema.internet.ipv6_opts.IPDFFOption
+   :members:
    :show-inheritance:
 
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. autoattribute:: version
-   .. autoattribute:: flags
-   .. autoattribute:: seq
-
-.. autoclass:: pcapkit.protocols.data.internet.ipv6_opts.DFFFlags(dup, ret)
-   :no-members:
+.. autoclass:: pcapkit.protocols.schema.internet.ipv6_opts.DFFFlags
+   :members:
    :show-inheritance:
 
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. autoattribute:: dup
-   .. autoattribute:: ret
+Type Stubs
+~~~~~~~~~~
+
+.. autoclass:: pcapkit.protocols.schema.internet.ipv6_opts.TaggerIDInfo
+   :members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
+.. autoclass:: pcapkit.protocols.schema.internet.ipv6_opts.QuickStartFlags
+   :members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
+.. autoclass:: pcapkit.protocols.schema.internet.ipv6_opts.RPLFlags
+   :members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
+.. autoclass:: pcapkit.protocols.schema.internet.ipv6_opts.MPLFlags
+   :members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
+.. autoclass:: pcapkit.protocols.schema.internet.ipv6_opts.DFFFlags
+   :members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
+.. autoclass:: pcapkit.protocols.schema.internet.ipv6_opts.SMFDPDTestFlag
+   :members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
+.. autoclass:: pcapkit.protocols.schema.internet.ipv6_opts.QSTestFlags
+   :members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
+.. autoclass:: pcapkit.protocols.schema.internet.ipv6_opts.QSNonce
+   :members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
+Auxiliary Functions
+~~~~~~~~~~~~~~~~~~~
+
+.. autofunction:: pcapkit.protocols.schema.internet.ipv6_opts.mpl_opt_seed_id_len
+
+.. autofunction:: pcapkit.protocols.schema.internet.ipv6_opts.smf_dpd_data_selector
+.. autofunction:: pcapkit.protocols.schema.internet.ipv6_opts.smf_i_dpd_tid_selector
+.. autofunction:: pcapkit.protocols.schema.internet.ipv6_opts.quick_start_data_selector
+
+Data Models
+-----------
+
+.. module:: pcapkit.protocols.data.internet.ipv6_opts
+
+.. autoclass:: pcapkit.protocols.data.internet.ipv6_opts.IPv6_Opts
+   :members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
+.. autoclass:: pcapkit.protocols.data.internet.ipv6_opts.Option
+   :members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
+.. autoclass:: pcapkit.protocols.data.internet.ipv6_opts.UnassignedOption
+   :members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
+.. autoclass:: pcapkit.protocols.data.internet.ipv6_opts.PadOption
+   :members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
+.. autoclass:: pcapkit.protocols.data.internet.ipv6_opts.TunnelEncapsulationLimitOption
+   :members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
+.. autoclass:: pcapkit.protocols.data.internet.ipv6_opts.RouterAlertOption
+   :members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
+.. autoclass:: pcapkit.protocols.data.internet.ipv6_opts.CALIPSOOption
+   :members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
+.. autoclass:: pcapkit.protocols.data.internet.ipv6_opts.SMFDPDOption
+   :members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
+.. autoclass:: pcapkit.protocols.data.internet.ipv6_opts.SMFIdentificationBasedDPDOption
+   :members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
+.. autoclass:: pcapkit.protocols.data.internet.ipv6_opts.SMFHashBasedDPDOption
+   :members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
+.. autoclass:: pcapkit.protocols.data.internet.ipv6_opts.PDMOption
+   :members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
+.. autoclass:: pcapkit.protocols.data.internet.ipv6_opts.QuickStartOption
+   :members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
+.. autoclass:: pcapkit.protocols.data.internet.ipv6_opts.RPLOption
+   :members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
+.. autoclass:: pcapkit.protocols.data.internet.ipv6_opts.RPLFlags
+   :members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
+.. autoclass:: pcapkit.protocols.data.internet.ipv6_opts.MPLOption
+   :members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
+.. autoclass:: pcapkit.protocols.data.internet.ipv6_opts.MPLFlags
+   :members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
+.. autoclass:: pcapkit.protocols.data.internet.ipv6_opts.ILNPOption
+   :members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
+.. autoclass:: pcapkit.protocols.data.internet.ipv6_opts.LineIdentificationOption
+   :members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
+.. autoclass:: pcapkit.protocols.data.internet.ipv6_opts.JumboPayloadOption
+   :members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
+.. autoclass:: pcapkit.protocols.data.internet.ipv6_opts.HomeAddressOption
+   :members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
+.. autoclass:: pcapkit.protocols.data.internet.ipv6_opts.IPDFFOption
+   :members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
+.. autoclass:: pcapkit.protocols.data.internet.ipv6_opts.DFFFlags
+   :members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
 
 .. raw:: html
 

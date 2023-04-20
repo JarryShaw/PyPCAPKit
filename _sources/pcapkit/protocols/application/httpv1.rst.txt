@@ -2,7 +2,6 @@ HTTP/1.* - Hypertext Transfer Protocol
 ======================================
 
 .. module:: pcapkit.protocols.application.httpv1
-.. module:: pcapkit.protocols.data.application.httpv1
 
 :mod:`pcapkit.protocols.application.httpv1` contains
 :class:`~pcapkit.protocols.application.httpv1.HTTP`
@@ -34,61 +33,70 @@ as below:
    .. autoproperty:: alias
    .. autoproperty:: version
 
+   .. automethod:: id
+
    .. automethod:: read
    .. automethod:: make
-   .. automethod:: id
+
+   .. automethod:: _make_data
 
    .. automethod:: _read_http_header
    .. automethod:: _read_http_body
 
-.. autodata:: pcapkit.protocols.application.httpv1.HTTP_METHODS
+Packet Type
+-----------
 
-Data Structures
----------------
-
-.. autoclass:: pcapkit.protocols.data.application.httpv1.HTTP(receipt, header, body)
-   :no-members:
+.. autoclass:: pcapkit.protocols.application.httpv1.Type
+   :members:
    :show-inheritance:
 
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. autoattribute:: receipt
-   .. autoattribute:: header
-   .. autoattribute:: body
+Header Schemas
+--------------
 
-.. autoclass:: pcapkit.protocols.data.application.httpv1.Header(type)
-   :no-members:
+.. module:: pcapkit.protocols.schema.application.httpv1
+
+.. autoclass:: pcapkit.protocols.schema.application.httpv1.HTTP
+   :members:
    :show-inheritance:
 
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. autoattribute:: type
+Data Models
+-----------
 
-.. autoclass:: pcapkit.protocols.data.application.httpv1.RequestHeader(type, method, uri, version)
-   :no-members:
+.. module:: pcapkit.protocols.data.application.httpv1
+
+.. autoclass:: pcapkit.protocols.data.application.httpv1.HTTP
+   :members:
    :show-inheritance:
 
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. autoattribute:: type
-   .. autoattribute:: method
-   .. autoattribute:: uri
-   .. autoattribute:: version
-
-.. autoclass:: pcapkit.protocols.data.application.httpv1.ResponseHeader(type, version, status, message)
-   :no-members:
+.. autoclass:: pcapkit.protocols.data.application.httpv1.Header
+   :members:
    :show-inheritance:
 
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. autoattribute:: type
-   .. autoattribute:: version
-   .. autoattribute:: status
-   .. autoattribute:: message
+.. autoclass:: pcapkit.protocols.data.application.httpv1.RequestHeader
+   :members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
+.. autoclass:: pcapkit.protocols.data.application.httpv1.ResponseHeader
+   :members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
 
 .. raw:: html
 

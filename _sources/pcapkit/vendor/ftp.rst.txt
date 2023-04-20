@@ -1,3 +1,4 @@
+==============================================================
 :class:`~pcapkit.protocols.application.ftp.FTP` Vendor Crawler
 ==============================================================
 
@@ -14,19 +15,27 @@ crawlers include:
    * - :class:`FTP_ReturnCode <pcapkit.vendor.ftp.return_code.ReturnCode>`
      - FTP Return Codes [*]_
 
-.. automodule:: pcapkit.vendor.ftp.command
-   :no-members:
+FTP Command
+===========
+
+.. module:: pcapkit.vendor.ftp.command
+
+This module contains the vendor crawler for **FTP Command**,
+which is automatically generating :class:`pcapkit.const.ftp.command.Command`.
 
 .. autoclass:: pcapkit.vendor.ftp.command.Command
-   :noindex:
    :members: LINK
    :show-inheritance:
 
-.. automodule:: pcapkit.vendor.ftp.return_code
-   :no-members:
+FTP Server Return Code
+======================
+
+.. module:: pcapkit.vendor.ftp.return_code
+
+This module contains the vendor crawler for **FTP Server Return Code**,
+which is automatically generating :class:`pcapkit.const.ftp.return_code.ReturnCode`.
 
 .. autoclass:: pcapkit.vendor.ftp.return_code.ReturnCode
-   :noindex:
    :members: FLAG, LINK
    :show-inheritance:
 

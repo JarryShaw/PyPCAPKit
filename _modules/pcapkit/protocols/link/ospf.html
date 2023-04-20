@@ -1,38 +1,343 @@
+<!doctype html>
+<html class="no-js" lang="en">
+  <head><meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1"/>
+    <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../../../genindex.html" /><link rel="search" title="Search" href="../../../../search.html" />
 
-<!DOCTYPE html>
+    <!-- Generated with Sphinx 6.1.3 and Furo 2023.03.27 -->
+        <title>pcapkit.protocols.link.ospf - PyPCAPKit</title>
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/styles/furo.css?digest=fad236701ea90a88636c2a8c73b44ae642ed2a53" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/copybutton.css" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/styles/furo-extensions.css?digest=30d1aed668e5c3a91c3e3bf6a60b675221979f0e" />
+    
+    
 
-<html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pcapkit.protocols.link.ospf &#8212; PyPCAPKit 0.16.3 documentation</title>
-    <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../../../../_static/alabaster.css" />
-    <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
-    <script src="../../../../_static/doctools.js"></script>
-    <script src="../../../../_static/sphinx_highlight.js"></script>
-    <link rel="index" title="Index" href="../../../../genindex.html" />
-    <link rel="search" title="Search" href="../../../../search.html" />
-   
-  <link rel="stylesheet" href="../../../../_static/custom.css" type="text/css" />
+
+<style>
+  body {
+    --color-code-background: #f8f8f8;
+  --color-code-foreground: black;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-half" viewBox="0 0 24 24">
+    <title>Auto light/dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-shadow">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M13 12h5" />
+      <path d="M13 15h4" />
+      <path d="M13 18h1" />
+      <path d="M13 9h4" />
+      <path d="M13 6h1" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc">
+<label class="overlay sidebar-overlay" for="__navigation">
+  <div class="visually-hidden">Hide navigation sidebar</div>
+</label>
+<label class="overlay toc-overlay" for="__toc">
+  <div class="visually-hidden">Hide table of contents sidebar</div>
+</label>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <div class="visually-hidden">Toggle site navigation sidebar</div>
+        <i class="icon"><svg><use href="#svg-menu"></use></svg></i>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="../../../../index.html"><div class="brand">PyPCAPKit</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle">
+          <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+          <svg class="theme-icon-when-auto"><use href="#svg-sun-half"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon no-toc" for="__toc">
+        <div class="visually-hidden">Toggle table of contents sidebar</div>
+        <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="../../../../index.html">
   
   
-  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
-
-  </head><body>
   
+</a><form class="sidebar-search-container" method="get" action="../../../../search.html" role="search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../../../pcapkit/index.html">Module Documentation</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../../../pcapkit/interface/index.html">User Interface</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/interface/core.html">Core Interface</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/interface/misc.html">Auxiliary Interface</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../../../pcapkit/foundation/index.html">Library Foundation</a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/foundation/extraction.html">Extractor for PCAP Files</a></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../../../pcapkit/foundation/reassembly/index.html">Fragmented Packets Reassembly</a><input class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/foundation/reassembly/reassembly.html">Base Class</a></li>
+<li class="toctree-l4 has-children"><a class="reference internal" href="../../../../pcapkit/foundation/reassembly/ip/index.html">IP Datagram Reassembly</a><input class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" role="switch" type="checkbox"/><label for="toctree-checkbox-5"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l5"><a class="reference internal" href="../../../../pcapkit/foundation/reassembly/ip/ip.html">Base Class</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../../../pcapkit/foundation/reassembly/ip/ipv4.html">IPv4 Datagram Reassembly</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../../../pcapkit/foundation/reassembly/ip/ipv6.html">IPv6 Datagram Reassembly</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/foundation/reassembly/tcp.html">TCP Datagram Reassembly</a></li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../../../pcapkit/foundation/traceflow/index.html">Trace Flows</a><input class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" role="switch" type="checkbox"/><label for="toctree-checkbox-6"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/foundation/traceflow/traceflow.html">Base Class</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/foundation/traceflow/tcp.html">Trace TCP Flows</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/foundation/registry.html">Registry Management</a></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../../../pcapkit/foundation/engines/index.html">Engine Support</a><input class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" role="switch" type="checkbox"/><label for="toctree-checkbox-7"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/foundation/engines/engine.html">Base Class</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/foundation/engines/builtin.html">Built-in Engines</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/foundation/engines/3rdparty.html">3rd-Party Engines</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../../../pcapkit/protocols/index.html">Protocol Family</a><input class="toctree-checkbox" id="toctree-checkbox-8" name="toctree-checkbox-8" role="switch" type="checkbox"/><label for="toctree-checkbox-8"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/protocols/protocol.html">Root Protocol</a></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../../../pcapkit/protocols/misc/index.html">Auxiliary Protocols</a><input class="toctree-checkbox" id="toctree-checkbox-9" name="toctree-checkbox-9" role="switch" type="checkbox"/><label for="toctree-checkbox-9"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/misc/pcap.html">PCAP File Headers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/misc/raw.html">Raw Packet Data</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/misc/null.html">No-Payload Packet</a></li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../../../pcapkit/protocols/link/index.html">Link Layer Protocols</a><input class="toctree-checkbox" id="toctree-checkbox-10" name="toctree-checkbox-10" role="switch" type="checkbox"/><label for="toctree-checkbox-10"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/link/link.html">Base Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/link/ethernet.html">Ethernet Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/link/arp.html">ARP/InARP - (Inverse) Address Resolution Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/link/rarp.html">RARP/DRARP - (Dynamic) Reverse Address Resolution Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/link/l2tp.html">L2TP - Layer Two Tunnelling Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/link/ospf.html">OSPF - Open Shortest Path First</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/link/vlan.html">VLAN - 802.1Q Customer VLAN Tag Type</a></li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../../../pcapkit/protocols/internet/index.html">Internet Layer Protocols</a><input class="toctree-checkbox" id="toctree-checkbox-11" name="toctree-checkbox-11" role="switch" type="checkbox"/><label for="toctree-checkbox-11"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/internet.html">Base Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ip.html">IP - Internet Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv4.html">IPv4 - Internet Protocol version 4</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6.html">IPv6 - Internet Protocol version 6</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6_frag.html">IPv6-Frag - Fragment Header for IPv6</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6_opts.html">IPv6-Opts - Destination Options for IPv6</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6_route.html">IPv6-Route - Routing Header for IPv6</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/hopopt.html">HOPOPT - IPv6 Hop-by-Hop Options</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipsec.html">IPsec - Internet Protocol Security</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ah.html">AH - Authentication Header</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/hip.html">HIP - Host Identity Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/mh.html">MH - Mobility Header</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipx.html">IPX - Internetwork Packet Exchange</a></li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../../../pcapkit/protocols/transport/index.html">Transport Layer Protocols</a><input class="toctree-checkbox" id="toctree-checkbox-12" name="toctree-checkbox-12" role="switch" type="checkbox"/><label for="toctree-checkbox-12"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/transport/transport.html">Base Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/transport/tcp.html">TCP - Transmission Control Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/transport/udp.html">UDP - User Datagram Protocol</a></li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../../../pcapkit/protocols/application/index.html">Application Layer Protocols</a><input class="toctree-checkbox" id="toctree-checkbox-13" name="toctree-checkbox-13" role="switch" type="checkbox"/><label for="toctree-checkbox-13"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/application/application.html">Base Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/application/http.html">HTTP - Hypertext Transfer Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/application/httpv1.html">HTTP/1.* - Hypertext Transfer Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/application/httpv2.html">HTTP/2 - Hypertext Transfer Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/application/ftp.html">FTP - File Transfer Protocol</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../../../pcapkit/corekit/index.html">Core Utilities</a><input class="toctree-checkbox" id="toctree-checkbox-14" name="toctree-checkbox-14" role="switch" type="checkbox"/><label for="toctree-checkbox-14"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/corekit/fields.html">Protocol Fields</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/corekit/infoclass.html">Info Class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/corekit/multidict.html">Multi-Mapping Dictionary</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/corekit/protochain.html">Protocol Chain</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/corekit/version.html">Version Info</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../../../pcapkit/toolkit/index.html">Compatibility Tools</a><input class="toctree-checkbox" id="toctree-checkbox-15" name="toctree-checkbox-15" role="switch" type="checkbox"/><label for="toctree-checkbox-15"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/toolkit/builtin.html">Built-in Support</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/toolkit/3rdparty.html">3rd-Party Support</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../../../pcapkit/dumpkit/index.html">Dump Utilities</a><input class="toctree-checkbox" id="toctree-checkbox-16" name="toctree-checkbox-16" role="switch" type="checkbox"/><label for="toctree-checkbox-16"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/dumpkit/null.html">Null Dumper</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/dumpkit/pcap.html">PCAP Dumper</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../../../pcapkit/utilities/index.html">Module Utilities</a><input class="toctree-checkbox" id="toctree-checkbox-17" name="toctree-checkbox-17" role="switch" type="checkbox"/><label for="toctree-checkbox-17"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/utilities/exceptions.html">User Defined Exceptions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/utilities/warnings.html">User Defined Warnings</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../../../pcapkit/const/index.html">Constant Enumerations</a><input class="toctree-checkbox" id="toctree-checkbox-18" name="toctree-checkbox-18" role="switch" type="checkbox"/><label for="toctree-checkbox-18"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/const/reg.html">Protocol Type Registry Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/const/pcapng.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">PCAPNG</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/const/arp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">ARP</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/const/l2tp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">L2TP</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/const/ospf.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/const/vlan.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">VLAN</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/const/hip.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HIP</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/const/ipv4.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv4</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/const/ipv6.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/const/ipx.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPX</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/const/mh.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">MH</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/const/tcp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/const/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/const/http.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTTP</span></code> Constant Enumerations</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../../../pcapkit/vendor/index.html">Vendor Crawlers</a><input class="toctree-checkbox" id="toctree-checkbox-19" name="toctree-checkbox-19" role="switch" type="checkbox"/><label for="toctree-checkbox-19"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/vendor/default.html">Base Crawler</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/vendor/reg.html">Protocol Type Registry Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/vendor/pcapng.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">PCAPNG</span></code> Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/vendor/arp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">ARP</span></code> Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/vendor/l2tp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">L2TP</span></code> Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/vendor/ospf.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code> Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/vendor/vlan.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">VLAN</span></code> Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/vendor/hip.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HIP</span></code> Vendor Crawler</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/vendor/ipv4.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv4</span></code> Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/vendor/ipv6.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6</span></code> Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/vendor/ipx.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPX</span></code> Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/vendor/mh.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">MH</span></code> Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/vendor/tcp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code> Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/vendor/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawler</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/vendor/http.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTTP</span></code> Vendor Crawler</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../demo.html">How to …</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../pep.html">Help Wanted</a></li>
+</ul>
 
-    <div class="document">
-      <div class="documentwrapper">
-        <div class="bodywrapper">
-          
+</div>
+</div>
 
-          <div class="body" role="main">
-            
-  <h1>Source code for pcapkit.protocols.link.ospf</h1><div class="highlight"><pre>
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          <div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle">
+              <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+              <svg class="theme-icon-when-auto"><use href="#svg-sun-half"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon no-toc" for="__toc">
+            <div class="visually-hidden">Toggle table of contents sidebar</div>
+            <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+          </label>
+        </div>
+        <article role="main">
+          <h1>Source code for pcapkit.protocols.link.ospf</h1><div class="highlight"><pre>
 <span></span><span class="c1"># -*- coding: utf-8 -*-</span>
 <span class="sd">&quot;&quot;&quot;OSPF - Open Shortest Path First</span>
 <span class="sd">=====================================</span>
+
+<span class="sd">.. module:: pcapkit.protocols.link.ospf</span>
 
 <span class="sd">:mod:`pcapkit.protocols.link.ospf` contains</span>
 <span class="sd">:class:`~pcapkit.protocols.link.ospf.OSPF` only,</span>
@@ -40,31 +345,34 @@
 <span class="sd">First (OSPF) [*]_, whose structure is described</span>
 <span class="sd">as below:</span>
 
-<span class="sd">+========+=======+====================+=================================+</span>
-<span class="sd">| Octets | Bits  | Name               | Description                     |</span>
-<span class="sd">+========+=======+====================+=================================+</span>
-<span class="sd">| 0      |     0 | ``ospf.version``   | Version Number                  |</span>
-<span class="sd">+--------+-------+--------------------+---------------------------------+</span>
-<span class="sd">| 0      |     0 | ``ospf.type``      | Type                            |</span>
-<span class="sd">+--------+-------+--------------------+---------------------------------+</span>
-<span class="sd">| 0      |     1 | ``ospf.len``       | Packet Length (header included) |</span>
-<span class="sd">+--------+-------+--------------------+---------------------------------+</span>
-<span class="sd">| 0      |     2 | ``ospf.router_id`` | Router ID                       |</span>
-<span class="sd">+--------+-------+--------------------+---------------------------------+</span>
-<span class="sd">| 0      |     4 | ``ospf.area_id``   | Area ID                         |</span>
-<span class="sd">+--------+-------+--------------------+---------------------------------+</span>
-<span class="sd">| 0      |     6 | ``ospf.chksum``    | Checksum                        |</span>
-<span class="sd">+--------+-------+--------------------+---------------------------------+</span>
-<span class="sd">| 0      |     7 | ``ospf.autype``    | Authentication Type             |</span>
-<span class="sd">+--------+-------+--------------------+---------------------------------+</span>
-<span class="sd">| 1      |     8 | ``ospf.auth``      | Authentication                  |</span>
-<span class="sd">+--------+-------+--------------------+---------------------------------+</span>
+<span class="sd">.. table::</span>
+
+<span class="sd">   ====== ===== ================== ===============================</span>
+<span class="sd">   Octets Bits  Name               Description</span>
+<span class="sd">   ====== ===== ================== ===============================</span>
+<span class="sd">   0          0 ``ospf.version``   Version Number</span>
+<span class="sd">   ------ ----- ------------------ -------------------------------</span>
+<span class="sd">   0          0 ``ospf.type``      Type</span>
+<span class="sd">   ------ ----- ------------------ -------------------------------</span>
+<span class="sd">   0          1 ``ospf.len``       Packet Length (header included)</span>
+<span class="sd">   ------ ----- ------------------ -------------------------------</span>
+<span class="sd">   0          2 ``ospf.router_id`` Router ID</span>
+<span class="sd">   ------ ----- ------------------ -------------------------------</span>
+<span class="sd">   0          4 ``ospf.area_id``   Area ID</span>
+<span class="sd">   ------ ----- ------------------ -------------------------------</span>
+<span class="sd">   0          6 ``ospf.chksum``    Checksum</span>
+<span class="sd">   ------ ----- ------------------ -------------------------------</span>
+<span class="sd">   0          7 ``ospf.autype``    Authentication Type</span>
+<span class="sd">   ------ ----- ------------------ -------------------------------</span>
+<span class="sd">   1          8 ``ospf.auth``      Authentication</span>
+<span class="sd">   ====== ===== ================== ===============================</span>
 
 <span class="sd">.. [*] https://en.wikipedia.org/wiki/Open_Shortest_Path_First</span>
 
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="kn">import</span> <span class="nn">ipaddress</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
+<span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">cast</span>
 
 <span class="kn">from</span> <span class="nn">pcapkit.const.ospf.authentication</span> <span class="kn">import</span> <span class="n">Authentication</span> <span class="k">as</span> <span class="n">Enum_Authentication</span>
 <span class="kn">from</span> <span class="nn">pcapkit.const.ospf.packet</span> <span class="kn">import</span> <span class="n">Packet</span> <span class="k">as</span> <span class="n">Enum_Packet</span>
@@ -72,18 +380,30 @@
 <span class="kn">from</span> <span class="nn">pcapkit.protocols.data.link.ospf</span> <span class="kn">import</span> \
     <span class="n">CrytographicAuthentication</span> <span class="k">as</span> <span class="n">Data_CrytographicAuthentication</span>
 <span class="kn">from</span> <span class="nn">pcapkit.protocols.link.link</span> <span class="kn">import</span> <span class="n">Link</span>
-<span class="kn">from</span> <span class="nn">pcapkit.utilities.exceptions</span> <span class="kn">import</span> <span class="n">UnsupportedCall</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.schema.link.ospf</span> <span class="kn">import</span> <span class="n">OSPF</span> <span class="k">as</span> <span class="n">Schema_OSPF</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.schema.link.ospf</span> <span class="kn">import</span> \
+    <span class="n">CrytographicAuthentication</span> <span class="k">as</span> <span class="n">Schema_CrytographicAuthentication</span>
+<span class="kn">from</span> <span class="nn">pcapkit.utilities.exceptions</span> <span class="kn">import</span> <span class="n">ProtocolError</span><span class="p">,</span> <span class="n">UnsupportedCall</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">enum</span> <span class="kn">import</span> <span class="n">IntEnum</span> <span class="k">as</span> <span class="n">StdlibEnum</span>
     <span class="kn">from</span> <span class="nn">ipaddress</span> <span class="kn">import</span> <span class="n">IPv4Address</span>
-    <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">NoReturn</span><span class="p">,</span> <span class="n">Optional</span>
+    <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">NoReturn</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Type</span>
 
+    <span class="kn">from</span> <span class="nn">aenum</span> <span class="kn">import</span> <span class="n">IntEnum</span> <span class="k">as</span> <span class="n">AenumEnum</span>
     <span class="kn">from</span> <span class="nn">typing_extensions</span> <span class="kn">import</span> <span class="n">Literal</span>
+
+    <span class="kn">from</span> <span class="nn">pcapkit.protocols.protocol</span> <span class="kn">import</span> <span class="n">Protocol</span>
+    <span class="kn">from</span> <span class="nn">pcapkit.protocols.schema.schema</span> <span class="kn">import</span> <span class="n">Schema</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;OSPF&#39;</span><span class="p">]</span>
 
+<span class="c1"># Ethernet address pattern</span>
+<span class="n">PAT_MAC_ADDR</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">rb</span><span class="s1">&#39;(?i)(?:[0-9a-f]</span><span class="si">{2}</span><span class="s1">[:-])</span><span class="si">{5}</span><span class="s1">[0-9a-f]</span><span class="si">{2}</span><span class="s1">&#39;</span><span class="p">)</span>
 
-<div class="viewcode-block" id="OSPF"><a class="viewcode-back" href="../../../../pcapkit/protocols/link/ospf.html#pcapkit.protocols.link.ospf.OSPF">[docs]</a><span class="k">class</span> <span class="nc">OSPF</span><span class="p">(</span><span class="n">Link</span><span class="p">[</span><span class="n">Data_OSPF</span><span class="p">]):</span>
+
+<div class="viewcode-block" id="OSPF"><a class="viewcode-back" href="../../../../pcapkit/protocols/link/ospf.html#pcapkit.protocols.link.ospf.OSPF">[docs]</a><span class="k">class</span> <span class="nc">OSPF</span><span class="p">(</span><span class="n">Link</span><span class="p">[</span><span class="n">Data_OSPF</span><span class="p">,</span> <span class="n">Schema_OSPF</span><span class="p">],</span>
+           <span class="n">schema</span><span class="o">=</span><span class="n">Schema_OSPF</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">Data_OSPF</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;This class implements Open Shortest Path First.&quot;&quot;&quot;</span>
 
     <span class="c1">##########################################################################</span>
@@ -145,48 +465,93 @@
 <span class="sd">            Parsed packet data.</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="n">length</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">length</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
-
-        <span class="n">_vers</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_unpack</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
-        <span class="n">_type</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_unpack</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
-        <span class="n">_tlen</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_unpack</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
-        <span class="n">_rtid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_id_numbers</span><span class="p">()</span>
-        <span class="n">_area</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_id_numbers</span><span class="p">()</span>
-        <span class="n">_csum</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_fileng</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
-        <span class="n">_autp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_unpack</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+        <span class="n">schema</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__schema__</span>
 
         <span class="n">ospf</span> <span class="o">=</span> <span class="n">Data_OSPF</span><span class="p">(</span>
-            <span class="n">version</span><span class="o">=</span><span class="n">_vers</span><span class="p">,</span>
-            <span class="nb">type</span><span class="o">=</span><span class="n">Enum_Packet</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">_type</span><span class="p">),</span>
-            <span class="nb">len</span><span class="o">=</span><span class="n">_tlen</span><span class="p">,</span>
-            <span class="n">router_id</span><span class="o">=</span><span class="n">_rtid</span><span class="p">,</span>
-            <span class="n">area_id</span><span class="o">=</span><span class="n">_area</span><span class="p">,</span>
-            <span class="n">chksum</span><span class="o">=</span><span class="n">_csum</span><span class="p">,</span>
-            <span class="n">autype</span><span class="o">=</span><span class="n">Enum_Authentication</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">_autp</span><span class="p">),</span>
+            <span class="n">version</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">version</span><span class="p">,</span>
+            <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
+            <span class="nb">len</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">,</span>
+            <span class="n">router_id</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">router_id</span><span class="p">,</span>
+            <span class="n">area_id</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">area_id</span><span class="p">,</span>
+            <span class="n">chksum</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">checksum</span><span class="p">,</span>
+            <span class="n">autype</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">auth_type</span><span class="p">,</span>
         <span class="p">)</span>
+        <span class="n">length</span> <span class="o">=</span> <span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="k">if</span> <span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="k">else</span> <span class="p">(</span><span class="n">length</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span>
 
         <span class="k">if</span> <span class="n">ospf</span><span class="o">.</span><span class="n">autype</span> <span class="o">==</span> <span class="n">Enum_Authentication</span><span class="o">.</span><span class="n">Cryptographic_authentication</span><span class="p">:</span>
             <span class="n">ospf</span><span class="o">.</span><span class="n">__update__</span><span class="p">([</span>
-                <span class="p">(</span><span class="s1">&#39;auth&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_encrypt_auth</span><span class="p">()),</span>
+                <span class="p">(</span><span class="s1">&#39;auth&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_encrypt_auth</span><span class="p">(</span>
+                    <span class="n">cast</span><span class="p">(</span><span class="s1">&#39;Schema_CrytographicAuthentication&#39;</span><span class="p">,</span> <span class="n">schema</span><span class="o">.</span><span class="n">auth_data</span><span class="p">),</span>
+                <span class="p">)),</span>
             <span class="p">])</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">ospf</span><span class="o">.</span><span class="n">__update__</span><span class="p">([</span>
-                <span class="p">(</span><span class="s1">&#39;auth&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_fileng</span><span class="p">(</span><span class="mi">8</span><span class="p">)),</span>
+                <span class="p">(</span><span class="s1">&#39;auth&#39;</span><span class="p">,</span> <span class="n">cast</span><span class="p">(</span><span class="s1">&#39;bytes&#39;</span><span class="p">,</span> <span class="n">schema</span><span class="o">.</span><span class="n">auth_data</span><span class="p">)),</span>
             <span class="p">])</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_decode_next_layer</span><span class="p">(</span><span class="n">ospf</span><span class="p">,</span> <span class="n">length</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">length</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="OSPF.make"><a class="viewcode-back" href="../../../../pcapkit/protocols/link/ospf.html#pcapkit.protocols.link.ospf.OSPF.make">[docs]</a>    <span class="k">def</span> <span class="nf">make</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;NoReturn&#39;</span><span class="p">:</span>
+<div class="viewcode-block" id="OSPF.make"><a class="viewcode-back" href="../../../../pcapkit/protocols/link/ospf.html#pcapkit.protocols.link.ospf.OSPF.make">[docs]</a>    <span class="k">def</span> <span class="nf">make</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+             <span class="n">version</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span>
+             <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_Packet | StdlibEnum | AenumEnum | str | int&#39;</span> <span class="o">=</span> <span class="n">Enum_Packet</span><span class="o">.</span><span class="n">Hello</span><span class="p">,</span>
+             <span class="n">type_default</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+             <span class="n">type_namespace</span><span class="p">:</span> <span class="s1">&#39;Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># pylint: disable=line-too-long</span>
+             <span class="n">type_reversed</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+             <span class="n">router_id</span><span class="p">:</span> <span class="s1">&#39;IPv4Address | str | bytes | bytearray&#39;</span> <span class="o">=</span> <span class="s1">&#39;0.0.0.0&#39;</span><span class="p">,</span>  <span class="c1"># nosec: B104</span>
+             <span class="n">area_id</span><span class="p">:</span> <span class="s1">&#39;IPv4Address | str | bytes | bytearray&#39;</span> <span class="o">=</span> <span class="s1">&#39;0.0.0.0&#39;</span><span class="p">,</span>  <span class="c1"># nosec: B104</span>
+             <span class="n">checksum</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">&#39;</span><span class="se">\x00\x00</span><span class="s1">&#39;</span><span class="p">,</span>
+             <span class="n">auth_type</span><span class="p">:</span> <span class="s1">&#39;Enum_Authentication | StdlibEnum | AenumEnum | str | int&#39;</span> <span class="o">=</span> <span class="n">Enum_Authentication</span><span class="o">.</span><span class="n">No_Authentication</span><span class="p">,</span>
+             <span class="n">auth_type_default</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+             <span class="n">auth_type_namespace</span><span class="p">:</span> <span class="s1">&#39;Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># pylint: disable=line-too-long</span>
+             <span class="n">auth_type_reversed</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+             <span class="n">auth_data</span><span class="p">:</span> <span class="s1">&#39;bytes | Schema_CrytographicAuthentication | Data_CrytographicAuthentication&#39;</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">&#39;</span><span class="se">\x00\x00\x00\x00\x00\x00\x00\x00</span><span class="s1">&#39;</span><span class="p">,</span>
+             <span class="n">payload</span><span class="p">:</span> <span class="s1">&#39;bytes | Protocol | Schema&#39;</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">&#39;&#39;</span><span class="p">,</span>
+             <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Schema_OSPF&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Make (construct) packet data.</span>
 
 <span class="sd">        Args:</span>
+<span class="sd">            version: OSPF version number.</span>
+<span class="sd">            type: OSPF packet type.</span>
+<span class="sd">            type_default: Default value for ``type`` if not specified.</span>
+<span class="sd">            type_namespace: Namespace for ``type``.</span>
+<span class="sd">            type_reversed: Reverse namespace for ``type``.</span>
+<span class="sd">            router_id: Router ID.</span>
+<span class="sd">            area_id: Area ID.</span>
+<span class="sd">            checksum: Checksum.</span>
+<span class="sd">            auth_type: Authentication type.</span>
+<span class="sd">            auth_type_default: Default value for ``auth_type`` if not specified.</span>
+<span class="sd">            auth_type_namespace: Namespace for ``auth_type``.</span>
+<span class="sd">            auth_type_reversed: Reverse namespace for ``auth_type``.</span>
+<span class="sd">            auth_data: Authentication data.</span>
+<span class="sd">            payload: Payload data.</span>
 <span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            bytes: Constructed packet data.</span>
+<span class="sd">            Constructed packet data.</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">raise</span> <span class="ne">NotImplementedError</span></div>
+        <span class="n">type_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_index</span><span class="p">(</span><span class="nb">type</span><span class="p">,</span> <span class="n">type_default</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="n">type_namespace</span><span class="p">,</span>  <span class="c1"># type: ignore[call-overload]</span>
+                                 <span class="nb">reversed</span><span class="o">=</span><span class="n">type_reversed</span><span class="p">,</span> <span class="n">pack</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">auth_type_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_index</span><span class="p">(</span><span class="n">auth_type</span><span class="p">,</span> <span class="n">auth_type_default</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="n">auth_type_namespace</span><span class="p">,</span>  <span class="c1"># type: ignore[call-overload]</span>
+                                      <span class="nb">reversed</span><span class="o">=</span><span class="n">auth_type_reversed</span><span class="p">,</span> <span class="n">pack</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">auth_type_</span> <span class="o">==</span> <span class="n">Enum_Authentication</span><span class="o">.</span><span class="n">Cryptographic_authentication</span><span class="p">:</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_encrypt_auth</span><span class="p">(</span><span class="n">auth_data</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">auth_data</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;OSPF: invalid type for authentication data: </span><span class="si">{</span><span class="n">auth_data</span><span class="si">!r}</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">auth_data</span>
+
+        <span class="k">return</span> <span class="n">Schema_OSPF</span><span class="p">(</span>
+            <span class="n">version</span><span class="o">=</span><span class="n">version</span><span class="p">,</span>
+            <span class="nb">type</span><span class="o">=</span><span class="n">type_</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="mi">24</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">payload</span><span class="p">),</span>
+            <span class="n">router_id</span><span class="o">=</span><span class="n">router_id</span><span class="p">,</span>
+            <span class="n">area_id</span><span class="o">=</span><span class="n">area_id</span><span class="p">,</span>
+            <span class="n">checksum</span><span class="o">=</span><span class="n">checksum</span><span class="p">,</span>
+            <span class="n">auth_type</span><span class="o">=</span><span class="n">auth_type_</span><span class="p">,</span>
+            <span class="n">auth_data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span>
+            <span class="n">payload</span><span class="o">=</span><span class="n">payload</span><span class="p">,</span>
+        <span class="p">)</span></div>
 
     <span class="c1">##########################################################################</span>
     <span class="c1"># Data models.</span>
@@ -210,8 +575,33 @@
     <span class="c1"># Utilities.</span>
     <span class="c1">##########################################################################</span>
 
-    <span class="k">def</span> <span class="nf">_read_id_numbers</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;IPv4Address&#39;</span><span class="p">:</span>
+<div class="viewcode-block" id="OSPF._make_data"><a class="viewcode-back" href="../../../../pcapkit/protocols/link/ospf.html#pcapkit.protocols.link.ospf.OSPF._make_data">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">_make_data</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">&#39;Data_OSPF&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;dict[str, Any]&#39;</span><span class="p">:</span>  <span class="c1"># type: ignore[override]</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Create key-value pairs from ``data`` for protocol construction.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            data: protocol data</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Key-value pairs for protocol construction.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s1">&#39;version&#39;</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">version</span><span class="p">,</span>
+            <span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
+            <span class="s1">&#39;router_id&#39;</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">router_id</span><span class="p">,</span>
+            <span class="s1">&#39;area_id&#39;</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">area_id</span><span class="p">,</span>
+            <span class="s1">&#39;checksum&#39;</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">chksum</span><span class="p">,</span>
+            <span class="s1">&#39;auth_type&#39;</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">autype</span><span class="p">,</span>
+            <span class="s1">&#39;auth_data&#39;</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">auth</span><span class="p">,</span>
+            <span class="s1">&#39;payload&#39;</span><span class="p">:</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_make_payload</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+        <span class="p">}</span></div>
+
+    <span class="k">def</span> <span class="nf">_read_id_numbers</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">id</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;IPv4Address&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Read router and area IDs.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            id: ID bytes.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            Parsed IDs as an IPv4 address.</span>
@@ -219,9 +609,21 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1">#_byte = self._read_fileng(4)</span>
         <span class="c1">#_addr = &#39;.&#39;.join(str(_) for _ in _byte)</span>
-        <span class="k">return</span> <span class="n">ipaddress</span><span class="o">.</span><span class="n">ip_address</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_read_fileng</span><span class="p">(</span><span class="mi">4</span><span class="p">))</span>  <span class="c1"># type: ignore[return-value]</span>
+        <span class="k">return</span> <span class="n">ipaddress</span><span class="o">.</span><span class="n">ip_address</span><span class="p">(</span><span class="nb">id</span><span class="p">)</span>  <span class="c1"># type: ignore[return-value]</span>
 
-<div class="viewcode-block" id="OSPF._read_encrypt_auth"><a class="viewcode-back" href="../../../../pcapkit/protocols/link/ospf.html#pcapkit.protocols.link.ospf.OSPF._read_encrypt_auth">[docs]</a>    <span class="k">def</span> <span class="nf">_read_encrypt_auth</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Data_CrytographicAuthentication&#39;</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">_make_id_numbers</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">id</span><span class="p">:</span> <span class="s1">&#39;IPv4Address | str | bytes | bytearray&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;bytes&#39;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Make router and area IDs.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            id: ID.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            ID bytes.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">ipaddress</span><span class="o">.</span><span class="n">ip_address</span><span class="p">(</span><span class="nb">id</span><span class="p">)</span><span class="o">.</span><span class="n">packed</span>
+
+<div class="viewcode-block" id="OSPF._read_encrypt_auth"><a class="viewcode-back" href="../../../../pcapkit/protocols/link/ospf.html#pcapkit.protocols.link.ospf.OSPF._read_encrypt_auth">[docs]</a>    <span class="k">def</span> <span class="nf">_read_encrypt_auth</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">&#39;Schema_CrytographicAuthentication&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Data_CrytographicAuthentication&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Read Authentication field when Cryptographic Authentication is employed,</span>
 <span class="sd">        i.e. :attr:`~OSPF.autype` is ``2``.</span>
 
@@ -238,96 +640,78 @@
 <span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            length: packet length</span>
+<span class="sd">            schema: parsed authentication data</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            Parsed packet data.</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">_resv</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_fileng</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
-        <span class="n">_keys</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_unpack</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
-        <span class="n">_alen</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_unpack</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
-        <span class="n">_seqn</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_unpack</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
-
         <span class="n">auth</span> <span class="o">=</span> <span class="n">Data_CrytographicAuthentication</span><span class="p">(</span>
-            <span class="n">key_id</span><span class="o">=</span><span class="n">_keys</span><span class="p">,</span>
-            <span class="nb">len</span><span class="o">=</span><span class="n">_alen</span><span class="p">,</span>
-            <span class="n">seq</span><span class="o">=</span><span class="n">_seqn</span><span class="p">,</span>
+            <span class="n">key_id</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">key_id</span><span class="p">,</span>
+            <span class="nb">len</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">len</span><span class="p">,</span>
+            <span class="n">seq</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">seq</span><span class="p">,</span>
         <span class="p">)</span>
-        <span class="k">return</span> <span class="n">auth</span></div></div>
-</pre></div>
+        <span class="k">return</span> <span class="n">auth</span></div>
 
-          </div>
+<div class="viewcode-block" id="OSPF._make_encrypt_auth"><a class="viewcode-back" href="../../../../pcapkit/protocols/link/ospf.html#pcapkit.protocols.link.ospf.OSPF._make_encrypt_auth">[docs]</a>    <span class="k">def</span> <span class="nf">_make_encrypt_auth</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                           <span class="n">auth_data</span><span class="p">:</span> <span class="s1">&#39;bytes | Schema_CrytographicAuthentication | Data_CrytographicAuthentication&#39;</span>  <span class="c1"># pylint: disable=line-too-long</span>
+                           <span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;bytes | Schema_CrytographicAuthentication&#39;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Make Authentication field when Cryptographic Authentication is employed.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            auth_type: Authentication type.</span>
+<span class="sd">            auth_data: Authentication data.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Authentication bytes.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">auth_data</span><span class="p">,</span> <span class="p">(</span><span class="n">Schema_CrytographicAuthentication</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">)):</span>
+            <span class="k">return</span> <span class="n">auth_data</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">auth_data</span><span class="p">,</span> <span class="n">Data_CrytographicAuthentication</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">Schema_CrytographicAuthentication</span><span class="p">(</span>
+                <span class="n">key_id</span><span class="o">=</span><span class="n">auth_data</span><span class="o">.</span><span class="n">key_id</span><span class="p">,</span>
+                <span class="nb">len</span><span class="o">=</span><span class="n">auth_data</span><span class="o">.</span><span class="n">len</span><span class="p">,</span>
+                <span class="n">seq</span><span class="o">=</span><span class="n">auth_data</span><span class="o">.</span><span class="n">seq</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;OSPF: invalid type for auth_data: </span><span class="si">{</span><span class="n">auth_data</span><span class="si">!r}</span><span class="s1">&#39;</span><span class="p">)</span></div></div>
+</pre></div>
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          
           
         </div>
-      </div>
-      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
-        <div class="sphinxsidebarwrapper">
-<h1 class="logo"><a href="../../../../index.html">PyPCAPKit</a></h1>
-
-
-
-
-
-
-<p>
-<iframe src="https://ghbtns.com/github-btn.html?user=JarryShaw&repo=PyPCAPKit&type=star&count=true&size=large&v=2"
-  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
-</p>
-
-
-
-
-
-<h3>Navigation</h3>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../../pcapkit/index.html">Module Documentation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../demo.html">How to …</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../pep.html">Help Wanted</a></li>
-</ul>
-
-<div class="relations">
-<h3>Related Topics</h3>
-<ul>
-  <li><a href="../../../../index.html">Documentation overview</a><ul>
-  <li><a href="../../../index.html">Module code</a><ul>
-  </ul></li>
-  </ul></li>
-</ul>
-</div>
-<div id="searchbox" style="display: none" role="search">
-  <h3 id="searchlabel">Quick search</h3>
-    <div class="searchformwrapper">
-    <form class="search" action="../../../../search.html" method="get">
-      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
-      <input type="submit" value="Go" />
-    </form>
-    </div>
-</div>
-<script>document.getElementById('searchbox').style.display = "block"</script>
-
-
-
-
-
-
-
-
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; 2017-2023, Jarry Shaw
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            
+          </div>
         </div>
-      </div>
-      <div class="clearer"></div>
+        
+      </footer>
     </div>
-    <div class="footer">
-      &copy;2017-2023, Jarry Shaw.
+    <aside class="toc-drawer no-toc">
       
-    </div>
-
-    
-    <a href="https://github.com/JarryShaw/PyPCAPKit" class="github">
-        <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"  class="github"/>
-    </a>
-    
-
-    
-  </body>
+      
+      
+    </aside>
+  </div>
+</div><script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
+    <script src="../../../../_static/doctools.js"></script>
+    <script src="../../../../_static/sphinx_highlight.js"></script>
+    <script src="../../../../_static/scripts/furo.js"></script>
+    <script src="../../../../_static/clipboard.min.js"></script>
+    <script src="../../../../_static/copybutton.js"></script>
+    </body>
 </html>

@@ -1,88 +1,410 @@
+<!doctype html>
+<html class="no-js" lang="en">
+  <head><meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1"/>
+    <meta name="color-scheme" content="light dark"><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+<meta property="og:title" content="TCP Constant Enumerations" />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://pypcapkit.jarryshaw.me/pcapkit/const/tcp.html" />
+<meta property="og:site_name" content="PyPCAPKit" />
+<meta property="og:description" content="This module contains all constant enumerations of TCP implementations. Available enumerations include:,, TCP_Checksum, TCP Checksum*,, TCP_MPTCPOption, Multipath TCP options †,, TCP_Option, TCP Opt..." />
+<meta property="og:image:width" content="1146" />
+<meta property="og:image:height" content="600" />
+<meta property="og:image" content="https://pypcapkit.jarryshaw.me/_images/social_previews/summary_pcapkit_const_tcp_86e05fc9.png" />
+<meta property="og:image:alt" content="This module contains all constant enumerations of TCP implementations. Available enumerations include:,, TCP_Checksum, TCP Checksum*,, TCP_MPTCPOption, Multi..." />
+<meta name="description" content="This module contains all constant enumerations of TCP implementations. Available enumerations include:,, TCP_Checksum, TCP Checksum*,, TCP_MPTCPOption, Multipath TCP options †,, TCP_Option, TCP Opt..." />
+<meta name="twitter:card" content="summary_large_image" />
+<link rel="index" title="Index" href="../../genindex.html" /><link rel="search" title="Search" href="../../search.html" /><link rel="next" title="FTP Constant Enumerations" href="ftp.html" /><link rel="prev" title="MH Constant Enumerations" href="mh.html" />
 
-<!DOCTYPE html>
+    <!-- Generated with Sphinx 6.1.3 and Furo 2023.03.27 -->
+        <title>TCP Constant Enumerations - PyPCAPKit</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/styles/furo.css?digest=fad236701ea90a88636c2a8c73b44ae642ed2a53" />
+    <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/styles/furo-extensions.css?digest=30d1aed668e5c3a91c3e3bf6a60b675221979f0e" />
+    
+    
 
-<html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
-    <title>TCP Constant Enumerations &#8212; PyPCAPKit 0.16.3 documentation</title>
-    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css" />
-    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
-    <script src="../../_static/doctools.js"></script>
-    <script src="../../_static/sphinx_highlight.js"></script>
-    <link rel="index" title="Index" href="../../genindex.html" />
-    <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="FTP Constant Enumerations" href="ftp.html" />
-    <link rel="prev" title="MH Constant Enumerations" href="mh.html" />
-   
-  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+<style>
+  body {
+    --color-code-background: #f8f8f8;
+  --color-code-foreground: black;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-half" viewBox="0 0 24 24">
+    <title>Auto light/dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-shadow">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M13 12h5" />
+      <path d="M13 15h4" />
+      <path d="M13 18h1" />
+      <path d="M13 9h4" />
+      <path d="M13 6h1" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc">
+<label class="overlay sidebar-overlay" for="__navigation">
+  <div class="visually-hidden">Hide navigation sidebar</div>
+</label>
+<label class="overlay toc-overlay" for="__toc">
+  <div class="visually-hidden">Hide table of contents sidebar</div>
+</label>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <div class="visually-hidden">Toggle site navigation sidebar</div>
+        <i class="icon"><svg><use href="#svg-menu"></use></svg></i>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="../../index.html"><div class="brand">PyPCAPKit</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle">
+          <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+          <svg class="theme-icon-when-auto"><use href="#svg-sun-half"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
+        <div class="visually-hidden">Toggle table of contents sidebar</div>
+        <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="../../index.html">
   
   
-  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
-
-  </head><body>
   
+</a><form class="sidebar-search-container" method="get" action="../../search.html" role="search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <ul class="current">
+<li class="toctree-l1 current has-children"><a class="reference internal" href="../index.html">Module Documentation</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
+<li class="toctree-l2 has-children"><a class="reference internal" href="../interface/index.html">User Interface</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../interface/core.html">Core Interface</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../interface/misc.html">Auxiliary Interface</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../foundation/index.html">Library Foundation</a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../foundation/extraction.html">Extractor for PCAP Files</a></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../foundation/reassembly/index.html">Fragmented Packets Reassembly</a><input class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../foundation/reassembly/reassembly.html">Base Class</a></li>
+<li class="toctree-l4 has-children"><a class="reference internal" href="../foundation/reassembly/ip/index.html">IP Datagram Reassembly</a><input class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" role="switch" type="checkbox"/><label for="toctree-checkbox-5"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l5"><a class="reference internal" href="../foundation/reassembly/ip/ip.html">Base Class</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../foundation/reassembly/ip/ipv4.html">IPv4 Datagram Reassembly</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../foundation/reassembly/ip/ipv6.html">IPv6 Datagram Reassembly</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../foundation/reassembly/tcp.html">TCP Datagram Reassembly</a></li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../foundation/traceflow/index.html">Trace Flows</a><input class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" role="switch" type="checkbox"/><label for="toctree-checkbox-6"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../foundation/traceflow/traceflow.html">Base Class</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../foundation/traceflow/tcp.html">Trace TCP Flows</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../foundation/registry.html">Registry Management</a></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../foundation/engines/index.html">Engine Support</a><input class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" role="switch" type="checkbox"/><label for="toctree-checkbox-7"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../foundation/engines/engine.html">Base Class</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../foundation/engines/builtin.html">Built-in Engines</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../foundation/engines/3rdparty.html">3rd-Party Engines</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../protocols/index.html">Protocol Family</a><input class="toctree-checkbox" id="toctree-checkbox-8" name="toctree-checkbox-8" role="switch" type="checkbox"/><label for="toctree-checkbox-8"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../protocols/protocol.html">Root Protocol</a></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../protocols/misc/index.html">Auxiliary Protocols</a><input class="toctree-checkbox" id="toctree-checkbox-9" name="toctree-checkbox-9" role="switch" type="checkbox"/><label for="toctree-checkbox-9"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../protocols/misc/pcap.html">PCAP File Headers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../protocols/misc/raw.html">Raw Packet Data</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../protocols/misc/null.html">No-Payload Packet</a></li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../protocols/link/index.html">Link Layer Protocols</a><input class="toctree-checkbox" id="toctree-checkbox-10" name="toctree-checkbox-10" role="switch" type="checkbox"/><label for="toctree-checkbox-10"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../protocols/link/link.html">Base Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../protocols/link/ethernet.html">Ethernet Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../protocols/link/arp.html">ARP/InARP - (Inverse) Address Resolution Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../protocols/link/rarp.html">RARP/DRARP - (Dynamic) Reverse Address Resolution Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../protocols/link/l2tp.html">L2TP - Layer Two Tunnelling Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../protocols/link/ospf.html">OSPF - Open Shortest Path First</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../protocols/link/vlan.html">VLAN - 802.1Q Customer VLAN Tag Type</a></li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../protocols/internet/index.html">Internet Layer Protocols</a><input class="toctree-checkbox" id="toctree-checkbox-11" name="toctree-checkbox-11" role="switch" type="checkbox"/><label for="toctree-checkbox-11"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../protocols/internet/internet.html">Base Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../protocols/internet/ip.html">IP - Internet Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../protocols/internet/ipv4.html">IPv4 - Internet Protocol version 4</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../protocols/internet/ipv6.html">IPv6 - Internet Protocol version 6</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../protocols/internet/ipv6_frag.html">IPv6-Frag - Fragment Header for IPv6</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../protocols/internet/ipv6_opts.html">IPv6-Opts - Destination Options for IPv6</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../protocols/internet/ipv6_route.html">IPv6-Route - Routing Header for IPv6</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../protocols/internet/hopopt.html">HOPOPT - IPv6 Hop-by-Hop Options</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../protocols/internet/ipsec.html">IPsec - Internet Protocol Security</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../protocols/internet/ah.html">AH - Authentication Header</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../protocols/internet/hip.html">HIP - Host Identity Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../protocols/internet/mh.html">MH - Mobility Header</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../protocols/internet/ipx.html">IPX - Internetwork Packet Exchange</a></li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../protocols/transport/index.html">Transport Layer Protocols</a><input class="toctree-checkbox" id="toctree-checkbox-12" name="toctree-checkbox-12" role="switch" type="checkbox"/><label for="toctree-checkbox-12"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../protocols/transport/transport.html">Base Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../protocols/transport/tcp.html">TCP - Transmission Control Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../protocols/transport/udp.html">UDP - User Datagram Protocol</a></li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../protocols/application/index.html">Application Layer Protocols</a><input class="toctree-checkbox" id="toctree-checkbox-13" name="toctree-checkbox-13" role="switch" type="checkbox"/><label for="toctree-checkbox-13"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../protocols/application/application.html">Base Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../protocols/application/http.html">HTTP - Hypertext Transfer Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../protocols/application/httpv1.html">HTTP/1.* - Hypertext Transfer Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../protocols/application/httpv2.html">HTTP/2 - Hypertext Transfer Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../protocols/application/ftp.html">FTP - File Transfer Protocol</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../corekit/index.html">Core Utilities</a><input class="toctree-checkbox" id="toctree-checkbox-14" name="toctree-checkbox-14" role="switch" type="checkbox"/><label for="toctree-checkbox-14"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../corekit/fields.html">Protocol Fields</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../corekit/infoclass.html">Info Class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../corekit/multidict.html">Multi-Mapping Dictionary</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../corekit/protochain.html">Protocol Chain</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../corekit/version.html">Version Info</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../toolkit/index.html">Compatibility Tools</a><input class="toctree-checkbox" id="toctree-checkbox-15" name="toctree-checkbox-15" role="switch" type="checkbox"/><label for="toctree-checkbox-15"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../toolkit/builtin.html">Built-in Support</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../toolkit/3rdparty.html">3rd-Party Support</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../dumpkit/index.html">Dump Utilities</a><input class="toctree-checkbox" id="toctree-checkbox-16" name="toctree-checkbox-16" role="switch" type="checkbox"/><label for="toctree-checkbox-16"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../dumpkit/null.html">Null Dumper</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../dumpkit/pcap.html">PCAP Dumper</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../utilities/index.html">Module Utilities</a><input class="toctree-checkbox" id="toctree-checkbox-17" name="toctree-checkbox-17" role="switch" type="checkbox"/><label for="toctree-checkbox-17"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../utilities/exceptions.html">User Defined Exceptions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../utilities/warnings.html">User Defined Warnings</a></li>
+</ul>
+</li>
+<li class="toctree-l2 current has-children"><a class="reference internal" href="index.html">Constant Enumerations</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-18" name="toctree-checkbox-18" role="switch" type="checkbox"/><label for="toctree-checkbox-18"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="reg.html">Protocol Type Registry Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pcapng.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">PCAPNG</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="arp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">ARP</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="l2tp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">L2TP</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ospf.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="vlan.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">VLAN</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="hip.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HIP</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ipv4.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv4</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ipv6.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ipx.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPX</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="mh.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">MH</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3 current current-page"><a class="current reference internal" href="#"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="http.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTTP</span></code> Constant Enumerations</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../vendor/index.html">Vendor Crawlers</a><input class="toctree-checkbox" id="toctree-checkbox-19" name="toctree-checkbox-19" role="switch" type="checkbox"/><label for="toctree-checkbox-19"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../vendor/default.html">Base Crawler</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../vendor/reg.html">Protocol Type Registry Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../vendor/pcapng.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">PCAPNG</span></code> Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../vendor/arp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">ARP</span></code> Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../vendor/l2tp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">L2TP</span></code> Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../vendor/ospf.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code> Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../vendor/vlan.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">VLAN</span></code> Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../vendor/hip.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HIP</span></code> Vendor Crawler</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../vendor/ipv4.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv4</span></code> Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../vendor/ipv6.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6</span></code> Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../vendor/ipx.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPX</span></code> Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../vendor/mh.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">MH</span></code> Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../vendor/tcp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code> Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../vendor/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawler</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../vendor/http.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTTP</span></code> Vendor Crawler</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../demo.html">How to …</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../pep.html">Help Wanted</a></li>
+</ul>
 
-    <div class="document">
-      <div class="documentwrapper">
-        <div class="bodywrapper">
-          
+</div>
+</div>
 
-          <div class="body" role="main">
-            
-  <section id="module-pcapkit.const.tcp">
-<span id="tcp-constant-enumerations"></span><h1><a class="reference internal" href="../protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP" title="pcapkit.protocols.transport.tcp.TCP"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code></a> Constant Enumerations<a class="headerlink" href="#module-pcapkit.const.tcp" title="Permalink to this heading">¶</a></h1>
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          <div class="edit-this-page">
+  <a class="muted-link" href="https://github.com/JarryShaw/PyPCAPKit/edit/master/docs/source/pcapkit/const/tcp.rst" title="Edit this page">
+    <svg aria-hidden="true" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+      <path d="M4 20h4l10.5 -10.5a1.5 1.5 0 0 0 -4 -4l-10.5 10.5v4" />
+      <line x1="13.5" y1="6.5" x2="17.5" y2="10.5" />
+    </svg>
+    <span class="visually-hidden">Edit this page</span>
+  </a>
+</div><div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle">
+              <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+              <svg class="theme-icon-when-auto"><use href="#svg-sun-half"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
+            <div class="visually-hidden">Toggle table of contents sidebar</div>
+            <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+          </label>
+        </div>
+        <article role="main">
+          <section id="module-pcapkit.const.tcp">
+<span id="tcp-constant-enumerations"></span><h1><a class="reference internal" href="../protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP" title="pcapkit.protocols.transport.tcp.TCP"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code></a> Constant Enumerations<a class="headerlink" href="#module-pcapkit.const.tcp" title="Permalink to this heading">#</a></h1>
 <p>This module contains all constant enumerations of
 <a class="reference internal" href="../protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP" title="pcapkit.protocols.transport.tcp.TCP"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code></a> implementations. Available
 enumerations include:</p>
+<div class="table-wrapper docutils container">
 <table class="docutils align-default">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="#pcapkit.const.tcp.checksum.Checksum" title="pcapkit.const.tcp.checksum.Checksum"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP_Checksum</span></code></a></p></td>
 <td><p>TCP Checksum <a class="footnote-reference brackets" href="#id7" id="id1" role="doc-noteref"><span class="fn-bracket">[</span>*<span class="fn-bracket">]</span></a></p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP_MPTCPOption</span></code></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#pcapkit.const.tcp.mp_tcp_option.MPTCPOption" title="pcapkit.const.tcp.mp_tcp_option.MPTCPOption"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP_MPTCPOption</span></code></a></p></td>
 <td><p>Multipath TCP options <a class="footnote-reference brackets" href="#id8" id="id2" role="doc-noteref"><span class="fn-bracket">[</span>†<span class="fn-bracket">]</span></a></p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP_Option</span></code></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#pcapkit.const.tcp.option.Option" title="pcapkit.const.tcp.option.Option"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP_Option</span></code></a></p></td>
 <td><p>TCP Option Kind Numbers</p></td>
 </tr>
 </tbody>
 </table>
-<span class="target" id="module-pcapkit.const.tcp.checksum"></span><section id="tcp-checksum">
-<h2>TCP Checksum<a class="headerlink" href="#tcp-checksum" title="Permalink to this heading">¶</a></h2>
+</div>
+<section id="module-pcapkit.const.tcp.checksum">
+<span id="tcp-checksum"></span><h2>TCP Checksum<a class="headerlink" href="#module-pcapkit.const.tcp.checksum" title="Permalink to this heading">#</a></h2>
 <p>This module contains the constant enumeration for <strong>TCP Checksum</strong>,
-which is automatically generated from <code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.vendor.tcp.checksum.Checksum</span></code>.</p>
-</section>
+which is automatically generated from <a class="reference internal" href="../vendor/tcp.html#pcapkit.vendor.tcp.checksum.Checksum" title="pcapkit.vendor.tcp.checksum.Checksum"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.vendor.tcp.checksum.Checksum</span></code></a>.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.const.tcp.checksum.Checksum">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.const.tcp.checksum.</span></span><span class="sig-name descname"><span class="pre">Checksum</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value=&lt;no_arg&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">names=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">module=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qualname=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start=1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">boundary=None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/const/tcp/checksum.html#Checksum"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.tcp.checksum.Checksum" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.const.tcp.checksum.</span></span><span class="sig-name descname"><span class="pre">Checksum</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value=&lt;no_arg&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">names=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">module=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qualname=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start=1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">boundary=None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/const/tcp/checksum.html#Checksum"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.tcp.checksum.Checksum" title="Permalink to this definition">#</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">IntEnum</span></code></p>
 <p>[Checksum] TCP Checksum [<span class="target" id="index-0"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1146.html"><strong>RFC 1146</strong></a>]</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.tcp.checksum.Checksum.TCP_checksum">
-<span class="sig-name descname"><span class="pre">TCP_checksum</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0</span></em><a class="headerlink" href="#pcapkit.const.tcp.checksum.Checksum.TCP_checksum" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">TCP_checksum</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0</span></em><a class="headerlink" href="#pcapkit.const.tcp.checksum.Checksum.TCP_checksum" title="Permalink to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.tcp.checksum.Checksum.Checksum_8_bit_Fletcher_s_algorithm">
-<span class="sig-name descname"><span class="pre">Checksum_8_bit_Fletcher_s_algorithm</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1</span></em><a class="headerlink" href="#pcapkit.const.tcp.checksum.Checksum.Checksum_8_bit_Fletcher_s_algorithm" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">Checksum_8_bit_Fletcher_s_algorithm</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1</span></em><a class="headerlink" href="#pcapkit.const.tcp.checksum.Checksum.Checksum_8_bit_Fletcher_s_algorithm" title="Permalink to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.tcp.checksum.Checksum.Checksum_16_bit_Fletcher_s_algorithm">
-<span class="sig-name descname"><span class="pre">Checksum_16_bit_Fletcher_s_algorithm</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">2</span></em><a class="headerlink" href="#pcapkit.const.tcp.checksum.Checksum.Checksum_16_bit_Fletcher_s_algorithm" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">Checksum_16_bit_Fletcher_s_algorithm</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">2</span></em><a class="headerlink" href="#pcapkit.const.tcp.checksum.Checksum.Checksum_16_bit_Fletcher_s_algorithm" title="Permalink to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.tcp.checksum.Checksum.Redundant_Checksum_Avoidance">
-<span class="sig-name descname"><span class="pre">Redundant_Checksum_Avoidance</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">3</span></em><a class="headerlink" href="#pcapkit.const.tcp.checksum.Checksum.Redundant_Checksum_Avoidance" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">Redundant_Checksum_Avoidance</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">3</span></em><a class="headerlink" href="#pcapkit.const.tcp.checksum.Checksum.Redundant_Checksum_Avoidance" title="Permalink to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.const.tcp.checksum.Checksum._missing_">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">_missing_</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/const/tcp/checksum.html#Checksum._missing_"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.tcp.checksum.Checksum._missing_" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">_missing_</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/const/tcp/checksum.html#Checksum._missing_"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.tcp.checksum.Checksum._missing_" title="Permalink to this definition">#</a></dt>
 <dd><p>Lookup function used when value is not found.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -96,59 +418,59 @@ which is automatically generated from <code class="xref py py-class docutils lit
 
 </dd></dl>
 
-<span class="target" id="module-pcapkit.const.tcp.mp_tcp_option"></span><section id="multipath-tcp-options">
-<h2>Multipath TCP options<a class="headerlink" href="#multipath-tcp-options" title="Permalink to this heading">¶</a></h2>
-<p>This module contains the constant enumeration for <strong>Multipath TCP options</strong>,
-which is automatically generated from <code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.vendor.tcp.mp_tcp_option.MPTCPOption</span></code>.</p>
 </section>
+<section id="module-pcapkit.const.tcp.mp_tcp_option">
+<span id="multipath-tcp-options"></span><h2>Multipath TCP options<a class="headerlink" href="#module-pcapkit.const.tcp.mp_tcp_option" title="Permalink to this heading">#</a></h2>
+<p>This module contains the constant enumeration for <strong>Multipath TCP options</strong>,
+which is automatically generated from <a class="reference internal" href="../vendor/tcp.html#pcapkit.vendor.tcp.mp_tcp_option.MPTCPOption" title="pcapkit.vendor.tcp.mp_tcp_option.MPTCPOption"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.vendor.tcp.mp_tcp_option.MPTCPOption</span></code></a>.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.const.tcp.mp_tcp_option.MPTCPOption">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.const.tcp.mp_tcp_option.</span></span><span class="sig-name descname"><span class="pre">MPTCPOption</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value=&lt;no_arg&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">names=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">module=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qualname=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start=1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">boundary=None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/const/tcp/mp_tcp_option.html#MPTCPOption"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.tcp.mp_tcp_option.MPTCPOption" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.const.tcp.mp_tcp_option.</span></span><span class="sig-name descname"><span class="pre">MPTCPOption</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value=&lt;no_arg&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">names=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">module=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qualname=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start=1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">boundary=None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/const/tcp/mp_tcp_option.html#MPTCPOption"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.tcp.mp_tcp_option.MPTCPOption" title="Permalink to this definition">#</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">IntEnum</span></code></p>
 <p>[MPTCPOption] Multipath TCP options [<span class="target" id="index-1"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6824.html"><strong>RFC 6824</strong></a>]</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.tcp.mp_tcp_option.MPTCPOption.MP_CAPABLE">
-<span class="sig-name descname"><span class="pre">MP_CAPABLE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0</span></em><a class="headerlink" href="#pcapkit.const.tcp.mp_tcp_option.MPTCPOption.MP_CAPABLE" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">MP_CAPABLE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0</span></em><a class="headerlink" href="#pcapkit.const.tcp.mp_tcp_option.MPTCPOption.MP_CAPABLE" title="Permalink to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.tcp.mp_tcp_option.MPTCPOption.MP_JOIN">
-<span class="sig-name descname"><span class="pre">MP_JOIN</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1</span></em><a class="headerlink" href="#pcapkit.const.tcp.mp_tcp_option.MPTCPOption.MP_JOIN" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">MP_JOIN</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1</span></em><a class="headerlink" href="#pcapkit.const.tcp.mp_tcp_option.MPTCPOption.MP_JOIN" title="Permalink to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.tcp.mp_tcp_option.MPTCPOption.DSS">
-<span class="sig-name descname"><span class="pre">DSS</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">2</span></em><a class="headerlink" href="#pcapkit.const.tcp.mp_tcp_option.MPTCPOption.DSS" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">DSS</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">2</span></em><a class="headerlink" href="#pcapkit.const.tcp.mp_tcp_option.MPTCPOption.DSS" title="Permalink to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.tcp.mp_tcp_option.MPTCPOption.ADD_ADDR">
-<span class="sig-name descname"><span class="pre">ADD_ADDR</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">3</span></em><a class="headerlink" href="#pcapkit.const.tcp.mp_tcp_option.MPTCPOption.ADD_ADDR" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">ADD_ADDR</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">3</span></em><a class="headerlink" href="#pcapkit.const.tcp.mp_tcp_option.MPTCPOption.ADD_ADDR" title="Permalink to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.tcp.mp_tcp_option.MPTCPOption.REMOVE_ADDR">
-<span class="sig-name descname"><span class="pre">REMOVE_ADDR</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">4</span></em><a class="headerlink" href="#pcapkit.const.tcp.mp_tcp_option.MPTCPOption.REMOVE_ADDR" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">REMOVE_ADDR</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">4</span></em><a class="headerlink" href="#pcapkit.const.tcp.mp_tcp_option.MPTCPOption.REMOVE_ADDR" title="Permalink to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.tcp.mp_tcp_option.MPTCPOption.MP_PRIO">
-<span class="sig-name descname"><span class="pre">MP_PRIO</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">5</span></em><a class="headerlink" href="#pcapkit.const.tcp.mp_tcp_option.MPTCPOption.MP_PRIO" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">MP_PRIO</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">5</span></em><a class="headerlink" href="#pcapkit.const.tcp.mp_tcp_option.MPTCPOption.MP_PRIO" title="Permalink to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.tcp.mp_tcp_option.MPTCPOption.MP_FAIL">
-<span class="sig-name descname"><span class="pre">MP_FAIL</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">6</span></em><a class="headerlink" href="#pcapkit.const.tcp.mp_tcp_option.MPTCPOption.MP_FAIL" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">MP_FAIL</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">6</span></em><a class="headerlink" href="#pcapkit.const.tcp.mp_tcp_option.MPTCPOption.MP_FAIL" title="Permalink to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.tcp.mp_tcp_option.MPTCPOption.MP_FASTCLOSE">
-<span class="sig-name descname"><span class="pre">MP_FASTCLOSE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">7</span></em><a class="headerlink" href="#pcapkit.const.tcp.mp_tcp_option.MPTCPOption.MP_FASTCLOSE" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">MP_FASTCLOSE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">7</span></em><a class="headerlink" href="#pcapkit.const.tcp.mp_tcp_option.MPTCPOption.MP_FASTCLOSE" title="Permalink to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.const.tcp.mp_tcp_option.MPTCPOption._missing_">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">_missing_</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/const/tcp/mp_tcp_option.html#MPTCPOption._missing_"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.tcp.mp_tcp_option.MPTCPOption._missing_" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">_missing_</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/const/tcp/mp_tcp_option.html#MPTCPOption._missing_"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.tcp.mp_tcp_option.MPTCPOption._missing_" title="Permalink to this definition">#</a></dt>
 <dd><p>Lookup function used when value is not found.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -162,294 +484,294 @@ which is automatically generated from <code class="xref py py-class docutils lit
 
 </dd></dl>
 
-<span class="target" id="module-pcapkit.const.tcp.option"></span><section id="tcp-option-kind-numbers">
-<h2>TCP Option Kind Numbers<a class="headerlink" href="#tcp-option-kind-numbers" title="Permalink to this heading">¶</a></h2>
-<p>This module contains the constant enumeration for <strong>TCP Option Kind Numbers</strong>,
-which is automatically generated from <code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.vendor.tcp.option.Option</span></code>.</p>
 </section>
+<section id="module-pcapkit.const.tcp.option">
+<span id="tcp-option-kind-numbers"></span><h2>TCP Option Kind Numbers<a class="headerlink" href="#module-pcapkit.const.tcp.option" title="Permalink to this heading">#</a></h2>
+<p>This module contains the constant enumeration for <strong>TCP Option Kind Numbers</strong>,
+which is automatically generated from <a class="reference internal" href="../vendor/tcp.html#pcapkit.vendor.tcp.option.Option" title="pcapkit.vendor.tcp.option.Option"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.vendor.tcp.option.Option</span></code></a>.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.const.tcp.option.Option">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.const.tcp.option.</span></span><span class="sig-name descname"><span class="pre">Option</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value=&lt;no_arg&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">names=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">module=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qualname=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start=1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">boundary=None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/const/tcp/option.html#Option"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.tcp.option.Option" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.const.tcp.option.</span></span><span class="sig-name descname"><span class="pre">Option</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value=&lt;no_arg&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">names=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">module=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qualname=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start=1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">boundary=None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/const/tcp/option.html#Option"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.tcp.option.Option" title="Permalink to this definition">#</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">IntEnum</span></code></p>
 <p>[Option] TCP Option Kind Numbers</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.tcp.option.Option.End_of_Option_List">
-<span class="sig-name descname"><span class="pre">End_of_Option_List</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0</span></em><a class="headerlink" href="#pcapkit.const.tcp.option.Option.End_of_Option_List" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">End_of_Option_List</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0</span></em><a class="headerlink" href="#pcapkit.const.tcp.option.Option.End_of_Option_List" title="Permalink to this definition">#</a></dt>
 <dd><p>End of Option List [<span class="target" id="index-2"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9293.html"><strong>RFC 9293</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.tcp.option.Option.No_Operation">
-<span class="sig-name descname"><span class="pre">No_Operation</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1</span></em><a class="headerlink" href="#pcapkit.const.tcp.option.Option.No_Operation" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">No_Operation</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1</span></em><a class="headerlink" href="#pcapkit.const.tcp.option.Option.No_Operation" title="Permalink to this definition">#</a></dt>
 <dd><p>No-Operation [<span class="target" id="index-3"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9293.html"><strong>RFC 9293</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.tcp.option.Option.Maximum_Segment_Size">
-<span class="sig-name descname"><span class="pre">Maximum_Segment_Size</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">2</span></em><a class="headerlink" href="#pcapkit.const.tcp.option.Option.Maximum_Segment_Size" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">Maximum_Segment_Size</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">2</span></em><a class="headerlink" href="#pcapkit.const.tcp.option.Option.Maximum_Segment_Size" title="Permalink to this definition">#</a></dt>
 <dd><p>Maximum Segment Size [<span class="target" id="index-4"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9293.html"><strong>RFC 9293</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.tcp.option.Option.Window_Scale">
-<span class="sig-name descname"><span class="pre">Window_Scale</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">3</span></em><a class="headerlink" href="#pcapkit.const.tcp.option.Option.Window_Scale" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">Window_Scale</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">3</span></em><a class="headerlink" href="#pcapkit.const.tcp.option.Option.Window_Scale" title="Permalink to this definition">#</a></dt>
 <dd><p>Window Scale [<span class="target" id="index-5"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc7323.html"><strong>RFC 7323</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.tcp.option.Option.SACK_Permitted">
-<span class="sig-name descname"><span class="pre">SACK_Permitted</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">4</span></em><a class="headerlink" href="#pcapkit.const.tcp.option.Option.SACK_Permitted" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">SACK_Permitted</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">4</span></em><a class="headerlink" href="#pcapkit.const.tcp.option.Option.SACK_Permitted" title="Permalink to this definition">#</a></dt>
 <dd><p>SACK Permitted [<span class="target" id="index-6"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2018.html"><strong>RFC 2018</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.tcp.option.Option.SACK">
-<span class="sig-name descname"><span class="pre">SACK</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">5</span></em><a class="headerlink" href="#pcapkit.const.tcp.option.Option.SACK" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">SACK</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">5</span></em><a class="headerlink" href="#pcapkit.const.tcp.option.Option.SACK" title="Permalink to this definition">#</a></dt>
 <dd><p>SACK [<span class="target" id="index-7"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2018.html"><strong>RFC 2018</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.tcp.option.Option.Echo">
-<span class="sig-name descname"><span class="pre">Echo</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">6</span></em><a class="headerlink" href="#pcapkit.const.tcp.option.Option.Echo" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">Echo</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">6</span></em><a class="headerlink" href="#pcapkit.const.tcp.option.Option.Echo" title="Permalink to this definition">#</a></dt>
 <dd><p>Echo (obsoleted by option 8) [<span class="target" id="index-8"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1072.html"><strong>RFC 1072</strong></a>][<span class="target" id="index-9"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6247.html"><strong>RFC 6247</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.tcp.option.Option.Echo_Reply">
-<span class="sig-name descname"><span class="pre">Echo_Reply</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">7</span></em><a class="headerlink" href="#pcapkit.const.tcp.option.Option.Echo_Reply" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">Echo_Reply</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">7</span></em><a class="headerlink" href="#pcapkit.const.tcp.option.Option.Echo_Reply" title="Permalink to this definition">#</a></dt>
 <dd><p>Echo Reply (obsoleted by option 8) [<span class="target" id="index-10"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1072.html"><strong>RFC 1072</strong></a>][<span class="target" id="index-11"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6247.html"><strong>RFC 6247</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.tcp.option.Option.Timestamps">
-<span class="sig-name descname"><span class="pre">Timestamps</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">8</span></em><a class="headerlink" href="#pcapkit.const.tcp.option.Option.Timestamps" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">Timestamps</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">8</span></em><a class="headerlink" href="#pcapkit.const.tcp.option.Option.Timestamps" title="Permalink to this definition">#</a></dt>
 <dd><p>Timestamps [<span class="target" id="index-12"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc7323.html"><strong>RFC 7323</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.tcp.option.Option.Partial_Order_Connection_Permitted">
-<span class="sig-name descname"><span class="pre">Partial_Order_Connection_Permitted</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">9</span></em><a class="headerlink" href="#pcapkit.const.tcp.option.Option.Partial_Order_Connection_Permitted" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">Partial_Order_Connection_Permitted</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">9</span></em><a class="headerlink" href="#pcapkit.const.tcp.option.Option.Partial_Order_Connection_Permitted" title="Permalink to this definition">#</a></dt>
 <dd><p>Partial Order Connection Permitted (obsolete) [<span class="target" id="index-13"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1693.html"><strong>RFC 1693</strong></a>][<span class="target" id="index-14"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6247.html"><strong>RFC 6247</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.tcp.option.Option.Partial_Order_Service_Profile">
-<span class="sig-name descname"><span class="pre">Partial_Order_Service_Profile</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">10</span></em><a class="headerlink" href="#pcapkit.const.tcp.option.Option.Partial_Order_Service_Profile" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">Partial_Order_Service_Profile</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">10</span></em><a class="headerlink" href="#pcapkit.const.tcp.option.Option.Partial_Order_Service_Profile" title="Permalink to this definition">#</a></dt>
 <dd><p>Partial Order Service Profile (obsolete) [<span class="target" id="index-15"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1693.html"><strong>RFC 1693</strong></a>][<span class="target" id="index-16"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6247.html"><strong>RFC 6247</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.tcp.option.Option.CC">
-<span class="sig-name descname"><span class="pre">CC</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">11</span></em><a class="headerlink" href="#pcapkit.const.tcp.option.Option.CC" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">CC</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">11</span></em><a class="headerlink" href="#pcapkit.const.tcp.option.Option.CC" title="Permalink to this definition">#</a></dt>
 <dd><p>CC (obsolete) [<span class="target" id="index-17"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1644.html"><strong>RFC 1644</strong></a>][<span class="target" id="index-18"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6247.html"><strong>RFC 6247</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.tcp.option.Option.CC_NEW">
-<span class="sig-name descname"><span class="pre">CC_NEW</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">12</span></em><a class="headerlink" href="#pcapkit.const.tcp.option.Option.CC_NEW" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">CC_NEW</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">12</span></em><a class="headerlink" href="#pcapkit.const.tcp.option.Option.CC_NEW" title="Permalink to this definition">#</a></dt>
 <dd><p>CC.NEW (obsolete) [<span class="target" id="index-19"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1644.html"><strong>RFC 1644</strong></a>][<span class="target" id="index-20"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6247.html"><strong>RFC 6247</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.tcp.option.Option.CC_ECHO">
-<span class="sig-name descname"><span class="pre">CC_ECHO</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">13</span></em><a class="headerlink" href="#pcapkit.const.tcp.option.Option.CC_ECHO" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">CC_ECHO</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">13</span></em><a class="headerlink" href="#pcapkit.const.tcp.option.Option.CC_ECHO" title="Permalink to this definition">#</a></dt>
 <dd><p>CC.ECHO (obsolete) [<span class="target" id="index-21"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1644.html"><strong>RFC 1644</strong></a>][<span class="target" id="index-22"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6247.html"><strong>RFC 6247</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.tcp.option.Option.TCP_Alternate_Checksum_Request">
-<span class="sig-name descname"><span class="pre">TCP_Alternate_Checksum_Request</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">14</span></em><a class="headerlink" href="#pcapkit.const.tcp.option.Option.TCP_Alternate_Checksum_Request" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">TCP_Alternate_Checksum_Request</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">14</span></em><a class="headerlink" href="#pcapkit.const.tcp.option.Option.TCP_Alternate_Checksum_Request" title="Permalink to this definition">#</a></dt>
 <dd><p>TCP Alternate Checksum Request (obsolete) [<span class="target" id="index-23"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1146.html"><strong>RFC 1146</strong></a>][<span class="target" id="index-24"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6247.html"><strong>RFC 6247</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.tcp.option.Option.TCP_Alternate_Checksum_Data">
-<span class="sig-name descname"><span class="pre">TCP_Alternate_Checksum_Data</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">15</span></em><a class="headerlink" href="#pcapkit.const.tcp.option.Option.TCP_Alternate_Checksum_Data" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">TCP_Alternate_Checksum_Data</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">15</span></em><a class="headerlink" href="#pcapkit.const.tcp.option.Option.TCP_Alternate_Checksum_Data" title="Permalink to this definition">#</a></dt>
 <dd><p>TCP Alternate Checksum Data (obsolete) [<span class="target" id="index-25"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1146.html"><strong>RFC 1146</strong></a>][<span class="target" id="index-26"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6247.html"><strong>RFC 6247</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.tcp.option.Option.Skeeter">
-<span class="sig-name descname"><span class="pre">Skeeter</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">16</span></em><a class="headerlink" href="#pcapkit.const.tcp.option.Option.Skeeter" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">Skeeter</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">16</span></em><a class="headerlink" href="#pcapkit.const.tcp.option.Option.Skeeter" title="Permalink to this definition">#</a></dt>
 <dd><p>Skeeter [Stev Knowles]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.tcp.option.Option.Bubba">
-<span class="sig-name descname"><span class="pre">Bubba</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">17</span></em><a class="headerlink" href="#pcapkit.const.tcp.option.Option.Bubba" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">Bubba</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">17</span></em><a class="headerlink" href="#pcapkit.const.tcp.option.Option.Bubba" title="Permalink to this definition">#</a></dt>
 <dd><p>Bubba [Stev Knowles]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.tcp.option.Option.Trailer_Checksum_Option">
-<span class="sig-name descname"><span class="pre">Trailer_Checksum_Option</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">18</span></em><a class="headerlink" href="#pcapkit.const.tcp.option.Option.Trailer_Checksum_Option" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">Trailer_Checksum_Option</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">18</span></em><a class="headerlink" href="#pcapkit.const.tcp.option.Option.Trailer_Checksum_Option" title="Permalink to this definition">#</a></dt>
 <dd><p>Trailer Checksum Option [Subbu Subramaniam][Monroe Bridges]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.tcp.option.Option.MD5_Signature_Option">
-<span class="sig-name descname"><span class="pre">MD5_Signature_Option</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">19</span></em><a class="headerlink" href="#pcapkit.const.tcp.option.Option.MD5_Signature_Option" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">MD5_Signature_Option</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">19</span></em><a class="headerlink" href="#pcapkit.const.tcp.option.Option.MD5_Signature_Option" title="Permalink to this definition">#</a></dt>
 <dd><p>MD5 Signature Option (obsoleted by option 29) [<span class="target" id="index-27"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2385.html"><strong>RFC 2385</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.tcp.option.Option.SCPS_Capabilities">
-<span class="sig-name descname"><span class="pre">SCPS_Capabilities</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">20</span></em><a class="headerlink" href="#pcapkit.const.tcp.option.Option.SCPS_Capabilities" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">SCPS_Capabilities</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">20</span></em><a class="headerlink" href="#pcapkit.const.tcp.option.Option.SCPS_Capabilities" title="Permalink to this definition">#</a></dt>
 <dd><p>SCPS Capabilities [Keith Scott]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.tcp.option.Option.Selective_Negative_Acknowledgements">
-<span class="sig-name descname"><span class="pre">Selective_Negative_Acknowledgements</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">21</span></em><a class="headerlink" href="#pcapkit.const.tcp.option.Option.Selective_Negative_Acknowledgements" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">Selective_Negative_Acknowledgements</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">21</span></em><a class="headerlink" href="#pcapkit.const.tcp.option.Option.Selective_Negative_Acknowledgements" title="Permalink to this definition">#</a></dt>
 <dd><p>Selective Negative Acknowledgements [Keith Scott]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.tcp.option.Option.Record_Boundaries">
-<span class="sig-name descname"><span class="pre">Record_Boundaries</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">22</span></em><a class="headerlink" href="#pcapkit.const.tcp.option.Option.Record_Boundaries" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">Record_Boundaries</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">22</span></em><a class="headerlink" href="#pcapkit.const.tcp.option.Option.Record_Boundaries" title="Permalink to this definition">#</a></dt>
 <dd><p>Record Boundaries [Keith Scott]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.tcp.option.Option.Corruption_experienced">
-<span class="sig-name descname"><span class="pre">Corruption_experienced</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">23</span></em><a class="headerlink" href="#pcapkit.const.tcp.option.Option.Corruption_experienced" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">Corruption_experienced</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">23</span></em><a class="headerlink" href="#pcapkit.const.tcp.option.Option.Corruption_experienced" title="Permalink to this definition">#</a></dt>
 <dd><p>Corruption experienced [Keith Scott]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.tcp.option.Option.SNAP">
-<span class="sig-name descname"><span class="pre">SNAP</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">24</span></em><a class="headerlink" href="#pcapkit.const.tcp.option.Option.SNAP" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">SNAP</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">24</span></em><a class="headerlink" href="#pcapkit.const.tcp.option.Option.SNAP" title="Permalink to this definition">#</a></dt>
 <dd><p>SNAP [Vladimir Sukonnik]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.tcp.option.Option.Unassigned_25">
-<span class="sig-name descname"><span class="pre">Unassigned_25</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">25</span></em><a class="headerlink" href="#pcapkit.const.tcp.option.Option.Unassigned_25" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">Unassigned_25</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">25</span></em><a class="headerlink" href="#pcapkit.const.tcp.option.Option.Unassigned_25" title="Permalink to this definition">#</a></dt>
 <dd><p>Unassigned (released 2000-12-18)</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.tcp.option.Option.TCP_Compression_Filter">
-<span class="sig-name descname"><span class="pre">TCP_Compression_Filter</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">26</span></em><a class="headerlink" href="#pcapkit.const.tcp.option.Option.TCP_Compression_Filter" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">TCP_Compression_Filter</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">26</span></em><a class="headerlink" href="#pcapkit.const.tcp.option.Option.TCP_Compression_Filter" title="Permalink to this definition">#</a></dt>
 <dd><p>TCP Compression Filter [Steve Bellovin]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.tcp.option.Option.Quick_Start_Response">
-<span class="sig-name descname"><span class="pre">Quick_Start_Response</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">27</span></em><a class="headerlink" href="#pcapkit.const.tcp.option.Option.Quick_Start_Response" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">Quick_Start_Response</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">27</span></em><a class="headerlink" href="#pcapkit.const.tcp.option.Option.Quick_Start_Response" title="Permalink to this definition">#</a></dt>
 <dd><p>Quick-Start Response [<span class="target" id="index-28"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4782.html"><strong>RFC 4782</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.tcp.option.Option.User_Timeout_Option">
-<span class="sig-name descname"><span class="pre">User_Timeout_Option</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">28</span></em><a class="headerlink" href="#pcapkit.const.tcp.option.Option.User_Timeout_Option" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">User_Timeout_Option</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">28</span></em><a class="headerlink" href="#pcapkit.const.tcp.option.Option.User_Timeout_Option" title="Permalink to this definition">#</a></dt>
 <dd><p>User Timeout Option (also, other known unauthorized use) [<a href="#id3"><span class="problematic" id="id4">**</span></a><a href="#id5"><span class="problematic" id="id6">*</span></a>][1]
 [<span class="target" id="index-29"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5482.html"><strong>RFC 5482</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.tcp.option.Option.TCP_Authentication_Option">
-<span class="sig-name descname"><span class="pre">TCP_Authentication_Option</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">29</span></em><a class="headerlink" href="#pcapkit.const.tcp.option.Option.TCP_Authentication_Option" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">TCP_Authentication_Option</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">29</span></em><a class="headerlink" href="#pcapkit.const.tcp.option.Option.TCP_Authentication_Option" title="Permalink to this definition">#</a></dt>
 <dd><p>TCP Authentication Option (TCP-AO) [<span class="target" id="index-30"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5925.html"><strong>RFC 5925</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.tcp.option.Option.Multipath_TCP">
-<span class="sig-name descname"><span class="pre">Multipath_TCP</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">30</span></em><a class="headerlink" href="#pcapkit.const.tcp.option.Option.Multipath_TCP" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">Multipath_TCP</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">30</span></em><a class="headerlink" href="#pcapkit.const.tcp.option.Option.Multipath_TCP" title="Permalink to this definition">#</a></dt>
 <dd><p>Multipath TCP (MPTCP) [<span class="target" id="index-31"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8684.html"><strong>RFC 8684</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.tcp.option.Option.Reserved_31">
-<span class="sig-name descname"><span class="pre">Reserved_31</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">31</span></em><a class="headerlink" href="#pcapkit.const.tcp.option.Option.Reserved_31" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">Reserved_31</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">31</span></em><a class="headerlink" href="#pcapkit.const.tcp.option.Option.Reserved_31" title="Permalink to this definition">#</a></dt>
 <dd><p>Reserved (known unauthorized use without proper IANA assignment) [**]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.tcp.option.Option.Reserved_32">
-<span class="sig-name descname"><span class="pre">Reserved_32</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">32</span></em><a class="headerlink" href="#pcapkit.const.tcp.option.Option.Reserved_32" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">Reserved_32</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">32</span></em><a class="headerlink" href="#pcapkit.const.tcp.option.Option.Reserved_32" title="Permalink to this definition">#</a></dt>
 <dd><p>Reserved (known unauthorized use without proper IANA assignment) [**]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.tcp.option.Option.Reserved_33">
-<span class="sig-name descname"><span class="pre">Reserved_33</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">33</span></em><a class="headerlink" href="#pcapkit.const.tcp.option.Option.Reserved_33" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">Reserved_33</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">33</span></em><a class="headerlink" href="#pcapkit.const.tcp.option.Option.Reserved_33" title="Permalink to this definition">#</a></dt>
 <dd><p>Reserved (known unauthorized use without proper IANA assignment) [**]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.tcp.option.Option.TCP_Fast_Open_Cookie">
-<span class="sig-name descname"><span class="pre">TCP_Fast_Open_Cookie</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">34</span></em><a class="headerlink" href="#pcapkit.const.tcp.option.Option.TCP_Fast_Open_Cookie" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">TCP_Fast_Open_Cookie</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">34</span></em><a class="headerlink" href="#pcapkit.const.tcp.option.Option.TCP_Fast_Open_Cookie" title="Permalink to this definition">#</a></dt>
 <dd><p>TCP Fast Open Cookie [<span class="target" id="index-32"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc7413.html"><strong>RFC 7413</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.tcp.option.Option.Encryption_Negotiation">
-<span class="sig-name descname"><span class="pre">Encryption_Negotiation</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">69</span></em><a class="headerlink" href="#pcapkit.const.tcp.option.Option.Encryption_Negotiation" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">Encryption_Negotiation</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">69</span></em><a class="headerlink" href="#pcapkit.const.tcp.option.Option.Encryption_Negotiation" title="Permalink to this definition">#</a></dt>
 <dd><p>Encryption Negotiation (TCP-ENO) [<span class="target" id="index-33"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8547.html"><strong>RFC 8547</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.tcp.option.Option.Reserved_70">
-<span class="sig-name descname"><span class="pre">Reserved_70</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">70</span></em><a class="headerlink" href="#pcapkit.const.tcp.option.Option.Reserved_70" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">Reserved_70</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">70</span></em><a class="headerlink" href="#pcapkit.const.tcp.option.Option.Reserved_70" title="Permalink to this definition">#</a></dt>
 <dd><p>Reserved (known unauthorized use without proper IANA assignment) [**]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.tcp.option.Option.Reserved_76">
-<span class="sig-name descname"><span class="pre">Reserved_76</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">76</span></em><a class="headerlink" href="#pcapkit.const.tcp.option.Option.Reserved_76" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">Reserved_76</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">76</span></em><a class="headerlink" href="#pcapkit.const.tcp.option.Option.Reserved_76" title="Permalink to this definition">#</a></dt>
 <dd><p>Reserved (known unauthorized use without proper IANA assignment) [**]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.tcp.option.Option.Reserved_77">
-<span class="sig-name descname"><span class="pre">Reserved_77</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">77</span></em><a class="headerlink" href="#pcapkit.const.tcp.option.Option.Reserved_77" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">Reserved_77</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">77</span></em><a class="headerlink" href="#pcapkit.const.tcp.option.Option.Reserved_77" title="Permalink to this definition">#</a></dt>
 <dd><p>Reserved (known unauthorized use without proper IANA assignment) [**]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.tcp.option.Option.Reserved_78">
-<span class="sig-name descname"><span class="pre">Reserved_78</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">78</span></em><a class="headerlink" href="#pcapkit.const.tcp.option.Option.Reserved_78" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">Reserved_78</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">78</span></em><a class="headerlink" href="#pcapkit.const.tcp.option.Option.Reserved_78" title="Permalink to this definition">#</a></dt>
 <dd><p>Reserved (known unauthorized use without proper IANA assignment) [**]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.tcp.option.Option.Accurate_ECN_Order_0">
-<span class="sig-name descname"><span class="pre">Accurate_ECN_Order_0</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">172</span></em><a class="headerlink" href="#pcapkit.const.tcp.option.Option.Accurate_ECN_Order_0" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">Accurate_ECN_Order_0</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">172</span></em><a class="headerlink" href="#pcapkit.const.tcp.option.Option.Accurate_ECN_Order_0" title="Permalink to this definition">#</a></dt>
 <dd><p>Accurate ECN Order 0 (AccECN0) (TEMPORARY - registered 2022-08-03, expires
 2023-08-03) [draft-ietf-tcpm-accurate-ecn-20]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.tcp.option.Option.Reserved_173">
-<span class="sig-name descname"><span class="pre">Reserved_173</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">173</span></em><a class="headerlink" href="#pcapkit.const.tcp.option.Option.Reserved_173" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">Reserved_173</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">173</span></em><a class="headerlink" href="#pcapkit.const.tcp.option.Option.Reserved_173" title="Permalink to this definition">#</a></dt>
 <dd><p>Reserved</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.tcp.option.Option.Accurate_ECN_Order_1">
-<span class="sig-name descname"><span class="pre">Accurate_ECN_Order_1</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">174</span></em><a class="headerlink" href="#pcapkit.const.tcp.option.Option.Accurate_ECN_Order_1" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">Accurate_ECN_Order_1</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">174</span></em><a class="headerlink" href="#pcapkit.const.tcp.option.Option.Accurate_ECN_Order_1" title="Permalink to this definition">#</a></dt>
 <dd><p>Accurate ECN Order 1 (AccECN1) (TEMPORARY - registered 2022-08-03, expires
 2023-08-03) [draft-ietf-tcpm-accurate-ecn-20]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.tcp.option.Option.RFC3692_style_Experiment_1">
-<span class="sig-name descname"><span class="pre">RFC3692_style_Experiment_1</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">253</span></em><a class="headerlink" href="#pcapkit.const.tcp.option.Option.RFC3692_style_Experiment_1" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">RFC3692_style_Experiment_1</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">253</span></em><a class="headerlink" href="#pcapkit.const.tcp.option.Option.RFC3692_style_Experiment_1" title="Permalink to this definition">#</a></dt>
 <dd><p>RFC3692-style Experiment 1 (also improperly used for shipping
 products) [*] [<span class="target" id="index-34"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4727.html"><strong>RFC 4727</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.tcp.option.Option.RFC3692_style_Experiment_2">
-<span class="sig-name descname"><span class="pre">RFC3692_style_Experiment_2</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">254</span></em><a class="headerlink" href="#pcapkit.const.tcp.option.Option.RFC3692_style_Experiment_2" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">RFC3692_style_Experiment_2</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">254</span></em><a class="headerlink" href="#pcapkit.const.tcp.option.Option.RFC3692_style_Experiment_2" title="Permalink to this definition">#</a></dt>
 <dd><p>RFC3692-style Experiment 2 (also improperly used for shipping
 products) [*] [<span class="target" id="index-35"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4727.html"><strong>RFC 4727</strong></a>]</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.const.tcp.option.Option._missing_">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">_missing_</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/const/tcp/option.html#Option._missing_"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.tcp.option.Option._missing_" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">_missing_</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/const/tcp/option.html#Option._missing_"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.tcp.option.Option._missing_" title="Permalink to this definition">#</a></dt>
 <dd><p>Lookup function used when value is not found.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -474,99 +796,158 @@ products) [*] [<span class="target" id="index-35"></span><a class="rfc reference
 </aside>
 </aside>
 </section>
+</section>
 
-
-          </div>
-          
-        </div>
+        </article>
       </div>
-      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
-        <div class="sphinxsidebarwrapper">
-<h1 class="logo"><a href="../../index.html">PyPCAPKit</a></h1>
-
-
-
-
-
-
-<p>
-<iframe src="https://ghbtns.com/github-btn.html?user=JarryShaw&repo=PyPCAPKit&type=star&count=true&size=large&v=2"
-  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
-</p>
-
-
-
-
-
-<h3>Navigation</h3>
-<ul class="current">
-<li class="toctree-l1 current"><a class="reference internal" href="../index.html">Module Documentation</a><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="../interface/index.html">User Interface</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../foundation/index.html">Library Foundation</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../protocols/index.html">Protocol Family</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../corekit/index.html">Core Utilities</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../toolkit/index.html">Compatibility Tools</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../dumpkit/index.html">Dump Utilities</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../utilities/index.html">Utility Functions &amp; Classes</a></li>
-<li class="toctree-l2 current"><a class="reference internal" href="index.html">Constant Enumerations</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../vendor/index.html">Vendor Crawlers</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../index.html#command-line-tool">Command Line Tool</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../index.html#library-index">Library Index</a></li>
+      <footer>
+        
+        <div class="related-pages">
+          <a class="next-page" href="ftp.html">
+              <div class="page-info">
+                <div class="context">
+                  <span>Next</span>
+                </div>
+                <div class="title"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Constant Enumerations</div>
+              </div>
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+            </a>
+          <a class="prev-page" href="mh.html">
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+              <div class="page-info">
+                <div class="context">
+                  <span>Previous</span>
+                </div>
+                
+                <div class="title"><code class="xref py py-class docutils literal notranslate"><span class="pre">MH</span></code> Constant Enumerations</div>
+                
+              </div>
+            </a>
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; 2017-2023, Jarry Shaw
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer">
+      
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code> Constant Enumerations</a><ul>
+<li><a class="reference internal" href="#module-pcapkit.const.tcp.checksum">TCP Checksum</a><ul>
+<li><a class="reference internal" href="#pcapkit.const.tcp.checksum.Checksum"><code class="docutils literal notranslate"><span class="pre">Checksum</span></code></a><ul>
+<li><a class="reference internal" href="#pcapkit.const.tcp.checksum.Checksum.TCP_checksum"><code class="docutils literal notranslate"><span class="pre">Checksum.TCP_checksum</span></code></a></li>
+<li><a class="reference internal" href="#pcapkit.const.tcp.checksum.Checksum.Checksum_8_bit_Fletcher_s_algorithm"><code class="docutils literal notranslate"><span class="pre">Checksum.Checksum_8_bit_Fletcher_s_algorithm</span></code></a></li>
+<li><a class="reference internal" href="#pcapkit.const.tcp.checksum.Checksum.Checksum_16_bit_Fletcher_s_algorithm"><code class="docutils literal notranslate"><span class="pre">Checksum.Checksum_16_bit_Fletcher_s_algorithm</span></code></a></li>
+<li><a class="reference internal" href="#pcapkit.const.tcp.checksum.Checksum.Redundant_Checksum_Avoidance"><code class="docutils literal notranslate"><span class="pre">Checksum.Redundant_Checksum_Avoidance</span></code></a></li>
+<li><a class="reference internal" href="#pcapkit.const.tcp.checksum.Checksum._missing_"><code class="docutils literal notranslate"><span class="pre">Checksum._missing_()</span></code></a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="../../demo.html">How to …</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../pep.html">Help Wanted</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-pcapkit.const.tcp.mp_tcp_option">Multipath TCP options</a><ul>
+<li><a class="reference internal" href="#pcapkit.const.tcp.mp_tcp_option.MPTCPOption"><code class="docutils literal notranslate"><span class="pre">MPTCPOption</span></code></a><ul>
+<li><a class="reference internal" href="#pcapkit.const.tcp.mp_tcp_option.MPTCPOption.MP_CAPABLE"><code class="docutils literal notranslate"><span class="pre">MPTCPOption.MP_CAPABLE</span></code></a></li>
+<li><a class="reference internal" href="#pcapkit.const.tcp.mp_tcp_option.MPTCPOption.MP_JOIN"><code class="docutils literal notranslate"><span class="pre">MPTCPOption.MP_JOIN</span></code></a></li>
+<li><a class="reference internal" href="#pcapkit.const.tcp.mp_tcp_option.MPTCPOption.DSS"><code class="docutils literal notranslate"><span class="pre">MPTCPOption.DSS</span></code></a></li>
+<li><a class="reference internal" href="#pcapkit.const.tcp.mp_tcp_option.MPTCPOption.ADD_ADDR"><code class="docutils literal notranslate"><span class="pre">MPTCPOption.ADD_ADDR</span></code></a></li>
+<li><a class="reference internal" href="#pcapkit.const.tcp.mp_tcp_option.MPTCPOption.REMOVE_ADDR"><code class="docutils literal notranslate"><span class="pre">MPTCPOption.REMOVE_ADDR</span></code></a></li>
+<li><a class="reference internal" href="#pcapkit.const.tcp.mp_tcp_option.MPTCPOption.MP_PRIO"><code class="docutils literal notranslate"><span class="pre">MPTCPOption.MP_PRIO</span></code></a></li>
+<li><a class="reference internal" href="#pcapkit.const.tcp.mp_tcp_option.MPTCPOption.MP_FAIL"><code class="docutils literal notranslate"><span class="pre">MPTCPOption.MP_FAIL</span></code></a></li>
+<li><a class="reference internal" href="#pcapkit.const.tcp.mp_tcp_option.MPTCPOption.MP_FASTCLOSE"><code class="docutils literal notranslate"><span class="pre">MPTCPOption.MP_FASTCLOSE</span></code></a></li>
+<li><a class="reference internal" href="#pcapkit.const.tcp.mp_tcp_option.MPTCPOption._missing_"><code class="docutils literal notranslate"><span class="pre">MPTCPOption._missing_()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-pcapkit.const.tcp.option">TCP Option Kind Numbers</a><ul>
+<li><a class="reference internal" href="#pcapkit.const.tcp.option.Option"><code class="docutils literal notranslate"><span class="pre">Option</span></code></a><ul>
+<li><a class="reference internal" href="#pcapkit.const.tcp.option.Option.End_of_Option_List"><code class="docutils literal notranslate"><span class="pre">Option.End_of_Option_List</span></code></a></li>
+<li><a class="reference internal" href="#pcapkit.const.tcp.option.Option.No_Operation"><code class="docutils literal notranslate"><span class="pre">Option.No_Operation</span></code></a></li>
+<li><a class="reference internal" href="#pcapkit.const.tcp.option.Option.Maximum_Segment_Size"><code class="docutils literal notranslate"><span class="pre">Option.Maximum_Segment_Size</span></code></a></li>
+<li><a class="reference internal" href="#pcapkit.const.tcp.option.Option.Window_Scale"><code class="docutils literal notranslate"><span class="pre">Option.Window_Scale</span></code></a></li>
+<li><a class="reference internal" href="#pcapkit.const.tcp.option.Option.SACK_Permitted"><code class="docutils literal notranslate"><span class="pre">Option.SACK_Permitted</span></code></a></li>
+<li><a class="reference internal" href="#pcapkit.const.tcp.option.Option.SACK"><code class="docutils literal notranslate"><span class="pre">Option.SACK</span></code></a></li>
+<li><a class="reference internal" href="#pcapkit.const.tcp.option.Option.Echo"><code class="docutils literal notranslate"><span class="pre">Option.Echo</span></code></a></li>
+<li><a class="reference internal" href="#pcapkit.const.tcp.option.Option.Echo_Reply"><code class="docutils literal notranslate"><span class="pre">Option.Echo_Reply</span></code></a></li>
+<li><a class="reference internal" href="#pcapkit.const.tcp.option.Option.Timestamps"><code class="docutils literal notranslate"><span class="pre">Option.Timestamps</span></code></a></li>
+<li><a class="reference internal" href="#pcapkit.const.tcp.option.Option.Partial_Order_Connection_Permitted"><code class="docutils literal notranslate"><span class="pre">Option.Partial_Order_Connection_Permitted</span></code></a></li>
+<li><a class="reference internal" href="#pcapkit.const.tcp.option.Option.Partial_Order_Service_Profile"><code class="docutils literal notranslate"><span class="pre">Option.Partial_Order_Service_Profile</span></code></a></li>
+<li><a class="reference internal" href="#pcapkit.const.tcp.option.Option.CC"><code class="docutils literal notranslate"><span class="pre">Option.CC</span></code></a></li>
+<li><a class="reference internal" href="#pcapkit.const.tcp.option.Option.CC_NEW"><code class="docutils literal notranslate"><span class="pre">Option.CC_NEW</span></code></a></li>
+<li><a class="reference internal" href="#pcapkit.const.tcp.option.Option.CC_ECHO"><code class="docutils literal notranslate"><span class="pre">Option.CC_ECHO</span></code></a></li>
+<li><a class="reference internal" href="#pcapkit.const.tcp.option.Option.TCP_Alternate_Checksum_Request"><code class="docutils literal notranslate"><span class="pre">Option.TCP_Alternate_Checksum_Request</span></code></a></li>
+<li><a class="reference internal" href="#pcapkit.const.tcp.option.Option.TCP_Alternate_Checksum_Data"><code class="docutils literal notranslate"><span class="pre">Option.TCP_Alternate_Checksum_Data</span></code></a></li>
+<li><a class="reference internal" href="#pcapkit.const.tcp.option.Option.Skeeter"><code class="docutils literal notranslate"><span class="pre">Option.Skeeter</span></code></a></li>
+<li><a class="reference internal" href="#pcapkit.const.tcp.option.Option.Bubba"><code class="docutils literal notranslate"><span class="pre">Option.Bubba</span></code></a></li>
+<li><a class="reference internal" href="#pcapkit.const.tcp.option.Option.Trailer_Checksum_Option"><code class="docutils literal notranslate"><span class="pre">Option.Trailer_Checksum_Option</span></code></a></li>
+<li><a class="reference internal" href="#pcapkit.const.tcp.option.Option.MD5_Signature_Option"><code class="docutils literal notranslate"><span class="pre">Option.MD5_Signature_Option</span></code></a></li>
+<li><a class="reference internal" href="#pcapkit.const.tcp.option.Option.SCPS_Capabilities"><code class="docutils literal notranslate"><span class="pre">Option.SCPS_Capabilities</span></code></a></li>
+<li><a class="reference internal" href="#pcapkit.const.tcp.option.Option.Selective_Negative_Acknowledgements"><code class="docutils literal notranslate"><span class="pre">Option.Selective_Negative_Acknowledgements</span></code></a></li>
+<li><a class="reference internal" href="#pcapkit.const.tcp.option.Option.Record_Boundaries"><code class="docutils literal notranslate"><span class="pre">Option.Record_Boundaries</span></code></a></li>
+<li><a class="reference internal" href="#pcapkit.const.tcp.option.Option.Corruption_experienced"><code class="docutils literal notranslate"><span class="pre">Option.Corruption_experienced</span></code></a></li>
+<li><a class="reference internal" href="#pcapkit.const.tcp.option.Option.SNAP"><code class="docutils literal notranslate"><span class="pre">Option.SNAP</span></code></a></li>
+<li><a class="reference internal" href="#pcapkit.const.tcp.option.Option.Unassigned_25"><code class="docutils literal notranslate"><span class="pre">Option.Unassigned_25</span></code></a></li>
+<li><a class="reference internal" href="#pcapkit.const.tcp.option.Option.TCP_Compression_Filter"><code class="docutils literal notranslate"><span class="pre">Option.TCP_Compression_Filter</span></code></a></li>
+<li><a class="reference internal" href="#pcapkit.const.tcp.option.Option.Quick_Start_Response"><code class="docutils literal notranslate"><span class="pre">Option.Quick_Start_Response</span></code></a></li>
+<li><a class="reference internal" href="#pcapkit.const.tcp.option.Option.User_Timeout_Option"><code class="docutils literal notranslate"><span class="pre">Option.User_Timeout_Option</span></code></a></li>
+<li><a class="reference internal" href="#pcapkit.const.tcp.option.Option.TCP_Authentication_Option"><code class="docutils literal notranslate"><span class="pre">Option.TCP_Authentication_Option</span></code></a></li>
+<li><a class="reference internal" href="#pcapkit.const.tcp.option.Option.Multipath_TCP"><code class="docutils literal notranslate"><span class="pre">Option.Multipath_TCP</span></code></a></li>
+<li><a class="reference internal" href="#pcapkit.const.tcp.option.Option.Reserved_31"><code class="docutils literal notranslate"><span class="pre">Option.Reserved_31</span></code></a></li>
+<li><a class="reference internal" href="#pcapkit.const.tcp.option.Option.Reserved_32"><code class="docutils literal notranslate"><span class="pre">Option.Reserved_32</span></code></a></li>
+<li><a class="reference internal" href="#pcapkit.const.tcp.option.Option.Reserved_33"><code class="docutils literal notranslate"><span class="pre">Option.Reserved_33</span></code></a></li>
+<li><a class="reference internal" href="#pcapkit.const.tcp.option.Option.TCP_Fast_Open_Cookie"><code class="docutils literal notranslate"><span class="pre">Option.TCP_Fast_Open_Cookie</span></code></a></li>
+<li><a class="reference internal" href="#pcapkit.const.tcp.option.Option.Encryption_Negotiation"><code class="docutils literal notranslate"><span class="pre">Option.Encryption_Negotiation</span></code></a></li>
+<li><a class="reference internal" href="#pcapkit.const.tcp.option.Option.Reserved_70"><code class="docutils literal notranslate"><span class="pre">Option.Reserved_70</span></code></a></li>
+<li><a class="reference internal" href="#pcapkit.const.tcp.option.Option.Reserved_76"><code class="docutils literal notranslate"><span class="pre">Option.Reserved_76</span></code></a></li>
+<li><a class="reference internal" href="#pcapkit.const.tcp.option.Option.Reserved_77"><code class="docutils literal notranslate"><span class="pre">Option.Reserved_77</span></code></a></li>
+<li><a class="reference internal" href="#pcapkit.const.tcp.option.Option.Reserved_78"><code class="docutils literal notranslate"><span class="pre">Option.Reserved_78</span></code></a></li>
+<li><a class="reference internal" href="#pcapkit.const.tcp.option.Option.Accurate_ECN_Order_0"><code class="docutils literal notranslate"><span class="pre">Option.Accurate_ECN_Order_0</span></code></a></li>
+<li><a class="reference internal" href="#pcapkit.const.tcp.option.Option.Reserved_173"><code class="docutils literal notranslate"><span class="pre">Option.Reserved_173</span></code></a></li>
+<li><a class="reference internal" href="#pcapkit.const.tcp.option.Option.Accurate_ECN_Order_1"><code class="docutils literal notranslate"><span class="pre">Option.Accurate_ECN_Order_1</span></code></a></li>
+<li><a class="reference internal" href="#pcapkit.const.tcp.option.Option.RFC3692_style_Experiment_1"><code class="docutils literal notranslate"><span class="pre">Option.RFC3692_style_Experiment_1</span></code></a></li>
+<li><a class="reference internal" href="#pcapkit.const.tcp.option.Option.RFC3692_style_Experiment_2"><code class="docutils literal notranslate"><span class="pre">Option.RFC3692_style_Experiment_2</span></code></a></li>
+<li><a class="reference internal" href="#pcapkit.const.tcp.option.Option._missing_"><code class="docutils literal notranslate"><span class="pre">Option._missing_()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
 </ul>
 
-<div class="relations">
-<h3>Related Topics</h3>
-<ul>
-  <li><a href="../../index.html">Documentation overview</a><ul>
-  <li><a href="../index.html">Module Documentation</a><ul>
-  <li><a href="index.html">Constant Enumerations</a><ul>
-      <li>Previous: <a href="mh.html" title="previous chapter"><code class="xref py py-class docutils literal notranslate"><span class="pre">MH</span></code> Constant Enumerations</a></li>
-      <li>Next: <a href="ftp.html" title="next chapter"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Constant Enumerations</a></li>
-  </ul></li>
-  </ul></li>
-  </ul></li>
-</ul>
-</div>
-<div id="searchbox" style="display: none" role="search">
-  <h3 id="searchlabel">Quick search</h3>
-    <div class="searchformwrapper">
-    <form class="search" action="../../search.html" method="get">
-      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
-      <input type="submit" value="Go" />
-    </form>
-    </div>
-</div>
-<script>document.getElementById('searchbox').style.display = "block"</script>
-
-
-
-
-
-
-
-
+          </div>
         </div>
       </div>
-      <div class="clearer"></div>
-    </div>
-    <div class="footer">
-      &copy;2017-2023, Jarry Shaw.
       
-      |
-      <a href="../../_sources/pcapkit/const/tcp.rst.txt"
-          rel="nofollow">Page source</a>
-    </div>
-
-    
-    <a href="https://github.com/JarryShaw/PyPCAPKit" class="github">
-        <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"  class="github"/>
-    </a>
-    
-
-    
-  </body>
+      
+    </aside>
+  </div>
+</div><script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/sphinx_highlight.js"></script>
+    <script src="../../_static/scripts/furo.js"></script>
+    <script src="../../_static/clipboard.min.js"></script>
+    <script src="../../_static/copybutton.js"></script>
+    </body>
 </html>

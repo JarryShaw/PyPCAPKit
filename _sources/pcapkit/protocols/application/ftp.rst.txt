@@ -2,7 +2,6 @@ FTP - File Transfer Protocol
 ============================
 
 .. module:: pcapkit.protocols.application.ftp
-.. module:: pcapkit.protocols.data.application.ftp
 
 :mod:`pcapkit.protocols.application.ftp` contains
 :class:`~pcapkit.protocols.application.ftp.FTP` only,
@@ -22,42 +21,64 @@ which implements extractor for File Transfer Protocol
    .. automethod:: read
    .. automethod:: make
 
-Data Structures
----------------
+   .. automethod:: _make_data
 
-.. autoclass:: pcapkit.protocols.data.application.ftp.FTP(type)
+.. autoclass:: pcapkit.protocols.application.ftp.FTP_DATA
    :no-members:
    :show-inheritance:
 
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. autoattribute:: type
+   .. autoproperty:: name
 
-.. autoclass:: pcapkit.protocols.data.application.ftp.Request(type, command, arg, raw)
-   :no-members:
+Packet Type
+-----------
+
+.. autoclass:: pcapkit.protocols.application.ftp.Type
+   :members:
    :show-inheritance:
 
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. autoattribute:: type
-   .. autoattribute:: command
-   .. autoattribute:: arg
-   .. autoattribute:: raw
+Header Schemas
+--------------
 
-.. autoclass:: pcapkit.protocols.data.application.ftp.Response(type, code, arg, mf, raw)
-   :no-members:
+.. module:: pcapkit.protocols.schema.application.ftp
+
+.. autoclass:: pcapkit.protocols.schema.application.ftp.FTP
+   :members:
    :show-inheritance:
 
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. autoattribute:: type
-   .. autoattribute:: code
-   .. autoattribute:: arg
-   .. autoattribute:: mf
-   .. autoattribute:: raw
+Data Models
+-----------
+
+.. module:: pcapkit.protocols.data.application.ftp
+
+.. autoclass:: pcapkit.protocols.data.application.ftp.FTP
+   :members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
+.. autoclass:: pcapkit.protocols.data.application.ftp.Request
+   :members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
+.. autoclass:: pcapkit.protocols.data.application.ftp.Response
+   :members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
 
 .. raw:: html
 

@@ -9,11 +9,12 @@ Module Documentation
 
 .. _DictDumper: https://dictdumper.jarryshaw.me
 
-Unlike popular PCAP file extractors, such as `Scapy`_,
-`DPKT`_, `PyShark`_, and etc, :mod:`pcapkit` uses streaming
-strategy to read input files. That is to read frame by
-frame, decrease occupation on memory, as well as enhance
-efficiency in some way.
+Unlike popular PCAP file extractors, such as `Scapy`_, `DPKT`_,
+`PyShark`_, and etc, :mod:`pcapkit` tends to provide comprehensive
+support to all protocols, including but not limited to their
+parameters and/or options, etc. Therefore, :mod:`pcapkit` contains
+enumeration registries used by protocols, independent protocol
+schema definitions as well as various customisable interfaces.
 
 .. _Scapy: https://scapy.net
 .. _DPKT: https://dpkt.readthedocs.io
@@ -32,8 +33,20 @@ efficiency in some way.
    const/index
    vendor/index
 
-.. automodule:: pcapkit.__main__
-   :no-members:
+Command Line Tool
+=================
+
+.. module:: pcapkit.__main__
+
+.. important::
+
+   This module requires ``emoji`` package to be installed.
+
+:mod:`pcapkit.__main__` was originally the module file of
+|jspcapy|_, which is now deprecated and merged with :mod:`pcapkit`.
+
+.. |jspcapy| replace:: ``jspcapy``
+.. _jspcapy: https://github.com/JarryShaw/jspcapy
 
 .. code-block:: text
 
@@ -78,5 +91,48 @@ efficiency in some way.
      -L LAYER, --layer LAYER
                            Indicate extract frames until which layer.
 
-.. automodule:: pcapkit.all
-   :no-members:
+Library Index
+=============
+
+.. module:: pcapkit.all
+
+:mod:`pcapkit` has defined various and numerous functions
+and classes, which have different features and purposes.
+To make a simple index for this library, :mod:`pcapkit.all`
+contains all things from :mod:`pcapkit`.
+
+Environment Variables
+=====================
+
+.. envvar:: PCAPKIT_DEVMODE
+
+   If set to ``1``, :mod:`pcapkit` will run in development mode.
+
+   .. seealso::
+
+      :data:`pcapkit.utilities.logging.DEVMODE`
+
+.. envvar:: PCAPKIT_VERBOSE
+
+   If set to ``1``, :mod:`pcapkit` will run with verbose output.
+
+   .. seealso::
+
+      :data:`pcapkit.utilities.logging.VERBOSE`
+
+.. envvar:: PCAPKIT_HTTP_PROXY
+
+   HTTP proxy address for :mod:`pcapkit.vendor` crawlers.
+
+.. envvar:: PCAPKIT_HTTPS_PROXY
+
+   HTTPS proxy address for :mod:`pcapkit.vendor` crawlers.
+
+.. envvar:: PCAPKIT_SPHINX
+
+   If set to ``1``, :mod:`pcapkit` will run with Sphinx additional
+   typing hints and docstrings support.
+
+   .. seealso::
+
+      :data:`pcapkit.utilities.logging.SPHINX_TYPE_CHECKING`

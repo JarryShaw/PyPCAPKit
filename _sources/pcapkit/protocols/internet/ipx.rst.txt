@@ -2,7 +2,6 @@ IPX - Internetwork Packet Exchange
 ==================================
 
 .. module:: pcapkit.protocols.internet.ipx
-.. module:: pcapkit.protocols.data.internet.ipx
 
 :mod:`pcapkit.protocols.internet.ipx` contains
 :class:`~pcapkit.protocols.internet.ipx.IPX` only,
@@ -21,18 +20,12 @@ Octets      Bits        Name                    Description
   18        144   ``ipx.src``               Source Address
 ======= ========= ====================== =====================================
 
-.. raw:: html
-
-   <br />
-
 .. autoclass:: pcapkit.protocols.internet.ipx.IPX
    :no-members:
    :show-inheritance:
 
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
-
-   .. automethod:: __index__
 
    .. autoproperty:: name
    .. autoproperty:: length
@@ -43,36 +36,40 @@ Octets      Bits        Name                    Description
    .. automethod:: read
    .. automethod:: make
 
-   .. automethod:: _read_ipx_address
+   .. automethod:: _make_data
 
-Data Structures
----------------
+   .. automethod:: __index__
 
-.. autoclass:: pcapkit.protocols.data.internet.ipx.IPX(chksum, len, count, type, dst, src)
-   :no-members:
+Header Schemas
+--------------
+
+.. module:: pcapkit.protocols.schema.internet.ipx
+
+.. autoclass:: pcapkit.protocols.schema.internet.ipx.IPX
+   :members:
    :show-inheritance:
 
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. autoattribute:: chksum
-   .. autoattribute:: len
-   .. autoattribute:: count
-   .. autoattribute:: type
-   .. autoattribute:: dst
-   .. autoattribute:: src
+Data Models
+-----------
 
-.. autoclass:: pcapkit.protocols.data.internet.ipx.Address(network, node, socket, addr)
-   :no-members:
+.. module:: pcapkit.protocols.data.internet.ipx
+
+.. autoclass:: pcapkit.protocols.data.internet.ipx.IPX
+   :members:
    :show-inheritance:
 
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. autoattribute:: network
-   .. autoattribute:: node
-   .. autoattribute:: socket
-   .. autoattribute:: addr
+.. autoclass:: pcapkit.protocols.data.internet.ipx.Address
+   :members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
 
 .. raw:: html
 

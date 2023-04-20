@@ -2,7 +2,6 @@ Ethernet Protocol
 =================
 
 .. module:: pcapkit.protocols.link.ethernet
-.. module:: pcapkit.protocols.data.link.ethernet
 
 :mod:`pcapkit.protocols.link.ethernet` contains
 :class:`~pcapkit.protocols.link.ethernet.Ethernet`
@@ -22,18 +21,12 @@ below:
    2         16 ``eth.type`` Protocol (Internet Layer)
    ====== ===== ============ =========================
 
-.. raw:: html
-
-   <br />
-
 .. autoclass:: pcapkit.protocols.link.ethernet.Ethernet
    :no-members:
    :show-inheritance:
 
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
-
-   .. automethod:: __index__
 
    .. autoproperty:: name
    .. autoproperty:: length
@@ -44,21 +37,38 @@ below:
    .. automethod:: read
    .. automethod:: make
 
-   .. .. automethod:: _read_mac_addr
+   .. automethod:: _make_data
 
-Data Structures
----------------
+   .. automethod:: __index__
 
-.. autoclass:: pcapkit.protocols.data.link.ethernet.Ethernet(dst, src, type)
-   :no-members:
+Header Schemas
+--------------
+
+.. module:: pcapkit.protocols.schema.link.ethernet
+
+.. autoclass:: pcapkit.protocols.schema.link.ethernet.Ethernet
+   :members:
    :show-inheritance:
 
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. autoattribute:: dst
-   .. autoattribute:: src
-   .. autoattribute:: type
+Auxiliary Functions
+~~~~~~~~~~~~~~~~~~~
+
+.. autofunction:: pcapkit.protocols.schema.link.ethernet.callback_payload
+
+Data Models
+-----------
+
+.. module:: pcapkit.protocols.data.link.ethernet
+
+.. autoclass:: pcapkit.protocols.data.link.ethernet.Ethernet
+   :members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
 
 .. raw:: html
 

@@ -1,3 +1,4 @@
+==================================================================
 :class:`~pcapkit.protocols.internet.hip.HIP` Constant Enumerations
 ==================================================================
 
@@ -19,6 +20,8 @@ enumerations include:
      - ECDSA Curve Label [*]_
    * - :class:`HIP_ECDSALowCurve <pcapkit.const.hip.ecdsa_low_curve.ECDSALowCurve>`
      - ECDSA_LOW Curve Label [*]_
+   * - :class:`HIP_EdDSACurve <pcapkit.const.hip.eddsa_curve.EdDSACurve>`
+     - EdDSA Curve Label [*]_
    * - :class:`HIP_ESPTransformSuite <pcapkit.const.hip.esp_transform_suite.ESPTransformSuite>`
      - ESP Transform Suite IDs [*]_
    * - :class:`HIP_Group <pcapkit.const.hip.group.Group>`
@@ -44,174 +47,238 @@ enumerations include:
    * - :class:`HIP_Transport <pcapkit.const.hip.transport.Transport>`
      - HIP Transport Modes [*]_
 
-.. automodule:: pcapkit.const.hip.certificate
-   :no-members:
+HIP Certificate Types
+=====================
+
+.. module:: pcapkit.const.hip.certificate
+
+This module contains the constant enumeration for **HIP Certificate Types**,
+which is automatically generated from :class:`pcapkit.vendor.hip.certificate.Certificate`.
 
 .. autoclass:: pcapkit.const.hip.certificate.Certificate
    :members:
    :undoc-members:
-   :private-members:
-   :exclude-members: get, _missing_
    :show-inheritance:
 
-.. automodule:: pcapkit.const.hip.cipher
-   :no-members:
+Cipher IDs
+==========
+
+.. module:: pcapkit.const.hip.cipher
+
+This module contains the constant enumeration for **Cipher IDs**,
+which is automatically generated from :class:`pcapkit.vendor.hip.cipher.Cipher`.
 
 .. autoclass:: pcapkit.const.hip.cipher.Cipher
    :members:
    :undoc-members:
-   :private-members:
-   :exclude-members: get, _missing_
    :show-inheritance:
 
-.. automodule:: pcapkit.const.hip.di
-   :no-members:
+DI-Types
+========
+
+.. module:: pcapkit.const.hip.di
+
+This module contains the constant enumeration for **DI-Types**,
+which is automatically generated from :class:`pcapkit.vendor.hip.di.DITypes`.
 
 .. autoclass:: pcapkit.const.hip.di.DITypes
    :members:
    :undoc-members:
-   :private-members:
-   :exclude-members: get, _missing_
    :show-inheritance:
 
-.. automodule:: pcapkit.const.hip.ecdsa_curve
-   :no-members:
+ECDSA Curve Label
+=================
+
+.. module:: pcapkit.const.hip.ecdsa_curve
+
+This module contains the constant enumeration for **ECDSA Curve Label**,
+which is automatically generated from :class:`pcapkit.vendor.hip.ecdsa_curve.ECDSACurve`.
 
 .. autoclass:: pcapkit.const.hip.ecdsa_curve.ECDSACurve
    :members:
    :undoc-members:
-   :private-members:
-   :exclude-members: get, _missing_
    :show-inheritance:
 
-.. automodule:: pcapkit.const.hip.ecdsa_low_curve
-   :no-members:
+ECDSA_LOW Curve Label
+=====================
+
+.. module:: pcapkit.const.hip.ecdsa_low_curve
+
+This module contains the constant enumeration for **ECDSA_LOW Curve Label**,
+which is automatically generated from :class:`pcapkit.vendor.hip.ecdsa_low_curve.ECDSALowCurve`.
 
 .. autoclass:: pcapkit.const.hip.ecdsa_low_curve.ECDSALowCurve
    :members:
    :undoc-members:
-   :private-members:
-   :exclude-members: get, _missing_
    :show-inheritance:
 
-.. automodule:: pcapkit.const.hip.esp_transform_suite
-   :no-members:
+EdDSA Curve Label
+=================
+
+.. module:: pcapkit.const.hip.eddsa_curve
+
+This module contains the constant enumeration for **EdDSA Curve Label**,
+which is automatically generated from :class:`pcapkit.vendor.hip.eddsa_curve.EdDSACurve`.
+
+.. autoclass:: pcapkit.const.hip.eddsa_curve.EdDSACurve
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+ESP Transform Suite IDs
+=======================
+
+.. module:: pcapkit.const.hip.esp_transform_suite
+
+This module contains the constant enumeration for **ESP Transform Suite IDs**,
+which is automatically generated from :class:`pcapkit.vendor.hip.esp_transform_suite.ESPTransformSuite`.
 
 .. autoclass:: pcapkit.const.hip.esp_transform_suite.ESPTransformSuite
    :members:
    :undoc-members:
-   :private-members:
-   :exclude-members: get, _missing_
    :show-inheritance:
 
-.. automodule:: pcapkit.const.hip.group
-   :no-members:
+Group IDs
+=========
+
+.. module:: pcapkit.const.hip.group
+
+This module contains the constant enumeration for **Group IDs**,
+which is automatically generated from :class:`pcapkit.vendor.hip.group.Group`.
 
 .. autoclass:: pcapkit.const.hip.group.Group
    :members:
    :undoc-members:
-   :private-members:
-   :exclude-members: get, _missing_
    :show-inheritance:
 
-.. automodule:: pcapkit.const.hip.hi_algorithm
-   :no-members:
+HI Algorithm
+============
+
+.. module:: pcapkit.const.hip.hi_algorithm
+
+This module contains the constant enumeration for **HI Algorithm**,
+which is automatically generated from :class:`pcapkit.vendor.hip.hi_algorithm.HIAlgorithm`.
 
 .. autoclass:: pcapkit.const.hip.hi_algorithm.HIAlgorithm
    :members:
    :undoc-members:
-   :private-members:
-   :exclude-members: get, _missing_
    :show-inheritance:
 
-.. automodule:: pcapkit.const.hip.hit_suite
-   :no-members:
+HIT Suite ID
+============
+
+.. module:: pcapkit.const.hip.hit_suite
+
+This module contains the constant enumeration for **HIT Suite ID**,
+which is automatically generated from :class:`pcapkit.vendor.hip.hit_suite.HITSuite`.
 
 .. autoclass:: pcapkit.const.hip.hit_suite.HITSuite
    :members:
    :undoc-members:
-   :private-members:
-   :exclude-members: get, _missing_
    :show-inheritance:
 
-.. automodule:: pcapkit.const.hip.nat_traversal
-   :no-members:
+HIP NAT Traversal Modes
+=======================
+
+.. module:: pcapkit.const.hip.nat_traversal
+
+This module contains the constant enumeration for **HIP NAT Traversal Modes**,
+which is automatically generated from :class:`pcapkit.vendor.hip.nat_traversal.NATTraversal`.
 
 .. autoclass:: pcapkit.const.hip.nat_traversal.NATTraversal
    :members:
    :undoc-members:
-   :private-members:
-   :exclude-members: get, _missing_
    :show-inheritance:
 
-.. automodule:: pcapkit.const.hip.notify_message
-   :no-members:
+Notify Message Types
+==========================
+
+.. module:: pcapkit.const.hip.notify_message
+
+This module contains the constant enumeration for **Notify Message Types**,
+which is automatically generated from :class:`pcapkit.vendor.hip.notify_message.NotifyMessage`.
 
 .. autoclass:: pcapkit.const.hip.notify_message.NotifyMessage
    :members:
    :undoc-members:
-   :private-members:
-   :exclude-members: get, _missing_
    :show-inheritance:
 
-.. automodule:: pcapkit.const.hip.packet
-   :no-members:
+HIP Packet Types
+================
+
+.. module:: pcapkit.const.hip.packet
+
+This module contains the constant enumeration for **HIP Packet Types**,
+which is automatically generated from :class:`pcapkit.vendor.hip.packet.Packet`.
 
 .. autoclass:: pcapkit.const.hip.packet.Packet
    :members:
    :undoc-members:
-   :private-members:
-   :exclude-members: get, _missing_
    :show-inheritance:
 
-.. automodule:: pcapkit.const.hip.parameter
-   :no-members:
+HIP Parameter Types
+===================
+
+.. module:: pcapkit.const.hip.parameter
+
+This module contains the constant enumeration for **HIP Parameter Types**,
+which is automatically generated from :class:`pcapkit.vendor.hip.parameter.Parameter`.
 
 .. autoclass:: pcapkit.const.hip.parameter.Parameter
    :members:
    :undoc-members:
-   :private-members:
-   :exclude-members: get, _missing_
    :show-inheritance:
 
-.. automodule:: pcapkit.const.hip.registration
-   :no-members:
+Registration Failure Types
+==========================
 
-.. autoclass:: pcapkit.const.hip.registration.Registration
-   :members:
-   :undoc-members:
-   :private-members:
-   :exclude-members: get, _missing_
-   :show-inheritance:
+.. module:: pcapkit.const.hip.registration_failure
 
-.. automodule:: pcapkit.const.hip.registration_failure
-   :no-members:
+This module contains the constant enumeration for **Registration Failure Types**,
+which is automatically generated from :class:`pcapkit.vendor.hip.registration_failure.RegistrationFailure`.
 
 .. autoclass:: pcapkit.const.hip.registration_failure.RegistrationFailure
    :members:
    :undoc-members:
-   :private-members:
-   :exclude-members: get, _missing_
    :show-inheritance:
 
-.. automodule:: pcapkit.const.hip.suite
-   :no-members:
+Registration Types
+==================
+
+.. module:: pcapkit.const.hip.registration
+
+This module contains the constant enumeration for **Registration Types**,
+which is automatically generated from :class:`pcapkit.vendor.hip.registration.Registration`.
+
+.. autoclass:: pcapkit.const.hip.registration.Registration
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Suite IDs
+=========
+
+.. module:: pcapkit.const.hip.suite
+
+This module contains the constant enumeration for **Suite IDs**,
+which is automatically generated from :class:`pcapkit.vendor.hip.suite.Suite`.
 
 .. autoclass:: pcapkit.const.hip.suite.Suite
    :members:
    :undoc-members:
-   :private-members:
-   :exclude-members: get, _missing_
    :show-inheritance:
 
-.. automodule:: pcapkit.const.hip.transport
-   :no-members:
+HIP Transport Modes
+===================
+
+.. module:: pcapkit.const.hip.transport
+
+This module contains the constant enumeration for **HIP Transport Modes**,
+which is automatically generated from :class:`pcapkit.vendor.hip.transport.Transport`.
 
 .. autoclass:: pcapkit.const.hip.transport.Transport
    :members:
    :undoc-members:
-   :private-members:
-   :exclude-members: get, _missing_
    :show-inheritance:
 
 .. raw:: html
@@ -223,6 +290,7 @@ enumerations include:
 .. [*] https://www.iana.org/assignments/hip-parameters/hip-parameters.xhtml#hip-parameters-7
 .. [*] https://www.iana.org/assignments/hip-parameters/hip-parameters.xhtml#ecdsa-curve-label
 .. [*] https://www.iana.org/assignments/hip-parameters/hip-parameters.xhtml#ecdsa-low-curve-label
+.. [*] https://www.iana.org/assignments/hip-parameters/hip-parameters.xhtml#eddsa-curve-label
 .. [*] https://www.iana.org/assignments/hip-parameters/hip-parameters.xhtml#esp-transform-suite-ids
 .. [*] https://www.iana.org/assignments/hip-parameters/hip-parameters.xhtml#hip-parameters-5
 .. [*] https://www.iana.org/assignments/hip-parameters/hip-parameters.xhtml#hi-algorithm

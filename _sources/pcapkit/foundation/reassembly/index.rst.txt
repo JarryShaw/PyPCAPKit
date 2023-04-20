@@ -1,3 +1,4 @@
+=============================
 Fragmented Packets Reassembly
 =============================
 
@@ -12,4 +13,21 @@ of IP and TCP packets.
 
    reassembly
    ip/index
-   tcp/index
+   tcp
+
+Auxiliary Data
+==============
+
+.. autoclass:: pcapkit.foundation.reassembly.ReassemblyManager
+   :members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
+.. autoclass:: pcapkit.foundation.reassembly.data.ReassemblyData
+   :members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.

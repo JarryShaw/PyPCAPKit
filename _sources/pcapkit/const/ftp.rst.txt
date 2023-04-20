@@ -1,3 +1,4 @@
+=====================================================================
 :class:`~pcapkit.protocols.application.ftp.FTP` Constant Enumerations
 =====================================================================
 
@@ -14,36 +15,30 @@ enumerations include:
    * - :class:`FTP_ReturnCode <pcapkit.const.ftp.return_code.ReturnCode>`
      - FTP Return Codes [*]_
 
-.. automodule:: pcapkit.const.ftp.command
-   :no-members:
+FTP Command
+===========
 
-.. data:: pcapkit.const.ftp.command.Command
-   :type: defaultInfo[CommandType]
+.. module:: pcapkit.const.ftp.command
 
-   FTP commands.
+This module contains the constant enumeration for **FTP Command**,
+which is automatically generated from :class:`pcapkit.vendor.ftp.command.Command`.
 
-.. autoclass:: pcapkit.const.ftp.command.CommandType
+.. autoclass:: pcapkit.const.ftp.command.Command
    :members:
    :undoc-members:
-   :private-members:
-   :exclude-members: get, _missing_
    :show-inheritance:
 
-.. autoclass:: pcapkit.const.ftp.command.defaultInfo
-   :members:
-   :undoc-members:
-   :private-members:
-   :exclude-members: get, _missing_
-   :show-inheritance:
+FTP Server Return Code
+============================
 
-.. automodule:: pcapkit.const.ftp.return_code
-   :no-members:
+.. module:: pcapkit.const.ftp.return_code
+
+This module contains the constant enumeration for **FTP Server Return Code**,
+which is automatically generated from :class:`pcapkit.vendor.ftp.return_code.ReturnCode`.
 
 .. autoclass:: pcapkit.const.ftp.return_code.ReturnCode
    :members:
    :undoc-members:
-   :private-members:
-   :exclude-members: get, _missing_
    :show-inheritance:
 
 .. raw:: html

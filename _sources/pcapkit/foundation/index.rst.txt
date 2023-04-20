@@ -13,6 +13,7 @@ APIs for :mod:`pcapkit`, and TCP/IP reassembly implementations.
    :maxdepth: 2
 
    extraction
-   traceflow
    reassembly/index
+   traceflow/index
    registry
+   engines/index

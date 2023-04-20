@@ -2,7 +2,6 @@ HIP - Host Identity Protocol
 ============================
 
 .. module:: pcapkit.protocols.internet.hip
-.. module:: pcapkit.protocols.data.internet.hip
 
 :mod:`pcapkit.protocols.internet.hip` contains
 :class:`~pcapkit.protocols.internet.hip.HIP` only,
@@ -27,19 +26,12 @@ Octets      Bits        Name                    Description
   40        320   ``hip.parameters``        HIP Parameters
 ======= ========= ====================== ==================================
 
-.. raw:: html
-
-   <br />
-
 .. autoclass:: pcapkit.protocols.internet.hip.HIP
    :no-members:
    :show-inheritance:
 
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
-
-   .. automethod:: __post_init__
-   .. automethod:: __index__
 
    .. autoproperty:: name
    .. autoproperty:: alias
@@ -50,6 +42,8 @@ Octets      Bits        Name                    Description
 
    .. automethod:: read
    .. automethod:: make
+
+   .. automethod:: _make_data
 
    .. automethod:: _read_hip_param
    .. automethod:: _read_param_unassigned
@@ -102,578 +96,928 @@ Octets      Bits        Name                    Description
    .. automethod:: _read_param_via_rvs
    .. automethod:: _read_param_relay_hmac
 
-Data Structures
----------------
+   .. automethod:: _make_hip_param
+   .. automethod:: _make_param_unassigned
+   .. automethod:: _make_param_esp_info
+   .. automethod:: _make_param_r1_counter
+   .. automethod:: _make_param_locator_set
+   .. automethod:: _make_param_puzzle
+   .. automethod:: _make_param_solution
+   .. automethod:: _make_param_seq
+   .. automethod:: _make_param_ack
+   .. automethod:: _make_param_dh_group_list
+   .. automethod:: _make_param_diffie_hellman
+   .. automethod:: _make_param_hip_transform
+   .. automethod:: _make_param_hip_cipher
+   .. automethod:: _make_param_nat_traversal_mode
+   .. automethod:: _make_param_transaction_pacing
+   .. automethod:: _make_param_encrypted
+   .. automethod:: _make_param_host_id
+   .. automethod:: _make_param_hit_suite_list
+   .. automethod:: _make_param_cert
+   .. automethod:: _make_param_notification
+   .. automethod:: _make_param_echo_request_signed
+   .. automethod:: _make_param_reg_info
+   .. automethod:: _make_param_reg_request
+   .. automethod:: _make_param_reg_response
+   .. automethod:: _make_param_reg_failed
+   .. automethod:: _make_param_reg_from
+   .. automethod:: _make_param_echo_response_signed
+   .. automethod:: _make_param_transport_format_list
+   .. automethod:: _make_param_esp_transform
+   .. automethod:: _make_param_seq_data
+   .. automethod:: _make_param_ack_data
+   .. automethod:: _make_param_payload_mic
+   .. automethod:: _make_param_transaction_id
+   .. automethod:: _make_param_overlay_id
+   .. automethod:: _make_param_route_dst
+   .. automethod:: _make_param_hip_transport_mode
+   .. automethod:: _make_param_hip_mac
+   .. automethod:: _make_param_hip_mac_2
+   .. automethod:: _make_param_hip_signature_2
+   .. automethod:: _make_param_hip_signature
+   .. automethod:: _make_param_echo_request_unsigned
+   .. automethod:: _make_param_echo_response_unsigned
+   .. automethod:: _make_param_relay_from
+   .. automethod:: _make_param_relay_to
+   .. automethod:: _make_param_overlay_ttl
+   .. automethod:: _make_param_route_via
+   .. automethod:: _make_param_from
+   .. automethod:: _make_param_rvs_hmac
+   .. automethod:: _make_param_via_rvs
+   .. automethod:: _make_param_relay_hmac
 
-.. autoclass:: pcapkit.protocols.data.internet.hip.HIP(next, length, type, version, chksum, control, shit, rhit)
-   :no-members:
+   .. automethod:: __post_init__
+   .. automethod:: __index__
+
+Type Stubs
+----------
+
+.. autoclass:: pcapkit.protocols.internet.hip.Locator
+   :members:
    :show-inheritance:
 
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. autoattribute:: next
-   .. autoattribute:: length
-   .. autoattribute:: type
-   .. autoattribute:: version
-   .. autoattribute:: chksum
-   .. autoattribute:: control
-   .. autoattribute:: shit
-   .. autoattribute:: rhit
-   .. autoattribute:: parameters
+Header Schemas
+--------------
 
-.. autoclass:: pcapkit.protocols.data.internet.hip.Control(anonymous)
-   :no-members:
+.. module:: pcapkit.protocols.schema.internet.hip
+
+.. autoclass:: pcapkit.protocols.schema.internet.hip.HIP
+   :members:
    :show-inheritance:
 
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. autoattribute:: anonymous
-
-.. autoclass:: pcapkit.protocols.data.internet.hip.Parameter(type, critical, length)
-   :no-members:
+.. autoclass:: pcapkit.protocols.schema.internet.hip.Parameter
+   :members:
    :show-inheritance:
 
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. autoattribute:: type
-   .. autoattribute:: critical
-   .. autoattribute:: length
-
-.. autoclass:: pcapkit.protocols.data.internet.hip.UnassignedParameter(type, critical, length, contents)
-   :no-members:
+.. autoclass:: pcapkit.protocols.schema.internet.hip.UnassignedParameter
+   :members:
    :show-inheritance:
 
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. autoattribute:: contents
-
-.. autoclass:: pcapkit.protocols.data.internet.hip.ESPInfoParameter(type, critical, length, index, old_spi, new_spi)
-   :no-members:
+.. autoclass:: pcapkit.protocols.schema.internet.hip.ESPInfoParameter
+   :members:
    :show-inheritance:
 
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. autoattribute:: index
-   .. autoattribute:: old_spi
-   .. autoattribute:: new_spi
-
-.. autoclass:: pcapkit.protocols.data.internet.hip.R1CounterParameter(type, critical, length, counter)
-   :no-members:
+.. autoclass:: pcapkit.protocols.schema.internet.hip.R1CounterParameter
+   :members:
    :show-inheritance:
 
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. autoattribute:: counter
-
-.. autoclass:: pcapkit.protocols.data.internet.hip.LocatorSetParameter(type, critical, length, locator_set)
-   :no-members:
+.. autoclass:: pcapkit.protocols.schema.internet.hip.LocatorSetParameter
+   :members:
    :show-inheritance:
 
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. autoattribute:: locator_set
-
-.. autoclass:: pcapkit.protocols.data.internet.hip.Locator(traffic, type, length, preferred, lifetime, locator)
-   :no-members:
+.. autoclass:: pcapkit.protocols.schema.internet.hip.Locator
+   :members:
    :show-inheritance:
 
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. autoattribute:: traffic
-   .. autoattribute:: type
-   .. autoattribute:: length
-   .. autoattribute:: preferred
-   .. autoattribute:: lifetime
-   .. autoattribute:: locator
-
-.. autoclass:: pcapkit.protocols.data.internet.hip.LocatorData(spi, ip)
-   :no-members:
+.. autoclass:: pcapkit.protocols.schema.internet.hip.LocatorData
+   :members:
    :show-inheritance:
 
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. autoattribute:: spi
-   .. autoattribute:: ip
-
-.. autoclass:: pcapkit.protocols.data.internet.hip.PuzzleParameter(type, critical, length, index, lifetime, opaque, random)
-   :no-members:
+.. autoclass:: pcapkit.protocols.schema.internet.hip.PuzzleParameter
+   :members:
    :show-inheritance:
 
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. autoattribute:: index
-   .. autoattribute:: lifetime
-   .. autoattribute:: opaque
-   .. autoattribute:: random
-
-.. autoclass:: pcapkit.protocols.data.internet.hip.SolutionParameter(type, critical, length, index, lifetime, opaque, random, solution)
-   :no-members:
+.. autoclass:: pcapkit.protocols.schema.internet.hip.SolutionParameter
+   :members:
    :show-inheritance:
 
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. autoattribute:: index
-   .. autoattribute:: lifetime
-   .. autoattribute:: opaque
-   .. autoattribute:: random
-   .. autoattribute:: solution
-
-.. autoclass:: pcapkit.protocols.data.internet.hip.SEQParameter(type, critical, length, id)
-   :no-members:
+.. autoclass:: pcapkit.protocols.schema.internet.hip.SEQParameter
+   :members:
    :show-inheritance:
 
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. autoattribute:: id
-
-.. autoclass:: pcapkit.protocols.data.internet.hip.ACKParameter(type, critical, length, update_id)
-   :no-members:
+.. autoclass:: pcapkit.protocols.schema.internet.hip.ACKParameter
+   :members:
    :show-inheritance:
 
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. autoattribute:: update_id
-
-.. autoclass:: pcapkit.protocols.data.internet.hip.DHGroupListParameter(type, critical, length, group_id)
-   :no-members:
+.. autoclass:: pcapkit.protocols.schema.internet.hip.DHGroupListParameter
+   :members:
    :show-inheritance:
 
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. autoattribute:: group_id
-
-.. autoclass:: pcapkit.protocols.data.internet.hip.DeffieHellmanParameter(type, critical, length, group_id, pub_len, pub_val)
-   :no-members:
+.. autoclass:: pcapkit.protocols.schema.internet.hip.DiffieHellmanParameter
+   :members:
    :show-inheritance:
 
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. autoattribute:: group_id
-   .. autoattribute:: pub_len
-   .. autoattribute:: pub_val
-
-.. autoclass:: pcapkit.protocols.data.internet.hip.HIPTransformParameter(type, critical, length, suite_id)
-   :no-members:
+.. autoclass:: pcapkit.protocols.schema.internet.hip.HIPTransformParameter
+   :members:
    :show-inheritance:
 
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. autoattribute:: suite_id
-
-.. autoclass:: pcapkit.protocols.data.internet.hip.HIPCipherParameter(type, critical, length, cipher_id)
-   :no-members:
+.. autoclass:: pcapkit.protocols.schema.internet.hip.HIPCipherParameter
+   :members:
    :show-inheritance:
 
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. autoattribute:: cipher_id
-
-.. autoclass:: pcapkit.protocols.data.internet.hip.NATTraversalModeParameter(type, critical, length, mode_id)
-   :no-members:
+.. autoclass:: pcapkit.protocols.schema.internet.hip.NATTraversalModeParameter
+   :members:
    :show-inheritance:
 
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. autoattribute:: mode_id
-
-.. autoclass:: pcapkit.protocols.data.internet.hip.TransactionPacingParameter(type, critical, length, min_ta)
-   :no-members:
+.. autoclass:: pcapkit.protocols.schema.internet.hip.TransactionPacingParameter
+   :members:
    :show-inheritance:
 
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. autoattribute:: min_ta
-
-.. autoclass:: pcapkit.protocols.data.internet.hip.EncryptedParameter(type, critical, length, raw)
-   :no-members:
+.. autoclass:: pcapkit.protocols.schema.internet.hip.EncryptedParameter
+   :members:
    :show-inheritance:
 
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. autoattribute:: raw
-
-.. autoclass:: pcapkit.protocols.data.internet.hip.HostIDParameter(type, critical, length, hi_len, di_type, di_len, algorithm, hi, di)
-   :no-members:
+.. autoclass:: pcapkit.protocols.schema.internet.hip.HostIDParameter
+   :members:
    :show-inheritance:
 
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. autoattribute:: hi_len
-   .. autoattribute:: di_type
-   .. autoattribute:: di_len
-   .. autoattribute:: algorithm
-   .. autoattribute:: hi
-   .. autoattribute:: di
-
-.. autoclass:: pcapkit.protocols.data.internet.hip.HostIdentity(curve, pubkey)
-   :no-members:
+.. autoclass:: pcapkit.protocols.schema.internet.hip.HostIdentity
+   :members:
    :show-inheritance:
 
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. autoattribute:: curve
-   .. autoattribute:: pubkey
-
-.. autoclass:: pcapkit.protocols.data.internet.hip.HITSuiteListParameter(type, critical, length, suite_id)
-   :no-members:
+.. autoclass:: pcapkit.protocols.schema.internet.hip.ECDSACurveHostIdentity
+   :members:
    :show-inheritance:
 
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. autoattribute:: suite_id
-
-.. autoclass:: pcapkit.protocols.data.internet.hip.CertParameter(type, critical, length, cert_group, cert_count, cert_id, cert_type, cert)
-   :no-members:
+.. autoclass:: pcapkit.protocols.schema.internet.hip.ECDSALowCurveHostIdentity
+   :members:
    :show-inheritance:
 
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. autoattribute:: cert_group
-   .. autoattribute:: cert_count
-   .. autoattribute:: cert_id
-   .. autoattribute:: cert_type
-   .. autoattribute:: cert
-
-.. autoclass:: pcapkit.protocols.data.internet.hip.NotificationParameter(type, critical, length, msg_type, msg)
-   :no-members:
+.. autoclass:: pcapkit.protocols.schema.internet.hip.EdDSACurveHostIdentity
+   :members:
    :show-inheritance:
 
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. autoattribute:: msg_type
-   .. autoattribute:: msg
-
-.. autoclass:: pcapkit.protocols.data.internet.hip.EchoRequestSignedParameter(type, critical, length, opaque)
-   :no-members:
+.. autoclass:: pcapkit.protocols.schema.internet.hip.HITSuiteListParameter
+   :members:
    :show-inheritance:
 
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. autoattribute:: opaque
-
-.. autoclass:: pcapkit.protocols.data.internet.hip.RegInfoParameter(type, critical, length, lifetime, reg_type)
-   :no-members:
+.. autoclass:: pcapkit.protocols.schema.internet.hip.CertParameter
+   :members:
    :show-inheritance:
 
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. autoattribute:: lifetime
-   .. autoattribute:: reg_type
-
-.. autoclass:: pcapkit.protocols.data.internet.hip.Lifetime(min, max)
-   :no-members:
+.. autoclass:: pcapkit.protocols.schema.internet.hip.NotificationParameter
+   :members:
    :show-inheritance:
 
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. autoattribute:: min
-   .. autoattribute:: max
-
-.. autoclass:: pcapkit.protocols.data.internet.hip.RegRequestParameter(type, critical, length, lifetime, reg_type)
-   :no-members:
+.. autoclass:: pcapkit.protocols.schema.internet.hip.EchoRequestSignedParameter
+   :members:
    :show-inheritance:
 
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. autoattribute:: lifetime
-   .. autoattribute:: reg_type
-
-.. autoclass:: pcapkit.protocols.data.internet.hip.RegResponseParameter(type, critical, length, lifetime, reg_type)
-   :no-members:
+.. autoclass:: pcapkit.protocols.schema.internet.hip.RegInfoParameter
+   :members:
    :show-inheritance:
 
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. autoattribute:: lifetime
-   .. autoattribute:: reg_type
-
-.. autoclass:: pcapkit.protocols.data.internet.hip.RegFailedParameter(type, critical, length, lifetime, reg_type)
-   :no-members:
+.. autoclass:: pcapkit.protocols.schema.internet.hip.RegRequestParameter
+   :members:
    :show-inheritance:
 
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. autoattribute:: lifetime
-   .. autoattribute:: reg_type
-
-.. autoclass:: pcapkit.protocols.data.internet.hip.RegFromParameter(type, critical, length, port, protocol, address)
-   :no-members:
+.. autoclass:: pcapkit.protocols.schema.internet.hip.RegResponseParameter
+   :members:
    :show-inheritance:
 
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. autoattribute:: port
-   .. autoattribute:: protocol
-   .. autoattribute:: address
-
-.. autoclass:: pcapkit.protocols.data.internet.hip.EchoResponseSignedParameter(type, critical, length, opaque)
-   :no-members:
+.. autoclass:: pcapkit.protocols.schema.internet.hip.RegFailedParameter
+   :members:
    :show-inheritance:
 
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. autoattribute:: opaque
-
-.. autoclass:: pcapkit.protocols.data.internet.hip.TransportFormatListParameter(type, critical, length, tf_type)
-   :no-members:
+.. autoclass:: pcapkit.protocols.schema.internet.hip.RegFromParameter
+   :members:
    :show-inheritance:
 
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. autoattribute:: tf_type
-
-.. autoclass:: pcapkit.protocols.data.internet.hip.ESPTransformParameter(type, critical, length, suite_id)
-   :no-members:
+.. autoclass:: pcapkit.protocols.schema.internet.hip.EchoResponseSignedParameter
+   :members:
    :show-inheritance:
 
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. autoattribute:: suite_id
-
-.. autoclass:: pcapkit.protocols.data.internet.hip.SeqDataParameter(type, critical, length, seq)
-   :no-members:
+.. autoclass:: pcapkit.protocols.schema.internet.hip.TransportFormatListParameter
+   :members:
    :show-inheritance:
 
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. autoattribute:: seq
-
-.. autoclass:: pcapkit.protocols.data.internet.hip.AckDataParameter(type, critical, length, ack)
-   :no-members:
+.. autoclass:: pcapkit.protocols.schema.internet.hip.ESPTransformParameter
+   :members:
    :show-inheritance:
 
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. autoattribute:: ack
-
-.. autoclass:: pcapkit.protocols.data.internet.hip.PayloadMICParameter(type, critical, length, next, payload, mic)
-   :no-members:
+.. autoclass:: pcapkit.protocols.schema.internet.hip.SeqDataParameter
+   :members:
    :show-inheritance:
 
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. autoattribute:: next
-   .. autoattribute:: payload
-   .. autoattribute:: mic
-
-.. autoclass:: pcapkit.protocols.data.internet.hip.TransactionIDParameter(type, critical, length, id)
-   :no-members:
+.. autoclass:: pcapkit.protocols.schema.internet.hip.AckDataParameter
+   :members:
    :show-inheritance:
 
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. autoattribute:: id
-
-.. autoclass:: pcapkit.protocols.data.internet.hip.OverlayIDParameter(type, critical, length, id)
-   :no-members:
+.. autoclass:: pcapkit.protocols.schema.internet.hip.PayloadMICParameter
+   :members:
    :show-inheritance:
 
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. autoattribute:: id
-
-.. autoclass:: pcapkit.protocols.data.internet.hip.RouteDstParameter(type, critical, length, flags, hit)
-   :no-members:
+.. autoclass:: pcapkit.protocols.schema.internet.hip.TransactionIDParameter
+   :members:
    :show-inheritance:
 
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. autoattribute:: flags
-   .. autoattribute:: hit
-
-.. autoclass:: pcapkit.protocols.data.internet.hip.Flags(symmetric, must_follow)
-   :no-members:
+.. autoclass:: pcapkit.protocols.schema.internet.hip.OverlayIDParameter
+   :members:
    :show-inheritance:
 
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. autoattribute:: symmetric
-   .. autoattribute:: must_follow
-
-.. autoclass:: pcapkit.protocols.data.internet.hip.HIPTransportModeParameter(type, critical, length, port, mode_id)
-   :no-members:
+.. autoclass:: pcapkit.protocols.schema.internet.hip.RouteDstParameter
+   :members:
    :show-inheritance:
 
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. autoattribute:: port
-   .. autoattribute:: mode_id
-
-.. autoclass:: pcapkit.protocols.data.internet.hip.HIPMACParameter(type, critical, length, hmac)
-   :no-members:
+.. autoclass:: pcapkit.protocols.schema.internet.hip.HIPTransportModeParameter
+   :members:
    :show-inheritance:
 
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. autoattribute:: hmac
-
-.. autoclass:: pcapkit.protocols.data.internet.hip.HIPMAC2Parameter(type, critical, length, hmac)
-   :no-members:
+.. autoclass:: pcapkit.protocols.schema.internet.hip.HIPMACParameter
+   :members:
    :show-inheritance:
 
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. autoattribute:: hmac
-
-.. autoclass:: pcapkit.protocols.data.internet.hip.HIPSignature2Parameter(type, critical, length, algorithm, signature)
-   :no-members:
+.. autoclass:: pcapkit.protocols.schema.internet.hip.HIPMAC2Parameter
+   :members:
    :show-inheritance:
 
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. autoattribute:: algorithm
-   .. autoattribute:: signature
-
-.. autoclass:: pcapkit.protocols.data.internet.hip.HIPSignatureParameter(type, critical, length, algorithm, signature)
-   :no-members:
+.. autoclass:: pcapkit.protocols.schema.internet.hip.HIPSignature2Parameter
+   :members:
    :show-inheritance:
 
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. autoattribute:: algorithm
-   .. autoattribute:: signature
-
-.. autoclass:: pcapkit.protocols.data.internet.hip.EchoRequestUnsignedParameter(type, critical, length, opaque)
-   :no-members:
+.. autoclass:: pcapkit.protocols.schema.internet.hip.HIPSignatureParameter
+   :members:
    :show-inheritance:
 
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. autoattribute:: opaque
-
-.. autoclass:: pcapkit.protocols.data.internet.hip.EchoResponseUnsignedParameter(type, critical, length, opaque)
-   :no-members:
+.. autoclass:: pcapkit.protocols.schema.internet.hip.EchoRequestUnsignedParameter
+   :members:
    :show-inheritance:
 
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. autoattribute:: opaque
-
-.. autoclass:: pcapkit.protocols.data.internet.hip.RelayFromParameter(type, critical, length, port, protocol, address)
-   :no-members:
+.. autoclass:: pcapkit.protocols.schema.internet.hip.EchoResponseUnsignedParameter
+   :members:
    :show-inheritance:
 
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. autoattribute:: port
-   .. autoattribute:: protocol
-   .. autoattribute:: address
-
-.. autoclass:: pcapkit.protocols.data.internet.hip.RelayToParameter(type, critical, length, port, protocol, address)
-   :no-members:
+.. autoclass:: pcapkit.protocols.schema.internet.hip.RelayFromParameter
+   :members:
    :show-inheritance:
 
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. autoattribute:: port
-   .. autoattribute:: protocol
-   .. autoattribute:: address
-
-.. autoclass:: pcapkit.protocols.data.internet.hip.OverlayTTLParameter(type, critical, length, ttl)
-   :no-members:
+.. autoclass:: pcapkit.protocols.schema.internet.hip.RelayToParameter
+   :members:
    :show-inheritance:
 
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. autoattribute:: ttl
-
-.. autoclass:: pcapkit.protocols.data.internet.hip.RouteViaParameter(type, critical, length, flags, hit)
-   :no-members:
+.. autoclass:: pcapkit.protocols.schema.internet.hip.OverlayTTLParameter
+   :members:
    :show-inheritance:
 
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. autoattribute:: flags
-   .. autoattribute:: hit
-
-.. autoclass:: pcapkit.protocols.data.internet.hip.FromParameter(type, critical, length, address)
-   :no-members:
+.. autoclass:: pcapkit.protocols.schema.internet.hip.RouteViaParameter
+   :members:
    :show-inheritance:
 
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. autoattribute:: address
-
-.. autoclass:: pcapkit.protocols.data.internet.hip.RVSHMACParameter(type, critical, length, hmac)
-   :no-members:
+.. autoclass:: pcapkit.protocols.schema.internet.hip.FromParameter
+   :members:
    :show-inheritance:
 
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. autoattribute:: hmac
-
-.. autoclass:: pcapkit.protocols.data.internet.hip.ViaRVSParameter(type, critical, length, address)
-   :no-members:
+.. autoclass:: pcapkit.protocols.schema.internet.hip.RVSHMACParameter
+   :members:
    :show-inheritance:
 
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. autoattribute:: address
-
-.. autoclass:: pcapkit.protocols.data.internet.hip.RelayHMACParameter(type, critical, length, hmac)
-   :no-members:
+.. autoclass:: pcapkit.protocols.schema.internet.hip.ViaRVSParameter
+   :members:
    :show-inheritance:
 
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. autoattribute:: hmac
+.. autoclass:: pcapkit.protocols.schema.internet.hip.RelayHMACParameter
+   :members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
+Type Stubs
+~~~~~~~~~~
+
+.. autoclass:: pcapkit.protocols.schema.internet.hip.PacketType
+   :members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
+.. autoclass:: pcapkit.protocols.schema.internet.hip.VersionType
+   :members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
+.. autoclass:: pcapkit.protocols.schema.internet.hip.ControlsType
+   :members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
+.. autoclass:: pcapkit.protocols.schema.internet.hip.LocatorFlags
+   :members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
+.. autoclass:: pcapkit.protocols.schema.internet.hip.DIData
+   :members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
+.. autoclass:: pcapkit.protocols.schema.internet.hip.RouteFlags
+   :members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
+Auxiliary Functions
+~~~~~~~~~~~~~~~~~~~
+
+.. autofunction:: pcapkit.protocols.schema.internet.hip.locator_value_selector
+.. autofunction:: pcapkit.protocols.schema.internet.hip.host_id_hi_selector
+
+Data Models
+-----------
+
+.. module:: pcapkit.protocols.data.internet.hip
+
+.. autoclass:: pcapkit.protocols.data.internet.hip.HIP
+   :members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
+.. autoclass:: pcapkit.protocols.data.internet.hip.Control
+   :members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
+.. autoclass:: pcapkit.protocols.data.internet.hip.Parameter
+   :members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
+.. autoclass:: pcapkit.protocols.data.internet.hip.UnassignedParameter
+   :members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
+.. autoclass:: pcapkit.protocols.data.internet.hip.ESPInfoParameter
+   :members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
+.. autoclass:: pcapkit.protocols.data.internet.hip.R1CounterParameter
+   :members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
+.. autoclass:: pcapkit.protocols.data.internet.hip.LocatorSetParameter
+   :members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
+.. autoclass:: pcapkit.protocols.data.internet.hip.Locator
+   :members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
+.. autoclass:: pcapkit.protocols.data.internet.hip.LocatorData
+   :members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
+.. autoclass:: pcapkit.protocols.data.internet.hip.PuzzleParameter
+   :members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
+.. autoclass:: pcapkit.protocols.data.internet.hip.SolutionParameter
+   :members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
+.. autoclass:: pcapkit.protocols.data.internet.hip.SEQParameter
+   :members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
+.. autoclass:: pcapkit.protocols.data.internet.hip.ACKParameter
+   :members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
+.. autoclass:: pcapkit.protocols.data.internet.hip.DHGroupListParameter
+   :members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
+.. autoclass:: pcapkit.protocols.data.internet.hip.DiffieHellmanParameter
+   :members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
+.. autoclass:: pcapkit.protocols.data.internet.hip.HIPTransformParameter
+   :members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
+.. autoclass:: pcapkit.protocols.data.internet.hip.HIPCipherParameter
+   :members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
+.. autoclass:: pcapkit.protocols.data.internet.hip.NATTraversalModeParameter
+   :members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
+.. autoclass:: pcapkit.protocols.data.internet.hip.TransactionPacingParameter
+   :members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
+.. autoclass:: pcapkit.protocols.data.internet.hip.EncryptedParameter
+   :members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
+.. autoclass:: pcapkit.protocols.data.internet.hip.HostIDParameter
+   :members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
+.. autoclass:: pcapkit.protocols.data.internet.hip.HostIdentity
+   :members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
+.. autoclass:: pcapkit.protocols.data.internet.hip.HITSuiteListParameter
+   :members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
+.. autoclass:: pcapkit.protocols.data.internet.hip.CertParameter
+   :members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
+.. autoclass:: pcapkit.protocols.data.internet.hip.NotificationParameter
+   :members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
+.. autoclass:: pcapkit.protocols.data.internet.hip.EchoRequestSignedParameter
+   :members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
+.. autoclass:: pcapkit.protocols.data.internet.hip.RegInfoParameter
+   :members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
+.. autoclass:: pcapkit.protocols.data.internet.hip.Lifetime
+   :members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
+.. autoclass:: pcapkit.protocols.data.internet.hip.RegRequestParameter
+   :members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
+.. autoclass:: pcapkit.protocols.data.internet.hip.RegResponseParameter
+   :members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
+.. autoclass:: pcapkit.protocols.data.internet.hip.RegFailedParameter
+   :members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
+.. autoclass:: pcapkit.protocols.data.internet.hip.RegFromParameter
+   :members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
+.. autoclass:: pcapkit.protocols.data.internet.hip.EchoResponseSignedParameter
+   :members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
+.. autoclass:: pcapkit.protocols.data.internet.hip.TransportFormatListParameter
+   :members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
+.. autoclass:: pcapkit.protocols.data.internet.hip.ESPTransformParameter
+   :members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
+.. autoclass:: pcapkit.protocols.data.internet.hip.SeqDataParameter
+   :members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
+.. autoclass:: pcapkit.protocols.data.internet.hip.AckDataParameter
+   :members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
+.. autoclass:: pcapkit.protocols.data.internet.hip.PayloadMICParameter
+   :members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
+.. autoclass:: pcapkit.protocols.data.internet.hip.TransactionIDParameter
+   :members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
+.. autoclass:: pcapkit.protocols.data.internet.hip.OverlayIDParameter
+   :members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
+.. autoclass:: pcapkit.protocols.data.internet.hip.RouteDstParameter
+   :members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
+.. autoclass:: pcapkit.protocols.data.internet.hip.Flags
+   :members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
+.. autoclass:: pcapkit.protocols.data.internet.hip.HIPTransportModeParameter
+   :members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
+.. autoclass:: pcapkit.protocols.data.internet.hip.HIPMACParameter
+   :members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
+.. autoclass:: pcapkit.protocols.data.internet.hip.HIPMAC2Parameter
+   :members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
+.. autoclass:: pcapkit.protocols.data.internet.hip.HIPSignature2Parameter
+   :members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
+.. autoclass:: pcapkit.protocols.data.internet.hip.HIPSignatureParameter
+   :members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
+.. autoclass:: pcapkit.protocols.data.internet.hip.EchoRequestUnsignedParameter
+   :members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
+.. autoclass:: pcapkit.protocols.data.internet.hip.EchoResponseUnsignedParameter
+   :members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
+.. autoclass:: pcapkit.protocols.data.internet.hip.RelayFromParameter
+   :members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
+.. autoclass:: pcapkit.protocols.data.internet.hip.RelayToParameter
+   :members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
+.. autoclass:: pcapkit.protocols.data.internet.hip.OverlayTTLParameter
+   :members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
+.. autoclass:: pcapkit.protocols.data.internet.hip.RouteViaParameter
+   :members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
+.. autoclass:: pcapkit.protocols.data.internet.hip.FromParameter
+   :members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
+.. autoclass:: pcapkit.protocols.data.internet.hip.RVSHMACParameter
+   :members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
+.. autoclass:: pcapkit.protocols.data.internet.hip.ViaRVSParameter
+   :members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
+.. autoclass:: pcapkit.protocols.data.internet.hip.RelayHMACParameter
+   :members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
 
 .. raw:: html
 

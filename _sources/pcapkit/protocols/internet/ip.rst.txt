@@ -2,7 +2,6 @@ IP - Internet Protocol
 ======================
 
 .. module:: pcapkit.protocols.internet.ip
-.. module:: pcapkit.protocols.data.internet.ip
 
 :mod:`pcapkit.protocols.internet.ip` contains
 :class:`~pcapkit.protocols.internet.ip.IP` only,

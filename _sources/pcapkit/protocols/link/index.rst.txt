@@ -3,6 +3,7 @@ Link Layer Protocols
 
 .. module:: pcapkit.protocols.link
 .. module:: pcapkit.protocols.data.link
+.. module:: pcapkit.protocols.schema.link
 
 :mod:`pcapkit.protocols.link` is collection of all protocols in
 link layer, with detailed implementation and methods.

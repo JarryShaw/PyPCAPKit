@@ -2,7 +2,6 @@ VLAN - 802.1Q Customer VLAN Tag Type
 ====================================
 
 .. module:: pcapkit.protocols.link.vlan
-.. module:: pcapkit.protocols.data.link.vlan
 
 :mod:`pcapkit.protocols.link.vlan` contains
 :class:`~pcapkit.protocols.link.vlan.VLAN`
@@ -20,18 +19,12 @@ Octets      Bits        Name                    Description
   3          24   ``vlan.type``             Protocol (Internet Layer)
 ======= ========= ====================== =============================
 
-.. raw:: html
-
-   <br />
-
 .. autoclass:: pcapkit.protocols.link.vlan.VLAN
    :no-members:
    :show-inheritance:
 
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
-
-   .. automethod:: __index__
 
    .. autoproperty:: name
    .. autoproperty:: alias
@@ -42,29 +35,57 @@ Octets      Bits        Name                    Description
    .. automethod:: read
    .. automethod:: make
 
-Data Structures
----------------
+   .. automethod:: _make_data
 
-.. autoclass:: pcapkit.protocols.data.link.vlan.VLAN(tci, type)
-   :no-members:
+   .. automethod:: __index__
+
+Header Schemas
+--------------
+
+.. module:: pcapkit.protocols.schema.link.vlan
+
+.. autoclass:: pcapkit.protocols.schema.link.vlan.VLAN
+   :members:
    :show-inheritance:
 
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. autoattribute:: tci
-   .. autoattribute:: type
-
-.. autoclass:: pcapkit.protocols.data.link.vlan.TCI(pcp, dei, vid)
-   :no-members:
+.. autoclass:: pcapkit.protocols.schema.link.vlan.TCI
+   :members:
    :show-inheritance:
 
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. autoattribute:: pcp
-   .. autoattribute:: dei
-   .. autoattribute:: vid
+Type Stubs
+~~~~~~~~~~
+
+.. autoclass:: pcapkit.protocols.schema.link.vlan.TCIType
+   :members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
+Data Models
+-----------
+
+.. module:: pcapkit.protocols.data.link.vlan
+
+.. autoclass:: pcapkit.protocols.data.link.vlan.VLAN
+   :members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
+.. autoclass:: pcapkit.protocols.data.link.vlan.TCI
+   :members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
 
 .. raw:: html
 

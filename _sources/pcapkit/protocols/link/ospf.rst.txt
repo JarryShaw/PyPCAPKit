@@ -2,7 +2,6 @@ OSPF - Open Shortest Path First
 ===============================
 
 .. module:: pcapkit.protocols.link.ospf
-.. module:: pcapkit.protocols.data.link.ospf
 
 :mod:`pcapkit.protocols.link.ospf` contains
 :class:`~pcapkit.protocols.link.ospf.OSPF` only,
@@ -43,8 +42,6 @@ as below:
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. automethod:: __index__
-
    .. autoproperty:: name
    .. autoproperty:: alias
    .. autoproperty:: length
@@ -53,38 +50,55 @@ as below:
    .. automethod:: read
    .. automethod:: make
 
+   .. automethod:: _make_data
+
    .. automethod:: _read_encrypt_auth
+   .. automethod:: _make_encrypt_auth
 
-Data Structures
----------------
+   .. automethod:: __index__
 
-.. autoclass:: pcapkit.protocols.data.link.ospf.OSPF(version, type, length, router_id, area_id, chksum, autype)
-   :no-members:
+Header Schemas
+--------------
+
+.. module:: pcapkit.protocols.schema.link.ospf
+
+.. autoclass:: pcapkit.protocols.schema.link.ospf.OSPF
+   :members:
    :show-inheritance:
 
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. autoattribute:: version
-   .. autoattribute:: type
-   .. autoattribute:: len
-   .. autoattribute:: router_id
-   .. autoattribute:: area_id
-   .. autoattribute:: chksum
-   .. autoattribute:: autype
-
-   .. autoattribute:: auth
-
-.. autoclass:: pcapkit.protocols.data.link.ospf.CrytographicAuthentication(key_id, len, seq)
-   :no-members:
+.. autoclass:: pcapkit.protocols.schema.link.ospf.CrytographicAuthentication
+   :members:
    :show-inheritance:
 
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. autoattribute:: key_id
-   .. autoattribute:: len
-   .. autoattribute:: seq
+Auxiliary Functions
+~~~~~~~~~~~~~~~~~~~
+
+.. autofunction:: pcapkit.protocols.schema.link.ospf.ospf_auth_data_selector
+
+Data Models
+-----------
+
+.. module:: pcapkit.protocols.data.link.ospf
+
+.. autoclass:: pcapkit.protocols.data.link.ospf.OSPF
+   :members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
+.. autoclass:: pcapkit.protocols.data.link.ospf.CrytographicAuthentication
+   :members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
 
 .. raw:: html
 

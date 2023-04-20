@@ -2,7 +2,6 @@ MH - Mobility Header
 ====================
 
 .. module:: pcapkit.protocols.internet.mh
-.. module:: pcapkit.protocols.data.internet.mh
 
 :mod:`pcapkit.protocols.internet.mh` contains
 :class:`~pcapkit.protocols.internet.mh.MH` only,
@@ -20,10 +19,6 @@ Octets      Bits        Name                    Description
   6          48   ``mh.data``                 Message Data
 ======= ========= ================== ===============================
 
-.. raw:: html
-
-   <br />
-
 .. todo::
 
    Implements extractor for message data of all MH types.
@@ -35,9 +30,6 @@ Octets      Bits        Name                    Description
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. automethod:: __post_init__
-   .. automethod:: __index__
-
    .. autoproperty:: name
    .. autoproperty:: length
    .. autoproperty:: payload
@@ -47,21 +39,34 @@ Octets      Bits        Name                    Description
    .. automethod:: read
    .. automethod:: make
 
-Data Structures
----------------
+   .. automethod:: _make_data
 
-.. autoclass:: pcapkit.protocols.data.internet.mh.MH(next, length, type, chksum, data)
-   :no-members:
+   .. automethod:: __post_init__
+   .. automethod:: __index__
+
+Header Schemas
+--------------
+
+.. module:: pcapkit.protocols.schema.internet.mh
+
+.. autoclass:: pcapkit.protocols.schema.internet.mh.MH
+   :members:
    :show-inheritance:
 
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. autoattribute:: next
-   .. autoattribute:: length
-   .. autoattribute:: type
-   .. autoattribute:: chksum
-   .. autoattribute:: data
+Data Models
+-----------
+
+.. module:: pcapkit.protocols.data.internet.mh
+
+.. autoclass:: pcapkit.protocols.data.internet.mh.MH
+   :members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
 
 .. raw:: html
 

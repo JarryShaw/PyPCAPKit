@@ -1,3 +1,4 @@
+============================================
 Protocol Type Registry Constant Enumerations
 ============================================
 
@@ -15,34 +16,43 @@ implementations. Available enumerations include:
    * - :class:`TRANSTYPE <pcapkit.const.reg.transtype.TransType>`
      - Transport Layer Protocol Numbers [*]_
 
-.. automodule:: pcapkit.const.reg.linktype
-   :no-members:
+Link-Layer Header Type Values
+=============================
+
+.. module:: pcapkit.const.reg.linktype
+
+This module contains the constant enumeration for **Link-Layer Header Type Values**,
+which is automatically generated from :class:`pcapkit.vendor.reg.linktype.LinkType`.
 
 .. autoclass:: pcapkit.const.reg.linktype.LinkType
    :members:
    :undoc-members:
-   :private-members:
-   :exclude-members: get, _missing_
    :show-inheritance:
 
-.. automodule:: pcapkit.const.reg.ethertype
-   :no-members:
+Ethertype IEEE 802 Numbers
+==========================
+
+.. module:: pcapkit.const.reg.ethertype
+
+This module contains the constant enumeration for **Ethertype IEEE 802 Numbers**,
+which is automatically generated from :class:`pcapkit.vendor.reg.ethertype.EtherType`.
 
 .. autoclass:: pcapkit.const.reg.ethertype.EtherType
    :members:
    :undoc-members:
-   :private-members:
-   :exclude-members: get, _missing_
    :show-inheritance:
 
-.. automodule:: pcapkit.const.reg.transtype
-   :no-members:
+Transport Layer Protocol Numbers
+================================
+
+.. module:: pcapkit.const.reg.transtype
+
+This module contains the constant enumeration for **Transport Layer Protocol Numbers**,
+which is automatically generated from :class:`pcapkit.vendor.reg.transtype.TransType`.
 
 .. autoclass:: pcapkit.const.reg.transtype.TransType
    :members:
    :undoc-members:
-   :private-members:
-   :exclude-members: get, _missing_
    :show-inheritance:
 
 .. raw:: html

@@ -1,0 +1,1270 @@
+<!doctype html>
+<html class="no-js" lang="en">
+  <head><meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1"/>
+    <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../../../../genindex.html" /><link rel="search" title="Search" href="../../../../../search.html" />
+
+    <!-- Generated with Sphinx 6.1.3 and Furo 2023.03.27 -->
+        <title>pcapkit.protocols.schema.transport.tcp - PyPCAPKit</title>
+      <link rel="stylesheet" type="text/css" href="../../../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../../../_static/styles/furo.css?digest=fad236701ea90a88636c2a8c73b44ae642ed2a53" />
+    <link rel="stylesheet" type="text/css" href="../../../../../_static/copybutton.css" />
+    <link rel="stylesheet" type="text/css" href="../../../../../_static/styles/furo-extensions.css?digest=30d1aed668e5c3a91c3e3bf6a60b675221979f0e" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f8f8f8;
+  --color-code-foreground: black;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-half" viewBox="0 0 24 24">
+    <title>Auto light/dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-shadow">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M13 12h5" />
+      <path d="M13 15h4" />
+      <path d="M13 18h1" />
+      <path d="M13 9h4" />
+      <path d="M13 6h1" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc">
+<label class="overlay sidebar-overlay" for="__navigation">
+  <div class="visually-hidden">Hide navigation sidebar</div>
+</label>
+<label class="overlay toc-overlay" for="__toc">
+  <div class="visually-hidden">Hide table of contents sidebar</div>
+</label>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <div class="visually-hidden">Toggle site navigation sidebar</div>
+        <i class="icon"><svg><use href="#svg-menu"></use></svg></i>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="../../../../../index.html"><div class="brand">PyPCAPKit</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle">
+          <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+          <svg class="theme-icon-when-auto"><use href="#svg-sun-half"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon no-toc" for="__toc">
+        <div class="visually-hidden">Toggle table of contents sidebar</div>
+        <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="../../../../../index.html">
+  
+  
+  
+</a><form class="sidebar-search-container" method="get" action="../../../../../search.html" role="search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../../../../pcapkit/index.html">Module Documentation</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../../../../pcapkit/interface/index.html">User Interface</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/interface/core.html">Core Interface</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/interface/misc.html">Auxiliary Interface</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../../../../pcapkit/foundation/index.html">Library Foundation</a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/foundation/extraction.html">Extractor for PCAP Files</a></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../../../../pcapkit/foundation/reassembly/index.html">Fragmented Packets Reassembly</a><input class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/foundation/reassembly/reassembly.html">Base Class</a></li>
+<li class="toctree-l4 has-children"><a class="reference internal" href="../../../../../pcapkit/foundation/reassembly/ip/index.html">IP Datagram Reassembly</a><input class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" role="switch" type="checkbox"/><label for="toctree-checkbox-5"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l5"><a class="reference internal" href="../../../../../pcapkit/foundation/reassembly/ip/ip.html">Base Class</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../../../../pcapkit/foundation/reassembly/ip/ipv4.html">IPv4 Datagram Reassembly</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../../../../pcapkit/foundation/reassembly/ip/ipv6.html">IPv6 Datagram Reassembly</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/foundation/reassembly/tcp.html">TCP Datagram Reassembly</a></li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../../../../pcapkit/foundation/traceflow/index.html">Trace Flows</a><input class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" role="switch" type="checkbox"/><label for="toctree-checkbox-6"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/foundation/traceflow/traceflow.html">Base Class</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/foundation/traceflow/tcp.html">Trace TCP Flows</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/foundation/registry.html">Registry Management</a></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../../../../pcapkit/foundation/engines/index.html">Engine Support</a><input class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" role="switch" type="checkbox"/><label for="toctree-checkbox-7"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/foundation/engines/engine.html">Base Class</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/foundation/engines/builtin.html">Built-in Engines</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/foundation/engines/3rdparty.html">3rd-Party Engines</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../../../../pcapkit/protocols/index.html">Protocol Family</a><input class="toctree-checkbox" id="toctree-checkbox-8" name="toctree-checkbox-8" role="switch" type="checkbox"/><label for="toctree-checkbox-8"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/protocols/protocol.html">Root Protocol</a></li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../../../../pcapkit/protocols/misc/index.html">Auxiliary Protocols</a><input class="toctree-checkbox" id="toctree-checkbox-9" name="toctree-checkbox-9" role="switch" type="checkbox"/><label for="toctree-checkbox-9"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/misc/pcap.html">PCAP File Headers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/misc/raw.html">Raw Packet Data</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/misc/null.html">No-Payload Packet</a></li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../../../../pcapkit/protocols/link/index.html">Link Layer Protocols</a><input class="toctree-checkbox" id="toctree-checkbox-10" name="toctree-checkbox-10" role="switch" type="checkbox"/><label for="toctree-checkbox-10"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/link/link.html">Base Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/link/ethernet.html">Ethernet Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/link/arp.html">ARP/InARP - (Inverse) Address Resolution Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/link/rarp.html">RARP/DRARP - (Dynamic) Reverse Address Resolution Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/link/l2tp.html">L2TP - Layer Two Tunnelling Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/link/ospf.html">OSPF - Open Shortest Path First</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/link/vlan.html">VLAN - 802.1Q Customer VLAN Tag Type</a></li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../../../../pcapkit/protocols/internet/index.html">Internet Layer Protocols</a><input class="toctree-checkbox" id="toctree-checkbox-11" name="toctree-checkbox-11" role="switch" type="checkbox"/><label for="toctree-checkbox-11"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/internet/internet.html">Base Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/internet/ip.html">IP - Internet Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/internet/ipv4.html">IPv4 - Internet Protocol version 4</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/internet/ipv6.html">IPv6 - Internet Protocol version 6</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/internet/ipv6_frag.html">IPv6-Frag - Fragment Header for IPv6</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/internet/ipv6_opts.html">IPv6-Opts - Destination Options for IPv6</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/internet/ipv6_route.html">IPv6-Route - Routing Header for IPv6</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/internet/hopopt.html">HOPOPT - IPv6 Hop-by-Hop Options</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/internet/ipsec.html">IPsec - Internet Protocol Security</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/internet/ah.html">AH - Authentication Header</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/internet/hip.html">HIP - Host Identity Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/internet/mh.html">MH - Mobility Header</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/internet/ipx.html">IPX - Internetwork Packet Exchange</a></li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../../../../pcapkit/protocols/transport/index.html">Transport Layer Protocols</a><input class="toctree-checkbox" id="toctree-checkbox-12" name="toctree-checkbox-12" role="switch" type="checkbox"/><label for="toctree-checkbox-12"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/transport/transport.html">Base Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/transport/tcp.html">TCP - Transmission Control Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/transport/udp.html">UDP - User Datagram Protocol</a></li>
+</ul>
+</li>
+<li class="toctree-l3 has-children"><a class="reference internal" href="../../../../../pcapkit/protocols/application/index.html">Application Layer Protocols</a><input class="toctree-checkbox" id="toctree-checkbox-13" name="toctree-checkbox-13" role="switch" type="checkbox"/><label for="toctree-checkbox-13"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/application/application.html">Base Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/application/http.html">HTTP - Hypertext Transfer Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/application/httpv1.html">HTTP/1.* - Hypertext Transfer Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/application/httpv2.html">HTTP/2 - Hypertext Transfer Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/application/ftp.html">FTP - File Transfer Protocol</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../../../../pcapkit/corekit/index.html">Core Utilities</a><input class="toctree-checkbox" id="toctree-checkbox-14" name="toctree-checkbox-14" role="switch" type="checkbox"/><label for="toctree-checkbox-14"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/corekit/fields.html">Protocol Fields</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/corekit/infoclass.html">Info Class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/corekit/multidict.html">Multi-Mapping Dictionary</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/corekit/protochain.html">Protocol Chain</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/corekit/version.html">Version Info</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../../../../pcapkit/toolkit/index.html">Compatibility Tools</a><input class="toctree-checkbox" id="toctree-checkbox-15" name="toctree-checkbox-15" role="switch" type="checkbox"/><label for="toctree-checkbox-15"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/toolkit/builtin.html">Built-in Support</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/toolkit/3rdparty.html">3rd-Party Support</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../../../../pcapkit/dumpkit/index.html">Dump Utilities</a><input class="toctree-checkbox" id="toctree-checkbox-16" name="toctree-checkbox-16" role="switch" type="checkbox"/><label for="toctree-checkbox-16"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/dumpkit/null.html">Null Dumper</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/dumpkit/pcap.html">PCAP Dumper</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../../../../pcapkit/utilities/index.html">Module Utilities</a><input class="toctree-checkbox" id="toctree-checkbox-17" name="toctree-checkbox-17" role="switch" type="checkbox"/><label for="toctree-checkbox-17"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/utilities/exceptions.html">User Defined Exceptions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/utilities/warnings.html">User Defined Warnings</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../../../../pcapkit/const/index.html">Constant Enumerations</a><input class="toctree-checkbox" id="toctree-checkbox-18" name="toctree-checkbox-18" role="switch" type="checkbox"/><label for="toctree-checkbox-18"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/const/reg.html">Protocol Type Registry Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/const/pcapng.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">PCAPNG</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/const/arp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">ARP</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/const/l2tp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">L2TP</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/const/ospf.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/const/vlan.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">VLAN</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/const/hip.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HIP</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/const/ipv4.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv4</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/const/ipv6.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/const/ipx.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPX</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/const/mh.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">MH</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/const/tcp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/const/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Constant Enumerations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/const/http.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTTP</span></code> Constant Enumerations</a></li>
+</ul>
+</li>
+<li class="toctree-l2 has-children"><a class="reference internal" href="../../../../../pcapkit/vendor/index.html">Vendor Crawlers</a><input class="toctree-checkbox" id="toctree-checkbox-19" name="toctree-checkbox-19" role="switch" type="checkbox"/><label for="toctree-checkbox-19"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/default.html">Base Crawler</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/reg.html">Protocol Type Registry Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/pcapng.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">PCAPNG</span></code> Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/arp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">ARP</span></code> Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/l2tp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">L2TP</span></code> Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/ospf.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code> Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/vlan.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">VLAN</span></code> Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/hip.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HIP</span></code> Vendor Crawler</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/ipv4.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv4</span></code> Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/ipv6.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6</span></code> Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/ipx.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPX</span></code> Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/mh.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">MH</span></code> Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/tcp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code> Vendor Crawlers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Vendor Crawler</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/vendor/http.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTTP</span></code> Vendor Crawler</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../demo.html">How to …</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../pep.html">Help Wanted</a></li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          <div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle">
+              <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+              <svg class="theme-icon-when-auto"><use href="#svg-sun-half"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon no-toc" for="__toc">
+            <div class="visually-hidden">Toggle table of contents sidebar</div>
+            <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+          </label>
+        </div>
+        <article role="main">
+          <h1>Source code for pcapkit.protocols.schema.transport.tcp</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="c1"># mypy: disable-error-code=assignment</span>
+<span class="sd">&quot;&quot;&quot;header schema for transmission control protocol&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">collections</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">cast</span>
+
+<span class="kn">from</span> <span class="nn">pcapkit.const.tcp.checksum</span> <span class="kn">import</span> <span class="n">Checksum</span> <span class="k">as</span> <span class="n">Enum_Checksum</span>
+<span class="kn">from</span> <span class="nn">pcapkit.const.tcp.mp_tcp_option</span> <span class="kn">import</span> <span class="n">MPTCPOption</span> <span class="k">as</span> <span class="n">Enum_MPTCPOption</span>
+<span class="kn">from</span> <span class="nn">pcapkit.const.tcp.option</span> <span class="kn">import</span> <span class="n">Option</span> <span class="k">as</span> <span class="n">Enum_Option</span>
+<span class="kn">from</span> <span class="nn">pcapkit.corekit.fields.collections</span> <span class="kn">import</span> <span class="n">ListField</span><span class="p">,</span> <span class="n">OptionField</span>
+<span class="kn">from</span> <span class="nn">pcapkit.corekit.fields.ipaddress</span> <span class="kn">import</span> <span class="n">IPv4Field</span><span class="p">,</span> <span class="n">IPv6Field</span>
+<span class="kn">from</span> <span class="nn">pcapkit.corekit.fields.misc</span> <span class="kn">import</span> <span class="p">(</span><span class="n">ConditionalField</span><span class="p">,</span> <span class="n">ForwardMatchField</span><span class="p">,</span> <span class="n">PayloadField</span><span class="p">,</span>
+                                         <span class="n">SchemaField</span><span class="p">,</span> <span class="n">SwitchField</span><span class="p">)</span>
+<span class="kn">from</span> <span class="nn">pcapkit.corekit.fields.numbers</span> <span class="kn">import</span> <span class="p">(</span><span class="n">EnumField</span><span class="p">,</span> <span class="n">NumberField</span><span class="p">,</span> <span class="n">UInt8Field</span><span class="p">,</span> <span class="n">UInt16Field</span><span class="p">,</span>
+                                            <span class="n">UInt32Field</span><span class="p">,</span> <span class="n">UInt64Field</span><span class="p">)</span>
+<span class="kn">from</span> <span class="nn">pcapkit.corekit.fields.strings</span> <span class="kn">import</span> <span class="n">BitField</span><span class="p">,</span> <span class="n">BytesField</span><span class="p">,</span> <span class="n">PaddingField</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.schema.schema</span> <span class="kn">import</span> <span class="n">Schema</span>
+<span class="kn">from</span> <span class="nn">pcapkit.utilities.exceptions</span> <span class="kn">import</span> <span class="n">FieldError</span>
+<span class="kn">from</span> <span class="nn">pcapkit.utilities.logging</span> <span class="kn">import</span> <span class="n">SPHINX_TYPE_CHECKING</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s1">&#39;TCP&#39;</span><span class="p">,</span>
+
+    <span class="s1">&#39;Option&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;UnassignedOption&#39;</span><span class="p">,</span> <span class="s1">&#39;EndOfOptionList&#39;</span><span class="p">,</span> <span class="s1">&#39;NoOperation&#39;</span><span class="p">,</span> <span class="s1">&#39;MaximumSegmentSize&#39;</span><span class="p">,</span> <span class="s1">&#39;WindowScale&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;SACKPermitted&#39;</span><span class="p">,</span> <span class="s1">&#39;SACK&#39;</span><span class="p">,</span> <span class="s1">&#39;Echo&#39;</span><span class="p">,</span> <span class="s1">&#39;EchoReply&#39;</span><span class="p">,</span> <span class="s1">&#39;Timestamp&#39;</span><span class="p">,</span> <span class="s1">&#39;PartialOrderConnectionPermitted&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;PartialOrderConnectionProfile&#39;</span><span class="p">,</span> <span class="s1">&#39;CC&#39;</span><span class="p">,</span> <span class="s1">&#39;CCNew&#39;</span><span class="p">,</span> <span class="s1">&#39;CCEcho&#39;</span><span class="p">,</span> <span class="s1">&#39;AlternateChecksumRequest&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;AlternateChecksumData&#39;</span><span class="p">,</span> <span class="s1">&#39;MD5Signature&#39;</span><span class="p">,</span> <span class="s1">&#39;QuickStartResponse&#39;</span><span class="p">,</span> <span class="s1">&#39;UserTimeout&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;Authentication&#39;</span><span class="p">,</span> <span class="s1">&#39;FastOpenCookie&#39;</span><span class="p">,</span>
+
+    <span class="s1">&#39;MPTCP&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;MPTCPUnknown&#39;</span><span class="p">,</span> <span class="s1">&#39;MPTCPCapable&#39;</span><span class="p">,</span> <span class="s1">&#39;MPTCPDSS&#39;</span><span class="p">,</span> <span class="s1">&#39;MPTCPAddAddress&#39;</span><span class="p">,</span> <span class="s1">&#39;MPTCPRemoveAddress&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;MPTCPPriority&#39;</span><span class="p">,</span> <span class="s1">&#39;MPTCPFallback&#39;</span><span class="p">,</span> <span class="s1">&#39;MPTCPFastclose&#39;</span><span class="p">,</span>
+
+    <span class="s1">&#39;MPTCPJoin&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;MPTCPJoinSYN&#39;</span><span class="p">,</span> <span class="s1">&#39;MPTCPJoinSYNACK&#39;</span><span class="p">,</span> <span class="s1">&#39;MPTCPJoinACK&#39;</span><span class="p">,</span>
+<span class="p">]</span>
+
+<span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">ipaddress</span> <span class="kn">import</span> <span class="n">IPv4Address</span><span class="p">,</span> <span class="n">IPv6Address</span>
+    <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">IO</span><span class="p">,</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Optional</span>
+
+    <span class="kn">from</span> <span class="nn">typing_extensions</span> <span class="kn">import</span> <span class="n">Literal</span>
+
+    <span class="kn">from</span> <span class="nn">pcapkit.corekit.fields.field</span> <span class="kn">import</span> <span class="n">_Field</span> <span class="k">as</span> <span class="n">Field</span>
+    <span class="kn">from</span> <span class="nn">pcapkit.protocols.protocol</span> <span class="kn">import</span> <span class="n">Protocol</span>
+
+<span class="k">if</span> <span class="n">SPHINX_TYPE_CHECKING</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">typing_extensions</span> <span class="kn">import</span> <span class="n">TypedDict</span>
+
+<div class="viewcode-block" id="OffsetFlag"><a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.schema.transport.tcp.OffsetFlag">[docs]</a>    <span class="k">class</span> <span class="nc">OffsetFlag</span><span class="p">(</span><span class="n">TypedDict</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;TCP offset field flag.&quot;&quot;&quot;</span>
+
+        <span class="c1">#: Data offset.</span>
+        <span class="n">offset</span><span class="p">:</span> <span class="nb">int</span>
+        <span class="c1">#: ECN-nonce concealment protection.</span>
+        <span class="n">ns</span><span class="p">:</span> <span class="nb">int</span></div>
+
+<div class="viewcode-block" id="Flags"><a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.schema.transport.tcp.Flags">[docs]</a>    <span class="k">class</span> <span class="nc">Flags</span><span class="p">(</span><span class="n">TypedDict</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;TCP flags.&quot;&quot;&quot;</span>
+
+        <span class="c1">#: Congestion window reduced.</span>
+        <span class="n">cwr</span><span class="p">:</span> <span class="nb">int</span>
+        <span class="c1">#: ECN-Echo.</span>
+        <span class="n">ece</span><span class="p">:</span> <span class="nb">int</span>
+        <span class="c1">#: Urgent pointer.</span>
+        <span class="n">urg</span><span class="p">:</span> <span class="nb">int</span>
+        <span class="c1">#: Acknowledgment.</span>
+        <span class="n">ack</span><span class="p">:</span> <span class="nb">int</span>
+        <span class="c1">#: Push function.</span>
+        <span class="n">psh</span><span class="p">:</span> <span class="nb">int</span>
+        <span class="c1">#: Reset connection.</span>
+        <span class="n">rst</span><span class="p">:</span> <span class="nb">int</span>
+        <span class="c1">#: Synchronize sequence numbers.</span>
+        <span class="n">syn</span><span class="p">:</span> <span class="nb">int</span>
+        <span class="c1">#: Last packet from sender.</span>
+        <span class="n">fin</span><span class="p">:</span> <span class="nb">int</span></div>
+
+<div class="viewcode-block" id="POCProfile"><a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.schema.transport.tcp.POCProfile">[docs]</a>    <span class="k">class</span> <span class="nc">POCProfile</span><span class="p">(</span><span class="n">TypedDict</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;TCP partial order connection service profile.&quot;&quot;&quot;</span>
+
+        <span class="c1">#: Start flag.</span>
+        <span class="n">start</span><span class="p">:</span> <span class="nb">int</span>
+        <span class="c1">#: End flag.</span>
+        <span class="n">end</span><span class="p">:</span> <span class="nb">int</span></div>
+
+<div class="viewcode-block" id="QuickStartFlags"><a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.schema.transport.tcp.QuickStartFlags">[docs]</a>    <span class="k">class</span> <span class="nc">QuickStartFlags</span><span class="p">(</span><span class="n">TypedDict</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;TCP quick start flags.&quot;&quot;&quot;</span>
+
+        <span class="c1">#: Rate request.</span>
+        <span class="n">rate</span><span class="p">:</span> <span class="nb">int</span></div>
+
+<div class="viewcode-block" id="QuickStartNonce"><a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.schema.transport.tcp.QuickStartNonce">[docs]</a>    <span class="k">class</span> <span class="nc">QuickStartNonce</span><span class="p">(</span><span class="n">TypedDict</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;TCP quick start nonce.&quot;&quot;&quot;</span>
+
+        <span class="c1">#: Nonce.</span>
+        <span class="n">nonce</span><span class="p">:</span> <span class="nb">int</span></div>
+
+<div class="viewcode-block" id="TimeoutInfo"><a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.schema.transport.tcp.TimeoutInfo">[docs]</a>    <span class="k">class</span> <span class="nc">TimeoutInfo</span><span class="p">(</span><span class="n">TypedDict</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;User timeout information.&quot;&quot;&quot;</span>
+
+        <span class="c1">#: Granularity.</span>
+        <span class="n">granularity</span><span class="p">:</span> <span class="nb">int</span>
+        <span class="c1">#: Timeout value.</span>
+        <span class="n">timeout</span><span class="p">:</span> <span class="nb">int</span></div>
+
+<div class="viewcode-block" id="MPTCPSubtypeTest"><a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.schema.transport.tcp.MPTCPSubtypeTest">[docs]</a>    <span class="k">class</span> <span class="nc">MPTCPSubtypeTest</span><span class="p">(</span><span class="n">TypedDict</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;TCP MPTCP subtype.&quot;&quot;&quot;</span>
+
+        <span class="c1">#: Length.</span>
+        <span class="n">length</span><span class="p">:</span> <span class="nb">int</span>
+        <span class="c1">#: Subtype.</span>
+        <span class="n">subtype</span><span class="p">:</span> <span class="nb">int</span></div>
+
+<div class="viewcode-block" id="MPTCPSubtypeUnknown"><a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.schema.transport.tcp.MPTCPSubtypeUnknown">[docs]</a>    <span class="k">class</span> <span class="nc">MPTCPSubtypeUnknown</span><span class="p">(</span><span class="n">TypedDict</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;TCP unknown MPTCP subtype field.&quot;&quot;&quot;</span>
+
+        <span class="c1">#: Subtype.</span>
+        <span class="n">subtype</span><span class="p">:</span> <span class="nb">int</span>
+        <span class="c1">#: Data.</span>
+        <span class="n">data</span><span class="p">:</span> <span class="nb">int</span></div>
+
+<div class="viewcode-block" id="MPTCPSubtypeCapable"><a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.schema.transport.tcp.MPTCPSubtypeCapable">[docs]</a>    <span class="k">class</span> <span class="nc">MPTCPSubtypeCapable</span><span class="p">(</span><span class="n">TypedDict</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;MPTCP Capable subtype field.&quot;&quot;&quot;</span>
+
+        <span class="c1">#: Subtype.</span>
+        <span class="n">subtype</span><span class="p">:</span> <span class="nb">int</span>
+        <span class="c1">#: Version.</span>
+        <span class="n">version</span><span class="p">:</span> <span class="nb">int</span></div>
+
+<div class="viewcode-block" id="MPTCPCapableFlags"><a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.schema.transport.tcp.MPTCPCapableFlags">[docs]</a>    <span class="k">class</span> <span class="nc">MPTCPCapableFlags</span><span class="p">(</span><span class="n">TypedDict</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;MPTCP Capable flags.&quot;&quot;&quot;</span>
+
+        <span class="c1">#: Checksum required.</span>
+        <span class="n">req</span><span class="p">:</span> <span class="nb">int</span>
+        <span class="c1">#: Extensibility flag.</span>
+        <span class="n">ext</span><span class="p">:</span> <span class="nb">int</span>
+        <span class="c1">#: Use of HMAC-SHA1.</span>
+        <span class="n">hsa</span><span class="p">:</span> <span class="nb">int</span></div>
+
+<div class="viewcode-block" id="MPTCPSubtypeJoin"><a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.schema.transport.tcp.MPTCPSubtypeJoin">[docs]</a>    <span class="k">class</span> <span class="nc">MPTCPSubtypeJoin</span><span class="p">(</span><span class="n">TypedDict</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;MPTCP Join subtype field.&quot;&quot;&quot;</span>
+
+        <span class="c1">#: Subtype.</span>
+        <span class="n">subtype</span><span class="p">:</span> <span class="nb">int</span>
+        <span class="c1">#: Backup flag.</span>
+        <span class="n">backup</span><span class="p">:</span> <span class="nb">int</span></div>
+
+<div class="viewcode-block" id="MPTCPSubtype"><a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.schema.transport.tcp.MPTCPSubtype">[docs]</a>    <span class="k">class</span> <span class="nc">MPTCPSubtype</span><span class="p">(</span><span class="n">TypedDict</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;MPTCP subtype field.&quot;&quot;&quot;</span>
+
+        <span class="c1">#: Subtype.</span>
+        <span class="n">subtype</span><span class="p">:</span> <span class="nb">int</span></div>
+
+<div class="viewcode-block" id="MPTCPDSSFlags"><a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.schema.transport.tcp.MPTCPDSSFlags">[docs]</a>    <span class="k">class</span> <span class="nc">MPTCPDSSFlags</span><span class="p">(</span><span class="n">TypedDict</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;MPTCP-DSS flags.&quot;&quot;&quot;</span>
+
+        <span class="c1">#: ``DATA_FIN`` flag.</span>
+        <span class="n">F</span><span class="p">:</span> <span class="nb">int</span>
+        <span class="c1">#: Data sequence number is 8 octets (if not set, DSN is 4 octets).</span>
+        <span class="n">m</span><span class="p">:</span> <span class="nb">int</span>
+        <span class="c1">#: Data Sequence Number (DSN), Subflow Sequence Number (SSN), Data-Level</span>
+        <span class="c1">#: Length, and Checksum present.</span>
+        <span class="n">M</span><span class="p">:</span> <span class="nb">int</span>
+        <span class="c1">#: Data ACK is 8 octets (if not set, Data ACK is 4 octets).</span>
+        <span class="n">a</span><span class="p">:</span> <span class="nb">int</span>
+        <span class="c1">#: Data ACK present.</span>
+        <span class="n">A</span><span class="p">:</span> <span class="nb">int</span></div>
+
+<div class="viewcode-block" id="MPTCPSubtypeAddAddress"><a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.schema.transport.tcp.MPTCPSubtypeAddAddress">[docs]</a>    <span class="k">class</span> <span class="nc">MPTCPSubtypeAddAddress</span><span class="p">(</span><span class="n">TypedDict</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;MPTCP Add Address subtype field.&quot;&quot;&quot;</span>
+
+        <span class="c1">#: Subtype.</span>
+        <span class="n">subtype</span><span class="p">:</span> <span class="nb">int</span>
+        <span class="c1">#: IP version.</span>
+        <span class="n">version</span><span class="p">:</span> <span class="nb">int</span></div>
+
+<div class="viewcode-block" id="MPTCPSubtypePriority"><a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.schema.transport.tcp.MPTCPSubtypePriority">[docs]</a>    <span class="k">class</span> <span class="nc">MPTCPSubtypePriority</span><span class="p">(</span><span class="n">TypedDict</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;MPTCP Priority subtype field.&quot;&quot;&quot;</span>
+
+        <span class="c1">#: Subtype.</span>
+        <span class="n">subtype</span><span class="p">:</span> <span class="nb">int</span>
+        <span class="c1">#: Backup flag.</span>
+        <span class="n">backup</span><span class="p">:</span> <span class="nb">int</span></div>
+
+
+<div class="viewcode-block" id="mptcp_data_selector"><a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.schema.transport.tcp.mptcp_data_selector">[docs]</a><span class="k">def</span> <span class="nf">mptcp_data_selector</span><span class="p">(</span><span class="n">pkt</span><span class="p">:</span> <span class="s1">&#39;dict[str, Any]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Field&#39;</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Selector function for :attr:`_MPTCP.data` field.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        pkt: Packet data.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        A :class:`~pcapkit.corekit.fields.misc.SchemaField` wrapped</span>
+<span class="sd">        :class:`~pcapkit.protocols.schema.transport.tcp.MPTCP` subclass</span>
+<span class="sd">        instance.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">subtype</span> <span class="o">=</span> <span class="n">Enum_MPTCPOption</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">pkt</span><span class="p">[</span><span class="s1">&#39;test&#39;</span><span class="p">][</span><span class="s1">&#39;subtype&#39;</span><span class="p">])</span>
+    <span class="n">pkt</span><span class="p">[</span><span class="s1">&#39;test&#39;</span><span class="p">][</span><span class="s1">&#39;subtype&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">subtype</span>
+
+    <span class="k">if</span> <span class="n">subtype</span> <span class="o">==</span> <span class="n">Enum_MPTCPOption</span><span class="o">.</span><span class="n">MP_CAPABLE</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">SchemaField</span><span class="p">(</span><span class="n">schema</span><span class="o">=</span><span class="n">MPTCPCapable</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">subtype</span> <span class="o">==</span> <span class="n">Enum_MPTCPOption</span><span class="o">.</span><span class="n">MP_JOIN</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">&#39;flags&#39;</span><span class="p">][</span><span class="s1">&#39;syn&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">&#39;flags&#39;</span><span class="p">][</span><span class="s1">&#39;ack&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">SchemaField</span><span class="p">(</span><span class="n">schema</span><span class="o">=</span><span class="n">MPTCPJoinSYN</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">&#39;flags&#39;</span><span class="p">][</span><span class="s1">&#39;syn&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">&#39;flags&#39;</span><span class="p">][</span><span class="s1">&#39;ack&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">SchemaField</span><span class="p">(</span><span class="n">schema</span><span class="o">=</span><span class="n">MPTCPJoinSYNACK</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">&#39;flags&#39;</span><span class="p">][</span><span class="s1">&#39;syn&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">&#39;flags&#39;</span><span class="p">][</span><span class="s1">&#39;ack&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">SchemaField</span><span class="p">(</span><span class="n">schema</span><span class="o">=</span><span class="n">MPTCPJoinACK</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="n">FieldError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;TCP: [OptNo </span><span class="si">{</span><span class="n">Enum_Option</span><span class="o">.</span><span class="n">Multipath_TCP</span><span class="si">}</span><span class="s1">] </span><span class="si">{</span><span class="n">Enum_MPTCPOption</span><span class="o">.</span><span class="n">MP_JOIN</span><span class="si">}</span><span class="s1"> invalid flags&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">subtype</span> <span class="o">==</span> <span class="n">Enum_MPTCPOption</span><span class="o">.</span><span class="n">DSS</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">SchemaField</span><span class="p">(</span><span class="n">schema</span><span class="o">=</span><span class="n">MPTCPDSS</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">subtype</span> <span class="o">==</span> <span class="n">Enum_MPTCPOption</span><span class="o">.</span><span class="n">ADD_ADDR</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">SchemaField</span><span class="p">(</span><span class="n">schema</span><span class="o">=</span><span class="n">MPTCPAddAddress</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">subtype</span> <span class="o">==</span> <span class="n">Enum_MPTCPOption</span><span class="o">.</span><span class="n">REMOVE_ADDR</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">SchemaField</span><span class="p">(</span><span class="n">schema</span><span class="o">=</span><span class="n">MPTCPRemoveAddress</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">subtype</span> <span class="o">==</span> <span class="n">Enum_MPTCPOption</span><span class="o">.</span><span class="n">MP_PRIO</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">SchemaField</span><span class="p">(</span><span class="n">schema</span><span class="o">=</span><span class="n">MPTCPPriority</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">subtype</span> <span class="o">==</span> <span class="n">Enum_MPTCPOption</span><span class="o">.</span><span class="n">MP_FAIL</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">SchemaField</span><span class="p">(</span><span class="n">schema</span><span class="o">=</span><span class="n">MPTCPFallback</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">subtype</span> <span class="o">==</span> <span class="n">Enum_MPTCPOption</span><span class="o">.</span><span class="n">MP_FASTCLOSE</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">SchemaField</span><span class="p">(</span><span class="n">schema</span><span class="o">=</span><span class="n">MPTCPFastclose</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">SchemaField</span><span class="p">(</span><span class="n">schema</span><span class="o">=</span><span class="n">MPTCPUnknown</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="mptcp_add_address_length"><a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.schema.transport.tcp.mptcp_add_address_length">[docs]</a><span class="k">def</span> <span class="nf">mptcp_add_address_length</span><span class="p">(</span><span class="n">pkt</span><span class="p">:</span> <span class="s1">&#39;dict[str, Any]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Literal[4, 16]&#39;</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Length callback function for :attr:`MPTCPAddAddress.address` field.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        pkt: Packet data.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Length of :attr:`MPTCPAddAddress.address` field.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">&#39;test&#39;</span><span class="p">][</span><span class="s1">&#39;version&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
+        <span class="k">return</span> <span class="mi">4</span>
+    <span class="k">if</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">&#39;test&#39;</span><span class="p">][</span><span class="s1">&#39;version&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">6</span><span class="p">:</span>
+        <span class="k">return</span> <span class="mi">16</span>
+    <span class="k">raise</span> <span class="n">FieldError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;TCP: [OptNo </span><span class="si">{</span><span class="n">Enum_Option</span><span class="o">.</span><span class="n">Multipath_TCP</span><span class="si">}</span><span class="s1">] </span><span class="si">{</span><span class="n">Enum_MPTCPOption</span><span class="o">.</span><span class="n">ADD_ADDR</span><span class="si">}</span><span class="s1"> invalid IP version&#39;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="mptcp_add_address_selector"><a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.schema.transport.tcp.mptcp_add_address_selector">[docs]</a><span class="k">def</span> <span class="nf">mptcp_add_address_selector</span><span class="p">(</span><span class="n">pkt</span><span class="p">:</span> <span class="s1">&#39;dict[str, Any]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Field&#39;</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Selector function for :attr:`MPTCPAddAddress.address` field.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        pkt: Packet data.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        * If IP version is 4, a :class:`~pcapkit.corekit.fields.ipaddress.IPv4Field`</span>
+<span class="sd">          instance.</span>
+<span class="sd">        * If IP version is 6, a :class:`~pcapkit.corekit.fields.ipaddress.IPv6Field`</span>
+<span class="sd">          instance.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">&#39;test&#39;</span><span class="p">][</span><span class="s1">&#39;version&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">IPv4Field</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">&#39;test&#39;</span><span class="p">][</span><span class="s1">&#39;version&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">6</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">IPv6Field</span><span class="p">()</span>
+    <span class="k">raise</span> <span class="n">FieldError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;TCP: [OptNo </span><span class="si">{</span><span class="n">Enum_Option</span><span class="o">.</span><span class="n">Multipath_TCP</span><span class="si">}</span><span class="s1">] </span><span class="si">{</span><span class="n">Enum_MPTCPOption</span><span class="o">.</span><span class="n">ADD_ADDR</span><span class="si">}</span><span class="s1"> invalid IP version&#39;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Option"><a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.schema.transport.tcp.Option">[docs]</a><span class="k">class</span> <span class="nc">Option</span><span class="p">(</span><span class="n">Schema</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for TCP options.&quot;&quot;&quot;</span>
+
+    <span class="c1">#: Option kind.</span>
+    <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span> <span class="o">=</span> <span class="n">EnumField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="n">Enum_Option</span><span class="p">)</span>
+    <span class="c1">#: Option length.</span>
+    <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span> <span class="o">=</span> <span class="n">ConditionalField</span><span class="p">(</span>
+        <span class="n">UInt8Field</span><span class="p">(),</span>
+        <span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">&#39;kind&#39;</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="n">Enum_Option</span><span class="o">.</span><span class="n">End_of_Option_List</span><span class="p">,</span> <span class="n">Enum_Option</span><span class="o">.</span><span class="n">No_Operation</span><span class="p">),</span>
+    <span class="p">)</span>
+
+<div class="viewcode-block" id="Option.post_process"><a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.schema.transport.tcp.Option.post_process">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">post_process</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">&#39;Schema&#39;</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">&#39;IO[bytes]&#39;</span><span class="p">,</span>
+                     <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">&#39;dict[str, Any]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Schema&#39;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Revise ``schema`` data after unpacking process.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            schema: parsed schema</span>
+<span class="sd">            data: Packed data.</span>
+<span class="sd">            length: Length of data.</span>
+<span class="sd">            packet: Unpacked data.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Revised schema.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+            <span class="n">schema</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">&#39;Option&#39;</span><span class="p">,</span> <span class="n">schema</span><span class="p">)</span>
+
+        <span class="c1"># for EOOL/NOP option, length is always 1</span>
+        <span class="k">if</span> <span class="n">schema</span><span class="o">.</span><span class="n">kind</span> <span class="ow">in</span> <span class="p">(</span><span class="n">Enum_Option</span><span class="o">.</span><span class="n">End_of_Option_List</span><span class="p">,</span> <span class="n">Enum_Option</span><span class="o">.</span><span class="n">No_Operation</span><span class="p">):</span>
+            <span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="k">return</span> <span class="n">schema</span></div></div>
+
+
+<div class="viewcode-block" id="UnassignedOption"><a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.schema.transport.tcp.UnassignedOption">[docs]</a><span class="k">class</span> <span class="nc">UnassignedOption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for TCP unassigned options.&quot;&quot;&quot;</span>
+
+    <span class="c1">#: Option data.</span>
+    <span class="n">data</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span> <span class="o">=</span> <span class="n">BytesField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">&#39;length&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="mi">2</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+        <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
+
+
+<div class="viewcode-block" id="EndOfOptionList"><a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.schema.transport.tcp.EndOfOptionList">[docs]</a><span class="k">class</span> <span class="nc">EndOfOptionList</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for TCP end of option list.&quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+        <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
+
+
+<div class="viewcode-block" id="NoOperation"><a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.schema.transport.tcp.NoOperation">[docs]</a><span class="k">class</span> <span class="nc">NoOperation</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for TCP no operation.&quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+        <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
+
+
+<div class="viewcode-block" id="MaximumSegmentSize"><a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.schema.transport.tcp.MaximumSegmentSize">[docs]</a><span class="k">class</span> <span class="nc">MaximumSegmentSize</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for TCP max segment size option.&quot;&quot;&quot;</span>
+
+    <span class="c1">#: Maximum segment size.</span>
+    <span class="n">mss</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span> <span class="o">=</span> <span class="n">UInt16Field</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+        <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">mss</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
+
+
+<div class="viewcode-block" id="WindowScale"><a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.schema.transport.tcp.WindowScale">[docs]</a><span class="k">class</span> <span class="nc">WindowScale</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for TCP window scale option.&quot;&quot;&quot;</span>
+
+    <span class="c1">#: Window scale (shift count).</span>
+    <span class="n">shift</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span> <span class="o">=</span> <span class="n">UInt8Field</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+        <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">scale</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
+
+
+<div class="viewcode-block" id="SACKPermitted"><a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.schema.transport.tcp.SACKPermitted">[docs]</a><span class="k">class</span> <span class="nc">SACKPermitted</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for TCP SACK permitted option.&quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+        <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
+
+
+<span class="k">class</span> <span class="nc">SACKBlock</span><span class="p">(</span><span class="n">Schema</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for TCP SACK option data.&quot;&quot;&quot;</span>
+
+    <span class="c1">#: Left edge of the block.</span>
+    <span class="n">left</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span> <span class="o">=</span> <span class="n">UInt32Field</span><span class="p">()</span>
+    <span class="c1">#: Right edge of the block.</span>
+    <span class="n">right</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span> <span class="o">=</span> <span class="n">UInt32Field</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+        <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">left</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">right</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>
+
+
+<div class="viewcode-block" id="SACK"><a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.schema.transport.tcp.SACK">[docs]</a><span class="k">class</span> <span class="nc">SACK</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for TCP SACK option.&quot;&quot;&quot;</span>
+
+    <span class="c1">#: Selected ACK data.</span>
+    <span class="n">sack</span><span class="p">:</span> <span class="s1">&#39;list[SACKBlock]&#39;</span> <span class="o">=</span> <span class="n">ListField</span><span class="p">(</span>
+        <span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">&#39;length&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="mi">2</span><span class="p">,</span>
+        <span class="n">item_type</span><span class="o">=</span><span class="n">SchemaField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">schema</span><span class="o">=</span><span class="n">SACKBlock</span><span class="p">),</span>
+    <span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+        <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">sack</span><span class="p">:</span> <span class="s1">&#39;list[SACKBlock]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
+
+
+<div class="viewcode-block" id="Echo"><a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.schema.transport.tcp.Echo">[docs]</a><span class="k">class</span> <span class="nc">Echo</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for TCP echo option.&quot;&quot;&quot;</span>
+
+    <span class="c1">#: Info to be echoed.</span>
+    <span class="n">data</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span> <span class="o">=</span> <span class="n">BytesField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+        <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
+
+
+<div class="viewcode-block" id="EchoReply"><a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.schema.transport.tcp.EchoReply">[docs]</a><span class="k">class</span> <span class="nc">EchoReply</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for TCP echo reply option.&quot;&quot;&quot;</span>
+
+    <span class="c1">#: Echoed info.</span>
+    <span class="n">data</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span> <span class="o">=</span> <span class="n">BytesField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+        <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
+
+
+<div class="viewcode-block" id="Timestamp"><a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.schema.transport.tcp.Timestamp">[docs]</a><span class="k">class</span> <span class="nc">Timestamp</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for TCP timestamps option.&quot;&quot;&quot;</span>
+
+    <span class="c1">#: Timestamp value.</span>
+    <span class="n">value</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span> <span class="o">=</span> <span class="n">UInt32Field</span><span class="p">()</span>
+    <span class="c1">#: Timestamp echo reply.</span>
+    <span class="n">reply</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span> <span class="o">=</span> <span class="n">UInt32Field</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+        <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">reply</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
+
+
+<div class="viewcode-block" id="PartialOrderConnectionPermitted"><a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.schema.transport.tcp.PartialOrderConnectionPermitted">[docs]</a><span class="k">class</span> <span class="nc">PartialOrderConnectionPermitted</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for TCP partial order connection permitted option.&quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+        <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
+
+
+<div class="viewcode-block" id="PartialOrderConnectionProfile"><a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.schema.transport.tcp.PartialOrderConnectionProfile">[docs]</a><span class="k">class</span> <span class="nc">PartialOrderConnectionProfile</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for TCP partial order connection service profile option.&quot;&quot;&quot;</span>
+
+    <span class="c1">#: Profile data.</span>
+    <span class="n">profile</span><span class="p">:</span> <span class="s1">&#39;POCProfile&#39;</span> <span class="o">=</span> <span class="n">BitField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="p">{</span>
+        <span class="s1">&#39;start&#39;</span><span class="p">:</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+        <span class="s1">&#39;end&#39;</span><span class="p">:</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+    <span class="p">})</span>
+
+    <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+        <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">profile</span><span class="p">:</span> <span class="s1">&#39;POCProfile&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
+
+
+<div class="viewcode-block" id="CC"><a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.schema.transport.tcp.CC">[docs]</a><span class="k">class</span> <span class="nc">CC</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for TCP CC option.&quot;&quot;&quot;</span>
+
+    <span class="c1">#: Connection count.</span>
+    <span class="n">count</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span> <span class="o">=</span> <span class="n">UInt32Field</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+        <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">count</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
+
+
+<div class="viewcode-block" id="CCNew"><a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.schema.transport.tcp.CCNew">[docs]</a><span class="k">class</span> <span class="nc">CCNew</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for TCP connection count (new) option.&quot;&quot;&quot;</span>
+
+    <span class="c1">#: Connection count.</span>
+    <span class="n">count</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span> <span class="o">=</span> <span class="n">UInt32Field</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+        <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">count</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
+
+
+<div class="viewcode-block" id="CCEcho"><a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.schema.transport.tcp.CCEcho">[docs]</a><span class="k">class</span> <span class="nc">CCEcho</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for TCP connection count (echo) option.&quot;&quot;&quot;</span>
+
+    <span class="c1">#: Connection count.</span>
+    <span class="n">count</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span> <span class="o">=</span> <span class="n">UInt32Field</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+        <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">count</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
+
+
+<div class="viewcode-block" id="AlternateChecksumRequest"><a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.schema.transport.tcp.AlternateChecksumRequest">[docs]</a><span class="k">class</span> <span class="nc">AlternateChecksumRequest</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for TCP alternate checksum request option.&quot;&quot;&quot;</span>
+
+    <span class="c1">#: Checksum algorithm.</span>
+    <span class="n">algorithm</span><span class="p">:</span> <span class="s1">&#39;Enum_Checksum&#39;</span> <span class="o">=</span> <span class="n">EnumField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="n">Enum_Checksum</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+        <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">algorithm</span><span class="p">:</span> <span class="s1">&#39;Enum_Checksum&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
+
+
+<div class="viewcode-block" id="AlternateChecksumData"><a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.schema.transport.tcp.AlternateChecksumData">[docs]</a><span class="k">class</span> <span class="nc">AlternateChecksumData</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for TCP alternate checksum data option.&quot;&quot;&quot;</span>
+
+    <span class="c1">#: Checksum data.</span>
+    <span class="n">data</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span> <span class="o">=</span> <span class="n">BytesField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">&#39;length&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="mi">2</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+        <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
+
+
+<div class="viewcode-block" id="MD5Signature"><a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.schema.transport.tcp.MD5Signature">[docs]</a><span class="k">class</span> <span class="nc">MD5Signature</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for TCP MD5 signature option.&quot;&quot;&quot;</span>
+
+    <span class="c1">#: MD5 digest.</span>
+    <span class="n">digest</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span> <span class="o">=</span> <span class="n">BytesField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">16</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+        <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">digest</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
+
+
+<div class="viewcode-block" id="QuickStartResponse"><a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.schema.transport.tcp.QuickStartResponse">[docs]</a><span class="k">class</span> <span class="nc">QuickStartResponse</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for TCP quick start response option.&quot;&quot;&quot;</span>
+
+    <span class="c1">#: Flags.</span>
+    <span class="n">flags</span><span class="p">:</span> <span class="s1">&#39;QuickStartFlags&#39;</span> <span class="o">=</span> <span class="n">BitField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="p">{</span>
+        <span class="s1">&#39;rate&#39;</span><span class="p">:</span> <span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span>
+    <span class="p">})</span>
+    <span class="c1">#: TTL difference.</span>
+    <span class="n">diff</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span> <span class="o">=</span> <span class="n">UInt8Field</span><span class="p">()</span>
+    <span class="c1">#: QS nonce.</span>
+    <span class="n">nonce</span><span class="p">:</span> <span class="s1">&#39;QuickStartNonce&#39;</span> <span class="o">=</span> <span class="n">BitField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="p">{</span>
+        <span class="s1">&#39;nonce&#39;</span><span class="p">:</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">30</span><span class="p">),</span>
+    <span class="p">})</span>
+
+    <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+        <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">flags</span><span class="p">:</span> <span class="s1">&#39;QuickStartFlags&#39;</span><span class="p">,</span> <span class="n">diff</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">nonce</span><span class="p">:</span> <span class="s1">&#39;QuickStartNonce&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
+
+
+<div class="viewcode-block" id="UserTimeout"><a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.schema.transport.tcp.UserTimeout">[docs]</a><span class="k">class</span> <span class="nc">UserTimeout</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for TCP user timeout option.&quot;&quot;&quot;</span>
+
+    <span class="c1">#: Granularity and user timeout.</span>
+    <span class="n">info</span><span class="p">:</span> <span class="s1">&#39;TimeoutInfo&#39;</span> <span class="o">=</span> <span class="n">BitField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="p">{</span>
+        <span class="s1">&#39;granularity&#39;</span><span class="p">:</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+        <span class="s1">&#39;timeout&#39;</span><span class="p">:</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">15</span><span class="p">),</span>
+    <span class="p">})</span>
+
+    <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+        <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">info</span><span class="p">:</span> <span class="s1">&#39;TimeoutInfo&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
+
+
+<div class="viewcode-block" id="Authentication"><a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.schema.transport.tcp.Authentication">[docs]</a><span class="k">class</span> <span class="nc">Authentication</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for TCP authentication option.&quot;&quot;&quot;</span>
+
+    <span class="c1">#: Key ID.</span>
+    <span class="n">key_id</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span> <span class="o">=</span> <span class="n">UInt8Field</span><span class="p">()</span>
+    <span class="c1">#: Next key ID.</span>
+    <span class="n">next_key_id</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span> <span class="o">=</span> <span class="n">UInt8Field</span><span class="p">()</span>
+    <span class="c1">#: MAC value.</span>
+    <span class="n">mac</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span> <span class="o">=</span> <span class="n">BytesField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">&#39;length&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="mi">4</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+        <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">key_id</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">next_key_id</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">mac</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
+
+
+<span class="k">class</span> <span class="nc">_MPTCP</span><span class="p">(</span><span class="n">Schema</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for Multipath TCP options in a generic representation.&quot;&quot;&quot;</span>
+
+    <span class="c1">#: Subtype and flags.</span>
+    <span class="n">test</span><span class="p">:</span> <span class="s1">&#39;MPTCPSubtypeTest&#39;</span> <span class="o">=</span> <span class="n">ForwardMatchField</span><span class="p">(</span><span class="n">BitField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="p">{</span>
+        <span class="s1">&#39;length&#39;</span><span class="p">:</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">8</span><span class="p">),</span>
+        <span class="s1">&#39;subtype&#39;</span><span class="p">:</span> <span class="p">(</span><span class="mi">16</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span>
+    <span class="p">}))</span>
+    <span class="c1">#: Subtype-specific data.</span>
+    <span class="n">data</span><span class="p">:</span> <span class="s1">&#39;MPTCP&#39;</span> <span class="o">=</span> <span class="n">SwitchField</span><span class="p">(</span>
+        <span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">&#39;test&#39;</span><span class="p">][</span><span class="s1">&#39;length&#39;</span><span class="p">],</span>
+        <span class="n">selector</span><span class="o">=</span><span class="n">mptcp_data_selector</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">post_process</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">&#39;Schema&#39;</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">&#39;IO[bytes]&#39;</span><span class="p">,</span>
+                     <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">&#39;dict[str, Any]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Schema&#39;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Revise ``schema`` data after unpacking process.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            schema: parsed schema</span>
+<span class="sd">            data: Packed data.</span>
+<span class="sd">            length: Length of data.</span>
+<span class="sd">            packet: Unpacked data.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Revised schema.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+            <span class="n">schema</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">&#39;_MPTCP&#39;</span><span class="p">,</span> <span class="n">schema</span><span class="p">)</span>
+
+        <span class="n">ret</span> <span class="o">=</span> <span class="n">schema</span><span class="o">.</span><span class="n">data</span>
+        <span class="n">ret</span><span class="o">.</span><span class="n">subtype</span> <span class="o">=</span> <span class="n">Enum_MPTCPOption</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">packet</span><span class="p">[</span><span class="s1">&#39;test&#39;</span><span class="p">][</span><span class="s1">&#39;subtype&#39;</span><span class="p">])</span>
+        <span class="k">return</span> <span class="n">ret</span>
+
+
+<div class="viewcode-block" id="MPTCP"><a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.schema.transport.tcp.MPTCP">[docs]</a><span class="k">class</span> <span class="nc">MPTCP</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for Multipath TCP options.&quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+        <span class="c1">#: MPTCP subtype.</span>
+        <span class="n">subtype</span><span class="p">:</span> <span class="s1">&#39;Enum_MPTCPOption&#39;</span></div>
+
+
+<div class="viewcode-block" id="MPTCPUnknown"><a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.schema.transport.tcp.MPTCPUnknown">[docs]</a><span class="k">class</span> <span class="nc">MPTCPUnknown</span><span class="p">(</span><span class="n">MPTCP</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for unknown Multipath TCP option.&quot;&quot;&quot;</span>
+
+    <span class="c1">#: Subtype and data.</span>
+    <span class="n">test</span><span class="p">:</span> <span class="s1">&#39;MPTCPSubtypeUnknown&#39;</span> <span class="o">=</span> <span class="n">BitField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="p">{</span>
+        <span class="s1">&#39;subtype&#39;</span><span class="p">:</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span>
+        <span class="s1">&#39;data&#39;</span><span class="p">:</span> <span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span>
+    <span class="p">})</span>
+    <span class="c1">#: Data.</span>
+    <span class="n">data</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span> <span class="o">=</span> <span class="n">BytesField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">&#39;length&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="mi">2</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+        <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">test</span><span class="p">:</span> <span class="s1">&#39;MPTCPSubtypeUnknown&#39;</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
+
+
+<div class="viewcode-block" id="MPTCPCapable"><a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.schema.transport.tcp.MPTCPCapable">[docs]</a><span class="k">class</span> <span class="nc">MPTCPCapable</span><span class="p">(</span><span class="n">MPTCP</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for Multipath TCP capable option.&quot;&quot;&quot;</span>
+
+    <span class="c1">#: Subtype and version.</span>
+    <span class="n">test</span><span class="p">:</span> <span class="s1">&#39;MPTCPSubtypeCapable&#39;</span> <span class="o">=</span> <span class="n">BitField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="p">{</span>
+        <span class="s1">&#39;subtype&#39;</span><span class="p">:</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span>
+        <span class="s1">&#39;version&#39;</span><span class="p">:</span> <span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span>
+    <span class="p">})</span>
+    <span class="c1">#: Flags.</span>
+    <span class="n">flags</span><span class="p">:</span> <span class="s1">&#39;MPTCPCapableFlags&#39;</span> <span class="o">=</span> <span class="n">BitField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="p">{</span>
+        <span class="s1">&#39;req&#39;</span><span class="p">:</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+        <span class="s1">&#39;ext&#39;</span><span class="p">:</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+        <span class="s1">&#39;hsa&#39;</span><span class="p">:</span> <span class="p">(</span><span class="mi">7</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+    <span class="p">})</span>
+    <span class="c1">#: Option sender&#39;s key.</span>
+    <span class="n">skey</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span> <span class="o">=</span> <span class="n">UInt64Field</span><span class="p">()</span>
+    <span class="c1">#: Option receiver&#39;s key.</span>
+    <span class="n">rkey</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span> <span class="o">=</span> <span class="n">ConditionalField</span><span class="p">(</span>
+        <span class="n">UInt64Field</span><span class="p">(),</span>
+        <span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">&#39;length&#39;</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">32</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+        <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">test</span><span class="p">:</span> <span class="s1">&#39;MPTCPSubtypeCapable&#39;</span><span class="p">,</span> <span class="n">flags</span><span class="p">:</span> <span class="s1">&#39;MPTCPCapableFlags&#39;</span><span class="p">,</span> <span class="n">skey</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">rkey</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
+
+
+<div class="viewcode-block" id="MPTCPJoin"><a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.schema.transport.tcp.MPTCPJoin">[docs]</a><span class="k">class</span> <span class="nc">MPTCPJoin</span><span class="p">(</span><span class="n">MPTCP</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for Multipath TCP join option.&quot;&quot;&quot;</span></div>
+
+
+<div class="viewcode-block" id="MPTCPJoinSYN"><a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.schema.transport.tcp.MPTCPJoinSYN">[docs]</a><span class="k">class</span> <span class="nc">MPTCPJoinSYN</span><span class="p">(</span><span class="n">MPTCPJoin</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for Multipath TCP join option for ``SYN`` connection.&quot;&quot;&quot;</span>
+
+    <span class="c1">#: Subtype and flags.</span>
+    <span class="n">test</span><span class="p">:</span> <span class="s1">&#39;MPTCPSubtypeJoin&#39;</span> <span class="o">=</span> <span class="n">BitField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="p">{</span>
+        <span class="s1">&#39;subtype&#39;</span><span class="p">:</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span>
+        <span class="s1">&#39;backup&#39;</span><span class="p">:</span> <span class="p">(</span><span class="mi">7</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+    <span class="p">})</span>
+    <span class="c1">#: Address ID.</span>
+    <span class="n">addr_id</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span> <span class="o">=</span> <span class="n">UInt8Field</span><span class="p">()</span>
+    <span class="c1">#: Receiver&#39;s token.</span>
+    <span class="n">token</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span> <span class="o">=</span> <span class="n">UInt32Field</span><span class="p">()</span>
+    <span class="c1">#: Sender&#39;s random number.</span>
+    <span class="n">nonce</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span> <span class="o">=</span> <span class="n">UInt32Field</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+        <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">test</span><span class="p">:</span> <span class="s1">&#39;MPTCPSubtypeJoin&#39;</span><span class="p">,</span> <span class="n">addr_id</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">token</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">nonce</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
+
+
+<div class="viewcode-block" id="MPTCPJoinSYNACK"><a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.schema.transport.tcp.MPTCPJoinSYNACK">[docs]</a><span class="k">class</span> <span class="nc">MPTCPJoinSYNACK</span><span class="p">(</span><span class="n">MPTCPJoin</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for Multipath TCP join option for ``SYN/ACK`` connection.&quot;&quot;&quot;</span>
+
+    <span class="c1">#: Subtype and flags.</span>
+    <span class="n">test</span><span class="p">:</span> <span class="s1">&#39;MPTCPSubtypeJoin&#39;</span> <span class="o">=</span> <span class="n">BitField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="p">{</span>
+        <span class="s1">&#39;subtype&#39;</span><span class="p">:</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span>
+        <span class="s1">&#39;backup&#39;</span><span class="p">:</span> <span class="p">(</span><span class="mi">7</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+    <span class="p">})</span>
+    <span class="c1">#: Address ID.</span>
+    <span class="n">addr_id</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span> <span class="o">=</span> <span class="n">UInt8Field</span><span class="p">()</span>
+    <span class="c1">#: Sender&#39;s truncated HMAC</span>
+    <span class="n">hmac</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span> <span class="o">=</span> <span class="n">BytesField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">8</span><span class="p">)</span>
+    <span class="c1">#: Sender&#39;s random number.</span>
+    <span class="n">nonce</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span> <span class="o">=</span> <span class="n">UInt32Field</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+        <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">test</span><span class="p">:</span> <span class="s1">&#39;MPTCPSubtypeJoin&#39;</span><span class="p">,</span> <span class="n">addr_id</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">hmac</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">,</span> <span class="n">nonce</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
+
+
+<div class="viewcode-block" id="MPTCPJoinACK"><a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.schema.transport.tcp.MPTCPJoinACK">[docs]</a><span class="k">class</span> <span class="nc">MPTCPJoinACK</span><span class="p">(</span><span class="n">MPTCPJoin</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for Multipath TCP join option for ``ACK`` connection.&quot;&quot;&quot;</span>
+
+    <span class="c1">#: Subtype.</span>
+    <span class="n">test</span><span class="p">:</span> <span class="s1">&#39;MPTCPSubtype&#39;</span> <span class="o">=</span> <span class="n">BitField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="p">{</span>
+        <span class="s1">&#39;subtype&#39;</span><span class="p">:</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span>
+    <span class="p">})</span>
+    <span class="c1">#: Reserved.</span>
+    <span class="n">reserved</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span> <span class="o">=</span> <span class="n">PaddingField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="c1">#: Sender&#39;s HMAC.</span>
+    <span class="n">hmac</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span> <span class="o">=</span> <span class="n">BytesField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+        <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">test</span><span class="p">:</span> <span class="s1">&#39;MPTCPSubtype&#39;</span><span class="p">,</span> <span class="n">hmac</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
+
+
+<div class="viewcode-block" id="MPTCPDSS"><a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.schema.transport.tcp.MPTCPDSS">[docs]</a><span class="k">class</span> <span class="nc">MPTCPDSS</span><span class="p">(</span><span class="n">MPTCP</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for Multipath TCP DSS option.&quot;&quot;&quot;</span>
+
+    <span class="c1">#: Subtype and flags.</span>
+    <span class="n">test</span><span class="p">:</span> <span class="s1">&#39;MPTCPSubtype&#39;</span> <span class="o">=</span> <span class="n">BitField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="p">{</span>
+        <span class="s1">&#39;subtype&#39;</span><span class="p">:</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span>
+    <span class="p">})</span>
+    <span class="c1">#: Flags.</span>
+    <span class="n">flags</span><span class="p">:</span> <span class="s1">&#39;MPTCPDSSFlags&#39;</span> <span class="o">=</span> <span class="n">BitField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="p">{</span>
+        <span class="s1">&#39;F&#39;</span><span class="p">:</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+        <span class="s1">&#39;m&#39;</span><span class="p">:</span> <span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+        <span class="s1">&#39;M&#39;</span><span class="p">:</span> <span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+        <span class="s1">&#39;a&#39;</span><span class="p">:</span> <span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+        <span class="s1">&#39;A&#39;</span><span class="p">:</span> <span class="p">(</span><span class="mi">7</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+    <span class="p">})</span>
+    <span class="c1">#: Data ACK.</span>
+    <span class="n">ack</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span> <span class="o">=</span> <span class="n">ConditionalField</span><span class="p">(</span>
+        <span class="n">NumberField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="mi">8</span> <span class="k">if</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">&#39;flags&#39;</span><span class="p">][</span><span class="s1">&#39;a&#39;</span><span class="p">]</span> <span class="k">else</span> <span class="mi">0</span><span class="p">,</span> <span class="n">signed</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span>
+        <span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">&#39;flags&#39;</span><span class="p">][</span><span class="s1">&#39;A&#39;</span><span class="p">],</span>
+    <span class="p">)</span>
+    <span class="c1">#: Data sequence number.</span>
+    <span class="n">dsn</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span> <span class="o">=</span> <span class="n">ConditionalField</span><span class="p">(</span>
+        <span class="n">NumberField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="mi">8</span> <span class="k">if</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">&#39;flags&#39;</span><span class="p">][</span><span class="s1">&#39;m&#39;</span><span class="p">]</span> <span class="k">else</span> <span class="mi">0</span><span class="p">,</span> <span class="n">signed</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span>
+        <span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">&#39;flags&#39;</span><span class="p">][</span><span class="s1">&#39;M&#39;</span><span class="p">],</span>
+    <span class="p">)</span>
+    <span class="c1">#: Subflow sequence number.</span>
+    <span class="n">ssn</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span> <span class="o">=</span> <span class="n">ConditionalField</span><span class="p">(</span>
+        <span class="n">UInt32Field</span><span class="p">(),</span>
+        <span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">&#39;flags&#39;</span><span class="p">][</span><span class="s1">&#39;M&#39;</span><span class="p">],</span>
+    <span class="p">)</span>
+    <span class="c1">#: Data level length.</span>
+    <span class="n">dl_len</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span> <span class="o">=</span> <span class="n">ConditionalField</span><span class="p">(</span>
+        <span class="n">UInt16Field</span><span class="p">(),</span>
+        <span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">&#39;flags&#39;</span><span class="p">][</span><span class="s1">&#39;M&#39;</span><span class="p">],</span>
+    <span class="p">)</span>
+    <span class="c1">#: Checksum.</span>
+    <span class="n">checksum</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span> <span class="o">=</span> <span class="n">ConditionalField</span><span class="p">(</span>
+        <span class="n">BytesField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">2</span><span class="p">),</span>
+        <span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">&#39;flags&#39;</span><span class="p">][</span><span class="s1">&#39;M&#39;</span><span class="p">],</span>
+    <span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+        <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">test</span><span class="p">:</span> <span class="s1">&#39;MPTCPSubtype&#39;</span><span class="p">,</span> <span class="n">flags</span><span class="p">:</span> <span class="s1">&#39;MPTCPDSSFlags&#39;</span><span class="p">,</span> <span class="n">ack</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span><span class="p">,</span> <span class="n">dsn</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span><span class="p">,</span> <span class="n">ssn</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span><span class="p">,</span> <span class="n">dl_len</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span><span class="p">,</span> <span class="n">checksum</span><span class="p">:</span> <span class="s1">&#39;Optional[bytes]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
+
+
+<div class="viewcode-block" id="MPTCPAddAddress"><a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.schema.transport.tcp.MPTCPAddAddress">[docs]</a><span class="k">class</span> <span class="nc">MPTCPAddAddress</span><span class="p">(</span><span class="n">MPTCP</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for Multipath TCP add address option.&quot;&quot;&quot;</span>
+
+    <span class="c1">#: Subtype and IP version.</span>
+    <span class="n">test</span><span class="p">:</span> <span class="s1">&#39;MPTCPSubtypeAddAddress&#39;</span> <span class="o">=</span> <span class="n">BitField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="p">{</span>
+        <span class="s1">&#39;subtype&#39;</span><span class="p">:</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span>
+        <span class="s1">&#39;version&#39;</span><span class="p">:</span> <span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span>
+    <span class="p">})</span>
+    <span class="c1">#: Address ID.</span>
+    <span class="n">addr_id</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span> <span class="o">=</span> <span class="n">UInt8Field</span><span class="p">()</span>
+    <span class="c1">#: Address.</span>
+    <span class="n">address</span><span class="p">:</span> <span class="s1">&#39;IPv4Address | IPv6Address&#39;</span> <span class="o">=</span> <span class="n">SwitchField</span><span class="p">(</span>
+        <span class="n">length</span><span class="o">=</span><span class="n">mptcp_add_address_length</span><span class="p">,</span>
+        <span class="n">selector</span><span class="o">=</span><span class="n">mptcp_add_address_selector</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="c1">#: Port.</span>
+    <span class="n">port</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span> <span class="o">=</span> <span class="n">ConditionalField</span><span class="p">(</span>
+        <span class="n">UInt16Field</span><span class="p">(),</span>
+        <span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">&#39;length&#39;</span><span class="p">]</span> <span class="ow">in</span> <span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">22</span><span class="p">),</span>
+    <span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+        <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">test</span><span class="p">:</span> <span class="s1">&#39;MPTCPSubtypeAddAddress&#39;</span><span class="p">,</span> <span class="n">addr_id</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">address</span><span class="p">:</span> <span class="s1">&#39;IPv4Address | IPv6Address&#39;</span><span class="p">,</span> <span class="n">port</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
+
+
+<div class="viewcode-block" id="MPTCPRemoveAddress"><a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.schema.transport.tcp.MPTCPRemoveAddress">[docs]</a><span class="k">class</span> <span class="nc">MPTCPRemoveAddress</span><span class="p">(</span><span class="n">MPTCP</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for Multipath TCP remove address option.&quot;&quot;&quot;</span>
+
+    <span class="c1">#: Subtype.</span>
+    <span class="n">test</span><span class="p">:</span> <span class="s1">&#39;MPTCPSubtype&#39;</span> <span class="o">=</span> <span class="n">BitField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="p">{</span>
+        <span class="s1">&#39;subtype&#39;</span><span class="p">:</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span>
+    <span class="p">})</span>
+    <span class="c1">#: Address ID.</span>
+    <span class="n">addr_id</span><span class="p">:</span> <span class="s1">&#39;list[int]&#39;</span> <span class="o">=</span> <span class="n">ListField</span><span class="p">(</span>
+        <span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">&#39;length&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="mi">3</span><span class="p">,</span>
+        <span class="n">item_type</span><span class="o">=</span><span class="n">UInt8Field</span><span class="p">(),</span>
+    <span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+        <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">test</span><span class="p">:</span> <span class="s1">&#39;MPTCPSubtype&#39;</span><span class="p">,</span> <span class="n">addr_id</span><span class="p">:</span> <span class="s1">&#39;list[int]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
+
+
+<div class="viewcode-block" id="MPTCPPriority"><a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.schema.transport.tcp.MPTCPPriority">[docs]</a><span class="k">class</span> <span class="nc">MPTCPPriority</span><span class="p">(</span><span class="n">MPTCP</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for Multipath TCP priority option.&quot;&quot;&quot;</span>
+
+    <span class="c1">#: Subtype.</span>
+    <span class="n">test</span><span class="p">:</span> <span class="s1">&#39;MPTCPSubtypePriority&#39;</span> <span class="o">=</span> <span class="n">BitField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="p">{</span>
+        <span class="s1">&#39;subtype&#39;</span><span class="p">:</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span>
+        <span class="s1">&#39;backup&#39;</span><span class="p">:</span> <span class="p">(</span><span class="mi">7</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+    <span class="p">})</span>
+    <span class="c1">#: Address ID.</span>
+    <span class="n">addr_id</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span> <span class="o">=</span> <span class="n">ConditionalField</span><span class="p">(</span>
+        <span class="n">UInt8Field</span><span class="p">(),</span>
+        <span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">&#39;length&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">4</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+        <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">test</span><span class="p">:</span> <span class="s1">&#39;MPTCPSubtypePriority&#39;</span><span class="p">,</span> <span class="n">addr_id</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
+
+
+<div class="viewcode-block" id="MPTCPFallback"><a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.schema.transport.tcp.MPTCPFallback">[docs]</a><span class="k">class</span> <span class="nc">MPTCPFallback</span><span class="p">(</span><span class="n">MPTCP</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for Multipath TCP fallback option.&quot;&quot;&quot;</span>
+
+    <span class="c1">#: Subtype.</span>
+    <span class="n">test</span><span class="p">:</span> <span class="s1">&#39;MPTCPSubtype&#39;</span> <span class="o">=</span> <span class="n">BitField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="p">{</span>
+        <span class="s1">&#39;subtype&#39;</span><span class="p">:</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span>
+    <span class="p">})</span>
+    <span class="c1">#: Data sequence number.</span>
+    <span class="n">dsn</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span> <span class="o">=</span> <span class="n">UInt64Field</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+        <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">test</span><span class="p">:</span> <span class="s1">&#39;MPTCPSubtype&#39;</span><span class="p">,</span> <span class="n">dsn</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
+
+
+<div class="viewcode-block" id="MPTCPFastclose"><a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.schema.transport.tcp.MPTCPFastclose">[docs]</a><span class="k">class</span> <span class="nc">MPTCPFastclose</span><span class="p">(</span><span class="n">MPTCP</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for Multipath TCP fastclose option.&quot;&quot;&quot;</span>
+
+    <span class="c1">#: Subtype.</span>
+    <span class="n">test</span><span class="p">:</span> <span class="s1">&#39;MPTCPSubtype&#39;</span> <span class="o">=</span> <span class="n">BitField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="p">{</span>
+        <span class="s1">&#39;subtype&#39;</span><span class="p">:</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span>
+    <span class="p">})</span>
+    <span class="c1">#: Option receiver&#39;s key.</span>
+    <span class="n">key</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span> <span class="o">=</span> <span class="n">UInt64Field</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+        <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">test</span><span class="p">:</span> <span class="s1">&#39;MPTCPSubtype&#39;</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
+
+
+<div class="viewcode-block" id="FastOpenCookie"><a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.schema.transport.tcp.FastOpenCookie">[docs]</a><span class="k">class</span> <span class="nc">FastOpenCookie</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;&quot;Header schema for TCP Fast Open option.&quot;&quot;&quot;</span>
+
+    <span class="c1">#: Cookie.</span>
+    <span class="n">cookie</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span> <span class="o">=</span> <span class="n">ConditionalField</span><span class="p">(</span>
+        <span class="n">BytesField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">&#39;length&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="mi">2</span><span class="p">),</span>
+        <span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">&#39;length&#39;</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="mi">6</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+        <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">cookie</span><span class="p">:</span> <span class="s1">&#39;Optional[bytes]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
+
+
+<div class="viewcode-block" id="TCP"><a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.schema.transport.tcp.TCP">[docs]</a><span class="k">class</span> <span class="nc">TCP</span><span class="p">(</span><span class="n">Schema</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for TCP packet.&quot;&quot;&quot;</span>
+
+    <span class="c1">#: Source port.</span>
+    <span class="n">srcport</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span> <span class="o">=</span> <span class="n">UInt16Field</span><span class="p">()</span>
+    <span class="c1">#: Destination port.</span>
+    <span class="n">dstport</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span> <span class="o">=</span> <span class="n">UInt16Field</span><span class="p">()</span>
+    <span class="c1">#: Sequence number.</span>
+    <span class="n">seq</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span> <span class="o">=</span> <span class="n">UInt32Field</span><span class="p">()</span>
+    <span class="c1">#: Acknowledgement number.</span>
+    <span class="n">ack</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span> <span class="o">=</span> <span class="n">UInt32Field</span><span class="p">()</span>
+    <span class="c1">#: Data offset.</span>
+    <span class="n">offset</span><span class="p">:</span> <span class="s1">&#39;OffsetFlag&#39;</span> <span class="o">=</span> <span class="n">BitField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="p">{</span>
+        <span class="s1">&#39;offset&#39;</span><span class="p">:</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span>
+        <span class="s1">&#39;ns&#39;</span><span class="p">:</span> <span class="p">(</span><span class="mi">7</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+    <span class="p">})</span>
+    <span class="c1">#: TCP flags.</span>
+    <span class="n">flags</span><span class="p">:</span> <span class="s1">&#39;Flags&#39;</span> <span class="o">=</span> <span class="n">BitField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="p">{</span>
+        <span class="s1">&#39;cwr&#39;</span><span class="p">:</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+        <span class="s1">&#39;ece&#39;</span><span class="p">:</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+        <span class="s1">&#39;urg&#39;</span><span class="p">:</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+        <span class="s1">&#39;ack&#39;</span><span class="p">:</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+        <span class="s1">&#39;psh&#39;</span><span class="p">:</span> <span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+        <span class="s1">&#39;rst&#39;</span><span class="p">:</span> <span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+        <span class="s1">&#39;syn&#39;</span><span class="p">:</span> <span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+        <span class="s1">&#39;fin&#39;</span><span class="p">:</span> <span class="p">(</span><span class="mi">7</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+    <span class="p">})</span>
+    <span class="c1">#: Window size.</span>
+    <span class="n">window</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span> <span class="o">=</span> <span class="n">UInt16Field</span><span class="p">()</span>
+    <span class="c1">#: Checksum.</span>
+    <span class="n">checksum</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span> <span class="o">=</span> <span class="n">BytesField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+    <span class="c1">#: Urgent pointer.</span>
+    <span class="n">urgent</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span> <span class="o">=</span> <span class="n">UInt16Field</span><span class="p">()</span>
+    <span class="c1">#: Options.</span>
+    <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;list[Option]&#39;</span> <span class="o">=</span> <span class="n">OptionField</span><span class="p">(</span>
+        <span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">&#39;offset&#39;</span><span class="p">][</span><span class="s1">&#39;offset&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="mi">4</span> <span class="o">-</span> <span class="mi">20</span><span class="p">,</span>
+        <span class="n">base_schema</span><span class="o">=</span><span class="n">Option</span><span class="p">,</span>
+        <span class="n">type_name</span><span class="o">=</span><span class="s1">&#39;kind&#39;</span><span class="p">,</span>
+        <span class="n">eool</span><span class="o">=</span><span class="n">Enum_Option</span><span class="o">.</span><span class="n">End_of_Option_List</span><span class="p">,</span>
+        <span class="n">registry</span><span class="o">=</span><span class="n">collections</span><span class="o">.</span><span class="n">defaultdict</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="n">UnassignedOption</span><span class="p">,</span> <span class="p">{</span>
+            <span class="n">Enum_Option</span><span class="o">.</span><span class="n">End_of_Option_List</span><span class="p">:</span> <span class="n">EndOfOptionList</span><span class="p">,</span>
+            <span class="n">Enum_Option</span><span class="o">.</span><span class="n">No_Operation</span><span class="p">:</span> <span class="n">NoOperation</span><span class="p">,</span>
+            <span class="n">Enum_Option</span><span class="o">.</span><span class="n">Maximum_Segment_Size</span><span class="p">:</span> <span class="n">MaximumSegmentSize</span><span class="p">,</span>
+            <span class="n">Enum_Option</span><span class="o">.</span><span class="n">Window_Scale</span><span class="p">:</span> <span class="n">WindowScale</span><span class="p">,</span>
+            <span class="n">Enum_Option</span><span class="o">.</span><span class="n">SACK_Permitted</span><span class="p">:</span> <span class="n">SACKPermitted</span><span class="p">,</span>
+            <span class="n">Enum_Option</span><span class="o">.</span><span class="n">SACK</span><span class="p">:</span> <span class="n">SACK</span><span class="p">,</span>
+            <span class="n">Enum_Option</span><span class="o">.</span><span class="n">Echo</span><span class="p">:</span> <span class="n">Echo</span><span class="p">,</span>
+            <span class="n">Enum_Option</span><span class="o">.</span><span class="n">Echo_Reply</span><span class="p">:</span> <span class="n">EchoReply</span><span class="p">,</span>
+            <span class="n">Enum_Option</span><span class="o">.</span><span class="n">Timestamps</span><span class="p">:</span> <span class="n">Timestamp</span><span class="p">,</span>
+            <span class="n">Enum_Option</span><span class="o">.</span><span class="n">Partial_Order_Connection_Permitted</span><span class="p">:</span> <span class="n">PartialOrderConnectionPermitted</span><span class="p">,</span>
+            <span class="n">Enum_Option</span><span class="o">.</span><span class="n">Partial_Order_Service_Profile</span><span class="p">:</span> <span class="n">PartialOrderConnectionProfile</span><span class="p">,</span>
+            <span class="n">Enum_Option</span><span class="o">.</span><span class="n">CC</span><span class="p">:</span> <span class="n">CC</span><span class="p">,</span>
+            <span class="n">Enum_Option</span><span class="o">.</span><span class="n">CC_NEW</span><span class="p">:</span> <span class="n">CCNew</span><span class="p">,</span>
+            <span class="n">Enum_Option</span><span class="o">.</span><span class="n">CC_ECHO</span><span class="p">:</span> <span class="n">CCEcho</span><span class="p">,</span>
+            <span class="n">Enum_Option</span><span class="o">.</span><span class="n">TCP_Alternate_Checksum_Request</span><span class="p">:</span> <span class="n">AlternateChecksumRequest</span><span class="p">,</span>
+            <span class="n">Enum_Option</span><span class="o">.</span><span class="n">TCP_Alternate_Checksum_Data</span><span class="p">:</span> <span class="n">AlternateChecksumData</span><span class="p">,</span>
+            <span class="n">Enum_Option</span><span class="o">.</span><span class="n">MD5_Signature_Option</span><span class="p">:</span> <span class="n">MD5Signature</span><span class="p">,</span>
+            <span class="n">Enum_Option</span><span class="o">.</span><span class="n">Quick_Start_Response</span><span class="p">:</span> <span class="n">QuickStartResponse</span><span class="p">,</span>
+            <span class="n">Enum_Option</span><span class="o">.</span><span class="n">User_Timeout_Option</span><span class="p">:</span> <span class="n">UserTimeout</span><span class="p">,</span>
+            <span class="n">Enum_Option</span><span class="o">.</span><span class="n">TCP_Authentication_Option</span><span class="p">:</span> <span class="n">Authentication</span><span class="p">,</span>
+            <span class="n">Enum_Option</span><span class="o">.</span><span class="n">Multipath_TCP</span><span class="p">:</span> <span class="n">_MPTCP</span><span class="p">,</span>
+            <span class="n">Enum_Option</span><span class="o">.</span><span class="n">TCP_Fast_Open_Cookie</span><span class="p">:</span> <span class="n">FastOpenCookie</span><span class="p">,</span>
+        <span class="p">}),</span>
+    <span class="p">)</span>
+    <span class="c1">#: Padding.</span>
+    <span class="n">padding</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span> <span class="o">=</span> <span class="n">PaddingField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;__option_padding__&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+    <span class="c1">#: Payload.</span>
+    <span class="n">payload</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span> <span class="o">=</span> <span class="n">PayloadField</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+        <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">srcport</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">dstport</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">seq</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">ack</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span>
+                     <span class="n">offset</span><span class="p">:</span> <span class="s1">&#39;OffsetFlag&#39;</span><span class="p">,</span> <span class="n">flags</span><span class="p">:</span> <span class="s1">&#39;Flags&#39;</span><span class="p">,</span> <span class="n">window</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">checksum</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">,</span>
+                     <span class="n">urgent</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;list[Option | bytes] | bytes&#39;</span><span class="p">,</span> <span class="n">payload</span><span class="p">:</span> <span class="s1">&#39;bytes | Protocol | Schema&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
+</pre></div>
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          
+          
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; 2017-2023, Jarry Shaw
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer no-toc">
+      
+      
+      
+    </aside>
+  </div>
+</div><script data-url_root="../../../../../" id="documentation_options" src="../../../../../_static/documentation_options.js"></script>
+    <script src="../../../../../_static/doctools.js"></script>
+    <script src="../../../../../_static/sphinx_highlight.js"></script>
+    <script src="../../../../../_static/scripts/furo.js"></script>
+    <script src="../../../../../_static/clipboard.min.js"></script>
+    <script src="../../../../../_static/copybutton.js"></script>
+    </body>
+</html>
