@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 """file transfer protocol
 
+.. module:: pcapkit.protocols.application.ftp
+
 :mod:`pcapkit.protocols.application.ftp` contains
 :class:`~pcapkit.protocols.application.ftp.FTP` only,
 which implements extractor for File Transfer Protocol

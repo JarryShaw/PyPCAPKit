@@ -2,6 +2,8 @@
 """HTTP/2 - Hypertext Transfer Protocol
 ==========================================
 
+.. module:: pcapkit.protocols.application.httpv2
+
 :mod:`pcapkit.protocols.application.httpv2` contains
 :class:`~pcapkit.protocols.application.httpv2.HTTP`
 only, which implements extractor for Hypertext Transfer

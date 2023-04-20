@@ -2,6 +2,8 @@
 r"""HTTP/1.* - Hypertext Transfer Protocol
 ============================================
 
+.. module:: pcapkit.protocols.application.httpv1
+
 :mod:`pcapkit.protocols.application.httpv1` contains
 :class:`~pcapkit.protocols.application.httpv1.HTTP`
 only, which implements extractor for Hypertext Transfer

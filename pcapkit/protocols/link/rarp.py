@@ -37,7 +37,7 @@ from pcapkit.protocols.schema.link.arp import ARP as Schema_ARP
 if TYPE_CHECKING:
     from typing_extensions import Literal
 
-__all__ = ['RARP']
+__all__ = ['RARP', 'DRARP']
 
 
 class RARP(ARP, schema=Schema_ARP, data=Data_ARP):  # pylint: disable=abstract-method
@@ -67,3 +67,16 @@ class RARP(ARP, schema=Schema_ARP, data=Data_ARP):  # pylint: disable=abstract-m
 
         """
         return Enum_EtherType.Reverse_Address_Resolution_Protocol  # type: ignore[return-value]
+
+
+class DRARP(RARP):
+    """This class implements Dynamic Reverse Address Resolution Protocol."""
+
+    ##########################################################################
+    # Methods.
+    ##########################################################################
+
+    @classmethod
+    def id(cls) -> 'tuple[Literal["DRARP"]]':  # type: ignore[override]
+        """Index ID of the protocol."""
+        return ('DRARP',)

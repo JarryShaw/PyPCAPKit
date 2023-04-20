@@ -56,10 +56,14 @@ below:
 
    .. automethod:: __index__
 
-.. currentmodule:: pcapkit.protocols.link
-.. class:: InARP
+.. autoclass:: pcapkit.protocols.link.arp.InARP
+   :no-members:
+   :show-inheritance:
 
-   Alias of :class:`pcapkit.protocols.link.arp.ARP`.
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
+   .. automethod:: id
 
 Header Schemas
 --------------

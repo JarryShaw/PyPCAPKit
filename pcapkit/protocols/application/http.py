@@ -2,6 +2,8 @@
 """HTTP - Hypertext Transfer Protocol
 ========================================
 
+.. module:: pcapkit.protocols.application.http
+
 :mod:`pcapkit.protocols.application.http` contains
 :class:`~pcapkit.protocols.application.http.HTTP`
 only, which is a base class for Hypertext Transfer
@@ -68,7 +70,7 @@ class HTTP(Application[PT, ST], Generic[PT, ST]):
     ##########################################################################
 
     @classmethod
-    def id(cls) -> 'tuple[Literal["HTTPv1"], Literal["HTTPv2"]]':
+    def id(cls) -> 'tuple[Literal["HTTP"], Literal["HTTPv1"], Literal["HTTPv2"]]':
         """Index ID of the protocol."""
         return ('HTTP', 'HTTPv1', 'HTTPv2')
 
@@ -124,7 +126,7 @@ class HTTP(Application[PT, ST], Generic[PT, ST]):
             from pcapkit.protocols.application.httpv2 import HTTP as protocol  # type: ignore[no-redef] # isort: skip # pylint: disable=line-too-long,import-outside-toplevel
         else:
             raise ProtocolError(f"invalid HTTP version: {version}")
-        return protocol.make(**kwargs)
+        return protocol.make(**kwargs)  # type: ignore[return-value]
 
     ##########################################################################
     # Utilities.

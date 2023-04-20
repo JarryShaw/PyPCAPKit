@@ -35,10 +35,14 @@ Octets      Bits        Name                    Description
 
    .. automethod:: __index__
 
-.. currentmodule:: pcapkit.protocols.link
-.. class:: DRARP
+.. autoclass:: pcapkit.protocols.link.rarp.RARP
+   :no-members:
+   :show-inheritance:
 
-   Alias of :class:`pcapkit.protocols.link.rarp.RARP`.
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
+   .. automethod:: id
 
 .. raw:: html
 

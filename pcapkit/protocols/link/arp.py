@@ -65,7 +65,7 @@ if TYPE_CHECKING:
     from pcapkit.protocols.protocol import Protocol
     from pcapkit.protocols.schema.schema import Schema
 
-__all__ = ['ARP']
+__all__ = ['ARP', 'InARP']
 
 # check Python version
 py38 = ((version_info := sys.version_info).major >= 3 and version_info.minor >= 8)
@@ -128,9 +128,9 @@ class ARP(Link[Data_ARP, Schema_ARP],
     ##########################################################################
 
     @classmethod
-    def id(cls) -> 'tuple[Literal["ARP"], Literal["InARP"]]':
+    def id(cls) -> 'tuple[Literal["ARP"]]':
         """Index ID of the protocol."""
-        return ('ARP', 'InARP')
+        return ('ARP',)
 
     def read(self, length: 'Optional[int]' = None, **kwargs: 'Any') -> 'Data_ARP':  # pylint: disable=unused-argument
         r"""Read Address Resolution Protocol.
@@ -406,3 +406,16 @@ class ARP(Link[Data_ARP, Schema_ARP],
         if isinstance(addr, (ipaddress.IPv4Address, ipaddress.IPv6Address)):
             return addr.packed
         return addr
+
+
+class InARP(ARP):
+    """This class implements Inverse Address Resolution Protocol."""
+
+    ##########################################################################
+    # Methods.
+    ##########################################################################
+
+    @classmethod
+    def id(cls) -> 'tuple[Literal["InARP"]]':  # type: ignore[override]
+        """Index ID of the protocol."""
+        return ('InARP',)

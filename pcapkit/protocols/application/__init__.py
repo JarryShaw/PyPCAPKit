@@ -3,6 +3,8 @@
 """Application Layer Protocols
 =================================
 
+.. module:: pcapkit.protocols.application
+
 :mod:`pcapkit.protocols.application` is collection of all protocols in
 application layer, with detailed implementation and methods.
 

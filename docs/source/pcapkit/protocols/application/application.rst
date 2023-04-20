@@ -17,12 +17,12 @@ and etc.
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. automethod:: __post_init__
-   .. automethod:: __index__
-
    .. autoproperty:: layer
 
    .. automethod:: _decode_next_layer
    .. automethod:: _import_next_layer
 
    .. autoattribute:: __layer__
+
+   .. automethod:: __post_init__
+   .. automethod:: __index__

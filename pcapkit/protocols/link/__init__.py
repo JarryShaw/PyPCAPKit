@@ -15,18 +15,15 @@ link layer, with detailed implementation and methods.
 from pcapkit.protocols.link.link import Link
 
 # Utility Classes for Protocols
-from pcapkit.protocols.link.arp import ARP
+from pcapkit.protocols.link.arp import ARP, InARP
 from pcapkit.protocols.link.ethernet import Ethernet
 from pcapkit.protocols.link.l2tp import L2TP
 from pcapkit.protocols.link.ospf import OSPF
-from pcapkit.protocols.link.rarp import RARP
+from pcapkit.protocols.link.rarp import RARP, DRARP
 from pcapkit.protocols.link.vlan import VLAN
 
 # Link-Layer Header Type Values
 from pcapkit.const.reg.linktype import LinkType as LINKTYPE
-
-InARP = ARP
-DRARP = RARP
 
 __all__ = [
     # Protocol Numbers

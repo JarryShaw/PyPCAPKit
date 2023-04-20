@@ -2,7 +2,6 @@ HTTP/2 - Hypertext Transfer Protocol
 ====================================
 
 .. module:: pcapkit.protocols.application.httpv2
-.. module:: pcapkit.protocols.data.application.httpv2
 
 :mod:`pcapkit.protocols.application.httpv2` contains
 :class:`~pcapkit.protocols.application.httpv2.HTTP`
@@ -36,10 +35,13 @@ Octets      Bits        Name                    Description
    .. autoproperty:: length
    .. autoproperty:: version
 
-   .. automethod:: read
-   .. automethod:: make
    .. automethod:: id
    .. automethod:: register_frame
+
+   .. automethod:: read
+   .. automethod:: make
+
+   .. automethod:: _make_data
 
    .. automethod:: _read_http_none
    .. automethod:: _read_http_data
@@ -53,209 +55,297 @@ Octets      Bits        Name                    Description
    .. automethod:: _read_http_window_update
    .. automethod:: _read_http_continuation
 
+   .. automethod:: _make_http_none
+   .. automethod:: _make_http_data
+   .. automethod:: _make_http_headers
+   .. automethod:: _make_http_priority
+   .. automethod:: _make_http_rst_stream
+   .. automethod:: _make_http_settings
+   .. automethod:: _make_http_push_promise
+   .. automethod:: _make_http_ping
+   .. automethod:: _make_http_goaway
+   .. automethod:: _make_http_window_update
+   .. automethod:: _make_http_continuation
+
    .. autoattribute:: __frame__
       :no-value:
 
-Data Structures
----------------
+Header Schemas
+--------------
 
-.. autoclass:: pcapkit.protocols.data.application.httpv2.HTTP(length, type, flags, sid)
-   :no-members:
+.. module:: pcapkit.protocols.schema.application.httpv2
+
+.. autoclass:: pcapkit.protocols.schema.application.httpv2.HTTP
+   :members:
    :show-inheritance:
 
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. autoattribute:: length
-   .. autoattribute:: type
-   .. autoattribute:: flags
-   .. autoattribute:: sid
-
-.. autoclass:: pcapkit.protocols.data.application.httpv2.Flags()
-   :no-members:
+.. autoclass:: pcapkit.protocols.schema.application.httpv2.FrameType
+   :members:
    :show-inheritance:
 
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
-.. autoclass:: pcapkit.protocols.data.application.httpv2.UnassignedFrame(length, type, flags, sid, data)
-   :no-members:
+.. autoclass:: pcapkit.protocols.schema.application.httpv2.UnassignedFrame
+   :members:
    :show-inheritance:
 
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. autoattribute:: data
-
-.. autoclass:: pcapkit.protocols.data.application.httpv2.DataFrame(length, type, flags, sid, pad_len, data)
-   :no-members:
+.. autoclass:: pcapkit.protocols.schema.application.httpv2.DataFrame
+   :members:
    :show-inheritance:
 
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. autoattribute:: flags
-   .. autoattribute:: pad_len
-   .. autoattribute:: data
-
-.. autoclass:: pcapkit.protocols.data.application.httpv2.DataFrameFlags(END_STREAM, PADDED)
-   :no-members:
+.. autoclass:: pcapkit.protocols.schema.application.httpv2.HeadersFrame
+   :members:
    :show-inheritance:
 
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. autoattribute:: END_STREAM
-   .. autoattribute:: PADDED
-
-.. autoclass:: pcapkit.protocols.data.application.httpv2.HeadersFrame(length, type, flags, sid, pad_len, excl_dependency, stream_dependency, weight, fragment)
-   :no-members:
+.. autoclass:: pcapkit.protocols.schema.application.httpv2.PriorityFrame
+   :members:
    :show-inheritance:
 
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. autoattribute:: flags
-   .. autoattribute:: pad_len
-   .. autoattribute:: excl_dependency
-   .. autoattribute:: stream_dependency
-   .. autoattribute:: weight
-   .. autoattribute:: fragment
-
-.. autoclass:: pcapkit.protocols.data.application.httpv2.HeadersFrameFlags(END_STREAM, END_HEADERS, PADDED, PRIORITY)
-   :no-members:
+.. autoclass:: pcapkit.protocols.schema.application.httpv2.RSTStreamFrame
+   :members:
    :show-inheritance:
 
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. autoattribute:: END_STREAM
-   .. autoattribute:: END_HEADERS
-   .. autoattribute:: PADDED
-   .. autoattribute:: PRIORITY
-
-.. autoclass:: pcapkit.protocols.data.application.httpv2.PriorityFrame(length, type, flags, sid, excl_dependency, stream_dependency, weight)
-   :no-members:
+.. autoclass:: pcapkit.protocols.schema.application.httpv2.SettingPair
+   :members:
    :show-inheritance:
 
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. autoattribute:: flags
-   .. autoattribute:: excl_dependency
-   .. autoattribute:: stream_dependency
-   .. autoattribute:: weight
-
-.. autoclass:: pcapkit.protocols.data.application.httpv2.RSTStreamFrame(length, type, flags, sid, error)
-   :no-members:
+.. autoclass:: pcapkit.protocols.schema.application.httpv2.SettingsFrame
+   :members:
    :show-inheritance:
 
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. autoattribute:: flags
-   .. autoattribute:: error
-
-.. autoclass:: pcapkit.protocols.data.application.httpv2.SettingsFrame(length, type, flags, sid, settings)
-   :no-members:
+.. autoclass:: pcapkit.protocols.schema.application.httpv2.PushPromiseFrame
+   :members:
    :show-inheritance:
 
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. autoattribute:: flags
-   .. autoattribute:: settings
-
-.. autoclass:: pcapkit.protocols.data.application.httpv2.SettingsFrameFlags(ACK)
-   :no-members:
+.. autoclass:: pcapkit.protocols.schema.application.httpv2.PingFrame
+   :members:
    :show-inheritance:
 
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. autoattribute:: ACK
-
-.. autoclass:: pcapkit.protocols.data.application.httpv2.PushPromiseFrame(length, type, flags, sid, pad_len, promised_sid, fragment)
-   :no-members:
+.. autoclass:: pcapkit.protocols.schema.application.httpv2.GoawayFrame
+   :members:
    :show-inheritance:
 
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. autoattribute:: flags
-   .. autoattribute:: pad_len
-   .. autoattribute:: promised_sid
-   .. autoattribute:: fragment
-
-.. autoclass:: pcapkit.protocols.data.application.httpv2.PushPromiseFrameFlags(END_HEADERS, PADDED)
-   :no-members:
+.. autoclass:: pcapkit.protocols.schema.application.httpv2.WindowUpdateFrame
+   :members:
    :show-inheritance:
 
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. autoattribute:: END_HEADERS
-   .. autoattribute:: PADDED
-
-.. autoclass:: pcapkit.protocols.data.application.httpv2.PingFrame(length, type, flags, sid, data)
-   :no-members:
+.. autoclass:: pcapkit.protocols.schema.application.httpv2.ContinuationFrame
+   :members:
    :show-inheritance:
 
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. autoattribute:: flags
-   .. autoattribute:: data
+Type Stubs
+~~~~~~~~~~
 
-.. autoclass:: pcapkit.protocols.data.application.httpv2.PingFrameFlags(ACK)
-   :no-members:
+.. autoclass:: pcapkit.protocols.schema.application.httpv2.FrameFlags
+   :members:
    :show-inheritance:
 
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. autoattribute:: ACK
-
-.. autoclass:: pcapkit.protocols.data.application.httpv2.GoawayFrame(length, type, flags, sid, last_sid, error, debug_data)
-   :no-members:
+.. autoclass:: pcapkit.protocols.schema.application.httpv2.StreamID
+   :members:
    :show-inheritance:
 
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. autoattribute:: flags
-   .. autoattribute:: last_sid
-   .. autoattribute:: error
-   .. autoattribute:: debug_data
-
-.. autoclass:: pcapkit.protocols.data.application.httpv2.WindowUpdateFrame(length, type, flags, sid, increment)
-   :no-members:
+.. autoclass:: pcapkit.protocols.schema.application.httpv2.StreamDependency
+   :members:
    :show-inheritance:
 
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. autoattribute:: flags
-   .. autoattribute:: increment
-
-.. autoclass:: pcapkit.protocols.data.application.httpv2.ContinuationFrame(length, type, flags, sid, fragment)
-   :no-members:
+.. autoclass:: pcapkit.protocols.schema.application.httpv2.WindowSize
+   :members:
    :show-inheritance:
 
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. autoattribute:: flags
-   .. autoattribute:: fragment
+Auxiliary Functions
+~~~~~~~~~~~~~~~~~~~
 
-.. autoclass:: pcapkit.protocols.data.application.httpv2.ContinuationFrameFlags(END_HEADERS)
-   :no-members:
+.. autofunction:: pcapkit.protocols.schema.application.httpv2.http_frame_selector
+
+Data Models
+-----------
+
+.. module:: pcapkit.protocols.data.application.httpv2
+
+.. autoclass:: pcapkit.protocols.data.application.httpv2.HTTP
+   :members:
    :show-inheritance:
 
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. autoattribute:: END_HEADERS
+.. autoclass:: pcapkit.protocols.data.application.httpv2.Flags
+   :members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
+.. autoclass:: pcapkit.protocols.data.application.httpv2.UnassignedFrame
+   :members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
+.. autoclass:: pcapkit.protocols.data.application.httpv2.DataFrame
+   :members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
+.. autoclass:: pcapkit.protocols.data.application.httpv2.DataFrameFlags
+   :members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
+.. autoclass:: pcapkit.protocols.data.application.httpv2.HeadersFrame
+   :members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
+.. autoclass:: pcapkit.protocols.data.application.httpv2.HeadersFrameFlags
+   :members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
+.. autoclass:: pcapkit.protocols.data.application.httpv2.PriorityFrame
+   :members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
+.. autoclass:: pcapkit.protocols.data.application.httpv2.RSTStreamFrame
+   :members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
+.. autoclass:: pcapkit.protocols.data.application.httpv2.SettingsFrame
+   :members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
+.. autoclass:: pcapkit.protocols.data.application.httpv2.SettingsFrameFlags
+   :members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
+.. autoclass:: pcapkit.protocols.data.application.httpv2.PushPromiseFrame
+   :members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
+.. autoclass:: pcapkit.protocols.data.application.httpv2.PushPromiseFrameFlags
+   :members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
+.. autoclass:: pcapkit.protocols.data.application.httpv2.PingFrame
+   :members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
+.. autoclass:: pcapkit.protocols.data.application.httpv2.PingFrameFlags
+   :members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
+.. autoclass:: pcapkit.protocols.data.application.httpv2.GoawayFrame
+   :members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
+.. autoclass:: pcapkit.protocols.data.application.httpv2.WindowUpdateFrame
+   :members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
+.. autoclass:: pcapkit.protocols.data.application.httpv2.ContinuationFrame
+   :members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
+.. autoclass:: pcapkit.protocols.data.application.httpv2.ContinuationFrameFlags
+   :members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
 
 .. raw:: html
 

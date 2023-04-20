@@ -2,7 +2,6 @@ HTTP - Hypertext Transfer Protocol
 ==================================
 
 .. module:: pcapkit.protocols.application.http
-.. module:: pcapkit.protocols.data.application.http
 
 :mod:`pcapkit.protocols.application.http` contains
 :class:`~pcapkit.protocols.application.http.HTTP`
@@ -24,20 +23,13 @@ and :class:`HTTP/2 <pcapkit.protocols.application.application.httpv2>`.
    .. autoproperty:: version
 
    .. automethod:: id
+
    .. automethod:: read
    .. automethod:: make
 
+   .. automethod:: _make_data
+
    .. automethod:: _guess_version
-
-Data Structures
----------------
-
-.. autoclass:: pcapkit.protocols.data.application.http.HTTP()
-   :no-members:
-   :show-inheritance:
-
-   :param \*args: Arbitrary positional arguments.
-   :param \*\*kwargs: Arbitrary keyword arguments.
 
 .. raw:: html
 

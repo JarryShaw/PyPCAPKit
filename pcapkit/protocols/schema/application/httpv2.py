@@ -13,6 +13,7 @@ from pcapkit.corekit.fields.misc import ConditionalField, SchemaField, SwitchFie
 from pcapkit.corekit.fields.numbers import EnumField, NumberField, UInt8Field, UInt32Field
 from pcapkit.corekit.fields.strings import BitField, BytesField, PaddingField
 from pcapkit.protocols.schema.schema import Schema
+from pcapkit.utilities.logging import SPHINX_TYPE_CHECKING
 
 __all__ = [
     'HTTP',
@@ -26,9 +27,10 @@ __all__ = [
 if TYPE_CHECKING:
     from typing import IO, Any, Optional
 
-    from typing_extensions import TypedDict
-
     from pcapkit.corekit.fields.field import _Field as Field
+
+if SPHINX_TYPE_CHECKING:
+    from typing_extensions import TypedDict
 
     class FrameFlags(TypedDict):
         """HTTP frame specific flags."""

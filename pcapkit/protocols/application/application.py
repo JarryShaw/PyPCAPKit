@@ -2,6 +2,8 @@
 """Base Protocol
 ===================
 
+.. module:: pcapkit.protocols.application.application
+
 :mod:`pcapkit.protocols.application.application` contains only
 :class:`~pcapkit.protocols.application.application.Application`,
 which is a base class for application layer protocols, eg.
