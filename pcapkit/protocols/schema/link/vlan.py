@@ -10,7 +10,6 @@ from pcapkit.corekit.fields.misc import PayloadField
 from pcapkit.corekit.fields.numbers import EnumField, UInt8Field, UInt16Field
 from pcapkit.corekit.fields.strings import BitField
 from pcapkit.protocols.schema.schema import Schema
-
 from pcapkit.utilities.logging import SPHINX_TYPE_CHECKING
 
 __all__ = ['VLAN', 'TCI']

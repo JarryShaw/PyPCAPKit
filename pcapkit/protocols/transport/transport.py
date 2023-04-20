@@ -21,7 +21,7 @@ from pcapkit.utilities.logging import DEVMODE, logger
 from pcapkit.utilities.warnings import RegistryWarning, warn
 
 if TYPE_CHECKING:
-    from typing import Any, Optional, Type, DefaultDict
+    from typing import Any, DefaultDict, Optional, Type
 
     from typing_extensions import Literal
 
