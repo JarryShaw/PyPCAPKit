@@ -6,7 +6,7 @@ import sys
 import setuptools
 
 # version string
-__version__ = '0.16.3'
+__version__ = '1.0.0b1'
 
 # README
 with open('README.rst', encoding='utf-8') as file:

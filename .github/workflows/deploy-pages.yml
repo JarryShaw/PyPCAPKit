@@ -25,11 +25,12 @@ jobs:
           export PCAPKIT_DEVMODE=1
 
           brew install python@3.11 libmagic || true
+          brew unlink python@3.11 || true
           brew link --force --overwrite python@3.11
 
-          python3.11 -m pip install -U pip setuptools wheel
-          python3.11 -m pip install -r docs/requirements.txt
-          python3.11 -m pip install -e .[all]
+          python3 -m pip install -U pip setuptools wheel
+          python3 -m pip install -r docs/requirements.txt
+          python3 -m pip install -e .[all]
           make -C docs html
 
           # disable Jekyll

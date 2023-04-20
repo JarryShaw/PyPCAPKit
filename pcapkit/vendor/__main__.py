@@ -25,7 +25,7 @@ if TYPE_CHECKING:
     from pcapkit.vendor.default import Vendor
 
 #: version string
-__version__ = '0.16.3'
+__version__ = '1.0.0b1'
 
 
 def get_parser() -> 'ArgumentParser':

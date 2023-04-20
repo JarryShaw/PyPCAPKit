@@ -39,7 +39,7 @@ copyright = f'2017-{datetime.date.today().year}, Jarry Shaw'  # pylint: disable=
 author = 'Jarry Shaw'
 
 # The full version, including alpha/beta/rc tags
-release = '0.16.3'
+release = '1.0.0b1'
 
 
 # -- General configuration ---------------------------------------------------
@@ -152,7 +152,7 @@ html_theme_options = {
 
     "source_repository": "https://github.com/JarryShaw/PyPCAPKit/",
     "source_branch": "master",
-    "source_directory": "docs/",
+    "source_directory": "docs/source/",
 }
 html_title = "PyPCAPKit"
 
