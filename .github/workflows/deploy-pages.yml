@@ -21,6 +21,8 @@ jobs:
 
       - name: Install and Build 🔧 # This example project is built using npm and outputs the result to the 'build' folder. Replace with the commands required to build your project, or remove this step entirely if your site is pre-built.
         run: |
+          set -x
+
           export PCAPKIT_SPHINX=1
           export PCAPKIT_DEVMODE=1
 
@@ -31,6 +33,8 @@ jobs:
           python3 -m pip install -U pip setuptools wheel
           python3 -m pip install -r docs/requirements.txt
           python3 -m pip install -e .[all]
+
+          rm -rf docs/build
           make -C docs html
 
           # disable Jekyll
