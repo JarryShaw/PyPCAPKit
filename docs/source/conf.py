@@ -12,6 +12,8 @@ import sys
 import typing
 from typing import TYPE_CHECKING
 
+import pcapkit
+
 if TYPE_CHECKING:
     from typing import Any, Dict, List
     from sphinx.application import Sphinx
@@ -39,7 +41,7 @@ copyright = f'2017-{datetime.date.today().year}, Jarry Shaw'  # pylint: disable=
 author = 'Jarry Shaw'
 
 # The full version, including alpha/beta/rc tags
-release = '1.0.0b1'
+release = pcapkit.__version__
 
 
 # -- General configuration ---------------------------------------------------

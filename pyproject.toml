@@ -1,3 +1,107 @@
 [build-system]
-requires = ["setuptools", "wheel"]
-build-backend = "setuptools.build_meta:__legacy__"
+requires = [
+    "setuptools>=62.0.0",
+
+    # version compatibility
+    "f2format; python_version < '3.6'",
+    "bpc-walrus; python_version < '3.8'",
+    "pathlib2>=2.3.2; python_version == '3.4'",
+]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pypcapkit"
+dynamic = [ "version", "readme" ]
+authors = [
+    { name="Jarry Shaw", email="jarryshaw@icloud.com" },
+]
+maintainers = [
+    { name="Jarry Shaw", email="jarryshaw@icloud.com" },
+]
+license = { text="BSD 3-Clause License" }
+requires-python = ">=3.6, <4"
+description = "PyPCAPKit: comprehensive network packet analysis library"
+keywords = [ "network", "pcap", "packet" ]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Environment :: Console",
+    "Environment :: MacOS X",
+    "Environment :: Win32 (MS Windows)",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Information Technology",
+    "Intended Audience :: Science/Research",
+    "Intended Audience :: System Administrators",
+    "Intended Audience :: Telecommunications Industry",
+    "License :: OSI Approved :: BSD License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.6",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python ::Implementation :: CPython",
+    "Programming Language :: Python ::Implementation :: PyPy",
+    "Topic :: Security",
+    "Topic :: System :: Networking",
+    "Topic :: System :: Networking :: Monitoring",
+    "Topic :: Utilities",
+    "Typing :: Typed",
+]
+dependencies = [
+    "dictdumper~=0.8.0",  # for formatted output
+    "chardet",            # for bytes decode
+    "aenum",              # for const types
+    "tbtrim>=0.2.1",      # for refined exceptions
+]
+
+[project.urls]
+homepage = "https://jarryshaw.github.io/PyPCAPKit/"
+documentation = "https://jarryshaw.github.io/PyPCAPKit/"
+repository = "https://github.com/JarryShaw/PyPCAPKit"
+changelog = "https://github.com/JarryShaw/PyPCAPKit/releases"
+
+[project.scripts]
+pcapkit-cli = "pcapkit.__main__:main"
+pcapkit-vendor = "pcapkit.vendor.__main__:main"
+
+[project.optional-dependencies]
+# for CLI display
+cli = [ "emoji" ]
+# for normal users
+DPKT = [ "dpkt" ]
+Scapy = [ "scapy" ]
+PyShark = [ "pyshark" ]
+# for developers
+vendor = [ "requests[socks]", "beautifulsoup4[html5lib]" ]
+all = [
+    "emoji",
+    "dpkt", "scapy", "pyshark",
+    "requests[socks]", "beautifulsoup4[html5lib]",
+]
+docs = [
+    "Sphinx>=6.1.3",
+    "sphinx-autodoc-typehints", "sphinx-opengraph", "sphinx-copybutton",
+    "furo",
+    "typing-extensions",
+]
+
+# setuptools specific
+
+[tool.setuptools]
+zip-safe = false  # We use __file__ in pcapkit/__init__.py, therefore Scapy isn't zip safe
+
+[tool.setuptools.packages.find]
+include = [
+    "pcapkit*",
+]
+exclude = [
+    "test*",
+    "docs*",
+    "sample*",
+]
+
+[tool.setuptools.dynamic]
+version = { attr="pcapkit.__version__" }

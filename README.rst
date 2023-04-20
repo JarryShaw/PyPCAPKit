@@ -8,9 +8,10 @@ PyPCAPKit - Comprehensive Network Packet Analysis Library
 .. _docs: https://jarryshaw.github.io/PyPCAPKit/
 
 The PyPCAPKit project is an open source Python program focus
-on `PCAP`_ parsing and analysis, which works as a stream PCAP file extractor.
-With support of `DictDumper`_, it shall support multiple
-output report formats.
+on `PCAP`_ parsing and analysis, which works as a network
+packet extraction, construction and analysis library. With
+support of `DictDumper`_, it shall support multiple output
+report formats.
 
    The whole project supports **Python 3.6** or later.
 

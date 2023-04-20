@@ -19,6 +19,9 @@ import argparse
 import sys
 from typing import TYPE_CHECKING
 
+from pcapkit import __version__
+from pcapkit.foundation.extraction import Extractor
+from pcapkit.interface import JSON, PLIST, TREE
 from pcapkit.utilities.compat import ModuleNotFoundError  # pylint: disable=redefined-builtin
 from pcapkit.utilities.exceptions import stacklevel
 from pcapkit.utilities.warnings import EmojiWarning, warn
@@ -29,14 +32,10 @@ except ModuleNotFoundError:
     warn("dependency package 'emoji' not found",
          EmojiWarning, stacklevel=stacklevel())
 
-from pcapkit.foundation.extraction import Extractor
-from pcapkit.interface import JSON, PLIST, TREE
+__all__ = ['main']
 
 if TYPE_CHECKING:
     from argparse import ArgumentParser
-
-#: version number
-__version__ = '1.0.0b1'
 
 
 def get_parser() -> 'ArgumentParser':

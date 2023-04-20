@@ -1,155 +1,47 @@
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import subprocess  # nosec
+import os
 import sys
+from typing import TYPE_CHECKING
 
-import setuptools
+if TYPE_CHECKING:
+    from typing import Any
 
-# version string
-__version__ = '1.0.0b1'
+if sys.version_info[0] <= 2:
+    raise OSError("PyPCAPKit does not support Python 2!")
 
-# README
-with open('README.rst', encoding='utf-8') as file:
-    long_description = file.read()
-
-###############################################################################
-# general configuration
-###############################################################################
-
-# setup attributes
-attrs = dict(
-    name='pypcapkit',
-    version=__version__,
-    description='Comprehensive Network Packet Analysis Library',
-    long_description=long_description,
-    author='Jarry Shaw',
-    author_email='jarryshaw@icloud.com',
-    maintainer='Jarry Shaw',
-    maintainer_email='jarryshaw@icloud.com',
-    url='https://github.com/JarryShaw/PyPCAPKit',
-    download_url='https://github.com/JarryShaw/PyPCAPKit/archive/v%s.tar.gz' % __version__,  # pylint: disable=consider-using-f-string
-    # py_modules
-    packages=setuptools.find_packages(),
-    # scripts
-    # ext_modules
-    classifiers=[
-        'Development Status :: 5 - Production/Stable',
-        'Environment :: Console',
-        'Environment :: MacOS X',
-        'Environment :: Win32 (MS Windows)',
-        'Intended Audience :: Developers',
-        'License :: OSI Approved :: BSD License',
-        'Natural Language :: English',
-        'Operating System :: OS Independent',
-        'Programming Language :: Python',
-        'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.6',
-        'Programming Language :: Python :: 3.7',
-        'Programming Language :: Python :: 3.8',
-        'Programming Language :: Python :: 3.9',
-        'Programming Language :: Python :: 3.10',
-        'Programming Language :: Python :: 3.11',
-        'Programming Language :: Python :: 3 :: Only',
-        'Programming Language :: Python :: Implementation',
-        'Programming Language :: Python :: Implementation :: CPython',
-        'Programming Language :: Python :: Implementation :: PyPy',
-        'Topic :: System :: Networking',
-        'Topic :: Utilities',
-        'Typing :: Typed',
-    ],
-    # distclass
-    # script_name
-    # script_args
-    # options
-    license='BSD 3-Clause License',
-    keywords=[
-        'computer-networking',
-        'pcap-analyser',
-        'pcap-parser',
-    ],
-    platforms=[
-        'any'
-    ],
-    # cmdclass
-    # data_files
-    # package_dir
-    # obsoletes
-    # provides
-    # requires
-    # command_packages
-    # command_options
-    package_data={
-        '': [
-            'LICENSE',
-            'README.rst',
-        ],
-    },
-    # include_package_data
-    # libraries
-    # headers
-    # ext_package
-    # include_dirs
-    # password
-    # fullname
-    # long_description_content_type
-    # python_requires
-    # zip_safe
-    install_requires=[
-        'dictdumper~=0.8.0',        # for formatted output
-        'chardet',                  # for bytes decode
-        'aenum',                    # for const types
-        'tbtrim>=0.2.1',            # for refined exceptions
-    ],
-    entry_points={
-        'console_scripts': [
-            'pcapkit-cli = pcapkit.__main__:main',
-            'pcapkit-vendor = pcapkit.vendor.__main__:main',
-        ]
-    },
-    extras_require={
-        'all': [
-            'emoji',
-            'dpkt', 'scapy', 'pyshark',
-            'requests[socks]', 'beautifulsoup4[html5lib]',
-        ],
-        # for CLI display
-        'cli': ['emoji'],
-        # for normal users
-        'DPKT': ['dpkt'],
-        'Scapy': ['scapy'],
-        'PyShark': ['pyshark'],
-        # for developers
-        'vendor': ['requests[socks]', 'beautifulsoup4[html5lib]'],
-    },
-    setup_requires=[
-        # version compatibility
-        'f2format; python_version < "3.6"',
-        'bpc-walrus; python_version < "3.8"',
-        'pathlib2>=2.3.2; python_version == "3.4"',
-    ],
-)
-
-###############################################################################
-# pybpc integration
-###############################################################################
+try:
+    from setuptools import setup
+    from setuptools.command.build_py import build_py
+    from setuptools.command.sdist import sdist
+except:
+    raise ImportError("setuptools is required to install PyPCAPKit!")
 
 
-def refactor() -> 'None':
+def get_long_description() -> 'str | None':
+    """Extract description from README.rst, for PyPI's usage."""
+    with open('README.rst', encoding='utf-8') as file:
+        long_description = file.read()
+    return long_description
+
+
+def refactor(path: 'str') -> 'None':
     """Refactor code."""
-    if version_info < (3, 6):
+    if sys.version_info < (3, 6):
         try:
             subprocess.check_call(  # nosec
-                [sys.executable, '-m', 'f2format', '--no-archive', 'pcapkit']
+                [sys.executable, '-m', 'f2format', '--no-archive', path]
             )
         except subprocess.CalledProcessError as error:
             print('Failed to perform assignment expression backport compiling.'
                   'Please consider manually install `bpc-f2format` and try again.', file=sys.stderr)
             sys.exit(error.returncode)
 
-    if version_info < (3, 8):
+    if sys.version_info < (3, 8):
         try:
             subprocess.check_call(  # nosec
-                [sys.executable, '-m', 'walrus', '--no-archive', 'pcapkit']
+                [sys.executable, '-m', 'walrus', '--no-archive', path]
             )
         except subprocess.CalledProcessError as error:
             print('Failed to perform assignment expression backport compiling.'
@@ -157,109 +49,31 @@ def refactor() -> 'None':
             sys.exit(error.returncode)
 
 
-###############################################################################
-# setuptools commands
-###############################################################################
+class pcapkit_sdist(sdist):
+    """Modified sdist to run PyBPC conversion."""
 
-from setuptools import setup
-from setuptools.command.bdist_egg import bdist_egg as _bdist_egg
-from setuptools.command.build_py import build_py as _build_py
-from setuptools.command.develop import develop as _develop
-from setuptools.command.install import install as _install
-from setuptools.command.sdist import sdist as _sdist
+    def make_release_tree(self, base_dir: 'str', *args: 'Any', **kwargs: 'Any') -> 'None':
+        super(pcapkit_sdist, self).make_release_tree(base_dir, *args, **kwargs)
 
-version_info = sys.version_info[:2]
+        # PyBPC compatibility enforcement
+        refactor(os.path.join(base_dir, 'pcapkit'))
 
-attrs.update(dict(
-    include_package_data=True,
-    # libraries
-    # headers
-    # ext_package
-    # include_dirs
-    # password
-    # fullname
+
+class pcapkit_build_py(build_py):
+    """Modified build_py to run PyBPC conversion."""
+
+    def build_package_data(self) -> 'None':
+        super(pcapkit_build_py, self).build_package_data()
+
+        # PyBPC compatibility enforcement
+        refactor(os.path.join(self.build_lib, 'pcapkit'))
+
+
+setup(
+    cmdclass={
+        'sdistpcapkit_': pcapkit_sdist,
+        'build_py': pcapkit_build_py,
+    },
+    long_description=get_long_description(),
     long_description_content_type='text/x-rst',
-    python_requires='>=3.6',
-    zip_safe=True,
-))
-
-
-class bdist_egg(_bdist_egg):
-    """Add on-distribution backport code conversion."""
-
-    def run(self) -> 'None':
-        """Run command."""
-        refactor()
-        _bdist_egg.run(self)
-
-
-class develop(_develop):
-    """Add on-develop backport code conversion."""
-
-    def run(self) -> 'None':
-        """Run command."""
-        refactor()
-        _develop.run(self)
-
-
-class build_py(_build_py):
-    """Add on-build backport code conversion."""
-
-    def run(self) -> 'None':
-        refactor()
-        _build_py.run(self)
-
-
-class install(_install):
-    """Add on-install backport code conversion."""
-
-    def run(self) -> 'None':
-        refactor()
-        _install.run(self)
-
-
-class sdist(_sdist):
-    """Add on-distribution backport code conversion."""
-
-    def run(self) -> 'None':
-        refactor()
-        _sdist.run(self)
-
-
-cmdclass = {
-    'bdist_egg': bdist_egg,
-    'develop': develop,
-}
-
-###############################################################################
-# wheel commands
-###############################################################################
-
-try:
-    from wheel.bdist_wheel import bdist_wheel as _bdist_wheel
-
-
-    class bdist_wheel(_bdist_wheel):
-        """Add on-wheel backport code conversion."""
-
-        def run(self) -> 'None':
-            """Run command."""
-            refactor()
-            _bdist_wheel.run(self)
-
-
-    cmdclass['bdist_wheel'] = bdist_wheel
-except ImportError:
-    pass
-
-###############################################################################
-# final setup
-###############################################################################
-
-# set-up script for pip distribution
-setup(cmdclass={
-    'build_py': build_py,
-    'install': install,
-    'sdist': sdist,
-    **cmdclass,
-}, **attrs)
+)

@@ -3,18 +3,9 @@ global-exclude .DS_Store
 global-include *.md
 global-include *.py
 
-prune .github
-prune .venv
-prune .vscode
-
-prune archive
-prune devel
-prune doc
 prune release
 prune sample
-prune src
 prune test
-prune testbench
 prune temp
 
 include README.rst

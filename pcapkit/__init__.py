@@ -111,3 +111,6 @@ __all__ = [
     'FTP', 'FTP_DATA',                                      # Application Layer
     'HTTP',
 ]
+
+#: version number
+__version__ = '1.0.0b1'
