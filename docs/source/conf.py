@@ -153,6 +153,15 @@ html_theme_options = {
     "source_repository": "https://github.com/JarryShaw/PyPCAPKit/",
     "source_branch": "master",
     "source_directory": "docs/source/",
+
+    "light_css_variables": {
+        "font-stack": "Georgia, serif",
+        "font-stack--monospace": "'Consolas', 'Menlo', 'DejaVu Sans Mono', 'Bitstream Vera Sans Mono', monospace",
+    },
+    "dark_css_variables": {
+        "font-stack": "Georgia, serif",
+        "font-stack--monospace": "'Consolas', 'Menlo', 'DejaVu Sans Mono', 'Bitstream Vera Sans Mono', monospace",
+    },
 }
 html_title = "PyPCAPKit"
 
