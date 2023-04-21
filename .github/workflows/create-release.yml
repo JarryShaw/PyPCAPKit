@@ -24,7 +24,16 @@ jobs:
         with:
           python-version: '3.11'
 
+      - name: Check Version
+        run: |
+          python -m pip install -e .
+          echo "PCAPKIT_VERSION=$(python -c 'import pcapkit; print(pcapkit.__version__)')" >> $GITHUB_ENV
+          echo "PCAPKIT_PRERELEASE=$(python3 -c 'import pcapkit, pkg_resources; print(str(pkg_resources.parse_version(pcapkit.__version__).is_prerelease).lower())')" >> $GITHUB_ENV
+
+          echo "PCAPKIT_LATEST=v$(git tag --sort version:refname | tail -n 2 | head -n 1)" >> $GITHUB_ENV
+
       - name: Install and Setup
+        if: ${{ env.PCAPKIT_LATEST != env.PCAPKIT_VERSION }}
         run: |
           set -x
 
@@ -32,33 +41,32 @@ jobs:
           python -m pip install -U build
 
       - name: Build PyPI
+        if: ${{ env.PCAPKIT_LATEST != env.PCAPKIT_VERSION }}
         run: |
           python -m build
 
       - name: Build Anaconda
+        if: ${{ env.PCAPKIT_LATEST != env.PCAPKIT_VERSION }}
         run: |
           # TODO: Anaconda distro
 
       - name: Publish to PyPI
+        if: ${{ env.PCAPKIT_LATEST != env.PCAPKIT_VERSION }}
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           password: ${{ secrets.PYPI_API_TOKEN }}
           skip-existing: true
 
       - name: Publish package to TestPyPI
+        if: ${{ env.PCAPKIT_LATEST != env.PCAPKIT_VERSION }}
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           password: ${{ secrets.TEST_PYPI_API_TOKEN }}
           repository-url: https://test.pypi.org/legacy/
           skip-existing: true
 
-      - name: Get Version
-        run: |
-          python -m pip install -e .
-          echo "PCAPKIT_VERSION=$(python -c 'import pcapkit; print(pcapkit.__version__)')" >> $GITHUB_ENV
-          echo "PCAPKIT_PRERELEASE=$(python3 -c 'import pcapkit, pkg_resources; print(str(pkg_resources.parse_version(pcapkit.__version__).is_prerelease).lower())')" >> $GITHUB_ENV
-
       - name: Changelog
+        if: ${{ env.PCAPKIT_LATEST != env.PCAPKIT_VERSION }}
         uses: Bullrich/generate-release-changelog@master
         id: changelog
         env:
@@ -86,6 +94,7 @@ jobs:
         #   echo "PCAPKIT_CHANGELOG=$changelog" >> $GITHUB_ENV
 
       - name: Create Release
+        if: ${{ env.PCAPKIT_LATEST != env.PCAPKIT_VERSION }}
         id: create_release
         uses: ncipollo/release-action@v1.12.0
         env:
