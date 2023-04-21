@@ -16,7 +16,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
 
       - uses: actions/setup-python@v4
         with:
@@ -62,7 +64,7 @@ jobs:
           # https://github.com/Bullrich/generate-release-changelog/blob/master/entrypoint.sh
 
           tag=$(git tag --sort version:refname | tail -n 2 | head -n 1)
-          echo $tag
+          echo tag=$tag
 
           if [ "$tag" ]; then
             changelog=$(git log --oneline --no-decorate $tag..HEAD)
