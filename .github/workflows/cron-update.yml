@@ -16,9 +16,6 @@ jobs:
         run: |
           set -x
 
-          export PCAPKIT_VENDOR_RETRY=10
-          export PCAPKIT_CI_MODE=1
-
           brew install python@3.11 || true
           brew unlink python@3.11 || true
           brew link --force --overwrite python@3.11
@@ -30,6 +27,9 @@ jobs:
       - name: Update Vendor
         run: |
           set -x
+
+          export PCAPKIT_VENDOR_RETRY=10
+          export PCAPKIT_CI_MODE=1
 
           pcapkit-vendor
           isort -l100 -ppcapkit --skip-glob '**/__init__.py' pcapkit
