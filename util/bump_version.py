@@ -48,11 +48,13 @@ try:
 except ImportError:
     path = os.path.join('pcapkit', '__init__.py')
 
+contents = []  # type: list[str]
 with open(path, 'r', encoding='utf-8') as in_file:
-    content = in_file.read()
-
-content.replace(f'__version__ = {version!r}',
-                f'__version__ = {new_ver!r}')
+    for line in in_file:
+        if line.startswith('__version__'):
+            line = f'__version__ = {new_ver!r}'
+        contents.append(line)
 
 with open (path, 'w', encoding='utf-8') as out_file:
-    out_file.write(content)
+    out_file.writelines(contents)
+    out_file.write('\n')
