@@ -27,10 +27,14 @@ jobs:
       - name: Check Version
         run: |
           python -m pip install -e .
+
           echo "PCAPKIT_VERSION=$(python -c 'import pcapkit; print(pcapkit.__version__)')" >> $GITHUB_ENV
           echo "PCAPKIT_PRERELEASE=$(python3 -c 'import pcapkit, pkg_resources; print(str(pkg_resources.parse_version(pcapkit.__version__).is_prerelease).lower())')" >> $GITHUB_ENV
 
           echo "PCAPKIT_LATEST=$(git tag --sort version:refname | tail -n 2 | head -n 1 | s/v//)" >> $GITHUB_ENV
+
+          echo version=$PCAPKIT_VERSION
+          echo latest=$PCAPKIT_LATEST
 
       - name: Install and Setup
         if: ${{ env.PCAPKIT_LATEST != env.PCAPKIT_VERSION }}
