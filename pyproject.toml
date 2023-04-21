@@ -3,8 +3,8 @@ requires = [
     "setuptools>=61.0.0",
 
     # version compatibility
-    "f2format; python_version < '3.6'",
-    "python-poseur; python_version < '3.8'",
+    "bpc-f2format; python_version < '3.6'",
+    "poseur; python_version < '3.8'",  # bpc-poseur
     "bpc-walrus; python_version < '3.8'",
     "pathlib2>=2.3.2; python_version == '3.4'",
 ]

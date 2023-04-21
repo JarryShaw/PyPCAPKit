@@ -60,3 +60,6 @@ bandit:
 
 profile:
 	$(MAKE) -C test profile
+
+mypy-types:
+	pipenv run mypy --install-types

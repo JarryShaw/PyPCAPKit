@@ -7,12 +7,42 @@ on:
 name: Create Release
 
 jobs:
-  build:
-    name: Create Release
+  release:
+    name: GitHub Release
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
+
+      - name: Install and Build
+        run: |
+          set -x
+
+          brew install python@3.11 || true
+          brew unlink python@3.11 || true
+          brew link --force --overwrite python@3.11
+
+          python3 -m pip install -U pip setuptools wheel
+          python3 -m pip install -U build twine
+
+          # PyPI distro
+          python3 -m build
+
+          # TODO: Anaconda distro
+
+          twine check dist/*
+
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          password: ${{ secrets.PYPI_API_TOKEN }}
+
+      - name: Publish package to TestPyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          password: ${{ secrets.TEST_PYPI_API_TOKEN }}
+          repository-url: https://test.pypi.org/legacy/
+
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1

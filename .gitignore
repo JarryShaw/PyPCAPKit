@@ -35,6 +35,8 @@ Pipfile.lock
 build_tmp
 release
 
+/VERSION
+
 # Created by https://www.gitignore.io/api/macos,python,visualstudiocode
 
 ### macOS ###

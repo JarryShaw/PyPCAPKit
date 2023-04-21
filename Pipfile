@@ -37,6 +37,7 @@ types-docutils = "*"
 types-emoji = "*"
 types-requests = "*"
 types-urllib3 = "*"
+types-setuptools = "*"
 pybind11 = {extras = ["global"],version = "*"}
 snakeviz = "*"
 tuna = "*"
