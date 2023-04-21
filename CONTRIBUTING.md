@@ -13,7 +13,7 @@ resources to make it easier to get your contribution accepted.
 
 This is a rough outline of what a contributor's workflow looks like:
 
-- Create a topic branch from where you want to base your work. This is usually master.
+- Create a topic branch from where you want to base your work. This is usually main.
 - Make commits of logical units and add test case if the change fixes a bug or adds new functionality.
 - Run tests and make sure all the tests are passed.
 - Make sure your commit messages are in the proper format (see below).
