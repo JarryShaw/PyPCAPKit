@@ -112,3 +112,5 @@ following objects and functions:
      - ≥ 3.9
    * - :class:`enum.StrEnum`
      - ≥ 3.11
+   * - :func:`typing.final`
+     - ≥ 3.8

@@ -9,6 +9,9 @@ if TYPE_CHECKING:
     from typing import Any, Callable, Optional, Type, Union
 
 __all__ = [
+    # functions
+    'final',
+
     # exceptions
     'ModuleNotFoundError',
 
@@ -132,3 +135,8 @@ if version < (3, 11):
     from aenum import StrEnum
 else:
     from enum import StrEnum
+
+if version < (3, 8):
+    from typing_extensions import final
+else:
+    from typing import final

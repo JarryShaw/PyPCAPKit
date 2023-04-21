@@ -35,8 +35,6 @@ import ipaddress
 import math
 from typing import TYPE_CHECKING, cast, overload
 
-from typing_extensions import TypedDict
-
 from pcapkit.const.hip.certificate import Certificate as Enum_Certificate
 from pcapkit.const.hip.cipher import Cipher as Enum_Cipher
 from pcapkit.const.hip.di import DITypes as Enum_DITypes
@@ -198,6 +196,7 @@ from pcapkit.protocols.schema.internet.hip import UnassignedParameter as Schema_
 from pcapkit.protocols.schema.internet.hip import ViaRVSParameter as Schema_ViaRVSParameter
 from pcapkit.protocols.schema.schema import Schema
 from pcapkit.utilities.exceptions import ProtocolError, UnsupportedCall
+from pcapkit.utilities.logging import SPHINX_TYPE_CHECKING
 from pcapkit.utilities.warnings import ProtocolWarning, RegistryWarning, warn
 
 if TYPE_CHECKING:
@@ -231,21 +230,24 @@ if TYPE_CHECKING:
 __all__ = ['HIP']
 
 
-class Locator(TypedDict):
-    """Locator dictionary type."""
+if SPHINX_TYPE_CHECKING:
+    from typing_extensions import TypedDict
 
-    #: Traffic type.
-    traffic: 'int'
-    #: Locator type.
-    type: 'int'
-    #: Preferred flag.
-    preferred: 'bool'
-    #: Lifetime.
-    lifetime: 'timedelta | int'
-    #: IP address.
-    ip: 'IPv6Address | bytes | int | str'
-    #: SPI.
-    spi: 'NotRequired[int]'
+    class Locator(TypedDict):
+        """Locator dictionary type."""
+
+        #: Traffic type.
+        traffic: 'int'
+        #: Locator type.
+        type: 'int'
+        #: Preferred flag.
+        preferred: 'bool'
+        #: Lifetime.
+        lifetime: 'timedelta | int'
+        #: IP address.
+        ip: 'IPv6Address | bytes | int | str'
+        #: SPI.
+        spi: 'NotRequired[int]'
 
 
 class HIP(Internet[Data_HIP, Schema_HIP],

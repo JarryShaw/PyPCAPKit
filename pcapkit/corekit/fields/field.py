@@ -6,8 +6,7 @@ import copy
 import struct
 from typing import TYPE_CHECKING, Generic, TypeVar, cast
 
-from typing_extensions import final
-
+from pcapkit.utilities.compat import final
 from pcapkit.utilities.exceptions import NoDefaultValue
 
 __all__ = ['Field']
