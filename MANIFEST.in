@@ -1,12 +1,15 @@
 global-exclude .DS_Store
 
-global-include *.md
+global-include *.rst
 global-include *.py
 
-prune release
+prune .eggs
+prune .github
+prune .venv
+prune docs
 prune sample
-prune test
 prune temp
+prune test
 
 include README.rst
 include LICENSE

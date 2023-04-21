@@ -14,6 +14,8 @@ if sys.version_info[0] <= 2:
 try:
     from setuptools import setup
     from setuptools.command.build_py import build_py
+    from setuptools.command.develop import develop
+    from setuptools.command.install import install
     from setuptools.command.sdist import sdist
 except:
     raise ImportError("setuptools is required to install PyPCAPKit!")
@@ -28,6 +30,8 @@ def get_long_description() -> 'str | None':
 
 def refactor(path: 'str') -> 'None':
     """Refactor code."""
+    import subprocess  # nosec: B404
+
     if sys.version_info < (3, 6):
         try:
             subprocess.check_call(  # nosec
@@ -69,10 +73,32 @@ class pcapkit_build_py(build_py):
         refactor(os.path.join(self.build_lib, 'pcapkit'))
 
 
+class pcapkit_develop(develop):
+    """Modified develop to run PyBPC conversion."""
+
+    def run(self) -> 'None':
+        super(pcapkit_develop, self).run()
+
+        # PyBPC compatibility enforcement
+        refactor(os.path.join(self.install_lib, 'pcapkit'))
+
+
+class pcapkit_install(install):
+    """Modified install to run PyBPC conversion."""
+
+    def run(self) -> 'None':
+        super(pcapkit_install, self).run()
+
+        # PyBPC compatibility enforcement
+        refactor(os.path.join(self.install_lib, 'pcapkit'))
+
+
 setup(
     cmdclass={
         'sdistpcapkit_': pcapkit_sdist,
         'build_py': pcapkit_build_py,
+        'develop': pcapkit_develop,
+        'install': pcapkit_install,
     },
     long_description=get_long_description(),
     long_description_content_type='text/x-rst',

@@ -1,6 +1,6 @@
 [build-system]
 requires = [
-    "setuptools>=62.0.0",
+    "setuptools>=61.0.0",
 
     # version compatibility
     "f2format; python_version < '3.6'",
@@ -42,8 +42,8 @@ classifiers = [
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3 :: Only",
-    "Programming Language :: Python ::Implementation :: CPython",
-    "Programming Language :: Python ::Implementation :: PyPy",
+    "Programming Language :: Python :: Implementation :: CPython",
+    "Programming Language :: Python :: Implementation :: PyPy",
     "Topic :: Security",
     "Topic :: System :: Networking",
     "Topic :: System :: Networking :: Monitoring",

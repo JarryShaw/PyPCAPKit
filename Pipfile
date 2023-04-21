@@ -40,6 +40,7 @@ types-urllib3 = "*"
 pybind11 = {extras = ["global"],version = "*"}
 snakeviz = "*"
 tuna = "*"
+build = "*"
 
 [requires]
 python_version = "3"

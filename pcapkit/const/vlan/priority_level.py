@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 # pylint: disable=line-too-long,consider-using-f-string
-"""Priority levels defined in IEEE 802.1p.
-=============================================
+"""Priority levels defined in IEEE 802.1p
+============================================
 
 .. module:: pcapkit.const.vlan.priority_level
 
-This module contains the constant enumeration for **Priority levels defined in IEEE 802.1p.**,
+This module contains the constant enumeration for **Priority levels defined in IEEE 802.1p**,
 which is automatically generated from :class:`pcapkit.vendor.vlan.priority_level.PriorityLevel`.
 
 """
@@ -16,7 +16,7 @@ __all__ = ['PriorityLevel']
 
 
 class PriorityLevel(IntEnum):
-    """[PriorityLevel] Priority levels defined in IEEE 802.1p."""
+    """[PriorityLevel] Priority levels defined in IEEE 802.1p"""
 
     #: Background (lowest)
     BK = 0b001

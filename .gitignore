@@ -33,6 +33,7 @@ _build
 Pipfile.lock
 
 build_tmp
+release
 
 # Created by https://www.gitignore.io/api/macos,python,visualstudiocode
 
