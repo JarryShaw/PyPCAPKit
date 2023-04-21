@@ -42,5 +42,17 @@ else:
     new_ver = base_version + '.post1'
 
 # write to file
-with open('VERSION', 'w', encoding='utf-8') as file:
-    file.write(str(new_ver))
+try:
+    import pcapkit
+    path = os.path.join(pcapkit.__path__[0], '__init__.py')
+except ImportError:
+    path = os.path.join('pcapkit', '__init__.py')
+
+with open(path, 'r', encoding='utf-8') as in_file:
+    content = in_file.read()
+
+content.replace(f'__version__ = {version!r}',
+                f'__version__ = {new_ver!r}')
+
+with open (path, 'w', encoding='utf-8') as out_file:
+    out_file.write(content)

@@ -13,7 +13,7 @@ name: Create Release
 jobs:
   release:
     name: GitHub Release
-    runs-on: ubuntu-latest
+    runs-on: macos-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
@@ -49,12 +49,13 @@ jobs:
 
       - name: Create Release
         id: create_release
-        uses: actions/create-release@v1
+        uses: marvinpinto/action-automatic-releases@latest
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
         with:
-          tag_name: ${{ github.ref }}
-          release_name: PyPCAPKit ${{ github.ref }}
-          body: ${{ join(github.event.commits.*.message, '\n') }}
-          draft: false
-          prerelease: false
+          repo_token: "${{ secrets.GITHUB_TOKEN }}"
+          automatic_release_tag: ${{ github.ref }}
+          title: PyPCAPKit ${{ github.ref }}
+          prerelease: ${{ contains(github.ref, 'pre') || contains(github.ref, 'a') || contains(github.ref, 'b') || contains(github.ref, 'rc') }}
+          files: |
+            dist/*
