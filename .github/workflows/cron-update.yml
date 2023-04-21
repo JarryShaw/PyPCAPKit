@@ -48,7 +48,12 @@ jobs:
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
-          git commit -m "Updated vendor constant enumerations at $(date)" -a
+          git commit -am << EOS
+          Bumped version to $(python3 -c 'import pcapkit; print(pcapkit.__version__)')
+
+          Updated vendor constant enumerations at $(date). The following files
+          have been changed: ${{ steps.verify-changed-files.outputs.changed_files }}
+          EOS
 
       - name: Push changes
         uses: ad-m/github-push-action@master
@@ -57,18 +62,18 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           branch: ${{ github.ref }}
 
-      - name: Create Tag
-        if: steps.verify-changed-files.outputs.files_changed == 'true'
-        run: |
-          version=$(python3 -c 'import pcapkit; print(pcapkit.__version__)')
-          git tag "v$version" -m "New distribution [$version] \
+      # - name: Create Tag
+      #   if: steps.verify-changed-files.outputs.files_changed == 'true'
+      #   run: |
+      #     version=$(python3 -c 'import pcapkit; print(pcapkit.__version__)')
+      #     git tag "v$version" -m "New distribution [$version] \
 
-          Update vendor constant enumerations at $(date). The following files have been changed: ${{ steps.verify-changed-files.outputs.changed_files }}"
+      #     Update vendor constant enumerations at $(date). The following files have been changed: ${{ steps.verify-changed-files.outputs.changed_files }}"
 
-      - name: Push changes
-        uses: ad-m/github-push-action@master
-        if: steps.verify-changed-files.outputs.files_changed == 'true'
-        with:
-          tags: true
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          branch: ${{ github.ref }}
+      # - name: Push changes
+      #   uses: ad-m/github-push-action@master
+      #   if: steps.verify-changed-files.outputs.files_changed == 'true'
+      #   with:
+      #     tags: true
+      #     github_token: ${{ secrets.GITHUB_TOKEN }}
+      #     branch: ${{ github.ref }}
