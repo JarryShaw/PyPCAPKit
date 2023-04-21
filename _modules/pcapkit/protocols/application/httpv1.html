@@ -369,7 +369,6 @@
 <span class="sd">.. [*] https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol</span>
 
 <span class="sd">&quot;&quot;&quot;</span>
-<span class="kn">import</span> <span class="nn">enum</span>
 <span class="kn">import</span> <span class="nn">re</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
 
@@ -381,6 +380,7 @@
 <span class="kn">from</span> <span class="nn">pcapkit.protocols.data.application.httpv1</span> <span class="kn">import</span> <span class="n">RequestHeader</span> <span class="k">as</span> <span class="n">Data_RequestHeader</span>
 <span class="kn">from</span> <span class="nn">pcapkit.protocols.data.application.httpv1</span> <span class="kn">import</span> <span class="n">ResponseHeader</span> <span class="k">as</span> <span class="n">Data_ResponseHeader</span>
 <span class="kn">from</span> <span class="nn">pcapkit.protocols.schema.application.httpv1</span> <span class="kn">import</span> <span class="n">HTTP</span> <span class="k">as</span> <span class="n">Schema_HTTP</span>
+<span class="kn">from</span> <span class="nn">pcapkit.utilities.compat</span> <span class="kn">import</span> <span class="n">StrEnum</span>
 <span class="kn">from</span> <span class="nn">pcapkit.utilities.exceptions</span> <span class="kn">import</span> <span class="n">ProtocolError</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
@@ -403,7 +403,7 @@
 <span class="n">_RE_STATUS</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">rb</span><span class="s1">&#39;\d</span><span class="si">{3}</span><span class="s1">&#39;</span><span class="p">)</span>
 
 
-<div class="viewcode-block" id="Type"><a class="viewcode-back" href="../../../../pcapkit/protocols/application/httpv1.html#pcapkit.protocols.application.httpv1.Type">[docs]</a><span class="k">class</span> <span class="nc">Type</span><span class="p">(</span><span class="n">enum</span><span class="o">.</span><span class="n">StrEnum</span><span class="p">):</span>
+<div class="viewcode-block" id="Type"><a class="viewcode-back" href="../../../../pcapkit/protocols/application/httpv1.html#pcapkit.protocols.application.httpv1.Type">[docs]</a><span class="k">class</span> <span class="nc">Type</span><span class="p">(</span><span class="n">StrEnum</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;HTTP packet type.&quot;&quot;&quot;</span>
 
     <span class="c1">#: Request packet.</span>
