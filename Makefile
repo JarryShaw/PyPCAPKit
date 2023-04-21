@@ -241,7 +241,8 @@ isort:
 	pipenv run isort -l100 -ppcapkit --skip-glob '**/__init__.py' pcapkit temp/sort.py
 
 vermin:
-	vermin pcapkit --backport argparse --backport enum --backport importlib --backport ipaddress --backport typing --no-parse-comments pcapkit -v
+	vermin pcapkit --backport argparse --backport enum --backport importlib --backport ipaddress --backport typing --backport typing_extensions --no-parse-comments --eval-annotations -vv pcapkit > temp/vermin.txt
+	code temp/vermin.txt
 
 pylint:
 	pipenv run pylint --load-plugins=pylint.extensions.check_elif,pylint.extensions.docstyle,pylint.extensions.emptystring,pylint.extensions.overlapping_exceptions --disable=all --enable=F,E,W,R,basic,classes,format,imports,refactoring,else_if_used,docstyle,compare-to-empty-string,overlapping-except --disable=blacklisted-name,invalid-name,missing-class-docstring,missing-function-docstring,missing-module-docstring,design,too-many-lines,eq-without-hash,old-division,no-absolute-import,input-builtin,too-many-nested-blocks,broad-except,singleton-comparison,ungrouped-imports --max-line-length=120 --init-import=yes pcapkit
@@ -250,7 +251,7 @@ mypy:
 	pipenv run mypy --follow-imports=silent --ignore-missing-imports --show-column-numbers --show-error-codes pcapkit
 
 bandit:
-	pipenv run bandit pcapkit
+	pipenv run bandit -r pcapkit
 
 profile:
 	$(MAKE) -C test profile

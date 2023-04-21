@@ -1151,7 +1151,7 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
             opt = Data_QuickStartReportOption(
                 code=schema.type,
                 type=self._read_ipv4_opt_type(schema.type),
-                length=schema_req.length,
+                length=schema_rep.length,
                 func=func,
                 rate=40000 * (2 ** rate) / 1000 if rate > 0 else 0,
                 nonce=schema_rep.nonce['nonce'],

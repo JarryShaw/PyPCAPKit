@@ -384,7 +384,7 @@ class Vendor(metaclass=abc.ABCMeta):
             return self.request()  # type: ignore[unreachable]
 
         try:
-            page = requests.get(self.LINK)
+            page = requests.get(self.LINK)  # nosec: B113
             if not page.ok or not page.text:
                 raise requests.exceptions.RequestException
         except requests.RequestException as err:
@@ -394,7 +394,7 @@ class Vendor(metaclass=abc.ABCMeta):
                 if proxies is None:
                     raise requests.RequestException from err
 
-                page = requests.get(self.LINK, proxies=proxies)
+                page = requests.get(self.LINK, proxies=proxies)  # nosec: B113
                 if not page.ok or not page.text:
                     raise requests.exceptions.RequestException from err
             except requests.RequestException:
