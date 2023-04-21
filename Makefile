@@ -19,9 +19,9 @@ dist-build:
 	pipenv run python -m build
 
 dist-upload:
-	twine check dist/*
-	twine upload dist/* -r pypi --skip-existing
-	twine upload dist/* -r testpypi --skip-existing
+	pipenv run twine check dist/*
+	pipenv run twine upload dist/* -r pypi --skip-existing
+	pipenv run twine upload dist/* -r testpypi --skip-existing
 
 git-tag:
 	git tag --sign "v$(VERSION)"
@@ -46,7 +46,7 @@ isort:
 	pipenv run isort -l100 -ppcapkit --skip-glob '**/__init__.py' pcapkit temp/sort.py
 
 vermin:
-	vermin pcapkit --backport argparse --backport enum --backport importlib --backport ipaddress --backport typing --backport typing_extensions --no-parse-comments --eval-annotations -vv pcapkit > temp/vermin.txt
+	pipenv run vermin pcapkit --backport argparse --backport enum --backport importlib --backport ipaddress --backport typing --backport typing_extensions --no-parse-comments --eval-annotations -vv pcapkit > temp/vermin.txt
 	code temp/vermin.txt
 
 pylint:

@@ -41,6 +41,7 @@ pybind11 = {extras = ["global"],version = "*"}
 snakeviz = "*"
 tuna = "*"
 build = "*"
+twine = "*"
 
 [requires]
 python_version = "3"
