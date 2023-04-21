@@ -34,6 +34,11 @@ jobs:
         uses: tj-actions/verify-changed-files@v14
         id: verify-changed-files
 
+      - name: Bump Version
+        if: steps.verify-changed-files.outputs.files_changed == 'true'
+        run: |
+          python3 util/bump_version.py
+
       - name: Commit changes
         if: steps.verify-changed-files.outputs.files_changed == 'true'
         run: |
@@ -51,9 +56,7 @@ jobs:
       - name: Create Tag
         if: steps.verify-changed-files.outputs.files_changed == 'true'
         run: |
-          python3 util/bump_version.py
           version=$(python3 -c 'import pcapkit; print(pcapkit.__version__)')
-
           git tag "v$version" -m "New distribution [$version] \
 
           Update vendor constant enumerations at $(date). The following files have been changed: ${{ steps.verify-changed-files.outputs.changed_files }}"
