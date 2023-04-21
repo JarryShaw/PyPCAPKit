@@ -24,6 +24,7 @@ from typing import TYPE_CHECKING
 import requests
 
 from pcapkit.utilities.exceptions import VendorNotImplemented
+from pcapkit.utilities.logging import BOOLEAN_STATES
 from pcapkit.utilities.warnings import VendorRequestWarning, warn
 
 if TYPE_CHECKING:
@@ -31,6 +32,9 @@ if TYPE_CHECKING:
     from typing import Callable, Optional
 
 __all__ = ['Vendor']
+
+MAX_RETRY = int(os.environ.get('PCAPKIT_VENDOR_RETRY', 5)) or 1
+CI_MODE = BOOLEAN_STATES.get(os.environ.get('PCAPKIT_CI_MODE', 'false').casefold(), False)
 
 #: Default constant template of enumerate registry from IANA CSV.
 LINE = lambda NAME, DOCS, FLAG, ENUM, MISS, MODL: f'''\
@@ -384,21 +388,49 @@ class Vendor(metaclass=abc.ABCMeta):
             return self.request()  # type: ignore[unreachable]
 
         try:
-            page = requests.get(self.LINK)  # nosec: B113
-            if not page.ok or not page.text:
-                raise requests.exceptions.RequestException
-        except requests.RequestException as err:
-            warn('Connection failed; retry with proxies (if any)...', VendorRequestWarning, stacklevel=2)
+            counter = 1
+            while True:
+                if counter > MAX_RETRY:
+                    raise requests.exceptions.RequestException
+
+                page = requests.get(self.LINK)  # nosec: B113
+                if not page.ok or not page.text:
+                    warn(f'Connection failed; retry for {counter}/{MAX_RETRY}...',
+                         VendorRequestWarning, stacklevel=2)
+
+                    counter += 1
+                    continue
+                break
+        except requests.RequestException:
+            warn('Connection failed; retry with proxies (if any)...',
+                 VendorRequestWarning, stacklevel=2)
+
             try:
                 proxies = get_proxies() or None
                 if proxies is None:
-                    raise requests.RequestException from err
+                    raise
 
-                page = requests.get(self.LINK, proxies=proxies)  # nosec: B113
-                if not page.ok or not page.text:
-                    raise requests.exceptions.RequestException from err
+                counter = 1
+                while True:
+                    if counter > MAX_RETRY:
+                        raise
+
+                    page = requests.get(self.LINK, proxies=proxies)  # nosec: B113
+                    if not page.ok or not page.text:
+                        warn(f'Connection failed; retry with proxy for {counter}/{MAX_RETRY}...',
+                             VendorRequestWarning, stacklevel=2)
+
+                        counter += 1
+                        continue
+                    break
             except requests.RequestException:
-                warn('Connection failed; retry with manual intervene...', VendorRequestWarning, stacklevel=2)
+                if CI_MODE:
+                    warn('Connection failed; exit on CI mode...',
+                         VendorRequestWarning, stacklevel=2)
+                    raise
+
+                warn('Connection failed; retry with manual intervene...',
+                     VendorRequestWarning, stacklevel=2)
                 with tempfile.TemporaryDirectory(suffix='-tempdir',
                                                  prefix='pcapkit-',
                                                  dir=os.path.abspath(os.curdir)) as tempdir:
