@@ -52,7 +52,7 @@ jobs:
         if: steps.verify-changed-files.outputs.files_changed == 'true'
         run: |
           python3 util/bump_version.py
-          version=$(cat VERSION)
+          version=$(python3 -c 'import pcapkit; print(pcapkit.__version__)')
 
           git tag "v$version" -m "New distribution [$version] \
 
