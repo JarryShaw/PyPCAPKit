@@ -366,6 +366,7 @@
 <span class="kn">import</span> <span class="nn">requests</span>
 
 <span class="kn">from</span> <span class="nn">pcapkit.utilities.exceptions</span> <span class="kn">import</span> <span class="n">VendorNotImplemented</span>
+<span class="kn">from</span> <span class="nn">pcapkit.utilities.logging</span> <span class="kn">import</span> <span class="n">BOOLEAN_STATES</span>
 <span class="kn">from</span> <span class="nn">pcapkit.utilities.warnings</span> <span class="kn">import</span> <span class="n">VendorRequestWarning</span><span class="p">,</span> <span class="n">warn</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
@@ -373,6 +374,9 @@
     <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Optional</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Vendor&#39;</span><span class="p">]</span>
+
+<span class="n">MAX_RETRY</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;PCAPKIT_VENDOR_RETRY&#39;</span><span class="p">,</span> <span class="mi">5</span><span class="p">))</span> <span class="ow">or</span> <span class="mi">1</span>
+<span class="n">CI_MODE</span> <span class="o">=</span> <span class="n">BOOLEAN_STATES</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;PCAPKIT_CI_MODE&#39;</span><span class="p">,</span> <span class="s1">&#39;false&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">casefold</span><span class="p">(),</span> <span class="kc">False</span><span class="p">)</span>
 
 <span class="c1">#: Default constant template of enumerate registry from IANA CSV.</span>
 <span class="n">LINE</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">NAME</span><span class="p">,</span> <span class="n">DOCS</span><span class="p">,</span> <span class="n">FLAG</span><span class="p">,</span> <span class="n">ENUM</span><span class="p">,</span> <span class="n">MISS</span><span class="p">,</span> <span class="n">MODL</span><span class="p">:</span> <span class="sa">f</span><span class="s1">&#39;&#39;&#39;</span><span class="se">\</span>
@@ -726,21 +730,49 @@
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="p">()</span>  <span class="c1"># type: ignore[unreachable]</span>
 
         <span class="k">try</span><span class="p">:</span>
-            <span class="n">page</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">LINK</span><span class="p">)</span>  <span class="c1"># nosec: B113</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="n">page</span><span class="o">.</span><span class="n">ok</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">page</span><span class="o">.</span><span class="n">text</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="n">requests</span><span class="o">.</span><span class="n">exceptions</span><span class="o">.</span><span class="n">RequestException</span>
-        <span class="k">except</span> <span class="n">requests</span><span class="o">.</span><span class="n">RequestException</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
-            <span class="n">warn</span><span class="p">(</span><span class="s1">&#39;Connection failed; retry with proxies (if any)...&#39;</span><span class="p">,</span> <span class="n">VendorRequestWarning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+            <span class="n">counter</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">counter</span> <span class="o">&gt;</span> <span class="n">MAX_RETRY</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="n">requests</span><span class="o">.</span><span class="n">exceptions</span><span class="o">.</span><span class="n">RequestException</span>
+
+                <span class="n">page</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">LINK</span><span class="p">)</span>  <span class="c1"># nosec: B113</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">page</span><span class="o">.</span><span class="n">ok</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">page</span><span class="o">.</span><span class="n">text</span><span class="p">:</span>
+                    <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Connection failed; retry for </span><span class="si">{</span><span class="n">counter</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">MAX_RETRY</span><span class="si">}</span><span class="s1">...&#39;</span><span class="p">,</span>
+                         <span class="n">VendorRequestWarning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+
+                    <span class="n">counter</span> <span class="o">+=</span> <span class="mi">1</span>
+                    <span class="k">continue</span>
+                <span class="k">break</span>
+        <span class="k">except</span> <span class="n">requests</span><span class="o">.</span><span class="n">RequestException</span><span class="p">:</span>
+            <span class="n">warn</span><span class="p">(</span><span class="s1">&#39;Connection failed; retry with proxies (if any)...&#39;</span><span class="p">,</span>
+                 <span class="n">VendorRequestWarning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+
             <span class="k">try</span><span class="p">:</span>
                 <span class="n">proxies</span> <span class="o">=</span> <span class="n">get_proxies</span><span class="p">()</span> <span class="ow">or</span> <span class="kc">None</span>
                 <span class="k">if</span> <span class="n">proxies</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                    <span class="k">raise</span> <span class="n">requests</span><span class="o">.</span><span class="n">RequestException</span> <span class="kn">from</span> <span class="nn">err</span>
+                    <span class="k">raise</span>
 
-                <span class="n">page</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">LINK</span><span class="p">,</span> <span class="n">proxies</span><span class="o">=</span><span class="n">proxies</span><span class="p">)</span>  <span class="c1"># nosec: B113</span>
-                <span class="k">if</span> <span class="ow">not</span> <span class="n">page</span><span class="o">.</span><span class="n">ok</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">page</span><span class="o">.</span><span class="n">text</span><span class="p">:</span>
-                    <span class="k">raise</span> <span class="n">requests</span><span class="o">.</span><span class="n">exceptions</span><span class="o">.</span><span class="n">RequestException</span> <span class="kn">from</span> <span class="nn">err</span>
+                <span class="n">counter</span> <span class="o">=</span> <span class="mi">1</span>
+                <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">counter</span> <span class="o">&gt;</span> <span class="n">MAX_RETRY</span><span class="p">:</span>
+                        <span class="k">raise</span>
+
+                    <span class="n">page</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">LINK</span><span class="p">,</span> <span class="n">proxies</span><span class="o">=</span><span class="n">proxies</span><span class="p">)</span>  <span class="c1"># nosec: B113</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="n">page</span><span class="o">.</span><span class="n">ok</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">page</span><span class="o">.</span><span class="n">text</span><span class="p">:</span>
+                        <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Connection failed; retry with proxy for </span><span class="si">{</span><span class="n">counter</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">MAX_RETRY</span><span class="si">}</span><span class="s1">...&#39;</span><span class="p">,</span>
+                             <span class="n">VendorRequestWarning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+
+                        <span class="n">counter</span> <span class="o">+=</span> <span class="mi">1</span>
+                        <span class="k">continue</span>
+                    <span class="k">break</span>
             <span class="k">except</span> <span class="n">requests</span><span class="o">.</span><span class="n">RequestException</span><span class="p">:</span>
-                <span class="n">warn</span><span class="p">(</span><span class="s1">&#39;Connection failed; retry with manual intervene...&#39;</span><span class="p">,</span> <span class="n">VendorRequestWarning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">CI_MODE</span><span class="p">:</span>
+                    <span class="n">warn</span><span class="p">(</span><span class="s1">&#39;Connection failed; exit on CI mode...&#39;</span><span class="p">,</span>
+                         <span class="n">VendorRequestWarning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+                    <span class="k">raise</span>
+
+                <span class="n">warn</span><span class="p">(</span><span class="s1">&#39;Connection failed; retry with manual intervene...&#39;</span><span class="p">,</span>
+                     <span class="n">VendorRequestWarning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
                 <span class="k">with</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">TemporaryDirectory</span><span class="p">(</span><span class="n">suffix</span><span class="o">=</span><span class="s1">&#39;-tempdir&#39;</span><span class="p">,</span>
                                                  <span class="n">prefix</span><span class="o">=</span><span class="s1">&#39;pcapkit-&#39;</span><span class="p">,</span>
                                                  <span class="nb">dir</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">curdir</span><span class="p">))</span> <span class="k">as</span> <span class="n">tempdir</span><span class="p">:</span>
