@@ -57,10 +57,30 @@ jobs:
           echo "PCAPKIT_PRERELEASE=$(python3 -c 'import pcapkit, pkg_resources; print(str(pkg_resources.parse_version(pcapkit.__version__).is_prerelease).lower())')" >> $GITHUB_ENV
 
       - name: Changelog
-        uses: Bullrich/generate-release-changelog@master
-        id: changelog
-        env:
-          REPO: ${{ github.repository }}
+        run: |
+          # NOTE: inspired from Bullrich/generate-release-changelog
+          # https://github.com/Bullrich/generate-release-changelog/blob/master/entrypoint.sh
+
+          tag=$(git tag --sort version:refname | tail -n 2 | head -n 1)
+
+          if [ "$tag" ]; then
+            changelog=$(git log --oneline --no-decorate $tag..HEAD)
+          else
+            changelog=$(git log --oneline --no-decorate)
+          fi
+
+          echo $changelog
+
+          changelog="${changelog//'%'/'%25'}"
+          changelog="${changelog//$'\n'/'%0A' - }"
+          changelog=" - ${changelog//$'\r'/'%0D'}"
+
+          echo "PCAPKIT_CHANGELOG=$changelog" >> $GITHUB_ENV
+
+        # uses: Bullrich/generate-release-changelog@master
+        # id: changelog
+        # env:
+        #   REPO: ${{ github.repository }}
 
       - name: Create Release
         id: create_release
@@ -71,7 +91,7 @@ jobs:
           # allowUpdates: true
           artifacts: |
             dist/*
-          body: ${{ steps.changelog.outputs.changelog }}
+          body: ${{ env.PCAPKIT_CHANGELOG }}
           # generateReleaseNotes: true
           # makeLatest: true
           name: PyPCAPKit v${{ env.PCAPKIT_VERSION }}
