@@ -56,17 +56,24 @@ jobs:
           echo "PCAPKIT_VERSION=$(python -c 'import pcapkit; print(pcapkit.__version__)')" >> $GITHUB_ENV
           echo "PCAPKIT_PRERELEASE=$(python3 -c 'import pcapkit, pkg_resources; print(str(pkg_resources.parse_version(pcapkit.__version__).is_prerelease).lower())')" >> $GITHUB_ENV
 
+      - name: Changelog
+        uses: Bullrich/generate-release-changelog@master
+        id: changelog
+        env:
+          REPO: ${{ github.repository }}
+
       - name: Create Release
         id: create_release
         uses: ncipollo/release-action@v1.12.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
         with:
-          allowUpdates: true
+          # allowUpdates: true
           artifacts: |
             dist/*
-          generateReleaseNotes: true
-          makeLatest: true
+          body: ${{ steps.changelog.outputs.changelog }}
+          # generateReleaseNotes: true
+          # makeLatest: true
           name: PyPCAPKit v${{ env.PCAPKIT_VERSION }}
           prerelease: ${{ env.PCAPKIT_PRERELEASE }}
           tag: "v${{ env.PCAPKIT_VERSION }}"
