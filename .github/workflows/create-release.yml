@@ -59,31 +59,31 @@ jobs:
           echo "PCAPKIT_PRERELEASE=$(python3 -c 'import pcapkit, pkg_resources; print(str(pkg_resources.parse_version(pcapkit.__version__).is_prerelease).lower())')" >> $GITHUB_ENV
 
       - name: Changelog
-        run: |
-          # NOTE: inspired from Bullrich/generate-release-changelog
-          # https://github.com/Bullrich/generate-release-changelog/blob/master/entrypoint.sh
+        uses: Bullrich/generate-release-changelog@master
+        id: changelog
+        env:
+          REPO: ${{ github.repository }}
 
-          tag=$(git tag --sort version:refname | tail -n 2 | head -n 1)
-          echo tag=$tag
+        # run: |
+        #   # NOTE: inspired from Bullrich/generate-release-changelog
+        #   # https://github.com/Bullrich/generate-release-changelog/blob/master/entrypoint.sh
 
-          if [ "$tag" ]; then
-            changelog=$(git log --oneline --no-decorate $tag..HEAD)
-          else
-            changelog=$(git log --oneline --no-decorate)
-          fi
+        #   tag=$(git tag --sort version:refname | tail -n 2 | head -n 1)
+        #   echo tag=$tag
 
-          echo $changelog
+        #   if [ "$tag" ]; then
+        #     changelog=$(git log --oneline --no-decorate $tag..HEAD)
+        #   else
+        #     changelog=$(git log --oneline --no-decorate)
+        #   fi
 
-          changelog="${changelog//'%'/'%25'}"
-          changelog="${changelog//$'\n'/'%0A' - }"
-          changelog=" - ${changelog//$'\r'/'%0D'}"
+        #   echo $changelog
 
-          echo "PCAPKIT_CHANGELOG=$changelog" >> $GITHUB_ENV
+        #   changelog="${changelog//'%'/'%25'}"
+        #   changelog="${changelog//$'\n'/'%0A' - }"
+        #   changelog=" - ${changelog//$'\r'/'%0D'}"
 
-        # uses: Bullrich/generate-release-changelog@master
-        # id: changelog
-        # env:
-        #   REPO: ${{ github.repository }}
+        #   echo "PCAPKIT_CHANGELOG=$changelog" >> $GITHUB_ENV
 
       - name: Create Release
         id: create_release
@@ -94,7 +94,9 @@ jobs:
           # allowUpdates: true
           artifacts: |
             dist/*
-          body: ${{ env.PCAPKIT_CHANGELOG }}
+          # body: ${{ env.PCAPKIT_CHANGELOG }}
+          body: |
+            ${{ steps.changelog.outputs.changelog }}
           # generateReleaseNotes: true
           # makeLatest: true
           name: PyPCAPKit v${{ env.PCAPKIT_VERSION }}

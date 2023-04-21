@@ -24,9 +24,6 @@ class Hardware(IntEnum):
     #: Ethernet (10Mb) [Jon Postel]
     Ethernet = 1
 
-    #: Experimental Ethernet (3Mb) [Jon Postel]
-    Experimental_Ethernet = 2
-
     #: Amateur Radio AX.25 [Philip Koch]
     Amateur_Radio_AX_25 = 3
 
