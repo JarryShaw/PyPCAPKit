@@ -11,7 +11,6 @@ which implements extractor for File Transfer Protocol
 .. [*] https://en.wikipedia.org/wiki/File_Transfer_Protocol
 
 """
-import enum
 import re
 from typing import TYPE_CHECKING
 
@@ -23,6 +22,7 @@ from pcapkit.protocols.data.application.ftp import Request as Data_Request
 from pcapkit.protocols.data.application.ftp import Response as Data_Response
 from pcapkit.protocols.misc.raw import Raw
 from pcapkit.protocols.schema.application.ftp import FTP as Schema_FTP
+from pcapkit.utilities.compat import StrEnum
 from pcapkit.utilities.exceptions import ProtocolError, UnsupportedCall
 
 if TYPE_CHECKING:
@@ -37,7 +37,7 @@ FTP_REQUEST = re.compile(rb'^(?P<cmmd>[A-Z]{3,4})( +(?P<args>.*))?\r\n$', re.I)
 FTP_RESPONSE = re.compile(rb'^(?P<code>[0-9]{3})(?P<more>\-)?( +(?P<args>.*))?\r\n$', re.I)
 
 
-class Type(enum.StrEnum):
+class Type(StrEnum):
     """FTP packet type."""
 
     #: Request packet.

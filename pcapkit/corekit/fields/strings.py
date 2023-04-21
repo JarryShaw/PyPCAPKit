@@ -17,13 +17,13 @@ __all__ = [
 ]
 
 if TYPE_CHECKING:
-    from typing import Callable, Optional
+    from typing import Callable, Optional, Tuple
 
     from typing_extensions import Literal
 
     from pcapkit.corekit.fields.field import NoValueType
 
-    NamespaceEntry = tuple[int, int]
+    NamespaceEntry = Tuple[int, int]
 
 _T = TypeVar('_T', 'str', 'bytes', 'dict[str, Any]')
 

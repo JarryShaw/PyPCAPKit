@@ -52,6 +52,15 @@ def refactor(path: 'str') -> 'None':
                   'Please consider manually install `bpc-walrus` and try again.', file=sys.stderr)
             sys.exit(error.returncode)
 
+        try:
+            subprocess.check_call(  # nosec
+                [sys.executable, '-m', 'poseur', '--no-archive', path]
+            )
+        except subprocess.CalledProcessError as error:
+            print('Failed to perform assignment expression backport compiling.'
+                  'Please consider manually install `bpc-poseur` and try again.', file=sys.stderr)
+            sys.exit(error.returncode)
+
 
 class pcapkit_sdist(sdist):
     """Modified sdist to run PyBPC conversion."""

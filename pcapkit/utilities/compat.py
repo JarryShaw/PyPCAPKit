@@ -14,7 +14,8 @@ __all__ = [
 
     # classes
     'Collection', 'cached_property',
-    'Mapping', 'Tuple', 'List', 'Dict'
+    'Mapping', 'Tuple', 'List', 'Dict',
+    'StrEnum',
 
     # modules
     'pathlib',
@@ -56,7 +57,7 @@ else:
 if version <= (3, 4):
     import pathlib2 as pathlib  # pylint: disable=import-error
 else:
-    import pathlib  # type: ignore[no-redef]
+    import pathlib
 
 # functools.cached_property added in 3.8
 if version >= (3, 8):
@@ -126,3 +127,8 @@ else:
     Tuple = tuple  # type: ignore[assignment]
     List = list  # type: ignore[misc]
     Dict = dict  # type: ignore[misc]
+
+if version < (3, 11):
+    from aenum import StrEnum
+else:
+    from enum import StrEnum

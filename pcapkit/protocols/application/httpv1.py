@@ -27,7 +27,6 @@ as below:
 .. [*] https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol
 
 """
-import enum
 import re
 from typing import TYPE_CHECKING
 
@@ -39,6 +38,7 @@ from pcapkit.protocols.data.application.httpv1 import HTTP as Data_HTTP
 from pcapkit.protocols.data.application.httpv1 import RequestHeader as Data_RequestHeader
 from pcapkit.protocols.data.application.httpv1 import ResponseHeader as Data_ResponseHeader
 from pcapkit.protocols.schema.application.httpv1 import HTTP as Schema_HTTP
+from pcapkit.utilities.compat import StrEnum
 from pcapkit.utilities.exceptions import ProtocolError
 
 if TYPE_CHECKING:
@@ -61,7 +61,7 @@ _RE_VERSION = re.compile(rb"HTTP/(?P<version>\d\.\d)")
 _RE_STATUS = re.compile(rb'\d{3}')
 
 
-class Type(enum.StrEnum):
+class Type(StrEnum):
     """HTTP packet type."""
 
     #: Request packet.

@@ -74,7 +74,7 @@ from pcapkit.utilities.warnings import ProtocolWarning, RegistryWarning, warn
 
 if TYPE_CHECKING:
     from enum import IntEnum as StdlibEnum
-    from typing import Any, Callable, DefaultDict, Optional, Type
+    from typing import Any, Callable, DefaultDict, Optional, Type, Tuple
 
     from aenum import IntEnum as AenumEnum
     from mypy_extensions import DefaultArg, KwArg, NamedArg
@@ -84,7 +84,7 @@ if TYPE_CHECKING:
 
     FrameParser = Callable[[Schema_FrameType, NamedArg(Schema_HTTP, 'header')], Data_HTTP]
     FrameConstructor = Callable[[Enum_Frame, DefaultArg(Optional[Data_HTTP]),
-                                 KwArg(Any)], tuple[Schema_FrameType, 'Flags']]
+                                 KwArg(Any)], Tuple[Schema_FrameType, 'Flags']]
 
 __all__ = ['HTTP']
 

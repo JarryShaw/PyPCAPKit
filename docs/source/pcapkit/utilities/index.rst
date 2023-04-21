@@ -110,3 +110,5 @@ following objects and functions:
      - ≥ 3.9
    * - :class:`dict[KT, VT] <dict>`
      - ≥ 3.9
+   * - :class:`enum.StrEnum`
+     - ≥ 3.11
