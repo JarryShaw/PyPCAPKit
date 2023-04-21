@@ -49,6 +49,12 @@ jobs:
           repository-url: https://test.pypi.org/legacy/
           skip-existing: true
 
+      - name: Get Version
+        run: |
+          python -m pip install -e .
+          echo "PCAPKIT_VERSION=$(python -c 'import pcapkit; print(pcapkit.__version__)')" >> $GITHUB_ENV
+          echo "PCAPKIT_PRERELEASE=$(python3 -c 'import pcapkit, pkg_resources; print(str(pkg_resources.parse_version(pcapkit.__version__).is_prerelease).lower())')" >> $GITHUB_ENV
+
       - name: Create Release
         id: create_release
         uses: marvinpinto/action-automatic-releases@latest
@@ -56,8 +62,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
         with:
           repo_token: "${{ secrets.GITHUB_TOKEN }}"
-          automatic_release_tag: ${{ github.ref }}
-          title: PyPCAPKit ${{ github.ref }}
-          prerelease: ${{ contains(github.ref, 'pre') || contains(github.ref, 'a') || contains(github.ref, 'b') || contains(github.ref, 'rc') }}
+          automatic_release_tag: "v${{ env.PCAPKIT_VERSION }}"
+          title: PyPCAPKit v${{ env.PCAPKIT_VERSION }}
+          prerelease: ${{ env.PCAPKIT_PRERELEASE }}
           files: |
             dist/*
