@@ -22,19 +22,20 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: Install and Build
+      - name: Install and Setup
         run: |
           set -x
 
           python -m pip install -U pip setuptools wheel
-          python -m pip install -U build twine
+          python -m pip install -U build
 
-          # PyPI distro
+      - name: Build PyPI
+        run: |
           python -m build
 
+      - name: Build Anaconda
+        run: |
           # TODO: Anaconda distro
-
-          twine check dist/*
 
       - name: Publish to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
