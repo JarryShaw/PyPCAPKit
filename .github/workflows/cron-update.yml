@@ -2,7 +2,7 @@ name: "Vendor Update"
 
 on:
   schedule:
-    - cron: '0 10 * * *' # everyday at 10am
+    - cron: '0 10 * * 5' # everyday at 10am
   push:
     branches: [master, ]
 
@@ -20,7 +20,7 @@ jobs:
           brew unlink python@3.11 || true
           brew link --force --overwrite python@3.11
 
-          python3 -m pip install --U pip setuptools wheel
+          python3 -m pip install -U pip setuptools wheel
           python3 -m pip install -U isort
           python3 -m pip install -e .[all]
 
