@@ -74,7 +74,7 @@ from pcapkit.utilities.warnings import ProtocolWarning, RegistryWarning, warn
 
 if TYPE_CHECKING:
     from enum import IntEnum as StdlibEnum
-    from typing import Any, Callable, DefaultDict, Optional, Type, Tuple
+    from typing import Any, Callable, DefaultDict, Optional, Tuple, Type
 
     from aenum import IntEnum as AenumEnum
     from mypy_extensions import DefaultArg, KwArg, NamedArg

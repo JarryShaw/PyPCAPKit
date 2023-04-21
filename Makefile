@@ -7,7 +7,7 @@ SHELL  := /opt/homebrew/bin/bash
 VERSION = $(shell cat pcapkit/__init__.py | grep "^__version__" | sed "s/__version__ = '\(.*\)'/\1/")
 
 update: pipenv vendor
-dist: update vermin dist-clean dist-build dist-upload
+dist: update isort dist-clean dist-build dist-upload
 
 dist-clean:
 	mkdir -p sdist eggs wheels
