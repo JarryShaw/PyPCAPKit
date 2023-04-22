@@ -7,12 +7,14 @@ on:
     workflows: [ "Vendor Update" ]
     types:
       - completed
+  #release:
+  #  types: ['published']
 
 name: Create Release
 
 jobs:
-  release:
-    name: GitHub Release
+  version_check:
+    name: Check Version
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -26,55 +28,97 @@ jobs:
 
       - name: Install and Setup
         run: |
-          set -x
-
           python -m pip install -U pip setuptools wheel
-          python -m pip install -U build
 
       - name: Get Version
+        id: get_version
         run: |
           set -x
 
           python -m pip install -e .
 
-          echo "PCAPKIT_VERSION=$(python -c 'import pcapkit; print(pcapkit.__version__)')" >> $GITHUB_ENV
-          echo "PCAPKIT_PRERELEASE=$(python3 -c 'import pcapkit, pkg_resources; print(str(pkg_resources.parse_version(pcapkit.__version__).is_prerelease).lower())')" >> $GITHUB_ENV
-
-          echo "PCAPKIT_VERSION=${{ env.PCAPKIT_VERSION }}"
-          echo "PCAPKIT_PRERELEASE=${{ env.PCAPKIT_PRERELEASE }}"
+          echo "PCAPKIT_VERSION=$(python -c 'import pcapkit; print(pcapkit.__version__)')" >> $GITHUB_OUTPUT
+          echo "PCAPKIT_PRERELEASE=$(python -c 'import pcapkit, pkg_resources; print(str(pkg_resources.parse_version(pcapkit.__version__).is_prerelease).lower())')" >> $GITHUB_OUTPUT
 
       - uses: mukunku/tag-exists-action@v1.2.0
         id: check_tag
         with:
-          tag: "v${{ env.PCAPKIT_VERSION }}"
+          tag: "v${{ steps.get_version.outputs.PCAPKIT_VERSION }}"
 
-      - name: Build PyPI
-        if: ${{ !steps.check_tag.outputs.exists }}
+    outputs:
+      PCAPKIT_VERSION: ${{ steps.get_version.outputs.PCAPKIT_VERSION }}
+      PCAPKIT_PRERELEASE: ${{ steps.get_version.outputs.PCAPKIT_PRERELEASE }}
+      PCAPKIT_TAG_EXISTS: ${{ steps.check_tag.outputs.exists }}
+
+  pypi:
+    name: PyPI Release with Python ${{ matrix.python-version }}
+    runs-on: ubuntu-latest
+    needs: [ version_check ]
+    if: ${{ needs.version_check.outputs.PCAPKIT_TAG_EXISTS == 'false' }}
+    strategy:
+      matrix:
+        python-version:
+          - "3.6"
+          - "3.7"
+          - "3.8"
+          - "3.9"
+          - "3.10"
+          - "3.11"
+          - "pypy3.7"
+          - "pypy3.8"
+          - "pypy3.9"
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install and Setup
+        run: |
+          set -x
+
+          python -m pip install -U pip setuptools wheel
+          python -m pip install -U build
+
+      - name: Build Package (latest)
+        if: ${{ matrix.python-version == '3.11' }}
         run: |
           python -m build
 
-      - name: Build Anaconda
-        if: ${{ !steps.check_tag.outputs.exists }}
+      - name: Build Package (others)
+        if: ${{ matrix.python-version != '3.11' }}
         run: |
-          # TODO: Anaconda distro
+          python -m build --wheel
 
       - name: Publish to PyPI
-        if: ${{ !steps.check_tag.outputs.exists }}
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           password: ${{ secrets.PYPI_API_TOKEN }}
           skip-existing: true
 
       - name: Publish package to TestPyPI
-        if: ${{ !steps.check_tag.outputs.exists }}
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           password: ${{ secrets.TEST_PYPI_API_TOKEN }}
           repository-url: https://test.pypi.org/legacy/
           skip-existing: true
 
+  release:
+    name: GitHub Release
+    runs-on: ubuntu-latest
+    needs: [ version_check ]
+    if: ${{ needs.version_check.outputs.PCAPKIT_TAG_EXISTS == 'false' }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
       - name: Changelog
-        if: ${{ !steps.check_tag.outputs.exists }}
         uses: Bullrich/generate-release-changelog@master
         id: changelog
         env:
@@ -102,7 +146,6 @@ jobs:
         #   echo "PCAPKIT_CHANGELOG=$changelog" >> $GITHUB_ENV
 
       - name: Create Release
-        if: ${{ !steps.check_tag.outputs.exists }}
         id: create_release
         uses: ncipollo/release-action@v1.12.0
         env:
@@ -116,7 +159,41 @@ jobs:
             ${{ steps.changelog.outputs.changelog }}
           # generateReleaseNotes: true
           # makeLatest: true
-          name: PyPCAPKit v${{ env.PCAPKIT_VERSION }}
-          prerelease: ${{ env.PCAPKIT_PRERELEASE }}
-          tag: "v${{ env.PCAPKIT_VERSION }}"
+          name: PyPCAPKit v${{ needs.version_check.outputs.PCAPKIT_VERSION }}
+          prerelease: ${{ needs.version_check.outputs.PCAPKIT_PRERELEASE }}
+          tag: "v${{ needs.version_check.outputs.PCAPKIT_VERSION }}"
           token: "${{ secrets.GITHUB_TOKEN }}"
+
+  conda:
+    name: Conda deployment of package with Python ${{ matrix.python-version }}
+    runs-on: ubuntu-latest
+    needs: [ version_check ]
+    if: ${{ needs.version_check.outputs.PCAPKIT_TAG_EXISTS == 'false' }}
+    strategy:
+      matrix:
+        python-version: ["3.6", "3.7", "3.8", "3.9", "3.10", "3.11"]
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Conda environment creation and activation
+        uses: conda-incubator/setup-miniconda@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+          environment-file: util/conda-build.yaml    # Path to the build conda environment
+          auto-update-conda: false
+          auto-activate-base: false
+          show-channel-urls: true
+
+      - name: Build and upload the conda packages
+        uses: uibcdf/action-build-and-upload-conda-packages@v1.2.0
+        with:
+          meta_yaml_dir: .
+          python-version: ${{ matrix.python-version }} # Values previously defined in `matrix`
+          platform_linux-64: true
+          platform_osx-64: true
+          platform_win-64: true
+          user: jarryshaw
+          label: auto
+          token: ${{ secrets.ANACONDA_TOKEN }} # Replace with the right name of your secret
