@@ -50,8 +50,8 @@ jobs:
       PCAPKIT_PRERELEASE: ${{ steps.get_version.outputs.PCAPKIT_PRERELEASE }}
       PCAPKIT_TAG_EXISTS: ${{ steps.check_tag.outputs.exists }}
 
-  pypi:
-    name: PyPI Release # with Python ${{ matrix.python-version }}
+  pypi_github:
+    name: PyPI & GitHub Release # with Python ${{ matrix.python-version }}
     runs-on: ubuntu-latest
     needs: [ version_check ]
     if: ${{ needs.version_check.outputs.PCAPKIT_TAG_EXISTS == 'false' }}
@@ -105,17 +105,6 @@ jobs:
           password: ${{ secrets.TEST_PYPI_API_TOKEN }}
           repository-url: https://test.pypi.org/legacy/
           skip-existing: true
-
-  release:
-    name: GitHub Release
-    runs-on: ubuntu-latest
-    needs: [ version_check ]
-    if: ${{ needs.version_check.outputs.PCAPKIT_TAG_EXISTS == 'false' }}
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
 
       - name: Changelog
         uses: Bullrich/generate-release-changelog@master
