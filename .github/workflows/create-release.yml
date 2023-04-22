@@ -161,7 +161,7 @@ jobs:
     if: ${{ needs.version_check.outputs.PCAPKIT_TAG_EXISTS == 'false' }}
     strategy:
       matrix:
-        python-version: ["3.6", "3.7", "3.8", "3.9", "3.10", "3.11"]
+        python-version: [ "3.8", "3.9", "3.10", "3.11" ] # ignore 3.6/7 for now
     steps:
       - uses: actions/checkout@v3
         with:
