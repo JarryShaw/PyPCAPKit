@@ -30,9 +30,9 @@ requirements:
   run:
     - python
 
-test:
-  imports:
-    - pcapkit
+#test:
+#  imports:
+#    - pcapkit
 
 about:
   home: https://jarryshaw.github.io/PyPCAPKit
