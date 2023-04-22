@@ -15,6 +15,7 @@ import sys
 import warnings
 from typing import TYPE_CHECKING
 
+from pcapkit import __version__
 from pcapkit import vendor as vendor_module
 from pcapkit.utilities.warnings import InvalidVendorWarning, VendorRuntimeWarning, warn
 
@@ -23,9 +24,6 @@ if TYPE_CHECKING:
     from typing import Type
 
     from pcapkit.vendor.default import Vendor
-
-#: version string
-__version__ = '1.0.0b1'
 
 
 def get_parser() -> 'ArgumentParser':
