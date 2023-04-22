@@ -3,7 +3,7 @@
 
 package:
   name: {{ name }}
-  version: "{{ environ['GIT_DESCRIBE_TAG'] }}"
+  version: "{{ environ['PCAPKIT_VERSION'] }}"
 
 #source:
 #  url: "https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz"
@@ -11,7 +11,7 @@ package:
 
 source:
   git_url: https://github.com/JarryShaw/PyPCAPKit.git
-  git_rev: "{{ environ['GIT_DESCRIBE_TAG'] }}"
+  git_rev: "v{{ environ['PCAPKIT_VERSION'] }}"
   git_depth: 1 # (Defaults to -1/not shallow)
 
 build:
