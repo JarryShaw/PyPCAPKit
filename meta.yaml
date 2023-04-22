@@ -2,7 +2,7 @@
 #{% set version = "1.0.0b9" %}
 
 package:
-  name: "PyPCAPKit"
+  name: {{ name }}
   version: "{{ environ['GIT_DESCRIBE_TAG'] }}"
 
 #source:
