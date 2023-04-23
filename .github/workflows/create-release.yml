@@ -56,7 +56,7 @@ jobs:
     name: PyPI & GitHub Release # with Python ${{ matrix.python-version }}
     runs-on: ubuntu-latest
     needs: [ version_check ]
-    if: ${{ needs.version_check.outputs.PCAPKIT_TAG_EXISTS == 'false' }}
+    if: ${{ startsWith(github.ref, 'v') || needs.version_check.outputs.PCAPKIT_TAG_EXISTS == 'false' }}
     # strategy:
     #   matrix:
     #     python-version:
@@ -158,7 +158,7 @@ jobs:
     name: Conda deployment of package with Python ${{ matrix.python-version }}
     runs-on: ubuntu-latest
     needs: [ version_check ]
-    if: ${{ needs.version_check.outputs.PCAPKIT_TAG_EXISTS == 'false' }}
+    if: ${{ startsWith(github.ref, 'v') || needs.version_check.outputs.PCAPKIT_TAG_EXISTS == 'false' }}
     strategy:
       matrix:
         python-version: [ "3.8", "3.9", "3.10", "3.11" ] # ignore 3.6/7 for now
