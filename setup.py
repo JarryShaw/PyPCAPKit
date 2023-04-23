@@ -21,7 +21,7 @@ except:
     raise ImportError("setuptools is required to install PyPCAPKit!")
 
 
-def get_long_description() -> 'str | None':
+def get_long_description() -> 'str':
     """Extract description from README.rst, for PyPI's usage."""
     with open('README.rst', encoding='utf-8') as file:
         long_description = file.read()
@@ -85,7 +85,7 @@ class pcapkit_build_py(build_py):
 class pcapkit_develop(develop):
     """Modified develop to run PyBPC conversion."""
 
-    def run(self) -> 'None':
+    def run(self) -> 'None':  # type: ignore[override]
         super(pcapkit_develop, self).run()
 
         # PyBPC compatibility enforcement
@@ -99,7 +99,7 @@ class pcapkit_install(install):
         super(pcapkit_install, self).run()
 
         # PyBPC compatibility enforcement
-        refactor(os.path.join(self.install_lib, 'pcapkit'))
+        refactor(os.path.join(self.install_lib, 'pcapkit'))  # type: ignore[arg-type]
 
 
 setup(
