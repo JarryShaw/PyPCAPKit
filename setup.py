@@ -104,7 +104,7 @@ class pcapkit_install(install):
 
 setup(
     cmdclass={
-        'sdistpcapkit_': pcapkit_sdist,
+        'sdist': pcapkit_sdist,
         'build_py': pcapkit_build_py,
         'develop': pcapkit_develop,
         'install': pcapkit_install,
