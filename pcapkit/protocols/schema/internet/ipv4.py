@@ -40,6 +40,7 @@ if TYPE_CHECKING:
     from datetime import timedelta
     from ipaddress import IPv4Address
     from typing import IO, Any, Optional
+
     from typing_extensions import Self
 
     from pcapkit.corekit.fields.field import _Field as Field

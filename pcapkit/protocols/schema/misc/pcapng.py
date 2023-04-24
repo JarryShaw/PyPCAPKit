@@ -3,14 +3,14 @@
 """header schema for pcapng file format"""
 
 import collections
-from msilib import schema
 import sys
+from msilib import schema
 from typing import TYPE_CHECKING
 
 from pcapkit.const.pcapng.block_type import BlockType as Enum_BlockType
 from pcapkit.const.pcapng.option_type import OptionType as Enum_OptionType
 from pcapkit.corekit.fields.collections import OptionField
-from pcapkit.corekit.fields.misc import PayloadField, ForwardMatchField
+from pcapkit.corekit.fields.misc import ForwardMatchField, PayloadField
 from pcapkit.corekit.fields.numbers import (EnumField, UInt8Field, UInt16Field, UInt32Field,
                                             UInt64Field)
 from pcapkit.corekit.fields.strings import BitField, BytesField, PaddingField
@@ -27,7 +27,7 @@ __all__ = [
 ]
 
 if TYPE_CHECKING:
-    from typing import Any, IO
+    from typing import IO, Any
 
     from typing_extensions import Self
 

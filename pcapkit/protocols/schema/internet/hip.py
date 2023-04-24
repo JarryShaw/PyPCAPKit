@@ -61,6 +61,7 @@ __all__ = [
 if TYPE_CHECKING:
     from ipaddress import IPv6Address
     from typing import IO, Any, Optional
+
     from typing_extensions import Self
 
     from pcapkit.corekit.fields.field import _Field as Field
