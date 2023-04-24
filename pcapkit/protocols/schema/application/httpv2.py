@@ -27,6 +27,8 @@ __all__ = [
 if TYPE_CHECKING:
     from typing import IO, Any, Optional
 
+    from typing_extensions import Self
+
     from pcapkit.corekit.fields.field import _Field as Field
 
 if SPHINX_TYPE_CHECKING:
@@ -143,8 +145,8 @@ class FrameType(Schema):
         """Flags enumeration for HTTP/2 frames."""
 
     @classmethod
-    def post_process(cls, schema: 'Schema', data: 'IO[bytes]',
-                     length: 'int', packet: 'dict[str, Any]') -> 'Schema':
+    def post_process(cls, schema: 'Self', data: 'IO[bytes]',
+                     length: 'int', packet: 'dict[str, Any]') -> 'Self':
         """Revise ``schema`` data after unpacking process.
 
         Args:

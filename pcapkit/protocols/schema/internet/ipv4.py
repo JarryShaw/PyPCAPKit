@@ -40,6 +40,7 @@ if TYPE_CHECKING:
     from datetime import timedelta
     from ipaddress import IPv4Address
     from typing import IO, Any, Optional
+    from typing_extensions import Self
 
     from pcapkit.corekit.fields.field import _Field as Field
     from pcapkit.corekit.multidict import OrderedMultiDict
@@ -141,8 +142,8 @@ class Option(Schema):
     )
 
     @classmethod
-    def post_process(cls, schema: 'Schema', data: 'IO[bytes]',
-                     length: 'int', packet: 'dict[str, Any]') -> 'Schema':
+    def post_process(cls, schema: 'Self', data: 'IO[bytes]',
+                     length: 'int', packet: 'dict[str, Any]') -> 'Self':
         """Revise ``schema`` data after unpacking process.
 
         Args:
@@ -155,9 +156,6 @@ class Option(Schema):
             Revised schema.
 
         """
-        if TYPE_CHECKING:
-            schema = cast('Option', schema)
-
         # for EOOL/NOP option, length is always 1
         if schema.type in (Enum_OptionNumber.EOOL, Enum_OptionNumber.NOP):
             schema.length = 1
@@ -245,8 +243,8 @@ class TSOption(Option):
     )
 
     @classmethod
-    def post_process(cls, schema: 'Schema', data: 'IO[bytes]',
-                     length: 'int', packet: 'dict[str, Any]') -> 'Schema':
+    def post_process(cls, schema: 'Self', data: 'IO[bytes]',
+                     length: 'int', packet: 'dict[str, Any]') -> 'Self':
         """Revise ``schema`` data after unpacking process.
 
         Args:
@@ -259,9 +257,6 @@ class TSOption(Option):
             Revised schema.
 
         """
-        if TYPE_CHECKING:
-            schema = cast('TSOption', schema)
-
         ts_flag = Enum_TSFlag.get(schema.flags['flag'])
         if ts_flag == Enum_TSFlag.Timestamp_Only:
             ts_data = schema.ts_data
@@ -457,8 +452,8 @@ class _QSOption(Schema):
     )
 
     @classmethod
-    def post_process(cls, schema: 'Schema', data: 'IO[bytes]',
-                     length: 'int', packet: 'dict[str, Any]') -> 'Schema':
+    def post_process(cls, schema: 'Self', data: 'IO[bytes]',
+                     length: 'int', packet: 'dict[str, Any]') -> 'QuickStartRequestOption | QuickStartReportOption':
         """Revise ``schema`` data after unpacking process.
 
         Args:
@@ -471,9 +466,6 @@ class _QSOption(Schema):
             Revised schema.
 
         """
-        if TYPE_CHECKING:
-            schema = cast('_QSOption', schema)
-
         ret = schema.data
         ret.func = Enum_QSFunction.get(packet['flags']['func'])
         return ret

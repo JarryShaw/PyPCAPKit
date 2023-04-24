@@ -39,6 +39,7 @@ __all__ = [
 if TYPE_CHECKING:
     from ipaddress import IPv4Address, IPv6Address
     from typing import IO, Any, Optional
+    from typing_extensions import Self
 
     from pcapkit.corekit.fields.field import _Field as Field
     from pcapkit.protocols.protocol import Protocol
@@ -238,8 +239,8 @@ class Option(Schema):
     )
 
     @classmethod
-    def post_process(cls, schema: 'Schema', data: 'IO[bytes]',
-                     length: 'int', packet: 'dict[str, Any]') -> 'Schema':
+    def post_process(cls, schema: 'Self', data: 'IO[bytes]',
+                     length: 'int', packet: 'dict[str, Any]') -> 'Self':
         """Revise ``schema`` data after unpacking process.
 
         Args:
@@ -252,9 +253,6 @@ class Option(Schema):
             Revised schema.
 
         """
-        if TYPE_CHECKING:
-            schema = cast('Option', schema)
-
         # for Pad1 option, length is always 0
         if schema.type == Enum_Option.Pad1:
             schema.len = 0
@@ -340,8 +338,8 @@ class _SMFDPDOption(Schema):
     )
 
     @classmethod
-    def post_process(cls, schema: 'Schema', data: 'IO[bytes]',
-                     length: 'int', packet: 'dict[str, Any]') -> 'Schema':
+    def post_process(cls, schema: 'Self', data: 'IO[bytes]',
+                     length: 'int', packet: 'dict[str, Any]') -> 'SMFIdentificationBasedDPDOption | SMFHashBasedDPDOption':
         """Revise ``schema`` data after unpacking process.
 
         Args:
@@ -354,9 +352,6 @@ class _SMFDPDOption(Schema):
             Revised schema.
 
         """
-        if TYPE_CHECKING:
-            schema = cast('_SMFDPDOption', schema)
-
         ret = schema.data
         ret.mode = Enum_SMFDPDMode.get(schema.test['mode'])
         return ret
@@ -443,8 +438,8 @@ class _QuickStartOption(Schema):
     )
 
     @classmethod
-    def post_process(cls, schema: 'Schema', data: 'IO[bytes]',
-                     length: 'int', packet: 'dict[str, Any]') -> 'Schema':
+    def post_process(cls, schema: 'Self', data: 'IO[bytes]',
+                     length: 'int', packet: 'dict[str, Any]') -> 'QuickStartRequestOption | QuickStartReportOption':
         """Revise ``schema`` data after unpacking process.
 
         Args:
@@ -457,9 +452,6 @@ class _QuickStartOption(Schema):
             Revised schema.
 
         """
-        if TYPE_CHECKING:
-            schema = cast('_QuickStartOption', schema)
-
         ret = schema.data
         ret.func = Enum_QSFunction.get(packet['flags']['func'])
         return ret
@@ -549,8 +541,8 @@ class MPLOption(Option):
     ))
 
     @classmethod
-    def post_process(cls, schema: 'Schema', data: 'IO[bytes]',
-                     length: 'int', packet: 'dict[str, Any]') -> 'Schema':
+    def post_process(cls, schema: 'Self', data: 'IO[bytes]',
+                     length: 'int', packet: 'dict[str, Any]') -> 'Self':
         """Revise ``schema`` data after unpacking process.
 
         Args:
@@ -563,9 +555,6 @@ class MPLOption(Option):
             Revised schema.
 
         """
-        if TYPE_CHECKING:
-            schema = cast('MPLOption', schema)
-
         if schema.flags['type'] == Enum_SeedID.IPV6_SOURCE_ADDRESS:
             schema.seed = packet.get('src', NoValue)
         return schema

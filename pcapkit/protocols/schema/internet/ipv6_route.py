@@ -25,6 +25,7 @@ __all__ = [
 if TYPE_CHECKING:
     from ipaddress import IPv6Address
     from typing import IO, Any, Optional
+    from typing_extensions import Self
 
     from pcapkit.corekit.fields.field import _Field as Field
     from pcapkit.protocols.protocol import Protocol
@@ -150,8 +151,8 @@ class RPL(RoutingType):
     padding: 'bytes' = PaddingField(length=lambda pkt: pkt['pad']['pad_len'])
 
     @classmethod
-    def post_process(cls, schema: 'Schema', data: 'IO[bytes]',
-                     length: 'int', packet: 'dict[str, Any]') -> 'Schema':
+    def post_process(cls, schema: 'Self', data: 'IO[bytes]',
+                     length: 'int', packet: 'dict[str, Any]') -> 'Self':
         """Revise ``schema`` data after unpacking process.
 
         Args:
@@ -164,9 +165,6 @@ class RPL(RoutingType):
             Revised schema.
 
         """
-        if TYPE_CHECKING:
-            schema = cast('RPL', schema)
-
         buffer = cast('bytes', schema.ip)
         dst_val = cast('Optional[IPv6Address]', packet.get('dst'))
         dst = dst_val.packed if dst_val is not None else None

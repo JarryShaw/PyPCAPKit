@@ -61,6 +61,7 @@ __all__ = [
 if TYPE_CHECKING:
     from ipaddress import IPv6Address
     from typing import IO, Any, Optional
+    from typing_extensions import Self
 
     from pcapkit.corekit.fields.field import _Field as Field
     from pcapkit.protocols.data.internet.hip import EncryptedParameter as Data_EncryptedParameter
@@ -487,8 +488,8 @@ class EncryptedParameter(Parameter):
         packet['__cipher__'] = cipher_id
 
     @classmethod
-    def post_process(cls, schema: 'Schema', data: 'IO[bytes]',
-                     length: 'int', packet: 'dict[str, Any]') -> 'Schema':
+    def post_process(cls, schema: 'Self', data: 'IO[bytes]',
+                     length: 'int', packet: 'dict[str, Any]') -> 'Self':
         """Revise ``schema`` data after unpacking process.
 
         Args:

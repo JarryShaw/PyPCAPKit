@@ -506,7 +506,7 @@ class Schema(Mapping[str, VT], Generic[VT]):
 
     @classmethod
     def post_process(cls, schema: 'Self', data: 'IO[bytes]',
-                     length: 'int', packet: 'dict[str, Any]') -> 'Self':
+                     length: 'int', packet: 'dict[str, Any]') -> 'Schema':
         """Revise ``schema`` data after unpacking process.
 
         Args:
