@@ -13,7 +13,8 @@ descriptive of the structure of protocol headers.
 from pcapkit.corekit.fields.field import Field
 
 from pcapkit.corekit.fields.collections import ListField, OptionField
-from pcapkit.corekit.fields.ipaddress import IPv4Field, IPv6Field
+from pcapkit.corekit.fields.ipaddress import (IPv4AddressField, IPv4InterfaceField,
+                                              IPv6AddressField, IPv6InterfaceField)
 from pcapkit.corekit.fields.misc import (ConditionalField, ForwardMatchField, NoValueField,
                                          PayloadField, SchemaField)
 from pcapkit.corekit.fields.numbers import (EnumField, Int8Field, Int16Field, Int32Field,
@@ -39,5 +40,6 @@ __all__ = [
 
     'ListField', 'OptionField',
 
-    'IPv4Field', 'IPv6Field',
+    'IPv4AddressField', 'IPv6AddressField',
+    'IPv4InterfaceField', 'IPv6InterfaceField',
 ]

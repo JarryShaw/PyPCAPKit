@@ -47,5 +47,6 @@ __all__ = [
 
     'ListField', 'OptionField',
 
-    'IPv4Field', 'IPv6Field',
+    'IPv4AddressField', 'IPv6AddressField',
+    'IPv4InterfaceField', 'IPv6InterfaceField',
 ]

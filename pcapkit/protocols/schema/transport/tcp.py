@@ -9,7 +9,7 @@ from pcapkit.const.tcp.checksum import Checksum as Enum_Checksum
 from pcapkit.const.tcp.mp_tcp_option import MPTCPOption as Enum_MPTCPOption
 from pcapkit.const.tcp.option import Option as Enum_Option
 from pcapkit.corekit.fields.collections import ListField, OptionField
-from pcapkit.corekit.fields.ipaddress import IPv4Field, IPv6Field
+from pcapkit.corekit.fields.ipaddress import IPv4AddressField, IPv6AddressField
 from pcapkit.corekit.fields.misc import (ConditionalField, ForwardMatchField, PayloadField,
                                          SchemaField, SwitchField)
 from pcapkit.corekit.fields.numbers import (EnumField, NumberField, UInt8Field, UInt16Field,
@@ -256,9 +256,9 @@ def mptcp_add_address_selector(pkt: 'dict[str, Any]') -> 'Field':
 
     """
     if pkt['test']['version'] == 4:
-        return IPv4Field()
+        return IPv4AddressField()
     if pkt['test']['version'] == 6:
-        return IPv6Field()
+        return IPv6AddressField()
     raise FieldError(f'TCP: [OptNo {Enum_Option.Multipath_TCP}] {Enum_MPTCPOption.ADD_ADDR} invalid IP version')
 
 

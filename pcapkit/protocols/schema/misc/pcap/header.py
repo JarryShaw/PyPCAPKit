@@ -55,7 +55,7 @@ class Header(Schema):
     #: Max length of captured packets, in octets.
     snaplen: 'int' = UInt32Field(callback=magic_number_callback)
     #: Data link type.
-    network: 'Enum_LinkType' = EnumField(length=4, namespace=Enum_LinkType, byteorder='little')
+    network: 'Enum_LinkType' = EnumField(length=4, namespace=Enum_LinkType, callback=magic_number_callback)
 
     if TYPE_CHECKING:
         def __init__(self, magic_number: 'bytes', version_major: 'int', version_minor: 'int',  # pylint: disable=unused-argument,super-init-not-called,multiple-statements

@@ -5,7 +5,7 @@
 from typing import TYPE_CHECKING
 
 from pcapkit.const.reg.transtype import TransType as Enum_TransType
-from pcapkit.corekit.fields.ipaddress import IPv6Field
+from pcapkit.corekit.fields.ipaddress import IPv6AddressField
 from pcapkit.corekit.fields.misc import PayloadField
 from pcapkit.corekit.fields.numbers import EnumField, UInt8Field, UInt16Field
 from pcapkit.corekit.fields.strings import BitField
@@ -49,9 +49,9 @@ class IPv6(Schema):
     #: Hop limit.
     limit: int = UInt8Field()
     #: Source address.
-    src: 'IPv6Address' = IPv6Field()
+    src: 'IPv6Address' = IPv6AddressField()
     #: Destination address.
-    dst: 'IPv6Address' = IPv6Field()
+    dst: 'IPv6Address' = IPv6AddressField()
     #: Payload.
     payload: 'bytes' = PayloadField(length=lambda pkt: pkt['length'])
 

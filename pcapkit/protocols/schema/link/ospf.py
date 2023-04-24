@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING
 
 from pcapkit.const.ospf.authentication import Authentication as Enum_Authentication
 from pcapkit.const.ospf.packet import Packet as Enum_Packet
-from pcapkit.corekit.fields.ipaddress import IPv4Field
+from pcapkit.corekit.fields.ipaddress import IPv4AddressField
 from pcapkit.corekit.fields.misc import PayloadField, SchemaField, SwitchField
 from pcapkit.corekit.fields.numbers import EnumField, UInt8Field, UInt16Field, UInt32Field
 from pcapkit.corekit.fields.strings import BytesField, PaddingField
@@ -65,9 +65,9 @@ class OSPF(Schema):
     #: Length.
     length: 'int' = UInt16Field()
     #: Router ID.
-    router_id: 'IPv4Address' = IPv4Field()
+    router_id: 'IPv4Address' = IPv4AddressField()
     #: Area ID.
-    area_id: 'IPv4Address' = IPv4Field()
+    area_id: 'IPv4Address' = IPv4AddressField()
     #: Checksum.
     checksum: 'bytes' = BytesField(length=2)
     #: Authentication type.

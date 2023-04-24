@@ -24,7 +24,7 @@ from pcapkit.const.hip.suite import Suite as Enum_Suite
 from pcapkit.const.hip.transport import Transport as Enum_Transport
 from pcapkit.const.reg.transtype import TransType as Enum_TransType
 from pcapkit.corekit.fields.collections import ListField, OptionField
-from pcapkit.corekit.fields.ipaddress import IPv6Field
+from pcapkit.corekit.fields.ipaddress import IPv6AddressField
 from pcapkit.corekit.fields.misc import ConditionalField, PayloadField, SchemaField, SwitchField
 from pcapkit.corekit.fields.numbers import (EnumField, NumberField, UInt8Field, UInt16Field,
                                             UInt32Field)
@@ -132,7 +132,7 @@ def locator_value_selector(pkt: 'dict[str, Any]') -> 'Field':
 
     """
     if pkt['type'] == 0 and pkt['len'] == 4:
-        return IPv6Field()
+        return IPv6AddressField()
     if pkt['type'] == 1 and pkt['len'] == 5:
         return SchemaField(
             length=20,
@@ -271,7 +271,7 @@ class LocatorData(Schema):
     #: SPI.
     spi: 'int' = UInt32Field()
     #: Locator.
-    ip: 'IPv6Address' = IPv6Field()
+    ip: 'IPv6Address' = IPv6AddressField()
 
     if TYPE_CHECKING:
         def __init__(self, spi: 'int', ip: 'IPv6Address | int | bytes | str') -> 'None': ...
@@ -729,7 +729,7 @@ class RegFromParameter(Parameter):
     #: Reserved.
     reserved: 'bytes' = PaddingField(length=1)
     #: Address.
-    address: 'IPv6Address' = IPv6Field()
+    address: 'IPv6Address' = IPv6AddressField()
 
     if TYPE_CHECKING:
         def __init__(self, type: 'Enum_Parameter', len: 'int', port: 'int', protocol: 'Enum_TransType', address: 'IPv6Address | bytes | int | str') -> 'None': ...
@@ -861,7 +861,7 @@ class RouteDstParameter(Parameter):
     #: HIT addresses.
     hit: 'list[IPv6Address]' = ListField(
         length=lambda pkt: pkt['len'] - 4,
-        item_type=IPv6Field(),
+        item_type=IPv6AddressField(),
     )
     #: Padding.
     padding: 'bytes' = PaddingField(length=lambda pkt: (8 - (pkt['len'] % 8)) % 8)
@@ -973,7 +973,7 @@ class RelayFromParameter(Parameter):
     #: Reserved.
     reserved: 'bytes' = PaddingField(length=1)
     #: Address.
-    address: 'IPv6Address' = IPv6Field()
+    address: 'IPv6Address' = IPv6AddressField()
 
     if TYPE_CHECKING:
         def __init__(self, type: 'Enum_Parameter', len: 'int', port: 'int', protocol: 'Enum_TransType', address: 'str | bytes | int | IPv6Address') -> 'None': ...
@@ -989,7 +989,7 @@ class RelayToParameter(Parameter):
     #: Reserved.
     reserved: 'bytes' = PaddingField(length=1)
     #: Address.
-    address: 'IPv6Address' = IPv6Field()
+    address: 'IPv6Address' = IPv6AddressField()
 
     if TYPE_CHECKING:
         def __init__(self, type: 'Enum_Parameter', len: 'int', port: 'int', protocol: 'Enum_TransType', address: 'str | bytes | int | IPv6Address') -> 'None': ...
@@ -1022,7 +1022,7 @@ class RouteViaParameter(Parameter):
     #: HIT addresses.
     hit: 'list[IPv6Address]' = ListField(
         length=lambda pkt: pkt['len'] - 4,
-        item_type=IPv6Field(),
+        item_type=IPv6AddressField(),
     )
     #: Padding.
     padding: 'bytes' = PaddingField(length=lambda pkt: (8 - (pkt['len'] % 8)) % 8)
@@ -1035,7 +1035,7 @@ class FromParameter(Parameter):
     """Header schema for HIP ``FROM`` parameters."""
 
     #: Address.
-    address: 'IPv6Address' = IPv6Field()
+    address: 'IPv6Address' = IPv6AddressField()
     #: Padding.
     padding: 'bytes' = PaddingField(length=lambda pkt: (8 - (pkt['len'] % 8)) % 8)
 
@@ -1061,7 +1061,7 @@ class ViaRVSParameter(Parameter):
     #: Address.
     address: 'list[IPv6Address]' = ListField(
         length=lambda pkt: pkt['len'],
-        item_type=IPv6Field(),
+        item_type=IPv6AddressField(),
     )
     #: Padding.
     padding: 'bytes' = PaddingField(length=lambda pkt: (8 - (pkt['len'] % 8)) % 8)

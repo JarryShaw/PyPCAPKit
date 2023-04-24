@@ -14,7 +14,7 @@ from pcapkit.const.ipv4.router_alert import RouterAlert as Enum_RouterAlert
 from pcapkit.const.ipv4.ts_flag import TSFlag as Enum_TSFlag
 from pcapkit.const.reg.transtype import TransType as Enum_TransType
 from pcapkit.corekit.fields.collections import ListField, OptionField
-from pcapkit.corekit.fields.ipaddress import IPv4Field
+from pcapkit.corekit.fields.ipaddress import IPv4AddressField
 from pcapkit.corekit.fields.misc import (ConditionalField, ForwardMatchField, PayloadField,
                                          SchemaField, SwitchField)
 from pcapkit.corekit.fields.numbers import EnumField, UInt8Field, UInt16Field, UInt32Field
@@ -210,7 +210,7 @@ class LSROption(Option):
     #: Route.
     route: 'list[IPv4Address]' = ListField(
         length=lambda pkt: pkt['pointer'] - 4,
-        item_type=IPv4Field(),
+        item_type=IPv4AddressField(),
     )
     #: Remaining data buffer0.
     remainder: 'bytes' = PaddingField(
@@ -351,7 +351,7 @@ class RROption(Option):
     #: Route.
     route: 'list[IPv4Address]' = ListField(
         length=lambda pkt: pkt['pointer'] - 4,
-        item_type=IPv4Field(),
+        item_type=IPv4AddressField(),
     )
     #: Remaining data buffer0.
     remainder: 'bytes' = PaddingField(
@@ -381,7 +381,7 @@ class SSROption(Option):
     #: Route.
     route: 'list[IPv4Address]' = ListField(
         length=lambda pkt: pkt['pointer'] - 4,
-        item_type=IPv4Field(),
+        item_type=IPv4AddressField(),
     )
     #: Remaining data buffer0.
     remainder: 'bytes' = PaddingField(
@@ -423,7 +423,7 @@ class TROption(Option):
     #: Return hop count.
     ret: 'int' = UInt16Field()
     #: Originator IP address.
-    origin: 'IPv4Address' = IPv4Field()
+    origin: 'IPv4Address' = IPv4AddressField()
 
     if TYPE_CHECKING:
         def __init__(self, type: 'Enum_OptionNumber', length: 'int', id: 'int', out: 'int', ret: 'int', origin: 'IPv4Address | str | bytes | int') -> 'None': ...
@@ -546,9 +546,9 @@ class IPv4(Schema):
     #: Header checksum.
     chksum: 'bytes' = BytesField(length=2)
     #: Source address.
-    src: 'IPv4Address' = IPv4Field()
+    src: 'IPv4Address' = IPv4AddressField()
     #: Destination address.
-    dst: 'IPv4Address' = IPv4Field()
+    dst: 'IPv4Address' = IPv4AddressField()
     #: Options.
     options: 'list[Option]' = OptionField(
         length=lambda pkt: pkt['vihl']['ihl'] * 4 - 20,

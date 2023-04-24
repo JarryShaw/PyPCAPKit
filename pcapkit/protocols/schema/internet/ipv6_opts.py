@@ -14,7 +14,7 @@ from pcapkit.const.ipv6.tagger_id import TaggerID as Enum_TaggerID
 from pcapkit.const.reg.transtype import TransType as Enum_TransType
 from pcapkit.corekit.fields.collections import OptionField
 from pcapkit.corekit.fields.field import NoValue
-from pcapkit.corekit.fields.ipaddress import IPv4Field, IPv6Field
+from pcapkit.corekit.fields.ipaddress import IPv4AddressField, IPv6AddressField
 from pcapkit.corekit.fields.misc import (ConditionalField, ForwardMatchField, NoValueField,
                                          PayloadField, SchemaField, SwitchField)
 from pcapkit.corekit.fields.numbers import (EnumField, NumberField, UInt8Field, UInt16Field,
@@ -195,11 +195,11 @@ def smf_i_dpd_tid_selector(pkt: 'dict[str, Any]') -> 'Field':
     if tid_type == Enum_TaggerID.IPv4:
         if tid_len != 3:
             raise FieldValueError(f'IPv6-Opts: invalid TaggerID length: {tid_len}')
-        return IPv4Field()
+        return IPv4AddressField()
     if tid_type == Enum_TaggerID.IPv6:
         if tid_len != 15:
             raise FieldValueError(f'IPv6-Opts: invalid TaggerID length: {tid_len}')
-        return IPv6Field()
+        return IPv6AddressField()
     return BytesField(length=tid_len + 1)
 
 
@@ -601,7 +601,7 @@ class HomeAddressOption(Option):
     """Header schema for IPv6-Opts home address options."""
 
     #: Home address.
-    addr: 'IPv6Address' = IPv6Field()
+    addr: 'IPv6Address' = IPv6AddressField()
 
     if TYPE_CHECKING:
         def __init__(self, type: 'Enum_Option', len: 'int', addr: 'IPv6Address | int | str | bytes') -> 'None': ...

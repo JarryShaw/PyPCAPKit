@@ -61,7 +61,8 @@ __all__ = [
     'PaddingField',
     'ConditionalField', 'PayloadField', 'SchemaField',      # misc protocol fields
     'ForwardMatchField', 'NoValueField',
-    'IPv4Field', 'IPv6Field',                               # IP address protocol fields
+    'IPv4AddressField', 'IPv6AddressField',                 # IP address protocol fields
+    'IPv4InterfaceField', 'IPv6InterfaceField',
     'ListField', 'OptionField',                             # container protocol fields
 
     # pcapkit.dumpkit

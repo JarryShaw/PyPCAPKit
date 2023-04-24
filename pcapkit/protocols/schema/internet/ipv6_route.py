@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING, cast
 from pcapkit.const.ipv6.routing import Routing as Enum_Routing
 from pcapkit.const.reg.transtype import TransType as Enum_TransType
 from pcapkit.corekit.fields.collections import ListField
-from pcapkit.corekit.fields.ipaddress import IPv6Field
+from pcapkit.corekit.fields.ipaddress import IPv6AddressField
 from pcapkit.corekit.fields.misc import PayloadField, SchemaField, SwitchField
 from pcapkit.corekit.fields.numbers import EnumField, UInt8Field
 from pcapkit.corekit.fields.strings import BitField, BytesField, PaddingField
@@ -114,7 +114,7 @@ class SourceRoute(RoutingType):
     #: Addresses.
     ip: 'list[IPv6Address]' = ListField(
         length=lambda pkt: pkt['length'] * 8,
-        item_type=IPv6Field(),
+        item_type=IPv6AddressField(),
     )
 
     if TYPE_CHECKING:
@@ -127,7 +127,7 @@ class Type2(RoutingType):
     #: Reserved.
     reserved: 'bytes' = PaddingField(length=4)
     #: Addresses.
-    ip: 'IPv6Address' = IPv6Field()
+    ip: 'IPv6Address' = IPv6AddressField()
 
     if TYPE_CHECKING:
         def __init__(self, ip: 'IPv6Address | str | int | bytes') -> 'None': ...
