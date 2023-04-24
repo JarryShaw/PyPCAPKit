@@ -41,7 +41,10 @@ jobs:
       - name: Bump Version
         if: steps.verify-changed-files.outputs.files_changed == 'true'
         run: |
+          set -x
+
           python util/bump_version.py
+          isort -l100 -ppcapkit --skip-glob '**/__init__.py' pcapkit
 
       - name: Commit changes
         if: steps.verify-changed-files.outputs.files_changed == 'true'
