@@ -1,7 +1,7 @@
 Sphinx==6.2.0
 
 # extentions
-sphinx-autodoc-typehints==1.23.0
+sphinx-autodoc-typehints==1.23.4
 furo==2023.3.27
 sphinxext-opengraph==0.8.2
 sphinx-copybutton==0.5.2
