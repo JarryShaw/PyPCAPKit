@@ -382,6 +382,7 @@
     <span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">timedelta</span>
     <span class="kn">from</span> <span class="nn">ipaddress</span> <span class="kn">import</span> <span class="n">IPv4Address</span>
     <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">IO</span><span class="p">,</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Optional</span>
+    <span class="kn">from</span> <span class="nn">typing_extensions</span> <span class="kn">import</span> <span class="n">Self</span>
 
     <span class="kn">from</span> <span class="nn">pcapkit.corekit.fields.field</span> <span class="kn">import</span> <span class="n">_Field</span> <span class="k">as</span> <span class="n">Field</span>
     <span class="kn">from</span> <span class="nn">pcapkit.corekit.multidict</span> <span class="kn">import</span> <span class="n">OrderedMultiDict</span>
@@ -483,8 +484,8 @@
     <span class="p">)</span>
 
 <div class="viewcode-block" id="Option.post_process"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/ipv4.html#pcapkit.protocols.schema.internet.ipv4.Option.post_process">[docs]</a>    <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">post_process</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">&#39;Schema&#39;</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">&#39;IO[bytes]&#39;</span><span class="p">,</span>
-                     <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">&#39;dict[str, Any]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Schema&#39;</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">post_process</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">&#39;Self&#39;</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">&#39;IO[bytes]&#39;</span><span class="p">,</span>
+                     <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">&#39;dict[str, Any]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Self&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Revise ``schema`` data after unpacking process.</span>
 
 <span class="sd">        Args:</span>
@@ -497,9 +498,6 @@
 <span class="sd">            Revised schema.</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-            <span class="n">schema</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">&#39;Option&#39;</span><span class="p">,</span> <span class="n">schema</span><span class="p">)</span>
-
         <span class="c1"># for EOOL/NOP option, length is always 1</span>
         <span class="k">if</span> <span class="n">schema</span><span class="o">.</span><span class="n">type</span> <span class="ow">in</span> <span class="p">(</span><span class="n">Enum_OptionNumber</span><span class="o">.</span><span class="n">EOOL</span><span class="p">,</span> <span class="n">Enum_OptionNumber</span><span class="o">.</span><span class="n">NOP</span><span class="p">):</span>
             <span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">=</span> <span class="mi">1</span>
@@ -587,8 +585,8 @@
     <span class="p">)</span>
 
 <div class="viewcode-block" id="TSOption.post_process"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/ipv4.html#pcapkit.protocols.schema.internet.ipv4.TSOption.post_process">[docs]</a>    <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">post_process</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">&#39;Schema&#39;</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">&#39;IO[bytes]&#39;</span><span class="p">,</span>
-                     <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">&#39;dict[str, Any]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Schema&#39;</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">post_process</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">&#39;Self&#39;</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">&#39;IO[bytes]&#39;</span><span class="p">,</span>
+                     <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">&#39;dict[str, Any]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Self&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Revise ``schema`` data after unpacking process.</span>
 
 <span class="sd">        Args:</span>
@@ -601,9 +599,6 @@
 <span class="sd">            Revised schema.</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-            <span class="n">schema</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">&#39;TSOption&#39;</span><span class="p">,</span> <span class="n">schema</span><span class="p">)</span>
-
         <span class="n">ts_flag</span> <span class="o">=</span> <span class="n">Enum_TSFlag</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">&#39;flag&#39;</span><span class="p">])</span>
         <span class="k">if</span> <span class="n">ts_flag</span> <span class="o">==</span> <span class="n">Enum_TSFlag</span><span class="o">.</span><span class="n">Timestamp_Only</span><span class="p">:</span>
             <span class="n">ts_data</span> <span class="o">=</span> <span class="n">schema</span><span class="o">.</span><span class="n">ts_data</span>
@@ -799,8 +794,8 @@
     <span class="p">)</span>
 
     <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">post_process</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">&#39;Schema&#39;</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">&#39;IO[bytes]&#39;</span><span class="p">,</span>
-                     <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">&#39;dict[str, Any]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Schema&#39;</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">post_process</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">&#39;Self&#39;</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">&#39;IO[bytes]&#39;</span><span class="p">,</span>
+                     <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">&#39;dict[str, Any]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;QuickStartRequestOption | QuickStartReportOption&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Revise ``schema`` data after unpacking process.</span>
 
 <span class="sd">        Args:</span>
@@ -813,9 +808,6 @@
 <span class="sd">            Revised schema.</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-            <span class="n">schema</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">&#39;_QSOption&#39;</span><span class="p">,</span> <span class="n">schema</span><span class="p">)</span>
-
         <span class="n">ret</span> <span class="o">=</span> <span class="n">schema</span><span class="o">.</span><span class="n">data</span>
         <span class="n">ret</span><span class="o">.</span><span class="n">func</span> <span class="o">=</span> <span class="n">Enum_QSFunction</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">packet</span><span class="p">[</span><span class="s1">&#39;flags&#39;</span><span class="p">][</span><span class="s1">&#39;func&#39;</span><span class="p">])</span>
         <span class="k">return</span> <span class="n">ret</span>
