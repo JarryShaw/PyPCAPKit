@@ -830,23 +830,18 @@
 
         <span class="n">packet</span><span class="p">[</span><span class="s1">&#39;__cipher__&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">cipher_id</span></div>
 
-<div class="viewcode-block" id="EncryptedParameter.post_process"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.schema.internet.hip.EncryptedParameter.post_process">[docs]</a>    <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">post_process</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">&#39;Self&#39;</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">&#39;IO[bytes]&#39;</span><span class="p">,</span>
-                     <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">&#39;dict[str, Any]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Self&#39;</span><span class="p">:</span>
+<div class="viewcode-block" id="EncryptedParameter.post_process"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.schema.internet.hip.EncryptedParameter.post_process">[docs]</a>    <span class="k">def</span> <span class="nf">post_process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">&#39;dict[str, Any]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Schema&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Revise ``schema`` data after unpacking process.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            schema: parsed schema</span>
-<span class="sd">            data: Packed data.</span>
-<span class="sd">            length: Length of data.</span>
 <span class="sd">            packet: Unpacked data.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            Revised schema.</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">schema</span><span class="o">.</span><span class="n">cipher</span> <span class="o">=</span> <span class="n">packet</span><span class="p">[</span><span class="s1">&#39;__cipher__&#39;</span><span class="p">]</span>
-        <span class="k">return</span> <span class="n">schema</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cipher</span> <span class="o">=</span> <span class="n">packet</span><span class="p">[</span><span class="s1">&#39;__cipher__&#39;</span><span class="p">]</span>
+        <span class="k">return</span> <span class="bp">self</span></div>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
         <span class="c1">#: Cipher ID.</span>

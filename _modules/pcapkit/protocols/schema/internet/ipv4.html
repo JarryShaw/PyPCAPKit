@@ -484,15 +484,10 @@
         <span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="n">Enum_OptionNumber</span><span class="o">.</span><span class="n">EOOL</span><span class="p">,</span> <span class="n">Enum_OptionNumber</span><span class="o">.</span><span class="n">NOP</span><span class="p">),</span>
     <span class="p">)</span>
 
-<div class="viewcode-block" id="Option.post_process"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/ipv4.html#pcapkit.protocols.schema.internet.ipv4.Option.post_process">[docs]</a>    <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">post_process</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">&#39;Self&#39;</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">&#39;IO[bytes]&#39;</span><span class="p">,</span>
-                     <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">&#39;dict[str, Any]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Self&#39;</span><span class="p">:</span>
+<div class="viewcode-block" id="Option.post_process"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/ipv4.html#pcapkit.protocols.schema.internet.ipv4.Option.post_process">[docs]</a>    <span class="k">def</span> <span class="nf">post_process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">&#39;dict[str, Any]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Schema&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Revise ``schema`` data after unpacking process.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            schema: parsed schema</span>
-<span class="sd">            data: Packed data.</span>
-<span class="sd">            length: Length of data.</span>
 <span class="sd">            packet: Unpacked data.</span>
 
 <span class="sd">        Returns:</span>
@@ -500,9 +495,9 @@
 
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># for EOOL/NOP option, length is always 1</span>
-        <span class="k">if</span> <span class="n">schema</span><span class="o">.</span><span class="n">type</span> <span class="ow">in</span> <span class="p">(</span><span class="n">Enum_OptionNumber</span><span class="o">.</span><span class="n">EOOL</span><span class="p">,</span> <span class="n">Enum_OptionNumber</span><span class="o">.</span><span class="n">NOP</span><span class="p">):</span>
-            <span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">=</span> <span class="mi">1</span>
-        <span class="k">return</span> <span class="n">schema</span></div></div>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">type</span> <span class="ow">in</span> <span class="p">(</span><span class="n">Enum_OptionNumber</span><span class="o">.</span><span class="n">EOOL</span><span class="p">,</span> <span class="n">Enum_OptionNumber</span><span class="o">.</span><span class="n">NOP</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">length</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="k">return</span> <span class="bp">self</span></div></div>
 
 
 <div class="viewcode-block" id="UnassignedOption"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/ipv4.html#pcapkit.protocols.schema.internet.ipv4.UnassignedOption">[docs]</a><span class="k">class</span> <span class="nc">UnassignedOption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
@@ -585,63 +580,58 @@
         <span class="n">default</span><span class="o">=</span><span class="nb">bytes</span><span class="p">(</span><span class="mi">36</span><span class="p">),</span>  <span class="c1"># 36 is the maximum length of the option data field for timestamps</span>
     <span class="p">)</span>
 
-<div class="viewcode-block" id="TSOption.post_process"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/ipv4.html#pcapkit.protocols.schema.internet.ipv4.TSOption.post_process">[docs]</a>    <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">post_process</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">&#39;Self&#39;</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">&#39;IO[bytes]&#39;</span><span class="p">,</span>
-                     <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">&#39;dict[str, Any]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Self&#39;</span><span class="p">:</span>
+<div class="viewcode-block" id="TSOption.post_process"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/ipv4.html#pcapkit.protocols.schema.internet.ipv4.TSOption.post_process">[docs]</a>    <span class="k">def</span> <span class="nf">post_process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">&#39;dict[str, Any]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Schema&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Revise ``schema`` data after unpacking process.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            schema: parsed schema</span>
-<span class="sd">            data: Packed data.</span>
-<span class="sd">            length: Length of data.</span>
 <span class="sd">            packet: Unpacked data.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            Revised schema.</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">ts_flag</span> <span class="o">=</span> <span class="n">Enum_TSFlag</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">&#39;flag&#39;</span><span class="p">])</span>
+        <span class="n">ts_flag</span> <span class="o">=</span> <span class="n">Enum_TSFlag</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">&#39;flag&#39;</span><span class="p">])</span>
         <span class="k">if</span> <span class="n">ts_flag</span> <span class="o">==</span> <span class="n">Enum_TSFlag</span><span class="o">.</span><span class="n">Timestamp_Only</span><span class="p">:</span>
-            <span class="n">ts_data</span> <span class="o">=</span> <span class="n">schema</span><span class="o">.</span><span class="n">ts_data</span>
-            <span class="n">schema</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">ts_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ts_data</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="p">[]</span>
             <span class="n">ts_list</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: list[int | timedelta]</span>
 
             <span class="k">for</span> <span class="n">ts</span> <span class="ow">in</span> <span class="n">ts_data</span><span class="p">:</span>
-                <span class="n">schema</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ts</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ts</span><span class="p">)</span>
 
                 <span class="k">if</span> <span class="n">ts</span> <span class="o">&gt;&gt;</span> <span class="mi">31</span><span class="p">:</span>
-                    <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;IPv4: [OptNo </span><span class="si">{</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s1">] invalid format: timestamp error: </span><span class="si">{</span><span class="n">ts_val</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">ProtocolWarning</span><span class="p">)</span>
+                    <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;IPv4: [OptNo </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s1">] invalid format: timestamp error: </span><span class="si">{</span><span class="n">ts_val</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">ProtocolWarning</span><span class="p">)</span>
                     <span class="n">ts_val</span> <span class="o">=</span> <span class="n">ts</span> <span class="o">&amp;</span> <span class="mh">0x7FFFFFFF</span>  <span class="c1"># type: int | timedelta</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="n">ts_val</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">milliseconds</span><span class="o">=</span><span class="n">ts</span><span class="p">)</span>
                 <span class="n">ts_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ts_val</span><span class="p">)</span>
             <span class="n">timestamp</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">ts_list</span><span class="p">)</span>  <span class="c1"># type: tuple[int | timedelta, ...] | OrderedMultiDict[IPv4Address, int | timedelta]</span>
         <span class="k">elif</span> <span class="n">ts_flag</span> <span class="o">==</span> <span class="n">Enum_TSFlag</span><span class="o">.</span><span class="n">IP_with_Timestamp</span><span class="p">:</span>
-            <span class="n">ts_data</span> <span class="o">=</span> <span class="n">schema</span><span class="o">.</span><span class="n">ts_data</span>
-            <span class="n">schema</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">OrderedMultiDict</span><span class="p">()</span>
+            <span class="n">ts_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ts_data</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">OrderedMultiDict</span><span class="p">()</span>
             <span class="n">timestamp</span> <span class="o">=</span> <span class="n">OrderedMultiDict</span><span class="p">()</span>
 
             <span class="k">for</span> <span class="n">ip</span><span class="p">,</span> <span class="n">ts</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">ts_data</span><span class="p">[::</span><span class="mi">2</span><span class="p">],</span> <span class="n">ts_data</span><span class="p">[</span><span class="mi">1</span><span class="p">::</span><span class="mi">2</span><span class="p">]):</span>
                 <span class="n">ip_val</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">&#39;IPv4Address&#39;</span><span class="p">,</span> <span class="n">ipaddress</span><span class="o">.</span><span class="n">ip_address</span><span class="p">(</span><span class="n">ip</span><span class="p">))</span>
-                <span class="n">schema</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">ip_val</span><span class="p">,</span> <span class="n">ts</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">ip_val</span><span class="p">,</span> <span class="n">ts</span><span class="p">)</span>
 
                 <span class="k">if</span> <span class="n">ts</span> <span class="o">&gt;&gt;</span> <span class="mi">31</span><span class="p">:</span>
-                    <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;IPv4: [OptNo </span><span class="si">{</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s1">] invalid format: timestamp error: </span><span class="si">{</span><span class="n">ts_val</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">ProtocolWarning</span><span class="p">)</span>
+                    <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;IPv4: [OptNo </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s1">] invalid format: timestamp error: </span><span class="si">{</span><span class="n">ts_val</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">ProtocolWarning</span><span class="p">)</span>
                     <span class="n">ts_val</span> <span class="o">=</span> <span class="n">ts</span> <span class="o">&amp;</span> <span class="mh">0x7FFFFFFF</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="n">ts_val</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">milliseconds</span><span class="o">=</span><span class="n">ts</span><span class="p">)</span>
                 <span class="n">timestamp</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">ip_val</span><span class="p">,</span> <span class="n">ts_val</span><span class="p">)</span>
         <span class="k">elif</span> <span class="n">ts_flag</span> <span class="o">==</span> <span class="n">Enum_TSFlag</span><span class="o">.</span><span class="n">Prespecified_IP_with_Timestamp</span><span class="p">:</span>
-            <span class="n">ts_data</span> <span class="o">=</span> <span class="n">schema</span><span class="o">.</span><span class="n">ts_data</span>
-            <span class="n">schema</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">OrderedMultiDict</span><span class="p">()</span>
+            <span class="n">ts_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ts_data</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">OrderedMultiDict</span><span class="p">()</span>
             <span class="n">timestamp</span> <span class="o">=</span> <span class="n">OrderedMultiDict</span><span class="p">()</span>
 
             <span class="k">for</span> <span class="n">ip</span><span class="p">,</span> <span class="n">ts</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">ts_data</span><span class="p">[::</span><span class="mi">2</span><span class="p">],</span> <span class="n">ts_data</span><span class="p">[</span><span class="mi">1</span><span class="p">::</span><span class="mi">2</span><span class="p">]):</span>
                 <span class="n">ip_val</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">&#39;IPv4Address&#39;</span><span class="p">,</span> <span class="n">ipaddress</span><span class="o">.</span><span class="n">ip_address</span><span class="p">(</span><span class="n">ip</span><span class="p">))</span>
-                <span class="n">schema</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">ip_val</span><span class="p">,</span> <span class="n">ts</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">ip_val</span><span class="p">,</span> <span class="n">ts</span><span class="p">)</span>
 
                 <span class="k">if</span> <span class="n">ts</span> <span class="o">&gt;&gt;</span> <span class="mi">31</span><span class="p">:</span>
-                    <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;IPv4: [OptNo </span><span class="si">{</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s1">] invalid format: timestamp error: </span><span class="si">{</span><span class="n">ts_val</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">ProtocolWarning</span><span class="p">)</span>
+                    <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;IPv4: [OptNo </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s1">] invalid format: timestamp error: </span><span class="si">{</span><span class="n">ts_val</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">ProtocolWarning</span><span class="p">)</span>
                     <span class="n">ts_val</span> <span class="o">=</span> <span class="n">ts</span> <span class="o">&amp;</span> <span class="mh">0x7FFFFFFF</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="n">ts_val</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">milliseconds</span><span class="o">=</span><span class="n">ts</span><span class="p">)</span>
@@ -649,18 +639,18 @@
 
             <span class="c1"># extract also the prespecified IP addresses</span>
             <span class="c1"># but set the timestamp to 0</span>
-            <span class="n">pad</span> <span class="o">=</span> <span class="n">schema</span><span class="o">.</span><span class="n">remainder</span>
+            <span class="n">pad</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">remainder</span>
             <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">pad</span><span class="p">),</span> <span class="mi">8</span><span class="p">):</span>
                 <span class="n">buf_ip</span> <span class="o">=</span> <span class="n">pad</span><span class="p">[</span><span class="n">index</span><span class="p">:</span><span class="n">index</span> <span class="o">+</span> <span class="mi">4</span><span class="p">]</span>
-                <span class="n">schema</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">ipaddress</span><span class="o">.</span><span class="n">ip_address</span><span class="p">(</span><span class="n">buf_ip</span><span class="p">),</span> <span class="mi">0</span><span class="p">)</span>  <span class="c1"># type: ignore[arg-type]</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">ipaddress</span><span class="o">.</span><span class="n">ip_address</span><span class="p">(</span><span class="n">buf_ip</span><span class="p">),</span> <span class="mi">0</span><span class="p">)</span>  <span class="c1"># type: ignore[arg-type]</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;IPv4: [OptNo </span><span class="si">{</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s1">] invalid format: unknown timestmap flag: </span><span class="si">{</span><span class="n">ts_flag</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">ProtocolWarning</span><span class="p">)</span>
-            <span class="n">schema</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">schema</span><span class="o">.</span><span class="n">ts_data</span>
-            <span class="n">timestamp</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">ts_data</span><span class="p">)</span>
+            <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;IPv4: [OptNo </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s1">] invalid format: unknown timestmap flag: </span><span class="si">{</span><span class="n">ts_flag</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">ProtocolWarning</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ts_data</span>
+            <span class="n">timestamp</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ts_data</span><span class="p">)</span>
 
-        <span class="n">schema</span><span class="o">.</span><span class="n">ts_flag</span> <span class="o">=</span> <span class="n">ts_flag</span>
-        <span class="n">schema</span><span class="o">.</span><span class="n">timestamp</span> <span class="o">=</span> <span class="n">timestamp</span>
-        <span class="k">return</span> <span class="n">schema</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ts_flag</span> <span class="o">=</span> <span class="n">ts_flag</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">timestamp</span> <span class="o">=</span> <span class="n">timestamp</span>
+        <span class="k">return</span> <span class="bp">self</span></div>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
         <span class="n">ts_flag</span><span class="p">:</span> <span class="s1">&#39;Enum_TSFlag&#39;</span>
@@ -794,23 +784,18 @@
         <span class="n">selector</span><span class="o">=</span><span class="n">quick_start_data_selector</span><span class="p">,</span>
     <span class="p">)</span>
 
-    <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">post_process</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">&#39;Self&#39;</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">&#39;IO[bytes]&#39;</span><span class="p">,</span>
-                     <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">&#39;dict[str, Any]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;QuickStartRequestOption | QuickStartReportOption&#39;</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">post_process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">&#39;dict[str, Any]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Schema&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Revise ``schema`` data after unpacking process.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            schema: parsed schema</span>
-<span class="sd">            data: Packed data.</span>
-<span class="sd">            length: Length of data.</span>
 <span class="sd">            packet: Unpacked data.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            Revised schema.</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">ret</span> <span class="o">=</span> <span class="n">schema</span><span class="o">.</span><span class="n">data</span>
-        <span class="n">ret</span><span class="o">.</span><span class="n">func</span> <span class="o">=</span> <span class="n">Enum_QSFunction</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">packet</span><span class="p">[</span><span class="s1">&#39;flags&#39;</span><span class="p">][</span><span class="s1">&#39;func&#39;</span><span class="p">])</span>
+        <span class="n">ret</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span>
+        <span class="n">ret</span><span class="o">.</span><span class="n">func</span> <span class="o">=</span> <span class="n">Enum_QSFunction</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">&#39;func&#39;</span><span class="p">])</span>
         <span class="k">return</span> <span class="n">ret</span>
 
 

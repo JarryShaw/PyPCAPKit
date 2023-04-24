@@ -486,15 +486,11 @@
 <div class="viewcode-block" id="FrameType.Flags"><a class="viewcode-back" href="../../../../../pcapkit/protocols/application/httpv2.html#pcapkit.protocols.schema.application.httpv2.FrameType.Flags">[docs]</a>    <span class="k">class</span> <span class="nc">Flags</span><span class="p">(</span><span class="n">enum</span><span class="o">.</span><span class="n">IntFlag</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Flags enumeration for HTTP/2 frames.&quot;&quot;&quot;</span></div>
 
-<div class="viewcode-block" id="FrameType.post_process"><a class="viewcode-back" href="../../../../../pcapkit/protocols/application/httpv2.html#pcapkit.protocols.schema.application.httpv2.FrameType.post_process">[docs]</a>    <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">post_process</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">&#39;Self&#39;</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">&#39;IO[bytes]&#39;</span><span class="p">,</span>
-                     <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">&#39;dict[str, Any]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Self&#39;</span><span class="p">:</span>
+<div class="viewcode-block" id="FrameType.post_process"><a class="viewcode-back" href="../../../../../pcapkit/protocols/application/httpv2.html#pcapkit.protocols.schema.application.httpv2.FrameType.post_process">[docs]</a>    <span class="k">def</span> <span class="nf">post_process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">&#39;dict[str, Any]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Schema&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Revise ``schema`` data after unpacking process.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            schema: parsed schema</span>
-<span class="sd">            data: Packed data.</span>
-<span class="sd">            length: Length of data.</span>
 <span class="sd">            packet: Unpacked data.</span>
 
 <span class="sd">        Returns:</span>
@@ -503,13 +499,13 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">flags</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="nb">filter</span><span class="p">(</span><span class="k">lambda</span> <span class="n">kv</span><span class="p">:</span> <span class="n">kv</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;BIT_&#39;</span><span class="p">),</span>
-                               <span class="bp">cls</span><span class="o">.</span><span class="n">Flags</span><span class="o">.</span><span class="n">__members__</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
+                               <span class="bp">self</span><span class="o">.</span><span class="n">Flags</span><span class="o">.</span><span class="n">__members__</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
             <span class="n">name</span> <span class="o">=</span> <span class="n">key</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
             <span class="k">if</span> <span class="n">packet</span><span class="p">[</span><span class="s1">&#39;flags&#39;</span><span class="p">][</span><span class="n">name</span><span class="p">]:</span>
                 <span class="n">flags</span> <span class="o">|=</span> <span class="n">val</span>
 
-        <span class="n">schema</span><span class="o">.</span><span class="n">__flags__</span> <span class="o">=</span> <span class="n">flags</span>
-        <span class="k">return</span> <span class="n">schema</span></div></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__flags__</span> <span class="o">=</span> <span class="n">flags</span>
+        <span class="k">return</span> <span class="bp">self</span></div></div>
 
 
 <div class="viewcode-block" id="UnassignedFrame"><a class="viewcode-back" href="../../../../../pcapkit/protocols/application/httpv2.html#pcapkit.protocols.schema.application.httpv2.UnassignedFrame">[docs]</a><span class="k">class</span> <span class="nc">UnassignedFrame</span><span class="p">(</span><span class="n">FrameType</span><span class="p">):</span>

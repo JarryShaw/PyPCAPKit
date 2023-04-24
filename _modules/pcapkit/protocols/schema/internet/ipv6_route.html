@@ -493,56 +493,51 @@
     <span class="c1">#: Padding.</span>
     <span class="n">padding</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span> <span class="o">=</span> <span class="n">PaddingField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">&#39;pad&#39;</span><span class="p">][</span><span class="s1">&#39;pad_len&#39;</span><span class="p">])</span>
 
-<div class="viewcode-block" id="RPL.post_process"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/ipv6_route.html#pcapkit.protocols.schema.internet.ipv6_route.RPL.post_process">[docs]</a>    <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">post_process</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">&#39;Self&#39;</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">&#39;IO[bytes]&#39;</span><span class="p">,</span>
-                     <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">&#39;dict[str, Any]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Self&#39;</span><span class="p">:</span>
+<div class="viewcode-block" id="RPL.post_process"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/ipv6_route.html#pcapkit.protocols.schema.internet.ipv6_route.RPL.post_process">[docs]</a>    <span class="k">def</span> <span class="nf">post_process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">&#39;dict[str, Any]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Schema&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Revise ``schema`` data after unpacking process.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            schema: parsed schema</span>
-<span class="sd">            data: Packed data.</span>
-<span class="sd">            length: Length of data.</span>
 <span class="sd">            packet: Unpacked data.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            Revised schema.</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">buffer</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">&#39;bytes&#39;</span><span class="p">,</span> <span class="n">schema</span><span class="o">.</span><span class="n">ip</span><span class="p">)</span>
+        <span class="n">buffer</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">&#39;bytes&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ip</span><span class="p">)</span>
         <span class="n">dst_val</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">&#39;Optional[IPv6Address]&#39;</span><span class="p">,</span> <span class="n">packet</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;dst&#39;</span><span class="p">))</span>
         <span class="n">dst</span> <span class="o">=</span> <span class="n">dst_val</span><span class="o">.</span><span class="n">packed</span> <span class="k">if</span> <span class="n">dst_val</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span>
 
-        <span class="n">ilen</span> <span class="o">=</span> <span class="mi">16</span> <span class="o">-</span> <span class="n">schema</span><span class="o">.</span><span class="n">cmpr_i</span>
-        <span class="n">elen</span> <span class="o">=</span> <span class="mi">16</span> <span class="o">-</span> <span class="n">schema</span><span class="o">.</span><span class="n">cmpr_e</span>
+        <span class="n">ilen</span> <span class="o">=</span> <span class="mi">16</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">cmpr_i</span>
+        <span class="n">elen</span> <span class="o">=</span> <span class="mi">16</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">cmpr_e</span>
         <span class="n">addr</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: list[IPv6Address | bytes]</span>
         <span class="n">counter</span> <span class="o">=</span> <span class="mi">0</span>
 
         <span class="c1"># Addresses[1..n-1]</span>
-        <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">buffer</span><span class="p">)</span> <span class="o">-</span> <span class="n">schema</span><span class="o">.</span><span class="n">pad</span><span class="p">[</span><span class="s1">&#39;pad_len&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="n">elen</span><span class="p">)</span> <span class="o">//</span> <span class="n">ilen</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">buffer</span><span class="p">)</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">pad</span><span class="p">[</span><span class="s1">&#39;pad_len&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="n">elen</span><span class="p">)</span> <span class="o">//</span> <span class="n">ilen</span><span class="p">):</span>
             <span class="n">buf</span> <span class="o">=</span> <span class="n">buffer</span><span class="p">[</span><span class="n">counter</span><span class="p">:</span><span class="n">counter</span> <span class="o">+</span> <span class="n">ilen</span><span class="p">]</span>
             <span class="k">if</span> <span class="n">dst</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="k">if</span> <span class="n">schema</span><span class="o">.</span><span class="n">cmpr_i</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">cmpr_i</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
                     <span class="n">addr</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cast</span><span class="p">(</span><span class="s1">&#39;IPv6Address&#39;</span><span class="p">,</span> <span class="n">ipaddress</span><span class="o">.</span><span class="n">ip_address</span><span class="p">(</span><span class="n">buf</span><span class="p">)))</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="n">addr</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">buf</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">buf</span> <span class="o">=</span> <span class="n">dst</span><span class="p">[:</span><span class="n">schema</span><span class="o">.</span><span class="n">cmpr_i</span><span class="p">]</span> <span class="o">+</span> <span class="n">buf</span>
+                <span class="n">buf</span> <span class="o">=</span> <span class="n">dst</span><span class="p">[:</span><span class="bp">self</span><span class="o">.</span><span class="n">cmpr_i</span><span class="p">]</span> <span class="o">+</span> <span class="n">buf</span>
                 <span class="n">addr</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cast</span><span class="p">(</span><span class="s1">&#39;IPv6Address&#39;</span><span class="p">,</span> <span class="n">ipaddress</span><span class="o">.</span><span class="n">ip_address</span><span class="p">(</span><span class="n">buf</span><span class="p">)))</span>
             <span class="n">counter</span> <span class="o">+=</span> <span class="n">ilen</span>
 
         <span class="c1"># Addresses[n]</span>
         <span class="n">buf</span> <span class="o">=</span> <span class="n">buffer</span><span class="p">[</span><span class="n">counter</span><span class="p">:</span><span class="n">counter</span> <span class="o">+</span> <span class="n">elen</span><span class="p">]</span>
         <span class="k">if</span> <span class="n">dst</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">schema</span><span class="o">.</span><span class="n">cmpr_e</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">cmpr_e</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="n">addr</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cast</span><span class="p">(</span><span class="s1">&#39;IPv6Address&#39;</span><span class="p">,</span> <span class="n">ipaddress</span><span class="o">.</span><span class="n">ip_address</span><span class="p">(</span><span class="n">buf</span><span class="p">)))</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">addr</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">buf</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">buf</span> <span class="o">=</span> <span class="n">dst</span><span class="p">[:</span><span class="n">schema</span><span class="o">.</span><span class="n">cmpr_e</span><span class="p">]</span> <span class="o">+</span> <span class="n">buf</span>
+            <span class="n">buf</span> <span class="o">=</span> <span class="n">dst</span><span class="p">[:</span><span class="bp">self</span><span class="o">.</span><span class="n">cmpr_e</span><span class="p">]</span> <span class="o">+</span> <span class="n">buf</span>
             <span class="n">addr</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cast</span><span class="p">(</span><span class="s1">&#39;IPv6Address&#39;</span><span class="p">,</span> <span class="n">ipaddress</span><span class="o">.</span><span class="n">ip_address</span><span class="p">(</span><span class="n">buf</span><span class="p">)))</span>
 
-        <span class="n">schema</span><span class="o">.</span><span class="n">ip</span> <span class="o">=</span> <span class="n">addr</span>
-        <span class="k">return</span> <span class="n">schema</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ip</span> <span class="o">=</span> <span class="n">addr</span>
+        <span class="k">return</span> <span class="bp">self</span></div>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
         <span class="c1">#: Addresses (SRH prefix compression decoded).</span>
