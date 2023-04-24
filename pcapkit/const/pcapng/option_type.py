@@ -19,10 +19,58 @@ class OptionType(IntEnum):
     """[OptionType] Option Types"""
 
     #: opt_endofopt
-    endofopt = 0
+    opt_endofopt = 0
 
     #: opt_comment
-    comment = 1
+    opt_comment = 1
+
+    #: if_name
+    if_name = 2
+
+    #: if_description
+    if_description = 3
+
+    #: if_IPv4addr
+    if_IPv4addr = 4
+
+    #: if_IPv6addr
+    if_IPv6addr = 5
+
+    #: if_MACaddr
+    if_MACaddr = 6
+
+    #: if_EUIaddr
+    if_EUIaddr = 7
+
+    #: if_speed
+    if_speed = 8
+
+    #: if_tsresol
+    if_tsresol = 9
+
+    #: if_tzone
+    if_tzone = 10
+
+    #: if_filter
+    if_filter = 11
+
+    #: if_os
+    if_os = 12
+
+    #: if_fcslen
+    if_fcslen = 13
+
+    #: if_tsoffset
+    if_tsoffset = 14
+
+    #: if_hardware
+    if_hardware = 15
+
+    #: if_txspeed
+    if_txspeed = 16
+
+    #: if_rxspeed
+    if_rxspeed = 17
 
     @staticmethod
     def get(key: 'int | str', default: 'int' = -1) -> 'OptionType':
@@ -52,6 +100,6 @@ class OptionType(IntEnum):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))
         if value in (2988, 2989, 19372, 19373):
             #: opt_custom
-            extend_enum(cls, 'custom_%d' % value, value)
+            extend_enum(cls, 'opt_custom_%d' % value, value)
             return cls(value)
         return super()._missing_(value)

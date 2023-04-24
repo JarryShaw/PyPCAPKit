@@ -37,7 +37,7 @@ class OptionType(Vendor):
         """Count field records."""
         return collections.Counter()
 
-    def request(self, text: 'str') -> 'list[Tag]':  # type: ignore[override] # pylint: disable=signature-differs
+    def request(self, text: 'str') -> 'dict[str, list[Tag]]':  # type: ignore[override] # pylint: disable=signature-differs
         """Fetch registry table.
 
         Args:
@@ -48,10 +48,14 @@ class OptionType(Vendor):
 
         """
         soup = bs4.BeautifulSoup(text, 'html5lib')
-        table = soup.select('table#table-1')[0]
-        return table.select('tr')[1:]
+        table_1 = soup.select('table#table-1')[0]
+        table_3 = soup.select('table#table-3')[0]
+        return {
+            'table-1': table_1.select('tr')[1:],
+            'table-3': table_3.select('tr')[1:],
+        }
 
-    def process(self, data: 'list[Tag]') -> 'tuple[list[str], list[str]]':
+    def process(self, data: 'dict[str, list[Tag]]') -> 'tuple[list[str], list[str]]':  # type: ignore[override]
         """Process registry data.
 
         Args:
@@ -63,25 +67,35 @@ class OptionType(Vendor):
         """
         enum = []  # type: list[str]
         miss = []  # type: list[str]
-        for content in data:
-            name = content.select('td')[0].text.strip()[4:]
-            desc = content.select('td')[0].text.strip()
+
+        for content in data['table-1']:
+            name = content.select('td')[0].text.strip()
             temp = content.select('td')[1].text.strip()
 
             try:
                 code = int(temp)
 
                 pref = f'{name} = {code}'
-                sufs = self.wrap_comment(desc)
+                sufs = self.wrap_comment(name)
 
                 enum.append(f'#: {sufs}\n    {pref}')
             except ValueError:
                 opts = tuple(map(lambda x: int(x), temp.split('/')))
 
                 miss.append(f'if value in {opts!r}:')
-                miss.append(f'    #: {desc}')
+                miss.append(f'    #: {name}')
                 miss.append(f"    extend_enum(cls, '{self.safe_name(name)}_%d' % value, value)")
                 miss.append('    return cls(value)')
+
+        for content in data['table-3']:
+            name = content.select('td')[0].text.strip()
+            code = content.select('td')[1].text.strip()
+
+            pref = f'{name} = {int(code)}'
+            sufs = self.wrap_comment(name)
+
+            enum.append(f'#: {sufs}\n    {pref}')
+
         return enum, miss
 
 
