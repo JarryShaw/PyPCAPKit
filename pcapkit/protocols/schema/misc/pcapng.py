@@ -35,6 +35,8 @@ __all__ = [
     'EPB_FlagsOption', 'EPB_HashOption', 'EPB_DropCountOption', 'EPB_PacketIDOption',
     'EPB_QueueOption', 'EPB_VerdictOption',
     'NS_DNSNameOption', 'NS_DNSIP4AddrOption', 'NS_DNSIP6AddrOption',
+    'ISB_StartTimeOption', 'ISB_EndTimeOption', 'ISB_IFRecvOption', 'ISB_IFDropOption',
+    'ISB_FilterAcceptOption', 'ISB_OSDropOption', 'ISB_UsrDelivOption',
 
     'NameResolutionRecord', 'UnknownRecord', 'EndRecord', 'IPv4Record', 'IPv6Record',
 
@@ -816,4 +818,116 @@ class NameResolutionBlock(PCAPNG):
     if TYPE_CHECKING:
         def __init__(self, type: 'Enum_BlockType', length: 'int',
                      records: 'list[NameResolutionRecord | bytes] | bytes',
+                     options: 'list[Option | bytes] | bytes', length2: 'int') -> 'None': ...
+
+
+class ISB_StartTimeOption(Option):
+    """Header schema for PCAP-NG ``isb_starttime`` option."""
+
+    #: Timestamp (higher 32 bits).
+    timestamp_high: 'int' = UInt32Field(callback=byteorder_callback)
+    #: Timestamp (lower 32 bits).
+    timestamp_low: 'int' = UInt32Field(callback=byteorder_callback)
+
+    if TYPE_CHECKING:
+        def __init__(self, code: 'Enum_OptionType', length: 'int', timestamp_high: 'int', timestamp_low: 'int') -> 'None': ...
+
+
+class ISB_EndTimeOption(Option):
+    """Header schema for PCAP-NG ``isb_endtime`` option."""
+
+    #: Timestamp (higher 32 bits).
+    timestamp_high: 'int' = UInt32Field(callback=byteorder_callback)
+    #: Timestamp (lower 32 bits).
+    timestamp_low: 'int' = UInt32Field(callback=byteorder_callback)
+
+    if TYPE_CHECKING:
+        def __init__(self, code: 'Enum_OptionType', length: 'int', timestamp_high: 'int', timestamp_low: 'int') -> 'None': ...
+
+
+class ISB_IFRecvOption(Option):
+    """Header schema for PCAP-NG ``isb_ifrecv`` option."""
+
+    #: Number of packets received.
+    packets: 'int' = UInt64Field(callback=byteorder_callback)
+
+    if TYPE_CHECKING:
+        def __init__(self, code: 'Enum_OptionType', length: 'int', packets: 'int', bytes: 'int') -> 'None': ...
+
+
+class ISB_IFDropOption(Option):
+    """Header schema for PCAP-NG ``isb_ifdrop`` option."""
+
+    #: Number of packets dropped.
+    packets: 'int' = UInt64Field(callback=byteorder_callback)
+
+    if TYPE_CHECKING:
+        def __init__(self, code: 'Enum_OptionType', length: 'int', packets: 'int', bytes: 'int') -> 'None': ...
+
+
+class ISB_FilterAcceptOption(Option):
+    """Header schema for PCAP-NG ``isb_filteraccept`` option."""
+
+    #: Number of packets accepted by filter.
+    packets: 'int' = UInt64Field(callback=byteorder_callback)
+
+    if TYPE_CHECKING:
+        def __init__(self, code: 'Enum_OptionType', length: 'int', packets: 'int', bytes: 'int') -> 'None': ...
+
+
+class ISB_OSDropOption(Option):
+    """Header schema for PCAP-NG ``isb_osdrop`` option."""
+
+    #: Number of packets dropped by OS.
+    packets: 'int' = UInt64Field(callback=byteorder_callback)
+
+    if TYPE_CHECKING:
+        def __init__(self, code: 'Enum_OptionType', length: 'int', packets: 'int', bytes: 'int') -> 'None': ...
+
+
+class ISB_UsrDelivOption(Option):
+    """Header schema for PCAP-NG ``isb_usrdeliv`` option."""
+
+    #: Number of packets delivered to user.
+    packets: 'int' = UInt64Field(callback=byteorder_callback)
+
+    if TYPE_CHECKING:
+        def __init__(self, code: 'Enum_OptionType', length: 'int', packets: 'int', bytes: 'int') -> 'None': ...
+
+
+class InterfaceStatisticsBlock(PCAPNG):
+    """Header schema for PCAP-NG Interface Statistics Block (ISB)."""
+
+    #: Block total length.
+    length: 'int' = UInt32Field(callback=byteorder_callback)
+    #: Interface ID.
+    interface_id: 'int' = UInt32Field(callback=byteorder_callback)
+    #: Timestamp (higher 32 bits).
+    timestamp_high: 'int' = UInt32Field(callback=byteorder_callback)
+    #: Timestamp (lower 32 bits).
+    timestamp_low: 'int' = UInt32Field(callback=byteorder_callback)
+    #: Options.
+    options: 'list[Option]' = OptionField(
+        length=lambda pkt: pkt['length'] - 20 - pkt['captured_len'],
+        base_schema=Option,
+        type_name='type',
+        registry=collections.defaultdict(lambda: UnknownOption, {
+            Enum_OptionType.opt_endofopt: EndOfOption,
+            Enum_OptionType.opt_comment: CommentOption,
+            Enum_OptionType.isb_starttime: ISB_StartTimeOption,
+            Enum_OptionType.isb_endtime: ISB_EndTimeOption,
+            Enum_OptionType.isb_ifrecv: ISB_IFRecvOption,
+            Enum_OptionType.isb_ifdrop: ISB_IFDropOption,
+            Enum_OptionType.isb_filteraccept: ISB_FilterAcceptOption,
+            Enum_OptionType.isb_osdrop: ISB_OSDropOption,
+            Enum_OptionType.isb_usrdeliv: ISB_UsrDelivOption,
+        }),
+        eool=Enum_OptionType.opt_endofopt,
+    )
+    #: Block total length.
+    length2: 'int' = UInt32Field(callback=byteorder_callback)
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_BlockType', length: 'int', interface_id: 'int',
+                     timestamp_high: 'int', timestamp_low: 'int',
                      options: 'list[Option | bytes] | bytes', length2: 'int') -> 'None': ...
