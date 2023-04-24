@@ -19,11 +19,14 @@ crawlers include:
      - Hash Algorithms [*]_
    * - :class:`PCAPNG_VerdictType <pcapkit.vendor.pcapng.verdict_type.VerdictType>`
      - Verdict Types [*]_
+   * - :class:`PCAPNG_RecordType <pcapkit.vendor.pcapng.record_type.RecordType>`
+     - Record Types [*]_
 
 .. [*] https://www.ietf.org/staging/draft-tuexen-opsawg-pcapng-02.html#name-standardized-block-type-cod
 .. [*] https://www.ietf.org/staging/draft-tuexen-opsawg-pcapng-02.html#name-options
 .. [*] https://www.ietf.org/staging/draft-tuexen-opsawg-pcapng-02.html#name-enhanced-packet-block-flags
 .. [*] https://www.ietf.org/staging/draft-tuexen-opsawg-pcapng-02.html#name-enhanced-packet-block
+.. [*] https://www.ietf.org/staging/draft-tuexen-opsawg-pcapng-02.html#name-name-resolution-block
 
 """
 
@@ -31,8 +34,9 @@ from pcapkit.vendor.pcapng.block_type import BlockType as PCAPNG_BlockType
 from pcapkit.vendor.pcapng.hash_algorithm import HashAlgorithm as PCAPNG_HashAlgorithm
 from pcapkit.vendor.pcapng.option_type import OptionType as PCAPNG_OptionType
 from pcapkit.vendor.pcapng.verdict_type import VerdictType as PCAPNG_VerdictType
+from pcapkit.vendor.pcapng.record_type import RecordType as PCAPNG_RecordType
 
 __all__ = [
     'PCAPNG_BlockType', 'PCAPNG_OptionType', 'PCAPNG_HashAlgorithm',
-    'PCAPNG_VerdictType',
+    'PCAPNG_VerdictType', 'PCAPNG_RecordType',
 ]
