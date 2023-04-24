@@ -33,8 +33,8 @@ enumerations include:
 from pcapkit.const.pcapng.block_type import BlockType as PCAPNG_BlockType
 from pcapkit.const.pcapng.hash_algorithm import HashAlgorithm as PCAPNG_HashAlgorithm
 from pcapkit.const.pcapng.option_type import OptionType as PCAPNG_OptionType
-from pcapkit.const.pcapng.verdict_type import VerdictType as PCAPNG_VerdictType
 from pcapkit.const.pcapng.record_type import RecordType as PCAPNG_RecordType
+from pcapkit.const.pcapng.verdict_type import VerdictType as PCAPNG_VerdictType
 
 ___all__ = [
     'PCAPNG_BlockType', 'PCAPNG_OptionType', 'PCAPNG_HashAlgorithm',
