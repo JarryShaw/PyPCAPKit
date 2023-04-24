@@ -931,3 +931,14 @@ class InterfaceStatisticsBlock(PCAPNG):
         def __init__(self, type: 'Enum_BlockType', length: 'int', interface_id: 'int',
                      timestamp_high: 'int', timestamp_low: 'int',
                      options: 'list[Option | bytes] | bytes', length2: 'int') -> 'None': ...
+
+
+class SystemdJournalExportBlock(PCAPNG):
+    """Header schema for PCAP-NG :manpage:`systemd(1)` Journal Export Block."""
+
+    #: Block total length.
+    length: 'int' = UInt32Field(callback=byteorder_callback)
+    #: Journal entry.
+    entry: 'bytes' = BytesField(length=lambda pkt: pkt['length'])
+    #: Block total length.
+    length2: 'int' = UInt32Field(callback=byteorder_callback)
