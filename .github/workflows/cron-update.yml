@@ -45,6 +45,7 @@ jobs:
 
           python util/bump_version.py
           isort -l100 -ppcapkit --skip-glob '**/__init__.py' pcapkit
+          isort -l100 -ppcapkit pcapkit/vendor/*/*.py
 
       - name: Commit changes
         if: steps.verify-changed-files.outputs.files_changed == 'true'

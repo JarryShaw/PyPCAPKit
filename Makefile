@@ -44,6 +44,7 @@ docs-clean:
 
 isort:
 	pipenv run isort -l100 -ppcapkit --skip-glob '**/__init__.py' pcapkit temp/sort.py
+	pipenv run isort -l100 -ppcapkit pcapkit/const/*/*.py
 
 vermin:
 	pipenv run vermin pcapkit --backport argparse --backport enum --backport importlib --backport ipaddress --backport typing --backport typing_extensions --no-parse-comments --eval-annotations -vv pcapkit > temp/vermin.txt
