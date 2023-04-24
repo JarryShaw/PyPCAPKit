@@ -615,7 +615,11 @@
         </ul></li>
         <li><a href="pcapkit/protocols/protocol.html#pcapkit.protocols.protocol.Protocol._info">_info (pcapkit.protocols.protocol.Protocol attribute)</a>
 </li>
+        <li><a href="pcapkit/corekit/fields.html#pcapkit.corekit.fields.ipaddress._IPAddressField">_IPAddressField (class in pcapkit.corekit.fields.ipaddress)</a>
+</li>
         <li><a href="pcapkit/corekit/fields.html#pcapkit.corekit.fields.ipaddress._IPField">_IPField (class in pcapkit.corekit.fields.ipaddress)</a>
+</li>
+        <li><a href="pcapkit/corekit/fields.html#pcapkit.corekit.fields.ipaddress._IPInterfaceField">_IPInterfaceField (class in pcapkit.corekit.fields.ipaddress)</a>
 </li>
         <li><a href="pcapkit/foundation/extraction.html#pcapkit.foundation.extraction.Extractor._ipv4">_ipv4 (pcapkit.foundation.extraction.Extractor attribute)</a>
 </li>
@@ -971,10 +975,10 @@
 </li>
         <li><a href="pcapkit/protocols/internet/hip.html#pcapkit.protocols.internet.hip.HIP._make_param_payload_mic">_make_param_payload_mic() (pcapkit.protocols.internet.hip.HIP method)</a>
 </li>
-        <li><a href="pcapkit/protocols/internet/hip.html#pcapkit.protocols.internet.hip.HIP._make_param_puzzle">_make_param_puzzle() (pcapkit.protocols.internet.hip.HIP method)</a>
-</li>
     </ul></td>
     <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="pcapkit/protocols/internet/hip.html#pcapkit.protocols.internet.hip.HIP._make_param_puzzle">_make_param_puzzle() (pcapkit.protocols.internet.hip.HIP method)</a>
+</li>
         <li><a href="pcapkit/protocols/internet/hip.html#pcapkit.protocols.internet.hip.HIP._make_param_r1_counter">_make_param_r1_counter() (pcapkit.protocols.internet.hip.HIP method)</a>
 </li>
         <li><a href="pcapkit/protocols/internet/hip.html#pcapkit.protocols.internet.hip.HIP._make_param_reg_failed">_make_param_reg_failed() (pcapkit.protocols.internet.hip.HIP method)</a>
@@ -5766,7 +5770,9 @@
         </ul></li>
         <li><a href="pcapkit/const/mh.html#pcapkit.const.mh.option.Option.IPv4_Traffic_Offload_Selector">IPv4_Traffic_Offload_Selector (pcapkit.const.mh.option.Option attribute)</a>
 </li>
-        <li><a href="pcapkit/corekit/fields.html#pcapkit.corekit.fields.ipaddress.IPv4Field">IPv4Field (class in pcapkit.corekit.fields.ipaddress)</a>
+        <li><a href="pcapkit/corekit/fields.html#pcapkit.corekit.fields.ipaddress.IPv4AddressField">IPv4AddressField (class in pcapkit.corekit.fields.ipaddress)</a>
+</li>
+        <li><a href="pcapkit/corekit/fields.html#pcapkit.corekit.fields.ipaddress.IPv4InterfaceField">IPv4InterfaceField (class in pcapkit.corekit.fields.ipaddress)</a>
 </li>
         <li><a href="pcapkit/foundation/reassembly/ip/ipv6.html#pcapkit.foundation.reassembly.ipv6.IPv6">IPv6 (class in pcapkit.foundation.reassembly.ipv6)</a>
 
@@ -5848,9 +5854,11 @@
 </li>
         <li><a href="pcapkit/const/ipv6.html#pcapkit.const.ipv6.seed_id.SeedID.IPV6_SOURCE_ADDRESS">IPV6_SOURCE_ADDRESS (pcapkit.const.ipv6.seed_id.SeedID attribute)</a>
 </li>
-        <li><a href="pcapkit/corekit/fields.html#pcapkit.corekit.fields.ipaddress.IPv6Field">IPv6Field (class in pcapkit.corekit.fields.ipaddress)</a>
+        <li><a href="pcapkit/corekit/fields.html#pcapkit.corekit.fields.ipaddress.IPv6AddressField">IPv6AddressField (class in pcapkit.corekit.fields.ipaddress)</a>
 </li>
         <li><a href="pcapkit/protocols/internet/ipv6.html#pcapkit.protocols.schema.internet.ipv6.IPv6Hextet">IPv6Hextet (class in pcapkit.protocols.schema.internet.ipv6)</a>
+</li>
+        <li><a href="pcapkit/corekit/fields.html#pcapkit.corekit.fields.ipaddress.IPv6InterfaceField">IPv6InterfaceField (class in pcapkit.corekit.fields.ipaddress)</a>
 </li>
         <li><a href="pcapkit/protocols/internet/ipx.html#pcapkit.protocols.data.internet.ipx.IPX">IPX (class in pcapkit.protocols.data.internet.ipx)</a>
 
@@ -10568,8 +10576,6 @@
           <li><a href="pcapkit/protocols/internet/ipv6_frag.html#module-pcapkit.protocols.internet.ipv6_frag">module</a>
 </li>
         </ul></li>
-    </ul></td>
-    <td style="width: 33%; vertical-align: top;"><ul>
         <li>
     pcapkit.protocols.internet.ipv6_opts
 
@@ -10577,6 +10583,8 @@
           <li><a href="pcapkit/protocols/internet/ipv6_opts.html#module-pcapkit.protocols.internet.ipv6_opts">module</a>
 </li>
         </ul></li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
         <li>
     pcapkit.protocols.internet.ipv6_route
 
@@ -12003,7 +12011,11 @@
         <li><a href="pcapkit/corekit/fields.html#pcapkit.corekit.fields.field._Field.post_process">post_process() (pcapkit.corekit.fields.field._Field method)</a>
 
         <ul>
-          <li><a href="pcapkit/corekit/fields.html#pcapkit.corekit.fields.ipaddress._IPField.post_process">(pcapkit.corekit.fields.ipaddress._IPField method)</a>
+          <li><a href="pcapkit/corekit/fields.html#pcapkit.corekit.fields.ipaddress._IPAddressField.post_process">(pcapkit.corekit.fields.ipaddress._IPAddressField method)</a>
+</li>
+          <li><a href="pcapkit/corekit/fields.html#pcapkit.corekit.fields.ipaddress.IPv4InterfaceField.post_process">(pcapkit.corekit.fields.ipaddress.IPv4InterfaceField method)</a>
+</li>
+          <li><a href="pcapkit/corekit/fields.html#pcapkit.corekit.fields.ipaddress.IPv6InterfaceField.post_process">(pcapkit.corekit.fields.ipaddress.IPv6InterfaceField method)</a>
 </li>
           <li><a href="pcapkit/corekit/fields.html#pcapkit.corekit.fields.misc.ConditionalField.post_process">(pcapkit.corekit.fields.misc.ConditionalField method)</a>
 </li>
@@ -12065,7 +12077,11 @@
         <li><a href="pcapkit/corekit/fields.html#pcapkit.corekit.fields.field._Field.pre_process">pre_process() (pcapkit.corekit.fields.field._Field method)</a>
 
         <ul>
-          <li><a href="pcapkit/corekit/fields.html#pcapkit.corekit.fields.ipaddress._IPField.pre_process">(pcapkit.corekit.fields.ipaddress._IPField method)</a>
+          <li><a href="pcapkit/corekit/fields.html#pcapkit.corekit.fields.ipaddress._IPAddressField.pre_process">(pcapkit.corekit.fields.ipaddress._IPAddressField method)</a>
+</li>
+          <li><a href="pcapkit/corekit/fields.html#pcapkit.corekit.fields.ipaddress.IPv4InterfaceField.pre_process">(pcapkit.corekit.fields.ipaddress.IPv4InterfaceField method)</a>
+</li>
+          <li><a href="pcapkit/corekit/fields.html#pcapkit.corekit.fields.ipaddress.IPv6InterfaceField.pre_process">(pcapkit.corekit.fields.ipaddress.IPv6InterfaceField method)</a>
 </li>
           <li><a href="pcapkit/corekit/fields.html#pcapkit.corekit.fields.misc.ConditionalField.pre_process">(pcapkit.corekit.fields.misc.ConditionalField method)</a>
 </li>
@@ -16119,9 +16135,13 @@
         <li><a href="pcapkit/corekit/fields.html#pcapkit.corekit.fields.ipaddress._IPField.version">version (pcapkit.corekit.fields.ipaddress._IPField property)</a>
 
         <ul>
-          <li><a href="pcapkit/corekit/fields.html#pcapkit.corekit.fields.ipaddress.IPv4Field.version">(pcapkit.corekit.fields.ipaddress.IPv4Field property)</a>
+          <li><a href="pcapkit/corekit/fields.html#pcapkit.corekit.fields.ipaddress.IPv4AddressField.version">(pcapkit.corekit.fields.ipaddress.IPv4AddressField property)</a>
 </li>
-          <li><a href="pcapkit/corekit/fields.html#pcapkit.corekit.fields.ipaddress.IPv6Field.version">(pcapkit.corekit.fields.ipaddress.IPv6Field property)</a>
+          <li><a href="pcapkit/corekit/fields.html#pcapkit.corekit.fields.ipaddress.IPv4InterfaceField.version">(pcapkit.corekit.fields.ipaddress.IPv4InterfaceField property)</a>
+</li>
+          <li><a href="pcapkit/corekit/fields.html#pcapkit.corekit.fields.ipaddress.IPv6AddressField.version">(pcapkit.corekit.fields.ipaddress.IPv6AddressField property)</a>
+</li>
+          <li><a href="pcapkit/corekit/fields.html#pcapkit.corekit.fields.ipaddress.IPv6InterfaceField.version">(pcapkit.corekit.fields.ipaddress.IPv6InterfaceField property)</a>
 </li>
           <li><a href="pcapkit/protocols/application/http.html#pcapkit.protocols.application.http.HTTP.version">(pcapkit.protocols.application.http.HTTP property)</a>
 </li>

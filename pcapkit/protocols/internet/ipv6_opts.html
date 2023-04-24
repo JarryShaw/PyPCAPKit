@@ -2597,7 +2597,7 @@ conforms to this specification.</p>
 </dl>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.internet.ipv6_opts.HomeAddressOption.addr">
-<span class="sig-name descname"><span class="pre">addr</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">IPv6Address</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;IPv6Field&gt;</span></em><a class="headerlink" href="#pcapkit.protocols.schema.internet.ipv6_opts.HomeAddressOption.addr" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">addr</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">IPv6Address</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;IPv6AddressField&gt;</span></em><a class="headerlink" href="#pcapkit.protocols.schema.internet.ipv6_opts.HomeAddressOption.addr" title="Permalink to this definition">#</a></dt>
 <dd><p>Home address.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -2984,9 +2984,9 @@ instance.</p></li>
 <dd class="field-odd"><p><ul class="simple">
 <li><p>If <code class="docutils literal notranslate"><span class="pre">tid_type</span></code> is <code class="docutils literal notranslate"><span class="pre">0</span></code>, returns a <a class="reference internal" href="../../corekit/fields.html#pcapkit.corekit.fields.misc.NoValueField" title="pcapkit.corekit.fields.misc.NoValueField"><code class="xref py py-class docutils literal notranslate"><span class="pre">NoValueField</span></code></a>
 instance.</p></li>
-<li><p>If <code class="docutils literal notranslate"><span class="pre">tid_type</span></code> is <code class="docutils literal notranslate"><span class="pre">1</span></code>, returns a <a class="reference internal" href="../../corekit/fields.html#pcapkit.corekit.fields.ipaddress.IPv4Field" title="pcapkit.corekit.fields.ipaddress.IPv4Field"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv4Field</span></code></a>
+<li><p>If <code class="docutils literal notranslate"><span class="pre">tid_type</span></code> is <code class="docutils literal notranslate"><span class="pre">1</span></code>, returns a <code class="xref py py-class docutils literal notranslate"><span class="pre">IPv4Field</span></code>
 instance.</p></li>
-<li><p>If <code class="docutils literal notranslate"><span class="pre">tid_type</span></code> is <code class="docutils literal notranslate"><span class="pre">2</span></code>, returns a <a class="reference internal" href="../../corekit/fields.html#pcapkit.corekit.fields.ipaddress.IPv6Field" title="pcapkit.corekit.fields.ipaddress.IPv6Field"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6Field</span></code></a>
+<li><p>If <code class="docutils literal notranslate"><span class="pre">tid_type</span></code> is <code class="docutils literal notranslate"><span class="pre">2</span></code>, returns a <code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6Field</span></code>
 instance.</p></li>
 <li><p>Otherwise, returns a <a class="reference internal" href="../../corekit/fields.html#pcapkit.corekit.fields.strings.BytesField" title="pcapkit.corekit.fields.strings.BytesField"><code class="xref py py-class docutils literal notranslate"><span class="pre">BytesField</span></code></a> instance.</p></li>
 </ul>

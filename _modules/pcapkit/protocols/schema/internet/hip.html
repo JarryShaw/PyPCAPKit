@@ -366,7 +366,7 @@
 <span class="kn">from</span> <span class="nn">pcapkit.const.hip.transport</span> <span class="kn">import</span> <span class="n">Transport</span> <span class="k">as</span> <span class="n">Enum_Transport</span>
 <span class="kn">from</span> <span class="nn">pcapkit.const.reg.transtype</span> <span class="kn">import</span> <span class="n">TransType</span> <span class="k">as</span> <span class="n">Enum_TransType</span>
 <span class="kn">from</span> <span class="nn">pcapkit.corekit.fields.collections</span> <span class="kn">import</span> <span class="n">ListField</span><span class="p">,</span> <span class="n">OptionField</span>
-<span class="kn">from</span> <span class="nn">pcapkit.corekit.fields.ipaddress</span> <span class="kn">import</span> <span class="n">IPv6Field</span>
+<span class="kn">from</span> <span class="nn">pcapkit.corekit.fields.ipaddress</span> <span class="kn">import</span> <span class="n">IPv6AddressField</span>
 <span class="kn">from</span> <span class="nn">pcapkit.corekit.fields.misc</span> <span class="kn">import</span> <span class="n">ConditionalField</span><span class="p">,</span> <span class="n">PayloadField</span><span class="p">,</span> <span class="n">SchemaField</span><span class="p">,</span> <span class="n">SwitchField</span>
 <span class="kn">from</span> <span class="nn">pcapkit.corekit.fields.numbers</span> <span class="kn">import</span> <span class="p">(</span><span class="n">EnumField</span><span class="p">,</span> <span class="n">NumberField</span><span class="p">,</span> <span class="n">UInt8Field</span><span class="p">,</span> <span class="n">UInt16Field</span><span class="p">,</span>
                                             <span class="n">UInt32Field</span><span class="p">)</span>
@@ -403,6 +403,7 @@
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
     <span class="kn">from</span> <span class="nn">ipaddress</span> <span class="kn">import</span> <span class="n">IPv6Address</span>
     <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">IO</span><span class="p">,</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Optional</span>
+
     <span class="kn">from</span> <span class="nn">typing_extensions</span> <span class="kn">import</span> <span class="n">Self</span>
 
     <span class="kn">from</span> <span class="nn">pcapkit.corekit.fields.field</span> <span class="kn">import</span> <span class="n">_Field</span> <span class="k">as</span> <span class="n">Field</span>
@@ -473,7 +474,7 @@
 
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">&#39;len&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">IPv6Field</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">IPv6AddressField</span><span class="p">()</span>
     <span class="k">if</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">&#39;len&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">5</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">SchemaField</span><span class="p">(</span>
             <span class="n">length</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span>
@@ -612,7 +613,7 @@
     <span class="c1">#: SPI.</span>
     <span class="n">spi</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span> <span class="o">=</span> <span class="n">UInt32Field</span><span class="p">()</span>
     <span class="c1">#: Locator.</span>
-    <span class="n">ip</span><span class="p">:</span> <span class="s1">&#39;IPv6Address&#39;</span> <span class="o">=</span> <span class="n">IPv6Field</span><span class="p">()</span>
+    <span class="n">ip</span><span class="p">:</span> <span class="s1">&#39;IPv6Address&#39;</span> <span class="o">=</span> <span class="n">IPv6AddressField</span><span class="p">()</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
         <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">spi</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">ip</span><span class="p">:</span> <span class="s1">&#39;IPv6Address | int | bytes | str&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
@@ -1070,7 +1071,7 @@
     <span class="c1">#: Reserved.</span>
     <span class="n">reserved</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span> <span class="o">=</span> <span class="n">PaddingField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
     <span class="c1">#: Address.</span>
-    <span class="n">address</span><span class="p">:</span> <span class="s1">&#39;IPv6Address&#39;</span> <span class="o">=</span> <span class="n">IPv6Field</span><span class="p">()</span>
+    <span class="n">address</span><span class="p">:</span> <span class="s1">&#39;IPv6Address&#39;</span> <span class="o">=</span> <span class="n">IPv6AddressField</span><span class="p">()</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
         <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_Parameter&#39;</span><span class="p">,</span> <span class="nb">len</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">port</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">protocol</span><span class="p">:</span> <span class="s1">&#39;Enum_TransType&#39;</span><span class="p">,</span> <span class="n">address</span><span class="p">:</span> <span class="s1">&#39;IPv6Address | bytes | int | str&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
@@ -1202,7 +1203,7 @@
     <span class="c1">#: HIT addresses.</span>
     <span class="n">hit</span><span class="p">:</span> <span class="s1">&#39;list[IPv6Address]&#39;</span> <span class="o">=</span> <span class="n">ListField</span><span class="p">(</span>
         <span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">&#39;len&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="mi">4</span><span class="p">,</span>
-        <span class="n">item_type</span><span class="o">=</span><span class="n">IPv6Field</span><span class="p">(),</span>
+        <span class="n">item_type</span><span class="o">=</span><span class="n">IPv6AddressField</span><span class="p">(),</span>
     <span class="p">)</span>
     <span class="c1">#: Padding.</span>
     <span class="n">padding</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span> <span class="o">=</span> <span class="n">PaddingField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="p">(</span><span class="mi">8</span> <span class="o">-</span> <span class="p">(</span><span class="n">pkt</span><span class="p">[</span><span class="s1">&#39;len&#39;</span><span class="p">]</span> <span class="o">%</span> <span class="mi">8</span><span class="p">))</span> <span class="o">%</span> <span class="mi">8</span><span class="p">)</span>
@@ -1314,7 +1315,7 @@
     <span class="c1">#: Reserved.</span>
     <span class="n">reserved</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span> <span class="o">=</span> <span class="n">PaddingField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
     <span class="c1">#: Address.</span>
-    <span class="n">address</span><span class="p">:</span> <span class="s1">&#39;IPv6Address&#39;</span> <span class="o">=</span> <span class="n">IPv6Field</span><span class="p">()</span>
+    <span class="n">address</span><span class="p">:</span> <span class="s1">&#39;IPv6Address&#39;</span> <span class="o">=</span> <span class="n">IPv6AddressField</span><span class="p">()</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
         <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_Parameter&#39;</span><span class="p">,</span> <span class="nb">len</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">port</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">protocol</span><span class="p">:</span> <span class="s1">&#39;Enum_TransType&#39;</span><span class="p">,</span> <span class="n">address</span><span class="p">:</span> <span class="s1">&#39;str | bytes | int | IPv6Address&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
@@ -1330,7 +1331,7 @@
     <span class="c1">#: Reserved.</span>
     <span class="n">reserved</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span> <span class="o">=</span> <span class="n">PaddingField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
     <span class="c1">#: Address.</span>
-    <span class="n">address</span><span class="p">:</span> <span class="s1">&#39;IPv6Address&#39;</span> <span class="o">=</span> <span class="n">IPv6Field</span><span class="p">()</span>
+    <span class="n">address</span><span class="p">:</span> <span class="s1">&#39;IPv6Address&#39;</span> <span class="o">=</span> <span class="n">IPv6AddressField</span><span class="p">()</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
         <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_Parameter&#39;</span><span class="p">,</span> <span class="nb">len</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">port</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">protocol</span><span class="p">:</span> <span class="s1">&#39;Enum_TransType&#39;</span><span class="p">,</span> <span class="n">address</span><span class="p">:</span> <span class="s1">&#39;str | bytes | int | IPv6Address&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
@@ -1363,7 +1364,7 @@
     <span class="c1">#: HIT addresses.</span>
     <span class="n">hit</span><span class="p">:</span> <span class="s1">&#39;list[IPv6Address]&#39;</span> <span class="o">=</span> <span class="n">ListField</span><span class="p">(</span>
         <span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">&#39;len&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="mi">4</span><span class="p">,</span>
-        <span class="n">item_type</span><span class="o">=</span><span class="n">IPv6Field</span><span class="p">(),</span>
+        <span class="n">item_type</span><span class="o">=</span><span class="n">IPv6AddressField</span><span class="p">(),</span>
     <span class="p">)</span>
     <span class="c1">#: Padding.</span>
     <span class="n">padding</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span> <span class="o">=</span> <span class="n">PaddingField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="p">(</span><span class="mi">8</span> <span class="o">-</span> <span class="p">(</span><span class="n">pkt</span><span class="p">[</span><span class="s1">&#39;len&#39;</span><span class="p">]</span> <span class="o">%</span> <span class="mi">8</span><span class="p">))</span> <span class="o">%</span> <span class="mi">8</span><span class="p">)</span>
@@ -1376,7 +1377,7 @@
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for HIP ``FROM`` parameters.&quot;&quot;&quot;</span>
 
     <span class="c1">#: Address.</span>
-    <span class="n">address</span><span class="p">:</span> <span class="s1">&#39;IPv6Address&#39;</span> <span class="o">=</span> <span class="n">IPv6Field</span><span class="p">()</span>
+    <span class="n">address</span><span class="p">:</span> <span class="s1">&#39;IPv6Address&#39;</span> <span class="o">=</span> <span class="n">IPv6AddressField</span><span class="p">()</span>
     <span class="c1">#: Padding.</span>
     <span class="n">padding</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span> <span class="o">=</span> <span class="n">PaddingField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="p">(</span><span class="mi">8</span> <span class="o">-</span> <span class="p">(</span><span class="n">pkt</span><span class="p">[</span><span class="s1">&#39;len&#39;</span><span class="p">]</span> <span class="o">%</span> <span class="mi">8</span><span class="p">))</span> <span class="o">%</span> <span class="mi">8</span><span class="p">)</span>
 
@@ -1402,7 +1403,7 @@
     <span class="c1">#: Address.</span>
     <span class="n">address</span><span class="p">:</span> <span class="s1">&#39;list[IPv6Address]&#39;</span> <span class="o">=</span> <span class="n">ListField</span><span class="p">(</span>
         <span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">&#39;len&#39;</span><span class="p">],</span>
-        <span class="n">item_type</span><span class="o">=</span><span class="n">IPv6Field</span><span class="p">(),</span>
+        <span class="n">item_type</span><span class="o">=</span><span class="n">IPv6AddressField</span><span class="p">(),</span>
     <span class="p">)</span>
     <span class="c1">#: Padding.</span>
     <span class="n">padding</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span> <span class="o">=</span> <span class="n">PaddingField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="p">(</span><span class="mi">8</span> <span class="o">-</span> <span class="p">(</span><span class="n">pkt</span><span class="p">[</span><span class="s1">&#39;len&#39;</span><span class="p">]</span> <span class="o">%</span> <span class="mi">8</span><span class="p">))</span> <span class="o">%</span> <span class="mi">8</span><span class="p">)</span>

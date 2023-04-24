@@ -7,12 +7,12 @@
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://pypcapkit.jarryshaw.me/pcapkit/corekit/fields.html" />
 <meta property="og:site_name" content="PyPCAPKit" />
-<meta property="og:description" content="pcapkit.corekit.fields is collection of protocol fields, descriptive of the structure of protocol headers. Base Field: Auxiliary: Numerical Fields: Text Fields: IP Address Fields: Container Fields:..." />
+<meta property="og:description" content="pcapkit.corekit.fields is collection of protocol fields, descriptive of the structure of protocol headers. Base Field: Auxiliary: Numerical Fields: Text Fields: IP Address Fields: IP Addresses: IP ..." />
 <meta property="og:image:width" content="1146" />
 <meta property="og:image:height" content="600" />
 <meta property="og:image" content="https://pypcapkit.jarryshaw.me/_images/social_previews/summary_pcapkit_corekit_fields_e2cec793.png" />
 <meta property="og:image:alt" content="pcapkit.corekit.fields is collection of protocol fields, descriptive of the structure of protocol headers. Base Field: Auxiliary: Numerical Fields: Text Fiel..." />
-<meta name="description" content="pcapkit.corekit.fields is collection of protocol fields, descriptive of the structure of protocol headers. Base Field: Auxiliary: Numerical Fields: Text Fields: IP Address Fields: Container Fields:..." />
+<meta name="description" content="pcapkit.corekit.fields is collection of protocol fields, descriptive of the structure of protocol headers. Base Field: Auxiliary: Numerical Fields: Text Fields: IP Address Fields: IP Addresses: IP ..." />
 <meta name="twitter:card" content="summary_large_image" />
 <link rel="index" title="Index" href="../../genindex.html" /><link rel="search" title="Search" href="../../search.html" /><link rel="next" title="Info Class" href="infoclass.html" /><link rel="prev" title="Core Utilities" href="index.html" />
 
@@ -1106,8 +1106,8 @@ an integer value and accept the current packet as its only argument.</p></li>
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.corekit.fields.ipaddress._IPField">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.corekit.fields.ipaddress.</span></span><span class="sig-name descname"><span class="pre">_IPField</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">length</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default=&lt;pcapkit.corekit.fields.field.NoValueType</span> <span class="pre">object&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">callback=&lt;function</span> <span class="pre">Field.&lt;lambda&gt;&gt;</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/corekit/fields/ipaddress.html#_IPField"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.fields.ipaddress._IPField" title="Permalink to this definition">#</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#pcapkit.corekit.fields.field.Field" title="pcapkit.corekit.fields.field.Field"><code class="xref py py-class docutils literal notranslate"><span class="pre">Field</span></code></a>[<code class="xref py py-obj docutils literal notranslate"><span class="pre">_T</span></code>]</p>
-<p>Internal IP address value for protocol fields.</p>
+<dd><p>Bases: <a class="reference internal" href="#pcapkit.corekit.fields.field.Field" title="pcapkit.corekit.fields.field.Field"><code class="xref py py-class docutils literal notranslate"><span class="pre">Field</span></code></a>[<code class="xref py py-obj docutils literal notranslate"><span class="pre">_T</span></code>], <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Generic" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Generic</span></code></a>[<code class="xref py py-obj docutils literal notranslate"><span class="pre">_T</span></code>]</p>
+<p>Internal IP related value for protocol fields.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -1125,14 +1125,34 @@ an integer value and accept the current packet as its only argument.</p></li>
 <dd><p>IP version number.</p>
 </dd></dl>
 
+</dd></dl>
+
+<section id="ip-addresses">
+<h3>IP Addresses<a class="headerlink" href="#ip-addresses" title="Permalink to this heading">#</a></h3>
+<dl class="py class">
+<dt class="sig sig-object py" id="pcapkit.corekit.fields.ipaddress._IPAddressField">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.corekit.fields.ipaddress.</span></span><span class="sig-name descname"><span class="pre">_IPAddressField</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">length</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default=&lt;pcapkit.corekit.fields.field.NoValueType</span> <span class="pre">object&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">callback=&lt;function</span> <span class="pre">Field.&lt;lambda&gt;&gt;</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/corekit/fields/ipaddress.html#_IPAddressField"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.fields.ipaddress._IPAddressField" title="Permalink to this definition">#</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pcapkit.corekit.fields.ipaddress._IPField" title="pcapkit.corekit.fields.ipaddress._IPField"><code class="xref py py-class docutils literal notranslate"><span class="pre">_IPField</span></code></a>[<code class="xref py py-obj docutils literal notranslate"><span class="pre">_AT</span></code>]</p>
+<p>Internal IP address value for protocol fields.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>length</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Union" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Callable</span></code></a>[[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>]], <a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>]]) – Field size (in bytes); if a callable is given, it should return
+an integer value and accept the current packet as its only argument.</p></li>
+<li><p><strong>default</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Union" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.TypeVar" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">TypeVar</span></code></a>(<code class="docutils literal notranslate"><span class="pre">_T</span></code>), <a class="reference internal" href="#pcapkit.corekit.fields.field.NoValueType" title="pcapkit.corekit.fields.field.NoValueType"><code class="xref py py-class docutils literal notranslate"><span class="pre">NoValueType</span></code></a>]) – Field default value, if any.</p></li>
+<li><p><strong>callback</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Callable</span></code></a>[[<code class="xref py py-class docutils literal notranslate"><span class="pre">Self</span></code>, <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>]], <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a>]) – Callback function to be called upon
+<a class="reference internal" href="#pcapkit.corekit.fields.field._Field.__call__" title="pcapkit.corekit.fields.field._Field.__call__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">self.__call__</span></code></a>.</p></li>
+</ul>
+</dd>
+</dl>
 <dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.corekit.fields.ipaddress._IPField.pre_process">
-<span class="sig-name descname"><span class="pre">pre_process</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">packet</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/corekit/fields/ipaddress.html#_IPField.pre_process"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.fields.ipaddress._IPField.pre_process" title="Permalink to this definition">#</a></dt>
+<dt class="sig sig-object py" id="pcapkit.corekit.fields.ipaddress._IPAddressField.pre_process">
+<span class="sig-name descname"><span class="pre">pre_process</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">packet</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/corekit/fields/ipaddress.html#_IPAddressField.pre_process"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.fields.ipaddress._IPAddressField.pre_process" title="Permalink to this definition">#</a></dt>
 <dd><p>Process field value before packing.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>value</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Union" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.TypeVar" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">TypeVar</span></code></a>(<code class="docutils literal notranslate"><span class="pre">_T</span></code>, IPv4Address, IPv6Address), <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>]) – Field value.</p></li>
+<li><p><strong>value</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Union" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.TypeVar" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">TypeVar</span></code></a>(<code class="docutils literal notranslate"><span class="pre">_AT</span></code>, IPv4Address, IPv6Address), <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>]) – Field value.</p></li>
 <li><p><strong>packet</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>]) – Packet data.</p></li>
 </ul>
 </dd>
@@ -1146,8 +1166,8 @@ an integer value and accept the current packet as its only argument.</p></li>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.corekit.fields.ipaddress._IPField.post_process">
-<span class="sig-name descname"><span class="pre">post_process</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">packet</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/corekit/fields/ipaddress.html#_IPField.post_process"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.fields.ipaddress._IPField.post_process" title="Permalink to this definition">#</a></dt>
+<dt class="sig sig-object py" id="pcapkit.corekit.fields.ipaddress._IPAddressField.post_process">
+<span class="sig-name descname"><span class="pre">post_process</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">packet</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/corekit/fields/ipaddress.html#_IPAddressField.post_process"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.fields.ipaddress._IPAddressField.post_process" title="Permalink to this definition">#</a></dt>
 <dd><p>Process field value after parsing (unpacking).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -1157,7 +1177,7 @@ an integer value and accept the current packet as its only argument.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.TypeVar" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">TypeVar</span></code></a>(<code class="docutils literal notranslate"><span class="pre">_T</span></code>, IPv4Address, IPv6Address)</p>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.TypeVar" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">TypeVar</span></code></a>(<code class="docutils literal notranslate"><span class="pre">_AT</span></code>, IPv4Address, IPv6Address)</p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Processed field value.</p>
@@ -1168,9 +1188,9 @@ an integer value and accept the current packet as its only argument.</p></li>
 </dd></dl>
 
 <dl class="py class">
-<dt class="sig sig-object py" id="pcapkit.corekit.fields.ipaddress.IPv4Field">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.corekit.fields.ipaddress.</span></span><span class="sig-name descname"><span class="pre">IPv4Field</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">default=&lt;pcapkit.corekit.fields.field.NoValueType</span> <span class="pre">object&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">callback=&lt;function</span> <span class="pre">IPv4Field.&lt;lambda&gt;&gt;</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/corekit/fields/ipaddress.html#IPv4Field"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.fields.ipaddress.IPv4Field" title="Permalink to this definition">#</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#pcapkit.corekit.fields.ipaddress._IPField" title="pcapkit.corekit.fields.ipaddress._IPField"><code class="xref py py-class docutils literal notranslate"><span class="pre">_IPField</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/ipaddress.html#ipaddress.IPv4Address" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv4Address</span></code></a>]</p>
+<dt class="sig sig-object py" id="pcapkit.corekit.fields.ipaddress.IPv4AddressField">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.corekit.fields.ipaddress.</span></span><span class="sig-name descname"><span class="pre">IPv4AddressField</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">default=&lt;pcapkit.corekit.fields.field.NoValueType</span> <span class="pre">object&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">callback=&lt;function</span> <span class="pre">IPv4AddressField.&lt;lambda&gt;&gt;</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/corekit/fields/ipaddress.html#IPv4AddressField"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.fields.ipaddress.IPv4AddressField" title="Permalink to this definition">#</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pcapkit.corekit.fields.ipaddress._IPAddressField" title="pcapkit.corekit.fields.ipaddress._IPAddressField"><code class="xref py py-class docutils literal notranslate"><span class="pre">_IPAddressField</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/ipaddress.html#ipaddress.IPv4Address" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv4Address</span></code></a>]</p>
 <p>IPv4 address value for protocol fields.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -1182,17 +1202,17 @@ an integer value and accept the current packet as its only argument.</p></li>
 </dd>
 </dl>
 <dl class="py property">
-<dt class="sig sig-object py" id="pcapkit.corekit.fields.ipaddress.IPv4Field.version">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">version</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Literal" title="(in Python v3.11)"><span class="pre">Literal</span></a><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">4</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pcapkit.corekit.fields.ipaddress.IPv4Field.version" title="Permalink to this definition">#</a></dt>
+<dt class="sig sig-object py" id="pcapkit.corekit.fields.ipaddress.IPv4AddressField.version">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">version</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Literal" title="(in Python v3.11)"><span class="pre">Literal</span></a><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">4</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pcapkit.corekit.fields.ipaddress.IPv4AddressField.version" title="Permalink to this definition">#</a></dt>
 <dd><p>IP version number.</p>
 </dd></dl>
 
 </dd></dl>
 
 <dl class="py class">
-<dt class="sig sig-object py" id="pcapkit.corekit.fields.ipaddress.IPv6Field">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.corekit.fields.ipaddress.</span></span><span class="sig-name descname"><span class="pre">IPv6Field</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">default=&lt;pcapkit.corekit.fields.field.NoValueType</span> <span class="pre">object&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">callback=&lt;function</span> <span class="pre">IPv6Field.&lt;lambda&gt;&gt;</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/corekit/fields/ipaddress.html#IPv6Field"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.fields.ipaddress.IPv6Field" title="Permalink to this definition">#</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#pcapkit.corekit.fields.ipaddress._IPField" title="pcapkit.corekit.fields.ipaddress._IPField"><code class="xref py py-class docutils literal notranslate"><span class="pre">_IPField</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/ipaddress.html#ipaddress.IPv6Address" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6Address</span></code></a>]</p>
+<dt class="sig sig-object py" id="pcapkit.corekit.fields.ipaddress.IPv6AddressField">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.corekit.fields.ipaddress.</span></span><span class="sig-name descname"><span class="pre">IPv6AddressField</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">default=&lt;pcapkit.corekit.fields.field.NoValueType</span> <span class="pre">object&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">callback=&lt;function</span> <span class="pre">IPv6AddressField.&lt;lambda&gt;&gt;</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/corekit/fields/ipaddress.html#IPv6AddressField"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.fields.ipaddress.IPv6AddressField" title="Permalink to this definition">#</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pcapkit.corekit.fields.ipaddress._IPAddressField" title="pcapkit.corekit.fields.ipaddress._IPAddressField"><code class="xref py py-class docutils literal notranslate"><span class="pre">_IPAddressField</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/ipaddress.html#ipaddress.IPv6Address" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6Address</span></code></a>]</p>
 <p>IPv6 address value for protocol fields.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -1204,13 +1224,159 @@ an integer value and accept the current packet as its only argument.</p></li>
 </dd>
 </dl>
 <dl class="py property">
-<dt class="sig sig-object py" id="pcapkit.corekit.fields.ipaddress.IPv6Field.version">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">version</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Literal" title="(in Python v3.11)"><span class="pre">Literal</span></a><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">6</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pcapkit.corekit.fields.ipaddress.IPv6Field.version" title="Permalink to this definition">#</a></dt>
+<dt class="sig sig-object py" id="pcapkit.corekit.fields.ipaddress.IPv6AddressField.version">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">version</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Literal" title="(in Python v3.11)"><span class="pre">Literal</span></a><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">6</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pcapkit.corekit.fields.ipaddress.IPv6AddressField.version" title="Permalink to this definition">#</a></dt>
 <dd><p>IP version number.</p>
 </dd></dl>
 
 </dd></dl>
 
+</section>
+<section id="ip-interface">
+<h3>IP Interface<a class="headerlink" href="#ip-interface" title="Permalink to this heading">#</a></h3>
+<dl class="py class">
+<dt class="sig sig-object py" id="pcapkit.corekit.fields.ipaddress._IPInterfaceField">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.corekit.fields.ipaddress.</span></span><span class="sig-name descname"><span class="pre">_IPInterfaceField</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">length</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default=&lt;pcapkit.corekit.fields.field.NoValueType</span> <span class="pre">object&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">callback=&lt;function</span> <span class="pre">Field.&lt;lambda&gt;&gt;</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/corekit/fields/ipaddress.html#_IPInterfaceField"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.fields.ipaddress._IPInterfaceField" title="Permalink to this definition">#</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pcapkit.corekit.fields.ipaddress._IPField" title="pcapkit.corekit.fields.ipaddress._IPField"><code class="xref py py-class docutils literal notranslate"><span class="pre">_IPField</span></code></a>[<code class="xref py py-obj docutils literal notranslate"><span class="pre">_IT</span></code>]</p>
+<p>Internal IP interface value for protocol fields.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>length</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Union" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Callable</span></code></a>[[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>]], <a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>]]) – Field size (in bytes); if a callable is given, it should return
+an integer value and accept the current packet as its only argument.</p></li>
+<li><p><strong>default</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Union" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.TypeVar" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">TypeVar</span></code></a>(<code class="docutils literal notranslate"><span class="pre">_T</span></code>), <a class="reference internal" href="#pcapkit.corekit.fields.field.NoValueType" title="pcapkit.corekit.fields.field.NoValueType"><code class="xref py py-class docutils literal notranslate"><span class="pre">NoValueType</span></code></a>]) – Field default value, if any.</p></li>
+<li><p><strong>callback</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Callable</span></code></a>[[<code class="xref py py-class docutils literal notranslate"><span class="pre">Self</span></code>, <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>]], <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a>]) – Callback function to be called upon
+<a class="reference internal" href="#pcapkit.corekit.fields.field._Field.__call__" title="pcapkit.corekit.fields.field._Field.__call__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">self.__call__</span></code></a>.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pcapkit.corekit.fields.ipaddress.IPv4InterfaceField">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.corekit.fields.ipaddress.</span></span><span class="sig-name descname"><span class="pre">IPv4InterfaceField</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">default=&lt;pcapkit.corekit.fields.field.NoValueType</span> <span class="pre">object&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">callback=&lt;function</span> <span class="pre">IPv4InterfaceField.&lt;lambda&gt;&gt;</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/corekit/fields/ipaddress.html#IPv4InterfaceField"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.fields.ipaddress.IPv4InterfaceField" title="Permalink to this definition">#</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pcapkit.corekit.fields.ipaddress._IPInterfaceField" title="pcapkit.corekit.fields.ipaddress._IPInterfaceField"><code class="xref py py-class docutils literal notranslate"><span class="pre">_IPInterfaceField</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/ipaddress.html#ipaddress.IPv4Interface" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv4Interface</span></code></a>]</p>
+<p>IPv4 interface value for protocol fields.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>default</strong> (<a class="reference external" href="https://docs.python.org/3/library/ipaddress.html#ipaddress.IPv4Interface" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv4Interface</span></code></a> | <a class="reference internal" href="#pcapkit.corekit.fields.field.NoValueType" title="pcapkit.corekit.fields.field.NoValueType"><code class="xref py py-class docutils literal notranslate"><span class="pre">NoValueType</span></code></a>) – Field default value, if any.</p></li>
+<li><p><strong>callback</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Callable</span></code></a>[[<code class="xref py py-class docutils literal notranslate"><span class="pre">Self</span></code>, <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>]], <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a>]) – Callback function to be called upon
+<a class="reference internal" href="#pcapkit.corekit.fields.field._Field.__call__" title="pcapkit.corekit.fields.field._Field.__call__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">self.__call__</span></code></a>.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py property">
+<dt class="sig sig-object py" id="pcapkit.corekit.fields.ipaddress.IPv4InterfaceField.version">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">version</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Literal" title="(in Python v3.11)"><span class="pre">Literal</span></a><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">4</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pcapkit.corekit.fields.ipaddress.IPv4InterfaceField.version" title="Permalink to this definition">#</a></dt>
+<dd><p>IP version number.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.corekit.fields.ipaddress.IPv4InterfaceField.pre_process">
+<span class="sig-name descname"><span class="pre">pre_process</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">packet</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/corekit/fields/ipaddress.html#IPv4InterfaceField.pre_process"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.fields.ipaddress.IPv4InterfaceField.pre_process" title="Permalink to this definition">#</a></dt>
+<dd><p>Process field value before packing.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>value</strong> (<a class="reference external" href="https://docs.python.org/3/library/ipaddress.html#ipaddress.IPv4Interface" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv4Interface</span></code></a> | <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a> | <a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> | <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>) – Field value.</p></li>
+<li><p><strong>packet</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>]) – Packet data.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Processed field value.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.corekit.fields.ipaddress.IPv4InterfaceField.post_process">
+<span class="sig-name descname"><span class="pre">post_process</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">packet</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/corekit/fields/ipaddress.html#IPv4InterfaceField.post_process"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.fields.ipaddress.IPv4InterfaceField.post_process" title="Permalink to this definition">#</a></dt>
+<dd><p>Process field value after parsing (unpacking).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>value</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a>) – Field value.</p></li>
+<li><p><strong>packet</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>]) – Packet data.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/ipaddress.html#ipaddress.IPv4Interface" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv4Interface</span></code></a></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Processed field value.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pcapkit.corekit.fields.ipaddress.IPv6InterfaceField">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.corekit.fields.ipaddress.</span></span><span class="sig-name descname"><span class="pre">IPv6InterfaceField</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">default=&lt;pcapkit.corekit.fields.field.NoValueType</span> <span class="pre">object&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">callback=&lt;function</span> <span class="pre">IPv6InterfaceField.&lt;lambda&gt;&gt;</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/corekit/fields/ipaddress.html#IPv6InterfaceField"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.fields.ipaddress.IPv6InterfaceField" title="Permalink to this definition">#</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pcapkit.corekit.fields.ipaddress._IPInterfaceField" title="pcapkit.corekit.fields.ipaddress._IPInterfaceField"><code class="xref py py-class docutils literal notranslate"><span class="pre">_IPInterfaceField</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/ipaddress.html#ipaddress.IPv6Interface" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6Interface</span></code></a>]</p>
+<p>IPv6 interface value for protocol fields.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>default</strong> (<a class="reference external" href="https://docs.python.org/3/library/ipaddress.html#ipaddress.IPv6Interface" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6Interface</span></code></a> | <a class="reference internal" href="#pcapkit.corekit.fields.field.NoValueType" title="pcapkit.corekit.fields.field.NoValueType"><code class="xref py py-class docutils literal notranslate"><span class="pre">NoValueType</span></code></a>) – Field default value, if any.</p></li>
+<li><p><strong>callback</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Callable</span></code></a>[[<code class="xref py py-class docutils literal notranslate"><span class="pre">Self</span></code>, <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>]], <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a>]) – Callback function to be called upon
+<a class="reference internal" href="#pcapkit.corekit.fields.field._Field.__call__" title="pcapkit.corekit.fields.field._Field.__call__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">self.__call__</span></code></a>.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py property">
+<dt class="sig sig-object py" id="pcapkit.corekit.fields.ipaddress.IPv6InterfaceField.version">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">version</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Literal" title="(in Python v3.11)"><span class="pre">Literal</span></a><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">6</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pcapkit.corekit.fields.ipaddress.IPv6InterfaceField.version" title="Permalink to this definition">#</a></dt>
+<dd><p>IP version number.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.corekit.fields.ipaddress.IPv6InterfaceField.pre_process">
+<span class="sig-name descname"><span class="pre">pre_process</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">packet</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/corekit/fields/ipaddress.html#IPv6InterfaceField.pre_process"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.fields.ipaddress.IPv6InterfaceField.pre_process" title="Permalink to this definition">#</a></dt>
+<dd><p>Process field value before packing.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>value</strong> (<a class="reference external" href="https://docs.python.org/3/library/ipaddress.html#ipaddress.IPv6Interface" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6Interface</span></code></a> | <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a> | <a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> | <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>) – Field value.</p></li>
+<li><p><strong>packet</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>]) – Packet data.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Processed field value.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.corekit.fields.ipaddress.IPv6InterfaceField.post_process">
+<span class="sig-name descname"><span class="pre">post_process</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">packet</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/corekit/fields/ipaddress.html#IPv6InterfaceField.post_process"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.fields.ipaddress.IPv6InterfaceField.post_process" title="Permalink to this definition">#</a></dt>
+<dd><p>Process field value after parsing (unpacking).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>value</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a>) – Field value.</p></li>
+<li><p><strong>packet</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>]) – Packet data.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/ipaddress.html#ipaddress.IPv6Interface" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6Interface</span></code></a></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Processed field value.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
 </section>
 <section id="module-pcapkit.corekit.fields.collections">
 <span id="container-fields"></span><h2>Container Fields<a class="headerlink" href="#module-pcapkit.corekit.fields.collections" title="Permalink to this heading">#</a></h2>
@@ -2052,16 +2218,38 @@ instead of updating the current instance.</p>
 <li><a class="reference internal" href="#module-pcapkit.corekit.fields.ipaddress">IP Address Fields</a><ul>
 <li><a class="reference internal" href="#pcapkit.corekit.fields.ipaddress._IPField"><code class="docutils literal notranslate"><span class="pre">_IPField</span></code></a><ul>
 <li><a class="reference internal" href="#pcapkit.corekit.fields.ipaddress._IPField.version"><code class="docutils literal notranslate"><span class="pre">_IPField.version</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.corekit.fields.ipaddress._IPField.pre_process"><code class="docutils literal notranslate"><span class="pre">_IPField.pre_process()</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.corekit.fields.ipaddress._IPField.post_process"><code class="docutils literal notranslate"><span class="pre">_IPField.post_process()</span></code></a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#pcapkit.corekit.fields.ipaddress.IPv4Field"><code class="docutils literal notranslate"><span class="pre">IPv4Field</span></code></a><ul>
-<li><a class="reference internal" href="#pcapkit.corekit.fields.ipaddress.IPv4Field.version"><code class="docutils literal notranslate"><span class="pre">IPv4Field.version</span></code></a></li>
+<li><a class="reference internal" href="#ip-addresses">IP Addresses</a><ul>
+<li><a class="reference internal" href="#pcapkit.corekit.fields.ipaddress._IPAddressField"><code class="docutils literal notranslate"><span class="pre">_IPAddressField</span></code></a><ul>
+<li><a class="reference internal" href="#pcapkit.corekit.fields.ipaddress._IPAddressField.pre_process"><code class="docutils literal notranslate"><span class="pre">_IPAddressField.pre_process()</span></code></a></li>
+<li><a class="reference internal" href="#pcapkit.corekit.fields.ipaddress._IPAddressField.post_process"><code class="docutils literal notranslate"><span class="pre">_IPAddressField.post_process()</span></code></a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#pcapkit.corekit.fields.ipaddress.IPv6Field"><code class="docutils literal notranslate"><span class="pre">IPv6Field</span></code></a><ul>
-<li><a class="reference internal" href="#pcapkit.corekit.fields.ipaddress.IPv6Field.version"><code class="docutils literal notranslate"><span class="pre">IPv6Field.version</span></code></a></li>
+<li><a class="reference internal" href="#pcapkit.corekit.fields.ipaddress.IPv4AddressField"><code class="docutils literal notranslate"><span class="pre">IPv4AddressField</span></code></a><ul>
+<li><a class="reference internal" href="#pcapkit.corekit.fields.ipaddress.IPv4AddressField.version"><code class="docutils literal notranslate"><span class="pre">IPv4AddressField.version</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#pcapkit.corekit.fields.ipaddress.IPv6AddressField"><code class="docutils literal notranslate"><span class="pre">IPv6AddressField</span></code></a><ul>
+<li><a class="reference internal" href="#pcapkit.corekit.fields.ipaddress.IPv6AddressField.version"><code class="docutils literal notranslate"><span class="pre">IPv6AddressField.version</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#ip-interface">IP Interface</a><ul>
+<li><a class="reference internal" href="#pcapkit.corekit.fields.ipaddress._IPInterfaceField"><code class="docutils literal notranslate"><span class="pre">_IPInterfaceField</span></code></a></li>
+<li><a class="reference internal" href="#pcapkit.corekit.fields.ipaddress.IPv4InterfaceField"><code class="docutils literal notranslate"><span class="pre">IPv4InterfaceField</span></code></a><ul>
+<li><a class="reference internal" href="#pcapkit.corekit.fields.ipaddress.IPv4InterfaceField.version"><code class="docutils literal notranslate"><span class="pre">IPv4InterfaceField.version</span></code></a></li>
+<li><a class="reference internal" href="#pcapkit.corekit.fields.ipaddress.IPv4InterfaceField.pre_process"><code class="docutils literal notranslate"><span class="pre">IPv4InterfaceField.pre_process()</span></code></a></li>
+<li><a class="reference internal" href="#pcapkit.corekit.fields.ipaddress.IPv4InterfaceField.post_process"><code class="docutils literal notranslate"><span class="pre">IPv4InterfaceField.post_process()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#pcapkit.corekit.fields.ipaddress.IPv6InterfaceField"><code class="docutils literal notranslate"><span class="pre">IPv6InterfaceField</span></code></a><ul>
+<li><a class="reference internal" href="#pcapkit.corekit.fields.ipaddress.IPv6InterfaceField.version"><code class="docutils literal notranslate"><span class="pre">IPv6InterfaceField.version</span></code></a></li>
+<li><a class="reference internal" href="#pcapkit.corekit.fields.ipaddress.IPv6InterfaceField.pre_process"><code class="docutils literal notranslate"><span class="pre">IPv6InterfaceField.pre_process()</span></code></a></li>
+<li><a class="reference internal" href="#pcapkit.corekit.fields.ipaddress.IPv6InterfaceField.post_process"><code class="docutils literal notranslate"><span class="pre">IPv6InterfaceField.post_process()</span></code></a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>

@@ -356,7 +356,7 @@
 <span class="kn">from</span> <span class="nn">pcapkit.const.ipv4.ts_flag</span> <span class="kn">import</span> <span class="n">TSFlag</span> <span class="k">as</span> <span class="n">Enum_TSFlag</span>
 <span class="kn">from</span> <span class="nn">pcapkit.const.reg.transtype</span> <span class="kn">import</span> <span class="n">TransType</span> <span class="k">as</span> <span class="n">Enum_TransType</span>
 <span class="kn">from</span> <span class="nn">pcapkit.corekit.fields.collections</span> <span class="kn">import</span> <span class="n">ListField</span><span class="p">,</span> <span class="n">OptionField</span>
-<span class="kn">from</span> <span class="nn">pcapkit.corekit.fields.ipaddress</span> <span class="kn">import</span> <span class="n">IPv4Field</span>
+<span class="kn">from</span> <span class="nn">pcapkit.corekit.fields.ipaddress</span> <span class="kn">import</span> <span class="n">IPv4AddressField</span>
 <span class="kn">from</span> <span class="nn">pcapkit.corekit.fields.misc</span> <span class="kn">import</span> <span class="p">(</span><span class="n">ConditionalField</span><span class="p">,</span> <span class="n">ForwardMatchField</span><span class="p">,</span> <span class="n">PayloadField</span><span class="p">,</span>
                                          <span class="n">SchemaField</span><span class="p">,</span> <span class="n">SwitchField</span><span class="p">)</span>
 <span class="kn">from</span> <span class="nn">pcapkit.corekit.fields.numbers</span> <span class="kn">import</span> <span class="n">EnumField</span><span class="p">,</span> <span class="n">UInt8Field</span><span class="p">,</span> <span class="n">UInt16Field</span><span class="p">,</span> <span class="n">UInt32Field</span>
@@ -382,6 +382,7 @@
     <span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">timedelta</span>
     <span class="kn">from</span> <span class="nn">ipaddress</span> <span class="kn">import</span> <span class="n">IPv4Address</span>
     <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">IO</span><span class="p">,</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Optional</span>
+
     <span class="kn">from</span> <span class="nn">typing_extensions</span> <span class="kn">import</span> <span class="n">Self</span>
 
     <span class="kn">from</span> <span class="nn">pcapkit.corekit.fields.field</span> <span class="kn">import</span> <span class="n">_Field</span> <span class="k">as</span> <span class="n">Field</span>
@@ -551,7 +552,7 @@
     <span class="c1">#: Route.</span>
     <span class="n">route</span><span class="p">:</span> <span class="s1">&#39;list[IPv4Address]&#39;</span> <span class="o">=</span> <span class="n">ListField</span><span class="p">(</span>
         <span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">&#39;pointer&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="mi">4</span><span class="p">,</span>
-        <span class="n">item_type</span><span class="o">=</span><span class="n">IPv4Field</span><span class="p">(),</span>
+        <span class="n">item_type</span><span class="o">=</span><span class="n">IPv4AddressField</span><span class="p">(),</span>
     <span class="p">)</span>
     <span class="c1">#: Remaining data buffer0.</span>
     <span class="n">remainder</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span> <span class="o">=</span> <span class="n">PaddingField</span><span class="p">(</span>
@@ -692,7 +693,7 @@
     <span class="c1">#: Route.</span>
     <span class="n">route</span><span class="p">:</span> <span class="s1">&#39;list[IPv4Address]&#39;</span> <span class="o">=</span> <span class="n">ListField</span><span class="p">(</span>
         <span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">&#39;pointer&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="mi">4</span><span class="p">,</span>
-        <span class="n">item_type</span><span class="o">=</span><span class="n">IPv4Field</span><span class="p">(),</span>
+        <span class="n">item_type</span><span class="o">=</span><span class="n">IPv4AddressField</span><span class="p">(),</span>
     <span class="p">)</span>
     <span class="c1">#: Remaining data buffer0.</span>
     <span class="n">remainder</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span> <span class="o">=</span> <span class="n">PaddingField</span><span class="p">(</span>
@@ -722,7 +723,7 @@
     <span class="c1">#: Route.</span>
     <span class="n">route</span><span class="p">:</span> <span class="s1">&#39;list[IPv4Address]&#39;</span> <span class="o">=</span> <span class="n">ListField</span><span class="p">(</span>
         <span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">&#39;pointer&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="mi">4</span><span class="p">,</span>
-        <span class="n">item_type</span><span class="o">=</span><span class="n">IPv4Field</span><span class="p">(),</span>
+        <span class="n">item_type</span><span class="o">=</span><span class="n">IPv4AddressField</span><span class="p">(),</span>
     <span class="p">)</span>
     <span class="c1">#: Remaining data buffer0.</span>
     <span class="n">remainder</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span> <span class="o">=</span> <span class="n">PaddingField</span><span class="p">(</span>
@@ -764,7 +765,7 @@
     <span class="c1">#: Return hop count.</span>
     <span class="n">ret</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span> <span class="o">=</span> <span class="n">UInt16Field</span><span class="p">()</span>
     <span class="c1">#: Originator IP address.</span>
-    <span class="n">origin</span><span class="p">:</span> <span class="s1">&#39;IPv4Address&#39;</span> <span class="o">=</span> <span class="n">IPv4Field</span><span class="p">()</span>
+    <span class="n">origin</span><span class="p">:</span> <span class="s1">&#39;IPv4Address&#39;</span> <span class="o">=</span> <span class="n">IPv4AddressField</span><span class="p">()</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
         <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_OptionNumber&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="nb">id</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">out</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">ret</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">origin</span><span class="p">:</span> <span class="s1">&#39;IPv4Address | str | bytes | int&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
@@ -887,9 +888,9 @@
     <span class="c1">#: Header checksum.</span>
     <span class="n">chksum</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span> <span class="o">=</span> <span class="n">BytesField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
     <span class="c1">#: Source address.</span>
-    <span class="n">src</span><span class="p">:</span> <span class="s1">&#39;IPv4Address&#39;</span> <span class="o">=</span> <span class="n">IPv4Field</span><span class="p">()</span>
+    <span class="n">src</span><span class="p">:</span> <span class="s1">&#39;IPv4Address&#39;</span> <span class="o">=</span> <span class="n">IPv4AddressField</span><span class="p">()</span>
     <span class="c1">#: Destination address.</span>
-    <span class="n">dst</span><span class="p">:</span> <span class="s1">&#39;IPv4Address&#39;</span> <span class="o">=</span> <span class="n">IPv4Field</span><span class="p">()</span>
+    <span class="n">dst</span><span class="p">:</span> <span class="s1">&#39;IPv4Address&#39;</span> <span class="o">=</span> <span class="n">IPv4AddressField</span><span class="p">()</span>
     <span class="c1">#: Options.</span>
     <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;list[Option]&#39;</span> <span class="o">=</span> <span class="n">OptionField</span><span class="p">(</span>
         <span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">&#39;vihl&#39;</span><span class="p">][</span><span class="s1">&#39;ihl&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="mi">4</span> <span class="o">-</span> <span class="mi">20</span><span class="p">,</span>
