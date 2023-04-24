@@ -12,8 +12,7 @@ from pcapkit.const.pcapng.option_type import OptionType as Enum_OptionType
 from pcapkit.const.pcapng.verdict_type import VerdictType as Enum_VerdictType
 from pcapkit.const.reg.linktype import LinkType as Enum_LinkType
 from pcapkit.corekit.fields.collections import OptionField
-from pcapkit.corekit.fields.ipaddress import (IPv4AddressField, IPv4InterfaceField,
-                                              IPv6AddressField, IPv6InterfaceField)
+from pcapkit.corekit.fields.ipaddress import IPv4InterfaceField, IPv6InterfaceField
 from pcapkit.corekit.fields.misc import ForwardMatchField, PayloadField
 from pcapkit.corekit.fields.numbers import (EnumField, Int64Field, UInt8Field, UInt16Field,
                                             UInt32Field, UInt64Field)
@@ -35,6 +34,7 @@ __all__ = [
     'EPB_QueueOption', 'EPB_VerdictOption',
 
     'UnknownBlock', 'SectionHeaderBlock', 'InterfaceDescriptionBlock',
+    'EnhancedPacketBlock', 'SimplePacketBlock',
 ]
 
 if TYPE_CHECKING:
@@ -643,3 +643,24 @@ class EnhancedPacketBlock(PCAPNG):
         def __init__(self, type: 'Enum_BlockType', length: 'int', interface_id: 'int', timestamp_high: 'int',
                      timestamp_low: 'int', captured_len: 'int', original_len: 'int', packet_data: 'bytes',
                      padding: 'bytes', options: 'list[Option | bytes] | bytes', length2: 'int') -> 'None': ...
+
+
+class SimplePacketBlock(PCAPNG):
+    """Header schema for PCAP-NG Simple Packet Block (SPB)."""
+
+    __payload__ = 'packet_data'
+
+    #: Block total length.
+    length: 'int' = UInt32Field(callback=byteorder_callback)
+    #: Original packet length.
+    original_len: 'int' = UInt32Field(callback=byteorder_callback)
+    #: Packet data.
+    packet_data: 'bytes' = BytesField(length=lambda pkt: min(pkt.get('snaplen', 0xFFFFFFFFFFFFFFFF), pkt['original_len']))
+    #: Padding.
+    padding: 'bytes' = PaddingField(length=lambda pkt: (4 - pkt['length'] % 4) % 4)
+    #: Block total length.
+    length2: 'int' = UInt32Field(callback=byteorder_callback)
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_BlockType', length: 'int', original_len: 'int', packet_data: 'bytes',
+                     padding: 'bytes', length2: 'int') -> 'None': ...
