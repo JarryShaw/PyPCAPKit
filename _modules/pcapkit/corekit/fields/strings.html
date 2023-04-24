@@ -361,7 +361,7 @@
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
     <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span>
 
-    <span class="kn">from</span> <span class="nn">typing_extensions</span> <span class="kn">import</span> <span class="n">Literal</span>
+    <span class="kn">from</span> <span class="nn">typing_extensions</span> <span class="kn">import</span> <span class="n">Literal</span><span class="p">,</span> <span class="n">Self</span>
 
     <span class="kn">from</span> <span class="nn">pcapkit.corekit.fields.field</span> <span class="kn">import</span> <span class="n">NoValueType</span>
 
@@ -384,12 +384,12 @@
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int | Callable[[dict[str, Any]], int]&#39;</span><span class="p">,</span>
                  <span class="n">default</span><span class="p">:</span> <span class="s1">&#39;_T | NoValueType&#39;</span> <span class="o">=</span> <span class="n">NoValue</span><span class="p">,</span>
-                 <span class="n">callback</span><span class="p">:</span> <span class="s1">&#39;Callable[[_TextField[_T], dict[str, Any]], None]&#39;</span> <span class="o">=</span> <span class="k">lambda</span> <span class="o">*</span><span class="n">_</span><span class="p">:</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
+                 <span class="n">callback</span><span class="p">:</span> <span class="s1">&#39;Callable[[Self, dict[str, Any]], None]&#39;</span> <span class="o">=</span> <span class="k">lambda</span> <span class="o">*</span><span class="n">_</span><span class="p">:</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">length</span><span class="p">,</span> <span class="n">default</span><span class="p">,</span> <span class="n">callback</span><span class="p">)</span>  <span class="c1"># type: ignore[arg-type]</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_template</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_length</span><span class="si">}</span><span class="s1">s&#39;</span>
 
-<div class="viewcode-block" id="_TextField.__call__"><a class="viewcode-back" href="../../../../pcapkit/corekit/fields.html#pcapkit.corekit.fields.strings._TextField.__call__">[docs]</a>    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">&#39;dict[str, Any]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;_TextField&#39;</span><span class="p">:</span>
+<div class="viewcode-block" id="_TextField.__call__"><a class="viewcode-back" href="../../../../pcapkit/corekit/fields.html#pcapkit.corekit.fields.strings._TextField.__call__">[docs]</a>    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">&#39;dict[str, Any]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Self&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Update field attributes.</span>
 
 <span class="sd">        Args:</span>
@@ -403,7 +403,7 @@
 <span class="sd">            updating the current instance.</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">new_self</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">&#39;_TextField&#39;</span><span class="p">,</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__call__</span><span class="p">(</span><span class="n">packet</span><span class="p">))</span>
+        <span class="n">new_self</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__call__</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span>
         <span class="n">new_self</span><span class="o">.</span><span class="n">_template</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">new_self</span><span class="o">.</span><span class="n">_length</span><span class="si">}</span><span class="s1">s&#39;</span>
         <span class="k">return</span> <span class="n">new_self</span></div></div>
 
@@ -451,8 +451,8 @@
                  <span class="n">default</span><span class="p">:</span> <span class="s1">&#39;str | NoValueType&#39;</span> <span class="o">=</span> <span class="n">NoValue</span><span class="p">,</span> <span class="n">encoding</span><span class="p">:</span> <span class="s1">&#39;Optional[str]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                  <span class="n">errors</span><span class="p">:</span> <span class="s1">&#39;Literal[&quot;strict&quot;, &quot;ignore&quot;, &quot;replace&quot;]&#39;</span> <span class="o">=</span> <span class="s1">&#39;strict&#39;</span><span class="p">,</span>
                  <span class="n">unquote</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-                 <span class="n">callback</span><span class="p">:</span> <span class="s1">&#39;Callable[[StringField, dict[str, Any]], None]&#39;</span> <span class="o">=</span> <span class="k">lambda</span> <span class="o">*</span><span class="n">_</span><span class="p">:</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">length</span><span class="p">,</span> <span class="n">default</span><span class="p">,</span> <span class="n">callback</span><span class="p">)</span>  <span class="c1"># type: ignore[arg-type]</span>
+                 <span class="n">callback</span><span class="p">:</span> <span class="s1">&#39;Callable[[Self, dict[str, Any]], None]&#39;</span> <span class="o">=</span> <span class="k">lambda</span> <span class="o">*</span><span class="n">_</span><span class="p">:</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">length</span><span class="p">,</span> <span class="n">default</span><span class="p">,</span> <span class="n">callback</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_encoding</span> <span class="o">=</span> <span class="n">encoding</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_errors</span> <span class="o">=</span> <span class="n">errors</span>
@@ -515,8 +515,8 @@
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int | Callable[[dict[str, Any]], int]&#39;</span><span class="p">,</span>
                  <span class="n">default</span><span class="p">:</span> <span class="s1">&#39;dict[str, Any] | NoValueType&#39;</span> <span class="o">=</span> <span class="n">NoValue</span><span class="p">,</span>
                  <span class="n">namespace</span><span class="p">:</span> <span class="s1">&#39;Optional[dict[str, NamespaceEntry]]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                 <span class="n">callback</span><span class="p">:</span> <span class="s1">&#39;Callable[[BitField, dict[str, Any]], None]&#39;</span> <span class="o">=</span> <span class="k">lambda</span> <span class="o">*</span><span class="n">_</span><span class="p">:</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">length</span><span class="p">,</span> <span class="n">default</span><span class="p">,</span> <span class="n">callback</span><span class="p">)</span>  <span class="c1"># type: ignore[arg-type]</span>
+                 <span class="n">callback</span><span class="p">:</span> <span class="s1">&#39;Callable[[Self, dict[str, Any]], None]&#39;</span> <span class="o">=</span> <span class="k">lambda</span> <span class="o">*</span><span class="n">_</span><span class="p">:</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">length</span><span class="p">,</span> <span class="n">default</span><span class="p">,</span> <span class="n">callback</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_namespace</span> <span class="o">=</span> <span class="n">namespace</span> <span class="ow">or</span> <span class="p">{}</span>
 

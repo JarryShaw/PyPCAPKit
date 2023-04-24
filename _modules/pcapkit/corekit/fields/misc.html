@@ -359,6 +359,8 @@
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
     <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">IO</span><span class="p">,</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Type</span>
 
+    <span class="kn">from</span> <span class="nn">typing_extensions</span> <span class="kn">import</span> <span class="n">Self</span>
+
     <span class="kn">from</span> <span class="nn">pcapkit.corekit.fields.field</span> <span class="kn">import</span> <span class="n">NoValueType</span>
     <span class="kn">from</span> <span class="nn">pcapkit.protocols.protocol</span> <span class="kn">import</span> <span class="n">Protocol</span>
     <span class="kn">from</span> <span class="nn">pcapkit.protocols.schema.schema</span> <span class="kn">import</span> <span class="n">Schema</span>
@@ -470,7 +472,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_field</span> <span class="o">=</span> <span class="n">field</span>  <span class="c1"># type: _Field[_TC]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_condition</span> <span class="o">=</span> <span class="n">condition</span>
 
-<div class="viewcode-block" id="ConditionalField.__call__"><a class="viewcode-back" href="../../../../pcapkit/corekit/fields.html#pcapkit.corekit.fields.misc.ConditionalField.__call__">[docs]</a>    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">&#39;dict[str, Any]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;ConditionalField&#39;</span><span class="p">:</span>
+<div class="viewcode-block" id="ConditionalField.__call__"><a class="viewcode-back" href="../../../../pcapkit/corekit/fields.html#pcapkit.corekit.fields.misc.ConditionalField.__call__">[docs]</a>    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">&#39;dict[str, Any]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Self&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Update field attributes.</span>
 
 <span class="sd">        Arguments:</span>
@@ -610,7 +612,7 @@
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int | Callable[[dict[str, Any]], int]&#39;</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">_</span><span class="p">:</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span>
                  <span class="n">default</span><span class="p">:</span> <span class="s1">&#39;_TP | NoValueType | bytes&#39;</span> <span class="o">=</span> <span class="n">NoValue</span><span class="p">,</span>
                  <span class="n">protocol</span><span class="p">:</span> <span class="s1">&#39;Optional[Type[_TP]]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                 <span class="n">callback</span><span class="p">:</span> <span class="s1">&#39;Callable[[PayloadField[_TP], dict[str, Any]], None]&#39;</span> <span class="o">=</span> <span class="k">lambda</span> <span class="o">*</span><span class="n">_</span><span class="p">:</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
+                 <span class="n">callback</span><span class="p">:</span> <span class="s1">&#39;Callable[[Self, dict[str, Any]], None]&#39;</span> <span class="o">=</span> <span class="k">lambda</span> <span class="o">*</span><span class="n">_</span><span class="p">:</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_name</span> <span class="o">=</span> <span class="s1">&#39;&lt;payload&gt;&#39;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_default</span> <span class="o">=</span> <span class="n">default</span>  <span class="c1"># type: ignore[assignment]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_protocol</span> <span class="o">=</span> <span class="n">protocol</span>  <span class="c1"># type: ignore[assignment]</span>
@@ -622,7 +624,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_length</span> <span class="o">=</span> <span class="n">length</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_template</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_length</span><span class="si">}</span><span class="s1">s&#39;</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_length</span> <span class="k">else</span> <span class="s1">&#39;1024s&#39;</span>  <span class="c1"># use a reasonable default</span>
 
-<div class="viewcode-block" id="PayloadField.__call__"><a class="viewcode-back" href="../../../../pcapkit/corekit/fields.html#pcapkit.corekit.fields.misc.PayloadField.__call__">[docs]</a>    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">&#39;dict[str, Any]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;PayloadField&#39;</span><span class="p">:</span>
+<div class="viewcode-block" id="PayloadField.__call__"><a class="viewcode-back" href="../../../../pcapkit/corekit/fields.html#pcapkit.corekit.fields.misc.PayloadField.__call__">[docs]</a>    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">&#39;dict[str, Any]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Self&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Update field attributes.</span>
 
 <span class="sd">        Args:</span>
@@ -800,7 +802,7 @@
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int | Callable[[dict[str, Any]], int]&#39;</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">_</span><span class="p">:</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span>
                  <span class="n">schema</span><span class="p">:</span> <span class="s1">&#39;Optional[Type[_TS]]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                  <span class="n">default</span><span class="p">:</span> <span class="s1">&#39;_TS | NoValueType | bytes&#39;</span> <span class="o">=</span> <span class="n">NoValue</span><span class="p">,</span>
-                 <span class="n">callback</span><span class="p">:</span> <span class="s1">&#39;Callable[[SchemaField[_TS], dict[str, Any]], None]&#39;</span> <span class="o">=</span> <span class="k">lambda</span> <span class="o">*</span><span class="n">_</span><span class="p">:</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
+                 <span class="n">callback</span><span class="p">:</span> <span class="s1">&#39;Callable[[Self, dict[str, Any]], None]&#39;</span> <span class="o">=</span> <span class="k">lambda</span> <span class="o">*</span><span class="n">_</span><span class="p">:</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_name</span> <span class="o">=</span> <span class="s1">&#39;&lt;schema&gt;&#39;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_callback</span> <span class="o">=</span> <span class="n">callback</span>
 
@@ -818,7 +820,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_length</span> <span class="o">=</span> <span class="n">length</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_template</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_length</span><span class="si">}</span><span class="s1">s&#39;</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_length</span> <span class="k">else</span> <span class="s1">&#39;1024s&#39;</span>  <span class="c1"># use a reasonable default</span>
 
-    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">&#39;dict[str, Any]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;SchemaField&#39;</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">&#39;dict[str, Any]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Self&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Update field attributes.</span>
 
 <span class="sd">        Args:</span>

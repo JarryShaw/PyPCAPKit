@@ -363,9 +363,7 @@
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">Generic</span><span class="p">,</span> <span class="n">TypeVar</span><span class="p">,</span> <span class="n">cast</span>
 
 <span class="kn">from</span> <span class="nn">pcapkit.const.reg.linktype</span> <span class="kn">import</span> <span class="n">LinkType</span> <span class="k">as</span> <span class="n">Enum_LinkType</span>
-<span class="kn">from</span> <span class="nn">pcapkit.dumpkit.common</span> <span class="kn">import</span> <span class="n">_append_fallback</span> <span class="k">as</span> <span class="n">dumpkit_append_fallback</span>
-<span class="kn">from</span> <span class="nn">pcapkit.dumpkit.common</span> <span class="kn">import</span> <span class="n">default</span> <span class="k">as</span> <span class="n">dumpkit_default</span>
-<span class="kn">from</span> <span class="nn">pcapkit.dumpkit.common</span> <span class="kn">import</span> <span class="n">object_hook</span> <span class="k">as</span> <span class="n">dumpkit_object_hook</span>
+<span class="kn">from</span> <span class="nn">pcapkit.dumpkit.common</span> <span class="kn">import</span> <span class="n">make_dumper</span>
 <span class="kn">from</span> <span class="nn">pcapkit.foundation.engines.pcap</span> <span class="kn">import</span> <span class="n">PCAP</span> <span class="k">as</span> <span class="n">PCAP_Engine</span>
 <span class="kn">from</span> <span class="nn">pcapkit.foundation.reassembly</span> <span class="kn">import</span> <span class="n">ReassemblyManager</span>
 <span class="kn">from</span> <span class="nn">pcapkit.foundation.traceflow</span> <span class="kn">import</span> <span class="n">TraceFlowManager</span>
@@ -967,15 +965,9 @@
                 <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Unsupported output format: </span><span class="si">{</span><span class="n">fmt</span><span class="si">}</span><span class="s1">; disabled file output feature&#39;</span><span class="p">,</span>
                      <span class="n">FormatWarning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="n">stacklevel</span><span class="p">())</span>
             <span class="n">output</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">importlib</span><span class="o">.</span><span class="n">import_module</span><span class="p">(</span><span class="n">module</span><span class="p">),</span> <span class="n">class_</span><span class="p">)</span>  <span class="c1"># type: Type[Dumper]</span>
+            <span class="n">dumper</span> <span class="o">=</span> <span class="n">make_dumper</span><span class="p">(</span><span class="n">output</span><span class="p">)</span>
 
-            <span class="k">class</span> <span class="nc">DictDumper</span><span class="p">(</span><span class="n">output</span><span class="p">):</span>  <span class="c1"># type: ignore[valid-type,misc]</span>
-<span class="w">                </span><span class="sd">&quot;&quot;&quot;Customised :class:`~dictdumper.dumper.Dumper` object.&quot;&quot;&quot;</span>
-
-                <span class="n">object_hook</span> <span class="o">=</span> <span class="n">dumpkit_object_hook</span>
-                <span class="n">default</span> <span class="o">=</span> <span class="n">dumpkit_default</span>
-                <span class="n">_append_fallback</span> <span class="o">=</span> <span class="n">dumpkit_append_fallback</span>
-
-            <span class="bp">self</span><span class="o">.</span><span class="n">_ofile</span> <span class="o">=</span> <span class="n">DictDumper</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_flag_f</span> <span class="k">else</span> <span class="n">DictDumper</span><span class="p">(</span><span class="n">ofnm</span><span class="p">)</span>  <span class="c1"># output file</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_ofile</span> <span class="o">=</span> <span class="n">dumper</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_flag_f</span> <span class="k">else</span> <span class="n">dumper</span><span class="p">(</span><span class="n">ofnm</span><span class="p">)</span>  <span class="c1"># output file</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_magic</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ifile</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>  <span class="c1"># magic number</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_ifile</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">SEEK_SET</span><span class="p">)</span>

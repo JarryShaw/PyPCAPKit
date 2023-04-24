@@ -446,7 +446,7 @@
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">yield</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="k">yield from</span> <span class="n">mapping</span>
+        <span class="k">yield from</span> <span class="n">mapping</span>  <span class="c1"># type: ignore[misc]</span>
 
 
 <span class="c1">###############################################################################</span>

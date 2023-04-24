@@ -359,7 +359,7 @@
     <span class="kn">from</span> <span class="nn">ipaddress</span> <span class="kn">import</span> <span class="n">IPv4Address</span><span class="p">,</span> <span class="n">IPv6Address</span>
     <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span>
 
-    <span class="kn">from</span> <span class="nn">typing_extensions</span> <span class="kn">import</span> <span class="n">Literal</span>
+    <span class="kn">from</span> <span class="nn">typing_extensions</span> <span class="kn">import</span> <span class="n">Literal</span><span class="p">,</span> <span class="n">Self</span>
 
     <span class="kn">from</span> <span class="nn">pcapkit.corekit.fields.field</span> <span class="kn">import</span> <span class="n">NoValueType</span>
 
@@ -437,8 +437,8 @@
         <span class="k">return</span> <span class="mi">4</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">default</span><span class="p">:</span> <span class="s1">&#39;IPv4Address | NoValueType&#39;</span> <span class="o">=</span> <span class="n">NoValue</span><span class="p">,</span>
-                 <span class="n">callback</span><span class="p">:</span> <span class="s1">&#39;Callable[[IPv4Field, dict[str, Any]], None]&#39;</span> <span class="o">=</span> <span class="k">lambda</span> <span class="o">*</span><span class="n">_</span><span class="p">:</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="n">default</span><span class="p">,</span> <span class="n">callback</span><span class="p">)</span>  <span class="c1"># type: ignore[arg-type]</span>
+                 <span class="n">callback</span><span class="p">:</span> <span class="s1">&#39;Callable[[Self, dict[str, Any]], None]&#39;</span> <span class="o">=</span> <span class="k">lambda</span> <span class="o">*</span><span class="n">_</span><span class="p">:</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="n">default</span><span class="p">,</span> <span class="n">callback</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_template</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;4s&#39;</span></div>
 
@@ -459,8 +459,8 @@
         <span class="k">return</span> <span class="mi">6</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">default</span><span class="p">:</span> <span class="s1">&#39;IPv6Address | NoValueType&#39;</span> <span class="o">=</span> <span class="n">NoValue</span><span class="p">,</span>
-                 <span class="n">callback</span><span class="p">:</span> <span class="s1">&#39;Callable[[IPv6Field, dict[str, Any]], None]&#39;</span> <span class="o">=</span> <span class="k">lambda</span> <span class="o">*</span><span class="n">_</span><span class="p">:</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="mi">16</span><span class="p">,</span> <span class="n">default</span><span class="p">,</span> <span class="n">callback</span><span class="p">)</span>  <span class="c1"># type: ignore[arg-type]</span>
+                 <span class="n">callback</span><span class="p">:</span> <span class="s1">&#39;Callable[[Self, dict[str, Any]], None]&#39;</span> <span class="o">=</span> <span class="k">lambda</span> <span class="o">*</span><span class="n">_</span><span class="p">:</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="mi">16</span><span class="p">,</span> <span class="n">default</span><span class="p">,</span> <span class="n">callback</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_template</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;16s&#39;</span></div>
 </pre></div>

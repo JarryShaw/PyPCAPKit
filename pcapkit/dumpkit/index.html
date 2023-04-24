@@ -383,78 +383,6 @@ in <a class="reference external" href="https://dictdumper.jarryshaw.me/en/latest
 functions for <a class="reference internal" href="#module-pcapkit.dumpkit" title="pcapkit.dumpkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.dumpkit</span></code></a> implementation, which is
 generally the customised hooks for <code class="xref py py-class docutils literal notranslate"><span class="pre">dictdumper.Dumper</span></code>
 classes.</p>
-<dl class="py function">
-<dt class="sig sig-object py" id="pcapkit.dumpkit.common.object_hook">
-<span class="sig-prename descclassname"><span class="pre">pcapkit.dumpkit.common.</span></span><span class="sig-name descname"><span class="pre">object_hook</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">o</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/dumpkit/common.html#object_hook"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.dumpkit.common.object_hook" title="Permalink to this definition">#</a></dt>
-<dd><p>Convert content for function call.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>self</strong> (<a class="reference external" href="https://dictdumper.jarryshaw.me/en/latest/dictdumper.dumper.html#dictdumper.dumper.Dumper" title="(in DictDumper)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Dumper</span></code></a>) – Dumper instance.</p></li>
-<li><p><strong>o</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>) – object to convert</p></li>
-</ul>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a></p>
-</dd>
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Converted object.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="pcapkit.dumpkit.common.default">
-<span class="sig-prename descclassname"><span class="pre">pcapkit.dumpkit.common.</span></span><span class="sig-name descname"><span class="pre">default</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">o</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/dumpkit/common.html#default"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.dumpkit.common.default" title="Permalink to this definition">#</a></dt>
-<dd><p>Check content type for function call.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>self</strong> (<a class="reference external" href="https://dictdumper.jarryshaw.me/en/latest/dictdumper.dumper.html#dictdumper.dumper.Dumper" title="(in DictDumper)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Dumper</span></code></a>) – Dumper instance.</p></li>
-<li><p><strong>o</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>) – Object to check.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Literal" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Literal</span></code></a>[<code class="docutils literal notranslate"><span class="pre">'fallback'</span></code>]</p>
-</dd>
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Fallback string.</p>
-</dd>
-</dl>
-<div class="admonition-notes admonition">
-<p class="admonition-title">Notes</p>
-<p>This function is a fallback for <a class="reference external" href="https://dictdumper.jarryshaw.me/en/latest/dictdumper.dumper.html#dictdumper.dumper.Dumper.default" title="(in DictDumper)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">dictdumper.dumper.Dumper.default()</span></code></a>.
-It will be called when <a class="reference external" href="https://dictdumper.jarryshaw.me/en/latest/dictdumper.dumper.html#dictdumper.dumper.Dumper.default" title="(in DictDumper)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">dictdumper.dumper.Dumper.default()</span></code></a> fails
-to find a suitable function for dumping and it should pair with
-<a class="reference internal" href="#pcapkit.dumpkit.common._append_fallback" title="pcapkit.dumpkit.common._append_fallback"><code class="xref py py-func docutils literal notranslate"><span class="pre">pcapkit.dumpkit.common._append_fallback()</span></code></a> for use.</p>
-</div>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="pcapkit.dumpkit.common._append_fallback">
-<span class="sig-prename descclassname"><span class="pre">pcapkit.dumpkit.common.</span></span><span class="sig-name descname"><span class="pre">_append_fallback</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">file</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/dumpkit/common.html#_append_fallback"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.dumpkit.common._append_fallback" title="Permalink to this definition">#</a></dt>
-<dd><p>Fallback function for dumping.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>self</strong> (<a class="reference external" href="https://dictdumper.jarryshaw.me/en/latest/dictdumper.dumper.html#dictdumper.dumper.Dumper" title="(in DictDumper)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Dumper</span></code></a>) – Dumper instance.</p></li>
-<li><p><strong>value</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>) – Value to dump.</p></li>
-<li><p><strong>file</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.TextIO" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">TextIO</span></code></a>) – File object to write.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></p>
-</dd>
-</dl>
-<div class="admonition-notes admonition">
-<p class="admonition-title">Notes</p>
-<p>This function is a fallback for <a class="reference external" href="https://dictdumper.jarryshaw.me/en/latest/dictdumper.dumper.html#dictdumper.dumper.Dumper.default" title="(in DictDumper)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">dictdumper.dumper.Dumper.default()</span></code></a>.
-It will be called when <a class="reference external" href="https://dictdumper.jarryshaw.me/en/latest/dictdumper.dumper.html#dictdumper.dumper.Dumper.default" title="(in DictDumper)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">dictdumper.dumper.Dumper.default()</span></code></a> fails
-to find a suitable function for dumping and it should pair with
-<a class="reference internal" href="#pcapkit.dumpkit.common.default" title="pcapkit.dumpkit.common.default"><code class="xref py py-func docutils literal notranslate"><span class="pre">pcapkit.dumpkit.common.default()</span></code></a> for use.</p>
-</div>
-</dd></dl>
-
 </section>
 </section>
 
@@ -514,12 +442,7 @@ to find a suitable function for dumping and it should pair with
           <div class="toc-tree">
             <ul>
 <li><a class="reference internal" href="#">Dump Utilities</a><ul>
-<li><a class="reference internal" href="#module-pcapkit.dumpkit.common">Common Utilities</a><ul>
-<li><a class="reference internal" href="#pcapkit.dumpkit.common.object_hook"><code class="docutils literal notranslate"><span class="pre">object_hook()</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.dumpkit.common.default"><code class="docutils literal notranslate"><span class="pre">default()</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.dumpkit.common._append_fallback"><code class="docutils literal notranslate"><span class="pre">_append_fallback()</span></code></a></li>
-</ul>
-</li>
+<li><a class="reference internal" href="#module-pcapkit.dumpkit.common">Common Utilities</a></li>
 </ul>
 </li>
 </ul>

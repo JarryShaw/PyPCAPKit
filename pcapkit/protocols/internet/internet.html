@@ -432,7 +432,7 @@ attribute:</p>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.Protocol" title="pcapkit.protocols.protocol.Protocol">Protocol</a>[PT, ST]</p>
+<dd class="field-even"><p>Self</p>
 </dd>
 </dl>
 <dl class="py property">
@@ -486,6 +486,13 @@ should be as <code class="docutils literal notranslate"><span class="pre">{modul
 <dd class="field-odd"><p>Current protocol with next layer extracted.</p>
 </dd>
 </dl>
+<div class="admonition-notes admonition">
+<p class="admonition-title">Notes</p>
+<p>We added a new key <code class="docutils literal notranslate"><span class="pre">__next_type__</span></code> to <code class="docutils literal notranslate"><span class="pre">dict_</span></code> to store the
+next layer protocol type, and a new key <code class="docutils literal notranslate"><span class="pre">__next_name__</span></code> to
+store the next layer protocol name. These two keys will <strong>NOT</strong>
+be included when <a class="reference internal" href="../../corekit/infoclass.html#pcapkit.corekit.infoclass.Info.to_dict" title="pcapkit.corekit.infoclass.Info.to_dict"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Info.to_dict</span></code></a> is called.</p>
+</div>
 </dd></dl>
 
 <dl class="py method">

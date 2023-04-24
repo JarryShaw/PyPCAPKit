@@ -438,7 +438,7 @@
     <span class="c1">##########################################################################</span>
 
 <div class="viewcode-block" id="IPv6.read"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/ipv6.html#pcapkit.protocols.internet.ipv6.IPv6.read">[docs]</a>    <span class="k">def</span> <span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
-             <span class="n">packet</span><span class="p">:</span> <span class="s1">&#39;Optional[dict[str, Any]]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Data_IPv6&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
+             <span class="n">__packet__</span><span class="p">:</span> <span class="s1">&#39;Optional[dict[str, Any]]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Data_IPv6&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Read Internet Protocol version 6 (IPv6).</span>
 
 <span class="sd">        Structure of IPv6 header [:rfc:`2460`]:</span>
@@ -471,7 +471,7 @@
 
 <span class="sd">        Args:</span>
 <span class="sd">            length: Length of packet data.</span>
-<span class="sd">            packet: Optional packet data.</span>
+<span class="sd">            __packet__: Optional packet data.</span>
 <span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
 
 <span class="sd">        Returns:</span>
@@ -494,14 +494,14 @@
         <span class="p">})</span>  <span class="c1"># type: Data_IPv6</span>
 
         <span class="c1"># update packet info</span>
-        <span class="k">if</span> <span class="n">packet</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">packet</span> <span class="o">=</span> <span class="p">{}</span>
-        <span class="n">packet</span><span class="o">.</span><span class="n">update</span><span class="p">({</span>
+        <span class="k">if</span> <span class="n">__packet__</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">__packet__</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">__packet__</span><span class="o">.</span><span class="n">update</span><span class="p">({</span>
             <span class="s1">&#39;src&#39;</span><span class="p">:</span> <span class="n">ipv6</span><span class="o">.</span><span class="n">src</span><span class="p">,</span>
             <span class="s1">&#39;dst&#39;</span><span class="p">:</span> <span class="n">ipv6</span><span class="o">.</span><span class="n">dst</span><span class="p">,</span>
         <span class="p">})</span>
 
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_decode_next_layer</span><span class="p">(</span><span class="n">ipv6</span><span class="p">,</span> <span class="n">schema</span><span class="o">.</span><span class="n">next</span><span class="p">,</span> <span class="n">ipv6</span><span class="o">.</span><span class="n">payload</span><span class="p">,</span> <span class="n">packet</span><span class="o">=</span><span class="n">packet</span><span class="p">)</span>  <span class="c1"># pylint: disable=no-member</span></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_decode_next_layer</span><span class="p">(</span><span class="n">ipv6</span><span class="p">,</span> <span class="n">schema</span><span class="o">.</span><span class="n">next</span><span class="p">,</span> <span class="n">ipv6</span><span class="o">.</span><span class="n">payload</span><span class="p">,</span> <span class="n">packet</span><span class="o">=</span><span class="n">__packet__</span><span class="p">)</span>  <span class="c1"># pylint: disable=no-member</span></div>
 
 <div class="viewcode-block" id="IPv6.make"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/ipv6.html#pcapkit.protocols.internet.ipv6.IPv6.make">[docs]</a>    <span class="k">def</span> <span class="nf">make</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
              <span class="n">traffic_class</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
