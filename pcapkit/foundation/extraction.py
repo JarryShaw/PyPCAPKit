@@ -21,9 +21,7 @@ import sys
 from typing import TYPE_CHECKING, Generic, TypeVar, cast
 
 from pcapkit.const.reg.linktype import LinkType as Enum_LinkType
-from pcapkit.dumpkit.common import _append_fallback as dumpkit_append_fallback
-from pcapkit.dumpkit.common import default as dumpkit_default
-from pcapkit.dumpkit.common import object_hook as dumpkit_object_hook
+from pcapkit.dumpkit.common import make_dumper
 from pcapkit.foundation.engines.pcap import PCAP as PCAP_Engine
 from pcapkit.foundation.reassembly import ReassemblyManager
 from pcapkit.foundation.traceflow import TraceFlowManager
@@ -625,15 +623,9 @@ class Extractor(Generic[P]):
                 warn(f'Unsupported output format: {fmt}; disabled file output feature',
                      FormatWarning, stacklevel=stacklevel())
             output = getattr(importlib.import_module(module), class_)  # type: Type[Dumper]
+            dumper = make_dumper(output)
 
-            class DictDumper(output):  # type: ignore[valid-type,misc]
-                """Customised :class:`~dictdumper.dumper.Dumper` object."""
-
-                object_hook = dumpkit_object_hook
-                default = dumpkit_default
-                _append_fallback = dumpkit_append_fallback
-
-            self._ofile = DictDumper if self._flag_f else DictDumper(ofnm)  # output file
+            self._ofile = dumper if self._flag_f else dumper(ofnm)  # output file
 
         self._magic = self._ifile.read(4)  # magic number
         self._ifile.seek(0, os.SEEK_SET)

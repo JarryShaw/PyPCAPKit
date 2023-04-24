@@ -2,23 +2,11 @@
 pcapkit-*-tempdir/
 pcapkit-temp.html
 
-sample/out
-sample/*.js
-sample/!out.js
-sample/*.json
-sample/!out.json
-sample/*.plist
-sample/!out.plist
-sample/*.txt
-sample/!out.txt
-sample/*.xml
-sample/!out.xml
-sample/*.pcap
-sample/!in.pcap
-sample/*.cap
-sample/*.dat
-sample/*~orig*
-sample/*/
+sample/*
+!sample/out.json
+!sample/out.plist
+!sample/out.txt
+!sample/in.pcap
 
 src
 !requirements.txt

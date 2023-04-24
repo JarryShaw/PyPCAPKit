@@ -17,7 +17,7 @@ if TYPE_CHECKING:
     from ipaddress import IPv4Address, IPv6Address
     from typing import Any, Callable
 
-    from typing_extensions import Literal
+    from typing_extensions import Literal, Self
 
     from pcapkit.corekit.fields.field import NoValueType
 
@@ -95,8 +95,8 @@ class IPv4Field(_IPField[ipaddress.IPv4Address]):
         return 4
 
     def __init__(self, default: 'IPv4Address | NoValueType' = NoValue,
-                 callback: 'Callable[[IPv4Field, dict[str, Any]], None]' = lambda *_: None) -> 'None':
-        super().__init__(4, default, callback)  # type: ignore[arg-type]
+                 callback: 'Callable[[Self, dict[str, Any]], None]' = lambda *_: None) -> 'None':
+        super().__init__(4, default, callback)
 
         self._template = f'4s'
 
@@ -117,7 +117,7 @@ class IPv6Field(_IPField[ipaddress.IPv6Address]):
         return 6
 
     def __init__(self, default: 'IPv6Address | NoValueType' = NoValue,
-                 callback: 'Callable[[IPv6Field, dict[str, Any]], None]' = lambda *_: None) -> 'None':
-        super().__init__(16, default, callback)  # type: ignore[arg-type]
+                 callback: 'Callable[[Self, dict[str, Any]], None]' = lambda *_: None) -> 'None':
+        super().__init__(16, default, callback)
 
         self._template = f'16s'

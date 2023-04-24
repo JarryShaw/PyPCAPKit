@@ -147,6 +147,48 @@ class Frame(Protocol[Data_Frame, Schema_Frame],
         """
         return self._protos.index(name)
 
+    def pack(self, **kwargs: 'Any') -> 'bytes':
+        """Pack (construct) packet data.
+
+        Args:
+            **kwargs: Arbitrary keyword arguments.
+
+        Returns:
+            Constructed packet data.
+
+        Notes:
+            We used a special keyword argument ``__packet__`` to pass the
+            global packet data to underlying methods. This is useful when
+            the packet data is not available in the current instance.
+
+        """
+        self.__header__ = self.make(**kwargs)
+        packet = kwargs.get('__packet__', {})  # packet data
+        packet['byteorder'] = self._ghdr.magic_number.byteorder
+        return self.__header__.pack(packet)
+
+    def unpack(self, length: 'Optional[int]' = None, **kwargs: 'Any') -> 'Data_Frame':
+        """Unpack (parse) packet data.
+
+        Args:
+            length: Length of packet data.
+            **kwargs: Arbitrary keyword arguments.
+
+        Returns:
+            Parsed packet data.
+
+        Notes:
+            We used a special keyword argument ``__packet__`` to pass the
+            global packet data to underlying methods. This is useful when
+            the packet data is not available in the current instance.
+
+        """
+        if cast('Optional[Schema_Frame]', self.__header__) is None:
+            packet = kwargs.get('__packet__', {})  # packet data
+            packet['bytesorder'] = self._ghdr.magic_number.byteorder
+            self.__header__ = cast('Schema_Frame', self.__schema__.unpack(self._file, length, packet))  # type: ignore[call-arg,misc]
+        return self.read(length, **kwargs)
+
     def read(self, length: 'Optional[int]' = None, *, _read: 'bool' = True, **kwargs: 'Any') -> 'Data_Frame':
         r"""Read each block after global header.
 
@@ -382,6 +424,15 @@ class Frame(Protocol[Data_Frame, Schema_Frame],
 
         Returns:
             Current protocol with packet extracted.
+
+        Notes:
+            We added a new key ``__next_type__`` to ``dict_`` to store the
+            next layer protocol type, and a new key ``__next_name__`` to
+            store the next layer protocol name. These two keys will **NOT**
+            be included when :meth:`Info.to_dict <pcapkit.corekit.infoclass.Info.to_dict>` is called.
+
+            We also added a new key ``protocols`` to ``dict_`` to store the
+            protocol chain of the current packet (frame).
 
         """
         next_ = cast('Protocol', self._import_next_layer(proto, length, packet=packet))  # type: ignore[misc,call-arg,redundant-cast]

@@ -104,7 +104,7 @@ def iter_multi_items(mapping: 'Mapping[_KT, _VT | Iterable[_VT]] | Iterable[tupl
             else:
                 yield key, value
     else:
-        yield from mapping
+        yield from mapping  # type: ignore[misc]
 
 
 ###############################################################################

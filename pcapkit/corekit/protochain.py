@@ -18,6 +18,8 @@ from pcapkit.utilities.exceptions import IndexNotFound
 if TYPE_CHECKING:
     from typing import Iterator, Optional, Type
 
+    from typing_extensions import Self
+
     from pcapkit.protocols.protocol import Protocol
 
 __all__ = ['ProtoChain']
@@ -53,7 +55,7 @@ class ProtoChain(collections.abc.Sequence):
     ##########################################################################
 
     @classmethod
-    def from_list(cls, data: 'list[Protocol | Type[Protocol]]') -> 'ProtoChain':
+    def from_list(cls, data: 'list[Protocol | Type[Protocol]]') -> 'Self':
         """Create a protocol chain from a list.
 
         Args:

@@ -17,6 +17,8 @@ from typing import TYPE_CHECKING, Generic, TypeVar
 if TYPE_CHECKING:
     from typing import Any, Optional, Type
 
+    from typing_extensions import Self
+
     from pcapkit.corekit.infoclass import Info
     from pcapkit.protocols.protocol import Protocol
 
@@ -182,7 +184,7 @@ class Reassembly(Generic[PT, DT, IT, BT], metaclass=abc.ABCMeta):
     # Data models.
     ##########################################################################
 
-    def __new__(cls, *args: 'Any', **kwargs: 'Any') -> 'Reassembly[PT, DT, IT, BT]':  # pylint: disable=unused-argument
+    def __new__(cls, *args: 'Any', **kwargs: 'Any') -> 'Self':  # pylint: disable=unused-argument
         self = super().__new__(cls)
 
         # NOTE: Assign this attribute after ``__new__`` to avoid shared memory

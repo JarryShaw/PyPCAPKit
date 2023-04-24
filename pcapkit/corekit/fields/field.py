@@ -14,7 +14,7 @@ __all__ = ['Field']
 if TYPE_CHECKING:
     from typing import IO, Any, Callable, Optional
 
-    from typing_extensions import Literal
+    from typing_extensions import Literal, Self
 
 _T = TypeVar('_T')
 
@@ -80,7 +80,7 @@ class _Field(Generic[_T], metaclass=abc.ABCMeta):
         """Field is optional."""
         return False
 
-    def __call__(self, packet: 'dict[str, Any]') -> '_Field':
+    def __call__(self, packet: 'dict[str, Any]') -> 'Self':
         """Update field attributes.
 
         Arguments:
@@ -192,7 +192,7 @@ class Field(_Field[_T], Generic[_T]):
 
     def __init__(self, length: 'int | Callable[[dict[str, Any]], int]',
                  default: '_T | NoValueType' = NoValue,
-                 callback: 'Callable[[Field[_T], dict[str, Any]], None]' = lambda *_: None) -> 'None':
+                 callback: 'Callable[[Self, dict[str, Any]], None]' = lambda *_: None) -> 'None':
         self._name = '<unknown>'
         self._default = default
         self._callback = callback
@@ -202,7 +202,7 @@ class Field(_Field[_T], Generic[_T]):
             self._length_callback, length = length, 0
         self._length = length
 
-    def __call__(self, packet: 'dict[str, Any]') -> 'Field':
+    def __call__(self, packet: 'dict[str, Any]') -> 'Self':
         """Update field attributes.
 
         Args:

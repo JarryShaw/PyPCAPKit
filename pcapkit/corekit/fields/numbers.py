@@ -24,7 +24,7 @@ if TYPE_CHECKING:
     from typing import Any, Callable, Optional, Type
 
     from aenum import IntEnum as AenumEnum
-    from typing_extensions import Literal
+    from typing_extensions import Literal, Self
 
     from pcapkit.corekit.fields.field import NoValueType
 
@@ -59,12 +59,12 @@ class NumberField(Field[int], Generic[_T]):
                  default: 'int | NoValueType' = NoValue, signed: 'bool' = False,
                  byteorder: 'Literal["little", "big"]' = 'big',
                  bit_length: 'Optional[int]' = None,
-                 callback: 'Callable[[NumberField[_T], dict[str, Any]], None]' = lambda *_: None) -> 'None':
+                 callback: 'Callable[[Self, dict[str, Any]], None]' = lambda *_: None) -> 'None':
         if length is None:
             if self.__length__ is None:
                 raise IntError(f'Field has no length.')
             length = self.__length__
-        super().__init__(length, default, callback)  # type: ignore[arg-type]
+        super().__init__(length, default, callback)
 
         if bit_length is None:
             bit_length = self._length * 8
@@ -82,7 +82,7 @@ class NumberField(Field[int], Generic[_T]):
             struct_fmt = self.build_template(self._length, signed)
         self._template = f'{endian}{struct_fmt}'
 
-    def __call__(self, packet: 'dict[str, Any]') -> 'NumberField':
+    def __call__(self, packet: 'dict[str, Any]') -> 'Self':
         """Update field attributes.
 
         Args:
@@ -338,8 +338,8 @@ class EnumField(NumberField[enum.IntEnum | aenum.IntEnum]):
                  byteorder: 'Literal["little", "big"]' = 'big',
                  bit_length: 'Optional[int]' = None,
                  namespace: 'Optional[Type[StdlibEnum] | Type[AenumEnum]]' = None,
-                 callback: 'Callable[[EnumField, dict[str, Any]], None]' = lambda *_: None) -> 'None':
-        super().__init__(length, default, signed, byteorder, bit_length, callback)  # type: ignore[arg-type]
+                 callback: 'Callable[[Self, dict[str, Any]], None]' = lambda *_: None) -> 'None':
+        super().__init__(length, default, signed, byteorder, bit_length, callback)
 
         self._namespace = namespace
 

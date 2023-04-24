@@ -123,6 +123,8 @@ whose structure is described as below:
    .. automethod:: register
    .. automethod:: index
 
+   .. automethod:: unpack
+
    .. automethod:: read
    .. automethod:: make
 

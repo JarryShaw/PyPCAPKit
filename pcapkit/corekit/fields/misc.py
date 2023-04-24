@@ -17,6 +17,8 @@ __all__ = [
 if TYPE_CHECKING:
     from typing import IO, Any, Callable, Optional, Type
 
+    from typing_extensions import Self
+
     from pcapkit.corekit.fields.field import NoValueType
     from pcapkit.protocols.protocol import Protocol
     from pcapkit.protocols.schema.schema import Schema
@@ -128,7 +130,7 @@ class ConditionalField(_Field[_TC]):
         self._field = field  # type: _Field[_TC]
         self._condition = condition
 
-    def __call__(self, packet: 'dict[str, Any]') -> 'ConditionalField':
+    def __call__(self, packet: 'dict[str, Any]') -> 'Self':
         """Update field attributes.
 
         Arguments:
@@ -268,7 +270,7 @@ class PayloadField(_Field[_TP]):
     def __init__(self, length: 'int | Callable[[dict[str, Any]], int]' = lambda _: -1,
                  default: '_TP | NoValueType | bytes' = NoValue,
                  protocol: 'Optional[Type[_TP]]' = None,
-                 callback: 'Callable[[PayloadField[_TP], dict[str, Any]], None]' = lambda *_: None) -> 'None':
+                 callback: 'Callable[[Self, dict[str, Any]], None]' = lambda *_: None) -> 'None':
         self._name = '<payload>'
         self._default = default  # type: ignore[assignment]
         self._protocol = protocol  # type: ignore[assignment]
@@ -280,7 +282,7 @@ class PayloadField(_Field[_TP]):
         self._length = length
         self._template = f'{self._length}s' if self._length else '1024s'  # use a reasonable default
 
-    def __call__(self, packet: 'dict[str, Any]') -> 'PayloadField':
+    def __call__(self, packet: 'dict[str, Any]') -> 'Self':
         """Update field attributes.
 
         Args:
@@ -458,7 +460,7 @@ class SchemaField(_Field[_TS]):
     def __init__(self, length: 'int | Callable[[dict[str, Any]], int]' = lambda _: -1,
                  schema: 'Optional[Type[_TS]]' = None,
                  default: '_TS | NoValueType | bytes' = NoValue,
-                 callback: 'Callable[[SchemaField[_TS], dict[str, Any]], None]' = lambda *_: None) -> 'None':
+                 callback: 'Callable[[Self, dict[str, Any]], None]' = lambda *_: None) -> 'None':
         self._name = '<schema>'
         self._callback = callback
 
@@ -476,7 +478,7 @@ class SchemaField(_Field[_TS]):
         self._length = length
         self._template = f'{self._length}s' if self._length else '1024s'  # use a reasonable default
 
-    def __call__(self, packet: 'dict[str, Any]') -> 'SchemaField':
+    def __call__(self, packet: 'dict[str, Any]') -> 'Self':
         """Update field attributes.
 
         Args:

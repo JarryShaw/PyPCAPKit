@@ -230,9 +230,15 @@ class Protocol(Generic[PT, ST], metaclass=abc.ABCMeta):
         Returns:
             Constructed packet data.
 
+        Notes:
+            We used a special keyword argument ``__packet__`` to pass the
+            global packet data to underlying methods. This is useful when
+            the packet data is not available in the current instance.
+
         """
         self.__header__ = self.make(**kwargs)
-        return self.__header__.pack()
+        packet = kwargs.get('__packet__', {})  # packet data
+        return self.__header__.pack(packet)
 
     def unpack(self, length: 'Optional[int]' = None, **kwargs: 'Any') -> 'PT':
         """Unpack (parse) packet data.
@@ -244,9 +250,14 @@ class Protocol(Generic[PT, ST], metaclass=abc.ABCMeta):
         Returns:
             Parsed packet data.
 
+        Notes:
+            We used a special keyword argument ``__packet__`` to pass the
+            global packet data to underlying methods. This is useful when
+            the packet data is not available in the current instance.
+
         """
         if cast('Optional[ST]', self.__header__) is None:
-            packet = kwargs.get('packet', {})  # packet data
+            packet = kwargs.get('__packet__', {})  # packet data
             self.__header__ = cast('ST', self.__schema__.unpack(self._file, length, packet))  # type: ignore[call-arg,misc]
         return self.read(length, **kwargs)
 
@@ -365,9 +376,9 @@ class Protocol(Generic[PT, ST], metaclass=abc.ABCMeta):
             report = protocol(payload_io, len(payload), **kwargs)  # type: ignore[abstract]
         except Exception as exc:
             if isinstance(exc, StructError) and exc.eof:  # pylint: disable=no-member
-                from pcapkit.protocols.misc.null import NoPayload as protocol  # type: ignore[no-redef] # pylint: disable=import-outside-toplevel # isort: skip
+                from pcapkit.protocols.misc.null import NoPayload as protocol  # pylint: disable=import-outside-toplevel # isort: skip
             else:
-                from pcapkit.protocols.misc.raw import Raw as protocol  # type: ignore[no-redef] # pylint: disable=import-outside-toplevel # isort: skip
+                from pcapkit.protocols.misc.raw import Raw as protocol  # pylint: disable=import-outside-toplevel # isort: skip
             # error = traceback.format_exc(limit=1).strip().rsplit(os.linesep, maxsplit=1)[-1]
 
             # log error
@@ -396,7 +407,7 @@ class Protocol(Generic[PT, ST], metaclass=abc.ABCMeta):
         cls.__proto__[code] = (module, class_)
 
     @classmethod
-    def from_schema(cls, schema: 'ST | dict[str, Any]') -> 'Self':  # type: ignore[valid-type]
+    def from_schema(cls, schema: 'ST | dict[str, Any]') -> 'Self':
         """Create protocol instance from schema.
 
         Args:
@@ -418,7 +429,7 @@ class Protocol(Generic[PT, ST], metaclass=abc.ABCMeta):
         return self
 
     @classmethod
-    def from_data(cls, data: 'PT | dict[str, Any]') -> 'Self':  # type: ignore[valid-type]
+    def from_data(cls, data: 'PT | dict[str, Any]') -> 'Self':
         """Create protocol instance from data.
 
         Args:
@@ -443,7 +454,7 @@ class Protocol(Generic[PT, ST], metaclass=abc.ABCMeta):
     # Data models.
     ##########################################################################
 
-    def __new__(cls, *args: 'Any', **kwargs: 'Any') -> 'Protocol[PT, ST]':  # pylint: disable=unused-argument
+    def __new__(cls, *args: 'Any', **kwargs: 'Any') -> 'Self':  # pylint: disable=unused-argument
         self = super().__new__(cls)
 
         # NOTE: Assign this attribute after ``__new__`` to avoid shared memory
@@ -1011,6 +1022,12 @@ class Protocol(Generic[PT, ST], metaclass=abc.ABCMeta):
     def _make_payload(cls, data: 'Data') -> 'Protocol':
         """Create payload from ``data`` for protocol construction.
 
+        This method uses ``__next_type__`` and ``__next_name__`` to
+        determine the payload type and name. If either of them is
+        :data:`None`, a :class:`~pcapkit.protocols.misc.null.NoPayload`
+        instance will be returned. Otherwise, the payload will be
+        constructed by :meth:`Protocol.from_data <pcapkit.protocols.protocol.Protocol.from_data>`.
+
         Args:
             data: protocol data
 
@@ -1044,6 +1061,12 @@ class Protocol(Generic[PT, ST], metaclass=abc.ABCMeta):
 
         Returns:
             Current protocol with next layer extracted.
+
+        Notes:
+            We added a new key ``__next_type__`` to ``dict_`` to store the
+            next layer protocol type, and a new key ``__next_name__`` to
+            store the next layer protocol name. These two keys will **NOT**
+            be included when :meth:`Info.to_dict <pcapkit.corekit.infoclass.Info.to_dict>` is called.
 
         """
         next_ = cast('Protocol', self._import_next_layer(proto, length, packet=packet))  # type: ignore[misc,call-arg,redundant-cast]
@@ -1085,9 +1108,9 @@ class Protocol(Generic[PT, ST], metaclass=abc.ABCMeta):
             length = len(file_)
 
         if length == 0:
-            from pcapkit.protocols.misc.null import NoPayload as protocol  # type: ignore[no-redef] # isort: skip # pylint: disable=import-outside-toplevel
+            from pcapkit.protocols.misc.null import NoPayload as protocol  # isort: skip # pylint: disable=import-outside-toplevel
         elif self._sigterm:
-            from pcapkit.protocols.misc.raw import Raw as protocol  # type: ignore[no-redef] # isort: skip # pylint: disable=import-outside-toplevel
+            from pcapkit.protocols.misc.raw import Raw as protocol  # isort: skip # pylint: disable=import-outside-toplevel
         else:
             module, name = self.__proto__[proto]
             protocol = cast('Type[Protocol]', getattr(importlib.import_module(module), name))

@@ -19,7 +19,7 @@ __all__ = [
 if TYPE_CHECKING:
     from typing import Callable, Optional, Tuple
 
-    from typing_extensions import Literal
+    from typing_extensions import Literal, Self
 
     from pcapkit.corekit.fields.field import NoValueType
 
@@ -42,12 +42,12 @@ class _TextField(Field[_T], Generic[_T]):
 
     def __init__(self, length: 'int | Callable[[dict[str, Any]], int]',
                  default: '_T | NoValueType' = NoValue,
-                 callback: 'Callable[[_TextField[_T], dict[str, Any]], None]' = lambda *_: None) -> 'None':
+                 callback: 'Callable[[Self, dict[str, Any]], None]' = lambda *_: None) -> 'None':
         super().__init__(length, default, callback)  # type: ignore[arg-type]
 
         self._template = f'{self._length}s'
 
-    def __call__(self, packet: 'dict[str, Any]') -> '_TextField':
+    def __call__(self, packet: 'dict[str, Any]') -> 'Self':
         """Update field attributes.
 
         Args:
@@ -61,7 +61,7 @@ class _TextField(Field[_T], Generic[_T]):
             updating the current instance.
 
         """
-        new_self = cast('_TextField', super().__call__(packet))
+        new_self = super().__call__(packet)
         new_self._template = f'{new_self._length}s'
         return new_self
 
@@ -109,8 +109,8 @@ class StringField(_TextField[str]):
                  default: 'str | NoValueType' = NoValue, encoding: 'Optional[str]' = None,
                  errors: 'Literal["strict", "ignore", "replace"]' = 'strict',
                  unquote: 'bool' = False,
-                 callback: 'Callable[[StringField, dict[str, Any]], None]' = lambda *_: None) -> 'None':
-        super().__init__(length, default, callback)  # type: ignore[arg-type]
+                 callback: 'Callable[[Self, dict[str, Any]], None]' = lambda *_: None) -> 'None':
+        super().__init__(length, default, callback)
 
         self._encoding = encoding
         self._errors = errors
@@ -173,8 +173,8 @@ class BitField(_TextField[Dict[str, Any]]):
     def __init__(self, length: 'int | Callable[[dict[str, Any]], int]',
                  default: 'dict[str, Any] | NoValueType' = NoValue,
                  namespace: 'Optional[dict[str, NamespaceEntry]]' = None,
-                 callback: 'Callable[[BitField, dict[str, Any]], None]' = lambda *_: None) -> 'None':
-        super().__init__(length, default, callback)  # type: ignore[arg-type]
+                 callback: 'Callable[[Self, dict[str, Any]], None]' = lambda *_: None) -> 'None':
+        super().__init__(length, default, callback)
 
         self._namespace = namespace or {}
 

@@ -20,6 +20,8 @@ from pcapkit.utilities.exceptions import UnsupportedCall
 if TYPE_CHECKING:
     from typing import Any, Iterable, Iterator, NoReturn, Optional
 
+    from typing_extensions import Self
+
 __all__ = ['Info']
 
 VT = TypeVar('VT')
@@ -58,7 +60,7 @@ class Info(Mapping[str, VT], Generic[VT]):
     #: List of names to be excluded from :obj:`dict` conversion.
     __excluded__: 'list[str]' = []
 
-    def __new__(cls, *args: 'VT', **kwargs: 'VT') -> 'Info':  # pylint: disable=unused-argument
+    def __new__(cls, *args: 'VT', **kwargs: 'VT') -> 'Self':  # pylint: disable=unused-argument
         """Create a new instance.
 
         The class will try to automatically generate ``__init__`` method with
@@ -224,7 +226,7 @@ class Info(Mapping[str, VT], Generic[VT]):
 
     @classmethod
     def from_dict(cls, dict_: 'Optional[Mapping[str, VT] | Iterable[tuple[str, VT]]]' = None,
-                  **kwargs: 'VT') -> 'Info[VT]':
+                  **kwargs: 'VT') -> 'Self':
         r"""Create a new instance.
 
         * If ``dict_`` is present and has a ``.keys()`` method, then does:

@@ -96,7 +96,7 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
     ##########################################################################
 
     def read(self, length: 'Optional[int]' = None, *,
-             packet: 'Optional[dict[str, Any]]' = None, **kwargs: 'Any') -> 'Data_IPv6':  # pylint: disable=unused-argument
+             __packet__: 'Optional[dict[str, Any]]' = None, **kwargs: 'Any') -> 'Data_IPv6':  # pylint: disable=unused-argument
         """Read Internet Protocol version 6 (IPv6).
 
         Structure of IPv6 header [:rfc:`2460`]:
@@ -129,7 +129,7 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
 
         Args:
             length: Length of packet data.
-            packet: Optional packet data.
+            __packet__: Optional packet data.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
@@ -152,14 +152,14 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
         })  # type: Data_IPv6
 
         # update packet info
-        if packet is None:
-            packet = {}
-        packet.update({
+        if __packet__ is None:
+            __packet__ = {}
+        __packet__.update({
             'src': ipv6.src,
             'dst': ipv6.dst,
         })
 
-        return self._decode_next_layer(ipv6, schema.next, ipv6.payload, packet=packet)  # pylint: disable=no-member
+        return self._decode_next_layer(ipv6, schema.next, ipv6.payload, packet=__packet__)  # pylint: disable=no-member
 
     def make(self,
              traffic_class: 'int' = 0,

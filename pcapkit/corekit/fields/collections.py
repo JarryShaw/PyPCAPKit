@@ -20,6 +20,7 @@ if TYPE_CHECKING:
     from typing import IO, Any, Callable, Optional, Type
 
     from aenum import IntEnum as AenumEnum
+    from typing_extensions import Self
 
     from pcapkit.protocols.schema.schema import Schema
 
@@ -48,7 +49,7 @@ class ListField(_Field[List[_TL]]):
 
     def __init__(self, length: 'int | Callable[[dict[str, Any]], int]' = lambda _: -1,
                  item_type: 'Optional[_Field]' = None,
-                 callback: 'Callable[[ListField, dict[str, Any]], None]' = lambda *_: None) -> 'None':
+                 callback: 'Callable[[Self, dict[str, Any]], None]' = lambda *_: None) -> 'None':
         self._name = '<list>'
         self._callback = callback
         self._item_type = item_type
@@ -59,7 +60,7 @@ class ListField(_Field[List[_TL]]):
         self._length = length
         self._template = '0s'
 
-    def __call__(self, packet: 'dict[str, Any]') -> 'ListField':
+    def __call__(self, packet: 'dict[str, Any]') -> 'Self':
         """Update field attributes.
 
         Args:
@@ -199,7 +200,7 @@ class OptionField(ListField):
                  type_name: 'str' = 'type',
                  registry: 'Optional[defaultdict[int | StdlibEnum | AenumEnum, Type[Schema]]]' = None,
                  eool: 'Optional[int | StdlibEnum | AenumEnum]' = None,
-                 callback: 'Callable[[ListField, dict[str, Any]], None]' = lambda *_: None) -> 'None':
+                 callback: 'Callable[[Self, dict[str, Any]], None]' = lambda *_: None) -> 'None':
         super().__init__(length, None, callback)
         self._name = '<option>'
         self._eool = eool

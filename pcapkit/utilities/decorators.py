@@ -100,7 +100,7 @@ def beholder(func: 'Callable[Concatenate[Protocol, int, Optional[int], P], R_beh
     @functools.wraps(func)
     def behold(*args: 'P.args', **kwargs: 'P.kwargs') -> 'R_beholder':
         # extract self object & args
-        self = cast('Protocol', args[0])
+        self = cast('R_beholder', args[0])
         try:
             length = cast('int', args[2])
         except IndexError:
@@ -114,7 +114,7 @@ def beholder(func: 'Callable[Concatenate[Protocol, int, Optional[int], P], R_beh
             if isinstance(exc, StructError) and exc.eof:  # pylint: disable=no-member
                 from pcapkit.protocols.misc.null import NoPayload as protocol  # isort: skip # pylint: disable=import-outside-toplevel
             else:
-                from pcapkit.protocols.misc.raw import Raw as protocol  # type: ignore[no-redef] # isort: skip # pylint: disable=import-outside-toplevel
+                from pcapkit.protocols.misc.raw import Raw as protocol  # type: ignore[assignment] # isort: skip # pylint: disable=import-outside-toplevel
             # error = traceback.format_exc(limit=1).strip().rsplit(os.linesep, maxsplit=1)[-1]
 
             # log error
@@ -128,7 +128,7 @@ def beholder(func: 'Callable[Concatenate[Protocol, int, Optional[int], P], R_beh
     return behold
 
 
-def prepare(func: 'Callable[Concatenate[Type[Schema], bytes | IO[bytes], Optional[int], Optional[dict[str, Any]], P], R_prepare]') -> 'Callable[P, R_prepare]':
+def prepare(func: 'Callable[Concatenate[Type[R_prepare], bytes | IO[bytes], Optional[int], Optional[dict[str, Any]], P], R_prepare]') -> 'Callable[P, R_prepare]':
     """Prepare schema packet data before unpacking.
 
     Important:
@@ -154,7 +154,7 @@ def prepare(func: 'Callable[Concatenate[Type[Schema], bytes | IO[bytes], Optiona
     """
     @functools.wraps(func)
     def unpack(*args: 'P.args', **kwargs: 'P.kwargs') -> 'R_prepare':
-        cls = cast('Type[Schema]', args[0])
+        cls = cast('Type[R_prepare]', args[0])
         data = cast('bytes | IO[bytes]', args[1])
         length = cast('Optional[int]', args[2])
         packet = cast('Optional[dict[str, Any]]', args[3])
@@ -182,5 +182,5 @@ def prepare(func: 'Callable[Concatenate[Type[Schema], bytes | IO[bytes], Optiona
         schema = func(cls, data, length, packet)
         ret = cls.post_process(schema, data, length, packet)
 
-        return cast('R_prepare', ret)
+        return ret
     return unpack

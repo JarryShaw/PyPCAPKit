@@ -21,6 +21,8 @@ if TYPE_CHECKING:
     from collections import OrderedDict
     from typing import IO, Any, Iterable, Iterator, Optional
 
+    from typing_extensions import Self
+
 __all__ = ['Schema']
 
 VT = TypeVar('VT')
@@ -52,7 +54,7 @@ class Schema(Mapping[str, VT], Generic[VT]):
     #: List of names to be excluded from :obj:`dict` conversion.
     __excluded__: 'list[str]' = []
 
-    def __new__(cls, *args: 'VT', **kwargs: 'VT') -> 'Schema':  # pylint: disable=unused-argument
+    def __new__(cls, *args: 'VT', **kwargs: 'VT') -> 'Self':  # pylint: disable=unused-argument
         """Create a new instance.
 
         The class will try to automatically generate ``__init__`` method with
@@ -275,7 +277,7 @@ class Schema(Mapping[str, VT], Generic[VT]):
 
     @classmethod
     def from_dict(cls, dict_: 'Optional[Mapping[str, VT] | Iterable[tuple[str, VT]]]' = None,
-                  **kwargs: 'VT') -> 'Schema[VT]':
+                  **kwargs: 'VT') -> 'Self':
         r"""Create a new instance.
 
         * If ``dict_`` is present and has a ``.keys()`` method, then does:
@@ -416,7 +418,7 @@ class Schema(Mapping[str, VT], Generic[VT]):
     @prepare
     def unpack(cls, data: 'bytes | IO[bytes]',
                length: 'Optional[int]' = None,
-               packet: 'Optional[dict[str, Any]]' = None) -> 'Schema':
+               packet: 'Optional[dict[str, Any]]' = None) -> 'Self':
         """Unpack :obj:`bytes` into :class:`Schema`.
 
         Args:
@@ -426,6 +428,11 @@ class Schema(Mapping[str, VT], Generic[VT]):
 
         Returns:
             Unpacked data as :class:`Schema`.
+
+        Notes:
+            We used a ``__length__`` key in ``packet`` to record the length
+            of the remaining data, which is used to determine the length of
+            the payload field.
 
         """
         # force cast arg type since decorator changed their signatures
@@ -498,8 +505,8 @@ class Schema(Mapping[str, VT], Generic[VT]):
         """
 
     @classmethod
-    def post_process(cls, schema: 'Schema', data: 'IO[bytes]',
-                     length: 'int', packet: 'dict[str, Any]') -> 'Schema':
+    def post_process(cls, schema: 'Self', data: 'IO[bytes]',
+                     length: 'int', packet: 'dict[str, Any]') -> 'Self':
         """Revise ``schema`` data after unpacking process.
 
         Args:

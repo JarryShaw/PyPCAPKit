@@ -164,9 +164,15 @@ class Internet(Protocol[PT, ST], Generic[PT, ST]):  # pylint: disable=abstract-m
         Returns:
             Current protocol with next layer extracted.
 
+        Notes:
+            We added a new key ``__next_type__`` to ``dict_`` to store the
+            next layer protocol type, and a new key ``__next_name__`` to
+            store the next layer protocol name. These two keys will **NOT**
+            be included when :meth:`Info.to_dict <pcapkit.corekit.infoclass.Info.to_dict>` is called.
+
         """
         next_ = cast('Protocol',  # type: ignore[redundant-cast]
-                     self._import_next_layer(proto, length, packet=packet, version=version))  # type: ignore[call-arg,arg-type,misc]
+                     self._import_next_layer(proto, length, packet=packet, version=version))  # type: ignore[arg-type,misc,call-arg]
         info, chain = next_.info, next_.protochain
 
         # make next layer protocol name
@@ -213,9 +219,9 @@ class Internet(Protocol[PT, ST], Generic[PT, ST]):  # pylint: disable=abstract-m
             length = len(file_)
 
         if length == 0:
-            from pcapkit.protocols.misc.null import NoPayload as protocol  # type: ignore[no-redef] # isort: skip # pylint: disable=import-outside-toplevel
+            from pcapkit.protocols.misc.null import NoPayload as protocol  # isort: skip # pylint: disable=import-outside-toplevel
         elif self._sigterm:
-            from pcapkit.protocols.misc.raw import Raw as protocol  # type: ignore[no-redef] # isort: skip # pylint: disable=import-outside-toplevel
+            from pcapkit.protocols.misc.raw import Raw as protocol  # isort: skip # pylint: disable=import-outside-toplevel
         else:
             module, name = self.__proto__[proto]
             protocol = cast('Type[Protocol]', getattr(importlib.import_module(module), name))

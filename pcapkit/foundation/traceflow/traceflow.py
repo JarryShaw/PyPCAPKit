@@ -17,9 +17,7 @@ import sys
 from typing import TYPE_CHECKING, Generic, TypeVar, overload
 
 from pcapkit.corekit.infoclass import Info
-from pcapkit.dumpkit.common import _append_fallback as dumpkit_append_fallback
-from pcapkit.dumpkit.common import default as dumpkit_default
-from pcapkit.dumpkit.common import object_hook as dumpkit_object_hook
+from pcapkit.dumpkit.common import make_dumper
 from pcapkit.utilities.exceptions import FileExists, stacklevel
 from pcapkit.utilities.warnings import FileWarning, FormatWarning, warn
 
@@ -29,7 +27,7 @@ if TYPE_CHECKING:
     from typing import Any, DefaultDict, Optional, Type
 
     from dictdumper.dumper import Dumper
-    from typing_extensions import Literal
+    from typing_extensions import Literal, Self
 
     from pcapkit.protocols.protocol import Protocol
 
@@ -150,15 +148,7 @@ class TraceFlow(Generic[BufferID, Buffer, Index, Packet], metaclass=abc.ABCMeta)
                 warn(error.strerror, FileWarning, stacklevel=stacklevel())
             else:
                 raise FileExists(*error.args).with_traceback(error.__traceback__)
-
-        class DictDumper(output):  # type: ignore[valid-type,misc]
-            """Customised :class:`~dictdumper.dumper.Dumper` object."""
-
-            object_hook = dumpkit_object_hook
-            default = dumpkit_default
-            _append_fallback = dumpkit_append_fallback
-
-        return DictDumper, ext
+        return make_dumper(output), ext
 
     @abc.abstractmethod
     def dump(self, packet: 'Packet') -> 'None':
@@ -203,7 +193,7 @@ class TraceFlow(Generic[BufferID, Buffer, Index, Packet], metaclass=abc.ABCMeta)
     # Data models.
     ##########################################################################
 
-    def __new__(cls, *args: 'Any', **kwargs: 'Any') -> 'TraceFlow':  # pylint: disable=unused-argument
+    def __new__(cls, *args: 'Any', **kwargs: 'Any') -> 'Self':  # pylint: disable=unused-argument
         self = super().__new__(cls)
 
         # NOTE: Assign this attribute after ``__new__`` to avoid shared memory
