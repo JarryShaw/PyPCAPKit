@@ -72,6 +72,24 @@ class OptionType(IntEnum):
     #: if_rxspeed
     if_rxspeed = 17
 
+    #: epb_flags
+    epb_flags = 2
+
+    #: epb_hash
+    epb_hash = 3
+
+    #: epb_dropcount
+    epb_dropcount = 4
+
+    #: epb_packetid
+    epb_packetid = 5
+
+    #: epb_queue
+    epb_queue = 6
+
+    #: epb_verdict
+    epb_verdict = 7
+
     @staticmethod
     def get(key: 'int | str', default: 'int' = -1) -> 'OptionType':
         """Backport support for original codes.

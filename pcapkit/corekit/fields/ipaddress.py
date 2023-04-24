@@ -4,9 +4,9 @@
 import abc
 import ipaddress
 from sys import prefix
-from typing import TYPE_CHECKING, TypeVar, Generic, cast
+from typing import TYPE_CHECKING, Generic, TypeVar, cast
 
-from pcapkit.corekit.fields.field import Field, NoValue, _T
+from pcapkit.corekit.fields.field import _T, Field, NoValue
 from pcapkit.utilities.exceptions import FieldValueError
 
 __all__ = [
@@ -15,7 +15,7 @@ __all__ = [
 ]
 
 if TYPE_CHECKING:
-    from ipaddress import IPv4Address, IPv6Address, IPv4Interface, IPv6Interface
+    from ipaddress import IPv4Address, IPv4Interface, IPv6Address, IPv6Interface
     from typing import Any, Callable
 
     from typing_extensions import Literal, Self

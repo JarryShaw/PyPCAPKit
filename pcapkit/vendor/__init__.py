@@ -98,5 +98,6 @@ __all__ = [
     # VLAN
     'VLAN_PriorityLevel',
     # PCAPNG
-    'PCAPNG_BlockType', 'PCAPNG_OptionType',
+    'PCAPNG_BlockType', 'PCAPNG_OptionType', 'PCAPNG_HashAlgorithm',
+    'PCAPNG_VerdictType',
 ]

@@ -7,13 +7,16 @@ import sys
 from typing import TYPE_CHECKING
 
 from pcapkit.const.pcapng.block_type import BlockType as Enum_BlockType
+from pcapkit.const.pcapng.hash_algorithm import HashAlgorithm as Enum_HashAlgorithm
 from pcapkit.const.pcapng.option_type import OptionType as Enum_OptionType
+from pcapkit.const.pcapng.verdict_type import VerdictType as Enum_VerdictType
 from pcapkit.const.reg.linktype import LinkType as Enum_LinkType
 from pcapkit.corekit.fields.collections import OptionField
-from pcapkit.corekit.fields.ipaddress import IPv4AddressField, IPv4InterfaceField, IPv6AddressField, IPv6InterfaceField
+from pcapkit.corekit.fields.ipaddress import (IPv4AddressField, IPv4InterfaceField,
+                                              IPv6AddressField, IPv6InterfaceField)
 from pcapkit.corekit.fields.misc import ForwardMatchField, PayloadField
-from pcapkit.corekit.fields.numbers import (EnumField, Int64Field, Int8Field, UInt8Field, UInt16Field, UInt32Field,
-                                            UInt64Field)
+from pcapkit.corekit.fields.numbers import (EnumField, Int64Field, UInt8Field, UInt16Field,
+                                            UInt32Field, UInt64Field)
 from pcapkit.corekit.fields.strings import BitField, BytesField, PaddingField, StringField
 from pcapkit.protocols.schema.schema import Schema
 from pcapkit.utilities.exceptions import ProtocolError
@@ -28,13 +31,15 @@ __all__ = [
     'IF_MACAddrOption', 'IF_EUIAddrOption', 'IF_SpeedOption', 'IF_TSResolOption',
     'IF_TZoneOption', 'IF_FilterOption', 'IF_OSOption', 'IF_FCSLenOption',
     'IF_TSOffsetOption', 'IF_HardwareOption', 'IF_TxSpeedOption', 'IF_RxSpeedOption',
+    'EPB_FlagsOption', 'EPB_HashOption', 'EPB_DropCountOption', 'EPB_PacketIDOption',
+    'EPB_QueueOption', 'EPB_VerdictOption',
 
     'UnknownBlock', 'SectionHeaderBlock', 'InterfaceDescriptionBlock',
 ]
 
 if TYPE_CHECKING:
-    from typing import IO, Any
     from ipaddress import IPv4Interface, IPv6Interface
+    from typing import IO, Any
 
     from typing_extensions import Self
 
@@ -56,6 +61,37 @@ if SPHINX_TYPE_CHECKING:
         flag: int
         #: Resolution value.
         resolution: int
+
+    class EPBFlags(TypedDict):
+        """EPB flags."""
+
+        #: Inbound / Outbound packet (``00`` = information not available,
+        #: ``01`` = inbound, ``10`` = outbound)
+        direction: int
+        #: Reception type (``000`` = not specified, ``001`` = unicast,
+        #: ``010`` = multicast, ``011`` = broadcast, ``100`` = promiscuous).
+        reception: int
+        #: FCS length, in octets (``0000`` if this information is not available).
+        #: This value overrides the ``if_fcslen`` option of the Interface Description
+        #: Block, and is used with those link layers (e.g. PPP) where the length of
+        #: the FCS can change during time.
+        fcs_len: int
+        #: Link-layer-dependent error - CRC error (bit 24).
+        crc_error: int
+        #: Link-layer-dependent error - packet too long error (bit 25).
+        too_long: int
+        #: Link-layer-dependent error - packet too short error (bit 26).
+        too_short: int
+        #: Link-layer-dependent error - wrong Inter Frame Gap error (bit 27).
+        gap_error: int
+        #: Link-layer-dependent error - unaligned frame error (bit 28).
+        unaligned_error: int
+        #: Link-layer-dependent error - Start Frame Delimiter error (bit 29).
+        delimiter_error: int
+        #: Link-layer-dependent error - preamble error (bit 30).
+        preamble_error: int
+        #: Link-layer-dependent error - symbol error (bit 31).
+        symbol_error: int
 
 
 def byteorder_callback(field: 'NumberField', packet: 'dict[str, Any]') -> 'None':
@@ -472,3 +508,138 @@ class InterfaceDescriptionBlock(PCAPNG):
     if TYPE_CHECKING:
         def __init__(self, type: 'Enum_BlockType', length: 'int', linktype: 'int', reserved: 'int',
                      snaplen: 'int', options: 'list[Option | bytes] | bytes', length2: 'int') -> 'None': ...
+
+
+class EPB_FlagsOption(Option):
+    """Header schema for PCAP-NG ``epb_flags`` options."""
+
+    #: Flags.
+    flags: 'EPBFlags' = BitField(length=4, namespace={
+        'direction': (0, 2),
+        'reception': (2, 3),
+        'fcs_len': (5, 4),
+        'crc_error': (24, 1),
+        'too_long': (25, 1),
+        'too_short': (26, 1),
+        'gap_error': (27, 1),
+        'unaligned_error': (28, 1),
+        'delimiter_error': (29, 1),
+        'preamble_error': (30, 1),
+        'symbol_error': (31, 1),
+    })
+    #: Padding.
+    padding: 'bytes' = PaddingField(length=lambda pkt: (4 - pkt['length'] % 4) % 4)
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'int', length: 'int', flags: 'EPBFlags') -> 'None': ...
+
+
+class EPB_HashOption(Option):
+    """Header schema for PCAP-NG ``epb_hash`` options."""
+
+    #: Hash algorithm.
+    func: 'Enum_HashAlgorithm' = EnumField(length=1, namespace=Enum_HashAlgorithm, callback=byteorder_callback)
+    #: Hash value.
+    data: 'bytes' = BytesField(length=lambda pkt: pkt['length'] - 1)
+    #: Padding.
+    padding: 'bytes' = PaddingField(length=lambda pkt: (4 - pkt['length'] % 4) % 4)
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'int', length: 'int', func: 'Enum_HashAlgorithm', data: 'bytes') -> 'None': ...
+
+
+class EPB_DropCountOption(Option):
+    """Header schema for PCAP-NG ``epb_dropscount`` options."""
+
+    #: Number of packets dropped by the interface.
+    drop_count: 'int' = UInt64Field(callback=byteorder_callback)
+    #: Padding.
+    padding: 'bytes' = PaddingField(length=lambda pkt: (4 - pkt['length'] % 4) % 4)
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'int', length: 'int', drop_count: 'int') -> 'None': ...
+
+
+class EPB_PacketIDOption(Option):
+    """Header schema for PCAP-NG ``epb_packetid`` options."""
+
+    #: Packet ID.
+    packet_id: 'int' = UInt64Field(callback=byteorder_callback)
+    #: Padding.
+    padding: 'bytes' = PaddingField(length=lambda pkt: (4 - pkt['length'] % 4) % 4)
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'int', length: 'int', packet_id: 'int') -> 'None': ...
+
+
+class EPB_QueueOption(Option):
+    """Header schema for PCAP-NG ``epb_queue`` options."""
+
+    #: Queue ID.
+    queue_id: 'int' = UInt32Field(callback=byteorder_callback)
+    #: Padding.
+    padding: 'bytes' = PaddingField(length=lambda pkt: (4 - pkt['length'] % 4) % 4)
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'int', length: 'int', queue_id: 'int') -> 'None': ...
+
+
+class EPB_VerdictOption(Option):
+    """Header schema for PCAP-NG ``epb_verdict`` options."""
+
+    #: Verdict type.
+    verdict: 'Enum_VerdictType' = EnumField(length=1, namespace=Enum_VerdictType, callback=byteorder_callback)
+    #: Verdict value.
+    value: 'int' = NumberField(length=lambda pkt: pkt['length'] - 1, callback=byteorder_callback, signed=False)
+    #: Padding.
+    padding: 'bytes' = PaddingField(length=lambda pkt: (4 - pkt['length'] % 4) % 4)
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'int', length: 'int', verdict: 'Enum_VerdictType', value: 'int') -> 'None': ...
+
+
+class EnhancedPacketBlock(PCAPNG):
+    """Header schema for PCAP-NG Enhanced Packet Block (EPB)."""
+
+    __payload__ = 'packet_data'
+
+    #: Block total length.
+    length: 'int' = UInt32Field(callback=byteorder_callback)
+    #: Interface ID.
+    interface_id: 'int' = UInt32Field(callback=byteorder_callback)
+    #: Higher 32-bit of timestamp (in seconds).
+    timestamp_high: 'int' = UInt32Field(callback=byteorder_callback)
+    #: Lower 32-bit of timestamp (in seconds).
+    timestamp_low: 'int' = UInt32Field(callback=byteorder_callback)
+    #: Captured packet length.
+    captured_len: 'int' = UInt32Field(callback=byteorder_callback)
+    #: Original packet length.
+    original_len: 'int' = UInt32Field(callback=byteorder_callback)
+    #: Packet data.
+    packet_data: 'bytes' = BytesField(length=lambda pkt: pkt['captured_len'])
+    #: Padding.
+    padding: 'bytes' = PaddingField(length=lambda pkt: (4 - pkt['length'] % 4) % 4)
+    #: Options.
+    options: 'list[Option]' = OptionField(
+        length=lambda pkt: pkt['length'] - 32 - pkt['captured_len'] - len(pkt['padding']),
+        base_schema=Option,
+        type_name='type',
+        registry=collections.defaultdict(lambda: UnknownOption, {
+            Enum_OptionType.opt_endofopt: EndOfOption,
+            Enum_OptionType.opt_comment: CommentOption,
+            Enum_OptionType.epb_flags: EPB_FlagsOption,
+            Enum_OptionType.epb_hash: EPB_HashOption,
+            Enum_OptionType.epb_dropcount: EPB_DropCountOption,
+            Enum_OptionType.epb_packetid: EPB_PacketIDOption,
+            Enum_OptionType.epb_queue: EPB_QueueOption,
+            Enum_OptionType.epb_verdict: EPB_VerdictOption,
+        }),
+        eool=Enum_OptionType.opt_endofopt,
+    )
+    #: Block total length.
+    length2: 'int' = UInt32Field(callback=byteorder_callback)
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_BlockType', length: 'int', interface_id: 'int', timestamp_high: 'int',
+                     timestamp_low: 'int', captured_len: 'int', original_len: 'int', packet_data: 'bytes',
+                     padding: 'bytes', options: 'list[Option | bytes] | bytes', length2: 'int') -> 'None': ...

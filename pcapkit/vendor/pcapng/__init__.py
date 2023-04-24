@@ -11,19 +11,28 @@ crawlers include:
 
 .. list-table::
 
-   * - :class:`BlockType <pcapkit.vendor.pcapng.block_type.BlockType>`
+   * - :class:`PCAPNG_BlockType <pcapkit.vendor.pcapng.block_type.BlockType>`
      - Block Types [*]_
-   * - :class:`OptionType <pcapkit.vendor.pcapng.option_type.OptionType>`
+   * - :class:`PCAPNG_OptionType <pcapkit.vendor.pcapng.option_type.OptionType>`
      - Option Types [*]_
+   * - :class:`PCAPNG_HashAlgorithm <pcapkit.vendor.pcapng.hash_algorithm.HashAlgorithm>`
+     - Hash Algorithms [*]_
+   * - :class:`PCAPNG_VerdictType <pcapkit.vendor.pcapng.verdict_type.VerdictType>`
+     - Verdict Types [*]_
 
-.. [*] https://www.ietf.org/staging/draft-tuexen-opsawg-pcapng-02.html
-.. [*] https://www.ietf.org/staging/draft-tuexen-opsawg-pcapng-02.html
+.. [*] https://www.ietf.org/staging/draft-tuexen-opsawg-pcapng-02.html#name-standardized-block-type-cod
+.. [*] https://www.ietf.org/staging/draft-tuexen-opsawg-pcapng-02.html#name-options
+.. [*] https://www.ietf.org/staging/draft-tuexen-opsawg-pcapng-02.html#name-enhanced-packet-block-flags
+.. [*] https://www.ietf.org/staging/draft-tuexen-opsawg-pcapng-02.html#name-enhanced-packet-block
 
 """
 
 from pcapkit.vendor.pcapng.block_type import BlockType as PCAPNG_BlockType
+from pcapkit.vendor.pcapng.hash_algorithm import HashAlgorithm as PCAPNG_HashAlgorithm
 from pcapkit.vendor.pcapng.option_type import OptionType as PCAPNG_OptionType
+from pcapkit.vendor.pcapng.verdict_type import VerdictType as PCAPNG_VerdictType
 
 __all__ = [
-    'PCAPNG_BlockType', 'PCAPNG_OptionType',
+    'PCAPNG_BlockType', 'PCAPNG_OptionType', 'PCAPNG_HashAlgorithm',
+    'PCAPNG_VerdictType',
 ]
