@@ -99,6 +99,27 @@ class OptionType(IntEnum):
     #: ns_dnsIP6addr
     ns_dnsIP6addr = 4
 
+    #: isb_starttime
+    isb_starttime = 2
+
+    #: isb_endtime
+    isb_endtime = 3
+
+    #: isb_ifrecv
+    isb_ifrecv = 4
+
+    #: isb_ifdrop
+    isb_ifdrop = 5
+
+    #: isb_filteraccept
+    isb_filteraccept = 6
+
+    #: isb_osdrop
+    isb_osdrop = 7
+
+    #: isb_usrdeliv
+    isb_usrdeliv = 8
+
     @staticmethod
     def get(key: 'int | str', default: 'int' = -1) -> 'OptionType':
         """Backport support for original codes.
