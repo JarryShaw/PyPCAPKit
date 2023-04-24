@@ -6,13 +6,14 @@ import collections
 import sys
 from typing import TYPE_CHECKING
 
+from pcapkit.const.pcapng.record_type import RecordType as Enum_RecordType
 from pcapkit.const.pcapng.block_type import BlockType as Enum_BlockType
 from pcapkit.const.pcapng.hash_algorithm import HashAlgorithm as Enum_HashAlgorithm
 from pcapkit.const.pcapng.option_type import OptionType as Enum_OptionType
 from pcapkit.const.pcapng.verdict_type import VerdictType as Enum_VerdictType
 from pcapkit.const.reg.linktype import LinkType as Enum_LinkType
-from pcapkit.corekit.fields.collections import OptionField
-from pcapkit.corekit.fields.ipaddress import IPv4InterfaceField, IPv6InterfaceField
+from pcapkit.corekit.fields.collections import ListField, OptionField
+from pcapkit.corekit.fields.ipaddress import IPv4InterfaceField, IPv6InterfaceField, IPv4AddressField, IPv6AddressField
 from pcapkit.corekit.fields.misc import ForwardMatchField, PayloadField
 from pcapkit.corekit.fields.numbers import (EnumField, Int64Field, UInt8Field, UInt16Field,
                                             UInt32Field, UInt64Field)
@@ -32,13 +33,16 @@ __all__ = [
     'IF_TSOffsetOption', 'IF_HardwareOption', 'IF_TxSpeedOption', 'IF_RxSpeedOption',
     'EPB_FlagsOption', 'EPB_HashOption', 'EPB_DropCountOption', 'EPB_PacketIDOption',
     'EPB_QueueOption', 'EPB_VerdictOption',
+    'NS_DNSNameOption', 'NS_DNSIP4AddrOption', 'NS_DNSIP6AddrOption',
+
+    'NameResolutionRecord', 'UnknownRecord', 'EndRecord', 'IPv4Record', 'IPv6Record',
 
     'UnknownBlock', 'SectionHeaderBlock', 'InterfaceDescriptionBlock',
-    'EnhancedPacketBlock', 'SimplePacketBlock',
+    'EnhancedPacketBlock', 'SimplePacketBlock', 'NameResolutionBlock',
 ]
 
 if TYPE_CHECKING:
-    from ipaddress import IPv4Interface, IPv6Interface
+    from ipaddress import IPv4Interface, IPv6Interface, IPv4Address, IPv6Address
     from typing import IO, Any
 
     from typing_extensions import Self
@@ -167,9 +171,7 @@ class PCAPNG(Schema):
     #: Block type.
     type: 'Enum_BlockType' = EnumField(length=4, namespace=Enum_BlockType)
 
-    @classmethod
-    def post_process(cls, schema: 'Self', data: 'IO[bytes]',
-                     length: 'int', packet: 'dict[str, Any]') -> 'Self':
+    def post_process(self, packet: 'dict[str, Any]') -> 'Schema':
         """Revise ``schema`` data after unpacking process.
 
         This method validates the two block lengths and raises
@@ -177,18 +179,15 @@ class PCAPNG(Schema):
         equal.
 
         Args:
-            schema: parsed schema
-            data: Packed data.
-            length: Length of data.
             packet: Unpacked data.
 
         Returns:
             Revised schema.
 
         """
-        if schema.length != schema.length2:
-            raise ProtocolError(f'block length mismatch: {schema.length} != {schema.length2}')
-        return schema
+        if self.length != self.length2:
+            raise ProtocolError(f'block length mismatch: {self.length} != {self.length2}')
+        return self
 
     if TYPE_CHECKING:
         length: int
@@ -340,24 +339,19 @@ class IF_TSResolOption(Option):
     #: Padding.
     padding: 'bytes' = PaddingField(length=lambda pkt: (4 - pkt['length'] % 4) % 4)
 
-    @classmethod
-    def post_process(cls, schema: 'Self', data: 'IO[bytes]',
-                     length: 'int', packet: 'dict[str, Any]') -> 'Self':
+    def post_process(self, packet: 'dict[str, Any]') -> 'Schema':
         """Revise ``schema`` data after unpacking process.
 
         Args:
-            schema: parsed schema
-            data: Packed data.
-            length: Length of data.
             packet: Unpacked data.
 
         Returns:
             Revised schema.
 
         """
-        base = 10 if packet['tsresol']['flag'] == 0 else 2
-        schema.resolution = base ** packet['tsresol']['resolution']
-        return schema
+        base = 10 if self.tsresol['flag'] == 0 else 2
+        self.resolution = base ** self.tsresol['resolution']
+        return self
 
     if TYPE_CHECKING:
         #: Interface timestamp resolution, in units per second.
@@ -664,3 +658,161 @@ class SimplePacketBlock(PCAPNG):
     if TYPE_CHECKING:
         def __init__(self, type: 'Enum_BlockType', length: 'int', original_len: 'int', packet_data: 'bytes',
                      padding: 'bytes', length2: 'int') -> 'None': ...
+
+
+class NameResolutionRecord(Schema):
+    """Header schema for PCAP-NG NRB records."""
+
+    #: Record type.
+    type: 'Enum_RecordType' = EnumField(length=2, namespace=Enum_RecordType, callback=byteorder_callback)
+    #: Record value length.
+    length: 'int' = UInt16Field(callback=byteorder_callback)
+
+
+class UnknownRecord(NameResolutionRecord):
+    """Header schema for PCAP-NG NRB unknown records."""
+
+    #: Unknown record data.
+    data: 'bytes' = BytesField(length=lambda pkt: pkt['length'])
+    #: Padding.
+    padding: 'bytes' = PaddingField(length=lambda pkt: (4 - pkt['length'] % 4) % 4)
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_RecordType', length: 'int', data: 'bytes') -> 'None': ...
+
+
+class EndRecord(NameResolutionRecord):
+    """Header schema for PCAP-NG ``nrb_record_end`` records."""
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_RecordType', length: 'int') -> 'None': ...
+
+
+class IPv4Record(NameResolutionRecord):
+    """Header schema for PCAP-NG NRB ``nrb_record_ipv4`` records."""
+
+    #: IPv4 address.
+    ip: 'IPv4Address' = IPv4AddressField()
+    #: Name resolution data.
+    resol: 'str' = StringField(length=lambda pkt: pkt['length'] - 4)
+    #: Padding.
+    padding: 'bytes' = PaddingField(length=lambda pkt: (4 - pkt['length'] % 4) % 4)
+
+    def post_process(self, packet: 'dict[str, Any]') -> 'Schema':
+        """Revise ``schema`` data after unpacking process.
+
+        Args:
+            packet: Unpacked data.
+
+        Returns:
+            Revised schema.
+
+        """
+        self.names = self.resol.split('\x00')
+        return self
+
+    if TYPE_CHECKING:
+        #: Name resolution records.
+        names: 'list[str]'
+
+        def __init__(self, type: 'Enum_RecordType', length: 'int', ip: 'IPv4Address', resol: 'str', padding: 'bytes') -> 'None': ...
+
+
+class IPv6Record(NameResolutionRecord):
+    """Header schema for PCAP-NG NRB ``nrb_record_ipv4`` records."""
+
+    #: IPv4 address.
+    ip: 'IPv6Address' = IPv6AddressField()
+    #: Name resolution data.
+    resol: 'str' = StringField(length=lambda pkt: pkt['length'] - 4)
+    #: Padding.
+    padding: 'bytes' = PaddingField(length=lambda pkt: (4 - pkt['length'] % 4) % 4)
+
+    def post_process(self, packet: 'dict[str, Any]') -> 'Schema':
+        """Revise ``schema`` data after unpacking process.
+
+        Args:
+            packet: Unpacked data.
+
+        Returns:
+            Revised schema.
+
+        """
+        self.names = self.resol.split('\x00')
+        return self
+
+    if TYPE_CHECKING:
+        #: Name resolution records.
+        names: 'list[str]'
+
+        def __init__(self, type: 'Enum_RecordType', length: 'int', ip: 'IPv4Address', resol: 'str', padding: 'bytes') -> 'None': ...
+
+
+class NS_DNSNameOption(Option):
+    """Header schema for PCAP-NG ``ns_dnsname`` option."""
+
+    #: DNS name.
+    name: 'str' = StringField(length=lambda pkt: pkt['length'])
+
+    if TYPE_CHECKING:
+        def __init__(self, code: 'Enum_OptionType', length: 'int', name: 'str') -> 'None': ...
+
+
+class NS_DNSIP4AddrOption(Option):
+    """Header schema for PCAP-NG ``ns_dnsIP4addr`` option."""
+
+    #: IPv4 address.
+    ip: 'IPv4Address' = IPv4AddressField()
+
+    if TYPE_CHECKING:
+        def __init__(self, code: 'Enum_OptionType', length: 'int', ip: 'IPv4Address') -> 'None': ...
+
+
+class NS_DNSIP6AddrOption(Option):
+    """Header schema for PCAP-NG ``ns_dnsIP6addr`` option."""
+
+    #: IPv6 address.
+    ip: 'IPv6Address' = IPv6AddressField()
+
+    if TYPE_CHECKING:
+        def __init__(self, code: 'Enum_OptionType', length: 'int', ip: 'IPv6Address') -> 'None': ...
+
+
+class NameResolutionBlock(PCAPNG):
+    """Header schema for PCAP-NG Name Resolution Block (NRB)."""
+
+    #: Record total length.
+    length: 'int' = UInt16Field(callback=byteorder_callback)
+    #: Name resolution records.
+    records: 'list[NameResolutionRecord]' = OptionField(
+        length=lambda pkt: pkt['length'],
+        base_schema=NameResolutionRecord,
+        type_name='type',
+        registry=collections.defaultdict(lambda: UnknownRecord, {
+            Enum_RecordType.nrb_record_end: EndRecord,
+            Enum_RecordType.nrb_record_ipv4: IPv4Record,
+            Enum_RecordType.nrb_record_ipv6: IPv6Record,
+        }),
+        eool=Enum_RecordType.nrb_record_end,
+    )
+    #: Options.
+    options: 'list[Option]' = OptionField(
+        length=lambda pkt: pkt['length'] - 12 - pkt['captured_len'],
+        base_schema=Option,
+        type_name='type',
+        registry=collections.defaultdict(lambda: UnknownOption, {
+            Enum_OptionType.opt_endofopt: EndOfOption,
+            Enum_OptionType.opt_comment: CommentOption,
+            Enum_OptionType.ns_dnsname: NS_DNSNameOption,
+            Enum_OptionType.ns_dnsIP4addr: NS_DNSIP4AddrOption,
+            Enum_OptionType.ns_dnsIP6addr: NS_DNSIP6AddrOption,
+        }),
+        eool=Enum_OptionType.opt_endofopt,
+    )
+    #: Block total length.
+    length2: 'int' = UInt32Field(callback=byteorder_callback)
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_BlockType', length: 'int',
+                     records: 'list[NameResolutionRecord | bytes] | bytes',
+                     options: 'list[Option | bytes] | bytes', length2: 'int') -> 'None': ...
