@@ -144,15 +144,11 @@ class FrameType(Schema):
     class Flags(enum.IntFlag):
         """Flags enumeration for HTTP/2 frames."""
 
-    @classmethod
-    def post_process(cls, schema: 'Self', data: 'IO[bytes]',
-                     length: 'int', packet: 'dict[str, Any]') -> 'Self':
+    def post_process(self, packet: 'dict[str, Any]') -> 'Schema':
         """Revise ``schema`` data after unpacking process.
 
         Args:
             schema: parsed schema
-            data: Packed data.
-            length: Length of data.
             packet: Unpacked data.
 
         Returns:
@@ -161,13 +157,13 @@ class FrameType(Schema):
         """
         flags = 0
         for key, val in filter(lambda kv: kv[0].startswith('BIT_'),
-                               cls.Flags.__members__.items()):
+                               self.Flags.__members__.items()):
             name = key.lower()
             if packet['flags'][name]:
                 flags |= val
 
-        schema.__flags__ = flags
-        return schema
+        self.__flags__ = flags
+        return self
 
 
 class UnassignedFrame(FrameType):

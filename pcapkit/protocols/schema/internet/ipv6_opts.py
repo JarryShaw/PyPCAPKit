@@ -239,15 +239,10 @@ class Option(Schema):
         lambda pkt: pkt['type'] != Enum_Option.Pad1,
     )
 
-    @classmethod
-    def post_process(cls, schema: 'Self', data: 'IO[bytes]',
-                     length: 'int', packet: 'dict[str, Any]') -> 'Self':
+    def post_process(self, packet: 'dict[str, Any]') -> 'Schema':
         """Revise ``schema`` data after unpacking process.
 
         Args:
-            schema: parsed schema
-            data: Packed data.
-            length: Length of data.
             packet: Unpacked data.
 
         Returns:
@@ -255,9 +250,9 @@ class Option(Schema):
 
         """
         # for Pad1 option, length is always 0
-        if schema.type == Enum_Option.Pad1:
-            schema.len = 0
-        return schema
+        if self.type == Enum_Option.Pad1:
+            self.len = 0
+        return self
 
 
 class UnassignedOption(Option):
@@ -338,23 +333,18 @@ class _SMFDPDOption(Schema):
         selector=smf_dpd_data_selector,
     )
 
-    @classmethod
-    def post_process(cls, schema: 'Self', data: 'IO[bytes]',
-                     length: 'int', packet: 'dict[str, Any]') -> 'SMFIdentificationBasedDPDOption | SMFHashBasedDPDOption':
+    def post_process(self, packet: 'dict[str, Any]') -> 'Schema':
         """Revise ``schema`` data after unpacking process.
 
         Args:
-            schema: parsed schema
-            data: Packed data.
-            length: Length of data.
             packet: Unpacked data.
 
         Returns:
             Revised schema.
 
         """
-        ret = schema.data
-        ret.mode = Enum_SMFDPDMode.get(schema.test['mode'])
+        ret = self.data
+        ret.mode = Enum_SMFDPDMode.get(self.test['mode'])
         return ret
 
 
@@ -438,23 +428,18 @@ class _QuickStartOption(Schema):
         selector=quick_start_data_selector,
     )
 
-    @classmethod
-    def post_process(cls, schema: 'Self', data: 'IO[bytes]',
-                     length: 'int', packet: 'dict[str, Any]') -> 'QuickStartRequestOption | QuickStartReportOption':
+    def post_process(self, packet: 'dict[str, Any]') -> 'Schema':
         """Revise ``schema`` data after unpacking process.
 
         Args:
-            schema: parsed schema
-            data: Packed data.
-            length: Length of data.
             packet: Unpacked data.
 
         Returns:
             Revised schema.
 
         """
-        ret = schema.data
-        ret.func = Enum_QSFunction.get(packet['flags']['func'])
+        ret = self.data
+        ret.func = Enum_QSFunction.get(self.flags['func'])
         return ret
 
 
@@ -541,24 +526,19 @@ class MPLOption(Option):
         0 if pkt['flags']['type'] == 0 else mpl_opt_seed_id_len(pkt)
     ))
 
-    @classmethod
-    def post_process(cls, schema: 'Self', data: 'IO[bytes]',
-                     length: 'int', packet: 'dict[str, Any]') -> 'Self':
+    def post_process(self, packet: 'dict[str, Any]') -> 'Schema':
         """Revise ``schema`` data after unpacking process.
 
         Args:
-            schema: parsed schema
-            data: Packed data.
-            length: Length of data.
             packet: Unpacked data.
 
         Returns:
             Revised schema.
 
         """
-        if schema.flags['type'] == Enum_SeedID.IPV6_SOURCE_ADDRESS:
-            schema.seed = packet.get('src', NoValue)
-        return schema
+        if self.flags['type'] == Enum_SeedID.IPV6_SOURCE_ADDRESS:
+            self.seed = packet.get('src', NoValue)
+        return self
 
     if TYPE_CHECKING:
         def __init__(self, type: 'Enum_Option', len: 'int', flags: 'MPLFlags', seq: 'int',

@@ -124,17 +124,17 @@ class Schema(Mapping[str, VT], Generic[VT]):
             # It is inspired from the :func:`dataclasses._create_fn` function.
             init_ = (
                 f'def __create_fn__():\n'
-                f'    def __init__(self, {", ".join(args_)}):\n'
+                f'    def __init__(self, {", ".join(args_)}, *, __packet__=None):\n'
                 f'        self.__update__({", ".join(dict_)})\n'
-                f'        self.__post_init__()\n'
+                f'        self.__post_init__(__packet__)\n'
                 f'    return __init__\n'
             )
         else:
             init_ = (
                 'def __create_fn__():\n'
-                '    def __init__(self, dict_=None, **kwargs):\n'
+                '    def __init__(self, dict_=None, **kwargs, *, __packet__=None):\n'
                 '        self.__update__(dict_, **kwargs)\n'
-                '        self.__post_init__()\n'
+                '        self.__post_init__(__packet__)\n'
                 '    return __init__\n'
             )
 
@@ -158,11 +158,16 @@ class Schema(Mapping[str, VT], Generic[VT]):
 
         return self
 
-    def __post_init__(self) -> 'None':
+    def __post_init__(self, packet: 'Optional[dict[str, Any]]' = None) -> 'None':
         for name, field in self.__fields__.items():
             if self.__dict__[name] in (NoValue, None):
                 self.__dict__[name] = field.default
-        self.pack()
+
+        if packet is None:
+            packet = {}
+        self.pre_process(packet)
+        self.pack(packet)
+        self.post_process(packet, )
 
     def __update__(self, dict_: 'Optional[Mapping[str, VT] | Iterable[tuple[str, VT]]]' = None,
                    **kwargs: 'VT') -> 'None':
@@ -504,19 +509,14 @@ class Schema(Mapping[str, VT], Generic[VT]):
 
         """
 
-    @classmethod
-    def post_process(cls, schema: 'Self', data: 'IO[bytes]',
-                     length: 'int', packet: 'dict[str, Any]') -> 'Schema':
+    def post_process(self, packet: 'dict[str, Any]') -> 'Schema':
         """Revise ``schema`` data after unpacking process.
 
         Args:
-            schema: parsed schema
-            data: Packed data.
-            length: Length of data.
             packet: Unpacked data.
 
         Returns:
             Revised schema.
 
         """
-        return schema
+        return self

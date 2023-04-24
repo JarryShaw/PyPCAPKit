@@ -273,28 +273,20 @@ class Option(Schema):
         lambda pkt: pkt['kind'] not in (Enum_Option.End_of_Option_List, Enum_Option.No_Operation),
     )
 
-    @classmethod
-    def post_process(cls, schema: 'Self', data: 'IO[bytes]',
-                     length: 'int', packet: 'dict[str, Any]') -> 'Self':
+    def post_process(self, packet: 'dict[str, Any]') -> 'Schema':
         """Revise ``schema`` data after unpacking process.
 
         Args:
-            schema: parsed schema
-            data: Packed data.
-            length: Length of data.
             packet: Unpacked data.
 
         Returns:
             Revised schema.
 
         """
-        if TYPE_CHECKING:
-            schema = cast('Option', schema)
-
         # for EOOL/NOP option, length is always 1
-        if schema.kind in (Enum_Option.End_of_Option_List, Enum_Option.No_Operation):
-            schema.length = 1
-        return schema
+        if self.kind in (Enum_Option.End_of_Option_List, Enum_Option.No_Operation):
+            self.length = 1
+        return self
 
 
 class UnassignedOption(Option):
@@ -544,25 +536,17 @@ class _MPTCP(Schema):
         selector=mptcp_data_selector,
     )
 
-    @classmethod
-    def post_process(cls, schema: 'Self', data: 'IO[bytes]',
-                     length: 'int', packet: 'dict[str, Any]') -> 'MPTCP':
+    def post_process(self, packet: 'dict[str, Any]') -> 'Schema':
         """Revise ``schema`` data after unpacking process.
 
         Args:
-            schema: parsed schema
-            data: Packed data.
-            length: Length of data.
             packet: Unpacked data.
 
         Returns:
             Revised schema.
 
         """
-        if TYPE_CHECKING:
-            schema = cast('_MPTCP', schema)
-
-        ret = schema.data
+        ret = self.data
         ret.subtype = Enum_MPTCPOption.get(packet['test']['subtype'])
         return ret
 

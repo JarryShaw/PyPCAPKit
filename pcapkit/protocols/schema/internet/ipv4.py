@@ -142,15 +142,10 @@ class Option(Schema):
         lambda pkt: pkt['type'] not in (Enum_OptionNumber.EOOL, Enum_OptionNumber.NOP),
     )
 
-    @classmethod
-    def post_process(cls, schema: 'Self', data: 'IO[bytes]',
-                     length: 'int', packet: 'dict[str, Any]') -> 'Self':
+    def post_process(self, packet: 'dict[str, Any]') -> 'Schema':
         """Revise ``schema`` data after unpacking process.
 
         Args:
-            schema: parsed schema
-            data: Packed data.
-            length: Length of data.
             packet: Unpacked data.
 
         Returns:
@@ -158,9 +153,9 @@ class Option(Schema):
 
         """
         # for EOOL/NOP option, length is always 1
-        if schema.type in (Enum_OptionNumber.EOOL, Enum_OptionNumber.NOP):
-            schema.length = 1
-        return schema
+        if self.type in (Enum_OptionNumber.EOOL, Enum_OptionNumber.NOP):
+            self.length = 1
+        return self
 
 
 class UnassignedOption(Option):
@@ -243,63 +238,58 @@ class TSOption(Option):
         default=bytes(36),  # 36 is the maximum length of the option data field for timestamps
     )
 
-    @classmethod
-    def post_process(cls, schema: 'Self', data: 'IO[bytes]',
-                     length: 'int', packet: 'dict[str, Any]') -> 'Self':
+    def post_process(self, packet: 'dict[str, Any]') -> 'Schema':
         """Revise ``schema`` data after unpacking process.
 
         Args:
-            schema: parsed schema
-            data: Packed data.
-            length: Length of data.
             packet: Unpacked data.
 
         Returns:
             Revised schema.
 
         """
-        ts_flag = Enum_TSFlag.get(schema.flags['flag'])
+        ts_flag = Enum_TSFlag.get(self.flags['flag'])
         if ts_flag == Enum_TSFlag.Timestamp_Only:
-            ts_data = schema.ts_data
-            schema.data = []
+            ts_data = self.ts_data
+            self.data = []
             ts_list = []  # type: list[int | timedelta]
 
             for ts in ts_data:
-                schema.data.append(ts)
+                self.data.append(ts)
 
                 if ts >> 31:
-                    warn(f'IPv4: [OptNo {schema.type}] invalid format: timestamp error: {ts_val}', ProtocolWarning)
+                    warn(f'IPv4: [OptNo {self.type}] invalid format: timestamp error: {ts_val}', ProtocolWarning)
                     ts_val = ts & 0x7FFFFFFF  # type: int | timedelta
                 else:
                     ts_val = datetime.timedelta(milliseconds=ts)
                 ts_list.append(ts_val)
             timestamp = tuple(ts_list)  # type: tuple[int | timedelta, ...] | OrderedMultiDict[IPv4Address, int | timedelta]
         elif ts_flag == Enum_TSFlag.IP_with_Timestamp:
-            ts_data = schema.ts_data
-            schema.data = OrderedMultiDict()
+            ts_data = self.ts_data
+            self.data = OrderedMultiDict()
             timestamp = OrderedMultiDict()
 
             for ip, ts in zip(ts_data[::2], ts_data[1::2]):
                 ip_val = cast('IPv4Address', ipaddress.ip_address(ip))
-                schema.data.add(ip_val, ts)
+                self.data.add(ip_val, ts)
 
                 if ts >> 31:
-                    warn(f'IPv4: [OptNo {schema.type}] invalid format: timestamp error: {ts_val}', ProtocolWarning)
+                    warn(f'IPv4: [OptNo {self.type}] invalid format: timestamp error: {ts_val}', ProtocolWarning)
                     ts_val = ts & 0x7FFFFFFF
                 else:
                     ts_val = datetime.timedelta(milliseconds=ts)
                 timestamp.add(ip_val, ts_val)
         elif ts_flag == Enum_TSFlag.Prespecified_IP_with_Timestamp:
-            ts_data = schema.ts_data
-            schema.data = OrderedMultiDict()
+            ts_data = self.ts_data
+            self.data = OrderedMultiDict()
             timestamp = OrderedMultiDict()
 
             for ip, ts in zip(ts_data[::2], ts_data[1::2]):
                 ip_val = cast('IPv4Address', ipaddress.ip_address(ip))
-                schema.data.add(ip_val, ts)
+                self.data.add(ip_val, ts)
 
                 if ts >> 31:
-                    warn(f'IPv4: [OptNo {schema.type}] invalid format: timestamp error: {ts_val}', ProtocolWarning)
+                    warn(f'IPv4: [OptNo {self.type}] invalid format: timestamp error: {ts_val}', ProtocolWarning)
                     ts_val = ts & 0x7FFFFFFF
                 else:
                     ts_val = datetime.timedelta(milliseconds=ts)
@@ -307,18 +297,18 @@ class TSOption(Option):
 
             # extract also the prespecified IP addresses
             # but set the timestamp to 0
-            pad = schema.remainder
+            pad = self.remainder
             for index in range(0, len(pad), 8):
                 buf_ip = pad[index:index + 4]
-                schema.data.add(ipaddress.ip_address(buf_ip), 0)  # type: ignore[arg-type]
+                self.data.add(ipaddress.ip_address(buf_ip), 0)  # type: ignore[arg-type]
         else:
-            warn(f'IPv4: [OptNo {schema.type}] invalid format: unknown timestmap flag: {ts_flag}', ProtocolWarning)
-            schema.data = schema.ts_data
-            timestamp = tuple(schema.ts_data)
+            warn(f'IPv4: [OptNo {self.type}] invalid format: unknown timestmap flag: {ts_flag}', ProtocolWarning)
+            self.data = self.ts_data
+            timestamp = tuple(self.ts_data)
 
-        schema.ts_flag = ts_flag
-        schema.timestamp = timestamp
-        return schema
+        self.ts_flag = ts_flag
+        self.timestamp = timestamp
+        return self
 
     if TYPE_CHECKING:
         ts_flag: 'Enum_TSFlag'
@@ -452,23 +442,18 @@ class _QSOption(Schema):
         selector=quick_start_data_selector,
     )
 
-    @classmethod
-    def post_process(cls, schema: 'Self', data: 'IO[bytes]',
-                     length: 'int', packet: 'dict[str, Any]') -> 'QuickStartRequestOption | QuickStartReportOption':
+    def post_process(self, packet: 'dict[str, Any]') -> 'Schema':
         """Revise ``schema`` data after unpacking process.
 
         Args:
-            schema: parsed schema
-            data: Packed data.
-            length: Length of data.
             packet: Unpacked data.
 
         Returns:
             Revised schema.
 
         """
-        ret = schema.data
-        ret.func = Enum_QSFunction.get(packet['flags']['func'])
+        ret = self.data
+        ret.func = Enum_QSFunction.get(self.flags['func'])
         return ret
 
 

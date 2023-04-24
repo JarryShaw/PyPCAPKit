@@ -488,23 +488,18 @@ class EncryptedParameter(Parameter):
 
         packet['__cipher__'] = cipher_id
 
-    @classmethod
-    def post_process(cls, schema: 'Self', data: 'IO[bytes]',
-                     length: 'int', packet: 'dict[str, Any]') -> 'Self':
+    def post_process(self, packet: 'dict[str, Any]') -> 'Schema':
         """Revise ``schema`` data after unpacking process.
 
         Args:
-            schema: parsed schema
-            data: Packed data.
-            length: Length of data.
             packet: Unpacked data.
 
         Returns:
             Revised schema.
 
         """
-        schema.cipher = packet['__cipher__']
-        return schema
+        self.cipher = packet['__cipher__']
+        return self
 
     if TYPE_CHECKING:
         #: Cipher ID.

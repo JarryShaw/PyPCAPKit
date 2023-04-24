@@ -180,7 +180,7 @@ def prepare(func: 'Callable[Concatenate[Type[R_prepare], bytes | IO[bytes], Opti
         # and eventually revise the schema data
         cls.pre_process(packet)
         schema = func(cls, data, length, packet)
-        ret = cls.post_process(schema, data, length, packet)
+        ret = schema.post_process(packet)
 
-        return ret
+        return cast('R_prepare', ret)
     return unpack

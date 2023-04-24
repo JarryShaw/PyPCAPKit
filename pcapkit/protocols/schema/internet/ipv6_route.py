@@ -151,56 +151,51 @@ class RPL(RoutingType):
     #: Padding.
     padding: 'bytes' = PaddingField(length=lambda pkt: pkt['pad']['pad_len'])
 
-    @classmethod
-    def post_process(cls, schema: 'Self', data: 'IO[bytes]',
-                     length: 'int', packet: 'dict[str, Any]') -> 'Self':
+    def post_process(self, packet: 'dict[str, Any]') -> 'Schema':
         """Revise ``schema`` data after unpacking process.
 
         Args:
-            schema: parsed schema
-            data: Packed data.
-            length: Length of data.
             packet: Unpacked data.
 
         Returns:
             Revised schema.
 
         """
-        buffer = cast('bytes', schema.ip)
+        buffer = cast('bytes', self.ip)
         dst_val = cast('Optional[IPv6Address]', packet.get('dst'))
         dst = dst_val.packed if dst_val is not None else None
 
-        ilen = 16 - schema.cmpr_i
-        elen = 16 - schema.cmpr_e
+        ilen = 16 - self.cmpr_i
+        elen = 16 - self.cmpr_e
         addr = []  # type: list[IPv6Address | bytes]
         counter = 0
 
         # Addresses[1..n-1]
-        for _ in range((len(buffer) - schema.pad['pad_len'] - elen) // ilen):
+        for _ in range((len(buffer) - self.pad['pad_len'] - elen) // ilen):
             buf = buffer[counter:counter + ilen]
             if dst is None:
-                if schema.cmpr_i == 0:
+                if self.cmpr_i == 0:
                     addr.append(cast('IPv6Address', ipaddress.ip_address(buf)))
                 else:
                     addr.append(buf)
             else:
-                buf = dst[:schema.cmpr_i] + buf
+                buf = dst[:self.cmpr_i] + buf
                 addr.append(cast('IPv6Address', ipaddress.ip_address(buf)))
             counter += ilen
 
         # Addresses[n]
         buf = buffer[counter:counter + elen]
         if dst is None:
-            if schema.cmpr_e == 0:
+            if self.cmpr_e == 0:
                 addr.append(cast('IPv6Address', ipaddress.ip_address(buf)))
             else:
                 addr.append(buf)
         else:
-            buf = dst[:schema.cmpr_e] + buf
+            buf = dst[:self.cmpr_e] + buf
             addr.append(cast('IPv6Address', ipaddress.ip_address(buf)))
 
-        schema.ip = addr
-        return schema
+        self.ip = addr
+        return self
 
     if TYPE_CHECKING:
         #: Addresses (SRH prefix compression decoded).
