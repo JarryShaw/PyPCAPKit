@@ -51,10 +51,12 @@ class OptionType(Vendor):
         table_1 = soup.select('table#table-1')[0]
         table_3 = soup.select('table#table-3')[0]
         table_4 = soup.select('table#table-4')[0]
+        table_7 = soup.select('table#table-7')[0]
         return {
             'table-1': table_1.select('tr')[1:],
             'table-3': table_3.select('tr')[1:],
             'table-4': table_4.select('tr')[1:],
+            'table-7': table_7.select('tr')[1:],
         }
 
     def process(self, data: 'dict[str, list[Tag]]') -> 'tuple[list[str], list[str]]':  # type: ignore[override]
@@ -99,6 +101,15 @@ class OptionType(Vendor):
             enum.append(f'#: {sufs}\n    {pref}')
 
         for content in data['table-4']:
+            name = content.select('td')[0].text.strip()
+            code = content.select('td')[1].text.strip()
+
+            pref = f'{name} = {int(code)}'
+            sufs = self.wrap_comment(name)
+
+            enum.append(f'#: {sufs}\n    {pref}')
+
+        for content in data['table-7']:
             name = content.select('td')[0].text.strip()
             code = content.select('td')[1].text.strip()
 

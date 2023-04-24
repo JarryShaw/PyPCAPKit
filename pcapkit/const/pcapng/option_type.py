@@ -90,6 +90,15 @@ class OptionType(IntEnum):
     #: epb_verdict
     epb_verdict = 7
 
+    #: ns_dnsname
+    ns_dnsname = 2
+
+    #: ns_dnsIP4addr
+    ns_dnsIP4addr = 3
+
+    #: ns_dnsIP6addr
+    ns_dnsIP6addr = 4
+
     @staticmethod
     def get(key: 'int | str', default: 'int' = -1) -> 'OptionType':
         """Backport support for original codes.
