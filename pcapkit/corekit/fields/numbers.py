@@ -66,10 +66,11 @@ class NumberField(Field[int], Generic[_T]):
             length = self.__length__
         super().__init__(length, default, callback)
 
-        if bit_length is None:
-            bit_length = self._length * 8
-        self._bit_length = bit_length
-        self._bit_mask = (1 << bit_length) - 1
+        if bit_length is not None:
+            self._bit_length = bit_length
+            self._bit_mask = (1 << bit_length) - 1
+        else:
+            self._bit_length, self._bit_mask = -1, 0x00
 
         self._signed = signed if self.__signed__ is None else self.__signed__
         self._byteorder = byteorder
@@ -97,6 +98,10 @@ class NumberField(Field[int], Generic[_T]):
 
         """
         new_self = super().__call__(packet)
+
+        if self._bit_length < 0:
+            self._bit_length = self._length * 8
+            self._bit_mask = (1 << self._bit_length) - 1
 
         endian = '>' if new_self._byteorder == 'big' else '<'
         struct_fmt = new_self.build_template(new_self._length, new_self._signed)
