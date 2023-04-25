@@ -242,7 +242,7 @@ class OptionField(ListField):
         temp = []  # type: list[Schema]
         while length:
             # unpack option type using base schema
-            meta = self._base_schema.unpack(file, length, packet)  # type: ignore[call-arg,misc]
+            meta = self._base_schema.unpack(file, length, packet)  # type: ignore[call-arg,misc,var-annotated]
             code = cast('int', meta[self._type_name])
             schema = self._registry[code]
 
@@ -250,7 +250,7 @@ class OptionField(ListField):
             file.seek(-len(meta), io.SEEK_CUR)
 
             # unpack option using option schema
-            data = schema.unpack(file, length, packet)  # type: ignore[call-arg,misc]
+            data = schema.unpack(file, length, packet)  # type: ignore[call-arg,misc,var-annotated]
             new_packet[self.name].add(code, data)
             temp.append(data)
 

@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 """numerical field class"""
 
-import copy
 import enum
+import math
 from typing import TYPE_CHECKING, Generic, TypeVar, cast
 
 import aenum
@@ -96,8 +96,7 @@ class NumberField(Field[int], Generic[_T]):
             updating the current instance.
 
         """
-        new_self = copy.copy(self)
-        new_self._callback(new_self, packet)
+        new_self = super().__call__(packet)
 
         endian = '>' if new_self._byteorder == 'big' else '<'
         struct_fmt = new_self.build_template(new_self._length, new_self._signed)
@@ -143,6 +142,15 @@ class NumberField(Field[int], Generic[_T]):
         value = value & self._bit_mask
         if not self._need_process:
             return value
+
+        if self._length < 0:
+            self._length = math.ceil(value.bit_length() // 8)
+
+            endian = '>' if self._byteorder == 'big' else '<'
+            struct_fmt = self.build_template(self._length, self._signed)
+
+            self._template = f'{endian}{struct_fmt}'
+
         return value.to_bytes(
             self._length, self._byteorder, signed=self._signed
         )

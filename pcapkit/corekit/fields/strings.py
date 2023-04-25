@@ -45,7 +45,7 @@ class _TextField(Field[_T], Generic[_T]):
                  callback: 'Callable[[Self, dict[str, Any]], None]' = lambda *_: None) -> 'None':
         super().__init__(length, default, callback)  # type: ignore[arg-type]
 
-        self._template = f'{self._length}s'
+        self._template = f'{self._length}s' if self._length >= 0 else '1024s'  # reasonable default
 
     def __call__(self, packet: 'dict[str, Any]') -> 'Self':
         """Update field attributes.
@@ -77,6 +77,22 @@ class BytesField(_TextField[bytes]):
             :meth:`self.__call__ <pcapkit.corekit.fields.field._Field.__call__>`.
 
     """
+
+    def pre_process(self, value: 'bytes', packet: 'dict[str, Any]') -> 'bytes':  # pylint: disable=unused-argument
+        """Process field value before construction (packing).
+
+        Arguments:
+            value: Field value.
+            packet: Packet data.
+
+        Returns:
+            Processed field value.
+
+        """
+        if self._length < 0:
+            self._length = len(value)
+            self._template = f'{self._length}s'
+        return value
 
 
 class StringField(_TextField[str]):
@@ -129,6 +145,10 @@ class StringField(_TextField[str]):
         """
         if self._unquote:
             value = urllib_parse.quote(value, encoding=self._encoding or 'utf-8', errors=self._errors)
+
+        if self._length < 0:
+            self._length = len(value)
+            self._template = f'{self._length}s'
         return value.encode(self._encoding or 'utf-8', self._errors)
 
     def post_process(self, value: 'bytes', packet: 'dict[str, Any]') -> 'str':  # pylint: disable=unused-argument
@@ -160,8 +180,7 @@ class BitField(_TextField[Dict[str, Any]]):
     """Bit value for protocol fields.
 
     Args:
-        length: Field size (in bytes); if a callable is given, it should return
-            an integer value and accept the current packet as its only argument.
+        length: Field size (in bytes).
         default: Field default value, if any.
         namespace: Field namespace (a dict mapping field name to a tuple of start index,
             and length of the subfield).
@@ -170,7 +189,7 @@ class BitField(_TextField[Dict[str, Any]]):
 
     """
 
-    def __init__(self, length: 'int | Callable[[dict[str, Any]], int]',
+    def __init__(self, length: 'int',
                  default: 'dict[str, Any] | NoValueType' = NoValue,
                  namespace: 'Optional[dict[str, NamespaceEntry]]' = None,
                  callback: 'Callable[[Self, dict[str, Any]], None]' = lambda *_: None) -> 'None':

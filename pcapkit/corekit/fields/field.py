@@ -33,12 +33,21 @@ NoValue = NoValueType()
 
 
 class _Field(Generic[_T], metaclass=abc.ABCMeta):
-    """Internal base class for protocol fields."""
+    """Internal base class for protocol fields.
+
+    Important:
+        A negative value of :attr:`~_Field.length` indicates that the field
+        is variable-length (i.e., length unspecified) and thus
+        :meth:`~_Field.pack` should be considerate of the template format
+        and the actual value provided for packing.
+
+    """
 
     if TYPE_CHECKING:
         _name: 'str'
         _default: '_T | NoValueType'
         _template: 'str'
+        _callback: 'Callable[[Self, dict[str, Any]], None]'
 
     @property
     def name(self) -> 'str':
@@ -95,7 +104,7 @@ class _Field(Generic[_T], metaclass=abc.ABCMeta):
 
         """
         new_self = copy.copy(self)
-        new_self._callback(new_self, packet)  # type: ignore[attr-defined]
+        new_self._callback(new_self, packet)
         return new_self
 
     def __repr__(self) -> 'str':
@@ -199,7 +208,7 @@ class Field(_Field[_T], Generic[_T]):
 
         self._length_callback = None
         if not isinstance(length, int):
-            self._length_callback, length = length, 0
+            self._length_callback, length = length, -1
         self._length = length
 
     def __call__(self, packet: 'dict[str, Any]') -> 'Self':

@@ -31,9 +31,7 @@ class _IPField(Field[_T], Generic[_T]):
     """Internal IP related value for protocol fields.
 
     Args:
-        length: Field size (in bytes); if a callable is given, it should return
-            an integer value and accept the current packet as its only argument.
-        default: Field default value, if any.
+        length: Field size (in bytes).
         callback: Callback function to be called upon
             :meth:`self.__call__ <pcapkit.corekit.fields.field._Field.__call__>`.
 
@@ -49,9 +47,7 @@ class _IPAddressField(_IPField[_AT]):
     """Internal IP address value for protocol fields.
 
     Args:
-        length: Field size (in bytes); if a callable is given, it should return
-            an integer value and accept the current packet as its only argument.
-        default: Field default value, if any.
+        length: Field size (in bytes).
         callback: Callback function to be called upon
             :meth:`self.__call__ <pcapkit.corekit.fields.field._Field.__call__>`.
 

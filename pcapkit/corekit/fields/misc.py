@@ -278,9 +278,9 @@ class PayloadField(_Field[_TP]):
 
         self._length_callback = None
         if not isinstance(length, int):
-            self._length_callback, length = length, 0
+            self._length_callback, length = length, -1
         self._length = length
-        self._template = f'{self._length}s' if self._length else '1024s'  # use a reasonable default
+        self._template = f'{self._length}s' if self._length >= 0 else '1024s'  # use a reasonable default
 
     def __call__(self, packet: 'dict[str, Any]') -> 'Self':
         """Update field attributes.
@@ -347,11 +347,21 @@ class PayloadField(_Field[_TP]):
             file = io.BytesIO(buffer)  # type: IO[bytes]
         else:
             file = buffer
-        return self._protocol(file, self.length)  # type: ignore[abstract]
+
+        length = self._length if self._length > 0 else None
+        return self._protocol(file, length)  # type: ignore[abstract]
 
 
 class SwitchField(_Field[_TC]):
-    """Conditional type-switching field for protocol schema."""
+    """Conditional type-switching field for protocol schema.
+
+    Args:
+        length: Field size (in bytes); if a callable is given, it should return
+            an integer value and accept the current packet as its only argument.
+        selector: Callable function to select field type, which should accept
+            the current packet as its only argument and return a field instance.
+
+    """
 
     @property
     def optional(self) -> 'bool':
@@ -379,7 +389,7 @@ class SwitchField(_Field[_TC]):
 
         """
         new_self = copy.copy(self)
-        new_self._field = self._selector(packet)
+        new_self._field = self._selector(packet)(packet)
         new_self._template = new_self._field.template
         return new_self
 
@@ -445,7 +455,17 @@ class SwitchField(_Field[_TC]):
 
 
 class SchemaField(_Field[_TS]):
-    """Schema field for protocol schema."""
+    """Schema field for protocol schema.
+
+    Args:
+        length: Field size (in bytes); if a callable is given, it should return
+            an integer value and accept the current packet as its only argument.
+        schema: Field schema.
+        default: Default value for field.
+        callback: Callback function to process field value, which should accept
+            the current field and the current packet as its arguments.
+
+    """
 
     @property
     def optional(self) -> 'bool':
@@ -474,9 +494,9 @@ class SchemaField(_Field[_TS]):
 
         self._length_callback = None
         if not isinstance(length, int):
-            self._length_callback, length = length, 0
+            self._length_callback, length = length, -1
         self._length = length
-        self._template = f'{self._length}s' if self._length else '1024s'  # use a reasonable default
+        self._template = f'{self._length}s' if self._length >= 0 else '1024s'  # use a reasonable default
 
     def __call__(self, packet: 'dict[str, Any]') -> 'Self':
         """Update field attributes.

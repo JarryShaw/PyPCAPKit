@@ -6,6 +6,7 @@ import collections.abc
 import functools
 import io
 import itertools
+import math
 from typing import TYPE_CHECKING, Generic, TypeVar, cast
 
 from pcapkit.corekit.fields.collections import ListField
@@ -358,10 +359,22 @@ class Schema(Mapping[str, VT], Generic[VT]):
         Returns:
             Packed :class:`Schema` as :obj:`bytes`.
 
+        Notes:
+            Since we do not know the length of the packet, we use a
+            reasonable default value ``-1`` for the ``__length__``
+            field, as the :class:`~pcapkit.corekit.fields.field.Field`
+            class will consider negative value as a placeholder.
+
+            If you want to pack the packet with the correct length,
+            please provide the ``__length__`` value before packing.
+
         """
         if packet is None:
             packet = {}
         packet.update(self.__dict__)
+
+        if '__length__' not in packet:
+            packet['__length__'] = -1  # reasonable default value
 
         for field in self.__fields__.values():
             field = field(packet)
