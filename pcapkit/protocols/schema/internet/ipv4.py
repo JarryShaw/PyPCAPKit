@@ -39,9 +39,7 @@ __all__ = [
 if TYPE_CHECKING:
     from datetime import timedelta
     from ipaddress import IPv4Address
-    from typing import IO, Any, Optional
-
-    from typing_extensions import Self
+    from typing import Any, Optional
 
     from pcapkit.corekit.fields.field import _Field as Field
     from pcapkit.corekit.multidict import OrderedMultiDict

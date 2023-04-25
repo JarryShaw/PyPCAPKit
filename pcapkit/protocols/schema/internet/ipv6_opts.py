@@ -3,7 +3,7 @@
 """header schema for IPv6 destination options"""
 
 import collections
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING
 
 from pcapkit.const.ipv6.option import Option as Enum_Option
 from pcapkit.const.ipv6.qs_function import QSFunction as Enum_QSFunction
@@ -38,9 +38,7 @@ __all__ = [
 
 if TYPE_CHECKING:
     from ipaddress import IPv4Address, IPv6Address
-    from typing import IO, Any, Optional
-
-    from typing_extensions import Self
+    from typing import Any, Optional
 
     from pcapkit.corekit.fields.field import _Field as Field
     from pcapkit.protocols.protocol import Protocol

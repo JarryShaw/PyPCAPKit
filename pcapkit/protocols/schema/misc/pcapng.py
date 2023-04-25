@@ -6,14 +6,14 @@ import collections
 import sys
 from typing import TYPE_CHECKING
 
-from pcapkit.const.pcapng.secrets_type import SecretsType as Enum_SecretsType
 from pcapkit.const.pcapng.block_type import BlockType as Enum_BlockType
 from pcapkit.const.pcapng.hash_algorithm import HashAlgorithm as Enum_HashAlgorithm
 from pcapkit.const.pcapng.option_type import OptionType as Enum_OptionType
 from pcapkit.const.pcapng.record_type import RecordType as Enum_RecordType
+from pcapkit.const.pcapng.secrets_type import SecretsType as Enum_SecretsType
 from pcapkit.const.pcapng.verdict_type import VerdictType as Enum_VerdictType
 from pcapkit.const.reg.linktype import LinkType as Enum_LinkType
-from pcapkit.corekit.fields.collections import ListField, OptionField
+from pcapkit.corekit.fields.collections import OptionField
 from pcapkit.corekit.fields.ipaddress import (IPv4AddressField, IPv4InterfaceField,
                                               IPv6AddressField, IPv6InterfaceField)
 from pcapkit.corekit.fields.misc import ForwardMatchField, PayloadField, SchemaField, SwitchField
@@ -53,8 +53,8 @@ if TYPE_CHECKING:
     from ipaddress import IPv4Address, IPv4Interface, IPv6Address, IPv6Interface
     from typing import Any
 
-    from pcapkit.corekit.fields.numbers import NumberField
     from pcapkit.corekit.fields.field import _Field as Field
+    from pcapkit.corekit.fields.numbers import NumberField
 
 if SPHINX_TYPE_CHECKING:
     from typing_extensions import TypedDict

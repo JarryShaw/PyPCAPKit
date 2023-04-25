@@ -3,10 +3,8 @@
 
 import collections
 import collections.abc
-import functools
 import io
 import itertools
-import math
 from typing import TYPE_CHECKING, Generic, TypeVar, cast
 
 from pcapkit.corekit.fields.collections import ListField
