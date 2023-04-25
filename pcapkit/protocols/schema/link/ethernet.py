@@ -24,7 +24,7 @@ def callback_payload(self: 'PayloadField', packet: 'dict[str, Any]') -> 'None':
     from pcapkit.protocols.link.ethernet import Ethernet  # pylint: disable=import-outside-toplevel
 
     type_ = packet['type']
-    module, name = Ethernet.__proto__[type_]  # type: ignore[attr-defined]
+    module, name = Ethernet.__proto__[type_]
     protocol = cast('Type[Protocol]', getattr(importlib.import_module(module), name))
     self.protocol = protocol
 
