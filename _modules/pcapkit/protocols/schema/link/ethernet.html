@@ -366,7 +366,7 @@
     <span class="kn">from</span> <span class="nn">pcapkit.protocols.link.ethernet</span> <span class="kn">import</span> <span class="n">Ethernet</span>  <span class="c1"># pylint: disable=import-outside-toplevel</span>
 
     <span class="n">type_</span> <span class="o">=</span> <span class="n">packet</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span>
-    <span class="n">module</span><span class="p">,</span> <span class="n">name</span> <span class="o">=</span> <span class="n">Ethernet</span><span class="o">.</span><span class="n">__proto__</span><span class="p">[</span><span class="n">type_</span><span class="p">]</span>  <span class="c1"># type: ignore[attr-defined]</span>
+    <span class="n">module</span><span class="p">,</span> <span class="n">name</span> <span class="o">=</span> <span class="n">Ethernet</span><span class="o">.</span><span class="n">__proto__</span><span class="p">[</span><span class="n">type_</span><span class="p">]</span>
     <span class="n">protocol</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">&#39;Type[Protocol]&#39;</span><span class="p">,</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">importlib</span><span class="o">.</span><span class="n">import_module</span><span class="p">(</span><span class="n">module</span><span class="p">),</span> <span class="n">name</span><span class="p">))</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">protocol</span> <span class="o">=</span> <span class="n">protocol</span></div>
 
