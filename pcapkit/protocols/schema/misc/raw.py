@@ -17,8 +17,7 @@ class Raw(Schema):
     """Schema for raw packet."""
 
     #: Packet data.
-    packet: 'bytes' = PayloadField(length=lambda x: x.get('__length__', None),
-                                   default=b'', protocol='Raw')
+    packet: 'bytes' = PayloadField(length=lambda x: x['__length__'], default=b'')
 
     if TYPE_CHECKING:
         def __init__(self, packet: 'bytes | Schema | Protocol') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements
