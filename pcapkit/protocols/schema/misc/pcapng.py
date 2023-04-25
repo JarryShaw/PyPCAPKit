@@ -6,6 +6,7 @@ import collections
 import sys
 from typing import TYPE_CHECKING
 
+from pcapkit.const.pcapng.secrets_type import SecretsType as Enum_SecretsType
 from pcapkit.const.pcapng.block_type import BlockType as Enum_BlockType
 from pcapkit.const.pcapng.hash_algorithm import HashAlgorithm as Enum_HashAlgorithm
 from pcapkit.const.pcapng.option_type import OptionType as Enum_OptionType
@@ -15,7 +16,7 @@ from pcapkit.const.reg.linktype import LinkType as Enum_LinkType
 from pcapkit.corekit.fields.collections import ListField, OptionField
 from pcapkit.corekit.fields.ipaddress import (IPv4AddressField, IPv4InterfaceField,
                                               IPv6AddressField, IPv6InterfaceField)
-from pcapkit.corekit.fields.misc import ForwardMatchField, PayloadField
+from pcapkit.corekit.fields.misc import ForwardMatchField, PayloadField, SchemaField, SwitchField
 from pcapkit.corekit.fields.numbers import (EnumField, Int64Field, UInt8Field, UInt16Field,
                                             UInt32Field, UInt64Field)
 from pcapkit.corekit.fields.strings import BitField, BytesField, PaddingField, StringField
@@ -40,17 +41,20 @@ __all__ = [
 
     'NameResolutionRecord', 'UnknownRecord', 'EndRecord', 'IPv4Record', 'IPv6Record',
 
+    'DSBSecrets', 'TLSKeyLog', 'WireGuardKeyLog', 'ZigBeeNWKKey', 'ZigBeeAPSKey',
+
     'UnknownBlock', 'SectionHeaderBlock', 'InterfaceDescriptionBlock',
     'EnhancedPacketBlock', 'SimplePacketBlock', 'NameResolutionBlock',
+    'InterfaceStatisticsBlock', 'SystemdJournalExportBlock', 'DecryptionSecretsBlock',
+    'CustomBlock', 'PacketBlock',
 ]
 
 if TYPE_CHECKING:
     from ipaddress import IPv4Address, IPv4Interface, IPv6Address, IPv6Interface
-    from typing import IO, Any
-
-    from typing_extensions import Self
+    from typing import Any
 
     from pcapkit.corekit.fields.numbers import NumberField
+    from pcapkit.corekit.fields.field import _Field as Field
 
 if SPHINX_TYPE_CHECKING:
     from typing_extensions import TypedDict
@@ -129,6 +133,35 @@ def shb_byteorder_callback(field: 'NumberField', packet: 'dict[str, Any]') -> 'N
         raise ProtocolError(f'unknown byteorder magic: {magic:#x}')
 
 
+def dsb_secrets_selector(packet: 'dict[str, Any]') -> 'Field':
+    """Selector function for :attr:`DecryptionSecretsBlock.secrets_data` field.
+
+    Args:
+        pkt: Packet data.
+
+    Returns:
+        * If ``secrets_type`` is unknown, returns a
+          :class:`~pcapkit.corekit.fields.strings.BytesField` instance.
+        * If ``secret_type`` is :attr:`~pcapkit.const.pcapng.secrets_type.Secrets_Type.TLS_Key_Log`
+          and/or :attr:`~pcapkit.const.pcapng.secrets_type.Secrets_Type.WireGuard_Key_Log`,
+          returns a :class:`~pcapkit.corekit.fields.strings.StringField` instance.
+        * Otherwise, returns a :class:`~pcapkit.corekit.fields.misc.SchemaField`
+          wrapped :class:`~pcapkit.protocols.schema.misc.pcapng.DSBSecrets`
+          subclass instance.
+
+    """
+    secrets_type = packet['secrets_type']  # type: int
+    if secrets_type == Enum_SecretsType.TLS_Key_Log:
+        return SchemaField(length=packet['secrets_length'], schema=TLSKeyLog)
+    if secrets_type == Enum_SecretsType.WireGuard_Key_Log:
+        return SchemaField(length=packet['secrets_length'], schema=WireGuardKeyLog)
+    if secrets_type == Enum_SecretsType.ZigBee_NWK_Key:
+        return SchemaField(length=packet['secrets_length'], schema=ZigBeeNWKKey)
+    if secrets_type == Enum_SecretsType.ZigBee_APS_Key:
+        return SchemaField(length=packet['secrets_length'], schema=ZigBeeAPSKey)
+    return SchemaField(length=packet['secrets_length'], schema=UnknownSecrets)
+
+
 class Option(Schema):
     """Header schema for PCAP-NG file options."""
 
@@ -203,7 +236,7 @@ class UnknownBlock(PCAPNG):
     #: Block total length.
     length: 'int' = UInt32Field(callback=byteorder_callback)
     #: Block body (including padding).
-    body: 'bytes' = PayloadField(length=lambda pkt: pkt['length'])
+    body: 'bytes' = PayloadField(length=lambda pkt: pkt['length'] - 12)
     #: Block total length.
     length2: 'int' = UInt32Field(callback=byteorder_callback)
 
@@ -615,7 +648,7 @@ class EnhancedPacketBlock(PCAPNG):
     #: Packet data.
     packet_data: 'bytes' = BytesField(length=lambda pkt: pkt['captured_len'])
     #: Padding.
-    padding: 'bytes' = PaddingField(length=lambda pkt: (4 - pkt['length'] % 4) % 4)
+    padding: 'bytes' = PaddingField(length=lambda pkt: (4 - pkt['captured_len'] % 4) % 4)
     #: Options.
     options: 'list[Option]' = OptionField(
         length=lambda pkt: pkt['length'] - 32 - pkt['captured_len'] - len(pkt['padding']),
@@ -654,7 +687,7 @@ class SimplePacketBlock(PCAPNG):
     #: Packet data.
     packet_data: 'bytes' = BytesField(length=lambda pkt: min(pkt.get('snaplen', 0xFFFFFFFFFFFFFFFF), pkt['original_len']))
     #: Padding.
-    padding: 'bytes' = PaddingField(length=lambda pkt: (4 - pkt['length'] % 4) % 4)
+    padding: 'bytes' = PaddingField(length=lambda pkt: (4 - len(pkt['packet_data']) % 4) % 4)
     #: Block total length.
     length2: 'int' = UInt32Field(callback=byteorder_callback)
 
@@ -788,7 +821,7 @@ class NameResolutionBlock(PCAPNG):
     length: 'int' = UInt16Field(callback=byteorder_callback)
     #: Name resolution records.
     records: 'list[NameResolutionRecord]' = OptionField(
-        length=lambda pkt: pkt['length'],
+        length=lambda pkt: pkt['length'] - 12,
         base_schema=NameResolutionRecord,
         type_name='type',
         registry=collections.defaultdict(lambda: UnknownRecord, {
@@ -800,7 +833,7 @@ class NameResolutionBlock(PCAPNG):
     )
     #: Options.
     options: 'list[Option]' = OptionField(
-        length=lambda pkt: pkt['length'] - 12 - pkt['captured_len'],
+        length=lambda pkt: pkt['__length__'] - 4,
         base_schema=Option,
         type_name='type',
         registry=collections.defaultdict(lambda: UnknownOption, {
@@ -939,6 +972,169 @@ class SystemdJournalExportBlock(PCAPNG):
     #: Block total length.
     length: 'int' = UInt32Field(callback=byteorder_callback)
     #: Journal entry.
-    entry: 'bytes' = BytesField(length=lambda pkt: pkt['length'])
+    entry: 'bytes' = BytesField(length=lambda pkt: pkt['length'] - 12)
     #: Block total length.
     length2: 'int' = UInt32Field(callback=byteorder_callback)
+
+
+class DSBSecrets(Schema):
+    """Header schema for DSB secrets data."""
+
+
+class UnknownSecrets(DSBSecrets):
+    """Header schema for unknown DSB secrets data."""
+
+    #: Secrets data.
+    data: 'bytes' = BytesField(length=lambda pkt: pkt['__length__'])
+
+    if TYPE_CHECKING:
+        def __init__(self, data: 'bytes') -> 'None': ...
+
+
+class TLSKeyLog(DSBSecrets):
+    """Header schema for TLS Key Log secrets data."""
+
+    #: TLS key log data.
+    data: 'str' = StringField(length=lambda pkt: pkt['__length__'], encoding='ascii')
+
+    if TYPE_CHECKING:
+        def __init__(self, data: 'str') -> 'None': ...
+
+
+class WireGuardKeyLog(DSBSecrets):
+    """Header schema for WireGuard Key Log secrets data."""
+
+    #: WireGuard key log data.
+    data: 'str' = StringField(length=lambda pkt: pkt['__length__'], encoding='ascii')
+
+    if TYPE_CHECKING:
+        def __init__(self, data: 'str') -> 'None': ...
+
+
+class ZigBeeNWKKey(DSBSecrets):
+    """Header schema for ZigBee NWK Key and ZigBee PANID secrets data."""
+
+    #: AES-128 NKW key.
+    key: 'bytes' = BytesField(length=16)
+    #: ZigBee PANID.
+    panid: 'int' = UInt16Field(byteorder='little')
+    #: Padding.
+    padding: 'bytes' = BytesField(length=2)
+
+    if TYPE_CHECKING:
+        def __init__(self, key: 'bytes', panid: 'int') -> 'None': ...
+
+
+class ZigBeeAPSKey(DSBSecrets):
+    """Header schema for ZigBee APS Key secrets data."""
+
+    #: AES-128 APS key.
+    key: 'bytes' = BytesField(length=16)
+    #: ZigBee PANID.
+    panid: 'int' = UInt16Field(byteorder='little')
+    #: Low node short address.
+    addr_low: 'int' = UInt16Field(byteorder='little')
+    #: High node short address.
+    addr_high: 'int' = UInt16Field(byteorder='little')
+    #: Padding.
+    padding: 'bytes' = BytesField(length=2)
+
+    if TYPE_CHECKING:
+        def __init__(self, key: 'bytes', panid: 'int', addr_low: 'int', addr_high: 'int') -> 'None': ...
+
+
+class DecryptionSecretsBlock(PCAPNG):
+    """Header schema for PCAP-NG Decryption Secrets Block (DSB)."""
+
+    #: Block total length.
+    length: 'int' = UInt32Field(callback=byteorder_callback)
+    #: Secrets type.
+    secrets_type: 'Enum_SecretsType' = EnumField(length=4, namespace=Enum_SecretsType, callback=byteorder_callback)
+    #: Secrets length.
+    secrets_length: 'int' = UInt32Field(callback=byteorder_callback)
+    #: Secrets data.
+    secrets_data: 'DSBSecrets' = SwitchField(
+        length=lambda pkt: pkt['secrets_length'],
+        selector=dsb_secrets_selector,
+    )
+    #: Padding.
+    padding: 'bytes' = BytesField(length=lambda pkt: (4 - pkt['secrets_length'] % 4) % 4)
+    #: Options.
+    options: 'list[Option]' = OptionField(
+        length=lambda pkt: pkt['length'] - 20 - pkt['secrets_length'] - len(pkt['padding']),
+        base_schema=Option,
+        type_name='type',
+        registry=collections.defaultdict(lambda: UnknownOption, {
+            Enum_OptionType.opt_endofopt: EndOfOption,
+            Enum_OptionType.opt_comment: CommentOption,
+        }),
+        eool=Enum_OptionType.opt_endofopt,
+    )
+    #: Block total length.
+    length2: 'int' = UInt32Field(callback=byteorder_callback)
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_BlockType', length: 'int', secrets_type: 'Enum_SecretsType',
+                     secrets_length: 'int', secrets_data: 'bytes', padding: 'bytes',
+                     options: 'list[Option | bytes] | bytes', length2: 'int') -> 'None': ...
+
+
+class CustomBlock(PCAPNG):
+    """Header schema for PCAP-NG Custom Block (CB)."""
+
+    #: Block total length.
+    length: 'int' = UInt32Field(callback=byteorder_callback)
+    #: Private enterprise number.
+    pen: 'int' = UInt32Field(callback=byteorder_callback)
+    #: Custom data.
+    data: 'bytes' = BytesField(length=lambda pkt: pkt['length'] - 16)
+    #: Block total length.
+    length2: 'int' = UInt32Field(callback=byteorder_callback)
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_BlockType', length: 'int', pen: 'int', data: 'bytes', length2: 'int') -> 'None': ...
+
+
+class PacketBlock(PCAPNG):
+    """Header schema for PCAP-NG Packet Block (obsolete)."""
+
+    __payload__ = 'packet_data'
+
+    #: Block total length.
+    length: 'int' = UInt32Field(callback=byteorder_callback)
+    #: Interface ID.
+    interface_id: 'int' = UInt32Field(callback=byteorder_callback)
+    #: Drops count.
+    drops_count: 'int' = UInt32Field(callback=byteorder_callback, default=0xFFFF)
+    #: Timestamp (high).
+    timestamp_high: 'int' = UInt32Field(callback=byteorder_callback)
+    #: Timestamp (low).
+    timestamp_low: 'int' = UInt32Field(callback=byteorder_callback)
+    #: Captured packet length.
+    captured_length: 'int' = UInt32Field(callback=byteorder_callback)
+    #: Original packet length.
+    original_length: 'int' = UInt32Field(callback=byteorder_callback)
+    #: Packet data.
+    packet_data: 'bytes' = BytesField(length=lambda pkt: pkt['captured_length'])
+    #: Padding.
+    padding: 'bytes' = BytesField(length=lambda pkt: (4 - pkt['captured_length'] % 4) % 4)
+    #: Options.
+    options: 'list[Option]' = OptionField(
+        length=lambda pkt: pkt['length'] - 32 - pkt['captured_length'] - len(pkt['padding']),
+        base_schema=Option,
+        type_name='type',
+        registry=collections.defaultdict(lambda: UnknownOption, {
+            Enum_OptionType.opt_endofopt: EndOfOption,
+            Enum_OptionType.opt_comment: CommentOption,
+            Enum_OptionType.pack_flags: EPB_FlagsOption,
+            Enum_OptionType.pack_hash: EPB_HashOption,
+        }),
+        eool=Enum_OptionType.opt_endofopt,
+    )
+    #: Block total length.
+    length2: 'int' = UInt32Field(callback=byteorder_callback)
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_BlockType', length: 'int', interface_id: 'int', drops_count: 'int',
+                     timestamp_high: 'int', timestamp_low: 'int', captured_length: 'int', original_length: 'int',
+                     packet_data: 'bytes', padding: 'bytes', options: 'list[Option | bytes] | bytes', length2: 'int') -> 'None': ...
