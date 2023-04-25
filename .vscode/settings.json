@@ -212,6 +212,7 @@
         "packetid",
         "padn",
         "padr",
+        "PANID",
         "PCAPIO",
         "PCAPNG",
         "pcaprec",
