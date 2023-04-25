@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
-"""Secrets Types
-===================
+"""Filter Types
+==================
 
-.. module:: pcapkit.vendor.pcapng.secrets_type
+.. module:: pcapkit.vendor.pcapng.filter_type
 
-This module contains the vendor crawler for **Secrets Types**,
-which is automatically generating :class:`pcapkit.const.pcapng.secrets_type.SecretsType`.
+This module contains the vendor crawler for **Filter Types**,
+which is automatically generating :class:`pcapkit.const.pcapng.filter_type.FilterType`.
 
 """
 
@@ -18,28 +18,25 @@ from pcapkit.vendor.default import Vendor
 if TYPE_CHECKING:
     from collections import Counter
 
-__all__ = ['SecretsType']
+__all__ = ['FilterType']
 
-#: Secrets type registry.
+#: Filter type registry.
 DATA = {
-    0x544c534b: 'TLS Key Log',     # NSS Key Log Format
-    0x57474b4c: 'WireGuard Key Log',
-    0x5a4e574b: 'ZigBee NWK Key',  # ZigBee Specification
-    0x5a415053: 'ZigBee APS Key',  # ZigBee Specification
+    # TODO: https://www.ietf.org/staging/draft-tuexen-opsawg-pcapng-02.html#section-4.2-28.2.1
 }  # type: dict[int, str]
 
 
-class SecretsType(Vendor):
-    """Secrets Types"""
+class FilterType(Vendor):
+    """Filter Types"""
 
     #: Value limit checker.
-    FLAG = 'isinstance(value, int) and 0x00000000 <= value <= 0xFFFFFFFF'
+    FLAG = 'isinstance(value, int) and 0x00<= value <= 0xFF'
 
     def request(self) -> 'dict[int, str]':  # type: ignore[override] # pylint: disable=arguments-differ
         """Fetch registry data.
 
         Returns:
-            Registry data (:data:`~pcapkit.vendor.pcapng.secrets_type.DATA`).
+            Registry data (:data:`~pcapkit.vendor.pcapng.filter_type.DATA`).
 
         """
         return DATA
@@ -68,14 +65,14 @@ class SecretsType(Vendor):
         """
         enum = []  # type: list[str]
         miss = [
-            "extend_enum(cls, 'Unassigned_0x%08x' % value, value)",
+            "extend_enum(cls, 'Unassigned_%d' % value, value)",
             'return cls(value)'
         ]
         for code, name in DATA.items():
             renm = self.rename(name, code)  # type: ignore[arg-type]
-            enum.append(f"{renm} = 0x{code:08x}".ljust(76))
+            enum.append(f"{renm} = {code}".ljust(76))
         return enum, miss
 
 
 if __name__ == '__main__':
-    sys.exit(SecretsType())  # type: ignore[arg-type]
+    sys.exit(FilterType())  # type: ignore[arg-type]

@@ -22,6 +22,8 @@ vendor crawlers include:
      - Record Types [*]_
    * - :class:`PCAPNG_SecretsType <pcapkit.vendor.pcapng.secrets_type.SecretsType>`
      - Secrets Types [*]_
+   * - :class:`PCAPNG_FilterType <pcapkit.vendor.pcapng.filter_type.FilterType>`
+     - Filter Types [*]_
 
 Block Types
 ===========
@@ -36,7 +38,7 @@ which is automatically generating :class:`pcapkit.const.pcapng.block_type.BlockT
    :show-inheritance:
 
 Hash Algorithms
-=====================
+===============
 
 .. module:: pcapkit.vendor.pcapng.hash_algorithm
 
@@ -44,11 +46,11 @@ This module contains the vendor crawler for **Hash Algorithms**,
 which is automatically generating :class:`pcapkit.const.pcapng.hash_algorithm.HashAlgorithm`.
 
 .. autoclass:: pcapkit.vendor.pcapng.hash_algorithm.HashAlgorithm
-   :members: FLAG, LINK
+   :members: FLAG
    :show-inheritance:
 
 Option Types
-==================
+============
 
 .. module:: pcapkit.vendor.pcapng.option_type
 
@@ -60,7 +62,7 @@ which is automatically generating :class:`pcapkit.const.pcapng.option_type.Optio
    :show-inheritance:
 
 Record Types
-==================
+============
 
 .. module:: pcapkit.vendor.pcapng.record_type
 
@@ -72,7 +74,7 @@ which is automatically generating :class:`pcapkit.const.pcapng.record_type.Recor
    :show-inheritance:
 
 Secrets Types
-===================
+=============
 
 .. module:: pcapkit.vendor.pcapng.secrets_type
 
@@ -80,11 +82,11 @@ This module contains the vendor crawler for **Secrets Types**,
 which is automatically generating :class:`pcapkit.const.pcapng.secrets_type.SecretsType`.
 
 .. autoclass:: pcapkit.vendor.pcapng.secrets_type.SecretsType
-   :members: FLAG, LINK
+   :members: FLAG
    :show-inheritance:
 
 Verdict Types
-===================
+=============
 
 .. module:: pcapkit.vendor.pcapng.verdict_type
 
@@ -92,7 +94,19 @@ This module contains the vendor crawler for **Verdict Types**,
 which is automatically generating :class:`pcapkit.const.pcapng.verdict_type.VerdictType`.
 
 .. autoclass:: pcapkit.vendor.pcapng.verdict_type.VerdictType
-   :members: FLAG, LINK
+   :members: FLAG
+   :show-inheritance:
+
+Filter Types
+============
+
+.. module:: pcapkit.vendor.pcapng.filter_type
+
+This module contains the vendor crawler for **Filter Types**,
+which is automatically generating :class:`pcapkit.const.pcapng.filter_type.FilterType`.
+
+.. autoclass:: pcapkit.vendor.pcapng.filter_type
+   :members: FLAG
    :show-inheritance:
 
 .. raw:: html
@@ -105,3 +119,4 @@ which is automatically generating :class:`pcapkit.const.pcapng.verdict_type.Verd
 .. [*] https://www.ietf.org/staging/draft-tuexen-opsawg-pcapng-02.html#name-enhanced-packet-block
 .. [*] https://www.ietf.org/staging/draft-tuexen-opsawg-pcapng-02.html#name-name-resolution-block
 .. [*] https://www.ietf.org/staging/draft-tuexen-opsawg-pcapng-02.html#name-decryption-secrets-block
+.. [*] https://www.ietf.org/staging/draft-tuexen-opsawg-pcapng-02.html#name-interface-description-block

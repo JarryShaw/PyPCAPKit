@@ -23,6 +23,8 @@ enumerations include:
      - Record Types [*]_
    * - :class:`PCAPNG_SecretsType <pcapkit.const.pcapng.secrets_type.SecretsType>`
      - Secrets Types [*]_
+   * - :class:`PCAPNG_FilterType <pcapkit.const.pcapng.filter_type.FilterType>`
+     - Filter Types [*]_
 
 .. [*] https://www.ietf.org/staging/draft-tuexen-opsawg-pcapng-02.html#name-standardized-block-type-cod
 .. [*] https://www.ietf.org/staging/draft-tuexen-opsawg-pcapng-02.html#name-options
@@ -30,6 +32,7 @@ enumerations include:
 .. [*] https://www.ietf.org/staging/draft-tuexen-opsawg-pcapng-02.html#name-enhanced-packet-block
 .. [*] https://www.ietf.org/staging/draft-tuexen-opsawg-pcapng-02.html#name-name-resolution-block
 .. [*] https://www.ietf.org/staging/draft-tuexen-opsawg-pcapng-02.html#name-decryption-secrets-block
+.. [*] https://www.ietf.org/staging/draft-tuexen-opsawg-pcapng-02.html#name-interface-description-block
 
 """
 
@@ -39,8 +42,10 @@ from pcapkit.const.pcapng.option_type import OptionType as PCAPNG_OptionType
 from pcapkit.const.pcapng.record_type import RecordType as PCAPNG_RecordType
 from pcapkit.const.pcapng.secrets_type import SecretsType as PCAPNG_SecretsType
 from pcapkit.const.pcapng.verdict_type import VerdictType as PCAPNG_VerdictType
+from pcapkit.const.pcapng.filter_type import FilterType as PCAPNG_FilterType
 
 ___all__ = [
     'PCAPNG_BlockType', 'PCAPNG_OptionType', 'PCAPNG_HashAlgorithm',
     'PCAPNG_VerdictType', 'PCAPNG_RecordType', 'PCAPNG_SecretsType',
+    'PCAPNG_FilterType',
 ]

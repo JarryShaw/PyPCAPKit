@@ -22,6 +22,8 @@ enumerations include:
      - Record Types [*]_
    * - :class:`PCAPNG_SecretsType <pcapkit.const.pcapng.secrets_type.SecretsType>`
      - Secrets Types [*]_
+   * - :class:`PCAPNG_FilterType <pcapkit.const.pcapng.filter_type.FilterType>`
+     - Filter Types [*]_
 
 Block Types
 ===========
@@ -101,6 +103,19 @@ which is automatically generated from :class:`pcapkit.vendor.pcapng.verdict_type
    :undoc-members:
    :show-inheritance:
 
+Filter Types
+============
+
+.. module:: pcapkit.const.pcapng.filter_type
+
+This module contains the constant enumeration for **Filter Types**,
+which is automatically generated from :class:`pcapkit.vendor.pcapng.filter_type.FilterType`.
+
+.. autoclass:: pcapkit.const.pcapng.filter_type.FilterType
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 .. raw:: html
 
    <br />
@@ -111,3 +126,4 @@ which is automatically generated from :class:`pcapkit.vendor.pcapng.verdict_type
 .. [*] https://www.ietf.org/staging/draft-tuexen-opsawg-pcapng-02.html#name-enhanced-packet-block
 .. [*] https://www.ietf.org/staging/draft-tuexen-opsawg-pcapng-02.html#name-name-resolution-block
 .. [*] https://www.ietf.org/staging/draft-tuexen-opsawg-pcapng-02.html#name-decryption-secrets-block
+.. [*] https://www.ietf.org/staging/draft-tuexen-opsawg-pcapng-02.html#name-interface-description-block
