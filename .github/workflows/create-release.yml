@@ -33,7 +33,7 @@ jobs:
       - name: Get Version
         id: get_version
         run: |
-          set -x
+          set -ex
 
           python -m pip install -e .
 
