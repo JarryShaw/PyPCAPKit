@@ -120,6 +120,12 @@ class OptionType(IntEnum):
     #: isb_usrdeliv
     isb_usrdeliv = 8
 
+    #: pack_flags
+    pack_flags = 2
+
+    #: pack_hash
+    pack_hash = 3
+
     @staticmethod
     def get(key: 'int | str', default: 'int' = -1) -> 'OptionType':
         """Backport support for original codes.
