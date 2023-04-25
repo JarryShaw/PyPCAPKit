@@ -343,8 +343,8 @@
 <span></span><span class="c1"># -*- coding: utf-8 -*-</span>
 <span class="sd">&quot;&quot;&quot;numerical field class&quot;&quot;&quot;</span>
 
-<span class="kn">import</span> <span class="nn">copy</span>
 <span class="kn">import</span> <span class="nn">enum</span>
+<span class="kn">import</span> <span class="nn">math</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">Generic</span><span class="p">,</span> <span class="n">TypeVar</span><span class="p">,</span> <span class="n">cast</span>
 
 <span class="kn">import</span> <span class="nn">aenum</span>
@@ -408,10 +408,11 @@
             <span class="n">length</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__length__</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">length</span><span class="p">,</span> <span class="n">default</span><span class="p">,</span> <span class="n">callback</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="n">bit_length</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">bit_length</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_length</span> <span class="o">*</span> <span class="mi">8</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_bit_length</span> <span class="o">=</span> <span class="n">bit_length</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_bit_mask</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="n">bit_length</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
+        <span class="k">if</span> <span class="n">bit_length</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_bit_length</span> <span class="o">=</span> <span class="n">bit_length</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_bit_mask</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="n">bit_length</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_bit_length</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bit_mask</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mh">0x00</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_signed</span> <span class="o">=</span> <span class="n">signed</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__signed__</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">__signed__</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_byteorder</span> <span class="o">=</span> <span class="n">byteorder</span>
@@ -438,8 +439,11 @@
 <span class="sd">            updating the current instance.</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">new_self</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
-        <span class="n">new_self</span><span class="o">.</span><span class="n">_callback</span><span class="p">(</span><span class="n">new_self</span><span class="p">,</span> <span class="n">packet</span><span class="p">)</span>
+        <span class="n">new_self</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__call__</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bit_length</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_bit_length</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_length</span> <span class="o">*</span> <span class="mi">8</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_bit_mask</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bit_length</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
 
         <span class="n">endian</span> <span class="o">=</span> <span class="s1">&#39;&gt;&#39;</span> <span class="k">if</span> <span class="n">new_self</span><span class="o">.</span><span class="n">_byteorder</span> <span class="o">==</span> <span class="s1">&#39;big&#39;</span> <span class="k">else</span> <span class="s1">&#39;&lt;&#39;</span>
         <span class="n">struct_fmt</span> <span class="o">=</span> <span class="n">new_self</span><span class="o">.</span><span class="n">build_template</span><span class="p">(</span><span class="n">new_self</span><span class="o">.</span><span class="n">_length</span><span class="p">,</span> <span class="n">new_self</span><span class="o">.</span><span class="n">_signed</span><span class="p">)</span>
@@ -485,6 +489,15 @@
         <span class="n">value</span> <span class="o">=</span> <span class="n">value</span> <span class="o">&amp;</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bit_mask</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_need_process</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">value</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_length</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_length</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">value</span><span class="o">.</span><span class="n">bit_length</span><span class="p">()</span> <span class="o">//</span> <span class="mi">8</span><span class="p">)</span>
+
+            <span class="n">endian</span> <span class="o">=</span> <span class="s1">&#39;&gt;&#39;</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_byteorder</span> <span class="o">==</span> <span class="s1">&#39;big&#39;</span> <span class="k">else</span> <span class="s1">&#39;&lt;&#39;</span>
+            <span class="n">struct_fmt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">build_template</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_length</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_signed</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">_template</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">endian</span><span class="si">}{</span><span class="n">struct_fmt</span><span class="si">}</span><span class="s1">&#39;</span>
+
         <span class="k">return</span> <span class="n">value</span><span class="o">.</span><span class="n">to_bytes</span><span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_length</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_byteorder</span><span class="p">,</span> <span class="n">signed</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_signed</span>
         <span class="p">)</span></div>

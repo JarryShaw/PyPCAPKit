@@ -620,9 +620,9 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_length_callback</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">length</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_length_callback</span><span class="p">,</span> <span class="n">length</span> <span class="o">=</span> <span class="n">length</span><span class="p">,</span> <span class="mi">0</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_length_callback</span><span class="p">,</span> <span class="n">length</span> <span class="o">=</span> <span class="n">length</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_length</span> <span class="o">=</span> <span class="n">length</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_template</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_length</span><span class="si">}</span><span class="s1">s&#39;</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_length</span> <span class="k">else</span> <span class="s1">&#39;1024s&#39;</span>  <span class="c1"># use a reasonable default</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_template</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_length</span><span class="si">}</span><span class="s1">s&#39;</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_length</span> <span class="o">&gt;=</span> <span class="mi">0</span> <span class="k">else</span> <span class="s1">&#39;1024s&#39;</span>  <span class="c1"># use a reasonable default</span>
 
 <div class="viewcode-block" id="PayloadField.__call__"><a class="viewcode-back" href="../../../../pcapkit/corekit/fields.html#pcapkit.corekit.fields.misc.PayloadField.__call__">[docs]</a>    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">&#39;dict[str, Any]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Self&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Update field attributes.</span>
@@ -689,11 +689,21 @@
             <span class="n">file</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">BytesIO</span><span class="p">(</span><span class="n">buffer</span><span class="p">)</span>  <span class="c1"># type: IO[bytes]</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">file</span> <span class="o">=</span> <span class="n">buffer</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_protocol</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">length</span><span class="p">)</span>  <span class="c1"># type: ignore[abstract]</span></div></div>
+
+        <span class="n">length</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_length</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_length</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="kc">None</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_protocol</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">length</span><span class="p">)</span>  <span class="c1"># type: ignore[abstract]</span></div></div>
 
 
 <div class="viewcode-block" id="SwitchField"><a class="viewcode-back" href="../../../../pcapkit/corekit/fields.html#pcapkit.corekit.fields.misc.SwitchField">[docs]</a><span class="k">class</span> <span class="nc">SwitchField</span><span class="p">(</span><span class="n">_Field</span><span class="p">[</span><span class="n">_TC</span><span class="p">]):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Conditional type-switching field for protocol schema.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Conditional type-switching field for protocol schema.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        length: Field size (in bytes); if a callable is given, it should return</span>
+<span class="sd">            an integer value and accept the current packet as its only argument.</span>
+<span class="sd">        selector: Callable function to select field type, which should accept</span>
+<span class="sd">            the current packet as its only argument and return a field instance.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">optional</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;bool&#39;</span><span class="p">:</span>
@@ -721,7 +731,7 @@
 
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">new_self</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
-        <span class="n">new_self</span><span class="o">.</span><span class="n">_field</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_selector</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span>
+        <span class="n">new_self</span><span class="o">.</span><span class="n">_field</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_selector</span><span class="p">(</span><span class="n">packet</span><span class="p">)(</span><span class="n">packet</span><span class="p">)</span>
         <span class="n">new_self</span><span class="o">.</span><span class="n">_template</span> <span class="o">=</span> <span class="n">new_self</span><span class="o">.</span><span class="n">_field</span><span class="o">.</span><span class="n">template</span>
         <span class="k">return</span> <span class="n">new_self</span></div>
 
@@ -787,7 +797,17 @@
 
 
 <span class="k">class</span> <span class="nc">SchemaField</span><span class="p">(</span><span class="n">_Field</span><span class="p">[</span><span class="n">_TS</span><span class="p">]):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Schema field for protocol schema.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Schema field for protocol schema.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        length: Field size (in bytes); if a callable is given, it should return</span>
+<span class="sd">            an integer value and accept the current packet as its only argument.</span>
+<span class="sd">        schema: Field schema.</span>
+<span class="sd">        default: Default value for field.</span>
+<span class="sd">        callback: Callback function to process field value, which should accept</span>
+<span class="sd">            the current field and the current packet as its arguments.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">optional</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;bool&#39;</span><span class="p">:</span>
@@ -816,9 +836,9 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_length_callback</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">length</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_length_callback</span><span class="p">,</span> <span class="n">length</span> <span class="o">=</span> <span class="n">length</span><span class="p">,</span> <span class="mi">0</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_length_callback</span><span class="p">,</span> <span class="n">length</span> <span class="o">=</span> <span class="n">length</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_length</span> <span class="o">=</span> <span class="n">length</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_template</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_length</span><span class="si">}</span><span class="s1">s&#39;</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_length</span> <span class="k">else</span> <span class="s1">&#39;1024s&#39;</span>  <span class="c1"># use a reasonable default</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_template</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_length</span><span class="si">}</span><span class="s1">s&#39;</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_length</span> <span class="o">&gt;=</span> <span class="mi">0</span> <span class="k">else</span> <span class="s1">&#39;1024s&#39;</span>  <span class="c1"># use a reasonable default</span>
 
     <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">&#39;dict[str, Any]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Self&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Update field attributes.</span>
