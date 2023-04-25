@@ -17,8 +17,8 @@ from pcapkit.corekit.fields.collections import OptionField
 from pcapkit.corekit.fields.ipaddress import (IPv4AddressField, IPv4InterfaceField,
                                               IPv6AddressField, IPv6InterfaceField)
 from pcapkit.corekit.fields.misc import ForwardMatchField, PayloadField, SchemaField, SwitchField
-from pcapkit.corekit.fields.numbers import (EnumField, Int64Field, UInt8Field, UInt16Field,
-                                            UInt32Field, UInt64Field)
+from pcapkit.corekit.fields.numbers import (EnumField, Int64Field, NumberField, UInt8Field,
+                                            UInt16Field, UInt32Field, UInt64Field)
 from pcapkit.corekit.fields.strings import BitField, BytesField, PaddingField, StringField
 from pcapkit.protocols.schema.schema import Schema
 from pcapkit.utilities.exceptions import ProtocolError
@@ -54,7 +54,6 @@ if TYPE_CHECKING:
     from typing import Any
 
     from pcapkit.corekit.fields.field import _Field as Field
-    from pcapkit.corekit.fields.numbers import NumberField
 
 if SPHINX_TYPE_CHECKING:
     from typing_extensions import TypedDict
@@ -267,10 +266,10 @@ class SectionHeaderBlock(PCAPNG):
         base_schema=Option,
         type_name='type',
         registry=collections.defaultdict(lambda: UnknownOption, {
-            Enum_OptionType.endofopt: EndOfOption,
-            Enum_OptionType.comment: CommentOption,
+            Enum_OptionType.opt_endofopt: EndOfOption,
+            Enum_OptionType.opt_comment: CommentOption,
         }),
-        eool=Enum_OptionType.endofopt,
+        eool=Enum_OptionType.opt_endofopt,
     )
     #: Block total length.
     length2: 'int' = UInt32Field(callback=byteorder_callback)
