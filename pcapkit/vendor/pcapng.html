@@ -7,12 +7,12 @@
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://pypcapkit.jarryshaw.me/pcapkit/vendor/pcapng.html" />
 <meta property="og:site_name" content="PyPCAPKit" />
-<meta property="og:description" content="This module contains all vendor crawlers of PCAPNG implementations. Available vendor crawlers include:,, BlockType, Block Types*,,,, Block Types: This module contains the vendor crawler for Block T..." />
+<meta property="og:description" content="This module contains all vendor crawlers of PCAPNG implementations. Available vendor crawlers include:,, PCAPNG_BlockType, Block Types*,, PCAPNG_OptionType, Option Types †,, PCAPNG_HashAlgorithm, H..." />
 <meta property="og:image:width" content="1146" />
 <meta property="og:image:height" content="600" />
-<meta property="og:image" content="https://pypcapkit.jarryshaw.me/_images/social_previews/summary_pcapkit_vendor_pcapng_d8f31475.png" />
-<meta property="og:image:alt" content="This module contains all vendor crawlers of PCAPNG implementations. Available vendor crawlers include:,, BlockType, Block Types*,,,, Block Types: This module..." />
-<meta name="description" content="This module contains all vendor crawlers of PCAPNG implementations. Available vendor crawlers include:,, BlockType, Block Types*,,,, Block Types: This module contains the vendor crawler for Block T..." />
+<meta property="og:image" content="https://pypcapkit.jarryshaw.me/_images/social_previews/summary_pcapkit_vendor_pcapng_b6f0a8d2.png" />
+<meta property="og:image:alt" content="This module contains all vendor crawlers of PCAPNG implementations. Available vendor crawlers include:,, PCAPNG_BlockType, Block Types*,, PCAPNG_OptionType,..." />
+<meta name="description" content="This module contains all vendor crawlers of PCAPNG implementations. Available vendor crawlers include:,, PCAPNG_BlockType, Block Types*,, PCAPNG_OptionType, Option Types †,, PCAPNG_HashAlgorithm, H..." />
 <meta name="twitter:card" content="summary_large_image" />
 <link rel="index" title="Index" href="../../genindex.html" /><link rel="search" title="Search" href="../../search.html" /><link rel="next" title="ARP Vendor Crawlers" href="arp.html" /><link rel="prev" title="Protocol Type Registry Vendor Crawlers" href="reg.html" />
 
@@ -368,8 +368,23 @@ vendor crawlers include:</p>
 <div class="table-wrapper docutils container">
 <table class="docutils align-default">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="#pcapkit.vendor.pcapng.block_type.BlockType" title="pcapkit.vendor.pcapng.block_type.BlockType"><code class="xref py py-class docutils literal notranslate"><span class="pre">BlockType</span></code></a></p></td>
-<td><p>Block Types <a class="footnote-reference brackets" href="#id2" id="id1" role="doc-noteref"><span class="fn-bracket">[</span>*<span class="fn-bracket">]</span></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#pcapkit.vendor.pcapng.block_type.BlockType" title="pcapkit.vendor.pcapng.block_type.BlockType"><code class="xref py py-class docutils literal notranslate"><span class="pre">PCAPNG_BlockType</span></code></a></p></td>
+<td><p>Block Types <a class="footnote-reference brackets" href="#id7" id="id1" role="doc-noteref"><span class="fn-bracket">[</span>*<span class="fn-bracket">]</span></a></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#pcapkit.vendor.pcapng.option_type.OptionType" title="pcapkit.vendor.pcapng.option_type.OptionType"><code class="xref py py-class docutils literal notranslate"><span class="pre">PCAPNG_OptionType</span></code></a></p></td>
+<td><p>Option Types <a class="footnote-reference brackets" href="#id8" id="id2" role="doc-noteref"><span class="fn-bracket">[</span>†<span class="fn-bracket">]</span></a></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#pcapkit.vendor.pcapng.hash_algorithm.HashAlgorithm" title="pcapkit.vendor.pcapng.hash_algorithm.HashAlgorithm"><code class="xref py py-class docutils literal notranslate"><span class="pre">PCAPNG_HashAlgorithm</span></code></a></p></td>
+<td><p>Hash Algorithms <a class="footnote-reference brackets" href="#id9" id="id3" role="doc-noteref"><span class="fn-bracket">[</span>‡<span class="fn-bracket">]</span></a></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#pcapkit.vendor.pcapng.verdict_type.VerdictType" title="pcapkit.vendor.pcapng.verdict_type.VerdictType"><code class="xref py py-class docutils literal notranslate"><span class="pre">PCAPNG_VerdictType</span></code></a></p></td>
+<td><p>Verdict Types <a class="footnote-reference brackets" href="#id10" id="id4" role="doc-noteref"><span class="fn-bracket">[</span>§<span class="fn-bracket">]</span></a></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#pcapkit.vendor.pcapng.record_type.RecordType" title="pcapkit.vendor.pcapng.record_type.RecordType"><code class="xref py py-class docutils literal notranslate"><span class="pre">PCAPNG_RecordType</span></code></a></p></td>
+<td><p>Record Types <a class="footnote-reference brackets" href="#id11" id="id5" role="doc-noteref"><span class="fn-bracket">[</span>¶<span class="fn-bracket">]</span></a></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#pcapkit.vendor.pcapng.secrets_type.SecretsType" title="pcapkit.vendor.pcapng.secrets_type.SecretsType"><code class="xref py py-class docutils literal notranslate"><span class="pre">PCAPNG_SecretsType</span></code></a></p></td>
+<td><p>Secrets Types <a class="footnote-reference brackets" href="#id12" id="id6" role="doc-noteref"><span class="fn-bracket">[</span>#<span class="fn-bracket">]</span></a></p></td>
 </tr>
 </tbody>
 </table>
@@ -402,10 +417,190 @@ which is automatically generating <a class="reference internal" href="../const/p
 
 </dd></dl>
 
+</section>
+<section id="module-pcapkit.vendor.pcapng.hash_algorithm">
+<span id="hash-algorithms"></span><h2>Hash Algorithms<a class="headerlink" href="#module-pcapkit.vendor.pcapng.hash_algorithm" title="Permalink to this heading">#</a></h2>
+<p>This module contains the vendor crawler for <strong>Hash Algorithms</strong>,
+which is automatically generating <a class="reference internal" href="../const/pcapng.html#pcapkit.const.pcapng.hash_algorithm.HashAlgorithm" title="pcapkit.const.pcapng.hash_algorithm.HashAlgorithm"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.const.pcapng.hash_algorithm.HashAlgorithm</span></code></a>.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="pcapkit.vendor.pcapng.hash_algorithm.HashAlgorithm">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.vendor.pcapng.hash_algorithm.</span></span><span class="sig-name descname"><span class="pre">HashAlgorithm</span></span><a class="reference internal" href="../../_modules/pcapkit/vendor/pcapng/hash_algorithm.html#HashAlgorithm"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.vendor.pcapng.hash_algorithm.HashAlgorithm" title="Permalink to this definition">#</a></dt>
+<dd><p>Bases: <a class="reference internal" href="default.html#pcapkit.vendor.default.Vendor" title="pcapkit.vendor.default.Vendor"><code class="xref py py-class docutils literal notranslate"><span class="pre">Vendor</span></code></a></p>
+<p>Hash Algorithms</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="default.html#pcapkit.vendor.default.Vendor" title="pcapkit.vendor.default.Vendor">Vendor</a></p>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.vendor.pcapng.hash_algorithm.HashAlgorithm.FLAG">
+<span class="sig-name descname"><span class="pre">FLAG</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'isinstance(value,</span> <span class="pre">int)</span> <span class="pre">and</span> <span class="pre">0x00</span> <span class="pre">&lt;=</span> <span class="pre">value</span> <span class="pre">&lt;=</span> <span class="pre">0xFF'</span></em><a class="headerlink" href="#pcapkit.vendor.pcapng.hash_algorithm.HashAlgorithm.FLAG" title="Permalink to this definition">#</a></dt>
+<dd><p>Value limit checker.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.vendor.pcapng.hash_algorithm.HashAlgorithm.LINK">
+<span class="sig-name descname"><span class="pre">LINK</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#pcapkit.vendor.pcapng.hash_algorithm.HashAlgorithm.LINK" title="Permalink to this definition">#</a></dt>
+<dd><p>Link to registry.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-pcapkit.vendor.pcapng.option_type">
+<span id="option-types"></span><h2>Option Types<a class="headerlink" href="#module-pcapkit.vendor.pcapng.option_type" title="Permalink to this heading">#</a></h2>
+<p>This module contains the vendor crawler for <strong>Option Types</strong>,
+which is automatically generating <a class="reference internal" href="../const/pcapng.html#pcapkit.const.pcapng.option_type.OptionType" title="pcapkit.const.pcapng.option_type.OptionType"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.const.pcapng.option_type.OptionType</span></code></a>.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="pcapkit.vendor.pcapng.option_type.OptionType">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.vendor.pcapng.option_type.</span></span><span class="sig-name descname"><span class="pre">OptionType</span></span><a class="reference internal" href="../../_modules/pcapkit/vendor/pcapng/option_type.html#OptionType"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.vendor.pcapng.option_type.OptionType" title="Permalink to this definition">#</a></dt>
+<dd><p>Bases: <a class="reference internal" href="default.html#pcapkit.vendor.default.Vendor" title="pcapkit.vendor.default.Vendor"><code class="xref py py-class docutils literal notranslate"><span class="pre">Vendor</span></code></a></p>
+<p>Option Types</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="default.html#pcapkit.vendor.default.Vendor" title="pcapkit.vendor.default.Vendor">Vendor</a></p>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.vendor.pcapng.option_type.OptionType.FLAG">
+<span class="sig-name descname"><span class="pre">FLAG</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'isinstance(value,</span> <span class="pre">int)</span> <span class="pre">and</span> <span class="pre">0</span> <span class="pre">&lt;=</span> <span class="pre">value</span> <span class="pre">&lt;=</span> <span class="pre">0xFFFF'</span></em><a class="headerlink" href="#pcapkit.vendor.pcapng.option_type.OptionType.FLAG" title="Permalink to this definition">#</a></dt>
+<dd><p>Value limit checker.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.vendor.pcapng.option_type.OptionType.LINK">
+<span class="sig-name descname"><span class="pre">LINK</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'https://www.ietf.org/staging/draft-tuexen-opsawg-pcapng-02.html'</span></em><a class="headerlink" href="#pcapkit.vendor.pcapng.option_type.OptionType.LINK" title="Permalink to this definition">#</a></dt>
+<dd><p>Link to registry.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-pcapkit.vendor.pcapng.record_type">
+<span id="record-types"></span><h2>Record Types<a class="headerlink" href="#module-pcapkit.vendor.pcapng.record_type" title="Permalink to this heading">#</a></h2>
+<p>This module contains the vendor crawler for <strong>Record Types</strong>,
+which is automatically generating <a class="reference internal" href="../const/pcapng.html#pcapkit.const.pcapng.record_type.RecordType" title="pcapkit.const.pcapng.record_type.RecordType"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.const.pcapng.record_type.RecordType</span></code></a>.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="pcapkit.vendor.pcapng.record_type.RecordType">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.vendor.pcapng.record_type.</span></span><span class="sig-name descname"><span class="pre">RecordType</span></span><a class="reference internal" href="../../_modules/pcapkit/vendor/pcapng/record_type.html#RecordType"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.vendor.pcapng.record_type.RecordType" title="Permalink to this definition">#</a></dt>
+<dd><p>Bases: <a class="reference internal" href="default.html#pcapkit.vendor.default.Vendor" title="pcapkit.vendor.default.Vendor"><code class="xref py py-class docutils literal notranslate"><span class="pre">Vendor</span></code></a></p>
+<p>Record Types</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="default.html#pcapkit.vendor.default.Vendor" title="pcapkit.vendor.default.Vendor">Vendor</a></p>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.vendor.pcapng.record_type.RecordType.FLAG">
+<span class="sig-name descname"><span class="pre">FLAG</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'isinstance(value,</span> <span class="pre">int)</span> <span class="pre">and</span> <span class="pre">0</span> <span class="pre">&lt;=</span> <span class="pre">value</span> <span class="pre">&lt;=</span> <span class="pre">0xFFFF'</span></em><a class="headerlink" href="#pcapkit.vendor.pcapng.record_type.RecordType.FLAG" title="Permalink to this definition">#</a></dt>
+<dd><p>Value limit checker.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.vendor.pcapng.record_type.RecordType.LINK">
+<span class="sig-name descname"><span class="pre">LINK</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'https://www.ietf.org/staging/draft-tuexen-opsawg-pcapng-02.html'</span></em><a class="headerlink" href="#pcapkit.vendor.pcapng.record_type.RecordType.LINK" title="Permalink to this definition">#</a></dt>
+<dd><p>Link to registry.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-pcapkit.vendor.pcapng.secrets_type">
+<span id="secrets-types"></span><h2>Secrets Types<a class="headerlink" href="#module-pcapkit.vendor.pcapng.secrets_type" title="Permalink to this heading">#</a></h2>
+<p>This module contains the vendor crawler for <strong>Secrets Types</strong>,
+which is automatically generating <a class="reference internal" href="../const/pcapng.html#pcapkit.const.pcapng.secrets_type.SecretsType" title="pcapkit.const.pcapng.secrets_type.SecretsType"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.const.pcapng.secrets_type.SecretsType</span></code></a>.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="pcapkit.vendor.pcapng.secrets_type.SecretsType">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.vendor.pcapng.secrets_type.</span></span><span class="sig-name descname"><span class="pre">SecretsType</span></span><a class="reference internal" href="../../_modules/pcapkit/vendor/pcapng/secrets_type.html#SecretsType"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.vendor.pcapng.secrets_type.SecretsType" title="Permalink to this definition">#</a></dt>
+<dd><p>Bases: <a class="reference internal" href="default.html#pcapkit.vendor.default.Vendor" title="pcapkit.vendor.default.Vendor"><code class="xref py py-class docutils literal notranslate"><span class="pre">Vendor</span></code></a></p>
+<p>Secrets Types</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="default.html#pcapkit.vendor.default.Vendor" title="pcapkit.vendor.default.Vendor">Vendor</a></p>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.vendor.pcapng.secrets_type.SecretsType.FLAG">
+<span class="sig-name descname"><span class="pre">FLAG</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'isinstance(value,</span> <span class="pre">int)</span> <span class="pre">and</span> <span class="pre">0x00000000</span> <span class="pre">&lt;=</span> <span class="pre">value</span> <span class="pre">&lt;=</span> <span class="pre">0xFFFFFFFF'</span></em><a class="headerlink" href="#pcapkit.vendor.pcapng.secrets_type.SecretsType.FLAG" title="Permalink to this definition">#</a></dt>
+<dd><p>Value limit checker.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.vendor.pcapng.secrets_type.SecretsType.LINK">
+<span class="sig-name descname"><span class="pre">LINK</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#pcapkit.vendor.pcapng.secrets_type.SecretsType.LINK" title="Permalink to this definition">#</a></dt>
+<dd><p>Link to registry.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-pcapkit.vendor.pcapng.verdict_type">
+<span id="verdict-types"></span><h2>Verdict Types<a class="headerlink" href="#module-pcapkit.vendor.pcapng.verdict_type" title="Permalink to this heading">#</a></h2>
+<p>This module contains the vendor crawler for <strong>Verdict Types</strong>,
+which is automatically generating <a class="reference internal" href="../const/pcapng.html#pcapkit.const.pcapng.verdict_type.VerdictType" title="pcapkit.const.pcapng.verdict_type.VerdictType"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.const.pcapng.verdict_type.VerdictType</span></code></a>.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="pcapkit.vendor.pcapng.verdict_type.VerdictType">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.vendor.pcapng.verdict_type.</span></span><span class="sig-name descname"><span class="pre">VerdictType</span></span><a class="reference internal" href="../../_modules/pcapkit/vendor/pcapng/verdict_type.html#VerdictType"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.vendor.pcapng.verdict_type.VerdictType" title="Permalink to this definition">#</a></dt>
+<dd><p>Bases: <a class="reference internal" href="default.html#pcapkit.vendor.default.Vendor" title="pcapkit.vendor.default.Vendor"><code class="xref py py-class docutils literal notranslate"><span class="pre">Vendor</span></code></a></p>
+<p>Verdict Types</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="default.html#pcapkit.vendor.default.Vendor" title="pcapkit.vendor.default.Vendor">Vendor</a></p>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.vendor.pcapng.verdict_type.VerdictType.FLAG">
+<span class="sig-name descname"><span class="pre">FLAG</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'isinstance(value,</span> <span class="pre">int)</span> <span class="pre">and</span> <span class="pre">0x00</span> <span class="pre">&lt;=</span> <span class="pre">value</span> <span class="pre">&lt;=</span> <span class="pre">0xFF'</span></em><a class="headerlink" href="#pcapkit.vendor.pcapng.verdict_type.VerdictType.FLAG" title="Permalink to this definition">#</a></dt>
+<dd><p>Value limit checker.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.vendor.pcapng.verdict_type.VerdictType.LINK">
+<span class="sig-name descname"><span class="pre">LINK</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#pcapkit.vendor.pcapng.verdict_type.VerdictType.LINK" title="Permalink to this definition">#</a></dt>
+<dd><p>Link to registry.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
 <br /><aside class="footnote-list brackets">
-<aside class="footnote brackets" id="id2" role="note">
+<aside class="footnote brackets" id="id7" role="note">
 <span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id1">*</a><span class="fn-bracket">]</span></span>
-<p><a class="reference external" href="https://www.ietf.org/staging/draft-tuexen-opsawg-pcapng-02.html">https://www.ietf.org/staging/draft-tuexen-opsawg-pcapng-02.html</a></p>
+<p><a class="reference external" href="https://www.ietf.org/staging/draft-tuexen-opsawg-pcapng-02.html#name-standardized-block-type-cod">https://www.ietf.org/staging/draft-tuexen-opsawg-pcapng-02.html#name-standardized-block-type-cod</a></p>
+</aside>
+<aside class="footnote brackets" id="id8" role="note">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id2">†</a><span class="fn-bracket">]</span></span>
+<p><a class="reference external" href="https://www.ietf.org/staging/draft-tuexen-opsawg-pcapng-02.html#name-options">https://www.ietf.org/staging/draft-tuexen-opsawg-pcapng-02.html#name-options</a></p>
+</aside>
+<aside class="footnote brackets" id="id9" role="note">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id3">‡</a><span class="fn-bracket">]</span></span>
+<p><a class="reference external" href="https://www.ietf.org/staging/draft-tuexen-opsawg-pcapng-02.html#name-enhanced-packet-block-flags">https://www.ietf.org/staging/draft-tuexen-opsawg-pcapng-02.html#name-enhanced-packet-block-flags</a></p>
+</aside>
+<aside class="footnote brackets" id="id10" role="note">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id4">§</a><span class="fn-bracket">]</span></span>
+<p><a class="reference external" href="https://www.ietf.org/staging/draft-tuexen-opsawg-pcapng-02.html#name-enhanced-packet-block">https://www.ietf.org/staging/draft-tuexen-opsawg-pcapng-02.html#name-enhanced-packet-block</a></p>
+</aside>
+<aside class="footnote brackets" id="id11" role="note">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id5">¶</a><span class="fn-bracket">]</span></span>
+<p><a class="reference external" href="https://www.ietf.org/staging/draft-tuexen-opsawg-pcapng-02.html#name-name-resolution-block">https://www.ietf.org/staging/draft-tuexen-opsawg-pcapng-02.html#name-name-resolution-block</a></p>
+</aside>
+<aside class="footnote brackets" id="id12" role="note">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id6">#</a><span class="fn-bracket">]</span></span>
+<p><a class="reference external" href="https://www.ietf.org/staging/draft-tuexen-opsawg-pcapng-02.html#name-decryption-secrets-block">https://www.ietf.org/staging/draft-tuexen-opsawg-pcapng-02.html#name-decryption-secrets-block</a></p>
 </aside>
 </aside>
 </section>
@@ -471,6 +666,46 @@ which is automatically generating <a class="reference internal" href="../const/p
 <li><a class="reference internal" href="#pcapkit.vendor.pcapng.block_type.BlockType"><code class="docutils literal notranslate"><span class="pre">BlockType</span></code></a><ul>
 <li><a class="reference internal" href="#pcapkit.vendor.pcapng.block_type.BlockType.FLAG"><code class="docutils literal notranslate"><span class="pre">BlockType.FLAG</span></code></a></li>
 <li><a class="reference internal" href="#pcapkit.vendor.pcapng.block_type.BlockType.LINK"><code class="docutils literal notranslate"><span class="pre">BlockType.LINK</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-pcapkit.vendor.pcapng.hash_algorithm">Hash Algorithms</a><ul>
+<li><a class="reference internal" href="#pcapkit.vendor.pcapng.hash_algorithm.HashAlgorithm"><code class="docutils literal notranslate"><span class="pre">HashAlgorithm</span></code></a><ul>
+<li><a class="reference internal" href="#pcapkit.vendor.pcapng.hash_algorithm.HashAlgorithm.FLAG"><code class="docutils literal notranslate"><span class="pre">HashAlgorithm.FLAG</span></code></a></li>
+<li><a class="reference internal" href="#pcapkit.vendor.pcapng.hash_algorithm.HashAlgorithm.LINK"><code class="docutils literal notranslate"><span class="pre">HashAlgorithm.LINK</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-pcapkit.vendor.pcapng.option_type">Option Types</a><ul>
+<li><a class="reference internal" href="#pcapkit.vendor.pcapng.option_type.OptionType"><code class="docutils literal notranslate"><span class="pre">OptionType</span></code></a><ul>
+<li><a class="reference internal" href="#pcapkit.vendor.pcapng.option_type.OptionType.FLAG"><code class="docutils literal notranslate"><span class="pre">OptionType.FLAG</span></code></a></li>
+<li><a class="reference internal" href="#pcapkit.vendor.pcapng.option_type.OptionType.LINK"><code class="docutils literal notranslate"><span class="pre">OptionType.LINK</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-pcapkit.vendor.pcapng.record_type">Record Types</a><ul>
+<li><a class="reference internal" href="#pcapkit.vendor.pcapng.record_type.RecordType"><code class="docutils literal notranslate"><span class="pre">RecordType</span></code></a><ul>
+<li><a class="reference internal" href="#pcapkit.vendor.pcapng.record_type.RecordType.FLAG"><code class="docutils literal notranslate"><span class="pre">RecordType.FLAG</span></code></a></li>
+<li><a class="reference internal" href="#pcapkit.vendor.pcapng.record_type.RecordType.LINK"><code class="docutils literal notranslate"><span class="pre">RecordType.LINK</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-pcapkit.vendor.pcapng.secrets_type">Secrets Types</a><ul>
+<li><a class="reference internal" href="#pcapkit.vendor.pcapng.secrets_type.SecretsType"><code class="docutils literal notranslate"><span class="pre">SecretsType</span></code></a><ul>
+<li><a class="reference internal" href="#pcapkit.vendor.pcapng.secrets_type.SecretsType.FLAG"><code class="docutils literal notranslate"><span class="pre">SecretsType.FLAG</span></code></a></li>
+<li><a class="reference internal" href="#pcapkit.vendor.pcapng.secrets_type.SecretsType.LINK"><code class="docutils literal notranslate"><span class="pre">SecretsType.LINK</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-pcapkit.vendor.pcapng.verdict_type">Verdict Types</a><ul>
+<li><a class="reference internal" href="#pcapkit.vendor.pcapng.verdict_type.VerdictType"><code class="docutils literal notranslate"><span class="pre">VerdictType</span></code></a><ul>
+<li><a class="reference internal" href="#pcapkit.vendor.pcapng.verdict_type.VerdictType.FLAG"><code class="docutils literal notranslate"><span class="pre">VerdictType.FLAG</span></code></a></li>
+<li><a class="reference internal" href="#pcapkit.vendor.pcapng.verdict_type.VerdictType.LINK"><code class="docutils literal notranslate"><span class="pre">VerdictType.LINK</span></code></a></li>
 </ul>
 </li>
 </ul>

@@ -7,12 +7,12 @@
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://pypcapkit.jarryshaw.me/pcapkit/const/pcapng.html" />
 <meta property="og:site_name" content="PyPCAPKit" />
-<meta property="og:description" content="This module contains all constant enumerations of PCAPNG implementations. Available enumerations include:,, BlockType, Block Types*,,,, Block Types: This module contains the constant enumeration fo..." />
+<meta property="og:description" content="This module contains all constant enumerations of PCAPNG implementations. Available enumerations include:,, PCAPNG_BlockType, Block Types*,, PCAPNG_OptionType, Option Types †,, PCAPNG_HashAlgorithm..." />
 <meta property="og:image:width" content="1146" />
 <meta property="og:image:height" content="600" />
-<meta property="og:image" content="https://pypcapkit.jarryshaw.me/_images/social_previews/summary_pcapkit_const_pcapng_78ff4cd2.png" />
-<meta property="og:image:alt" content="This module contains all constant enumerations of PCAPNG implementations. Available enumerations include:,, BlockType, Block Types*,,,, Block Types: This mod..." />
-<meta name="description" content="This module contains all constant enumerations of PCAPNG implementations. Available enumerations include:,, BlockType, Block Types*,,,, Block Types: This module contains the constant enumeration fo..." />
+<meta property="og:image" content="https://pypcapkit.jarryshaw.me/_images/social_previews/summary_pcapkit_const_pcapng_5f722d74.png" />
+<meta property="og:image:alt" content="This module contains all constant enumerations of PCAPNG implementations. Available enumerations include:,, PCAPNG_BlockType, Block Types*,, PCAPNG_OptionTyp..." />
+<meta name="description" content="This module contains all constant enumerations of PCAPNG implementations. Available enumerations include:,, PCAPNG_BlockType, Block Types*,, PCAPNG_OptionType, Option Types †,, PCAPNG_HashAlgorithm..." />
 <meta name="twitter:card" content="summary_large_image" />
 <link rel="index" title="Index" href="../../genindex.html" /><link rel="search" title="Search" href="../../search.html" /><link rel="next" title="ARP Constant Enumerations" href="arp.html" /><link rel="prev" title="Protocol Type Registry Constant Enumerations" href="reg.html" />
 
@@ -368,8 +368,23 @@ enumerations include:</p>
 <div class="table-wrapper docutils container">
 <table class="docutils align-default">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="#pcapkit.const.pcapng.block_type.BlockType" title="pcapkit.const.pcapng.block_type.BlockType"><code class="xref py py-class docutils literal notranslate"><span class="pre">BlockType</span></code></a></p></td>
-<td><p>Block Types <a class="footnote-reference brackets" href="#id2" id="id1" role="doc-noteref"><span class="fn-bracket">[</span>*<span class="fn-bracket">]</span></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#pcapkit.const.pcapng.block_type.BlockType" title="pcapkit.const.pcapng.block_type.BlockType"><code class="xref py py-class docutils literal notranslate"><span class="pre">PCAPNG_BlockType</span></code></a></p></td>
+<td><p>Block Types <a class="footnote-reference brackets" href="#id7" id="id1" role="doc-noteref"><span class="fn-bracket">[</span>*<span class="fn-bracket">]</span></a></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#pcapkit.const.pcapng.option_type.OptionType" title="pcapkit.const.pcapng.option_type.OptionType"><code class="xref py py-class docutils literal notranslate"><span class="pre">PCAPNG_OptionType</span></code></a></p></td>
+<td><p>Option Types <a class="footnote-reference brackets" href="#id8" id="id2" role="doc-noteref"><span class="fn-bracket">[</span>†<span class="fn-bracket">]</span></a></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#pcapkit.const.pcapng.hash_algorithm.HashAlgorithm" title="pcapkit.const.pcapng.hash_algorithm.HashAlgorithm"><code class="xref py py-class docutils literal notranslate"><span class="pre">PCAPNG_HashAlgorithm</span></code></a></p></td>
+<td><p>Hash Algorithms <a class="footnote-reference brackets" href="#id9" id="id3" role="doc-noteref"><span class="fn-bracket">[</span>‡<span class="fn-bracket">]</span></a></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#pcapkit.const.pcapng.verdict_type.VerdictType" title="pcapkit.const.pcapng.verdict_type.VerdictType"><code class="xref py py-class docutils literal notranslate"><span class="pre">PCAPNG_VerdictType</span></code></a></p></td>
+<td><p>Verdict Types <a class="footnote-reference brackets" href="#id10" id="id4" role="doc-noteref"><span class="fn-bracket">[</span>§<span class="fn-bracket">]</span></a></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#pcapkit.const.pcapng.record_type.RecordType" title="pcapkit.const.pcapng.record_type.RecordType"><code class="xref py py-class docutils literal notranslate"><span class="pre">PCAPNG_RecordType</span></code></a></p></td>
+<td><p>Record Types <a class="footnote-reference brackets" href="#id11" id="id5" role="doc-noteref"><span class="fn-bracket">[</span>¶<span class="fn-bracket">]</span></a></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#pcapkit.const.pcapng.secrets_type.SecretsType" title="pcapkit.const.pcapng.secrets_type.SecretsType"><code class="xref py py-class docutils literal notranslate"><span class="pre">PCAPNG_SecretsType</span></code></a></p></td>
+<td><p>Secrets Types <a class="footnote-reference brackets" href="#id12" id="id6" role="doc-noteref"><span class="fn-bracket">[</span>#<span class="fn-bracket">]</span></a></p></td>
 </tr>
 </tbody>
 </table>
@@ -576,10 +591,459 @@ Varenni &lt;<a class="reference external" href="mailto:gianluca&#46;varenni&#37;
 
 </dd></dl>
 
+</section>
+<section id="module-pcapkit.const.pcapng.hash_algorithm">
+<span id="hash-algorithms"></span><h2>Hash Algorithms<a class="headerlink" href="#module-pcapkit.const.pcapng.hash_algorithm" title="Permalink to this heading">#</a></h2>
+<p>This module contains the constant enumeration for <strong>Hash Algorithms</strong>,
+which is automatically generated from <a class="reference internal" href="../vendor/pcapng.html#pcapkit.vendor.pcapng.hash_algorithm.HashAlgorithm" title="pcapkit.vendor.pcapng.hash_algorithm.HashAlgorithm"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.vendor.pcapng.hash_algorithm.HashAlgorithm</span></code></a>.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="pcapkit.const.pcapng.hash_algorithm.HashAlgorithm">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.const.pcapng.hash_algorithm.</span></span><span class="sig-name descname"><span class="pre">HashAlgorithm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value=&lt;no_arg&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">names=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">module=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qualname=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start=1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">boundary=None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/const/pcapng/hash_algorithm.html#HashAlgorithm"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.pcapng.hash_algorithm.HashAlgorithm" title="Permalink to this definition">#</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">IntEnum</span></code></p>
+<p>[HashAlgorithm] Hash Algorithms</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.pcapng.hash_algorithm.HashAlgorithm.two_s_complement">
+<span class="sig-name descname"><span class="pre">two_s_complement</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0</span></em><a class="headerlink" href="#pcapkit.const.pcapng.hash_algorithm.HashAlgorithm.two_s_complement" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.pcapng.hash_algorithm.HashAlgorithm.XOR">
+<span class="sig-name descname"><span class="pre">XOR</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1</span></em><a class="headerlink" href="#pcapkit.const.pcapng.hash_algorithm.HashAlgorithm.XOR" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.pcapng.hash_algorithm.HashAlgorithm.CRC32">
+<span class="sig-name descname"><span class="pre">CRC32</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">2</span></em><a class="headerlink" href="#pcapkit.const.pcapng.hash_algorithm.HashAlgorithm.CRC32" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.pcapng.hash_algorithm.HashAlgorithm.MD_5">
+<span class="sig-name descname"><span class="pre">MD_5</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">3</span></em><a class="headerlink" href="#pcapkit.const.pcapng.hash_algorithm.HashAlgorithm.MD_5" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.pcapng.hash_algorithm.HashAlgorithm.SHA_1">
+<span class="sig-name descname"><span class="pre">SHA_1</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">4</span></em><a class="headerlink" href="#pcapkit.const.pcapng.hash_algorithm.HashAlgorithm.SHA_1" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.pcapng.hash_algorithm.HashAlgorithm.Toeplitz">
+<span class="sig-name descname"><span class="pre">Toeplitz</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">5</span></em><a class="headerlink" href="#pcapkit.const.pcapng.hash_algorithm.HashAlgorithm.Toeplitz" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.const.pcapng.hash_algorithm.HashAlgorithm._missing_">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">_missing_</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/const/pcapng/hash_algorithm.html#HashAlgorithm._missing_"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.pcapng.hash_algorithm.HashAlgorithm._missing_" title="Permalink to this definition">#</a></dt>
+<dd><p>Lookup function used when value is not found.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>value</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>) – Value to get enum item.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#pcapkit.const.pcapng.hash_algorithm.HashAlgorithm" title="pcapkit.const.pcapng.hash_algorithm.HashAlgorithm"><code class="xref py py-class docutils literal notranslate"><span class="pre">HashAlgorithm</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-pcapkit.const.pcapng.option_type">
+<span id="option-types"></span><h2>Option Types<a class="headerlink" href="#module-pcapkit.const.pcapng.option_type" title="Permalink to this heading">#</a></h2>
+<p>This module contains the constant enumeration for <strong>Option Types</strong>,
+which is automatically generated from <a class="reference internal" href="../vendor/pcapng.html#pcapkit.vendor.pcapng.option_type.OptionType" title="pcapkit.vendor.pcapng.option_type.OptionType"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.vendor.pcapng.option_type.OptionType</span></code></a>.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="pcapkit.const.pcapng.option_type.OptionType">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.const.pcapng.option_type.</span></span><span class="sig-name descname"><span class="pre">OptionType</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value=&lt;no_arg&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">names=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">module=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qualname=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start=1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">boundary=None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/const/pcapng/option_type.html#OptionType"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.pcapng.option_type.OptionType" title="Permalink to this definition">#</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">IntEnum</span></code></p>
+<p>[OptionType] Option Types</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.pcapng.option_type.OptionType.opt_endofopt">
+<span class="sig-name descname"><span class="pre">opt_endofopt</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0</span></em><a class="headerlink" href="#pcapkit.const.pcapng.option_type.OptionType.opt_endofopt" title="Permalink to this definition">#</a></dt>
+<dd><p>opt_endofopt</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.pcapng.option_type.OptionType.opt_comment">
+<span class="sig-name descname"><span class="pre">opt_comment</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1</span></em><a class="headerlink" href="#pcapkit.const.pcapng.option_type.OptionType.opt_comment" title="Permalink to this definition">#</a></dt>
+<dd><p>opt_comment</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.pcapng.option_type.OptionType.if_name">
+<span class="sig-name descname"><span class="pre">if_name</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">2</span></em><a class="headerlink" href="#pcapkit.const.pcapng.option_type.OptionType.if_name" title="Permalink to this definition">#</a></dt>
+<dd><p>if_name</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.pcapng.option_type.OptionType.if_description">
+<span class="sig-name descname"><span class="pre">if_description</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">3</span></em><a class="headerlink" href="#pcapkit.const.pcapng.option_type.OptionType.if_description" title="Permalink to this definition">#</a></dt>
+<dd><p>if_description</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.pcapng.option_type.OptionType.if_IPv4addr">
+<span class="sig-name descname"><span class="pre">if_IPv4addr</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">4</span></em><a class="headerlink" href="#pcapkit.const.pcapng.option_type.OptionType.if_IPv4addr" title="Permalink to this definition">#</a></dt>
+<dd><p>if_IPv4addr</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.pcapng.option_type.OptionType.if_IPv6addr">
+<span class="sig-name descname"><span class="pre">if_IPv6addr</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">5</span></em><a class="headerlink" href="#pcapkit.const.pcapng.option_type.OptionType.if_IPv6addr" title="Permalink to this definition">#</a></dt>
+<dd><p>if_IPv6addr</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.pcapng.option_type.OptionType.if_MACaddr">
+<span class="sig-name descname"><span class="pre">if_MACaddr</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">6</span></em><a class="headerlink" href="#pcapkit.const.pcapng.option_type.OptionType.if_MACaddr" title="Permalink to this definition">#</a></dt>
+<dd><p>if_MACaddr</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.pcapng.option_type.OptionType.if_EUIaddr">
+<span class="sig-name descname"><span class="pre">if_EUIaddr</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">7</span></em><a class="headerlink" href="#pcapkit.const.pcapng.option_type.OptionType.if_EUIaddr" title="Permalink to this definition">#</a></dt>
+<dd><p>if_EUIaddr</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.pcapng.option_type.OptionType.if_speed">
+<span class="sig-name descname"><span class="pre">if_speed</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">8</span></em><a class="headerlink" href="#pcapkit.const.pcapng.option_type.OptionType.if_speed" title="Permalink to this definition">#</a></dt>
+<dd><p>if_speed</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.pcapng.option_type.OptionType.if_tsresol">
+<span class="sig-name descname"><span class="pre">if_tsresol</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">9</span></em><a class="headerlink" href="#pcapkit.const.pcapng.option_type.OptionType.if_tsresol" title="Permalink to this definition">#</a></dt>
+<dd><p>if_tsresol</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.pcapng.option_type.OptionType.if_tzone">
+<span class="sig-name descname"><span class="pre">if_tzone</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">10</span></em><a class="headerlink" href="#pcapkit.const.pcapng.option_type.OptionType.if_tzone" title="Permalink to this definition">#</a></dt>
+<dd><p>if_tzone</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.pcapng.option_type.OptionType.if_filter">
+<span class="sig-name descname"><span class="pre">if_filter</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">11</span></em><a class="headerlink" href="#pcapkit.const.pcapng.option_type.OptionType.if_filter" title="Permalink to this definition">#</a></dt>
+<dd><p>if_filter</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.pcapng.option_type.OptionType.if_os">
+<span class="sig-name descname"><span class="pre">if_os</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">12</span></em><a class="headerlink" href="#pcapkit.const.pcapng.option_type.OptionType.if_os" title="Permalink to this definition">#</a></dt>
+<dd><p>if_os</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.pcapng.option_type.OptionType.if_fcslen">
+<span class="sig-name descname"><span class="pre">if_fcslen</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">13</span></em><a class="headerlink" href="#pcapkit.const.pcapng.option_type.OptionType.if_fcslen" title="Permalink to this definition">#</a></dt>
+<dd><p>if_fcslen</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.pcapng.option_type.OptionType.if_tsoffset">
+<span class="sig-name descname"><span class="pre">if_tsoffset</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">14</span></em><a class="headerlink" href="#pcapkit.const.pcapng.option_type.OptionType.if_tsoffset" title="Permalink to this definition">#</a></dt>
+<dd><p>if_tsoffset</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.pcapng.option_type.OptionType.if_hardware">
+<span class="sig-name descname"><span class="pre">if_hardware</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">15</span></em><a class="headerlink" href="#pcapkit.const.pcapng.option_type.OptionType.if_hardware" title="Permalink to this definition">#</a></dt>
+<dd><p>if_hardware</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.pcapng.option_type.OptionType.if_txspeed">
+<span class="sig-name descname"><span class="pre">if_txspeed</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">16</span></em><a class="headerlink" href="#pcapkit.const.pcapng.option_type.OptionType.if_txspeed" title="Permalink to this definition">#</a></dt>
+<dd><p>if_txspeed</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.pcapng.option_type.OptionType.if_rxspeed">
+<span class="sig-name descname"><span class="pre">if_rxspeed</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">17</span></em><a class="headerlink" href="#pcapkit.const.pcapng.option_type.OptionType.if_rxspeed" title="Permalink to this definition">#</a></dt>
+<dd><p>if_rxspeed</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.pcapng.option_type.OptionType.epb_flags">
+<span class="sig-name descname"><span class="pre">epb_flags</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">2</span></em><a class="headerlink" href="#pcapkit.const.pcapng.option_type.OptionType.epb_flags" title="Permalink to this definition">#</a></dt>
+<dd><p>epb_flags</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.pcapng.option_type.OptionType.epb_hash">
+<span class="sig-name descname"><span class="pre">epb_hash</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">3</span></em><a class="headerlink" href="#pcapkit.const.pcapng.option_type.OptionType.epb_hash" title="Permalink to this definition">#</a></dt>
+<dd><p>epb_hash</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.pcapng.option_type.OptionType.epb_dropcount">
+<span class="sig-name descname"><span class="pre">epb_dropcount</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">4</span></em><a class="headerlink" href="#pcapkit.const.pcapng.option_type.OptionType.epb_dropcount" title="Permalink to this definition">#</a></dt>
+<dd><p>epb_dropcount</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.pcapng.option_type.OptionType.epb_packetid">
+<span class="sig-name descname"><span class="pre">epb_packetid</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">5</span></em><a class="headerlink" href="#pcapkit.const.pcapng.option_type.OptionType.epb_packetid" title="Permalink to this definition">#</a></dt>
+<dd><p>epb_packetid</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.pcapng.option_type.OptionType.epb_queue">
+<span class="sig-name descname"><span class="pre">epb_queue</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">6</span></em><a class="headerlink" href="#pcapkit.const.pcapng.option_type.OptionType.epb_queue" title="Permalink to this definition">#</a></dt>
+<dd><p>epb_queue</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.pcapng.option_type.OptionType.epb_verdict">
+<span class="sig-name descname"><span class="pre">epb_verdict</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">7</span></em><a class="headerlink" href="#pcapkit.const.pcapng.option_type.OptionType.epb_verdict" title="Permalink to this definition">#</a></dt>
+<dd><p>epb_verdict</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.pcapng.option_type.OptionType.ns_dnsname">
+<span class="sig-name descname"><span class="pre">ns_dnsname</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">2</span></em><a class="headerlink" href="#pcapkit.const.pcapng.option_type.OptionType.ns_dnsname" title="Permalink to this definition">#</a></dt>
+<dd><p>ns_dnsname</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.pcapng.option_type.OptionType.ns_dnsIP4addr">
+<span class="sig-name descname"><span class="pre">ns_dnsIP4addr</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">3</span></em><a class="headerlink" href="#pcapkit.const.pcapng.option_type.OptionType.ns_dnsIP4addr" title="Permalink to this definition">#</a></dt>
+<dd><p>ns_dnsIP4addr</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.pcapng.option_type.OptionType.ns_dnsIP6addr">
+<span class="sig-name descname"><span class="pre">ns_dnsIP6addr</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">4</span></em><a class="headerlink" href="#pcapkit.const.pcapng.option_type.OptionType.ns_dnsIP6addr" title="Permalink to this definition">#</a></dt>
+<dd><p>ns_dnsIP6addr</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.pcapng.option_type.OptionType.isb_starttime">
+<span class="sig-name descname"><span class="pre">isb_starttime</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">2</span></em><a class="headerlink" href="#pcapkit.const.pcapng.option_type.OptionType.isb_starttime" title="Permalink to this definition">#</a></dt>
+<dd><p>isb_starttime</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.pcapng.option_type.OptionType.isb_endtime">
+<span class="sig-name descname"><span class="pre">isb_endtime</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">3</span></em><a class="headerlink" href="#pcapkit.const.pcapng.option_type.OptionType.isb_endtime" title="Permalink to this definition">#</a></dt>
+<dd><p>isb_endtime</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.pcapng.option_type.OptionType.isb_ifrecv">
+<span class="sig-name descname"><span class="pre">isb_ifrecv</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">4</span></em><a class="headerlink" href="#pcapkit.const.pcapng.option_type.OptionType.isb_ifrecv" title="Permalink to this definition">#</a></dt>
+<dd><p>isb_ifrecv</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.pcapng.option_type.OptionType.isb_ifdrop">
+<span class="sig-name descname"><span class="pre">isb_ifdrop</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">5</span></em><a class="headerlink" href="#pcapkit.const.pcapng.option_type.OptionType.isb_ifdrop" title="Permalink to this definition">#</a></dt>
+<dd><p>isb_ifdrop</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.pcapng.option_type.OptionType.isb_filteraccept">
+<span class="sig-name descname"><span class="pre">isb_filteraccept</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">6</span></em><a class="headerlink" href="#pcapkit.const.pcapng.option_type.OptionType.isb_filteraccept" title="Permalink to this definition">#</a></dt>
+<dd><p>isb_filteraccept</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.pcapng.option_type.OptionType.isb_osdrop">
+<span class="sig-name descname"><span class="pre">isb_osdrop</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">7</span></em><a class="headerlink" href="#pcapkit.const.pcapng.option_type.OptionType.isb_osdrop" title="Permalink to this definition">#</a></dt>
+<dd><p>isb_osdrop</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.pcapng.option_type.OptionType.isb_usrdeliv">
+<span class="sig-name descname"><span class="pre">isb_usrdeliv</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">8</span></em><a class="headerlink" href="#pcapkit.const.pcapng.option_type.OptionType.isb_usrdeliv" title="Permalink to this definition">#</a></dt>
+<dd><p>isb_usrdeliv</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.pcapng.option_type.OptionType.pack_flags">
+<span class="sig-name descname"><span class="pre">pack_flags</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">2</span></em><a class="headerlink" href="#pcapkit.const.pcapng.option_type.OptionType.pack_flags" title="Permalink to this definition">#</a></dt>
+<dd><p>pack_flags</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.pcapng.option_type.OptionType.pack_hash">
+<span class="sig-name descname"><span class="pre">pack_hash</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">3</span></em><a class="headerlink" href="#pcapkit.const.pcapng.option_type.OptionType.pack_hash" title="Permalink to this definition">#</a></dt>
+<dd><p>pack_hash</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.const.pcapng.option_type.OptionType._missing_">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">_missing_</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/const/pcapng/option_type.html#OptionType._missing_"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.pcapng.option_type.OptionType._missing_" title="Permalink to this definition">#</a></dt>
+<dd><p>Lookup function used when value is not found.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>value</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>) – Value to get enum item.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#pcapkit.const.pcapng.option_type.OptionType" title="pcapkit.const.pcapng.option_type.OptionType"><code class="xref py py-class docutils literal notranslate"><span class="pre">OptionType</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-pcapkit.const.pcapng.record_type">
+<span id="record-types"></span><h2>Record Types<a class="headerlink" href="#module-pcapkit.const.pcapng.record_type" title="Permalink to this heading">#</a></h2>
+<p>This module contains the constant enumeration for <strong>Record Types</strong>,
+which is automatically generated from <a class="reference internal" href="../vendor/pcapng.html#pcapkit.vendor.pcapng.record_type.RecordType" title="pcapkit.vendor.pcapng.record_type.RecordType"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.vendor.pcapng.record_type.RecordType</span></code></a>.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="pcapkit.const.pcapng.record_type.RecordType">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.const.pcapng.record_type.</span></span><span class="sig-name descname"><span class="pre">RecordType</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value=&lt;no_arg&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">names=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">module=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qualname=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start=1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">boundary=None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/const/pcapng/record_type.html#RecordType"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.pcapng.record_type.RecordType" title="Permalink to this definition">#</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">IntEnum</span></code></p>
+<p>[RecordType] Record Types</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.pcapng.record_type.RecordType.nrb_record_end">
+<span class="sig-name descname"><span class="pre">nrb_record_end</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0</span></em><a class="headerlink" href="#pcapkit.const.pcapng.record_type.RecordType.nrb_record_end" title="Permalink to this definition">#</a></dt>
+<dd><p>nrb_record_end</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.pcapng.record_type.RecordType.nrb_record_ipv4">
+<span class="sig-name descname"><span class="pre">nrb_record_ipv4</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1</span></em><a class="headerlink" href="#pcapkit.const.pcapng.record_type.RecordType.nrb_record_ipv4" title="Permalink to this definition">#</a></dt>
+<dd><p>nrb_record_ipv4</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.pcapng.record_type.RecordType.nrb_record_ipv6">
+<span class="sig-name descname"><span class="pre">nrb_record_ipv6</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">2</span></em><a class="headerlink" href="#pcapkit.const.pcapng.record_type.RecordType.nrb_record_ipv6" title="Permalink to this definition">#</a></dt>
+<dd><p>nrb_record_ipv6</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.const.pcapng.record_type.RecordType._missing_">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">_missing_</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/const/pcapng/record_type.html#RecordType._missing_"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.pcapng.record_type.RecordType._missing_" title="Permalink to this definition">#</a></dt>
+<dd><p>Lookup function used when value is not found.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>value</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>) – Value to get enum item.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#pcapkit.const.pcapng.record_type.RecordType" title="pcapkit.const.pcapng.record_type.RecordType"><code class="xref py py-class docutils literal notranslate"><span class="pre">RecordType</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-pcapkit.const.pcapng.secrets_type">
+<span id="secrets-types"></span><h2>Secrets Types<a class="headerlink" href="#module-pcapkit.const.pcapng.secrets_type" title="Permalink to this heading">#</a></h2>
+<p>This module contains the constant enumeration for <strong>Secrets Types</strong>,
+which is automatically generated from <a class="reference internal" href="../vendor/pcapng.html#pcapkit.vendor.pcapng.secrets_type.SecretsType" title="pcapkit.vendor.pcapng.secrets_type.SecretsType"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.vendor.pcapng.secrets_type.SecretsType</span></code></a>.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="pcapkit.const.pcapng.secrets_type.SecretsType">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.const.pcapng.secrets_type.</span></span><span class="sig-name descname"><span class="pre">SecretsType</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value=&lt;no_arg&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">names=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">module=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qualname=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start=1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">boundary=None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/const/pcapng/secrets_type.html#SecretsType"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.pcapng.secrets_type.SecretsType" title="Permalink to this definition">#</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">IntEnum</span></code></p>
+<p>[SecretsType] Secrets Types</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.pcapng.secrets_type.SecretsType.TLS_Key_Log">
+<span class="sig-name descname"><span class="pre">TLS_Key_Log</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1414288203</span></em><a class="headerlink" href="#pcapkit.const.pcapng.secrets_type.SecretsType.TLS_Key_Log" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.pcapng.secrets_type.SecretsType.WireGuard_Key_Log">
+<span class="sig-name descname"><span class="pre">WireGuard_Key_Log</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1464290124</span></em><a class="headerlink" href="#pcapkit.const.pcapng.secrets_type.SecretsType.WireGuard_Key_Log" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.pcapng.secrets_type.SecretsType.ZigBee_NWK_Key">
+<span class="sig-name descname"><span class="pre">ZigBee_NWK_Key</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1515083595</span></em><a class="headerlink" href="#pcapkit.const.pcapng.secrets_type.SecretsType.ZigBee_NWK_Key" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.pcapng.secrets_type.SecretsType.ZigBee_APS_Key">
+<span class="sig-name descname"><span class="pre">ZigBee_APS_Key</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1514229843</span></em><a class="headerlink" href="#pcapkit.const.pcapng.secrets_type.SecretsType.ZigBee_APS_Key" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.const.pcapng.secrets_type.SecretsType._missing_">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">_missing_</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/const/pcapng/secrets_type.html#SecretsType._missing_"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.pcapng.secrets_type.SecretsType._missing_" title="Permalink to this definition">#</a></dt>
+<dd><p>Lookup function used when value is not found.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>value</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>) – Value to get enum item.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#pcapkit.const.pcapng.secrets_type.SecretsType" title="pcapkit.const.pcapng.secrets_type.SecretsType"><code class="xref py py-class docutils literal notranslate"><span class="pre">SecretsType</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-pcapkit.const.pcapng.verdict_type">
+<span id="verdict-types"></span><h2>Verdict Types<a class="headerlink" href="#module-pcapkit.const.pcapng.verdict_type" title="Permalink to this heading">#</a></h2>
+<p>This module contains the constant enumeration for <strong>Verdict Types</strong>,
+which is automatically generated from <a class="reference internal" href="../vendor/pcapng.html#pcapkit.vendor.pcapng.verdict_type.VerdictType" title="pcapkit.vendor.pcapng.verdict_type.VerdictType"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.vendor.pcapng.verdict_type.VerdictType</span></code></a>.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="pcapkit.const.pcapng.verdict_type.VerdictType">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.const.pcapng.verdict_type.</span></span><span class="sig-name descname"><span class="pre">VerdictType</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value=&lt;no_arg&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">names=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">module=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qualname=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start=1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">boundary=None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/const/pcapng/verdict_type.html#VerdictType"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.pcapng.verdict_type.VerdictType" title="Permalink to this definition">#</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">IntEnum</span></code></p>
+<p>[VerdictType] Verdict Types</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.pcapng.verdict_type.VerdictType.Hardware">
+<span class="sig-name descname"><span class="pre">Hardware</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0</span></em><a class="headerlink" href="#pcapkit.const.pcapng.verdict_type.VerdictType.Hardware" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.pcapng.verdict_type.VerdictType.Linux_eBPF_TC">
+<span class="sig-name descname"><span class="pre">Linux_eBPF_TC</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1</span></em><a class="headerlink" href="#pcapkit.const.pcapng.verdict_type.VerdictType.Linux_eBPF_TC" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.pcapng.verdict_type.VerdictType.Linux_eBPF_XDP">
+<span class="sig-name descname"><span class="pre">Linux_eBPF_XDP</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">2</span></em><a class="headerlink" href="#pcapkit.const.pcapng.verdict_type.VerdictType.Linux_eBPF_XDP" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.const.pcapng.verdict_type.VerdictType._missing_">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">_missing_</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/const/pcapng/verdict_type.html#VerdictType._missing_"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.pcapng.verdict_type.VerdictType._missing_" title="Permalink to this definition">#</a></dt>
+<dd><p>Lookup function used when value is not found.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>value</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>) – Value to get enum item.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#pcapkit.const.pcapng.verdict_type.VerdictType" title="pcapkit.const.pcapng.verdict_type.VerdictType"><code class="xref py py-class docutils literal notranslate"><span class="pre">VerdictType</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
 <br /><aside class="footnote-list brackets">
-<aside class="footnote brackets" id="id2" role="note">
+<aside class="footnote brackets" id="id7" role="note">
 <span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id1">*</a><span class="fn-bracket">]</span></span>
-<p><a class="reference external" href="https://www.ietf.org/staging/draft-tuexen-opsawg-pcapng-02.html">https://www.ietf.org/staging/draft-tuexen-opsawg-pcapng-02.html</a></p>
+<p><a class="reference external" href="https://www.ietf.org/staging/draft-tuexen-opsawg-pcapng-02.html#name-standardized-block-type-cod">https://www.ietf.org/staging/draft-tuexen-opsawg-pcapng-02.html#name-standardized-block-type-cod</a></p>
+</aside>
+<aside class="footnote brackets" id="id8" role="note">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id2">†</a><span class="fn-bracket">]</span></span>
+<p><a class="reference external" href="https://www.ietf.org/staging/draft-tuexen-opsawg-pcapng-02.html#name-options">https://www.ietf.org/staging/draft-tuexen-opsawg-pcapng-02.html#name-options</a></p>
+</aside>
+<aside class="footnote brackets" id="id9" role="note">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id3">‡</a><span class="fn-bracket">]</span></span>
+<p><a class="reference external" href="https://www.ietf.org/staging/draft-tuexen-opsawg-pcapng-02.html#name-enhanced-packet-block-flags">https://www.ietf.org/staging/draft-tuexen-opsawg-pcapng-02.html#name-enhanced-packet-block-flags</a></p>
+</aside>
+<aside class="footnote brackets" id="id10" role="note">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id4">§</a><span class="fn-bracket">]</span></span>
+<p><a class="reference external" href="https://www.ietf.org/staging/draft-tuexen-opsawg-pcapng-02.html#name-enhanced-packet-block">https://www.ietf.org/staging/draft-tuexen-opsawg-pcapng-02.html#name-enhanced-packet-block</a></p>
+</aside>
+<aside class="footnote brackets" id="id11" role="note">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id5">¶</a><span class="fn-bracket">]</span></span>
+<p><a class="reference external" href="https://www.ietf.org/staging/draft-tuexen-opsawg-pcapng-02.html#name-name-resolution-block">https://www.ietf.org/staging/draft-tuexen-opsawg-pcapng-02.html#name-name-resolution-block</a></p>
+</aside>
+<aside class="footnote brackets" id="id12" role="note">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id6">#</a><span class="fn-bracket">]</span></span>
+<p><a class="reference external" href="https://www.ietf.org/staging/draft-tuexen-opsawg-pcapng-02.html#name-decryption-secrets-block">https://www.ietf.org/staging/draft-tuexen-opsawg-pcapng-02.html#name-decryption-secrets-block</a></p>
 </aside>
 </aside>
 </section>
@@ -673,6 +1137,93 @@ Varenni &lt;<a class="reference external" href="mailto:gianluca&#46;varenni&#37;
 <li><a class="reference internal" href="#pcapkit.const.pcapng.block_type.BlockType.Custom_Block_that_rewriters_should_not_copy_into_new_files"><code class="docutils literal notranslate"><span class="pre">BlockType.Custom_Block_that_rewriters_should_not_copy_into_new_files</span></code></a></li>
 <li><a class="reference internal" href="#pcapkit.const.pcapng.block_type.BlockType.Section_Header_Block"><code class="docutils literal notranslate"><span class="pre">BlockType.Section_Header_Block</span></code></a></li>
 <li><a class="reference internal" href="#pcapkit.const.pcapng.block_type.BlockType._missing_"><code class="docutils literal notranslate"><span class="pre">BlockType._missing_()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-pcapkit.const.pcapng.hash_algorithm">Hash Algorithms</a><ul>
+<li><a class="reference internal" href="#pcapkit.const.pcapng.hash_algorithm.HashAlgorithm"><code class="docutils literal notranslate"><span class="pre">HashAlgorithm</span></code></a><ul>
+<li><a class="reference internal" href="#pcapkit.const.pcapng.hash_algorithm.HashAlgorithm.two_s_complement"><code class="docutils literal notranslate"><span class="pre">HashAlgorithm.two_s_complement</span></code></a></li>
+<li><a class="reference internal" href="#pcapkit.const.pcapng.hash_algorithm.HashAlgorithm.XOR"><code class="docutils literal notranslate"><span class="pre">HashAlgorithm.XOR</span></code></a></li>
+<li><a class="reference internal" href="#pcapkit.const.pcapng.hash_algorithm.HashAlgorithm.CRC32"><code class="docutils literal notranslate"><span class="pre">HashAlgorithm.CRC32</span></code></a></li>
+<li><a class="reference internal" href="#pcapkit.const.pcapng.hash_algorithm.HashAlgorithm.MD_5"><code class="docutils literal notranslate"><span class="pre">HashAlgorithm.MD_5</span></code></a></li>
+<li><a class="reference internal" href="#pcapkit.const.pcapng.hash_algorithm.HashAlgorithm.SHA_1"><code class="docutils literal notranslate"><span class="pre">HashAlgorithm.SHA_1</span></code></a></li>
+<li><a class="reference internal" href="#pcapkit.const.pcapng.hash_algorithm.HashAlgorithm.Toeplitz"><code class="docutils literal notranslate"><span class="pre">HashAlgorithm.Toeplitz</span></code></a></li>
+<li><a class="reference internal" href="#pcapkit.const.pcapng.hash_algorithm.HashAlgorithm._missing_"><code class="docutils literal notranslate"><span class="pre">HashAlgorithm._missing_()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-pcapkit.const.pcapng.option_type">Option Types</a><ul>
+<li><a class="reference internal" href="#pcapkit.const.pcapng.option_type.OptionType"><code class="docutils literal notranslate"><span class="pre">OptionType</span></code></a><ul>
+<li><a class="reference internal" href="#pcapkit.const.pcapng.option_type.OptionType.opt_endofopt"><code class="docutils literal notranslate"><span class="pre">OptionType.opt_endofopt</span></code></a></li>
+<li><a class="reference internal" href="#pcapkit.const.pcapng.option_type.OptionType.opt_comment"><code class="docutils literal notranslate"><span class="pre">OptionType.opt_comment</span></code></a></li>
+<li><a class="reference internal" href="#pcapkit.const.pcapng.option_type.OptionType.if_name"><code class="docutils literal notranslate"><span class="pre">OptionType.if_name</span></code></a></li>
+<li><a class="reference internal" href="#pcapkit.const.pcapng.option_type.OptionType.if_description"><code class="docutils literal notranslate"><span class="pre">OptionType.if_description</span></code></a></li>
+<li><a class="reference internal" href="#pcapkit.const.pcapng.option_type.OptionType.if_IPv4addr"><code class="docutils literal notranslate"><span class="pre">OptionType.if_IPv4addr</span></code></a></li>
+<li><a class="reference internal" href="#pcapkit.const.pcapng.option_type.OptionType.if_IPv6addr"><code class="docutils literal notranslate"><span class="pre">OptionType.if_IPv6addr</span></code></a></li>
+<li><a class="reference internal" href="#pcapkit.const.pcapng.option_type.OptionType.if_MACaddr"><code class="docutils literal notranslate"><span class="pre">OptionType.if_MACaddr</span></code></a></li>
+<li><a class="reference internal" href="#pcapkit.const.pcapng.option_type.OptionType.if_EUIaddr"><code class="docutils literal notranslate"><span class="pre">OptionType.if_EUIaddr</span></code></a></li>
+<li><a class="reference internal" href="#pcapkit.const.pcapng.option_type.OptionType.if_speed"><code class="docutils literal notranslate"><span class="pre">OptionType.if_speed</span></code></a></li>
+<li><a class="reference internal" href="#pcapkit.const.pcapng.option_type.OptionType.if_tsresol"><code class="docutils literal notranslate"><span class="pre">OptionType.if_tsresol</span></code></a></li>
+<li><a class="reference internal" href="#pcapkit.const.pcapng.option_type.OptionType.if_tzone"><code class="docutils literal notranslate"><span class="pre">OptionType.if_tzone</span></code></a></li>
+<li><a class="reference internal" href="#pcapkit.const.pcapng.option_type.OptionType.if_filter"><code class="docutils literal notranslate"><span class="pre">OptionType.if_filter</span></code></a></li>
+<li><a class="reference internal" href="#pcapkit.const.pcapng.option_type.OptionType.if_os"><code class="docutils literal notranslate"><span class="pre">OptionType.if_os</span></code></a></li>
+<li><a class="reference internal" href="#pcapkit.const.pcapng.option_type.OptionType.if_fcslen"><code class="docutils literal notranslate"><span class="pre">OptionType.if_fcslen</span></code></a></li>
+<li><a class="reference internal" href="#pcapkit.const.pcapng.option_type.OptionType.if_tsoffset"><code class="docutils literal notranslate"><span class="pre">OptionType.if_tsoffset</span></code></a></li>
+<li><a class="reference internal" href="#pcapkit.const.pcapng.option_type.OptionType.if_hardware"><code class="docutils literal notranslate"><span class="pre">OptionType.if_hardware</span></code></a></li>
+<li><a class="reference internal" href="#pcapkit.const.pcapng.option_type.OptionType.if_txspeed"><code class="docutils literal notranslate"><span class="pre">OptionType.if_txspeed</span></code></a></li>
+<li><a class="reference internal" href="#pcapkit.const.pcapng.option_type.OptionType.if_rxspeed"><code class="docutils literal notranslate"><span class="pre">OptionType.if_rxspeed</span></code></a></li>
+<li><a class="reference internal" href="#pcapkit.const.pcapng.option_type.OptionType.epb_flags"><code class="docutils literal notranslate"><span class="pre">OptionType.epb_flags</span></code></a></li>
+<li><a class="reference internal" href="#pcapkit.const.pcapng.option_type.OptionType.epb_hash"><code class="docutils literal notranslate"><span class="pre">OptionType.epb_hash</span></code></a></li>
+<li><a class="reference internal" href="#pcapkit.const.pcapng.option_type.OptionType.epb_dropcount"><code class="docutils literal notranslate"><span class="pre">OptionType.epb_dropcount</span></code></a></li>
+<li><a class="reference internal" href="#pcapkit.const.pcapng.option_type.OptionType.epb_packetid"><code class="docutils literal notranslate"><span class="pre">OptionType.epb_packetid</span></code></a></li>
+<li><a class="reference internal" href="#pcapkit.const.pcapng.option_type.OptionType.epb_queue"><code class="docutils literal notranslate"><span class="pre">OptionType.epb_queue</span></code></a></li>
+<li><a class="reference internal" href="#pcapkit.const.pcapng.option_type.OptionType.epb_verdict"><code class="docutils literal notranslate"><span class="pre">OptionType.epb_verdict</span></code></a></li>
+<li><a class="reference internal" href="#pcapkit.const.pcapng.option_type.OptionType.ns_dnsname"><code class="docutils literal notranslate"><span class="pre">OptionType.ns_dnsname</span></code></a></li>
+<li><a class="reference internal" href="#pcapkit.const.pcapng.option_type.OptionType.ns_dnsIP4addr"><code class="docutils literal notranslate"><span class="pre">OptionType.ns_dnsIP4addr</span></code></a></li>
+<li><a class="reference internal" href="#pcapkit.const.pcapng.option_type.OptionType.ns_dnsIP6addr"><code class="docutils literal notranslate"><span class="pre">OptionType.ns_dnsIP6addr</span></code></a></li>
+<li><a class="reference internal" href="#pcapkit.const.pcapng.option_type.OptionType.isb_starttime"><code class="docutils literal notranslate"><span class="pre">OptionType.isb_starttime</span></code></a></li>
+<li><a class="reference internal" href="#pcapkit.const.pcapng.option_type.OptionType.isb_endtime"><code class="docutils literal notranslate"><span class="pre">OptionType.isb_endtime</span></code></a></li>
+<li><a class="reference internal" href="#pcapkit.const.pcapng.option_type.OptionType.isb_ifrecv"><code class="docutils literal notranslate"><span class="pre">OptionType.isb_ifrecv</span></code></a></li>
+<li><a class="reference internal" href="#pcapkit.const.pcapng.option_type.OptionType.isb_ifdrop"><code class="docutils literal notranslate"><span class="pre">OptionType.isb_ifdrop</span></code></a></li>
+<li><a class="reference internal" href="#pcapkit.const.pcapng.option_type.OptionType.isb_filteraccept"><code class="docutils literal notranslate"><span class="pre">OptionType.isb_filteraccept</span></code></a></li>
+<li><a class="reference internal" href="#pcapkit.const.pcapng.option_type.OptionType.isb_osdrop"><code class="docutils literal notranslate"><span class="pre">OptionType.isb_osdrop</span></code></a></li>
+<li><a class="reference internal" href="#pcapkit.const.pcapng.option_type.OptionType.isb_usrdeliv"><code class="docutils literal notranslate"><span class="pre">OptionType.isb_usrdeliv</span></code></a></li>
+<li><a class="reference internal" href="#pcapkit.const.pcapng.option_type.OptionType.pack_flags"><code class="docutils literal notranslate"><span class="pre">OptionType.pack_flags</span></code></a></li>
+<li><a class="reference internal" href="#pcapkit.const.pcapng.option_type.OptionType.pack_hash"><code class="docutils literal notranslate"><span class="pre">OptionType.pack_hash</span></code></a></li>
+<li><a class="reference internal" href="#pcapkit.const.pcapng.option_type.OptionType._missing_"><code class="docutils literal notranslate"><span class="pre">OptionType._missing_()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-pcapkit.const.pcapng.record_type">Record Types</a><ul>
+<li><a class="reference internal" href="#pcapkit.const.pcapng.record_type.RecordType"><code class="docutils literal notranslate"><span class="pre">RecordType</span></code></a><ul>
+<li><a class="reference internal" href="#pcapkit.const.pcapng.record_type.RecordType.nrb_record_end"><code class="docutils literal notranslate"><span class="pre">RecordType.nrb_record_end</span></code></a></li>
+<li><a class="reference internal" href="#pcapkit.const.pcapng.record_type.RecordType.nrb_record_ipv4"><code class="docutils literal notranslate"><span class="pre">RecordType.nrb_record_ipv4</span></code></a></li>
+<li><a class="reference internal" href="#pcapkit.const.pcapng.record_type.RecordType.nrb_record_ipv6"><code class="docutils literal notranslate"><span class="pre">RecordType.nrb_record_ipv6</span></code></a></li>
+<li><a class="reference internal" href="#pcapkit.const.pcapng.record_type.RecordType._missing_"><code class="docutils literal notranslate"><span class="pre">RecordType._missing_()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-pcapkit.const.pcapng.secrets_type">Secrets Types</a><ul>
+<li><a class="reference internal" href="#pcapkit.const.pcapng.secrets_type.SecretsType"><code class="docutils literal notranslate"><span class="pre">SecretsType</span></code></a><ul>
+<li><a class="reference internal" href="#pcapkit.const.pcapng.secrets_type.SecretsType.TLS_Key_Log"><code class="docutils literal notranslate"><span class="pre">SecretsType.TLS_Key_Log</span></code></a></li>
+<li><a class="reference internal" href="#pcapkit.const.pcapng.secrets_type.SecretsType.WireGuard_Key_Log"><code class="docutils literal notranslate"><span class="pre">SecretsType.WireGuard_Key_Log</span></code></a></li>
+<li><a class="reference internal" href="#pcapkit.const.pcapng.secrets_type.SecretsType.ZigBee_NWK_Key"><code class="docutils literal notranslate"><span class="pre">SecretsType.ZigBee_NWK_Key</span></code></a></li>
+<li><a class="reference internal" href="#pcapkit.const.pcapng.secrets_type.SecretsType.ZigBee_APS_Key"><code class="docutils literal notranslate"><span class="pre">SecretsType.ZigBee_APS_Key</span></code></a></li>
+<li><a class="reference internal" href="#pcapkit.const.pcapng.secrets_type.SecretsType._missing_"><code class="docutils literal notranslate"><span class="pre">SecretsType._missing_()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-pcapkit.const.pcapng.verdict_type">Verdict Types</a><ul>
+<li><a class="reference internal" href="#pcapkit.const.pcapng.verdict_type.VerdictType"><code class="docutils literal notranslate"><span class="pre">VerdictType</span></code></a><ul>
+<li><a class="reference internal" href="#pcapkit.const.pcapng.verdict_type.VerdictType.Hardware"><code class="docutils literal notranslate"><span class="pre">VerdictType.Hardware</span></code></a></li>
+<li><a class="reference internal" href="#pcapkit.const.pcapng.verdict_type.VerdictType.Linux_eBPF_TC"><code class="docutils literal notranslate"><span class="pre">VerdictType.Linux_eBPF_TC</span></code></a></li>
+<li><a class="reference internal" href="#pcapkit.const.pcapng.verdict_type.VerdictType.Linux_eBPF_XDP"><code class="docutils literal notranslate"><span class="pre">VerdictType.Linux_eBPF_XDP</span></code></a></li>
+<li><a class="reference internal" href="#pcapkit.const.pcapng.verdict_type.VerdictType._missing_"><code class="docutils literal notranslate"><span class="pre">VerdictType._missing_()</span></code></a></li>
 </ul>
 </li>
 </ul>
