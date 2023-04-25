@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""data modules for no-payload packet"""
+"""data models for no-payload packet"""
 
 from pcapkit.protocols.data.data import Data
 

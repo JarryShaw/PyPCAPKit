@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""data modules for frame header of PCAP file"""
+"""data models for frame header of PCAP file"""
 
 from typing import TYPE_CHECKING
 

@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""data modules for raw protocol data"""
+"""data models for raw protocol data"""
 
 from typing import TYPE_CHECKING
 

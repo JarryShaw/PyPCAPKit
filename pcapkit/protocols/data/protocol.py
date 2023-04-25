@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""data modules for root protocol"""
+"""data models for root protocol"""
 
 from typing import TYPE_CHECKING
 
