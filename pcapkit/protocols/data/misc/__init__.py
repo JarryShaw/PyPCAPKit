@@ -5,6 +5,7 @@
 from pcapkit.protocols.data.misc.pcap import *
 
 # PCAP-NG file format
+from pcapkit.protocols.data.misc.pcapng import UnknownSecrets as PCAPNG_UnknownSecrets
 from pcapkit.protocols.data.misc.pcapng import PCAPNG
 from pcapkit.protocols.data.misc.pcapng import CommentOption as PCAPNG_CommentOption
 from pcapkit.protocols.data.misc.pcapng import CustomBlock as PCAPNG_CustomBlock
@@ -92,7 +93,8 @@ __all__ = [
     'PCAPNG_ISB_StartTimeOption', 'PCAPNG_ISB_EndTimeOption', 'PCAPNG_ISB_IFRecvOption', 'PCAPNG_ISB_IFDropOption',
     'PCAPNG_ISB_FilterAcceptOption', 'PCAPNG_ISB_OSDropOption', 'PCAPNG_ISB_UsrDelivOption',
     'PCAPNG_NameResolutionRecord', 'PCAPNG_UnknownRecord', 'PCAPNG_EndRecord', 'PCAPNG_IPv4Record', 'PCAPNG_IPv6Record',
-    'PCAPNG_DSBSecrets', 'PCAPNG_TLSKeyLog', 'PCAPNG_WireGuardKeyLog', 'PCAPNG_ZigBeeNWKKey', 'PCAPNG_ZigBeeAPSKey',
+    'PCAPNG_DSBSecrets', 'UnknownSecrets', 'PCAPNG_TLSKeyLog', 'PCAPNG_WireGuardKeyLog', 'PCAPNG_ZigBeeNWKKey',
+    'PCAPNG_ZigBeeAPSKey',
     'PCAPNG_UnknownBlock', 'PCAPNG_SectionHeaderBlock', 'PCAPNG_InterfaceDescriptionBlock',
     'PCAPNG_EnhancedPacketBlock', 'PCAPNG_SimplePacketBlock', 'PCAPNG_NameResolutionBlock',
     'PCAPNG_InterfaceStatisticsBlock', 'PCAPNG_SystemdJournalExportBlock', 'PCAPNG_DecryptionSecretsBlock',

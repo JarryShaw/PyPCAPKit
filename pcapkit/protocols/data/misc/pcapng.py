@@ -22,7 +22,8 @@ __all__ = [
 
     'NameResolutionRecord', 'UnknownRecord', 'EndRecord', 'IPv4Record', 'IPv6Record',
 
-    'DSBSecrets', 'TLSKeyLog', 'WireGuardKeyLog', 'ZigBeeNWKKey', 'ZigBeeAPSKey',
+    'DSBSecrets', 'UnknownSecrets', 'TLSKeyLog', 'WireGuardKeyLog', 'ZigBeeNWKKey',
+    'ZigBeeAPSKey',
 
     'UnknownBlock', 'SectionHeaderBlock', 'InterfaceDescriptionBlock',
     'EnhancedPacketBlock', 'SimplePacketBlock', 'NameResolutionBlock',
