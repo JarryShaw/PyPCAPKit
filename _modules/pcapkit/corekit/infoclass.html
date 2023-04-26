@@ -460,6 +460,7 @@
                     <span class="sa">f</span><span class="s1">&#39;def __create_fn__():</span><span class="se">\n</span><span class="s1">&#39;</span>
                     <span class="sa">f</span><span class="s1">&#39;    def __init__(self, </span><span class="si">{</span><span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">args_</span><span class="p">)</span><span class="si">}</span><span class="s1">):</span><span class="se">\n</span><span class="s1">&#39;</span>
                     <span class="sa">f</span><span class="s1">&#39;        self.__update__(</span><span class="si">{</span><span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dict_</span><span class="p">)</span><span class="si">}</span><span class="s1">)</span><span class="se">\n</span><span class="s1">&#39;</span>
+                    <span class="sa">f</span><span class="s1">&#39;        self.__post_init__()</span><span class="se">\n</span><span class="s1">&#39;</span>
                     <span class="sa">f</span><span class="s1">&#39;    return __init__</span><span class="se">\n</span><span class="s1">&#39;</span>
                 <span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
@@ -467,6 +468,7 @@
                     <span class="s1">&#39;def __create_fn__():</span><span class="se">\n</span><span class="s1">&#39;</span>
                     <span class="s1">&#39;    def __init__(self, dict_=None, **kwargs):</span><span class="se">\n</span><span class="s1">&#39;</span>
                     <span class="s1">&#39;        self.__update__(dict_, **kwargs)</span><span class="se">\n</span><span class="s1">&#39;</span>
+                    <span class="s1">&#39;        self.__post_init__()</span><span class="se">\n</span><span class="s1">&#39;</span>
                     <span class="s1">&#39;    return __init__</span><span class="se">\n</span><span class="s1">&#39;</span>
                 <span class="p">)</span>
 
@@ -484,6 +486,9 @@
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;__map_reverse__&#39;</span><span class="p">,</span> <span class="p">{})</span>
 
         <span class="k">return</span> <span class="bp">self</span></div>
+
+<div class="viewcode-block" id="Info.__post_init__"><a class="viewcode-back" href="../../../pcapkit/corekit/infoclass.html#pcapkit.corekit.infoclass.Info.__post_init__">[docs]</a>    <span class="k">def</span> <span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Customisation method to be called after initialisation.&quot;&quot;&quot;</span></div>
 
     <span class="k">def</span> <span class="nf">__update__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dict_</span><span class="p">:</span> <span class="s1">&#39;Optional[Mapping[str, VT] | Iterable[tuple[str, VT]]]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                    <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;VT&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
