@@ -92,6 +92,7 @@ from pcapkit.protocols.data.misc.pcapng import ZigBeeAPSKey as Data_ZigBeeAPSKey
 from pcapkit.protocols.data.misc.pcapng import ZigBeeNWKKey as Data_ZigBeeNWKKey
 from pcapkit.protocols.protocol import Protocol
 from pcapkit.protocols.schema.misc.pcapng import PCAPNG as Schema_PCAPNG
+from pcapkit.protocols.schema.misc.pcapng import BlockType as Schema_BlockType
 from pcapkit.protocols.schema.misc.pcapng import CommentOption as Schema_CommentOption
 from pcapkit.protocols.schema.misc.pcapng import CustomBlock as Schema_CustomBlock
 from pcapkit.protocols.schema.misc.pcapng import \
@@ -161,7 +162,14 @@ from pcapkit.utilities.warnings import RegistryWarning, warn
 __all__ = ['PCAPNG']
 
 if TYPE_CHECKING:
-    from typing import Any
+    from typing import Any, Callable, DefaultDict, Optional
+
+    from mypy_extensions import DefaultArg, KwArg, NamedArg
+    from typing_extensions import Literal
+
+    BlockParser = Callable[[Schema_BlockType, NamedArg(Schema_PCAPNG, 'header')], Data_PCAPNG]
+    BlockConstructor = Callable[[Enum_BlockType, DefaultArg(Optional[Data_PCAPNG]),
+                                 KwArg(Any)], Schema_BlockType]
 
 
 class PacketDirection(enum.IntEnum):
@@ -234,3 +242,42 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
          - :class:`pcapkit.protocols.internet.ipv6.IPv6`
 
     """
+
+    ##########################################################################
+    # Defaults.
+    ##########################################################################
+
+    #: DefaultDict[int, tuple[str, str]]: Protocol index mapping for decoding next layer,
+    #: c.f. :meth:`self._decode_next_layer <pcapkit.protocols.protocol.Protocol._decode_next_layer>`
+    #: & :meth:`self._import_next_layer <pcapkit.protocols.protocol.Protocol._import_next_layer>`.
+    #: The values should be a tuple representing the module name and class name.
+    __proto__ = collections.defaultdict(
+        lambda: ('pcapkit.protocols.misc.raw', 'Raw'),
+        {
+            Enum_LinkType.ETHERNET: ('pcapkit.protocols.link', 'Ethernet'),
+            Enum_LinkType.IPV4:     ('pcapkit.protocols.internet', 'IPv4'),
+            Enum_LinkType.IPV6:     ('pcapkit.protocols.internet', 'IPv6'),
+        },
+    )
+
+    #: DefaultDict[Enum_BlockType, str | tuple[BlockParser, BlockConstructor]]:
+    #: Block type to method mapping. Method names are expected to be referred
+    #: to the class by ``_read_pcapng_${name}`` and/or ``_make_pcapng_${name}``,
+    #: and if such name not found, the value should then be a method that can
+    #: parse the block by itself.
+    __block__ = collections.defaultdict(
+        lambda: 'unknown',
+        {
+            Enum_BlockType.Section_Header_Block: 'shb',
+            Enum_BlockType.Interface_Description_Block: 'idb',
+            Enum_BlockType.Enhanced_Packet_Block: 'epb',
+            Enum_BlockType.Simple_Packet_Block: 'spb',
+            Enum_BlockType.Name_Resolution_Block: 'nrb',
+            Enum_BlockType.Interface_Statistics_Block: 'isb',
+            Enum_BlockType.systemd_Journal_Export_Block: 'systemd',
+            Enum_BlockType.Decryption_Secrets_Block: 'dsb',
+            Enum_BlockType.Custom_Block_that_rewriters_can_copy_into_new_files: 'custom',
+            Enum_BlockType.Custom_Block_that_rewriters_should_not_copy_into_new_files: 'custom',
+            Enum_BlockType.Packet_Block: 'packet',
+        },
+    )  # type: DefaultDict[Enum_BlockType | int, str | tuple[BlockParser, BlockConstructor]]
