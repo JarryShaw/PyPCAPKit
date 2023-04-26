@@ -28,6 +28,7 @@ from pcapkit.const.pcapng.record_type import RecordType as Enum_RecordType
 from pcapkit.const.pcapng.secrets_type import SecretsType as Enum_SecretsType
 from pcapkit.const.pcapng.verdict_type import VerdictType as Enum_VerdictType
 from pcapkit.const.reg.linktype import LinkType as Enum_LinkType
+from pcapkit.corekit.multidict import OrderedMultiDict
 from pcapkit.corekit.version import VersionInfo
 from pcapkit.protocols.data.misc.pcapng import PCAPNG as Data_PCAPNG
 from pcapkit.protocols.data.misc.pcapng import CommentOption as Data_CommentOption
@@ -87,6 +88,7 @@ from pcapkit.protocols.data.misc.pcapng import TLSKeyLog as Data_TLSKeyLog
 from pcapkit.protocols.data.misc.pcapng import UnknownBlock as Data_UnknownBlock
 from pcapkit.protocols.data.misc.pcapng import UnknownOption as Data_UnknownOption
 from pcapkit.protocols.data.misc.pcapng import UnknownRecord as Data_UnknownRecord
+from pcapkit.protocols.data.misc.pcapng import UnknownSecrets as Data_UnknownSecrets
 from pcapkit.protocols.data.misc.pcapng import WireGuardKeyLog as Data_WireGuardKeyLog
 from pcapkit.protocols.data.misc.pcapng import ZigBeeAPSKey as Data_ZigBeeAPSKey
 from pcapkit.protocols.data.misc.pcapng import ZigBeeNWKKey as Data_ZigBeeNWKKey
@@ -152,6 +154,7 @@ from pcapkit.protocols.schema.misc.pcapng import TLSKeyLog as Schema_TLSKeyLog
 from pcapkit.protocols.schema.misc.pcapng import UnknownBlock as Schema_UnknownBlock
 from pcapkit.protocols.schema.misc.pcapng import UnknownOption as Schema_UnknownOption
 from pcapkit.protocols.schema.misc.pcapng import UnknownRecord as Schema_UnknownRecord
+from pcapkit.protocols.schema.misc.pcapng import UnknownSecrets as Schema_UnknownSecrets
 from pcapkit.protocols.schema.misc.pcapng import WireGuardKeyLog as Schema_WireGuardKeyLog
 from pcapkit.protocols.schema.misc.pcapng import ZigBeeAPSKey as Schema_ZigBeeAPSKey
 from pcapkit.protocols.schema.misc.pcapng import ZigBeeNWKKey as Schema_ZigBeeNWKKey
@@ -167,9 +170,25 @@ if TYPE_CHECKING:
     from mypy_extensions import DefaultArg, KwArg, NamedArg
     from typing_extensions import Literal
 
+    Option = OrderedMultiDict[Enum_OptionType, Data_Option]
+
     BlockParser = Callable[[Schema_BlockType, NamedArg(Schema_PCAPNG, 'header')], Data_PCAPNG]
     BlockConstructor = Callable[[Enum_BlockType, DefaultArg(Optional[Data_PCAPNG]),
                                  KwArg(Any)], Schema_BlockType]
+
+    OptionParser = Callable[[Schema_Option, NamedArg(Option, 'options')], Data_Option]
+    OptionConstructor = Callable[[Enum_OptionType, DefaultArg(Optional[Data_Option]),
+                                  KwArg(Any)], Schema_Option]
+
+    SecretsParser = Callable[[Schema_DSBSecrets, NamedArg(Schema_DecryptionSecretsBlock, 'dsb')],
+                             Data_DSBSecrets]
+    SecretsConstructor = Callable[[Enum_SecretsType, DefaultArg(Optional[Data_DSBSecrets]),
+                                   KwArg(Any)], Schema_DSBSecrets]
+
+    RecordParser = Callable[[Schema_NameResolutionRecord, NamedArg(Schema_NameResolutionBlock, 'nrb')],
+                            Data_NameResolutionRecord]
+    RecordConstructor = Callable[[Enum_RecordType, DefaultArg(Optional[Data_NameResolutionRecord]),
+                                  KwArg(Any)], Schema_NameResolutionRecord]
 
 
 class PacketDirection(enum.IntEnum):
@@ -247,8 +266,8 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
     # Defaults.
     ##########################################################################
 
-    #: DefaultDict[int, tuple[str, str]]: Protocol index mapping for decoding next layer,
-    #: c.f. :meth:`self._decode_next_layer <pcapkit.protocols.protocol.Protocol._decode_next_layer>`
+    #: DefaultDict[Enum_LinkType, tuple[str, str]]: Protocol index mapping for
+    #: decoding next layer, c.f. :meth:`self._decode_next_layer <pcapkit.protocols.protocol.Protocol._decode_next_layer>`
     #: & :meth:`self._import_next_layer <pcapkit.protocols.protocol.Protocol._import_next_layer>`.
     #: The values should be a tuple representing the module name and class name.
     __proto__ = collections.defaultdict(
@@ -258,7 +277,7 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
             Enum_LinkType.IPV4:     ('pcapkit.protocols.internet', 'IPv4'),
             Enum_LinkType.IPV6:     ('pcapkit.protocols.internet', 'IPv6'),
         },
-    )
+    )  # type: DefaultDict[Enum_LinkType | int, tuple[str, str]]
 
     #: DefaultDict[Enum_BlockType, str | tuple[BlockParser, BlockConstructor]]:
     #: Block type to method mapping. Method names are expected to be referred
@@ -281,3 +300,79 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
             Enum_BlockType.Packet_Block: 'packet',
         },
     )  # type: DefaultDict[Enum_BlockType | int, str | tuple[BlockParser, BlockConstructor]]
+
+    #: DefaultDict[Enum_OptionType, str | tuple[OptionParser, OptionConstructor]]:
+    #: Block option type to method mapping. Method names are expected to be
+    #: referred to the class by ``_read_option_${name}`` and/or ``_make_option_${name}``,
+    #: and if such name not found, the value should then be a method that can
+    #: parse the option by itself.
+    __option__ = collections.defaultdict(
+        lambda: 'unknown',
+        {
+            Enum_OptionType.opt_endofopt: 'endofopt',
+            Enum_OptionType.opt_comment: 'comment',
+            Enum_OptionType.if_name: 'if_name',
+            Enum_OptionType.if_description: 'if_description',
+            Enum_OptionType.if_IPv4addr: 'if_ipv4',
+            Enum_OptionType.if_IPv6addr: 'if_ipv6',
+            Enum_OptionType.if_MACaddr: 'if_mac',
+            Enum_OptionType.if_EUIaddr: 'if_eui',
+            Enum_OptionType.if_speed: 'if_speed',
+            Enum_OptionType.if_tsresol: 'if_tsresol',
+            Enum_OptionType.if_tzone: 'if_tzone',
+            Enum_OptionType.if_filter: 'if_filter',
+            Enum_OptionType.if_os: 'if_os',
+            Enum_OptionType.if_fcslen: 'if_fcslen',
+            Enum_OptionType.if_tsoffset: 'if_tsoffset',
+            Enum_OptionType.if_hardware: 'if_hardware',
+            Enum_OptionType.if_txspeed: 'if_txspeed',
+            Enum_OptionType.if_rxspeed: 'if_rxspeed',
+            Enum_OptionType.epb_flags: 'epb_flags',
+            Enum_OptionType.epb_hash: 'epb_hash',
+            Enum_OptionType.epb_dropcount: 'epb_dropcount',
+            Enum_OptionType.epb_packetid: 'epb_packetid',
+            Enum_OptionType.epb_queue: 'epb_queue',
+            Enum_OptionType.epb_verdict: 'epb_verdict',
+            Enum_OptionType.ns_dnsname: 'ns_dnsname',
+            Enum_OptionType.ns_dnsIP4addr: 'ns_dnsipv4',
+            Enum_OptionType.ns_dnsIP6addr: 'ns_dnsipv6',
+            Enum_OptionType.isb_starttime: 'isb_starttime',
+            Enum_OptionType.isb_endtime: 'isb_endtime',
+            Enum_OptionType.isb_ifrecv: 'isb_ifrecv',
+            Enum_OptionType.isb_ifdrop: 'isb_ifdrop',
+            Enum_OptionType.isb_filteraccept: 'isb_filteraccept',
+            Enum_OptionType.isb_osdrop: 'isb_osdrop',
+            Enum_OptionType.isb_usrdeliv: 'isb_usrdeliv',
+            Enum_OptionType.pack_flags: 'epb_flags',
+            Enum_OptionType.pack_hash: 'epb_hash',
+        },
+    )  # type: DefaultDict[Enum_OptionType | int, str | tuple[OptionParser, OptionConstructor]]
+
+    #: DefaultDict[Enum_SecretsType, str | tuple[SecretsParser, SecretsConstructor]]:
+    #: Decryption secrets type to method mapping. Method names are expected to
+    #: be referred to the class by ``_read_secrets_${name}`` and/or ``_make_secrets_${name}``,
+    #: and if such name not found, the value should then be a method that can
+    #: parse the decryption secrets by itself.
+    __secrets__ = collections.defaultdict(
+        lambda: 'unknown',
+        {
+            Enum_SecretsType.TLS_Key_Log: 'tls',
+            Enum_SecretsType.WireGuard_Key_Log: 'wireguard',
+            Enum_SecretsType.ZigBee_NWK_Key_Log: 'zigbee_nwk',
+            Enum_SecretsType.ZigBee_APS_Key_Log: 'zigbee_aps',
+        },
+    )  # type: DefaultDict[Enum_SecretsType | int, str | tuple[SecretsParser, SecretsConstructor]]
+
+    #: DefaultDict[Enum_RecordType, str | tuple[RecordParser, RecordConstructor]]:
+    #: Name record type to method mapping. Method names are expected to be
+    #: referred to the class by ``_read_record_${name}`` and/or ``_make_record_${name}``,
+    #: and if such name not found, the value should then be a method that can
+    #: parse the name record by itself.
+    __record__ = collections.defaultdict(
+        lambda: 'unknown',
+        {
+            Enum_RecordType.nrb_record_end: 'end',
+            Enum_RecordType.nrb_record_ipv4: 'ipv4',
+            Enum_RecordType.nrb_record_ipv6: 'ipv6',
+        },
+    )  # type: DefaultDict[Enum_RecordType | int, str | tuple[RecordParser, RecordConstructor]]
