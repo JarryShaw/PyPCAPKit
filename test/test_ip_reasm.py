@@ -16,7 +16,7 @@ extraction = pcapkit.extract(
 
 with open('../sample/out', 'a') as file:  # pylint: disable=unspecified-encoding
     # pprint.pprint(extraction.reassembly.ipv4)
-    for datagram in extraction.reassembly.ipv4:  # type: ignore[union-attr]
+    for datagram in extraction.reassembly.ipv4:
         print(f'completed = {datagram.completed}')
         file.write(f'completed = {datagram.completed}')
         file.write('\n')
