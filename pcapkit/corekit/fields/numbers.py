@@ -70,7 +70,7 @@ class NumberField(Field[int], Generic[_T]):
             self._bit_length = bit_length
             self._bit_mask = (1 << bit_length) - 1
         else:
-            self._bit_length, self._bit_mask = -1, 0x00
+            self._bit_length, self._bit_mask = -1, -1
 
         self._signed = signed if self.__signed__ is None else self.__signed__
         self._byteorder = byteorder
