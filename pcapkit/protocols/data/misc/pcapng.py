@@ -91,7 +91,7 @@ class UnknownOption(Option):
         def __init__(self, type: 'Enum_OptionType', length: 'int', data: 'bytes') -> None: ...
 
 
-class EndOfOptions(Option):
+class EndOfOption(Option):
     """Data model for PCAP-NG file ``opt_endofopt`` options."""
 
     if TYPE_CHECKING:
@@ -628,6 +628,16 @@ class TLSKeyLog(DSBSecrets):
     """Data model for TLS key log DSB secrets."""
 
     #: TLS key log entries.
+    entries: 'OrderedMultiDict[TLSKeyLabel, bytes]'
+
+    if TYPE_CHECKING:
+        def __init__(self, entries: 'OrderedMultiDict[TLSKeyLabel, bytes]') -> 'None': ...
+
+
+class WireGuardKeyLog(DSBSecrets):
+    """Data model for WireGuard key DSB secrets."""
+
+    #: WireGuard Key Log entries.
     entries: 'OrderedMultiDict[WireGuardKeyLabel, bytes]'
 
     if TYPE_CHECKING:

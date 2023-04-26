@@ -31,6 +31,26 @@ __all__ = [
     'PCAP_Header', 'PCAP_MagicNumber',
     'PCAP_Frame', 'PCAP_FrameInfo',
 
+    # PCAP-NG file format
+    'PCAPNG',
+    'PCAPNG_Option', 'PCAPNG_UnknownOption',
+    'PCAPNG_EndOfOption', 'PCAPNG_CommentOption',
+    'PCAPNG_IF_NameOption', 'PCAPNG_IF_DescriptionOption', 'PCAPNG_IF_IPv4AddrOption', 'PCAPNG_IF_IPv6AddrOption',
+    'PCAPNG_IF_MACAddrOption', 'PCAPNG_IF_EUIAddrOption', 'PCAPNG_IF_SpeedOption', 'PCAPNG_IF_TSResolOption',
+    'PCAPNG_IF_TZoneOption', 'PCAPNG_IF_FilterOption', 'PCAPNG_IF_OSOption', 'PCAPNG_IF_FCSLenOption',
+    'PCAPNG_IF_TSOffsetOption', 'PCAPNG_IF_HardwareOption', 'PCAPNG_IF_TxSpeedOption', 'PCAPNG_IF_RxSpeedOption',
+    'PCAPNG_EPB_FlagsOption', 'PCAPNG_EPB_HashOption', 'PCAPNG_EPB_DropCountOption', 'PCAPNG_EPB_PacketIDOption',
+    'PCAPNG_EPB_QueueOption', 'PCAPNG_EPB_VerdictOption',
+    'PCAPNG_NS_DNSNameOption', 'PCAPNG_NS_DNSIP4AddrOption', 'PCAPNG_NS_DNSIP6AddrOption',
+    'PCAPNG_ISB_StartTimeOption', 'PCAPNG_ISB_EndTimeOption', 'PCAPNG_ISB_IFRecvOption', 'PCAPNG_ISB_IFDropOption',
+    'PCAPNG_ISB_FilterAcceptOption', 'PCAPNG_ISB_OSDropOption', 'PCAPNG_ISB_UsrDelivOption',
+    'PCAPNG_NameResolutionRecord', 'PCAPNG_UnknownRecord', 'PCAPNG_EndRecord', 'PCAPNG_IPv4Record', 'PCAPNG_IPv6Record',
+    'PCAPNG_DSBSecrets', 'PCAPNG_TLSKeyLog', 'PCAPNG_WireGuardKeyLog', 'PCAPNG_ZigBeeNWKKey', 'PCAPNG_ZigBeeAPSKey',
+    'PCAPNG_UnknownBlock', 'PCAPNG_SectionHeaderBlock', 'PCAPNG_InterfaceDescriptionBlock',
+    'PCAPNG_EnhancedPacketBlock', 'PCAPNG_SimplePacketBlock', 'PCAPNG_NameResolutionBlock',
+    'PCAPNG_InterfaceStatisticsBlock', 'PCAPNG_SystemdJournalExportBlock', 'PCAPNG_DecryptionSecretsBlock',
+    'PCAPNG_CustomBlock', 'PCAPNG_PacketBlock',
+
     # Address Resolution Protocol
     'ARP', 'ARP_Address', 'ARP_Type',
 
