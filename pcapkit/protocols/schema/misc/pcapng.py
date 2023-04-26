@@ -48,6 +48,7 @@ __all__ = [
 
     'DSBSecrets', 'TLSKeyLog', 'WireGuardKeyLog', 'ZigBeeNWKKey', 'ZigBeeAPSKey',
 
+    'BlockType',
     'UnknownBlock', 'SectionHeaderBlock', 'InterfaceDescriptionBlock',
     'EnhancedPacketBlock', 'SimplePacketBlock', 'NameResolutionBlock',
     'InterfaceStatisticsBlock', 'SystemdJournalExportBlock', 'DecryptionSecretsBlock',
@@ -140,6 +141,44 @@ def shb_byteorder_callback(field: 'NumberField', packet: 'dict[str, Any]') -> 'N
         raise ProtocolError(f'unknown byteorder magic: {magic:#x}')
 
 
+def pcapng_block_selector(packet: 'dict[str, Any]') -> 'Field':
+    """Selector function for :attr:`PCAPNG.block` field.
+
+    Args:
+        pkt: Packet data.
+
+    Returns:
+        Returns a :class:`~pcapkit.corekit.fields.misc.SchemaField`
+        wrapped :class:`~pcapkit.protocols.schema.misc.pcapng.BlockType`
+        subclass instance.
+
+    """
+    block_type = packet['type']  # type: Enum_BlockType
+    if block_type == Enum_BlockType.Section_Header_Block:
+        return SchemaField(schema=SectionHeaderBlock)
+    elif block_type == Enum_BlockType.Interface_Description_Block:
+        return SchemaField(schema=InterfaceDescriptionBlock)
+    elif block_type == Enum_BlockType.Enhanced_Packet_Block:
+        return SchemaField(schema=EnhancedPacketBlock)
+    elif block_type == Enum_BlockType.Simple_Packet_Block:
+        return SchemaField(schema=SimplePacketBlock)
+    elif block_type == Enum_BlockType.Name_Resolution_Block:
+        return SchemaField(schema=NameResolutionBlock)
+    elif block_type == Enum_BlockType.Interface_Statistics_Block:
+        return SchemaField(schema=InterfaceStatisticsBlock)
+    elif block_type == Enum_BlockType.systemd_Journal_Export_Block:
+        return SchemaField(schema=SystemdJournalExportBlock)
+    elif block_type == Enum_BlockType.Decryption_Secrets_Block:
+        return SchemaField(schema=DecryptionSecretsBlock)
+    elif block_type == Enum_BlockType.Custom_Block_that_rewriters_can_copy_into_new_files:
+        return SchemaField(schema=CustomBlock)
+    elif block_type == Enum_BlockType.Custom_Block_that_rewriters_should_not_copy_into_new_files:
+        return SchemaField(schema=CustomBlock)
+    elif block_type == Enum_BlockType.Packet_Block:
+        return SchemaField(schema=PacketBlock)
+    return SchemaField(schema=UnknownBlock)
+
+
 def dsb_secrets_selector(packet: 'dict[str, Any]') -> 'Field':
     """Selector function for :attr:`DecryptionSecretsBlock.secrets_data` field.
 
@@ -174,6 +213,18 @@ class PCAPNG(Schema):
 
     #: Block type.
     type: 'Enum_BlockType' = EnumField(length=4, namespace=Enum_BlockType)
+    #: Block specific data.
+    block: 'BlockType' = SwitchField(
+        length=lambda pkt: pkt['__length__'],
+        selector=pcapng_block_selector,
+    )
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_BlockType', block: 'BlockType') -> 'None': ...
+
+
+class BlockType(Schema):
+    """Header schema for PCAP-NG file blocks."""
 
     def post_process(self, packet: 'dict[str, Any]') -> 'Schema':
         """Revise ``schema`` data after unpacking process.
@@ -198,7 +249,7 @@ class PCAPNG(Schema):
         length2: int
 
 
-class UnknownBlock(PCAPNG):
+class UnknownBlock(BlockType):
     """Header schema for unknown PCAP-NG file blocks."""
 
     #: Block total length.
@@ -252,7 +303,7 @@ class CommentOption(Option):
         def __init__(self, type: 'int', length: 'int', comment: 'str', padding: 'bytes') -> 'None': ...
 
 
-class SectionHeaderBlock(PCAPNG):
+class SectionHeaderBlock(BlockType):
     """Header schema for PCAP-NG Section Header Block (SHB)."""
 
     #: Fast forward field to test the byteorder.
@@ -502,7 +553,7 @@ class IF_RxSpeedOption(Option):
         def __init__(self, type: 'int', length: 'int', rx_speed: 'int') -> 'None': ...
 
 
-class InterfaceDescriptionBlock(PCAPNG):
+class InterfaceDescriptionBlock(BlockType):
     """Header schema for PCAP-NG Interface Description Block (IDB)."""
 
     #: Block total length.
@@ -636,7 +687,7 @@ class EPB_VerdictOption(Option):
         def __init__(self, type: 'int', length: 'int', verdict: 'Enum_VerdictType', value: 'bytes') -> 'None': ...
 
 
-class EnhancedPacketBlock(PCAPNG):
+class EnhancedPacketBlock(BlockType):
     """Header schema for PCAP-NG Enhanced Packet Block (EPB)."""
 
     __payload__ = 'packet_data'
@@ -683,7 +734,7 @@ class EnhancedPacketBlock(PCAPNG):
                      padding: 'bytes', options: 'list[Option | bytes] | bytes', length2: 'int') -> 'None': ...
 
 
-class SimplePacketBlock(PCAPNG):
+class SimplePacketBlock(BlockType):
     """Header schema for PCAP-NG Simple Packet Block (SPB)."""
 
     __payload__ = 'packet_data'
@@ -822,7 +873,7 @@ class NS_DNSIP6AddrOption(Option):
         def __init__(self, code: 'Enum_OptionType', length: 'int', ip: 'IPv6Address') -> 'None': ...
 
 
-class NameResolutionBlock(PCAPNG):
+class NameResolutionBlock(BlockType):
     """Header schema for PCAP-NG Name Resolution Block (NRB)."""
 
     #: Record total length.
@@ -964,7 +1015,7 @@ class ISB_UsrDelivOption(Option):
         def __init__(self, code: 'Enum_OptionType', length: 'int', packets: 'int', bytes: 'int') -> 'None': ...
 
 
-class InterfaceStatisticsBlock(PCAPNG):
+class InterfaceStatisticsBlock(BlockType):
     """Header schema for PCAP-NG Interface Statistics Block (ISB)."""
 
     #: Block total length.
@@ -1002,7 +1053,7 @@ class InterfaceStatisticsBlock(PCAPNG):
                      options: 'list[Option | bytes] | bytes', length2: 'int') -> 'None': ...
 
 
-class SystemdJournalExportBlock(PCAPNG):
+class SystemdJournalExportBlock(BlockType):
     """Header schema for PCAP-NG :manpage:`systemd(1)` Journal Export Block."""
 
     #: Block total length.
@@ -1176,7 +1227,7 @@ class ZigBeeAPSKey(DSBSecrets):
         def __init__(self, key: 'bytes', panid: 'int', addr_low: 'int', addr_high: 'int') -> 'None': ...
 
 
-class DecryptionSecretsBlock(PCAPNG):
+class DecryptionSecretsBlock(BlockType):
     """Header schema for PCAP-NG Decryption Secrets Block (DSB)."""
 
     #: Block total length.
@@ -1212,7 +1263,7 @@ class DecryptionSecretsBlock(PCAPNG):
                      options: 'list[Option | bytes] | bytes', length2: 'int') -> 'None': ...
 
 
-class CustomBlock(PCAPNG):
+class CustomBlock(BlockType):
     """Header schema for PCAP-NG Custom Block (CB)."""
 
     #: Block total length.
@@ -1228,7 +1279,7 @@ class CustomBlock(PCAPNG):
         def __init__(self, type: 'Enum_BlockType', length: 'int', pen: 'int', data: 'bytes', length2: 'int') -> 'None': ...
 
 
-class PacketBlock(PCAPNG):
+class PacketBlock(BlockType):
     """Header schema for PCAP-NG Packet Block (obsolete)."""
 
     __payload__ = 'packet_data'
