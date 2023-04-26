@@ -445,7 +445,7 @@ class Frame(Protocol[Data_Frame, Schema_Frame],
         # write info and protocol chain into dict
         dict_.__update__({
             layer: info,
-            'protocols': chain.chain,
+            'protocols': chain.chain if chain else '',
             '__next_type__': type(next_),
             '__next_name__': layer,
         })
