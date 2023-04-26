@@ -39,7 +39,7 @@ from pcapkit.utilities.warnings import RegistryWarning, warn
 
 if TYPE_CHECKING:
     from decimal import Decimal
-    from typing import IO, Any, Optional, Type
+    from typing import IO, Any, Optional, Type, DefaultDict
 
     from typing_extensions import Literal
 
@@ -78,8 +78,8 @@ class Frame(Protocol[Data_Frame, Schema_Frame],
     # Defaults.
     ##########################################################################
 
-    #: DefaultDict[int, tuple[str, str]]: Protocol index mapping for decoding next layer,
-    #: c.f. :meth:`self._decode_next_layer <pcapkit.protocols.protocol.Protocol._decode_next_layer>`
+    #: DefaultDict[Enum_LinkType, tuple[str, str]]: Protocol index mapping for
+    #: decoding next layer, c.f. :meth:`self._decode_next_layer <pcapkit.protocols.protocol.Protocol._decode_next_layer>`
     #: & :meth:`self._import_next_layer <pcapkit.protocols.protocol.Protocol._import_next_layer>`.
     #: The values should be a tuple representing the module name and class name.
     __proto__ = collections.defaultdict(
@@ -89,7 +89,7 @@ class Frame(Protocol[Data_Frame, Schema_Frame],
             Enum_LinkType.IPV4:     ('pcapkit.protocols.internet', 'IPv4'),
             Enum_LinkType.IPV6:     ('pcapkit.protocols.internet', 'IPv6'),
         },
-    )
+    )  # type: DefaultDict[Enum_LinkType | int, tuple[str, str]]
 
     ##########################################################################
     # Properties.
