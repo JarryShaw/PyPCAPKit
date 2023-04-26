@@ -31,12 +31,14 @@ __all__ = [
 ]
 
 if TYPE_CHECKING:
+    from datetime import datetime
+    from datetime import timezone as dt_timezone
+    from decimal import Decimal
     from ipaddress import IPv4Address, IPv4Interface, IPv6Address, IPv6Interface
     from typing import Optional
 
     from typing_extensions import Literal
 
-    from pcapkit.corekit.multidict import OrderedMultiDict, MultiDict
     from pcapkit.const.pcapng.block_type import BlockType as Enum_BlockType
     from pcapkit.const.pcapng.filter_type import FilterType as Enum_FilterType
     from pcapkit.const.pcapng.hash_algorithm import HashAlgorithm as Enum_HashAlgorithm
@@ -45,10 +47,10 @@ if TYPE_CHECKING:
     from pcapkit.const.pcapng.secrets_type import SecretsType as Enum_SecretsType
     from pcapkit.const.pcapng.verdict_type import VerdictType as Enum_VerdictType
     from pcapkit.const.reg.linktype import LinkType as Enum_LinkType
+    from pcapkit.corekit.multidict import MultiDict, OrderedMultiDict
     from pcapkit.corekit.version import VersionInfo
-    from datetime import datetime, timezone as dt_timezone
-    from decimal import Decimal
-    from pcapkit.protocols.misc.pcapng import PacketDirection, PacketReception, TLSKeyLabel, WireGuardKeyLabel
+    from pcapkit.protocols.misc.pcapng import (PacketDirection, PacketReception, TLSKeyLabel,
+                                               WireGuardKeyLabel)
 
 
 class PCAPNG(Data):

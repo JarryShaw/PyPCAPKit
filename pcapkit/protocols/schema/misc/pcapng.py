@@ -9,7 +9,6 @@ import struct
 import sys
 from typing import TYPE_CHECKING, Any
 
-from pcapkit.corekit.multidict import MultiDict, OrderedMultiDict
 from pcapkit.const.pcapng.block_type import BlockType as Enum_BlockType
 from pcapkit.const.pcapng.filter_type import FilterType as Enum_FilterType
 from pcapkit.const.pcapng.hash_algorithm import HashAlgorithm as Enum_HashAlgorithm
@@ -22,9 +21,10 @@ from pcapkit.corekit.fields.collections import OptionField
 from pcapkit.corekit.fields.ipaddress import (IPv4AddressField, IPv4InterfaceField,
                                               IPv6AddressField, IPv6InterfaceField)
 from pcapkit.corekit.fields.misc import ForwardMatchField, PayloadField, SchemaField, SwitchField
-from pcapkit.corekit.fields.numbers import (EnumField, Int64Field, NumberField, UInt8Field,
-                                            UInt16Field, UInt32Field, UInt64Field, Int32Field)
+from pcapkit.corekit.fields.numbers import (EnumField, Int32Field, Int64Field, NumberField,
+                                            UInt8Field, UInt16Field, UInt32Field, UInt64Field)
 from pcapkit.corekit.fields.strings import BitField, BytesField, PaddingField, StringField
+from pcapkit.corekit.multidict import MultiDict, OrderedMultiDict
 from pcapkit.protocols.schema.schema import Schema
 from pcapkit.utilities.exceptions import FieldValueError, ProtocolError
 from pcapkit.utilities.logging import SPHINX_TYPE_CHECKING

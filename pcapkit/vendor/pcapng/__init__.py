@@ -37,12 +37,12 @@ crawlers include:
 """
 
 from pcapkit.vendor.pcapng.block_type import BlockType as PCAPNG_BlockType
+from pcapkit.vendor.pcapng.filter_type import FilterType as PCAPNG_FilterType
 from pcapkit.vendor.pcapng.hash_algorithm import HashAlgorithm as PCAPNG_HashAlgorithm
 from pcapkit.vendor.pcapng.option_type import OptionType as PCAPNG_OptionType
 from pcapkit.vendor.pcapng.record_type import RecordType as PCAPNG_RecordType
 from pcapkit.vendor.pcapng.secrets_type import SecretsType as PCAPNG_SecretsType
 from pcapkit.vendor.pcapng.verdict_type import VerdictType as PCAPNG_VerdictType
-from pcapkit.vendor.pcapng.filter_type import FilterType as PCAPNG_FilterType
 
 __all__ = [
     'PCAPNG_BlockType', 'PCAPNG_OptionType', 'PCAPNG_HashAlgorithm',

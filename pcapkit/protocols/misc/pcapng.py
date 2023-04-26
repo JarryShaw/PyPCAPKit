@@ -14,22 +14,22 @@ which implements extractor for PCAP-NG file format [*]_.
 import collections
 import datetime
 import decimal
+import enum
 import io
 import operator
 import sys
 import time
-import enum
-from typing import TYPE_CHECKING, overload, cast
+from typing import TYPE_CHECKING, cast, overload
 
-from pcapkit.protocols.data.misc.pcapng import PCAPNG as Data_PCAPNG
-from pcapkit.const.reg.linktype import LinkType as Enum_LinkType
 from pcapkit.const.pcapng.block_type import BlockType as Enum_BlockType
 from pcapkit.const.pcapng.hash_algorithm import HashAlgorithm as Enum_HashAlgorithm
 from pcapkit.const.pcapng.option_type import OptionType as Enum_OptionType
 from pcapkit.const.pcapng.record_type import RecordType as Enum_RecordType
 from pcapkit.const.pcapng.secrets_type import SecretsType as Enum_SecretsType
 from pcapkit.const.pcapng.verdict_type import VerdictType as Enum_VerdictType
+from pcapkit.const.reg.linktype import LinkType as Enum_LinkType
 from pcapkit.corekit.version import VersionInfo
+from pcapkit.protocols.data.misc.pcapng import PCAPNG as Data_PCAPNG
 from pcapkit.protocols.protocol import Protocol
 from pcapkit.protocols.schema.misc.pcapng import PCAPNG as Schema_PCAPNG
 from pcapkit.protocols.schema.misc.pcapng import CommentOption as Schema_CommentOption
@@ -94,9 +94,9 @@ from pcapkit.protocols.schema.misc.pcapng import UnknownRecord as Schema_Unknown
 from pcapkit.protocols.schema.misc.pcapng import WireGuardKeyLog as Schema_WireGuardKeyLog
 from pcapkit.protocols.schema.misc.pcapng import ZigBeeAPSKey as Schema_ZigBeeAPSKey
 from pcapkit.protocols.schema.misc.pcapng import ZigBeeNWKKey as Schema_ZigBeeNWKKey
+from pcapkit.utilities.compat import StrEnum
 from pcapkit.utilities.exceptions import EndianError, FileError, UnsupportedCall
 from pcapkit.utilities.warnings import RegistryWarning, warn
-from pcapkit.utilities.compat import StrEnum
 
 __all__ = ['PCAPNG']
 

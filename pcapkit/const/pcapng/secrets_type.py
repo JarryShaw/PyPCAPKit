@@ -18,13 +18,13 @@ __all__ = ['SecretsType']
 class SecretsType(IntEnum):
     """[SecretsType] Secrets Types"""
 
-    TLS_Key_Log = 1414288203
+    TLS_Key_Log = 0x544c534b
 
-    WireGuard_Key_Log = 1464290124
+    WireGuard_Key_Log = 0x57474b4c
 
-    ZigBee_NWK_Key = 1515083595
+    ZigBee_NWK_Key = 0x5a4e574b
 
-    ZigBee_APS_Key = 1514229843
+    ZigBee_APS_Key = 0x5a415053
 
     @staticmethod
     def get(key: 'int | str', default: 'int' = -1) -> 'SecretsType':
