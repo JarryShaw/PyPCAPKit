@@ -39,7 +39,7 @@ from pcapkit.utilities.warnings import RegistryWarning, warn
 
 if TYPE_CHECKING:
     from decimal import Decimal
-    from typing import IO, Any, Optional, Type, DefaultDict
+    from typing import IO, Any, DefaultDict, Optional, Type
 
     from typing_extensions import Literal
 
