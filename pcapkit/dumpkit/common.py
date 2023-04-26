@@ -64,11 +64,12 @@ def make_dumper(output: 'Type[Dumper]') -> 'Type[Dumper]':
                 return str(o)
             if isinstance(o, (enum.Enum, aenum.Enum)):
                 addon = {key: val for key, val in o.__dict__.items() if not key.startswith('_')}
-                return dict(
-                    name=f'{type(o).__name__}::{o.name}',
-                    value=o.value,
-                    **addon,
-                )
+                if addon:
+                    return {
+                        'enum': f'<{type(o).__name__}::{o.name} ({o.value})',
+                        **addon,
+                    }
+                return f'{type(o).__name__}::{o.name} ({o.value})'
             return super(type(self), self).object_hook(o)  # type: ignore[unreachable]
 
         def default(self, o: 'Any') -> 'Literal["fallback"]':  # pylint: disable=unused-argument

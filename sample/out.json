@@ -16,10 +16,7 @@
 		"thiszone": 0,
 		"sigfigs": 0,
 		"snaplen": 262144,
-		"network": {
-			"name": "LinkType::ETHERNET",
-			"value": 1
-		}
+		"network": "LinkType::ETHERNET (1)"
 	},
 	"Frame 1": {
 		"frame_info": {
@@ -36,33 +33,21 @@
 		"ethernet": {
 			"dst": "40:33:1a:d1:85:1c",
 			"src": "a4:5e:60:d9:6b:97",
-			"type": {
-				"name": "EtherType::Internet_Protocol_version_6",
-				"value": 34525
-			},
+			"type": "EtherType::Internet_Protocol_version_6 (34525)",
 			"ipv6": {
 				"version": 6,
 				"class": 0,
 				"label": 0,
 				"payload": 32,
-				"next": {
-					"name": "TransType::IPv6_ICMP",
-					"value": 58
-				},
+				"next": "TransType::IPv6_ICMP (58)",
 				"limit": 255,
 				"src": "fe80::a6:87f9:2793:16ee",
 				"dst": "fe80::1ccd:7c77:bac7:46b7",
 				"hdr_len": 40,
 				"raw_len": 32,
-				"protocol": {
-					"name": "TransType::IPv6_ICMP",
-					"value": 58
-				},
+				"protocol": "TransType::IPv6_ICMP (58)",
 				"raw": {
-					"protocol": {
-						"name": "TransType::IPv6_ICMP",
-						"value": 58
-					},
+					"protocol": "TransType::IPv6_ICMP (58)",
 					"packet": {
 						"type": "bytes",
 						"value": "\ufffd\u0000\u000e\ufffd\u0000\u0000\u0000\u0000\ufffd\ufffd\u0000\u0000\u0000\u0000\u0000\u0000\u001c\ufffd|w\ufffd\ufffdF\ufffd\u0001\u0001\ufffd^`\ufffdk\ufffd",
@@ -89,33 +74,21 @@
 		"ethernet": {
 			"dst": "a4:5e:60:d9:6b:97",
 			"src": "40:33:1a:d1:85:1c",
-			"type": {
-				"name": "EtherType::Internet_Protocol_version_6",
-				"value": 34525
-			},
+			"type": "EtherType::Internet_Protocol_version_6 (34525)",
 			"ipv6": {
 				"version": 6,
 				"class": 0,
 				"label": 0,
 				"payload": 24,
-				"next": {
-					"name": "TransType::IPv6_ICMP",
-					"value": 58
-				},
+				"next": "TransType::IPv6_ICMP (58)",
 				"limit": 255,
 				"src": "fe80::1ccd:7c77:bac7:46b7",
 				"dst": "fe80::a6:87f9:2793:16ee",
 				"hdr_len": 40,
 				"raw_len": 24,
-				"protocol": {
-					"name": "TransType::IPv6_ICMP",
-					"value": 58
-				},
+				"protocol": "TransType::IPv6_ICMP (58)",
 				"raw": {
-					"protocol": {
-						"name": "TransType::IPv6_ICMP",
-						"value": 58
-					},
+					"protocol": "TransType::IPv6_ICMP (58)",
 					"packet": {
 						"type": "bytes",
 						"value": "\ufffd\u0000?\ufffd@\u0000\u0000\u0000\ufffd\ufffd\u0000\u0000\u0000\u0000\u0000\u0000\u001c\ufffd|w\ufffd\ufffdF\ufffd",
@@ -142,34 +115,16 @@
 		"ethernet": {
 			"dst": "a4:5e:60:d9:6b:97",
 			"src": "b8:f8:83:a5:f9:47",
-			"type": {
-				"name": "EtherType::Internet_Protocol_version_4",
-				"value": 2048
-			},
+			"type": "EtherType::Internet_Protocol_version_4 (2048)",
 			"ipv4": {
 				"version": 4,
 				"hdr_len": 20,
 				"tos": {
-					"pre": {
-						"name": "ToSPrecedence::Routine",
-						"value": 0
-					},
-					"del": {
-						"name": "ToSDelay::NORMAL",
-						"value": 0
-					},
-					"thr": {
-						"name": "ToSThroughput::NORMAL",
-						"value": 0
-					},
-					"rel": {
-						"name": "ToSReliability::NORMAL",
-						"value": 0
-					},
-					"ecn": {
-						"name": "ToSECN::Not_ECT",
-						"value": 0
-					}
+					"pre": "ToSPrecedence::Routine (0)",
+					"del": "ToSDelay::NORMAL (0)",
+					"thr": "ToSThroughput::NORMAL (0)",
+					"rel": "ToSReliability::NORMAL (0)",
+					"ecn": "ToSECN::Not_ECT (0)"
 				},
 				"len": 40,
 				"id": 50484,
@@ -179,10 +134,7 @@
 				},
 				"offset": 0,
 				"ttl": 43.0,
-				"protocol": {
-					"name": "TransType::TCP",
-					"value": 6
-				},
+				"protocol": "TransType::TCP (6)",
 				"checksum": {
 					"type": "bytes",
 					"value": "z\ufffd",
@@ -214,10 +166,7 @@
 						"hex": "7c8e"
 					},
 					"urgent_pointer": 0,
-					"connection": {
-						"name": "Flags::FIN|ACK",
-						"value": 17
-					},
+					"connection": "Flags::FIN|ACK (17)",
 					"nopayload": {
 					}
 				}
@@ -240,34 +189,16 @@
 		"ethernet": {
 			"dst": "b8:f8:83:a5:f9:47",
 			"src": "a4:5e:60:d9:6b:97",
-			"type": {
-				"name": "EtherType::Internet_Protocol_version_4",
-				"value": 2048
-			},
+			"type": "EtherType::Internet_Protocol_version_4 (2048)",
 			"ipv4": {
 				"version": 4,
 				"hdr_len": 20,
 				"tos": {
-					"pre": {
-						"name": "ToSPrecedence::Routine",
-						"value": 0
-					},
-					"del": {
-						"name": "ToSDelay::NORMAL",
-						"value": 0
-					},
-					"thr": {
-						"name": "ToSThroughput::NORMAL",
-						"value": 0
-					},
-					"rel": {
-						"name": "ToSReliability::NORMAL",
-						"value": 0
-					},
-					"ecn": {
-						"name": "ToSECN::Not_ECT",
-						"value": 0
-					}
+					"pre": "ToSPrecedence::Routine (0)",
+					"del": "ToSDelay::NORMAL (0)",
+					"thr": "ToSThroughput::NORMAL (0)",
+					"rel": "ToSReliability::NORMAL (0)",
+					"ecn": "ToSECN::Not_ECT (0)"
 				},
 				"len": 40,
 				"id": 0,
@@ -277,10 +208,7 @@
 				},
 				"offset": 0,
 				"ttl": 64.0,
-				"protocol": {
-					"name": "TransType::TCP",
-					"value": 6
-				},
+				"protocol": "TransType::TCP (6)",
 				"checksum": {
 					"type": "bytes",
 					"value": "*\ufffd",
@@ -312,10 +240,7 @@
 						"hex": "f93e"
 					},
 					"urgent_pointer": 0,
-					"connection": {
-						"name": "Flags::ACK",
-						"value": 16
-					},
+					"connection": "Flags::ACK (16)",
 					"nopayload": {
 					}
 				}
@@ -338,34 +263,16 @@
 		"ethernet": {
 			"dst": "b8:f8:83:a5:f9:47",
 			"src": "a4:5e:60:d9:6b:97",
-			"type": {
-				"name": "EtherType::Internet_Protocol_version_4",
-				"value": 2048
-			},
+			"type": "EtherType::Internet_Protocol_version_4 (2048)",
 			"ipv4": {
 				"version": 4,
 				"hdr_len": 20,
 				"tos": {
-					"pre": {
-						"name": "ToSPrecedence::Routine",
-						"value": 0
-					},
-					"del": {
-						"name": "ToSDelay::NORMAL",
-						"value": 0
-					},
-					"thr": {
-						"name": "ToSThroughput::NORMAL",
-						"value": 0
-					},
-					"rel": {
-						"name": "ToSReliability::NORMAL",
-						"value": 0
-					},
-					"ecn": {
-						"name": "ToSECN::Not_ECT",
-						"value": 0
-					}
+					"pre": "ToSPrecedence::Routine (0)",
+					"del": "ToSDelay::NORMAL (0)",
+					"thr": "ToSThroughput::NORMAL (0)",
+					"rel": "ToSReliability::NORMAL (0)",
+					"ecn": "ToSECN::Not_ECT (0)"
 				},
 				"len": 40,
 				"id": 0,
@@ -375,10 +282,7 @@
 				},
 				"offset": 0,
 				"ttl": 64.0,
-				"protocol": {
-					"name": "TransType::TCP",
-					"value": 6
-				},
+				"protocol": "TransType::TCP (6)",
 				"checksum": {
 					"type": "bytes",
 					"value": "*\ufffd",
@@ -410,10 +314,7 @@
 						"hex": "2af4"
 					},
 					"urgent_pointer": 0,
-					"connection": {
-						"name": "Flags::FIN|ACK",
-						"value": 17
-					},
+					"connection": "Flags::FIN|ACK (17)",
 					"nopayload": {
 					}
 				}
@@ -436,34 +337,16 @@
 		"ethernet": {
 			"dst": "ff:ff:ff:ff:ff:ff",
 			"src": "b8:f8:83:a5:f9:47",
-			"type": {
-				"name": "EtherType::Internet_Protocol_version_4",
-				"value": 2048
-			},
+			"type": "EtherType::Internet_Protocol_version_4 (2048)",
 			"ipv4": {
 				"version": 4,
 				"hdr_len": 20,
 				"tos": {
-					"pre": {
-						"name": "ToSPrecedence::Routine",
-						"value": 0
-					},
-					"del": {
-						"name": "ToSDelay::NORMAL",
-						"value": 0
-					},
-					"thr": {
-						"name": "ToSThroughput::NORMAL",
-						"value": 0
-					},
-					"rel": {
-						"name": "ToSReliability::NORMAL",
-						"value": 0
-					},
-					"ecn": {
-						"name": "ToSECN::Not_ECT",
-						"value": 0
-					}
+					"pre": "ToSPrecedence::Routine (0)",
+					"del": "ToSDelay::NORMAL (0)",
+					"thr": "ToSThroughput::NORMAL (0)",
+					"rel": "ToSReliability::NORMAL (0)",
+					"ecn": "ToSECN::Not_ECT (0)"
 				},
 				"len": 145,
 				"id": 0,
@@ -473,10 +356,7 @@
 				},
 				"offset": 0,
 				"ttl": 64.0,
-				"protocol": {
-					"name": "TransType::UDP",
-					"value": 17
-				},
+				"protocol": "TransType::UDP (17)",
 				"checksum": {
 					"type": "bytes",
 					"value": "x\ufffd",
