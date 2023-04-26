@@ -2,11 +2,16 @@
 # mypy: disable-error-code=assignment
 """header schema for pcapng file format"""
 
+import base64
 import collections
+import io
+import struct
 import sys
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
+from pcapkit.corekit.multidict import MultiDict, OrderedMultiDict
 from pcapkit.const.pcapng.block_type import BlockType as Enum_BlockType
+from pcapkit.const.pcapng.filter_type import FilterType as Enum_FilterType
 from pcapkit.const.pcapng.hash_algorithm import HashAlgorithm as Enum_HashAlgorithm
 from pcapkit.const.pcapng.option_type import OptionType as Enum_OptionType
 from pcapkit.const.pcapng.record_type import RecordType as Enum_RecordType
@@ -18,10 +23,10 @@ from pcapkit.corekit.fields.ipaddress import (IPv4AddressField, IPv4InterfaceFie
                                               IPv6AddressField, IPv6InterfaceField)
 from pcapkit.corekit.fields.misc import ForwardMatchField, PayloadField, SchemaField, SwitchField
 from pcapkit.corekit.fields.numbers import (EnumField, Int64Field, NumberField, UInt8Field,
-                                            UInt16Field, UInt32Field, UInt64Field)
+                                            UInt16Field, UInt32Field, UInt64Field, Int32Field)
 from pcapkit.corekit.fields.strings import BitField, BytesField, PaddingField, StringField
 from pcapkit.protocols.schema.schema import Schema
-from pcapkit.utilities.exceptions import ProtocolError
+from pcapkit.utilities.exceptions import FieldValueError, ProtocolError
 from pcapkit.utilities.logging import SPHINX_TYPE_CHECKING
 
 __all__ = [
@@ -53,7 +58,10 @@ if TYPE_CHECKING:
     from ipaddress import IPv4Address, IPv4Interface, IPv6Address, IPv6Interface
     from typing import Any
 
+    from typing_extensions import Self
+
     from pcapkit.corekit.fields.field import _Field as Field
+    from pcapkit.protocols.misc.pcapng import TLSKeyLabel, WireGuardKeyLabel
 
 if SPHINX_TYPE_CHECKING:
     from typing_extensions import TypedDict
@@ -161,45 +169,6 @@ def dsb_secrets_selector(packet: 'dict[str, Any]') -> 'Field':
     return SchemaField(length=packet['secrets_length'], schema=UnknownSecrets)
 
 
-class Option(Schema):
-    """Header schema for PCAP-NG file options."""
-
-    #: Option type.
-    type: 'Enum_OptionType' = EnumField(length=2, namespace=Enum_OptionType, callback=byteorder_callback)
-    #: Option data length.
-    length: 'int' = UInt16Field(callback=byteorder_callback)
-
-
-class UnknownOption(Option):
-    """Header schema for unknown PCAP-NG file options."""
-
-    #: Option value.
-    data: 'bytes' = PayloadField(length=lambda pkt: pkt['length'])
-    #: Padding.
-    padding: 'bytes' = PaddingField(length=lambda pkt: (4 - pkt['length'] % 4) % 4)
-
-    if TYPE_CHECKING:
-        def __init__(self, type: 'int', length: 'int', data: 'bytes', padding: 'bytes') -> 'None': ...
-
-
-class EndOfOption(Option):
-    """Header schema for PCAP-NG file ``opt_endofopt`` options."""
-
-    if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_OptionType', length: 'int') -> 'None': ...
-
-
-class CommentOption(Option):
-    """Header schema for PCAP-NG file ``opt_comment`` options."""
-
-    comment: 'bytes' = BytesField(length=lambda pkt: pkt['length'])
-    #: Padding.
-    padding: 'bytes' = PaddingField(length=lambda pkt: (4 - pkt['length'] % 4) % 4)
-
-    if TYPE_CHECKING:
-        def __init__(self, type: 'int', length: 'int', comment: 'bytes', padding: 'bytes') -> 'None': ...
-
-
 class PCAPNG(Schema):
     """Header schema for PCAP-NG file blocks."""
 
@@ -241,6 +210,46 @@ class UnknownBlock(PCAPNG):
 
     if TYPE_CHECKING:
         def __init__(self, type: 'Enum_BlockType', length: 'int', body: 'bytes', length2: 'int') -> 'None': ...
+
+
+class Option(Schema):
+    """Header schema for PCAP-NG file options."""
+
+    #: Option type.
+    type: 'Enum_OptionType' = EnumField(length=2, namespace=Enum_OptionType, callback=byteorder_callback)
+    #: Option data length.
+    length: 'int' = UInt16Field(callback=byteorder_callback)
+
+
+class UnknownOption(Option):
+    """Header schema for unknown PCAP-NG file options."""
+
+    #: Option value.
+    data: 'bytes' = PayloadField(length=lambda pkt: pkt['length'])
+    #: Padding.
+    padding: 'bytes' = PaddingField(length=lambda pkt: (4 - pkt['length'] % 4) % 4)
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'int', length: 'int', data: 'bytes', padding: 'bytes') -> 'None': ...
+
+
+class EndOfOption(Option):
+    """Header schema for PCAP-NG file ``opt_endofopt`` options."""
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_OptionType', length: 'int') -> 'None': ...
+
+
+class CommentOption(Option):
+    """Header schema for PCAP-NG file ``opt_comment`` options."""
+
+    #: Comment text.
+    comment: 'str' = StringField(length=lambda pkt: pkt['length'], encoding='utf-8')
+    #: Padding.
+    padding: 'bytes' = PaddingField(length=lambda pkt: (4 - pkt['length'] % 4) % 4)
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'int', length: 'int', comment: 'str', padding: 'bytes') -> 'None': ...
 
 
 class SectionHeaderBlock(PCAPNG):
@@ -288,19 +297,19 @@ class IF_NameOption(Option):
     padding: 'bytes' = PaddingField(length=lambda pkt: (4 - pkt['length'] % 4) % 4)
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'int', length: 'int', name: 'bytes', padding: 'bytes') -> 'None': ...
+        def __init__(self, type: 'int', length: 'int', name: 'str', padding: 'bytes') -> 'None': ...
 
 
 class IF_DescriptionOption(Option):
     """Header schema for PCAP-NG file ``if_description`` options."""
 
     #: Interface description.
-    desc: 'str' = StringField(length=lambda pkt: pkt['length'], encoding='utf-8')
+    description: 'str' = StringField(length=lambda pkt: pkt['length'], encoding='utf-8')
     #: Padding.
     padding: 'bytes' = PaddingField(length=lambda pkt: (4 - pkt['length'] % 4) % 4)
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'int', length: 'int', desc: 'bytes', padding: 'bytes') -> 'None': ...
+        def __init__(self, type: 'int', length: 'int', description: 'str', padding: 'bytes') -> 'None': ...
 
 
 class IF_IPv4AddrOption(Option):
@@ -331,7 +340,7 @@ class IF_MACAddrOption(Option):
     """Header schema for PCAP-NG file ``if_MACaddr`` options."""
 
     #: MAC interface.
-    mac: 'bytes' = BytesField(length=6)
+    interface: 'bytes' = BytesField(length=6)
     #: Padding.
     padding: 'bytes' = PaddingField(length=lambda pkt: (4 - pkt['length'] % 4) % 4)
 
@@ -343,7 +352,7 @@ class IF_EUIAddrOption(Option):
     """Header schema for PCAP-NG file ``if_EUIaddr`` options."""
 
     #: EUI interface.
-    eui: 'bytes' = BytesField(length=8)
+    interface: 'bytes' = BytesField(length=8)
     #: Padding.
     padding: 'bytes' = PaddingField(length=lambda pkt: (4 - pkt['length'] % 4) % 4)
 
@@ -398,8 +407,8 @@ class IF_TSResolOption(Option):
 class IF_TZoneOption(Option):
     """Header schema for PCAP-NG file ``if_tzone`` options."""
 
-    #: Interface time zone.
-    tzone: 'int' = UInt32Field(callback=byteorder_callback)
+    #: Interface time zone (as in seconds difference from GMT).
+    tzone: 'int' = Int32Field(callback=byteorder_callback)
     #: Padding.
     padding: 'bytes' = PaddingField(length=lambda pkt: (4 - pkt['length'] % 4) % 4)
 
@@ -411,14 +420,14 @@ class IF_FilterOption(Option):
     """Header schema for PCAP-NG file ``if_filter`` options."""
 
     #: Filter code.
-    code: 'int' = UInt8Field(callback=byteorder_callback)
+    code: 'Enum_FilterType' = EnumField(length=1, namespace=Enum_FilterType, callback=byteorder_callback)
     #: Capture filter.
-    filter: 'str' = StringField(length=lambda pkt: pkt['length'] - 1, encoding='utf-8')
+    filter: 'bytes' = BytesField(length=lambda pkt: pkt['length'] - 1)
     #: Padding.
     padding: 'bytes' = PaddingField(length=lambda pkt: (4 - pkt['length'] % 4) % 4)
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'int', length: 'int', code: 'int', filter: 'str') -> 'None': ...
+        def __init__(self, type: 'int', length: 'int', code: 'Enum_FilterType', filter: 'bytes') -> 'None': ...
 
 
 class IF_OSOption(Option):
@@ -578,7 +587,7 @@ class EPB_HashOption(Option):
 
 
 class EPB_DropCountOption(Option):
-    """Header schema for PCAP-NG ``epb_dropscount`` options."""
+    """Header schema for PCAP-NG ``epb_dropcount`` options."""
 
     #: Number of packets dropped by the interface.
     drop_count: 'int' = UInt64Field(callback=byteorder_callback)
@@ -619,12 +628,12 @@ class EPB_VerdictOption(Option):
     #: Verdict type.
     verdict: 'Enum_VerdictType' = EnumField(length=1, namespace=Enum_VerdictType, callback=byteorder_callback)
     #: Verdict value.
-    value: 'int' = NumberField(length=lambda pkt: pkt['length'] - 1, callback=byteorder_callback, signed=False)
+    value: 'bytes' = BytesField(length=lambda pkt: pkt['length'] - 1)
     #: Padding.
     padding: 'bytes' = PaddingField(length=lambda pkt: (4 - pkt['length'] % 4) % 4)
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'int', length: 'int', verdict: 'Enum_VerdictType', value: 'int') -> 'None': ...
+        def __init__(self, type: 'int', length: 'int', verdict: 'Enum_VerdictType', value: 'bytes') -> 'None': ...
 
 
 class EnhancedPacketBlock(PCAPNG):
@@ -847,7 +856,35 @@ class NameResolutionBlock(PCAPNG):
     #: Block total length.
     length2: 'int' = UInt32Field(callback=byteorder_callback)
 
+    def post_process(self, packet: 'dict[str, Any]') -> 'Self':
+        """Revise ``schema`` data after unpacking process.
+
+        Args:
+            packet: Unpacked data.
+
+        Returns:
+            Revised schema.
+
+        """
+        mapping = MultiDict()  # type: MultiDict[IPv4Address | IPv6Address, str]
+        reverse_mapping = MultiDict()  # type: MultiDict[str, IPv4Address | IPv6Address]
+
+        for record in self.records:
+            if isinstance(record, (IPv4Record, IPv6Record)):
+                for name in record.names:
+                    mapping.add(record.ip, name)
+                    reverse_mapping.add(name, record.ip)
+
+        self.mapping = mapping
+        self.reverse_mapping = reverse_mapping
+        return self
+
     if TYPE_CHECKING:
+        #: Name resolution mapping (IP address -> name).
+        mapping: 'MultiDict[IPv4Address | IPv6Address, str]'
+        #: Name resolution mapping (name -> IP address).
+        reverse_mapping: 'MultiDict[str, IPv4Address | IPv6Address]'
+
         def __init__(self, type: 'Enum_BlockType', length: 'int',
                      records: 'list[NameResolutionRecord | bytes] | bytes',
                      options: 'list[Option | bytes] | bytes', length2: 'int') -> 'None': ...
@@ -975,6 +1012,46 @@ class SystemdJournalExportBlock(PCAPNG):
     #: Block total length.
     length2: 'int' = UInt32Field(callback=byteorder_callback)
 
+    def post_process(self, packet: 'dict[str, Any]') -> 'Self':
+        """Revise ``schema`` data after unpacking process.
+
+        Args:
+            packet: Unpacked data.
+
+        Returns:
+            Revised schema.
+
+        """
+        data = []  # type: list[OrderedMultiDict[str, str | bytes]]
+
+        for entry_buffer in self.entry.split(b'\n\n'):
+            entry = OrderedMultiDict()  # type: OrderedMultiDict[str, str | bytes]
+
+            entry_data = io.BytesIO(entry_buffer)
+            while True:
+                line = entry_data.readline().strip()
+                if not line:
+                    break
+
+                line_split = line.split(b'=', maxsplit=1)
+                if len(line_split) == 2:
+                    key, value = line_split
+                    entry.add(key.decode('utf-8'), value.decode('utf-8'))
+                else:
+                    length = struct.unpack('<Q', entry_data.read(4))[0]  # type: int
+                    entry.add(line.decode('utf-8'), entry_data.read(length))
+                    entry_data.read()  # Skip trailing newline.
+
+            data.append(entry)
+        self.data = data
+        return self
+
+    if TYPE_CHECKING:
+        #: Journal entry (decoded).
+        data: 'list[OrderedMultiDict[str, str | bytes]]'
+
+        def __init__(self, type: 'Enum_BlockType', length: 'int', entry: 'bytes', length2: 'int') -> 'None': ...
+
 
 class DSBSecrets(Schema):
     """Header schema for DSB secrets data."""
@@ -996,7 +1073,35 @@ class TLSKeyLog(DSBSecrets):
     #: TLS key log data.
     data: 'str' = StringField(length=lambda pkt: pkt['__length__'], encoding='ascii')
 
+    def post_process(self, packet: 'dict[str, Any]') -> 'Schema':
+        """Revise ``schema`` data after unpacking process.
+
+        Args:
+            packet: Unpacked data.
+
+        Returns:
+            Revised schema.
+
+        """
+        from pcapkit.protocols.misc.pcapng import TLSKeyLabel
+
+        entries = collections.defaultdict(OrderedMultiDict)  # type: dict[TLSKeyLabel, OrderedMultiDict[bytes, bytes]]
+        for line in self.data.splitlines():
+            if not line or line.startswith('#'):
+                continue
+
+            label, random, secret = line.strip().split()
+            label_enum = TLSKeyLabel(label.upper())
+            entries[label_enum].add(bytes.fromhex(random),
+                                    bytes.fromhex(secret))
+
+        self.entries = entries
+        return self
+
     if TYPE_CHECKING:
+        #: TLS Key Log entries.
+        entries: 'dict[TLSKeyLabel, OrderedMultiDict[bytes, bytes]]'
+
         def __init__(self, data: 'str') -> 'None': ...
 
 
@@ -1006,7 +1111,36 @@ class WireGuardKeyLog(DSBSecrets):
     #: WireGuard key log data.
     data: 'str' = StringField(length=lambda pkt: pkt['__length__'], encoding='ascii')
 
+    def post_process(self, packet: 'dict[str, Any]') -> 'Schema':
+        """Revise ``schema`` data after unpacking process.
+
+        Args:
+            packet: Unpacked data.
+
+        Returns:
+            Revised schema.
+
+        """
+        from pcapkit.protocols.misc.pcapng import WireGuardKeyLabel
+
+        entries = OrderedMultiDict()  # type: OrderedMultiDict[WireGuardKeyLabel, bytes]
+        for line in self.data.splitlines():
+            if not line or line.startswith('#'):
+                continue
+
+            label, op, secret = line.strip().split()
+            if op != '=':
+                raise FieldValueError('invalid WireGuard key log format: {line!r}')
+            label_enum = WireGuardKeyLabel(label.upper())
+            entries.add(label_enum, base64.b64decode(secret))
+
+        self.entries = entries
+        return self
+
     if TYPE_CHECKING:
+        #: WireGuard Key Log entries.
+        entries: 'OrderedMultiDict[WireGuardKeyLabel, bytes]'
+
         def __init__(self, data: 'str') -> 'None': ...
 
 
@@ -1104,7 +1238,7 @@ class PacketBlock(PCAPNG):
     #: Interface ID.
     interface_id: 'int' = UInt32Field(callback=byteorder_callback)
     #: Drops count.
-    drops_count: 'int' = UInt32Field(callback=byteorder_callback, default=0xFFFF)
+    drop_count: 'int' = UInt32Field(callback=byteorder_callback, default=0xFFFF)
     #: Timestamp (high).
     timestamp_high: 'int' = UInt32Field(callback=byteorder_callback)
     #: Timestamp (low).
@@ -1134,6 +1268,6 @@ class PacketBlock(PCAPNG):
     length2: 'int' = UInt32Field(callback=byteorder_callback)
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_BlockType', length: 'int', interface_id: 'int', drops_count: 'int',
+        def __init__(self, type: 'Enum_BlockType', length: 'int', interface_id: 'int', drop_count: 'int',
                      timestamp_high: 'int', timestamp_low: 'int', captured_length: 'int', original_length: 'int',
                      packet_data: 'bytes', padding: 'bytes', options: 'list[Option | bytes] | bytes', length2: 'int') -> 'None': ...
