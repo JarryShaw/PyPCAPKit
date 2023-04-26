@@ -118,6 +118,7 @@ class Info(Mapping[str, VT], Generic[VT]):
                     f'def __create_fn__():\n'
                     f'    def __init__(self, {", ".join(args_)}):\n'
                     f'        self.__update__({", ".join(dict_)})\n'
+                    f'        self.__post_init__()\n'
                     f'    return __init__\n'
                 )
             else:
@@ -125,6 +126,7 @@ class Info(Mapping[str, VT], Generic[VT]):
                     'def __create_fn__():\n'
                     '    def __init__(self, dict_=None, **kwargs):\n'
                     '        self.__update__(dict_, **kwargs)\n'
+                    '        self.__post_init__()\n'
                     '    return __init__\n'
                 )
 
@@ -142,6 +144,9 @@ class Info(Mapping[str, VT], Generic[VT]):
         super().__setattr__(self, '__map_reverse__', {})
 
         return self
+
+    def __post_init__(self) -> 'None':
+        """Customisation method to be called after initialisation."""
 
     def __update__(self, dict_: 'Optional[Mapping[str, VT] | Iterable[tuple[str, VT]]]' = None,
                    **kwargs: 'VT') -> 'None':
