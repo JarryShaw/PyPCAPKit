@@ -22,6 +22,7 @@ from typing import TYPE_CHECKING, Generic, TypeVar, cast
 
 from pcapkit.dumpkit.common import make_dumper
 from pcapkit.foundation.engines.pcap import PCAP as PCAP_Engine
+from pcapkit.foundation.engines.pcapng import PCAPNG as PCAPNG_Engine
 from pcapkit.foundation.reassembly import ReassemblyManager
 from pcapkit.foundation.traceflow import TraceFlowManager
 from pcapkit.utilities.exceptions import (CallableError, FileNotFound, FormatError, IterableError,
@@ -153,9 +154,9 @@ class Extractor(Generic[P]):
     #: dict[str, tuple[str, str]]: Engine mapping for extracting frames.
     #: The values should be a tuple representing the module name and class name.
     __engine__ = {
-        'scapy': ('pcapkit.foundation.engine.scapy', 'Scapy'),
-        'dpkt': ('pcapkit.foundation.engine.dpkt', 'DPKT'),
-        'pyshark': ('pcapkit.foundation.engine.pyshark', 'PyShark'),
+        'scapy': ('pcapkit.foundation.engines.scapy', 'Scapy'),
+        'dpkt': ('pcapkit.foundation.engines.dpkt', 'DPKT'),
+        'pyshark': ('pcapkit.foundation.engines.pyshark', 'PyShark'),
     }  # type: dict[str, tuple[str, str]]
 
     ##########################################################################
@@ -240,6 +241,11 @@ class Extractor(Generic[P]):
         """PCAP extraction engine."""
         return self._exeng
 
+    @property
+    def magic_number(self) -> 'bytes':
+        """Magic number of input PCAP file."""
+        return self._magic
+
     ##########################################################################
     # Methods.
     ##########################################################################
@@ -319,7 +325,12 @@ class Extractor(Generic[P]):
                  'using default engine instead', EngineWarning, stacklevel=stacklevel())
             self._exnam = 'default'  # using default/pcapkit engine
 
-        self._exeng = cast('Engine[P]', PCAP_Engine(self))
+        if self._magic in PCAP_Engine.MAGIC_NUMBER:
+            self._exeng = cast('Engine[P]', PCAP_Engine(self))
+        elif self._magic in PCAPNG_Engine.MAGIC_NUMBER:
+            self._exeng = cast('Engine[P]', PCAPNG_Engine(self))
+        else:
+            raise FormatError(f'unknown file format: {self._magic!r}')
         self._exeng.run()
 
         # start iteration
@@ -445,7 +456,15 @@ class Extractor(Generic[P]):
 
             self._ifile.seek(0, os.SEEK_SET)
             return engine
-        raise FormatError(f'unknown PCAP file format: {self._magic!r}')
+
+        if self._magic in PCAPNG_Engine.MAGIC_NUMBER:
+            engine = PCAPNG_Engine(self)  # type: ignore[assignment]
+            engine.run()
+
+            self._ifile.seek(0, os.SEEK_SET)
+            return engine
+
+        raise FormatError(f'unknown file format: {self._magic!r}')
 
     def record_frames(self) -> 'None':
         """Read packet frames.
