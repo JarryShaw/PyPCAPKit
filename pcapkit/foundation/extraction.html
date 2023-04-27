@@ -411,18 +411,6 @@ extracts parametres from a PCAP file.</p>
 </dd>
 </dl>
 <dl class="py property">
-<dt class="sig sig-object py" id="pcapkit.foundation.extraction.Extractor.info">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">info</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="../corekit/version.html#pcapkit.corekit.version.VersionInfo" title="pcapkit.corekit.version.VersionInfo"><span class="pre">VersionInfo</span></a></em><a class="headerlink" href="#pcapkit.foundation.extraction.Extractor.info" title="Permalink to this definition">#</a></dt>
-<dd><p>Version of input PCAP file.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Raises<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference internal" href="../utilities/exceptions.html#pcapkit.utilities.exceptions.UnsupportedCall" title="pcapkit.utilities.exceptions.UnsupportedCall"><strong>UnsupportedCall</strong></a> – If <a class="reference internal" href="#pcapkit.foundation.extraction.Extractor._exnam" title="pcapkit.foundation.extraction.Extractor._exnam"><code class="xref py py-attr docutils literal notranslate"><span class="pre">self._exnam</span></code></a>
-    is <code class="docutils literal notranslate"><span class="pre">'scapy'</span></code> or <code class="docutils literal notranslate"><span class="pre">'pyshark'</span></code>, as such engines does not reserve such information.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py property">
 <dt class="sig sig-object py" id="pcapkit.foundation.extraction.Extractor.length">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">length</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a></em><a class="headerlink" href="#pcapkit.foundation.extraction.Extractor.length" title="Permalink to this definition">#</a></dt>
 <dd><p>Frame number (of current extracted frame or all).</p>
@@ -430,7 +418,7 @@ extracts parametres from a PCAP file.</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="pcapkit.foundation.extraction.Extractor.format">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">format</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Literal" title="(in Python v3.11)"><span class="pre">Literal</span></a><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'pcap'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'json'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'tree'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'plist'</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pcapkit.foundation.extraction.Extractor.format" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">format</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Formats</span></em><a class="headerlink" href="#pcapkit.foundation.extraction.Extractor.format" title="Permalink to this definition">#</a></dt>
 <dd><p>Format of output file.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Raises<span class="colon">:</span></dt>
@@ -459,14 +447,8 @@ extracts parametres from a PCAP file.</p>
 </dd></dl>
 
 <dl class="py property">
-<dt class="sig sig-object py" id="pcapkit.foundation.extraction.Extractor.header">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">header</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="../protocols/misc/pcap.html#pcapkit.protocols.misc.pcap.header.Header" title="pcapkit.protocols.misc.pcap.header.Header"><span class="pre">Header</span></a></em><a class="headerlink" href="#pcapkit.foundation.extraction.Extractor.header" title="Permalink to this definition">#</a></dt>
-<dd><p>Global header.</p>
-</dd></dl>
-
-<dl class="py property">
 <dt class="sig sig-object py" id="pcapkit.foundation.extraction.Extractor.frame">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">frame</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.11)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="../protocols/misc/pcap.html#pcapkit.protocols.misc.pcap.frame.Frame" title="pcapkit.protocols.misc.pcap.frame.Frame"><span class="pre">pcapkit.protocols.misc.pcap.frame.Frame</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pcapkit.foundation.extraction.Extractor.frame" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">frame</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.11)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="../const/hip.html#pcapkit.const.hip.packet.Packet" title="pcapkit.const.hip.packet.Packet"><span class="pre">Packet</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pcapkit.foundation.extraction.Extractor.frame" title="Permalink to this definition">#</a></dt>
 <dd><p>Extracted frames.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Raises<span class="colon">:</span></dt>
@@ -581,16 +563,17 @@ dependency not installed, or supplied engine unknown.</p>
 <span class="sig-name descname"><span class="pre">record_header</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/foundation/extraction.html#Extractor.record_header"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.extraction.Extractor.record_header" title="Permalink to this definition">#</a></dt>
 <dd><p>Read global header.</p>
 <p>The method will parse the PCAP global header and save the parsed result
-as <code class="xref py py-attr docutils literal notranslate"><span class="pre">self._gbhdr</span></code>. Information such as PCAP version,
-data link layer protocol type, nanosecond flag and byteorder will also be
-save the current <a class="reference internal" href="#pcapkit.foundation.extraction.Extractor" title="pcapkit.foundation.extraction.Extractor"><code class="xref py py-class docutils literal notranslate"><span class="pre">Extractor</span></code></a> instance.</p>
+to its extraction context. Information such as PCAP version, data link
+layer protocol type, nanosecond flag and byteorder will also be save
+the current <code class="xref py py-class docutils literal notranslate"><span class="pre">Engine</span></code> instance
+as well.</p>
 <p>If TCP flow tracing is enabled, the nanosecond flag and byteorder will
 be used for the output PCAP file of the traced TCP flows.</p>
 <p>For output, the method will dump the parsed PCAP global header under
 the name of <code class="docutils literal notranslate"><span class="pre">Global</span> <span class="pre">Header</span></code>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></p>
+<dd class="field-odd"><p><a class="reference internal" href="engines/engine.html#pcapkit.foundation.engines.engine.Engine" title="pcapkit.foundation.engines.engine.Engine"><code class="xref py py-class docutils literal notranslate"><span class="pre">Engine</span></code></a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -603,7 +586,7 @@ the name of <code class="docutils literal notranslate"><span class="pre">Global<
 to parse each frame from the input PCAP file; and
 performs cleanup by calling <code class="xref py py-meth docutils literal notranslate"><span class="pre">self._exeng.close</span></code>
 upon completion of the parsing process.
-:rtype: <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></p>
+:rtype: <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Union" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.TypeVar" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">TypeVar</span></code></a>(<code class="docutils literal notranslate"><span class="pre">P</span></code>), <code class="xref py py-class docutils literal notranslate"><span class="pre">EOFType</span></code>]</p>
 <div class="admonition-notes admonition">
 <p class="admonition-title">Notes</p>
 <p>Under non-auto mode, i.e. <a class="reference internal" href="#pcapkit.foundation.extraction.Extractor._flag_a" title="pcapkit.foundation.extraction.Extractor._flag_a"><code class="xref py py-attr docutils literal notranslate"><span class="pre">self._flag_a</span></code></a> is
@@ -611,110 +594,110 @@ upon completion of the parsing process.
 </div>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>None</p>
+<dd class="field-odd"><p><em>P</em> | <em>EOFType</em></p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.foundation.extraction.Extractor._frnum">
-<span class="sig-name descname"><span class="pre">_frnum</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></em><a class="headerlink" href="#pcapkit.foundation.extraction.Extractor._frnum" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">_frnum</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#pcapkit.foundation.extraction.Extractor._frnum" title="Permalink to this definition">#</a></dt>
 <dd><p>Frame number.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.foundation.extraction.Extractor._reasm">
-<span class="sig-name descname"><span class="pre">_reasm</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="reassembly/index.html#pcapkit.foundation.reassembly.ReassemblyManager" title="pcapkit.foundation.reassembly.ReassemblyManager"><code class="xref py py-class docutils literal notranslate"><span class="pre">ReassemblyManager</span></code></a></em><a class="headerlink" href="#pcapkit.foundation.extraction.Extractor._reasm" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">_reasm</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ReassemblyManager</span></em><a class="headerlink" href="#pcapkit.foundation.extraction.Extractor._reasm" title="Permalink to this definition">#</a></dt>
 <dd><p>Frame record for reassembly.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.foundation.extraction.Extractor._trace">
-<span class="sig-name descname"><span class="pre">_trace</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="traceflow/index.html#pcapkit.foundation.traceflow.TraceFlowManager" title="pcapkit.foundation.traceflow.TraceFlowManager"><code class="xref py py-class docutils literal notranslate"><span class="pre">TraceFlowManager</span></code></a></em><a class="headerlink" href="#pcapkit.foundation.extraction.Extractor._trace" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">_trace</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">TraceFlowManager</span></em><a class="headerlink" href="#pcapkit.foundation.extraction.Extractor._trace" title="Permalink to this definition">#</a></dt>
 <dd><p>Flow tracer.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.foundation.extraction.Extractor._ifile">
-<span class="sig-name descname"><span class="pre">_ifile</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.IO" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">IO</span></code></a><span class="pre">[</span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a><span class="pre">]</span></em><a class="headerlink" href="#pcapkit.foundation.extraction.Extractor._ifile" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">_ifile</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">IO[bytes]</span></em><a class="headerlink" href="#pcapkit.foundation.extraction.Extractor._ifile" title="Permalink to this definition">#</a></dt>
 <dd><p>Input file object.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.foundation.extraction.Extractor._ofile">
-<span class="sig-name descname"><span class="pre">_ofile</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Union" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code></a><span class="pre">[</span><a class="reference external" href="https://dictdumper.jarryshaw.me/en/latest/dictdumper.dumper.html#dictdumper.dumper.Dumper" title="(in DictDumper)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Dumper</span></code></a><span class="pre">,</span> <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Type</span></code></a><span class="pre">[</span><a class="reference external" href="https://dictdumper.jarryshaw.me/en/latest/dictdumper.dumper.html#dictdumper.dumper.Dumper" title="(in DictDumper)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Dumper</span></code></a><span class="pre">]]</span></em><a class="headerlink" href="#pcapkit.foundation.extraction.Extractor._ofile" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">_ofile</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Dumper</span> <span class="pre">|</span> <span class="pre">Type[Dumper]</span></em><a class="headerlink" href="#pcapkit.foundation.extraction.Extractor._ofile" title="Permalink to this definition">#</a></dt>
 <dd><p>Output file object.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.foundation.extraction.Extractor._exnam">
-<span class="sig-name descname"><span class="pre">_exnam</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Literal" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Literal</span></code></a><span class="pre">[</span><code class="docutils literal notranslate"><span class="pre">'default'</span></code><span class="pre">,</span> <code class="docutils literal notranslate"><span class="pre">'pcapkit'</span></code><span class="pre">,</span> <code class="docutils literal notranslate"><span class="pre">'dpkt'</span></code><span class="pre">,</span> <code class="docutils literal notranslate"><span class="pre">'scapy'</span></code><span class="pre">,</span> <code class="docutils literal notranslate"><span class="pre">'pyshark'</span></code><span class="pre">]</span></em><a class="headerlink" href="#pcapkit.foundation.extraction.Extractor._exnam" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">_exnam</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Engines</span></em><a class="headerlink" href="#pcapkit.foundation.extraction.Extractor._exnam" title="Permalink to this definition">#</a></dt>
 <dd><p>Extraction engine name.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.foundation.extraction.Extractor._exeng">
-<span class="sig-name descname"><span class="pre">_exeng</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="engines/engine.html#pcapkit.foundation.engines.engine.Engine" title="pcapkit.foundation.engines.engine.Engine"><code class="xref py py-class docutils literal notranslate"><span class="pre">Engine</span></code></a><span class="pre">[</span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.TypeVar" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">TypeVar</span></code></a><span class="pre">(</span><code class="docutils literal notranslate"><span class="pre">P</span></code><span class="pre">)]</span></em><a class="headerlink" href="#pcapkit.foundation.extraction.Extractor._exeng" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">_exeng</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Engine[P]</span></em><a class="headerlink" href="#pcapkit.foundation.extraction.Extractor._exeng" title="Permalink to this definition">#</a></dt>
 <dd><p>Extraction engine instance.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.foundation.extraction.Extractor._flag_a">
-<span class="sig-name descname"><span class="pre">_flag_a</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></em><a class="headerlink" href="#pcapkit.foundation.extraction.Extractor._flag_a" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">_flag_a</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#pcapkit.foundation.extraction.Extractor._flag_a" title="Permalink to this definition">#</a></dt>
 <dd><p>Auto extract flag.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.foundation.extraction.Extractor._flag_d">
-<span class="sig-name descname"><span class="pre">_flag_d</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></em><a class="headerlink" href="#pcapkit.foundation.extraction.Extractor._flag_d" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">_flag_d</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#pcapkit.foundation.extraction.Extractor._flag_d" title="Permalink to this definition">#</a></dt>
 <dd><p>Store data flag.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.foundation.extraction.Extractor._flag_e">
-<span class="sig-name descname"><span class="pre">_flag_e</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></em><a class="headerlink" href="#pcapkit.foundation.extraction.Extractor._flag_e" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">_flag_e</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#pcapkit.foundation.extraction.Extractor._flag_e" title="Permalink to this definition">#</a></dt>
 <dd><p>EOF flag.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.foundation.extraction.Extractor._flag_q">
-<span class="sig-name descname"><span class="pre">_flag_q</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></em><a class="headerlink" href="#pcapkit.foundation.extraction.Extractor._flag_q" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">_flag_q</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#pcapkit.foundation.extraction.Extractor._flag_q" title="Permalink to this definition">#</a></dt>
 <dd><p>No output file.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.foundation.extraction.Extractor._flag_t">
-<span class="sig-name descname"><span class="pre">_flag_t</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></em><a class="headerlink" href="#pcapkit.foundation.extraction.Extractor._flag_t" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">_flag_t</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#pcapkit.foundation.extraction.Extractor._flag_t" title="Permalink to this definition">#</a></dt>
 <dd><p>Trace flag.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.foundation.extraction.Extractor._flag_v">
-<span class="sig-name descname"><span class="pre">_flag_v</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></em><a class="headerlink" href="#pcapkit.foundation.extraction.Extractor._flag_v" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">_flag_v</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#pcapkit.foundation.extraction.Extractor._flag_v" title="Permalink to this definition">#</a></dt>
 <dd><p>Verbose flag.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.foundation.extraction.Extractor._ipv4">
-<span class="sig-name descname"><span class="pre">_ipv4</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></em><a class="headerlink" href="#pcapkit.foundation.extraction.Extractor._ipv4" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">_ipv4</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#pcapkit.foundation.extraction.Extractor._ipv4" title="Permalink to this definition">#</a></dt>
 <dd><p>IPv4 reassembly flag.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.foundation.extraction.Extractor._ipv6">
-<span class="sig-name descname"><span class="pre">_ipv6</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></em><a class="headerlink" href="#pcapkit.foundation.extraction.Extractor._ipv6" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">_ipv6</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#pcapkit.foundation.extraction.Extractor._ipv6" title="Permalink to this definition">#</a></dt>
 <dd><p>IPv6 reassembly flag.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.foundation.extraction.Extractor._tcp">
-<span class="sig-name descname"><span class="pre">_tcp</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></em><a class="headerlink" href="#pcapkit.foundation.extraction.Extractor._tcp" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">_tcp</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#pcapkit.foundation.extraction.Extractor._tcp" title="Permalink to this definition">#</a></dt>
 <dd><p>TCP reassembly flag.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.foundation.extraction.Extractor.__output__">
-<span class="sig-name descname"><span class="pre">__output__</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.DefaultDict" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">DefaultDict</span></code></a><span class="pre">[</span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a><span class="pre">,</span> <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code></a><span class="pre">[</span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a><span class="pre">,</span> <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a><span class="pre">,</span> <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a><span class="pre">[</span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a><span class="pre">]]]</span></em><a class="headerlink" href="#pcapkit.foundation.extraction.Extractor.__output__" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">__output__</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">DefaultDict[str,</span> <span class="pre">tuple[str,</span> <span class="pre">str,</span> <span class="pre">str</span> <span class="pre">|</span> <span class="pre">None]]</span></em><a class="headerlink" href="#pcapkit.foundation.extraction.Extractor.__output__" title="Permalink to this definition">#</a></dt>
 <dd><p>Format dumper mapping for
 writing output files. The values should be a tuple representing the
 module name, class name and file extension.</p>
@@ -727,7 +710,7 @@ module name, class name and file extension.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.foundation.extraction.Extractor.__engine__">
-<span class="sig-name descname"><span class="pre">__engine__</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a><span class="pre">[</span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a><span class="pre">,</span> <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code></a><span class="pre">[</span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a><span class="pre">,</span> <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a><span class="pre">]]</span></em><a class="headerlink" href="#pcapkit.foundation.extraction.Extractor.__engine__" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">__engine__</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">dict[str,</span> <span class="pre">tuple[str,</span> <span class="pre">str]]</span></em><a class="headerlink" href="#pcapkit.foundation.extraction.Extractor.__engine__" title="Permalink to this definition">#</a></dt>
 <dd><p>Engine mapping for extracting frames.
 The values should be a tuple representing the module name and class name.</p>
 <dl class="field-list simple">
@@ -841,12 +824,10 @@ until the EOF reached; then it calls <code class="xref py py-meth docutils liter
             <ul>
 <li><a class="reference internal" href="#">Extractor for PCAP Files</a><ul>
 <li><a class="reference internal" href="#pcapkit.foundation.extraction.Extractor"><code class="docutils literal notranslate"><span class="pre">Extractor</span></code></a><ul>
-<li><a class="reference internal" href="#pcapkit.foundation.extraction.Extractor.info"><code class="docutils literal notranslate"><span class="pre">Extractor.info</span></code></a></li>
 <li><a class="reference internal" href="#pcapkit.foundation.extraction.Extractor.length"><code class="docutils literal notranslate"><span class="pre">Extractor.length</span></code></a></li>
 <li><a class="reference internal" href="#pcapkit.foundation.extraction.Extractor.format"><code class="docutils literal notranslate"><span class="pre">Extractor.format</span></code></a></li>
 <li><a class="reference internal" href="#pcapkit.foundation.extraction.Extractor.input"><code class="docutils literal notranslate"><span class="pre">Extractor.input</span></code></a></li>
 <li><a class="reference internal" href="#pcapkit.foundation.extraction.Extractor.output"><code class="docutils literal notranslate"><span class="pre">Extractor.output</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.foundation.extraction.Extractor.header"><code class="docutils literal notranslate"><span class="pre">Extractor.header</span></code></a></li>
 <li><a class="reference internal" href="#pcapkit.foundation.extraction.Extractor.frame"><code class="docutils literal notranslate"><span class="pre">Extractor.frame</span></code></a></li>
 <li><a class="reference internal" href="#pcapkit.foundation.extraction.Extractor.reassembly"><code class="docutils literal notranslate"><span class="pre">Extractor.reassembly</span></code></a></li>
 <li><a class="reference internal" href="#pcapkit.foundation.extraction.Extractor.trace"><code class="docutils literal notranslate"><span class="pre">Extractor.trace</span></code></a></li>

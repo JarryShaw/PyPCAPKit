@@ -365,7 +365,7 @@
 
     <span class="kn">from</span> <span class="nn">typing_extensions</span> <span class="kn">import</span> <span class="n">Literal</span>
 
-    <span class="kn">from</span> <span class="nn">pcapkit.protocols.misc.pcap.frame</span> <span class="kn">import</span> <span class="n">Frame</span>
+    <span class="kn">from</span> <span class="nn">pcapkit.foundation.extraction</span> <span class="kn">import</span> <span class="n">Packet</span>
 
     <span class="n">ByteOrder</span> <span class="o">=</span> <span class="n">Literal</span><span class="p">[</span><span class="s1">&#39;little&#39;</span><span class="p">,</span> <span class="s1">&#39;big&#39;</span><span class="p">]</span>
     <span class="n">Formats</span> <span class="o">=</span> <span class="n">Literal</span><span class="p">[</span><span class="s1">&#39;pcap&#39;</span><span class="p">,</span> <span class="s1">&#39;json&#39;</span><span class="p">,</span> <span class="s1">&#39;tree&#39;</span><span class="p">,</span> <span class="s1">&#39;plist&#39;</span><span class="p">]</span>
@@ -384,12 +384,12 @@
     <span class="c1">#: Output filename.</span>
     <span class="n">filename</span><span class="p">:</span> <span class="s1">&#39;Optional[str]&#39;</span>
     <span class="c1">#: Packet list.</span>
-    <span class="n">packets</span><span class="p">:</span> <span class="s1">&#39;tuple[Frame, ...]&#39;</span>
+    <span class="n">packets</span><span class="p">:</span> <span class="s1">&#39;tuple[Packet, ...]&#39;</span>
     <span class="c1">#: TCP conversation.</span>
     <span class="n">conversations</span><span class="p">:</span> <span class="s1">&#39;tuple[bytes | tuple[bytes, ...], ...]&#39;</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="s1">&#39;Optional[str]&#39;</span><span class="p">,</span> <span class="n">packets</span><span class="p">:</span> <span class="s1">&#39;tuple[Frame, ...]&#39;</span><span class="p">,</span> <span class="n">conversations</span><span class="p">:</span> <span class="s1">&#39;tuple[bytes | tuple[bytes, ...], ...]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long</span></div>
+        <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="s1">&#39;Optional[str]&#39;</span><span class="p">,</span> <span class="n">packets</span><span class="p">:</span> <span class="s1">&#39;tuple[Packet, ...]&#39;</span><span class="p">,</span> <span class="n">conversations</span><span class="p">:</span> <span class="s1">&#39;tuple[bytes | tuple[bytes, ...], ...]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long</span></div>
 
 
 <div class="viewcode-block" id="follow_tcp_stream"><a class="viewcode-back" href="../../../pcapkit/interface/misc.html#pcapkit.interface.misc.follow_tcp_stream">[docs]</a><span class="k">def</span> <span class="nf">follow_tcp_stream</span><span class="p">(</span><span class="n">fin</span><span class="p">:</span> <span class="s1">&#39;Optional[str]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">verbose</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>              <span class="c1"># Extrator options</span>
@@ -428,9 +428,9 @@
     <span class="k">if</span> <span class="n">extraction</span><span class="o">.</span><span class="n">engine</span> <span class="o">==</span> <span class="s1">&#39;dpkt&#39;</span><span class="p">:</span>  <span class="c1"># type: ignore[comparison-overlap]</span>
         <span class="kn">from</span> <span class="nn">pcapkit.toolkit.dpkt</span> <span class="kn">import</span> <span class="n">tcp_reassembly</span>  <span class="c1"># pylint: disable=import-outside-toplevel</span>
     <span class="k">elif</span> <span class="n">extraction</span><span class="o">.</span><span class="n">engine</span> <span class="o">==</span> <span class="s1">&#39;scapy&#39;</span><span class="p">:</span>  <span class="c1"># type: ignore[comparison-overlap]</span>
-        <span class="kn">from</span> <span class="nn">pcapkit.toolkit.scapy</span> <span class="kn">import</span> <span class="n">tcp_reassembly</span>  <span class="c1"># type: ignore[no-redef] # isort: skip # pylint: disable=import-outside-toplevel</span>
+        <span class="kn">from</span> <span class="nn">pcapkit.toolkit.scapy</span> <span class="kn">import</span> <span class="n">tcp_reassembly</span>  <span class="c1"># isort: skip # pylint: disable=import-outside-toplevel</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="kn">from</span> <span class="nn">pcapkit.toolkit.default</span> <span class="kn">import</span> <span class="n">tcp_reassembly</span>  <span class="c1"># type: ignore[no-redef] # isort: skip # pylint: disable=import-outside-toplevel</span>
+        <span class="kn">from</span> <span class="nn">pcapkit.toolkit.pcap</span> <span class="kn">import</span> <span class="n">tcp_reassembly</span>  <span class="c1"># type: ignore[assignment] # isort: skip # pylint: disable=import-outside-toplevel</span>
         <span class="n">fallback</span> <span class="o">=</span> <span class="kc">True</span>
 
     <span class="n">streams</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: list[Stream]</span>
@@ -438,7 +438,7 @@
     <span class="k">for</span> <span class="n">stream</span> <span class="ow">in</span> <span class="n">extraction</span><span class="o">.</span><span class="n">trace</span><span class="o">.</span><span class="n">tcp</span><span class="p">:</span>
         <span class="n">reassembly</span> <span class="o">=</span> <span class="n">TCP_Reassembly</span><span class="p">(</span><span class="n">strict</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 
-        <span class="n">packets</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: list[Frame]</span>
+        <span class="n">packets</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: list[Packet]</span>
         <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="n">stream</span><span class="o">.</span><span class="n">index</span><span class="p">:</span>
             <span class="n">frame</span> <span class="o">=</span> <span class="n">frames</span><span class="p">[</span><span class="n">index</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
             <span class="n">packets</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">frame</span><span class="p">)</span>

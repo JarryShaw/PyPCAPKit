@@ -443,8 +443,12 @@ support, as is used by <a class="reference internal" href="../extraction.html#pc
 <code class="xref py py-attr docutils literal notranslate"><span class="pre">self._exptl</span></code> is provided as the DPKT
 engine currently does not support such operations.</p>
 </dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></p>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.FormatError" title="pcapkit.utilities.exceptions.FormatError"><strong>FormatError</strong></a> – If the file format is not supported, i.e., not a PCAP
+    file.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -465,6 +469,18 @@ engine currently does not support such operations.</p>
 <p class="admonition-title">See also</p>
 <p>Please refer to <code class="xref py py-meth docutils literal notranslate"><span class="pre">_default_read_frame()</span></code> for more operational information.</p>
 </div>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.foundation.engines.dpkt.DPKT._gbhdr">
+<span class="sig-name descname"><span class="pre">_gbhdr</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="../../protocols/misc/pcap.html#pcapkit.protocols.misc.pcap.header.Header" title="pcapkit.protocols.misc.pcap.header.Header"><code class="xref py py-class docutils literal notranslate"><span class="pre">Header</span></code></a></em><a class="headerlink" href="#pcapkit.foundation.engines.dpkt.DPKT._gbhdr" title="Permalink to this definition">#</a></dt>
+<dd><p>Global header.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.foundation.engines.dpkt.DPKT._dlink">
+<span class="sig-name descname"><span class="pre">_dlink</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="../../const/reg.html#pcapkit.const.reg.linktype.LinkType" title="pcapkit.const.reg.linktype.LinkType"><code class="xref py py-class docutils literal notranslate"><span class="pre">LinkType</span></code></a></em><a class="headerlink" href="#pcapkit.foundation.engines.dpkt.DPKT._dlink" title="Permalink to this definition">#</a></dt>
+<dd><p>Data link layer protocol.</p>
 </dd></dl>
 
 </dd></dl>
@@ -611,6 +627,8 @@ close the engine instance after the extraction process is finished.</p>
 <li><a class="reference internal" href="#pcapkit.foundation.engines.dpkt.DPKT"><code class="docutils literal notranslate"><span class="pre">DPKT</span></code></a><ul>
 <li><a class="reference internal" href="#pcapkit.foundation.engines.dpkt.DPKT.run"><code class="docutils literal notranslate"><span class="pre">DPKT.run()</span></code></a></li>
 <li><a class="reference internal" href="#pcapkit.foundation.engines.dpkt.DPKT.read_frame"><code class="docutils literal notranslate"><span class="pre">DPKT.read_frame()</span></code></a></li>
+<li><a class="reference internal" href="#pcapkit.foundation.engines.dpkt.DPKT._gbhdr"><code class="docutils literal notranslate"><span class="pre">DPKT._gbhdr</span></code></a></li>
+<li><a class="reference internal" href="#pcapkit.foundation.engines.dpkt.DPKT._dlink"><code class="docutils literal notranslate"><span class="pre">DPKT._dlink</span></code></a></li>
 </ul>
 </li>
 </ul>

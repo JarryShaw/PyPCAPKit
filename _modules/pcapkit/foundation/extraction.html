@@ -362,13 +362,10 @@
 <span class="kn">import</span> <span class="nn">sys</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">Generic</span><span class="p">,</span> <span class="n">TypeVar</span><span class="p">,</span> <span class="n">cast</span>
 
-<span class="kn">from</span> <span class="nn">pcapkit.const.reg.linktype</span> <span class="kn">import</span> <span class="n">LinkType</span> <span class="k">as</span> <span class="n">Enum_LinkType</span>
 <span class="kn">from</span> <span class="nn">pcapkit.dumpkit.common</span> <span class="kn">import</span> <span class="n">make_dumper</span>
 <span class="kn">from</span> <span class="nn">pcapkit.foundation.engines.pcap</span> <span class="kn">import</span> <span class="n">PCAP</span> <span class="k">as</span> <span class="n">PCAP_Engine</span>
 <span class="kn">from</span> <span class="nn">pcapkit.foundation.reassembly</span> <span class="kn">import</span> <span class="n">ReassemblyManager</span>
 <span class="kn">from</span> <span class="nn">pcapkit.foundation.traceflow</span> <span class="kn">import</span> <span class="n">TraceFlowManager</span>
-<span class="kn">from</span> <span class="nn">pcapkit.protocols.misc.pcap.frame</span> <span class="kn">import</span> <span class="n">Frame</span>
-<span class="kn">from</span> <span class="nn">pcapkit.protocols.misc.pcap.header</span> <span class="kn">import</span> <span class="n">Header</span>
 <span class="kn">from</span> <span class="nn">pcapkit.utilities.exceptions</span> <span class="kn">import</span> <span class="p">(</span><span class="n">CallableError</span><span class="p">,</span> <span class="n">FileNotFound</span><span class="p">,</span> <span class="n">FormatError</span><span class="p">,</span> <span class="n">IterableError</span><span class="p">,</span>
                                           <span class="n">UnsupportedCall</span><span class="p">,</span> <span class="n">stacklevel</span><span class="p">)</span>
 <span class="kn">from</span> <span class="nn">pcapkit.utilities.warnings</span> <span class="kn">import</span> <span class="n">EngineWarning</span><span class="p">,</span> <span class="n">FormatWarning</span><span class="p">,</span> <span class="n">warn</span>
@@ -383,21 +380,33 @@
     <span class="kn">from</span> <span class="nn">scapy.packet</span> <span class="kn">import</span> <span class="n">Packet</span> <span class="k">as</span> <span class="n">ScapyPacket</span>
     <span class="kn">from</span> <span class="nn">typing_extensions</span> <span class="kn">import</span> <span class="n">Literal</span>
 
-    <span class="kn">from</span> <span class="nn">pcapkit.corekit.version</span> <span class="kn">import</span> <span class="n">VersionInfo</span>
     <span class="kn">from</span> <span class="nn">pcapkit.foundation.engines.engine</span> <span class="kn">import</span> <span class="n">Engine</span>
     <span class="kn">from</span> <span class="nn">pcapkit.foundation.reassembly.data</span> <span class="kn">import</span> <span class="n">ReassemblyData</span>
     <span class="kn">from</span> <span class="nn">pcapkit.foundation.traceflow.data</span> <span class="kn">import</span> <span class="n">TraceFlowData</span>
+    <span class="kn">from</span> <span class="nn">pcapkit.protocols.misc.pcap.frame</span> <span class="kn">import</span> <span class="n">Frame</span>
+    <span class="kn">from</span> <span class="nn">pcapkit.protocols.misc.pcapng</span> <span class="kn">import</span> <span class="n">PCAPNG</span>
     <span class="kn">from</span> <span class="nn">pcapkit.protocols.protocol</span> <span class="kn">import</span> <span class="n">Protocol</span>
 
     <span class="n">Formats</span> <span class="o">=</span> <span class="n">Literal</span><span class="p">[</span><span class="s1">&#39;pcap&#39;</span><span class="p">,</span> <span class="s1">&#39;json&#39;</span><span class="p">,</span> <span class="s1">&#39;tree&#39;</span><span class="p">,</span> <span class="s1">&#39;plist&#39;</span><span class="p">]</span>
     <span class="n">Engines</span> <span class="o">=</span> <span class="n">Literal</span><span class="p">[</span><span class="s1">&#39;default&#39;</span><span class="p">,</span> <span class="s1">&#39;pcapkit&#39;</span><span class="p">,</span> <span class="s1">&#39;dpkt&#39;</span><span class="p">,</span> <span class="s1">&#39;scapy&#39;</span><span class="p">,</span> <span class="s1">&#39;pyshark&#39;</span><span class="p">]</span>
     <span class="n">Layers</span> <span class="o">=</span> <span class="n">Literal</span><span class="p">[</span><span class="s1">&#39;link&#39;</span><span class="p">,</span> <span class="s1">&#39;internet&#39;</span><span class="p">,</span> <span class="s1">&#39;transport&#39;</span><span class="p">,</span> <span class="s1">&#39;application&#39;</span><span class="p">,</span> <span class="s1">&#39;none&#39;</span><span class="p">]</span>
 
+    <span class="n">Packet</span> <span class="o">=</span> <span class="n">Union</span><span class="p">[</span><span class="n">Frame</span><span class="p">,</span> <span class="n">PCAPNG</span><span class="p">,</span> <span class="n">ScapyPacket</span><span class="p">,</span> <span class="n">DPKTPacket</span><span class="p">,</span> <span class="n">PySharkPacket</span><span class="p">]</span>
+
     <span class="n">Protocols</span> <span class="o">=</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Protocol</span><span class="p">,</span> <span class="n">Type</span><span class="p">[</span><span class="n">Protocol</span><span class="p">]]</span>
-    <span class="n">VerboseHandler</span> <span class="o">=</span> <span class="n">Callable</span><span class="p">[[</span><span class="s1">&#39;Extractor&#39;</span><span class="p">,</span> <span class="n">Union</span><span class="p">[</span><span class="n">Frame</span><span class="p">,</span> <span class="n">ScapyPacket</span><span class="p">,</span> <span class="n">DPKTPacket</span><span class="p">,</span> <span class="n">PySharkPacket</span><span class="p">]],</span> <span class="n">Any</span><span class="p">]</span>
+    <span class="n">VerboseHandler</span> <span class="o">=</span> <span class="n">Callable</span><span class="p">[[</span><span class="s1">&#39;Extractor&#39;</span><span class="p">,</span> <span class="n">Packet</span><span class="p">],</span> <span class="n">Any</span><span class="p">]</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Extractor&#39;</span><span class="p">]</span>
 
+
+<span class="k">class</span> <span class="nc">EOFType</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;End of file marker.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;str&#39;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s1">&#39;EOF&#39;</span>
+
+
+<span class="n">EOF</span> <span class="o">=</span> <span class="n">EOFType</span><span class="p">()</span>
 <span class="n">P</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s1">&#39;P&#39;</span><span class="p">)</span>
 
 
@@ -409,74 +418,67 @@
 <span class="sd">        :meth:`~pcapkit.foundation.extraction.Extractor.run`.</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="c1">#: Input file name.</span>
-    <span class="n">_ifnm</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span>
-    <span class="c1">#: Output file name.</span>
-    <span class="n">_ofnm</span><span class="p">:</span> <span class="s1">&#39;Optional[str]&#39;</span>
-    <span class="c1">#: Output file extension.</span>
-    <span class="n">_fext</span><span class="p">:</span> <span class="s1">&#39;Optional[str]&#39;</span>
+    <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+        <span class="c1">#: Input file name.</span>
+        <span class="n">_ifnm</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span>
+        <span class="c1">#: Output file name.</span>
+        <span class="n">_ofnm</span><span class="p">:</span> <span class="s1">&#39;Optional[str]&#39;</span>
+        <span class="c1">#: Output file extension.</span>
+        <span class="n">_fext</span><span class="p">:</span> <span class="s1">&#39;Optional[str]&#39;</span>
 
-    <span class="c1">#: Auto extract flag.</span>
-    <span class="n">_flag_a</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span>
-    <span class="c1">#: Store data flag.</span>
-    <span class="n">_flag_d</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span>
-    <span class="c1">#: EOF flag.</span>
-    <span class="n">_flag_e</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span>
-    <span class="c1">#: Split file flag.</span>
-    <span class="n">_flag_f</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span>
-    <span class="c1">#: No output file.</span>
-    <span class="n">_flag_q</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span>
-    <span class="c1">#: Trace flag.</span>
-    <span class="n">_flag_t</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span>
-    <span class="c1">#: Verbose flag.</span>
-    <span class="n">_flag_v</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span>
+        <span class="c1">#: Auto extract flag.</span>
+        <span class="n">_flag_a</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span>
+        <span class="c1">#: Store data flag.</span>
+        <span class="n">_flag_d</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span>
+        <span class="c1">#: EOF flag.</span>
+        <span class="n">_flag_e</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span>
+        <span class="c1">#: Split file flag.</span>
+        <span class="n">_flag_f</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span>
+        <span class="c1">#: No output file.</span>
+        <span class="n">_flag_q</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span>
+        <span class="c1">#: Trace flag.</span>
+        <span class="n">_flag_t</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span>
+        <span class="c1">#: Verbose flag.</span>
+        <span class="n">_flag_v</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span>
 
-    <span class="c1">#: Verbose callback function.</span>
-    <span class="c1">#_vfunc: &#39;VerboseHandler&#39;</span>
+        <span class="c1">#: Verbose callback function.</span>
+        <span class="c1">#_vfunc: &#39;VerboseHandler&#39;</span>
 
-    <span class="c1">#: Frame number.</span>
-    <span class="n">_frnum</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span>
-    <span class="c1">#: Frame records.</span>
-    <span class="n">_frame</span><span class="p">:</span> <span class="s1">&#39;list[Frame | ScapyPacket | DPKTPacket]&#39;</span>
+        <span class="c1">#: Frame number.</span>
+        <span class="n">_frnum</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span>
+        <span class="c1">#: Frame records.</span>
+        <span class="n">_frame</span><span class="p">:</span> <span class="s1">&#39;list[Packet]&#39;</span>
 
-    <span class="c1">#: Frame record for reassembly.</span>
-    <span class="n">_reasm</span><span class="p">:</span> <span class="s1">&#39;ReassemblyManager&#39;</span>
-    <span class="c1">#: Flow tracer.</span>
-    <span class="n">_trace</span><span class="p">:</span> <span class="s1">&#39;TraceFlowManager&#39;</span>
+        <span class="c1">#: Frame record for reassembly.</span>
+        <span class="n">_reasm</span><span class="p">:</span> <span class="s1">&#39;ReassemblyManager&#39;</span>
+        <span class="c1">#: Flow tracer.</span>
+        <span class="n">_trace</span><span class="p">:</span> <span class="s1">&#39;TraceFlowManager&#39;</span>
 
-    <span class="c1">#: IPv4 reassembly flag.</span>
-    <span class="n">_ipv4</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span>
-    <span class="c1">#: IPv6 reassembly flag.</span>
-    <span class="n">_ipv6</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span>
-    <span class="c1">#: TCP reassembly flag.</span>
-    <span class="n">_tcp</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span>
+        <span class="c1">#: IPv4 reassembly flag.</span>
+        <span class="n">_ipv4</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span>
+        <span class="c1">#: IPv6 reassembly flag.</span>
+        <span class="n">_ipv6</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span>
+        <span class="c1">#: TCP reassembly flag.</span>
+        <span class="n">_tcp</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span>
 
-    <span class="c1">#: Extract til protocol.</span>
-    <span class="n">_exptl</span><span class="p">:</span> <span class="s1">&#39;Protocols&#39;</span>
-    <span class="c1">#: Extract til layer.</span>
-    <span class="n">_exlyr</span><span class="p">:</span> <span class="s1">&#39;Layers&#39;</span>
-    <span class="c1">#: Extraction engine name.</span>
-    <span class="n">_exnam</span><span class="p">:</span> <span class="s1">&#39;Engines&#39;</span>
-    <span class="c1">#: Extraction engine instance.</span>
-    <span class="n">_exeng</span><span class="p">:</span> <span class="s1">&#39;Engine[P]&#39;</span>
+        <span class="c1">#: Extract til protocol.</span>
+        <span class="n">_exptl</span><span class="p">:</span> <span class="s1">&#39;Protocols&#39;</span>
+        <span class="c1">#: Extract til layer.</span>
+        <span class="n">_exlyr</span><span class="p">:</span> <span class="s1">&#39;Layers&#39;</span>
+        <span class="c1">#: Extraction engine name.</span>
+        <span class="n">_exnam</span><span class="p">:</span> <span class="s1">&#39;Engines&#39;</span>
+        <span class="c1">#: Extraction engine instance.</span>
+        <span class="n">_exeng</span><span class="p">:</span> <span class="s1">&#39;Engine[P]&#39;</span>
 
-    <span class="c1">#: Input file object.</span>
-    <span class="n">_ifile</span><span class="p">:</span> <span class="s1">&#39;IO[bytes]&#39;</span>
-    <span class="c1">#: Output file object.</span>
-    <span class="n">_ofile</span><span class="p">:</span> <span class="s1">&#39;Dumper | Type[Dumper]&#39;</span>
+        <span class="c1">#: Input file object.</span>
+        <span class="n">_ifile</span><span class="p">:</span> <span class="s1">&#39;IO[bytes]&#39;</span>
+        <span class="c1">#: Output file object.</span>
+        <span class="n">_ofile</span><span class="p">:</span> <span class="s1">&#39;Dumper | Type[Dumper]&#39;</span>
 
-    <span class="c1">#: Magic number.</span>
-    <span class="n">_magic</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span>
-    <span class="c1">#: Global header.</span>
-    <span class="n">_gbhdr</span><span class="p">:</span> <span class="s1">&#39;Header&#39;</span>
-    <span class="c1">#: Version info.</span>
-    <span class="n">_vinfo</span><span class="p">:</span> <span class="s1">&#39;VersionInfo&#39;</span>
-    <span class="c1">#: Data link layer protocol.</span>
-    <span class="n">_dlink</span><span class="p">:</span> <span class="s1">&#39;Enum_LinkType&#39;</span>
-    <span class="c1">#: Nanosecond flag.</span>
-    <span class="n">_nnsec</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span>
-    <span class="c1">#: Output format.</span>
-    <span class="n">_type</span><span class="p">:</span> <span class="s1">&#39;Formats&#39;</span>
+        <span class="c1">#: Magic number.</span>
+        <span class="n">_magic</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span>
+        <span class="c1">#: Output format.</span>
+        <span class="n">_offmt</span><span class="p">:</span> <span class="s1">&#39;Formats&#39;</span>
 
     <span class="c1">##########################################################################</span>
     <span class="c1"># Defaults.</span>
@@ -512,19 +514,6 @@
     <span class="c1">##########################################################################</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">info</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;VersionInfo&#39;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Version of input PCAP file.</span>
-
-<span class="sd">        Raises:</span>
-<span class="sd">            UnsupportedCall: If :attr:`self._exnam &lt;pcapkit.foundation.extraction.Extractor._exnam&gt;`</span>
-<span class="sd">                is ``&#39;scapy&#39;`` or ``&#39;pyshark&#39;``, as such engines does not reserve such information.</span>
-
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_exnam</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;scapy&#39;</span><span class="p">,</span> <span class="s1">&#39;pyshark&#39;</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="n">UnsupportedCall</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;&#39;Extractor(engine=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_exnam</span><span class="si">}</span><span class="s2">)&#39; object has no attribute &#39;info&#39;&quot;</span><span class="p">)</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_vinfo</span>
-
-    <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">length</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;int&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Frame number (of current extracted frame or all).&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_frnum</span>
@@ -540,7 +529,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_flag_q</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">UnsupportedCall</span><span class="p">(</span><span class="s2">&quot;&#39;Extractor(nofile=True)&#39; object has no attribute &#39;format&#39;&quot;</span><span class="p">)</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_type</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_offmt</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">input</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;str&#39;</span><span class="p">:</span>
@@ -561,12 +550,7 @@
         <span class="k">return</span> <span class="n">cast</span><span class="p">(</span><span class="s1">&#39;str&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ofnm</span><span class="p">)</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">header</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Header&#39;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Global header.&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gbhdr</span>
-
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">frame</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;tuple[Frame, ...]&#39;</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">frame</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;tuple[Packet, ...]&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Extracted frames.</span>
 
 <span class="sd">        Raises:</span>
@@ -789,13 +773,14 @@
 
         <span class="k">return</span> <span class="n">ifnm</span><span class="p">,</span> <span class="n">ofnm</span><span class="p">,</span> <span class="n">fmt</span><span class="p">,</span> <span class="n">ext</span><span class="p">,</span> <span class="n">files</span>
 
-<div class="viewcode-block" id="Extractor.record_header"><a class="viewcode-back" href="../../../pcapkit/foundation/extraction.html#pcapkit.foundation.extraction.Extractor.record_header">[docs]</a>    <span class="k">def</span> <span class="nf">record_header</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
+<div class="viewcode-block" id="Extractor.record_header"><a class="viewcode-back" href="../../../pcapkit/foundation/extraction.html#pcapkit.foundation.extraction.Extractor.record_header">[docs]</a>    <span class="k">def</span> <span class="nf">record_header</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Engine&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Read global header.</span>
 
 <span class="sd">        The method will parse the PCAP global header and save the parsed result</span>
-<span class="sd">        as :attr:`self._gbhdr &lt;Extractor._gbhdr&gt;`. Information such as PCAP version,</span>
-<span class="sd">        data link layer protocol type, nanosecond flag and byteorder will also be</span>
-<span class="sd">        save the current :class:`Extractor` instance.</span>
+<span class="sd">        to its extraction context. Information such as PCAP version, data link</span>
+<span class="sd">        layer protocol type, nanosecond flag and byteorder will also be save</span>
+<span class="sd">        the current :class:`~pcapkit.foundation.engins.engine.Engine` instance</span>
+<span class="sd">        as well.</span>
 
 <span class="sd">        If TCP flow tracing is enabled, the nanosecond flag and byteorder will</span>
 <span class="sd">        be used for the output PCAP file of the traced TCP flows.</span>
@@ -806,12 +791,14 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># pylint: disable=attribute-defined-outside-init,protected-access</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_magic</span> <span class="ow">in</span> <span class="n">PCAP_Engine</span><span class="o">.</span><span class="n">MAGIC_NUMBER</span><span class="p">:</span>
-            <span class="n">PCAP_Engine</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+            <span class="n">engine</span> <span class="o">=</span> <span class="n">PCAP_Engine</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+            <span class="n">engine</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+
             <span class="bp">self</span><span class="o">.</span><span class="n">_ifile</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">SEEK_SET</span><span class="p">)</span>
-            <span class="k">return</span>
+            <span class="k">return</span> <span class="n">engine</span>
         <span class="k">raise</span> <span class="n">FormatError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;unknown PCAP file format: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_magic</span><span class="si">!r}</span><span class="s1">&#39;</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Extractor.record_frames"><a class="viewcode-back" href="../../../pcapkit/foundation/extraction.html#pcapkit.foundation.extraction.Extractor.record_frames">[docs]</a>    <span class="k">def</span> <span class="nf">record_frames</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
+<div class="viewcode-block" id="Extractor.record_frames"><a class="viewcode-back" href="../../../pcapkit/foundation/extraction.html#pcapkit.foundation.extraction.Extractor.record_frames">[docs]</a>    <span class="k">def</span> <span class="nf">record_frames</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;P | EOFType&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Read packet frames.</span>
 
 <span class="sd">        The method calls :meth:`self._exeng.read_frame &lt;pcapkit.foundation.engine.engine.Engin.read_frame&gt;`</span>
@@ -827,11 +814,12 @@
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_flag_a</span><span class="p">:</span>
             <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
                 <span class="k">try</span><span class="p">:</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">_exeng</span><span class="o">.</span><span class="n">read_frame</span><span class="p">()</span>
+                    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_exeng</span><span class="o">.</span><span class="n">read_frame</span><span class="p">()</span>
                 <span class="k">except</span> <span class="p">(</span><span class="ne">EOFError</span><span class="p">,</span> <span class="ne">StopIteration</span><span class="p">):</span>
                     <span class="c1"># quit when EOF</span>
                     <span class="k">break</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_cleanup</span><span class="p">()</span></div>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_cleanup</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">EOF</span></div>
 
     <span class="c1">##########################################################################</span>
     <span class="c1"># Data models.</span>

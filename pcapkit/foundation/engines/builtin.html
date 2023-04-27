@@ -376,6 +376,24 @@ support, as is used by <a class="reference internal" href="../extraction.html#pc
 <dd class="field-odd"><p><strong>extractor</strong> (<a class="reference internal" href="../extraction.html#pcapkit.foundation.extraction.Extractor" title="pcapkit.foundation.extraction.Extractor"><code class="xref py py-class docutils literal notranslate"><span class="pre">Extractor</span></code></a>) – <a class="reference internal" href="../extraction.html#pcapkit.foundation.extraction.Extractor" title="pcapkit.foundation.extraction.Extractor"><code class="xref py py-class docutils literal notranslate"><span class="pre">Extractor</span></code></a> instance.</p>
 </dd>
 </dl>
+<dl class="py property">
+<dt class="sig sig-object py" id="pcapkit.foundation.engines.pcap.PCAP.header">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">header</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="../../protocols/misc/pcap.html#pcapkit.protocols.misc.pcap.header.Header" title="pcapkit.protocols.misc.pcap.header.Header"><span class="pre">Header</span></a></em><a class="headerlink" href="#pcapkit.foundation.engines.pcap.PCAP.header" title="Permalink to this definition">#</a></dt>
+<dd><p>Global header.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pcapkit.foundation.engines.pcap.PCAP.version">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">version</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="../../corekit/version.html#pcapkit.corekit.version.VersionInfo" title="pcapkit.corekit.version.VersionInfo"><span class="pre">VersionInfo</span></a></em><a class="headerlink" href="#pcapkit.foundation.engines.pcap.PCAP.version" title="Permalink to this definition">#</a></dt>
+<dd><p>Version of input PCAP file.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pcapkit.foundation.engines.pcap.PCAP.dlink">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">dlink</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="../../const/reg.html#pcapkit.const.reg.linktype.LinkType" title="pcapkit.const.reg.linktype.LinkType"><span class="pre">LinkType</span></a></em><a class="headerlink" href="#pcapkit.foundation.engines.pcap.PCAP.dlink" title="Permalink to this definition">#</a></dt>
+<dd><p>Data link layer protocol.</p>
+</dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.foundation.engines.pcap.PCAP.run">
 <span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/foundation/engines/pcap.html#PCAP.run"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.engines.pcap.PCAP.run" title="Permalink to this definition">#</a></dt>
@@ -385,11 +403,9 @@ the extraction process by parsing the PCAP global header and then halt
 the extraction process until the <code class="xref py py-meth docutils literal notranslate"><span class="pre">self.extractor._read_frame</span></code> method
 is called.</p>
 <p>The method will parse the PCAP global header and save the parsed result
-as <code class="xref py py-attr docutils literal notranslate"><span class="pre">self.extractor._gbhdr</span></code>. Information such as
-PCAP version, data link layer protocol type, nanosecond flag and byteorder
-will also be save the current <code class="xref py py-class docutils literal notranslate"><span class="pre">Extractor</span></code> instance.</p>
-<p>If TCP flow tracing is enabled, the nanosecond flag and byteorder will
-be used for the output PCAP file of the traced TCP flows.</p>
+as <code class="xref py py-attr docutils literal notranslate"><span class="pre">self._gbhdr</span></code>. Information such as PCAP version, data
+link layer protocol type, nanosecond flag and byteorder will also be
+save the current <a class="reference internal" href="#pcapkit.foundation.engines.pcap.PCAP" title="pcapkit.foundation.engines.pcap.PCAP"><code class="xref py py-class docutils literal notranslate"><span class="pre">PCAP</span></code></a> engine instance.</p>
 <p>For output, the method will dump the parsed PCAP global header under
 the name of <code class="docutils literal notranslate"><span class="pre">Global</span> <span class="pre">Header</span></code>.</p>
 <dl class="field-list simple">
@@ -485,6 +501,9 @@ the name of <code class="docutils literal notranslate"><span class="pre">Global<
 <li><a class="reference internal" href="#">Built-in Engines</a><ul>
 <li><a class="reference internal" href="#module-pcapkit.foundation.engines.pcap">PCAP Support</a><ul>
 <li><a class="reference internal" href="#pcapkit.foundation.engines.pcap.PCAP"><code class="docutils literal notranslate"><span class="pre">PCAP</span></code></a><ul>
+<li><a class="reference internal" href="#pcapkit.foundation.engines.pcap.PCAP.header"><code class="docutils literal notranslate"><span class="pre">PCAP.header</span></code></a></li>
+<li><a class="reference internal" href="#pcapkit.foundation.engines.pcap.PCAP.version"><code class="docutils literal notranslate"><span class="pre">PCAP.version</span></code></a></li>
+<li><a class="reference internal" href="#pcapkit.foundation.engines.pcap.PCAP.dlink"><code class="docutils literal notranslate"><span class="pre">PCAP.dlink</span></code></a></li>
 <li><a class="reference internal" href="#pcapkit.foundation.engines.pcap.PCAP.run"><code class="docutils literal notranslate"><span class="pre">PCAP.run()</span></code></a></li>
 <li><a class="reference internal" href="#pcapkit.foundation.engines.pcap.PCAP.read_frame"><code class="docutils literal notranslate"><span class="pre">PCAP.read_frame()</span></code></a></li>
 </ul>

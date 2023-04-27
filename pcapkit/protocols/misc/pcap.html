@@ -1019,14 +1019,14 @@ the packet data is not available in the current instance.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.misc.pcap.frame.Frame.__proto__">
-<span class="sig-name descname"><span class="pre">__proto__</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">DefaultDict[int,</span> <span class="pre">tuple[str,</span> <span class="pre">str]]</span></em><a class="headerlink" href="#pcapkit.protocols.misc.pcap.frame.Frame.__proto__" title="Permalink to this definition">#</a></dt>
-<dd><p>Protocol index mapping for decoding next layer,
-c.f. <a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.Protocol._decode_next_layer" title="pcapkit.protocols.protocol.Protocol._decode_next_layer"><code class="xref py py-meth docutils literal notranslate"><span class="pre">self._decode_next_layer</span></code></a>
+<span class="sig-name descname"><span class="pre">__proto__</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">DefaultDict[Enum_LinkType</span> <span class="pre">|</span> <span class="pre">int,</span> <span class="pre">tuple[str,</span> <span class="pre">str]]</span></em><a class="headerlink" href="#pcapkit.protocols.misc.pcap.frame.Frame.__proto__" title="Permalink to this definition">#</a></dt>
+<dd><p>Protocol index mapping for
+decoding next layer, c.f. <a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.Protocol._decode_next_layer" title="pcapkit.protocols.protocol.Protocol._decode_next_layer"><code class="xref py py-meth docutils literal notranslate"><span class="pre">self._decode_next_layer</span></code></a>
 &amp; <a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.Protocol._import_next_layer" title="pcapkit.protocols.protocol.Protocol._import_next_layer"><code class="xref py py-meth docutils literal notranslate"><span class="pre">self._import_next_layer</span></code></a>.
 The values should be a tuple representing the module name and class name.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>DefaultDict[<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)">int</a>, <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.11)">tuple</a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)">str</a>, <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)">str</a>]]</p>
+<dd class="field-odd"><p>DefaultDict[Enum_LinkType, <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.11)">tuple</a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)">str</a>, <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)">str</a>]]</p>
 </dd>
 </dl>
 </dd></dl>
