@@ -123,7 +123,7 @@ class PCAPNG(Engine[P_PCAPNG]):
         """
         ext = self._extractor
 
-        shb = P_PCAPNG(ext._ifile)
+        shb = P_PCAPNG(ext._ifile, num=0, ctx=None)
         if shb.info.type != Enum_BlockType.Section_Header_Block:
             raise FormatError(f'PCAP-NG: [SHB] invalid block type: {shb.info.type!r}')
 
