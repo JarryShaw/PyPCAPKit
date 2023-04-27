@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """data models for PCAP-NG file format"""
 
+import decimal
 from typing import TYPE_CHECKING
 
 from pcapkit.protocols.data.data import Data
@@ -384,6 +385,11 @@ class EPB_VerdictOption(Option):
 class EnhancedPacketBlock(PCAPNG):
     """Data model for PCAP-NG Enhanced Packet Block (EPB)."""
 
+    #: Section index.
+    section_number: 'int'
+    #: Frame index.
+    number: 'int'
+
     #: Interface ID.
     interface_id: 'int'
     #: Timestamp (in seconds).
@@ -401,21 +407,46 @@ class EnhancedPacketBlock(PCAPNG):
         #: Protocol chain.
         protocols: 'str'
 
-        def __init__(self, interface_id: 'int', timestamp: 'datetime', timestamp_epoch: 'Decimal', captured_len: 'int',
-                     original_len: 'int', options: 'OrderedMultiDict[Enum_OptionType, Option]') -> 'None': ...
+        def __init__(self, section_number: 'int', number: 'int', interface_id: 'int', timestamp: 'datetime',
+                     timestamp_epoch: 'Decimal', captured_len: 'int', original_len: 'int',
+                     options: 'OrderedMultiDict[Enum_OptionType, Option]') -> 'None': ...
 
 
 class SimplePacketBlock(PCAPNG):
     """Data model for PCAP-NG Simple Packet Block (SPB)."""
 
+    #: Section index.
+    section_number: 'int'
+    #: Frame index.
+    number: 'int'
+
     #: Original packet length.
     original_len: 'int'
+
+    def __post_init__(self) -> None:
+        """Post-initialization handling."""
+        self.__update__(
+            interface_id=0,
+            timestamp=datetime.utcfromtimestamp(0),
+            timestamp_epoch=decimal.Decimal(0),
+            captured_len=self.length - 16,
+        )
 
     if TYPE_CHECKING:
         #: Protocol chain.
         protocols: 'str'
 
-        def __init__(self, type: 'Enum_BlockType', length: 'int', original_len: 'int') -> 'None': ...
+        #: Interface ID.
+        interface_id: 'int'
+        #: Timestamp (in seconds).
+        timestamp: 'datetime'
+        #: Timestamp as in UNIX epoch (in seconds).
+        timestamp_epoch: 'Decimal'
+        #: Captured packet length.
+        captured_len: 'int'
+
+        def __init__(self, section_number: 'int', number: 'int', type: 'Enum_BlockType',
+                     length: 'int', original_len: 'int') -> 'None': ...
 
 
 class NameResolutionRecord(Data):
@@ -704,6 +735,11 @@ class CustomBlock(PCAPNG):
 class PacketBlock(PCAPNG):
     """Data model for PCAP-NG Packet Block (obsolete)."""
 
+    #: Section index.
+    section_number: 'int'
+    #: Frame index.
+    number: 'int'
+
     #: Interface ID.
     interface_id: 'int'
     #: Drops count.
@@ -713,9 +749,9 @@ class PacketBlock(PCAPNG):
     #: Timestamp as in UNIX epoch (in seconds).
     timestamp_epoch: 'Decimal'
     #: Captured packet length.
-    captured_length: 'int'
+    captured_len: 'int'
     #: Original packet length.
-    original_length: 'int'
+    original_len: 'int'
     #: Options.
     options: 'OrderedMultiDict[Enum_OptionType, Option]'
 
@@ -723,7 +759,7 @@ class PacketBlock(PCAPNG):
         #: Protocol chain.
         protocols: 'str'
 
-        def __init__(self, type: 'Enum_BlockType', length: 'int', interface_id: 'int', drop_count: 'int',
-                     timestamp: 'datetime', timestamp_epoch: 'Decimal', captured_length: 'int',
-                     original_length: 'int', protocols: 'str',
-                     options: 'OrderedMultiDict[Enum_OptionType, Option]') -> 'None': ...
+        def __init__(self, section_number: 'int', number: 'int', type: 'Enum_BlockType',
+                     length: 'int', interface_id: 'int', drop_count: 'int', timestamp: 'datetime',
+                     timestamp_epoch: 'Decimal', captured_length: 'int', original_length: 'int',
+                     protocols: 'str', options: 'OrderedMultiDict[Enum_OptionType, Option]') -> 'None': ...
