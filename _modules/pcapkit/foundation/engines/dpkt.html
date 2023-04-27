@@ -362,12 +362,15 @@
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;DPKT&#39;</span><span class="p">]</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-    <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Iterator</span>
+    <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Type</span><span class="p">,</span> <span class="n">Union</span>
 
     <span class="kn">from</span> <span class="nn">dpkt.dpkt</span> <span class="kn">import</span> <span class="n">Packet</span> <span class="k">as</span> <span class="n">DPKTPacket</span>
+    <span class="kn">from</span> <span class="nn">dpkt.pcap</span> <span class="kn">import</span> <span class="n">Reader</span> <span class="k">as</span> <span class="n">PCAPReader</span>
+    <span class="kn">from</span> <span class="nn">dpkt.pcapng</span> <span class="kn">import</span> <span class="n">Reader</span> <span class="k">as</span> <span class="n">PCAPNGReader</span>
 
     <span class="kn">from</span> <span class="nn">pcapkit.foundation.extraction</span> <span class="kn">import</span> <span class="n">Extractor</span>
-    <span class="kn">from</span> <span class="nn">pcapkit.protocols.misc.pcap.header</span> <span class="kn">import</span> <span class="n">Header</span>
+
+    <span class="n">Reader</span> <span class="o">=</span> <span class="n">Union</span><span class="p">[</span><span class="n">PCAPReader</span><span class="p">,</span> <span class="n">PCAPNGReader</span><span class="p">]</span>
 
 
 <div class="viewcode-block" id="DPKT"><a class="viewcode-back" href="../../../../pcapkit/foundation/engines/3rdparty.html#pcapkit.foundation.engines.dpkt.DPKT">[docs]</a><span class="k">class</span> <span class="nc">DPKT</span><span class="p">(</span><span class="n">Engine</span><span class="p">[</span><span class="s1">&#39;DPKTPacket&#39;</span><span class="p">]):</span>
@@ -377,12 +380,6 @@
 <span class="sd">        extractor: :class:`~pcapkit.foundation.extraction.Extractor` instance.</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
-
-    <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="c1">#: Global header.</span>
-        <span class="n">_gbhdr</span><span class="p">:</span> <span class="s1">&#39;Header&#39;</span>
-        <span class="c1">#: Data link layer protocol.</span>
-        <span class="n">_dlink</span><span class="p">:</span> <span class="s1">&#39;Enum_LinkType&#39;</span>
 
     <span class="c1">##########################################################################</span>
     <span class="c1"># Properties.</span>
@@ -406,7 +403,7 @@
         <span class="kn">import</span> <span class="nn">dpkt</span>  <span class="c1"># isort:skip</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_expkg</span> <span class="o">=</span> <span class="n">dpkt</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_extmp</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">&#39;Iterator[tuple[float, DPKTPacket]]&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_extmp</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">&#39;Reader&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
 
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">extractor</span><span class="p">)</span>
 
@@ -454,34 +451,8 @@
             <span class="n">reader</span> <span class="o">=</span> <span class="n">dpkt</span><span class="o">.</span><span class="n">pcapng</span><span class="o">.</span><span class="n">Reader</span><span class="p">(</span><span class="n">ext</span><span class="o">.</span><span class="n">_ifile</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">FormatError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;unsupported file format: </span><span class="si">{</span><span class="n">ext</span><span class="o">.</span><span class="n">magic_number</span><span class="si">!r}</span><span class="s1">&#39;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_dlink</span> <span class="o">=</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">reader</span><span class="o">.</span><span class="n">datalink</span><span class="p">())</span>
-
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dlink</span> <span class="o">==</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">ETHERNET</span><span class="p">:</span>
-            <span class="n">pkg</span> <span class="o">=</span> <span class="n">dpkt</span><span class="o">.</span><span class="n">ethernet</span><span class="o">.</span><span class="n">Ethernet</span>
-        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dlink</span><span class="o">.</span><span class="n">value</span> <span class="o">==</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">IPV4</span><span class="p">:</span>
-            <span class="n">pkg</span> <span class="o">=</span> <span class="n">dpkt</span><span class="o">.</span><span class="n">ip</span><span class="o">.</span><span class="n">IP</span>
-        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dlink</span><span class="o">.</span><span class="n">value</span> <span class="o">==</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">IPV6</span><span class="p">:</span>
-            <span class="n">pkg</span> <span class="o">=</span> <span class="n">dpkt</span><span class="o">.</span><span class="n">ip6</span><span class="o">.</span><span class="n">IP6</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">warn</span><span class="p">(</span><span class="s1">&#39;unrecognised link layer protocol; all analysis functions ignored&#39;</span><span class="p">,</span>
-                 <span class="n">DPKTWarning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="n">stacklevel</span><span class="p">())</span>
-
-            <span class="k">class</span> <span class="nc">RawPacket</span><span class="p">(</span><span class="n">dpkt</span><span class="o">.</span><span class="n">dpkt</span><span class="o">.</span><span class="n">Packet</span><span class="p">):</span>  <span class="c1"># type: ignore[name-defined]</span>
-<span class="w">                </span><span class="sd">&quot;&quot;&quot;Raw packet.&quot;&quot;&quot;</span>
-
-                <span class="k">def</span> <span class="fm">__len__</span><span class="p">(</span><span class="n">ext</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;int&#39;</span><span class="p">:</span>
-                    <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">ext</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
-
-                <span class="k">def</span> <span class="fm">__bytes__</span><span class="p">(</span><span class="n">ext</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;bytes&#39;</span><span class="p">:</span>
-                    <span class="k">return</span> <span class="n">ext</span><span class="o">.</span><span class="n">data</span>
-
-                <span class="k">def</span> <span class="nf">unpack</span><span class="p">(</span><span class="n">ext</span><span class="p">,</span> <span class="n">buf</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
-                    <span class="n">ext</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">buf</span>
-
-            <span class="n">pkg</span> <span class="o">=</span> <span class="n">RawPacket</span>
 
         <span class="c1"># extract &amp; analyse file</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_expkg</span> <span class="o">=</span> <span class="n">pkg</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_extmp</span> <span class="o">=</span> <span class="n">reader</span></div>
 
 <div class="viewcode-block" id="DPKT.read_frame"><a class="viewcode-back" href="../../../../pcapkit/foundation/engines/3rdparty.html#pcapkit.foundation.engines.dpkt.DPKT.read_frame">[docs]</a>    <span class="k">def</span> <span class="nf">read_frame</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DPKTPacket&#39;</span><span class="p">:</span>
@@ -498,9 +469,13 @@
                                           <span class="n">tcp_reassembly</span><span class="p">,</span> <span class="n">tcp_traceflow</span><span class="p">)</span>
         <span class="n">ext</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_extractor</span>
 
+        <span class="n">reader</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_extmp</span>
+        <span class="n">linktype</span> <span class="o">=</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">reader</span><span class="o">.</span><span class="n">datalink</span><span class="p">())</span>
+
         <span class="c1"># fetch DPKT packet</span>
-        <span class="n">timestamp</span><span class="p">,</span> <span class="n">pkt</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">&#39;tuple[float, bytes]&#39;</span><span class="p">,</span> <span class="nb">next</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_extmp</span><span class="p">))</span>
-        <span class="n">packet</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_expkg</span><span class="p">(</span><span class="n">pkt</span><span class="p">)</span>  <span class="c1"># type: DPKTPacket</span>
+        <span class="n">timestamp</span><span class="p">,</span> <span class="n">pkt</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">&#39;tuple[float, bytes]&#39;</span><span class="p">,</span> <span class="nb">next</span><span class="p">(</span><span class="n">reader</span><span class="p">))</span>
+        <span class="n">protocol</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_protocol</span><span class="p">(</span><span class="n">linktype</span><span class="p">)</span>
+        <span class="n">packet</span> <span class="o">=</span> <span class="n">protocol</span><span class="p">(</span><span class="n">pkt</span><span class="p">)</span>  <span class="c1"># type: DPKTPacket</span>
 
         <span class="c1"># verbose output</span>
         <span class="n">ext</span><span class="o">.</span><span class="n">_frnum</span> <span class="o">+=</span> <span class="mi">1</span>
@@ -509,7 +484,7 @@
         <span class="c1"># write plist</span>
         <span class="n">frnum</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;Frame </span><span class="si">{</span><span class="n">ext</span><span class="o">.</span><span class="n">_frnum</span><span class="si">}</span><span class="s1">&#39;</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">ext</span><span class="o">.</span><span class="n">_flag_q</span><span class="p">:</span>
-            <span class="n">info</span> <span class="o">=</span> <span class="n">packet2dict</span><span class="p">(</span><span class="n">packet</span><span class="p">,</span> <span class="n">timestamp</span><span class="p">,</span> <span class="n">data_link</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_dlink</span><span class="p">)</span>
+            <span class="n">info</span> <span class="o">=</span> <span class="n">packet2dict</span><span class="p">(</span><span class="n">packet</span><span class="p">,</span> <span class="n">timestamp</span><span class="p">,</span> <span class="n">data_link</span><span class="o">=</span><span class="n">linktype</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">ext</span><span class="o">.</span><span class="n">_flag_f</span><span class="p">:</span>
                 <span class="n">ofile</span> <span class="o">=</span> <span class="n">ext</span><span class="o">.</span><span class="n">_ofile</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">ext</span><span class="o">.</span><span class="n">_ofnm</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">frnum</span><span class="si">}</span><span class="s1">.</span><span class="si">{</span><span class="n">ext</span><span class="o">.</span><span class="n">_fext</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
                 <span class="n">ofile</span><span class="p">(</span><span class="n">info</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">frnum</span><span class="p">)</span>
@@ -536,7 +511,7 @@
         <span class="c1"># trace flows</span>
         <span class="k">if</span> <span class="n">ext</span><span class="o">.</span><span class="n">_flag_t</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">ext</span><span class="o">.</span><span class="n">_tcp</span><span class="p">:</span>
-                <span class="n">data_tf_tcp</span> <span class="o">=</span> <span class="n">tcp_traceflow</span><span class="p">(</span><span class="n">packet</span><span class="p">,</span> <span class="n">timestamp</span><span class="p">,</span> <span class="n">data_link</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_dlink</span><span class="p">,</span> <span class="n">count</span><span class="o">=</span><span class="n">ext</span><span class="o">.</span><span class="n">_frnum</span><span class="p">)</span>
+                <span class="n">data_tf_tcp</span> <span class="o">=</span> <span class="n">tcp_traceflow</span><span class="p">(</span><span class="n">packet</span><span class="p">,</span> <span class="n">timestamp</span><span class="p">,</span> <span class="n">data_link</span><span class="o">=</span><span class="n">linktype</span><span class="p">,</span> <span class="n">count</span><span class="o">=</span><span class="n">ext</span><span class="o">.</span><span class="n">_frnum</span><span class="p">)</span>
                 <span class="k">if</span> <span class="n">data_tf_tcp</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                     <span class="n">ext</span><span class="o">.</span><span class="n">_trace</span><span class="o">.</span><span class="n">tcp</span><span class="p">(</span><span class="n">data_tf_tcp</span><span class="p">)</span>
 
@@ -547,7 +522,49 @@
             <span class="n">ext</span><span class="o">.</span><span class="n">_frame</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span>
 
         <span class="c1"># return frame record</span>
-        <span class="k">return</span> <span class="n">packet</span></div></div>
+        <span class="k">return</span> <span class="n">packet</span></div>
+
+    <span class="c1">##########################################################################</span>
+    <span class="c1"># Utilities.</span>
+    <span class="c1">##########################################################################</span>
+
+    <span class="k">def</span> <span class="nf">_get_protocol</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">linktype</span><span class="p">:</span> <span class="s1">&#39;Optional[Enum_LinkType]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Type[DPKTPacket]&#39;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns the protocol for parsing the current packet.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            linktype: Link type code.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">dpkt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_expkg</span>
+        <span class="n">reader</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_extmp</span>
+
+        <span class="k">if</span> <span class="n">linktype</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">linktype</span> <span class="o">=</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">reader</span><span class="o">.</span><span class="n">datalink</span><span class="p">())</span>
+
+        <span class="k">if</span> <span class="n">linktype</span> <span class="o">==</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">ETHERNET</span><span class="p">:</span>
+            <span class="n">pkg</span> <span class="o">=</span> <span class="n">dpkt</span><span class="o">.</span><span class="n">ethernet</span><span class="o">.</span><span class="n">Ethernet</span>
+        <span class="k">elif</span> <span class="n">linktype</span><span class="o">.</span><span class="n">value</span> <span class="o">==</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">IPV4</span><span class="p">:</span>
+            <span class="n">pkg</span> <span class="o">=</span> <span class="n">dpkt</span><span class="o">.</span><span class="n">ip</span><span class="o">.</span><span class="n">IP</span>
+        <span class="k">elif</span> <span class="n">linktype</span><span class="o">.</span><span class="n">value</span> <span class="o">==</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">IPV6</span><span class="p">:</span>
+            <span class="n">pkg</span> <span class="o">=</span> <span class="n">dpkt</span><span class="o">.</span><span class="n">ip6</span><span class="o">.</span><span class="n">IP6</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">warn</span><span class="p">(</span><span class="s1">&#39;unrecognised link layer protocol; all analysis functions ignored&#39;</span><span class="p">,</span>
+                 <span class="n">DPKTWarning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="n">stacklevel</span><span class="p">())</span>
+
+            <span class="k">class</span> <span class="nc">RawPacket</span><span class="p">(</span><span class="n">dpkt</span><span class="o">.</span><span class="n">dpkt</span><span class="o">.</span><span class="n">Packet</span><span class="p">):</span>  <span class="c1"># type: ignore[name-defined]</span>
+<span class="w">                </span><span class="sd">&quot;&quot;&quot;Raw packet.&quot;&quot;&quot;</span>
+
+                <span class="k">def</span> <span class="fm">__len__</span><span class="p">(</span><span class="n">ext</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;int&#39;</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">ext</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
+
+                <span class="k">def</span> <span class="fm">__bytes__</span><span class="p">(</span><span class="n">ext</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;bytes&#39;</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="n">ext</span><span class="o">.</span><span class="n">data</span>
+
+                <span class="k">def</span> <span class="nf">unpack</span><span class="p">(</span><span class="n">ext</span><span class="p">,</span> <span class="n">buf</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
+                    <span class="n">ext</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">buf</span>
+
+            <span class="n">pkg</span> <span class="o">=</span> <span class="n">RawPacket</span>
+        <span class="k">return</span> <span class="n">pkg</span></div>
 </pre></div>
         </article>
       </div>
