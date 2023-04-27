@@ -16,7 +16,8 @@ from pcapkit.const.ipv6.extension_header import ExtensionHeader as Enum_Extensio
 from pcapkit.foundation.reassembly.data.ip import Packet as IP_Packet
 from pcapkit.foundation.reassembly.data.tcp import Packet as TCP_Packet
 from pcapkit.foundation.traceflow.data.tcp import Packet as TF_TCP_Packet
-from pcapkit.protocols.data.misc.pcap.frame import Frame as Data_Frame, FrameInfo as Data_FrameInfo
+from pcapkit.protocols.data.misc.pcap.frame import Frame as Data_Frame
+from pcapkit.protocols.data.misc.pcap.frame import FrameInfo as Data_FrameInfo
 
 if TYPE_CHECKING:
     from ipaddress import IPv4Address, IPv6Address

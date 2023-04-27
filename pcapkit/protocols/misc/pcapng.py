@@ -166,7 +166,7 @@ __all__ = ['PCAPNG']
 
 if TYPE_CHECKING:
     from decimal import Decimal
-    from typing import Any, Callable, DefaultDict, Optional, Type, Union, IO
+    from typing import IO, Any, Callable, DefaultDict, Optional, Type, Union
 
     from mypy_extensions import DefaultArg, KwArg, NamedArg
     from typing_extensions import Literal
