@@ -1,0 +1,249 @@
+# -*- coding: utf-8 -*-
+"""PCAP-NG Support
+=====================
+
+.. module:: pcapkit.foundation.engines.pcapng
+
+This module contains the implementation for PCAP-NG file extraction
+support, as is used by :class:`pcapkit.foundation.extraction.Extractor`.
+
+"""
+from typing import TYPE_CHECKING, cast
+
+from pcapkit.const.pcapng.block_type import BlockType as Enum_BlockType
+from pcapkit.corekit.infoclass import Info
+from pcapkit.foundation.engines.engine import Engine
+from pcapkit.protocols.misc.pcapng import PCAPNG as P_PCAPNG
+from pcapkit.utilities.exceptions import FormatError
+
+__all__ = ['PCAPNG']
+
+if TYPE_CHECKING:
+    from typing import Any, Optional
+
+    from pcapkit.protocols.data.misc.pcapng import PCAPNG as Data_PCAPNG
+    from pcapkit.protocols.data.misc.pcapng import CustomBlock as Data_CustomBlock
+    from pcapkit.protocols.data.misc.pcapng import \
+        DecryptionSecretsBlock as Data_DecryptionSecretsBlock
+    from pcapkit.protocols.data.misc.pcapng import EnhancedPacketBlock as Data_EnhancedPacketBlock
+    from pcapkit.protocols.data.misc.pcapng import \
+        InterfaceDescriptionBlock as Data_InterfaceDescriptionBlock
+    from pcapkit.protocols.data.misc.pcapng import \
+        InterfaceStatisticsBlock as Data_InterfaceStatisticsBlock
+    from pcapkit.protocols.data.misc.pcapng import NameResolutionBlock as Data_NameResolutionBlock
+    from pcapkit.protocols.data.misc.pcapng import PacketBlock as Data_PacketBlock
+    from pcapkit.protocols.data.misc.pcapng import SectionHeaderBlock as Data_SectionHeaderBlock
+    from pcapkit.protocols.data.misc.pcapng import SimplePacketBlock as Data_SimplePacketBlock
+    from pcapkit.protocols.data.misc.pcapng import \
+        SystemdJournalExportBlock as Data_SystemdJournalExportBlock
+    from pcapkit.protocols.data.misc.pcapng import UnknownBlock as Data_UnknownBlock
+
+
+class Context(Info):
+    """Context manager for PCAP-NG file format."""
+
+    #: Section header.
+    section: 'Data_SectionHeaderBlock'
+
+    def __post_init__(self) -> None:
+        """Post initialisation hook."""
+        self.__update__(
+            interfaces=[],
+            packets=[],
+            names=[],
+            journals=[],
+            secrets=[],
+            custom=[],
+            statistics=[],
+            unknown=[],
+        )
+
+    if TYPE_CHECKING:
+        #: Interface descriptions.
+        interfaces: 'list[Data_InterfaceDescriptionBlock]'
+        #: Packets.
+        packets: 'list[Data_PacketBlock | Data_SimplePacketBlock | Data_EnhancedPacketBlock]'
+        #: Name resolution records.
+        names: 'list[Data_NameResolutionBlock]'
+        #: :manpage:`systemd(1)` journal export records.
+        journals: 'list[Data_SystemdJournalExportBlock]'
+        #: Decryption secrets.
+        secrets: 'list[Data_DecryptionSecretsBlock]'
+        #: Custom blocks.
+        custom: 'list[Data_CustomBlock]'
+        #: Interface statistics.
+        statistics: 'list[Data_InterfaceStatisticsBlock]'
+        #: Unknown blocks.
+        unknown: 'list[Data_UnknownBlock]'
+
+        def __init__(self, section: 'Data_SectionHeaderBlock') -> 'None': ...
+
+
+class PCAPNG(Engine[P_PCAPNG]):
+    """PCAP-NG file extraction support.
+
+    Args:
+        extractor: :class:`~pcapkit.foundation.extraction.Extractor` instance.
+
+    """
+    if TYPE_CHECKING:
+        #: Current context.
+        _ctx: 'Context'
+        #: File context storage.
+        _ctx_list: 'list[Context]'
+
+    MAGIC_NUMBER = b'\x0a\x0d\x0d\x0a'
+
+    ##########################################################################
+    # Properties.
+    ##########################################################################
+
+    @classmethod
+    def name(cls) -> 'str':
+        """Engine name."""
+        return 'PCAP-NG'
+
+    @classmethod
+    def module(cls) -> 'str':
+        """Engine module name."""
+        return 'pcapkit.foundation.engine.pcapng'
+
+    ##########################################################################
+    # Methods.
+    ##########################################################################
+
+    def run(self) -> 'None':
+        """Start extraction.
+
+        This method is the entry point for PCAP-NG file extraction. It will
+        directly extract the first block, which should be a section header
+        block, and then save the related information into the internal
+        context storage.
+
+        """
+        ext = self._extractor
+
+        shb = P_PCAPNG(ext._ifile)
+        if shb.info.type != Enum_BlockType.Section_Header_Block:
+            raise FormatError(f'PCAP-NG: [SHB] invalid block type: {shb.info.type!r}')
+
+        self._ctx = Context(cast('Data_SectionHeaderBlock', shb.info))
+        self._ctx_list.append(self._ctx)
+
+        self._write_file(shb.info, name=f'Section Header {len(self._ctx_list)}')
+
+    def read_frame(self) -> 'P_PCAPNG':
+        """Read frames.
+
+        This method performs following tasks:
+
+        - read the next block from input file;
+        - check if the block is a packet block;
+        - if not, save the block into the internal context storage and repeat;
+        - if yes, save the related information into the internal context storage;
+        - write the parsed block into output file.
+        - reassemble IP and/or TCP fragments;
+        - trace TCP flows if any;
+        - record frame information if any.
+
+        Returns:
+            Parsed PCAP-NG block.
+
+        """
+        from pcapkit.toolkit.pcap import (ipv4_reassembly, ipv6_reassembly, tcp_reassembly,
+                                          tcp_traceflow)
+        ext = self._extractor
+
+        while True:
+            # read next block
+            block = P_PCAPNG(ext._ifile, num=ext._frnum+1, ctx=self._ctx,
+                            layer=ext._exlyr, protocol=ext._exptl)
+
+            # check block type
+            if block.info.type == Enum_BlockType.Section_Header_Block:
+                self._ctx = Context(cast('Data_SectionHeaderBlock', block.info))
+                self._ctx_list.append(self._ctx)
+
+                self._write_file(block.info, name=f'Section Header {len(self._ctx_list)}')
+
+            elif block.info.type == Enum_BlockType.Interface_Description_Block:
+                self._ctx.interfaces.append(cast('Data_InterfaceDescriptionBlock', block.info))
+                self._write_file(block.info, name=f'Interface Description {len(self._ctx.interfaces)}')
+
+            elif block.info.type == Enum_BlockType.Name_Resolution_Block:
+                self._ctx.names.append(cast('Data_NameResolutionBlock', block.info))
+                self._write_file(block.info, name=f'Name Resolution {len(self._ctx.names)}')
+
+            elif block.info.type == Enum_BlockType.systemd_Journal_Export_Block:
+                self._ctx.journals.append(cast('Data_SystemdJournalExportBlock', block.info))
+                self._write_file(block.info, name=f'systemd Journal Export {len(self._ctx.journals)}')
+
+            elif block.info.type == Enum_BlockType.Decryption_Secrets_Block:
+                self._ctx.secrets.append(cast('Data_DecryptionSecretsBlock', block.info))
+                self._write_file(block.info, name=f'Decryption Secrets {len(self._ctx.secrets)}')
+
+            elif block.info.type == Enum_BlockType.Interface_Statistics_Block:
+                info = cast('Data_InterfaceStatisticsBlock', block.info)
+                if info.interface_id >= len(self._ctx.interfaces):
+                    raise FormatError(f'PCAP-NG: [ISB] invalid interface ID: {info.interface_id}')
+                self._ctx.statistics.append(info)
+
+                self._write_file(block.info, name=f'Interface Statistics {len(self._ctx.statistics)}')
+
+            elif block.info.type in (Enum_BlockType.Custom_Block_that_rewriters_can_copy_into_new_files,
+                                    Enum_BlockType.Custom_Block_that_rewriters_should_not_copy_into_new_files):
+                self._ctx.custom.append(cast('Data_CustomBlock', block.info))
+                self._write_file(block.info, name=f'Custom {len(self._ctx.custom)}')
+
+            elif block.info.type in (Enum_BlockType.Enhanced_Packet_Block,
+                                    Enum_BlockType.Simple_Packet_Block,
+                                    Enum_BlockType.Packet_Block):
+                break
+
+            else:
+                self._ctx.unknown.append(cast('Data_UnknownBlock', block.info))
+                self._write_file(block.info, name=f'Unknown {len(self._ctx.unknown)}')
+
+        # increment frame number
+        ext._frnum += 1
+
+        # verbose output
+        ext._vfunc(ext, block)
+
+        # write plist
+        self._write_file(block.info, name=f'Frame {ext._frnum}')
+
+        # record fragments
+
+        # trace flows
+
+        # record blocks
+        if ext._flag_d:
+            ext._frame.append(block)
+
+        # return block record
+        return block
+
+    ##########################################################################
+    # Utilities.
+    ##########################################################################
+
+    def _write_file(self, block: 'Data_PCAPNG', *, name: 'str') -> 'None':
+        """Write the parsed block into output file.
+
+        Args:
+            block: The parsed block.
+            name: The name of the block.
+
+        """
+        ext = self._extractor
+        if ext._flag_q:
+            return
+
+        if ext._flag_f:
+            ofile = ext._ofile(f'{ext._ofnm}/{name}.{ext._fext}')
+            ofile(self._ctx.to_dict(), name=name)
+        else:
+            ext._ofile(self._ctx.to_dict(), name=name)
+            ofile = ext._ofile
+        ext._offmt = ofile.kind
