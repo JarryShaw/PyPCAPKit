@@ -165,10 +165,13 @@ from pcapkit.utilities.warnings import RegistryWarning, warn
 __all__ = ['PCAPNG']
 
 if TYPE_CHECKING:
-    from typing import Any, Callable, DefaultDict, Optional
+    from decimal import Decimal
+    from typing import Any, Callable, DefaultDict, Optional, Type
 
     from mypy_extensions import DefaultArg, KwArg, NamedArg
     from typing_extensions import Literal
+
+    from pcapkit.protocols.schema.schema import Schema
 
     Option = OrderedMultiDict[Enum_OptionType, Data_Option]
 
@@ -260,6 +263,212 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
        * - :attr:`pcapkit.const.reg.linktype.LinkType.IPV6`
          - :class:`pcapkit.protocols.internet.ipv6.IPv6`
 
+    The class currently supports parsing of the following block types, which
+    are registered in the :attr:`self.__block__ <pcapkit.protocols.misc.pcapng.PCAPNG.__block__>`
+    attribute:
+
+    .. list-table::
+       :header-rows: 1
+
+       * - Block Type
+         - Block Parser
+         - Block Constructor
+       * - :attr:`~pcapkit.const.pcapng.block_type.BlockType.Section_Header_Block`
+         - :meth:`~pcapkit.protocols.misc.pcapng.PCAPNG._read_block_shb`
+         - :meth:`~pcapkit.protocols.misc.pcapng.PCAPNG._make_block_shb`
+       * - :attr:`~pcapkit.const.pcapng.block_type.BlockType.Interface_Description_Block`
+         - :meth:`~pcapkit.protocols.misc.pcapng.PCAPNG._read_block_idb`
+         - :meth:`~pcapkit.protocols.misc.pcapng.PCAPNG._make_block_idb`
+       * - :attr:`~pcapkit.const.pcapng.block_type.BlockType.Enhanced_Packet_Block`
+         - :meth:`~pcapkit.protocols.misc.pcapng.PCAPNG._read_block_epb`
+         - :meth:`~pcapkit.protocols.misc.pcapng.PCAPNG._make_block_epb`
+       * - :attr:`~pcapkit.const.pcapng.block_type.BlockType.Simple_Packet_Block`
+         - :meth:`~pcapkit.protocols.misc.pcapng.PCAPNG._read_block_spb`
+         - :meth:`~pcapkit.protocols.misc.pcapng.PCAPNG._make_block_spb`
+       * - :attr:`~pcapkit.const.pcapng.block_type.BlockType.Name_Resolution_Block`
+         - :meth:`~pcapkit.protocols.misc.pcapng.PCAPNG._read_block_nrb`
+         - :meth:`~pcapkit.protocols.misc.pcapng.PCAPNG._make_block_nrb`
+       * - :attr:`~pcapkit.const.pcapng.block_type.BlockType.Interface_Statistics_Block`
+         - :meth:`~pcapkit.protocols.misc.pcapng.PCAPNG._read_block_isb`
+         - :meth:`~pcapkit.protocols.misc.pcapng.PCAPNG._make_block_isb`
+       * - :attr:`~pcapkit.const.pcapng.block_type.BlockType.systemd_Journal_Export_Block`
+         - :meth:`~pcapkit.protocols.misc.pcapng.PCAPNG._read_block_systemd`
+         - :meth:`~pcapkit.protocols.misc.pcapng.PCAPNG._make_block_systemd`
+       * - :attr:`~pcapkit.const.pcapng.block_type.BlockType.Decryption_Secrets_Block`
+         - :meth:`~pcapkit.protocols.misc.pcapng.PCAPNG._read_block_dsb`
+         - :meth:`~pcapkit.protocols.misc.pcapng.PCAPNG._make_block_dsb`
+       * - :attr:`~pcapkit.const.pcapng.block_type.BlockType.Custom_Block_that_rewriters_can_copy_into_new_files`
+         - :meth:`~pcapkit.protocols.misc.pcapng.PCAPNG._read_block_cb`
+         - :meth:`~pcapkit.protocols.misc.pcapng.PCAPNG._make_block_cb`
+       * - :attr:`~pcapkit.const.pcapng.block_type.BlockType.Custom_Block_that_rewriters_should_not_copy_into_new_files`
+         - :meth:`~pcapkit.protocols.misc.pcapng.PCAPNG._read_block_cb`
+         - :meth:`~pcapkit.protocols.misc.pcapng.PCAPNG._make_block_cb`
+       * - :attr:`~pcapkit.const.pcapng.block_type.BlockType.Packet_Block`
+         - :meth:`~pcapkit.protocols.misc.pcapng.PCAPNG._read_block_packet`
+         - :meth:`~pcapkit.protocols.misc.pcapng.PCAPNG._make_block_packet`
+
+    The class currently supports parsing of the following option types, which
+    are registered in the :attr:`self.__option__ <pcapkit.protocols.misc.pcapng.PCAPNG.__option__>`
+    attribute:
+
+    .. list-table::
+       :header-rows: 1
+
+       * - Option Type
+         - Option Parser
+         - Option Constructor
+       * - :attr:`~pcapkit.const.pcapng.option_type.OptionType.opt_endofopt`
+         - :meth:`~pcapkit.protocols.misc.pcapng.PCAPNG._read_option_endofopt`
+         - :meth:`~pcapkit.protocols.misc.pcapng.PCAPNG._make_option_endofopt`
+       * - :attr:`~pcapkit.const.pcapng.option_type.OptionType.opt_comment`
+         - :meth:`~pcapkit.protocols.misc.pcapng.PCAPNG._read_option_comment`
+         - :meth:`~pcapkit.protocols.misc.pcapng.PCAPNG._make_option_comment`
+       * - :attr:`~pcapkit.const.pcapng.option_type.OptionType.if_name`
+         - :meth:`~pcapkit.protocols.misc.pcapng.PCAPNG._read_option_if_name`
+         - :meth:`~pcapkit.protocols.misc.pcapng.PCAPNG._make_option_if_name`
+       * - :attr:`~pcapkit.const.pcapng.option_type.OptionType.if_description`
+         - :meth:`~pcapkit.protocols.misc.pcapng.PCAPNG._read_option_if_description`
+         - :meth:`~pcapkit.protocols.misc.pcapng.PCAPNG._make_option_if_description`
+       * - :attr:`~pcapkit.const.pcapng.option_type.OptionType.if_IPv4addr`
+         - :meth:`~pcapkit.protocols.misc.pcapng.PCAPNG._read_option_if_ipv4`
+         - :meth:`~pcapkit.protocols.misc.pcapng.PCAPNG._make_option_if_ipv4`
+       * - :attr:`~pcapkit.const.pcapng.option_type.OptionType.if_IPv6addr`
+         - :meth:`~pcapkit.protocols.misc.pcapng.PCAPNG._read_option_if_ipv6`
+         - :meth:`~pcapkit.protocols.misc.pcapng.PCAPNG._make_option_if_ipv6`
+       * - :attr:`~pcapkit.const.pcapng.option_type.OptionType.if_MACaddr`
+         - :meth:`~pcapkit.protocols.misc.pcapng.PCAPNG._read_option_if_mac`
+         - :meth:`~pcapkit.protocols.misc.pcapng.PCAPNG._make_option_if_mac`
+       * - :attr:`~pcapkit.const.pcapng.option_type.OptionType.if_EUIaddr`
+         - :meth:`~pcapkit.protocols.misc.pcapng.PCAPNG._read_option_if_eui`
+         - :meth:`~pcapkit.protocols.misc.pcapng.PCAPNG._make_option_if_eui`
+       * - :attr:`~pcapkit.const.pcapng.option_type.OptionType.if_speed`
+         - :meth:`~pcapkit.protocols.misc.pcapng.PCAPNG._read_option_if_speed`
+         - :meth:`~pcapkit.protocols.misc.pcapng.PCAPNG._make_option_if_speed`
+       * - :attr:`~pcapkit.const.pcapng.option_type.OptionType.if_tsresol`
+         - :meth:`~pcapkit.protocols.misc.pcapng.PCAPNG._read_option_if_tsresol`
+         - :meth:`~pcapkit.protocols.misc.pcapng.PCAPNG._make_option_if_tsresol`
+       * - :attr:`~pcapkit.const.pcapng.option_type.OptionType.if_tzone`
+         - :meth:`~pcapkit.protocols.misc.pcapng.PCAPNG._read_option_if_tzone`
+         - :meth:`~pcapkit.protocols.misc.pcapng.PCAPNG._make_option_if_tzone`
+       * - :attr:`~pcapkit.const.pcapng.option_type.OptionType.if_filter`
+         - :meth:`~pcapkit.protocols.misc.pcapng.PCAPNG._read_option_if_filter`
+         - :meth:`~pcapkit.protocols.misc.pcapng.PCAPNG._make_option_if_filter`
+       * - :attr:`~pcapkit.const.pcapng.option_type.OptionType.if_os`
+         - :meth:`~pcapkit.protocols.misc.pcapng.PCAPNG._read_option_if_os`
+         - :meth:`~pcapkit.protocols.misc.pcapng.PCAPNG._make_option_if_os`
+       * - :attr:`~pcapkit.const.pcapng.option_type.OptionType.if_fcslen`
+         - :meth:`~pcapkit.protocols.misc.pcapng.PCAPNG._read_option_if_fcslen`
+         - :meth:`~pcapkit.protocols.misc.pcapng.PCAPNG._make_option_if_fcslen`
+       * - :attr:`~pcapkit.const.pcapng.option_type.OptionType.if_tsoffset`
+         - :meth:`~pcapkit.protocols.misc.pcapng.PCAPNG._read_option_if_tsoffset`
+         - :meth:`~pcapkit.protocols.misc.pcapng.PCAPNG._make_option_if_tsoffset`
+       * - :attr:`~pcapkit.const.pcapng.option_type.OptionType.if_hardware`
+         - :meth:`~pcapkit.protocols.misc.pcapng.PCAPNG._read_option_if_hardware`
+         - :meth:`~pcapkit.protocols.misc.pcapng.PCAPNG._make_option_if_hardware`
+       * - :attr:`~pcapkit.const.pcapng.option_type.OptionType.if_txspeed`
+         - :meth:`~pcapkit.protocols.misc.pcapng.PCAPNG._read_option_if_txspeed`
+         - :meth:`~pcapkit.protocols.misc.pcapng.PCAPNG._make_option_if_txspeed`
+       * - :attr:`~pcapkit.const.pcapng.option_type.OptionType.if_rxspeed`
+         - :meth:`~pcapkit.protocols.misc.pcapng.PCAPNG._read_option_if_rxspeed`
+         - :meth:`~pcapkit.protocols.misc.pcapng.PCAPNG._make_option_if_rxspeed`
+       * - :attr:`~pcapkit.const.pcapng.option_type.OptionType.epb_flags`
+         - :meth:`~pcapkit.protocols.misc.pcapng.PCAPNG._read_option_epb_flags`
+         - :meth:`~pcapkit.protocols.misc.pcapng.PCAPNG._make_option_epb_flags`
+       * - :attr:`~pcapkit.const.pcapng.option_type.OptionType.epb_hash`
+         - :meth:`~pcapkit.protocols.misc.pcapng.PCAPNG._read_option_epb_hash`
+         - :meth:`~pcapkit.protocols.misc.pcapng.PCAPNG._make_option_epb_hash`
+       * - :attr:`~pcapkit.const.pcapng.option_type.OptionType.epb_dropcount`
+         - :meth:`~pcapkit.protocols.misc.pcapng.PCAPNG._read_option_epb_dropcount`
+         - :meth:`~pcapkit.protocols.misc.pcapng.PCAPNG._make_option_epb_dropcount`
+       * - :attr:`~pcapkit.const.pcapng.option_type.OptionType.epb_packetid`
+         - :meth:`~pcapkit.protocols.misc.pcapng.PCAPNG._read_option_epb_packetid`
+         - :meth:`~pcapkit.protocols.misc.pcapng.PCAPNG._make_option_epb_packetid`
+       * - :attr:`~pcapkit.const.pcapng.option_type.OptionType.epb_queue`
+         - :meth:`~pcapkit.protocols.misc.pcapng.PCAPNG._read_option_epb_queue`
+         - :meth:`~pcapkit.protocols.misc.pcapng.PCAPNG._make_option_epb_queue`
+       * - :attr:`~pcapkit.const.pcapng.option_type.OptionType.epb_verdict`
+         - :meth:`~pcapkit.protocols.misc.pcapng.PCAPNG._read_option_epb_verdict`
+         - :meth:`~pcapkit.protocols.misc.pcapng.PCAPNG._make_option_epb_verdict`
+       * - :attr:`~pcapkit.const.pcapng.option_type.OptionType.ds_dnsname`
+         - :meth:`~pcapkit.protocols.misc.pcapng.PCAPNG._read_option_ds_dnsname`
+         - :meth:`~pcapkit.protocols.misc.pcapng.PCAPNG._make_option_ds_dnsname`
+       * - :attr:`~pcapkit.const.pcapng.option_type.OptionType.ns_dnsIP4addr`
+         - :meth:`~pcapkit.protocols.misc.pcapng.PCAPNG._read_option_ns_dnsipv4`
+         - :meth:`~pcapkit.protocols.misc.pcapng.PCAPNG._make_option_ns_dnsipv4`
+       * - :attr:`~pcapkit.const.pcapng.option_type.OptionType.ns_dnsIP6addr`
+         - :meth:`~pcapkit.protocols.misc.pcapng.PCAPNG._read_option_ns_dnsipv6`
+         - :meth:`~pcapkit.protocols.misc.pcapng.PCAPNG._make_option_ns_dnsipv6`
+       * - :attr:`~pcapkit.const.pcapng.option_type.OptionType.isb_starttime`
+         - :meth:`~pcapkit.protocols.misc.pcapng.PCAPNG._read_option_isb_starttime`
+         - :meth:`~pcapkit.protocols.misc.pcapng.PCAPNG._make_option_isb_starttime`
+       * - :attr:`~pcapkit.const.pcapng.option_type.OptionType.isb_endtime`
+         - :meth:`~pcapkit.protocols.misc.pcapng.PCAPNG._read_option_isb_endtime`
+         - :meth:`~pcapkit.protocols.misc.pcapng.PCAPNG._make_option_isb_endtime`
+       * - :attr:`~pcapkit.const.pcapng.option_type.OptionType.isb_ifrecv`
+         - :meth:`~pcapkit.protocols.misc.pcapng.PCAPNG._read_option_isb_ifrecv`
+         - :meth:`~pcapkit.protocols.misc.pcapng.PCAPNG._make_option_isb_ifrecv`
+       * - :attr:`~pcapkit.const.pcapng.option_type.OptionType.isb_ifdrop`
+         - :meth:`~pcapkit.protocols.misc.pcapng.PCAPNG._read_option_isb_ifdrop`
+         - :meth:`~pcapkit.protocols.misc.pcapng.PCAPNG._make_option_isb_ifdrop`
+       * - :attr:`~pcapkit.const.pcapng.option_type.OptionType.isb_filteraccept`
+         - :meth:`~pcapkit.protocols.misc.pcapng.PCAPNG._read_option_isb_filteraccept`
+         - :meth:`~pcapkit.protocols.misc.pcapng.PCAPNG._make_option_isb_filteraccept`
+       * - :attr:`~pcapkit.const.pcapng.option_type.OptionType.isb_osdrop`
+         - :meth:`~pcapkit.protocols.misc.pcapng.PCAPNG._read_option_isb_osdrop`
+         - :meth:`~pcapkit.protocols.misc.pcapng.PCAPNG._make_option_isb_osdrop`
+       * - :attr:`~pcapkit.const.pcapng.option_type.OptionType.isb_usrdeliv`
+         - :meth:`~pcapkit.protocols.misc.pcapng.PCAPNG._read_option_isb_usrdeliv`
+         - :meth:`~pcapkit.protocols.misc.pcapng.PCAPNG._make_option_isb_usrdeliv`
+       * - :attr:`~pcapkit.const.pcapng.option_type.OptionType.pack_flags`
+         - :meth:`~pcapkit.protocols.misc.pcapng.PCAPNG._read_option_epb_flags`
+         - :meth:`~pcapkit.protocols.misc.pcapng.PCAPNG._make_option_epb_flags`
+       * - :attr:`~pcapkit.const.pcapng.option_type.OptionType.pack_hash`
+         - :meth:`~pcapkit.protocols.misc.pcapng.PCAPNG._read_option_epb_hash`
+         - :meth:`~pcapkit.protocols.misc.pcapng.PCAPNG._make_option_epb_hash`
+
+    The class currently supports parsing of the following name resolution
+    record types, which are registered in the :attr:`self.__record__ <pcapkit.protocols.misc.pcapng.PCAPNG.__record__>`
+    attribute:
+
+    .. list-table::
+       :header-rows: 1
+
+       * - Record Type
+         - Record Parser
+         - Record Constructor
+       * - :attr:`~pcapkit.const.pcapng.record_type.RecordType.nrb_record_end`
+         - :meth:`~pcapkit.protocols.misc.pcapng.PCAPNG._read_record_end`
+         - :meth:`~pcapkit.protocols.misc.pcapng.PCAPNG._make_record_end`
+       * - :attr:`~pcapkit.const.pcapng.record_type.RecordType.nrb_record_ipv4`
+         - :meth:`~pcapkit.protocols.misc.pcapng.PCAPNG._read_record_ipv4`
+         - :meth:`~pcapkit.protocols.misc.pcapng.PCAPNG._make_record_ipv4`
+       * - :attr:`~pcapkit.const.pcapng.record_type.RecordType.nrb_record_ipv6`
+         - :meth:`~pcapkit.protocols.misc.pcapng.PCAPNG._read_record_ipv6`
+         - :meth:`~pcapkit.protocols.misc.pcapng.PCAPNG._make_record_ipv6`
+
+    The class currently supports parsing of the following decryption secrets
+    types, which are registered in the :attr:`self.__secrets__ <pcapkit.protocols.misc.pcapng.PCAPNG.__secrets__>`
+    attribute:
+
+    .. list-table::
+       :header-rows: 1
+
+       * - Secrets Type
+         - Secrets Parser
+         - Secrets Constructor
+       * - :attr:`~pcapkit.const.pcapng.secrets_type.SecretsType.TLS_Key_Log`
+         - :meth:`~pcapkit.protocols.misc.pcapng.PCAPNG._read_secrets_tls`
+         - :meth:`~pcapkit.protocols.misc.pcapng.PCAPNG._make_secrets_tls`
+       * - :attr:`~pcapkit.const.pcapng.secrets_type.SecretsType.WireGuard_Key_Log`
+         - :meth:`~pcapkit.protocols.misc.pcapng.PCAPNG._read_secrets_wireguard`
+         - :meth:`~pcapkit.protocols.misc.pcapng.PCAPNG._make_secrets_wireguard`
+       * - :attr:`~pcapkit.const.pcapng.secrets_type.SecretsType.ZigBee_NWK_Key_Log`
+         - :meth:`~pcapkit.protocols.misc.pcapng.PCAPNG._read_secrets_zigbee_nwk`
+         - :meth:`~pcapkit.protocols.misc.pcapng.PCAPNG._make_secrets_zigbee_nwk`
+       * - :attr:`~pcapkit.const.pcapng.secrets_type.SecretsType.ZigBee_APS_Key_Log`
+         - :meth:`~pcapkit.protocols.misc.pcapng.PCAPNG._read_secrets_zigbee_aps`
+         - :meth:`~pcapkit.protocols.misc.pcapng.PCAPNG._make_secrets_zigbee_aps`
+
     """
 
     ##########################################################################
@@ -281,7 +490,7 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
 
     #: DefaultDict[Enum_BlockType, str | tuple[BlockParser, BlockConstructor]]:
     #: Block type to method mapping. Method names are expected to be referred
-    #: to the class by ``_read_pcapng_${name}`` and/or ``_make_pcapng_${name}``,
+    #: to the class by ``_read_block_${name}`` and/or ``_make_block_${name}``,
     #: and if such name not found, the value should then be a method that can
     #: parse the block by itself.
     __block__ = collections.defaultdict(
@@ -295,8 +504,8 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
             Enum_BlockType.Interface_Statistics_Block: 'isb',
             Enum_BlockType.systemd_Journal_Export_Block: 'systemd',
             Enum_BlockType.Decryption_Secrets_Block: 'dsb',
-            Enum_BlockType.Custom_Block_that_rewriters_can_copy_into_new_files: 'custom',
-            Enum_BlockType.Custom_Block_that_rewriters_should_not_copy_into_new_files: 'custom',
+            Enum_BlockType.Custom_Block_that_rewriters_can_copy_into_new_files: 'cb',
+            Enum_BlockType.Custom_Block_that_rewriters_should_not_copy_into_new_files: 'cb',
             Enum_BlockType.Packet_Block: 'packet',
         },
     )  # type: DefaultDict[Enum_BlockType | int, str | tuple[BlockParser, BlockConstructor]]
@@ -348,6 +557,20 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
         },
     )  # type: DefaultDict[Enum_OptionType | int, str | tuple[OptionParser, OptionConstructor]]
 
+    #: DefaultDict[Enum_RecordType, str | tuple[RecordParser, RecordConstructor]]:
+    #: Name resolution record type to method mapping. Method names are expected
+    #: to be referred to the class by ``_read_record_${name}`` and/or ``_make_record_${name}``,
+    #: and if such name not found, the value should then be a method that can
+    #: parse the name record by itself.
+    __record__ = collections.defaultdict(
+        lambda: 'unknown',
+        {
+            Enum_RecordType.nrb_record_end: 'end',
+            Enum_RecordType.nrb_record_ipv4: 'ipv4',
+            Enum_RecordType.nrb_record_ipv6: 'ipv6',
+        },
+    )  # type: DefaultDict[Enum_RecordType | int, str | tuple[RecordParser, RecordConstructor]]
+
     #: DefaultDict[Enum_SecretsType, str | tuple[SecretsParser, SecretsConstructor]]:
     #: Decryption secrets type to method mapping. Method names are expected to
     #: be referred to the class by ``_read_secrets_${name}`` and/or ``_make_secrets_${name}``,
@@ -363,16 +586,109 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
         },
     )  # type: DefaultDict[Enum_SecretsType | int, str | tuple[SecretsParser, SecretsConstructor]]
 
-    #: DefaultDict[Enum_RecordType, str | tuple[RecordParser, RecordConstructor]]:
-    #: Name record type to method mapping. Method names are expected to be
-    #: referred to the class by ``_read_record_${name}`` and/or ``_make_record_${name}``,
-    #: and if such name not found, the value should then be a method that can
-    #: parse the name record by itself.
-    __record__ = collections.defaultdict(
-        lambda: 'unknown',
-        {
-            Enum_RecordType.nrb_record_end: 'end',
-            Enum_RecordType.nrb_record_ipv4: 'ipv4',
-            Enum_RecordType.nrb_record_ipv6: 'ipv6',
-        },
-    )  # type: DefaultDict[Enum_RecordType | int, str | tuple[RecordParser, RecordConstructor]]
+    ##########################################################################
+    # Properties.
+    ##########################################################################
+
+    @property
+    def name(self) -> 'str':
+        """Name of corresponding protocol."""
+        return f'Frame {self._fnum}'
+
+    @property
+    def length(self) -> 'int':
+        """Header length of corresponding protocol."""
+        return self._info.length
+
+    ##########################################################################
+    # Methods.
+    ##########################################################################
+
+    @classmethod
+    def register(cls, code: 'Enum_LinkType', module: 'str', class_: 'str') -> 'None':  # type: ignore[override]
+        r"""Register a new protocol class.
+
+        Notes:
+            The full qualified class name of the new protocol class
+            should be as ``{module}.{class_}``.
+
+        Arguments:
+            code: protocol code as in :class:`~pcapkit.const.reg.linktype.LinkType`
+            module: module name
+            class\_: class name
+
+        """
+        if code in cls.__proto__:
+            warn(f'protocol {code} already registered, overwriting', RegistryWarning)
+        cls.__proto__[code] = (module, class_)
+
+    def index(self, name: 'str | Protocol | Type[Protocol]') -> 'int':
+        """Call :meth:`ProtoChain.index <pcapkit.corekit.protochain.ProtoChain.index>`.
+
+        Args:
+            name: ``name`` to be searched
+
+        Returns:
+            First index of ``name``.
+
+        Raises:
+            IndexNotFound: if ``name`` is not present
+
+        """
+        return self._protos.index(name)
+
+    def read(self, length: 'Optional[int]' = None, **kwargs: 'Any') -> 'Data_PCAPNG':
+        r"""Read each block after global header.
+
+        Args:
+            length: Length of data to be read.
+            **kwargs: Arbitrary keyword arguments.
+
+        Returns:
+            Data_Frame: Parsed packet data.
+
+        """
+
+    def make(self,
+             **kwargs: 'Any') -> 'Schema_PCAPNG':
+        """Make frame packet data.
+
+        Args:
+            **kwargs: Arbitrary keyword arguments.
+
+        Returns:
+            Constructed packet data.
+
+        """
+
+    ##########################################################################
+    # Data models.
+    ##########################################################################
+
+    def __length_hint__(self) -> 'Literal[12]':
+        """Return an estimated length for the object."""
+        return 12
+
+    # NOTE: This is a hack to make the ``__index__`` method work both as a
+    # class method and an instance method.
+    def __index__(self: 'Optional[PCAPNG]' = None) -> 'int':  # type: ignore[override]
+        """Index of the frame.
+
+        Args:
+            self: :class:`PCAPNG` object or :obj:`None`.
+
+        Returns:
+            If the object is initiated, i.e. :attr:`self._fnum <pcapkit.protocols.misc.pcap.frame.Frame._fnum>`
+            exists, returns the frame index number of itself; else raises :exc:`UnsupportedCall`.
+
+        Raises:
+            UnsupportedCall: This protocol has no registry entry.
+
+        """
+        if self is None:
+            raise UnsupportedCall("'PCAPNG' object cannot be interpreted as an integer")
+        return self._fnum
+
+    ##########################################################################
+    # Utilities.
+    ##########################################################################
