@@ -26,27 +26,27 @@ from pcapkit.protocols.internet.ipv6_opts import IPv6_Opts
 from pcapkit.protocols.internet.ipv6_route import IPv6_Route
 from pcapkit.protocols.link.link import Link
 from pcapkit.protocols.misc.pcap.frame import Frame
+from pcapkit.protocols.misc.pcapng import PCAPNG
 from pcapkit.protocols.protocol import Protocol
 from pcapkit.protocols.transport.tcp import TCP
 from pcapkit.protocols.transport.udp import UDP
 from pcapkit.utilities.exceptions import RegistryError
 from pcapkit.utilities.logging import logger
-from pcapkit.protocols.misc.pcapng import PCAPNG
 
 if TYPE_CHECKING:
     from typing import Type
 
     from typing_extensions import Literal
 
-    from pcapkit.const.pcapng.block_type import BlockType as PCAPNG_BlockType
-    from pcapkit.const.pcapng.option_type import OptionType as PCAPNG_OptionType
-    from pcapkit.const.pcapng.secrets_type import SecretsType as PCAPNG_SecretsType
-    from pcapkit.const.pcapng.record_type import RecordType as PCAPNG_RecordType
     from pcapkit.const.hip.parameter import Parameter as HIP_Parameter
     from pcapkit.const.http.frame import Frame as HTTP_Frame
     from pcapkit.const.ipv4.option_number import OptionNumber as IPv4_OptionNumber
     from pcapkit.const.ipv6.option import Option as IPv6_Option
     from pcapkit.const.ipv6.routing import Routing as IPv6_Routing
+    from pcapkit.const.pcapng.block_type import BlockType as PCAPNG_BlockType
+    from pcapkit.const.pcapng.option_type import OptionType as PCAPNG_OptionType
+    from pcapkit.const.pcapng.record_type import RecordType as PCAPNG_RecordType
+    from pcapkit.const.pcapng.secrets_type import SecretsType as PCAPNG_SecretsType
     from pcapkit.const.reg.ethertype import EtherType
     from pcapkit.const.reg.linktype import LinkType
     from pcapkit.const.reg.transtype import TransType
@@ -65,19 +65,18 @@ if TYPE_CHECKING:
     from pcapkit.protocols.internet.ipv6_opts import OptionParser as IPv6_Opts_OptionParser
     from pcapkit.protocols.internet.ipv6_route import TypeConstructor as IPv6_Route_TypeConstructor
     from pcapkit.protocols.internet.ipv6_route import TypeParser as IPv6_Route_TypeParser
+    from pcapkit.protocols.misc.pcapng import BlockConstructor as PCAPNG_BlockConstructor
+    from pcapkit.protocols.misc.pcapng import BlockParser as PCAPNG_BlockParser
+    from pcapkit.protocols.misc.pcapng import OptionConstructor as PCAPNG_OptionConstructor
+    from pcapkit.protocols.misc.pcapng import OptionParser as PCAPNG_OptionParser
+    from pcapkit.protocols.misc.pcapng import RecordConstructor as PCAPNG_RecordConstructor
+    from pcapkit.protocols.misc.pcapng import RecordParser as PCAPNG_RecordParser
+    from pcapkit.protocols.misc.pcapng import SecretsConstructor as PCAPNG_SecretsConstructor
+    from pcapkit.protocols.misc.pcapng import SecretsParser as PCAPNG_SecretsParser
     from pcapkit.protocols.transport.tcp import MPOptionConstructor as TCP_MPOptionConstructor
     from pcapkit.protocols.transport.tcp import MPOptionParser as TCP_MPOptionParser
     from pcapkit.protocols.transport.tcp import OptionConstructor as TCP_OptionConstructor
     from pcapkit.protocols.transport.tcp import OptionParser as TCP_OptionParser
-
-    from pcapkit.protocols.misc.pcapng import BlockParser as PCAPNG_BlockParser
-    from pcapkit.protocols.misc.pcapng import BlockConstructor as PCAPNG_BlockConstructor
-    from pcapkit.protocols.misc.pcapng import OptionParser as PCAPNG_OptionParser
-    from pcapkit.protocols.misc.pcapng import OptionConstructor as PCAPNG_OptionConstructor
-    from pcapkit.protocols.misc.pcapng import SecretsParser as PCAPNG_SecretsParser
-    from pcapkit.protocols.misc.pcapng import SecretsConstructor as PCAPNG_SecretsConstructor
-    from pcapkit.protocols.misc.pcapng import RecordParser as PCAPNG_RecordParser
-    from pcapkit.protocols.misc.pcapng import RecordConstructor as PCAPNG_RecordConstructor
 
 __all__ = [
     'register_protocol',

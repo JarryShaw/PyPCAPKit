@@ -16,7 +16,6 @@ import datetime
 import decimal
 import enum
 import io
-import operator
 import sys
 import time
 from typing import TYPE_CHECKING, cast, overload
@@ -166,10 +165,10 @@ __all__ = ['PCAPNG']
 
 if TYPE_CHECKING:
     from decimal import Decimal
-    from typing import IO, Any, Callable, DefaultDict, Optional, Type, Union
     from enum import IntEnum as StdlibEnum
-    from aenum import IntEnum as AenumEnum
+    from typing import IO, Any, Callable, DefaultDict, Optional, Type, Union
 
+    from aenum import IntEnum as AenumEnum
     from mypy_extensions import DefaultArg, KwArg, NamedArg
     from typing_extensions import Literal
 
