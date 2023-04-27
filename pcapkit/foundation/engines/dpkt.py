@@ -20,12 +20,15 @@ from pcapkit.utilities.warnings import AttributeWarning, DPKTWarning, warn
 __all__ = ['DPKT']
 
 if TYPE_CHECKING:
-    from typing import Iterator
+    from typing import Type, Union, Optional
 
     from dpkt.dpkt import Packet as DPKTPacket
+    from dpkt.pcap import Reader as PCAPReader
+    from dpkt.pcapng import Reader as PCAPNGReader
 
     from pcapkit.foundation.extraction import Extractor
-    from pcapkit.protocols.misc.pcap.header import Header
+
+    Reader = Union[PCAPReader, PCAPNGReader]
 
 
 class DPKT(Engine['DPKTPacket']):
@@ -35,12 +38,6 @@ class DPKT(Engine['DPKTPacket']):
         extractor: :class:`~pcapkit.foundation.extraction.Extractor` instance.
 
     """
-
-    if TYPE_CHECKING:
-        #: Global header.
-        _gbhdr: 'Header'
-        #: Data link layer protocol.
-        _dlink: 'Enum_LinkType'
 
     ##########################################################################
     # Properties.
@@ -64,7 +61,7 @@ class DPKT(Engine['DPKTPacket']):
         import dpkt  # isort:skip
 
         self._expkg = dpkt
-        self._extmp = cast('Iterator[tuple[float, DPKTPacket]]', None)
+        self._extmp = cast('Reader', None)
 
         super().__init__(extractor)
 
@@ -112,34 +109,8 @@ class DPKT(Engine['DPKTPacket']):
             reader = dpkt.pcapng.Reader(ext._ifile)
         else:
             raise FormatError(f'unsupported file format: {ext.magic_number!r}')
-        self._dlink = Enum_LinkType.get(reader.datalink())
-
-        if self._dlink == Enum_LinkType.ETHERNET:
-            pkg = dpkt.ethernet.Ethernet
-        elif self._dlink.value == Enum_LinkType.IPV4:
-            pkg = dpkt.ip.IP
-        elif self._dlink.value == Enum_LinkType.IPV6:
-            pkg = dpkt.ip6.IP6
-        else:
-            warn('unrecognised link layer protocol; all analysis functions ignored',
-                 DPKTWarning, stacklevel=stacklevel())
-
-            class RawPacket(dpkt.dpkt.Packet):  # type: ignore[name-defined]
-                """Raw packet."""
-
-                def __len__(ext) -> 'int':
-                    return len(ext.data)
-
-                def __bytes__(ext) -> 'bytes':
-                    return ext.data
-
-                def unpack(ext, buf: 'bytes') -> 'None':
-                    ext.data = buf
-
-            pkg = RawPacket
 
         # extract & analyse file
-        self._expkg = pkg
         self._extmp = reader
 
     def read_frame(self) -> 'DPKTPacket':
@@ -156,9 +127,13 @@ class DPKT(Engine['DPKTPacket']):
                                           tcp_reassembly, tcp_traceflow)
         ext = self._extractor
 
+        reader = self._extmp
+        linktype = Enum_LinkType.get(reader.datalink())
+
         # fetch DPKT packet
-        timestamp, pkt = cast('tuple[float, bytes]', next(self._extmp))
-        packet = self._expkg(pkt)  # type: DPKTPacket
+        timestamp, pkt = cast('tuple[float, bytes]', next(reader))
+        protocol = self._get_protocol(linktype)
+        packet = protocol(pkt)  # type: DPKTPacket
 
         # verbose output
         ext._frnum += 1
@@ -167,7 +142,7 @@ class DPKT(Engine['DPKTPacket']):
         # write plist
         frnum = f'Frame {ext._frnum}'
         if not ext._flag_q:
-            info = packet2dict(packet, timestamp, data_link=self._dlink)
+            info = packet2dict(packet, timestamp, data_link=linktype)
             if ext._flag_f:
                 ofile = ext._ofile(f'{ext._ofnm}/{frnum}.{ext._fext}')
                 ofile(info, name=frnum)
@@ -194,7 +169,7 @@ class DPKT(Engine['DPKTPacket']):
         # trace flows
         if ext._flag_t:
             if ext._tcp:
-                data_tf_tcp = tcp_traceflow(packet, timestamp, data_link=self._dlink, count=ext._frnum)
+                data_tf_tcp = tcp_traceflow(packet, timestamp, data_link=linktype, count=ext._frnum)
                 if data_tf_tcp is not None:
                     ext._trace.tcp(data_tf_tcp)
 
@@ -206,3 +181,45 @@ class DPKT(Engine['DPKTPacket']):
 
         # return frame record
         return packet
+
+    ##########################################################################
+    # Utilities.
+    ##########################################################################
+
+    def _get_protocol(self, linktype: 'Optional[Enum_LinkType]' = None) -> 'Type[DPKTPacket]':
+        """Returns the protocol for parsing the current packet.
+
+        Args:
+            linktype: Link type code.
+
+        """
+        dpkt = self._expkg
+        reader = self._extmp
+
+        if linktype is None:
+            linktype = Enum_LinkType.get(reader.datalink())
+
+        if linktype == Enum_LinkType.ETHERNET:
+            pkg = dpkt.ethernet.Ethernet
+        elif linktype.value == Enum_LinkType.IPV4:
+            pkg = dpkt.ip.IP
+        elif linktype.value == Enum_LinkType.IPV6:
+            pkg = dpkt.ip6.IP6
+        else:
+            warn('unrecognised link layer protocol; all analysis functions ignored',
+                 DPKTWarning, stacklevel=stacklevel())
+
+            class RawPacket(dpkt.dpkt.Packet):  # type: ignore[name-defined]
+                """Raw packet."""
+
+                def __len__(ext) -> 'int':
+                    return len(ext.data)
+
+                def __bytes__(ext) -> 'bytes':
+                    return ext.data
+
+                def unpack(ext, buf: 'bytes') -> 'None':
+                    ext.data = buf
+
+            pkg = RawPacket
+        return pkg
