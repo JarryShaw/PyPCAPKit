@@ -8,7 +8,8 @@ This module contains the implementation for PCAP file extraction
 support, as is used by :class:`pcapkit.foundation.extraction.Extractor`.
 
 """
-from git import TYPE_CHECKING
+from typing import TYPE_CHECKING
+
 from pcapkit.foundation.engines.engine import Engine
 from pcapkit.protocols.misc.pcap.frame import Frame
 from pcapkit.protocols.misc.pcap.header import Header
@@ -16,8 +17,8 @@ from pcapkit.protocols.misc.pcap.header import Header
 __all__ = ['PCAP']
 
 if TYPE_CHECKING:
-    from pcapkit.corekit.version import VersionInfo
     from pcapkit.const.reg.linktype import LinkType as Enum_LinkType
+    from pcapkit.corekit.version import VersionInfo
 
 
 class PCAP(Engine[Frame]):

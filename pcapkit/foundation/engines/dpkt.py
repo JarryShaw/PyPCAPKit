@@ -15,7 +15,7 @@ from typing import TYPE_CHECKING, cast
 from pcapkit.const.reg.linktype import LinkType as Enum_LinkType
 from pcapkit.foundation.engines import engine
 from pcapkit.foundation.engines.engine import Engine
-from pcapkit.utilities.exceptions import stacklevel, FormatError
+from pcapkit.utilities.exceptions import FormatError, stacklevel
 from pcapkit.utilities.warnings import AttributeWarning, DPKTWarning, warn
 
 __all__ = ['DPKT']
