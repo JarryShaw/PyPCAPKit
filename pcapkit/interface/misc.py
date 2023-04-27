@@ -23,7 +23,7 @@ if TYPE_CHECKING:
 
     from typing_extensions import Literal
 
-    from pcapkit.protocols.misc.pcap.frame import Frame
+    from pcapkit.foundation.extraction import Packet
 
     ByteOrder = Literal['little', 'big']
     Formats = Literal['pcap', 'json', 'tree', 'plist']
@@ -42,12 +42,12 @@ class Stream(Info):
     #: Output filename.
     filename: 'Optional[str]'
     #: Packet list.
-    packets: 'tuple[Frame, ...]'
+    packets: 'tuple[Packet, ...]'
     #: TCP conversation.
     conversations: 'tuple[bytes | tuple[bytes, ...], ...]'
 
     if TYPE_CHECKING:
-        def __init__(self, filename: 'Optional[str]', packets: 'tuple[Frame, ...]', conversations: 'tuple[bytes | tuple[bytes, ...], ...]') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long
+        def __init__(self, filename: 'Optional[str]', packets: 'tuple[Packet, ...]', conversations: 'tuple[bytes | tuple[bytes, ...], ...]') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long
 
 
 def follow_tcp_stream(fin: 'Optional[str]' = None, verbose: 'bool' = False,              # Extrator options
@@ -86,9 +86,9 @@ def follow_tcp_stream(fin: 'Optional[str]' = None, verbose: 'bool' = False,     
     if extraction.engine == 'dpkt':  # type: ignore[comparison-overlap]
         from pcapkit.toolkit.dpkt import tcp_reassembly  # pylint: disable=import-outside-toplevel
     elif extraction.engine == 'scapy':  # type: ignore[comparison-overlap]
-        from pcapkit.toolkit.scapy import tcp_reassembly  # type: ignore[no-redef] # isort: skip # pylint: disable=import-outside-toplevel
+        from pcapkit.toolkit.scapy import tcp_reassembly  # isort: skip # pylint: disable=import-outside-toplevel
     else:
-        from pcapkit.toolkit.default import tcp_reassembly  # type: ignore[no-redef] # isort: skip # pylint: disable=import-outside-toplevel
+        from pcapkit.toolkit.pcap import tcp_reassembly  # type: ignore[assignment] # isort: skip # pylint: disable=import-outside-toplevel
         fallback = True
 
     streams = []  # type: list[Stream]
@@ -96,7 +96,7 @@ def follow_tcp_stream(fin: 'Optional[str]' = None, verbose: 'bool' = False,     
     for stream in extraction.trace.tcp:
         reassembly = TCP_Reassembly(strict=False)
 
-        packets = []  # type: list[Frame]
+        packets = []  # type: list[Packet]
         for index in stream.index:
             frame = frames[index-1]
             packets.append(frame)

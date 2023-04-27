@@ -1,12 +1,13 @@
 # -*- coding: utf-8 -*-
-"""PyPCAPKit Tools
-=====================
+"""PCAP Tools
+================
 
-.. module:: pcapkit.toolkit.default
+.. module:: pcapkit.toolkit.pcap
 
-:mod:`pcapkit.toolkit.default` contains all you need for
-:mod:`pcapkit` handy usage. All functions returns with a
-flag to indicate if usable for its caller.
+:mod:`pcapkit.toolkit.pcap` contains all you need for
+:mod:`pcapkit` handy usage of PCAP file format. All
+functions returns with a flag to indicate if usable
+for its caller.
 
 """
 from typing import TYPE_CHECKING, cast

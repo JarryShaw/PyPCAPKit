@@ -131,8 +131,8 @@ class PCAP(Engine[Frame]):
             Parsed frame instance.
 
         """
-        from pcapkit.toolkit.default import (ipv4_reassembly, ipv6_reassembly, tcp_reassembly,
-                                             tcp_traceflow)
+        from pcapkit.toolkit.pcap import (ipv4_reassembly, ipv6_reassembly, tcp_reassembly,
+                                          tcp_traceflow)
         ext = self._extractor
 
         # read frame header
