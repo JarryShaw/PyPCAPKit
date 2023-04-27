@@ -114,7 +114,8 @@ __all__ = [
 
     # pcapkit.toolkit
     'ipv4_reassembly', 'ipv6_reassembly', 'tcp_reassembly', 'tcp_traceflow',
-                                                            # default engine
+    'pcapng_ipv4_reassembly', 'pcapng_ipv6_reassembly', 'pcapng_tcp_reassembly', 'pcapng_tcp_traceflow',
+    'pcapng_block2frame',                                   # default engine
     'dpkt_ipv6_hdr_len', 'dpkt_packet2chain', 'dpkt_packet2dict',
     'dpkt_ipv4_reassembly', 'dpkt_ipv6_reassembly', 'dpkt_tcp_reassembly', 'dpkt_tcp_traceflow',
                                                             # DPKT engine

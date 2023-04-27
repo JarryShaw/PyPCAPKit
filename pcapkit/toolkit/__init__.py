@@ -11,6 +11,11 @@ compatibility of multiple engine support.
 """
 # tools for default engine
 from pcapkit.toolkit.pcap import ipv4_reassembly, ipv6_reassembly, tcp_reassembly, tcp_traceflow
+from pcapkit.toolkit.pcapng import ipv4_reassembly as pcapng_ipv4_reassembly
+from pcapkit.toolkit.pcapng import ipv6_reassembly as pcapng_ipv6_reassembly
+from pcapkit.toolkit.pcapng import tcp_reassembly as pcapng_tcp_reassembly
+from pcapkit.toolkit.pcapng import tcp_traceflow as pcapng_tcp_traceflow
+from pcapkit.toolkit.pcapng import block2frame as pcapng_block2frame
 
 # # tools for DPKT engine
 # from pcapkit.toolkit.dpkt import ipv6_hdr_len as dpkt_ipv6_hdr_len
@@ -36,6 +41,8 @@ from pcapkit.toolkit.pcap import ipv4_reassembly, ipv6_reassembly, tcp_reassembl
 __all__ = [
     # default engine
     'ipv4_reassembly', 'ipv6_reassembly', 'tcp_reassembly', 'tcp_traceflow',
+    'pcapng_ipv4_reassembly', 'pcapng_ipv6_reassembly', 'pcapng_tcp_reassembly', 'pcapng_tcp_traceflow',
+    'pcapng_block2frame',
 
     # # DPKT engine
     # 'dpkt_ipv6_hdr_len', 'dpkt_packet2chain', 'dpkt_packet2dict',
