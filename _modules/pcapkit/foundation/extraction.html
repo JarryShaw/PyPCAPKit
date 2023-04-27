@@ -398,15 +398,6 @@
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Extractor&#39;</span><span class="p">]</span>
 
-
-<span class="k">class</span> <span class="nc">EOFType</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;End of file marker.&quot;&quot;&quot;</span>
-
-    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;str&#39;</span><span class="p">:</span>
-        <span class="k">return</span> <span class="s1">&#39;EOF&#39;</span>
-
-
-<span class="n">EOF</span> <span class="o">=</span> <span class="n">EOFType</span><span class="p">()</span>
 <span class="n">P</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s1">&#39;P&#39;</span><span class="p">)</span>
 
 
@@ -798,7 +789,7 @@
             <span class="k">return</span> <span class="n">engine</span>
         <span class="k">raise</span> <span class="n">FormatError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;unknown PCAP file format: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_magic</span><span class="si">!r}</span><span class="s1">&#39;</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Extractor.record_frames"><a class="viewcode-back" href="../../../pcapkit/foundation/extraction.html#pcapkit.foundation.extraction.Extractor.record_frames">[docs]</a>    <span class="k">def</span> <span class="nf">record_frames</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;P | EOFType&#39;</span><span class="p">:</span>
+<div class="viewcode-block" id="Extractor.record_frames"><a class="viewcode-back" href="../../../pcapkit/foundation/extraction.html#pcapkit.foundation.extraction.Extractor.record_frames">[docs]</a>    <span class="k">def</span> <span class="nf">record_frames</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Read packet frames.</span>
 
 <span class="sd">        The method calls :meth:`self._exeng.read_frame &lt;pcapkit.foundation.engine.engine.Engin.read_frame&gt;`</span>
@@ -814,12 +805,11 @@
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_flag_a</span><span class="p">:</span>
             <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
                 <span class="k">try</span><span class="p">:</span>
-                    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_exeng</span><span class="o">.</span><span class="n">read_frame</span><span class="p">()</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_exeng</span><span class="o">.</span><span class="n">read_frame</span><span class="p">()</span>
                 <span class="k">except</span> <span class="p">(</span><span class="ne">EOFError</span><span class="p">,</span> <span class="ne">StopIteration</span><span class="p">):</span>
                     <span class="c1"># quit when EOF</span>
                     <span class="k">break</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_cleanup</span><span class="p">()</span>
-        <span class="k">return</span> <span class="n">EOF</span></div>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_cleanup</span><span class="p">()</span></div>
 
     <span class="c1">##########################################################################</span>
     <span class="c1"># Data models.</span>

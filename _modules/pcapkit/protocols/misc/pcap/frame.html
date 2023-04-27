@@ -574,16 +574,21 @@
             <span class="c1"># move backward to the beginning of the packet</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_file</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">io</span><span class="o">.</span><span class="n">SEEK_SET</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="c1"># NOTE: We create a copy of the frame packet data here for parsing</span>
-            <span class="c1"># scenarios to keep the original packet data intact.</span>
+            <span class="c1"># NOTE: We create a copy of the frame data here for parsing</span>
+            <span class="c1"># scenarios to keep the original frame data intact.</span>
+            <span class="n">seek_cur</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_file</span><span class="o">.</span><span class="n">tell</span><span class="p">()</span>
 
-            <span class="c1">#: bytes: Raw packet data.</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_data</span> <span class="o">=</span> <span class="n">schema</span><span class="o">.</span><span class="n">packet</span>
-            <span class="c1">#: io.BytesIO: Source packet stream.</span>
+            <span class="c1"># move backward to the beginning of the frame</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_file</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">length</span><span class="p">,</span> <span class="n">io</span><span class="o">.</span><span class="n">SEEK_CUR</span><span class="p">)</span>
+
+            <span class="c1">#: bytes: Raw frame data.</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_fileng</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">length</span> <span class="o">+</span> <span class="n">_ilen</span><span class="p">)</span>
+
+            <span class="c1"># move backward to the beginning of frame&#39;s payload</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_file</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="n">seek_cur</span><span class="p">,</span> <span class="n">io</span><span class="o">.</span><span class="n">SEEK_SET</span><span class="p">)</span>
+
+            <span class="c1">#: io.BytesIO: Source data stream.</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_file</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">BytesIO</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">)</span>
-
-            <span class="c1"># move forward to the beginning of frame&#39;s first packet</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_file</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">length</span><span class="p">,</span> <span class="n">io</span><span class="o">.</span><span class="n">SEEK_CUR</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_decode_next_layer</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ghdr</span><span class="o">.</span><span class="n">network</span><span class="p">,</span> <span class="n">frame</span><span class="o">.</span><span class="n">len</span><span class="p">)</span></div>
 
