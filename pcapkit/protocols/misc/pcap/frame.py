@@ -234,14 +234,19 @@ class Frame(Protocol[Data_Frame, Schema_Frame],
         else:
             # NOTE: We create a copy of the frame packet data here for parsing
             # scenarios to keep the original packet data intact.
+            seek_cur = self._file.tell()
+
+            # move backward to the beginning of the frame
+            self._file.seek(-self.length, io.SEEK_CUR)
 
             #: bytes: Raw packet data.
-            self._data = schema.packet
+            self._data = self._read_fileng(self.length + _ilen)
+
+            # move backward to the beginning of frame's payload
+            self._file.seek(seek_cur, io.SEEK_SET)
+
             #: io.BytesIO: Source packet stream.
             self._file = io.BytesIO(self._data)
-
-            # move forward to the beginning of frame's first packet
-            self._file.seek(self.length, io.SEEK_CUR)
 
         return self._decode_next_layer(frame, self._ghdr.network, frame.len)
 
