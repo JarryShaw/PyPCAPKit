@@ -588,8 +588,8 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
         {
             Enum_SecretsType.TLS_Key_Log: 'tls',
             Enum_SecretsType.WireGuard_Key_Log: 'wireguard',
-            Enum_SecretsType.ZigBee_NWK_Key_Log: 'zigbee_nwk',
-            Enum_SecretsType.ZigBee_APS_Key_Log: 'zigbee_aps',
+            Enum_SecretsType.ZigBee_NWK_Key: 'zigbee_nwk',
+            Enum_SecretsType.ZigBee_APS_Key: 'zigbee_aps',
         },
     )  # type: DefaultDict[Enum_SecretsType | int, str | tuple[SecretsParser, SecretsConstructor]]
 
