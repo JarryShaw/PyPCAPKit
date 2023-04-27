@@ -13,8 +13,9 @@ support, as is used by :class:`pcapkit.foundation.extraction.Extractor`.
 from typing import TYPE_CHECKING, cast
 
 from pcapkit.const.reg.linktype import LinkType as Enum_LinkType
+from pcapkit.foundation.engines import engine
 from pcapkit.foundation.engines.engine import Engine
-from pcapkit.utilities.exceptions import stacklevel
+from pcapkit.utilities.exceptions import stacklevel, FormatError
 from pcapkit.utilities.warnings import AttributeWarning, DPKTWarning, warn
 
 __all__ = ['DPKT']
@@ -25,6 +26,7 @@ if TYPE_CHECKING:
     from dpkt.dpkt import Packet as DPKTPacket
 
     from pcapkit.foundation.extraction import Extractor
+    from pcapkit.protocols.misc.pcap.header import Header
 
 
 class DPKT(Engine['DPKTPacket']):
@@ -34,6 +36,12 @@ class DPKT(Engine['DPKTPacket']):
         extractor: :class:`~pcapkit.foundation.extraction.Extractor` instance.
 
     """
+
+    if TYPE_CHECKING:
+        #: Global header.
+        _gbhdr: 'Header'
+        #: Data link layer protocol.
+        _dlink: 'Enum_LinkType'
 
     ##########################################################################
     # Properties.
@@ -76,7 +84,13 @@ class DPKT(Engine['DPKTPacket']):
                 :attr:`self._exptl <Extractor._exptl>` is provided as the DPKT
                 engine currently does not support such operations.
 
+        Raises:
+            FormatError: If the file format is not supported, i.e., not a PCAP
+                file.
+
         """
+        from pcapkit.foundation.engines.pcap import PCAP
+
         ext = self._extractor
         dpkt = self._expkg
 
@@ -93,13 +107,17 @@ class DPKT(Engine['DPKTPacket']):
             )  # pylint: disable=logging-fstring-interpolation
 
         # extract global header
-        ext.record_header()
+        engine = ext.record_header()
+        if not isinstance(engine, PCAP):
+            raise FormatError(f'unsupported file format: {engine.name}')
+        self._gbhdr = engine.header
+        self._dlink = self._gbhdr.protocol
 
-        if ext._dlink == Enum_LinkType.ETHERNET:
+        if self._dlink == Enum_LinkType.ETHERNET:
             pkg = dpkt.ethernet.Ethernet
-        elif ext._dlink.value == Enum_LinkType.IPV4:
+        elif self._dlink.value == Enum_LinkType.IPV4:
             pkg = dpkt.ip.IP
-        elif ext._dlink.value == Enum_LinkType.IPV6:
+        elif self._dlink.value == Enum_LinkType.IPV6:
             pkg = dpkt.ip6.IP6
         else:
             warn('unrecognised link layer protocol; all analysis functions ignored',
@@ -148,7 +166,7 @@ class DPKT(Engine['DPKTPacket']):
         # write plist
         frnum = f'Frame {ext._frnum}'
         if not ext._flag_q:
-            info = packet2dict(packet, timestamp, data_link=ext._dlink)
+            info = packet2dict(packet, timestamp, data_link=self._dlink)
             if ext._flag_f:
                 ofile = ext._ofile(f'{ext._ofnm}/{frnum}.{ext._fext}')
                 ofile(info, name=frnum)
@@ -173,7 +191,7 @@ class DPKT(Engine['DPKTPacket']):
         # trace flows
         if ext._flag_t:
             if ext._tcp:
-                data_tf_tcp = tcp_traceflow(packet, timestamp, data_link=ext._dlink, count=ext._frnum)
+                data_tf_tcp = tcp_traceflow(packet, timestamp, data_link=self._dlink, count=ext._frnum)
                 if data_tf_tcp is not None:
                     ext._trace.tcp(data_tf_tcp)
 

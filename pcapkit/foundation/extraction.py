@@ -20,13 +20,11 @@ import os
 import sys
 from typing import TYPE_CHECKING, Generic, TypeVar, cast
 
-from pcapkit.const.reg.linktype import LinkType as Enum_LinkType
 from pcapkit.dumpkit.common import make_dumper
 from pcapkit.foundation.engines.pcap import PCAP as PCAP_Engine
 from pcapkit.foundation.reassembly import ReassemblyManager
 from pcapkit.foundation.traceflow import TraceFlowManager
 from pcapkit.protocols.misc.pcap.frame import Frame
-from pcapkit.protocols.misc.pcap.header import Header
 from pcapkit.utilities.exceptions import (CallableError, FileNotFound, FormatError, IterableError,
                                           UnsupportedCall, stacklevel)
 from pcapkit.utilities.warnings import EngineWarning, FormatWarning, warn
@@ -56,6 +54,15 @@ if TYPE_CHECKING:
 
 __all__ = ['Extractor']
 
+
+class EOFType:
+    """End of file marker."""
+
+    def __repr__(self) -> 'str':
+        return 'EOF'
+
+
+EOF = EOFType()
 P = TypeVar('P')
 
 
@@ -67,74 +74,67 @@ class Extractor(Generic[P]):
         :meth:`~pcapkit.foundation.extraction.Extractor.run`.
 
     """
-    #: Input file name.
-    _ifnm: 'str'
-    #: Output file name.
-    _ofnm: 'Optional[str]'
-    #: Output file extension.
-    _fext: 'Optional[str]'
+    if TYPE_CHECKING:
+        #: Input file name.
+        _ifnm: 'str'
+        #: Output file name.
+        _ofnm: 'Optional[str]'
+        #: Output file extension.
+        _fext: 'Optional[str]'
 
-    #: Auto extract flag.
-    _flag_a: 'bool'
-    #: Store data flag.
-    _flag_d: 'bool'
-    #: EOF flag.
-    _flag_e: 'bool'
-    #: Split file flag.
-    _flag_f: 'bool'
-    #: No output file.
-    _flag_q: 'bool'
-    #: Trace flag.
-    _flag_t: 'bool'
-    #: Verbose flag.
-    _flag_v: 'bool'
+        #: Auto extract flag.
+        _flag_a: 'bool'
+        #: Store data flag.
+        _flag_d: 'bool'
+        #: EOF flag.
+        _flag_e: 'bool'
+        #: Split file flag.
+        _flag_f: 'bool'
+        #: No output file.
+        _flag_q: 'bool'
+        #: Trace flag.
+        _flag_t: 'bool'
+        #: Verbose flag.
+        _flag_v: 'bool'
 
-    #: Verbose callback function.
-    #_vfunc: 'VerboseHandler'
+        #: Verbose callback function.
+        #_vfunc: 'VerboseHandler'
 
-    #: Frame number.
-    _frnum: 'int'
-    #: Frame records.
-    _frame: 'list[Frame | ScapyPacket | DPKTPacket]'
+        #: Frame number.
+        _frnum: 'int'
+        #: Frame records.
+        _frame: 'list[Frame | ScapyPacket | DPKTPacket]'
 
-    #: Frame record for reassembly.
-    _reasm: 'ReassemblyManager'
-    #: Flow tracer.
-    _trace: 'TraceFlowManager'
+        #: Frame record for reassembly.
+        _reasm: 'ReassemblyManager'
+        #: Flow tracer.
+        _trace: 'TraceFlowManager'
 
-    #: IPv4 reassembly flag.
-    _ipv4: 'bool'
-    #: IPv6 reassembly flag.
-    _ipv6: 'bool'
-    #: TCP reassembly flag.
-    _tcp: 'bool'
+        #: IPv4 reassembly flag.
+        _ipv4: 'bool'
+        #: IPv6 reassembly flag.
+        _ipv6: 'bool'
+        #: TCP reassembly flag.
+        _tcp: 'bool'
 
-    #: Extract til protocol.
-    _exptl: 'Protocols'
-    #: Extract til layer.
-    _exlyr: 'Layers'
-    #: Extraction engine name.
-    _exnam: 'Engines'
-    #: Extraction engine instance.
-    _exeng: 'Engine[P]'
+        #: Extract til protocol.
+        _exptl: 'Protocols'
+        #: Extract til layer.
+        _exlyr: 'Layers'
+        #: Extraction engine name.
+        _exnam: 'Engines'
+        #: Extraction engine instance.
+        _exeng: 'Engine[P]'
 
-    #: Input file object.
-    _ifile: 'IO[bytes]'
-    #: Output file object.
-    _ofile: 'Dumper | Type[Dumper]'
+        #: Input file object.
+        _ifile: 'IO[bytes]'
+        #: Output file object.
+        _ofile: 'Dumper | Type[Dumper]'
 
-    #: Magic number.
-    _magic: 'bytes'
-    #: Global header.
-    _gbhdr: 'Header'
-    #: Version info.
-    _vinfo: 'VersionInfo'
-    #: Data link layer protocol.
-    _dlink: 'Enum_LinkType'
-    #: Nanosecond flag.
-    _nnsec: 'bool'
-    #: Output format.
-    _type: 'Formats'
+        #: Magic number.
+        _magic: 'bytes'
+        #: Output format.
+        _offmt: 'Formats'
 
     ##########################################################################
     # Defaults.
@@ -170,19 +170,6 @@ class Extractor(Generic[P]):
     ##########################################################################
 
     @property
-    def info(self) -> 'VersionInfo':
-        """Version of input PCAP file.
-
-        Raises:
-            UnsupportedCall: If :attr:`self._exnam <pcapkit.foundation.extraction.Extractor._exnam>`
-                is ``'scapy'`` or ``'pyshark'``, as such engines does not reserve such information.
-
-        """
-        if self._exnam in ('scapy', 'pyshark'):
-            raise UnsupportedCall(f"'Extractor(engine={self._exnam})' object has no attribute 'info'")
-        return self._vinfo
-
-    @property
     def length(self) -> 'int':
         """Frame number (of current extracted frame or all)."""
         return self._frnum
@@ -198,7 +185,7 @@ class Extractor(Generic[P]):
         """
         if self._flag_q:
             raise UnsupportedCall("'Extractor(nofile=True)' object has no attribute 'format'")
-        return self._type
+        return self._offmt
 
     @property
     def input(self) -> 'str':
@@ -217,11 +204,6 @@ class Extractor(Generic[P]):
         if self._flag_q:
             raise UnsupportedCall("'Extractor(nofile=True)' object has no attribute 'format'")
         return cast('str', self._ofnm)
-
-    @property
-    def header(self) -> 'Header':
-        """Global header."""
-        return self._gbhdr
 
     @property
     def frame(self) -> 'tuple[Frame, ...]':
@@ -447,13 +429,14 @@ class Extractor(Generic[P]):
 
         return ifnm, ofnm, fmt, ext, files
 
-    def record_header(self) -> 'None':
+    def record_header(self) -> 'Engine':
         """Read global header.
 
         The method will parse the PCAP global header and save the parsed result
-        as :attr:`self._gbhdr <Extractor._gbhdr>`. Information such as PCAP version,
-        data link layer protocol type, nanosecond flag and byteorder will also be
-        save the current :class:`Extractor` instance.
+        to its extraction context. Information such as PCAP version, data link
+        layer protocol type, nanosecond flag and byteorder will also be save
+        the current :class:`~pcapkit.foundation.engins.engine.Engine` instance
+        as well.
 
         If TCP flow tracing is enabled, the nanosecond flag and byteorder will
         be used for the output PCAP file of the traced TCP flows.
@@ -464,12 +447,14 @@ class Extractor(Generic[P]):
         """
         # pylint: disable=attribute-defined-outside-init,protected-access
         if self._magic in PCAP_Engine.MAGIC_NUMBER:
-            PCAP_Engine(self).run()
+            engine = PCAP_Engine(self)
+            engine.run()
+
             self._ifile.seek(0, os.SEEK_SET)
-            return
+            return engine
         raise FormatError(f'unknown PCAP file format: {self._magic!r}')
 
-    def record_frames(self) -> 'None':
+    def record_frames(self) -> 'P | EOFType':
         """Read packet frames.
 
         The method calls :meth:`self._exeng.read_frame <pcapkit.foundation.engine.engine.Engin.read_frame>`
@@ -485,11 +470,12 @@ class Extractor(Generic[P]):
         if self._flag_a:
             while True:
                 try:
-                    self._exeng.read_frame()
+                    return self._exeng.read_frame()
                 except (EOFError, StopIteration):
                     # quit when EOF
                     break
             self._cleanup()
+        return EOF
 
     ##########################################################################
     # Data models.

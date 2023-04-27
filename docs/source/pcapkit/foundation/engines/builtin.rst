@@ -17,5 +17,9 @@ support, as is used by :class:`pcapkit.foundation.extraction.Extractor`.
    .. autoproperty:: name
    .. autoproperty:: module
 
+   .. autoproperty:: header
+   .. autoproperty:: version
+   .. autoproperty:: dlink
+
    .. automethod:: run
    .. automethod:: read_frame

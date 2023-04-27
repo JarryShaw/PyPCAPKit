@@ -8,11 +8,16 @@ This module contains the implementation for PCAP file extraction
 support, as is used by :class:`pcapkit.foundation.extraction.Extractor`.
 
 """
+from git import TYPE_CHECKING
 from pcapkit.foundation.engines.engine import Engine
 from pcapkit.protocols.misc.pcap.frame import Frame
 from pcapkit.protocols.misc.pcap.header import Header
 
 __all__ = ['PCAP']
+
+if TYPE_CHECKING:
+    from pcapkit.corekit.version import VersionInfo
+    from pcapkit.const.reg.linktype import LinkType as Enum_LinkType
 
 
 class PCAP(Engine[Frame]):
@@ -22,6 +27,16 @@ class PCAP(Engine[Frame]):
         extractor: :class:`~pcapkit.foundation.extraction.Extractor` instance.
 
     """
+
+    if TYPE_CHECKING:
+        #: Global header.
+        _gbhdr: 'Header'
+        #: Version info.
+        _vinfo: 'VersionInfo'
+        #: Data link layer protocol.
+        _dlink: 'Enum_LinkType'
+        #: Nanosecond flag.
+        _nnsec: 'bool'
 
     MAGIC_NUMBER = (
         b'\xa1\xb2\x3c\x4d',
@@ -44,6 +59,21 @@ class PCAP(Engine[Frame]):
         """Engine module name."""
         return 'pcapkit.foundation.engine.pcap'
 
+    @property
+    def header(self) -> 'Header':
+        """Global header."""
+        return self._gbhdr
+
+    @property
+    def version(self) -> 'VersionInfo':
+        """Version of input PCAP file."""
+        return self._vinfo
+
+    @property
+    def dlink(self) -> 'Enum_LinkType':
+        """Data link layer protocol."""
+        return self._dlink
+
     ##########################################################################
     # Methods.
     ##########################################################################
@@ -57,12 +87,9 @@ class PCAP(Engine[Frame]):
         is called.
 
         The method will parse the PCAP global header and save the parsed result
-        as :attr:`self.extractor._gbhdr <Extractor._gbhdr>`. Information such as
-        PCAP version, data link layer protocol type, nanosecond flag and byteorder
-        will also be save the current :class:`Extractor` instance.
-
-        If TCP flow tracing is enabled, the nanosecond flag and byteorder will
-        be used for the output PCAP file of the traced TCP flows.
+        as :attr:`self._gbhdr <_gbhdr>`. Information such as PCAP version, data
+        link layer protocol type, nanosecond flag and byteorder will also be
+        save the current :class:`PCAP` engine instance.
 
         For output, the method will dump the parsed PCAP global header under
         the name of ``Global Header``.
@@ -71,25 +98,21 @@ class PCAP(Engine[Frame]):
         # pylint: disable=attribute-defined-outside-init,protected-access
         ext = self._extractor
 
-        ext._gbhdr = Header(ext._ifile)
-        ext._vinfo = ext._gbhdr.version
-        ext._dlink = ext._gbhdr.protocol
-        ext._nnsec = ext._gbhdr.nanosecond
-
-        if ext._flag_t:
-            ext._trace._endian = ext._gbhdr.byteorder
-            ext._trace._nnsecd = ext._gbhdr.nanosecond
+        self._gbhdr = Header(ext._ifile)
+        self._vinfo = self._gbhdr.version
+        self._dlink = self._gbhdr.protocol
+        self._nnsec = self._gbhdr.nanosecond
 
         if ext._flag_q:
             return
 
         if ext._flag_f:
             ofile = ext._ofile(f'{ext._ofnm}/Global Header.{ext._fext}')
-            ofile(ext._gbhdr.info.to_dict(), name='Global Header')
+            ofile(self._gbhdr.info.to_dict(), name='Global Header')
         else:
-            ext._ofile(ext._gbhdr.info.to_dict(), name='Global Header')
+            ext._ofile(self._gbhdr.info.to_dict(), name='Global Header')
             ofile = ext._ofile
-        ext._type = ofile.kind
+        ext._offmt = ofile.kind
 
     def read_frame(self) -> 'Frame':
         """Read frames.
@@ -112,8 +135,8 @@ class PCAP(Engine[Frame]):
         ext = self._extractor
 
         # read frame header
-        frame = Frame(ext._ifile, num=ext._frnum+1, header=ext._gbhdr.info,
-                      layer=ext._exlyr, protocol=ext._exptl, nanosecond=ext._nnsec)
+        frame = Frame(ext._ifile, num=ext._frnum+1, header=self._gbhdr.info,
+                      layer=ext._exlyr, protocol=ext._exptl, nanosecond=self._nnsec)
         ext._frnum += 1
 
         # verbose output
@@ -146,7 +169,7 @@ class PCAP(Engine[Frame]):
         # trace flows
         if ext._flag_t:
             if ext._tcp:
-                data_tf_tcp = tcp_traceflow(frame, data_link=ext._dlink)
+                data_tf_tcp = tcp_traceflow(frame, data_link=self._dlink)
                 if data_tf_tcp is not None:
                     ext._trace.tcp(data_tf_tcp)
 
