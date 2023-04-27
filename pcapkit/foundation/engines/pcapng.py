@@ -25,15 +25,12 @@ if TYPE_CHECKING:
     from pcapkit.protocols.data.misc.pcapng import CustomBlock as Data_CustomBlock
     from pcapkit.protocols.data.misc.pcapng import \
         DecryptionSecretsBlock as Data_DecryptionSecretsBlock
-    from pcapkit.protocols.data.misc.pcapng import EnhancedPacketBlock as Data_EnhancedPacketBlock
     from pcapkit.protocols.data.misc.pcapng import \
         InterfaceDescriptionBlock as Data_InterfaceDescriptionBlock
     from pcapkit.protocols.data.misc.pcapng import \
         InterfaceStatisticsBlock as Data_InterfaceStatisticsBlock
     from pcapkit.protocols.data.misc.pcapng import NameResolutionBlock as Data_NameResolutionBlock
-    from pcapkit.protocols.data.misc.pcapng import PacketBlock as Data_PacketBlock
     from pcapkit.protocols.data.misc.pcapng import SectionHeaderBlock as Data_SectionHeaderBlock
-    from pcapkit.protocols.data.misc.pcapng import SimplePacketBlock as Data_SimplePacketBlock
     from pcapkit.protocols.data.misc.pcapng import \
         SystemdJournalExportBlock as Data_SystemdJournalExportBlock
     from pcapkit.protocols.data.misc.pcapng import UnknownBlock as Data_UnknownBlock
@@ -49,7 +46,7 @@ class Context(Info):
         """Post initialisation hook."""
         self.__update__(
             interfaces=[],
-            packets=[],
+            #packets=[],
             names=[],
             journals=[],
             secrets=[],
@@ -62,7 +59,7 @@ class Context(Info):
         #: Interface descriptions.
         interfaces: 'list[Data_InterfaceDescriptionBlock]'
         #: Packets.
-        packets: 'list[Data_PacketBlock | Data_SimplePacketBlock | Data_EnhancedPacketBlock]'
+        #packets: 'list[Data_PacketBlock | Data_SimplePacketBlock | Data_EnhancedPacketBlock]'
         #: Name resolution records.
         names: 'list[Data_NameResolutionBlock]'
         #: :manpage:`systemd(1)` journal export records.
