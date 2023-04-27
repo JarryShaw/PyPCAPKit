@@ -244,6 +244,13 @@ class HTTP(HTTPBase[Data_HTTP, Schema_HTTP],
         """Make (construct) packet data.
 
         Args:
+            type: Type of HTTP/2 frame.
+            type_default: Default frame type.
+            type_namespace: Namespace of frame type.
+            type_reversed: Whether to reverse the namespace.
+            flags: Flags of HTTP/2 frame.
+            sid: Stream ID of HTTP/2 frame.
+            frame: Frame data of HTTP/2 frame.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
