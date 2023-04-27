@@ -166,13 +166,15 @@ __all__ = ['PCAPNG']
 
 if TYPE_CHECKING:
     from decimal import Decimal
-    from typing import Any, Callable, DefaultDict, Optional, Type
+    from typing import Any, Callable, DefaultDict, Optional, Type, Union, IO
 
     from mypy_extensions import DefaultArg, KwArg, NamedArg
     from typing_extensions import Literal
 
+    from pcapkit.foundation.engines.pcapng import Context
     from pcapkit.protocols.schema.schema import Schema
 
+    Packet = Union[Data_EnhancedPacketBlock, Data_SimplePacketBlock, Data_PacketBlock]
     Option = OrderedMultiDict[Enum_OptionType, Data_Option]
 
     BlockParser = Callable[[Schema_BlockType, NamedArg(Schema_PCAPNG, 'header')], Data_PCAPNG]
@@ -471,6 +473,10 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
 
     """
 
+    PACKET_TYPES = (Enum_BlockType.Enhanced_Packet_Block,
+                    Enum_BlockType.Simple_Packet_Block,
+                    Enum_BlockType.Packet_Block)
+
     ##########################################################################
     # Defaults.
     ##########################################################################
@@ -593,12 +599,48 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
     @property
     def name(self) -> 'str':
         """Name of corresponding protocol."""
+        if self._info.type not in self.PACKET_TYPES:
+            return f'PCAP-NG {self._info.type!r}'
         return f'Frame {self._fnum}'
 
     @property
     def length(self) -> 'int':
         """Header length of corresponding protocol."""
         return self._info.length
+
+    @property
+    def context(self) -> 'Context':
+        """Context of current PCAP-NG block."""
+        return self._ctx
+
+    @property
+    def nanosecond(self) -> 'bool':
+        """Whether the timestamp is in nanosecond."""
+        if self._info.type not in self.PACKET_TYPES:
+            raise UnsupportedCall(f"'{self.__class__.__name__}' object has no attribute 'nanosecond'")
+
+        info = cast('Packet', self._info)
+        options = self._ctx.interfaces[info.interface_id].options
+        tsresol = cast('Optional[Data_IF_TSResolOption]',
+                       options.get(Enum_OptionType.if_tsresol))  # type: ignore[call-overload]
+        if tsresol is None:
+            return False
+        return tsresol.resolution > 1_000_000
+
+    @property
+    def linktype(self) -> 'Enum_LinkType':
+        """Data link layer protocol type.
+
+        Raises:
+            UnsupportedCall: If current block is not a valid packet block, i.e.,
+                EPB, ISB or obsolete Packet Block.
+
+        """
+        if self._info.type not in self.PACKET_TYPES:
+            raise UnsupportedCall(f"'{self.__class__.__name__}' object has no attribute 'linktype'")
+
+        info = cast('Packet', self._info)
+        return self._ctx.interfaces[info.interface_id].linktype
 
     ##########################################################################
     # Methods.
@@ -637,15 +679,77 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
         """
         return self._protos.index(name)
 
+    def pack(self, **kwargs: 'Any') -> 'bytes':
+        """Pack (construct) packet data.
+
+        Args:
+            **kwargs: Arbitrary keyword arguments.
+
+        Returns:
+            Constructed packet data.
+
+        Notes:
+            We used a special keyword argument ``__packet__`` to pass the
+            global packet data to underlying methods. This is useful when
+            the packet data is not available in the current instance.
+
+        """
+        self.__header__ = self.make(**kwargs)
+        packet = kwargs.get('__packet__', {})  # packet data
+
+        if self._ctx is not None:
+            packet['byteorder'] = self._ctx.section.byteorder
+        return self.__header__.pack(packet)
+
+    def unpack(self, length: 'Optional[int]' = None, **kwargs: 'Any') -> 'Data_PCAPNG':
+        """Unpack (parse) packet data.
+
+        Args:
+            length: Length of packet data.
+            **kwargs: Arbitrary keyword arguments.
+
+        Returns:
+            Parsed packet data.
+
+        Notes:
+            We used a special keyword argument ``__packet__`` to pass the
+            global packet data to underlying methods. This is useful when
+            the packet data is not available in the current instance.
+
+        """
+        if cast('Optional[Schema_PCAPNG]', self.__header__) is None:
+            packet = kwargs.get('__packet__', {})  # packet data
+
+            if self._ctx is not None:
+                packet['bytesorder'] = self._ctx.section.byteorder
+            self.__header__ = cast('Schema_PCAPNG', self.__schema__.unpack(self._file, length, packet))  # type: ignore[call-arg,misc]
+        return self.read(length, **kwargs)
+
     def read(self, length: 'Optional[int]' = None, **kwargs: 'Any') -> 'Data_PCAPNG':
-        r"""Read each block after global header.
+        r"""Read PCAP-NG file blocks.
+
+        Structure of PCAP-NG file blocks:
+
+        .. code-block:: text
+                                  1                   2                   3
+              0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           0 |                          Block Type                           |
+             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           4 |                      Block Total Length                       |
+             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           8 /                          Block Body                           /
+             /              variable length, padded to 32 bits               /
+             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+             |                      Block Total Length                       |
+             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
             length: Length of data to be read.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
-            Data_Frame: Parsed packet data.
+            Parsed packet data.
 
         """
 
@@ -665,6 +769,49 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
     # Data models.
     ##########################################################################
 
+    @overload  # type: ignore[override]
+    def __post_init__(self, file: 'IO[bytes] | bytes', length: 'Optional[int]' = ..., *,  # pylint: disable=arguments-differ
+                      num: 'int', ctx: 'Context', **kwargs: 'Any') -> 'None': ...
+    @overload
+    def __post_init__(self, *, num: 'int', ctx: 'Context',  # pylint: disable=arguments-differ
+                      **kwargs: 'Any') -> 'None': ...
+
+    def __post_init__(self, file: 'Optional[IO[bytes] | bytes]' = None, length: 'Optional[int]' = None, *,  # pylint: disable=arguments-differ
+                      num: 'int', ctx: 'Context', **kwargs: 'Any') -> 'None':
+        """Initialisation.
+
+        Args:
+            file: Source packet stream.
+            length: Length of packet data.
+            num: Frame index number.
+            ctx: Section context of the PCAP-NG file.
+            **kwargs: Arbitrary keyword arguments.
+
+        Notes:
+            For the first block, ``num`` will be set to ``0`` and ctx as :obj:`None`,
+            such that we can be sure that the first block is the section header block.
+
+        See Also:
+            For construction argument, please refer to :meth:`make`.
+
+        """
+        #: int: frame index number
+        self._fnum = num
+        #: pcapkit.foundation.engins.pcapng.Context: Context of the PCAP-NG file.
+        self._ctx = ctx
+
+        if file is None:
+            #: bytes: Raw packet data.
+            self._data = self.pack(**kwargs)
+            #: io.BytesIO: Source packet stream.
+            self._file = io.BytesIO(self._data)
+        else:
+            #: io.BytesIO: Source packet stream.
+            self._file = io.BytesIO(file) if isinstance(file, bytes) else file
+
+        #: pcapkit.corekit.infoclass.Info: Parsed packet data.
+        self._info = self.unpack(length, **kwargs)
+
     def __length_hint__(self) -> 'Literal[12]':
         """Return an estimated length for the object."""
         return 12
@@ -679,13 +826,14 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
 
         Returns:
             If the object is initiated, i.e. :attr:`self._fnum <pcapkit.protocols.misc.pcap.frame.Frame._fnum>`
-            exists, returns the frame index number of itself; else raises :exc:`UnsupportedCall`.
+            exists, and is of a packet block (EPB, ISB or Packet), returns the
+            frame index number of itself; else raises :exc:`UnsupportedCall`.
 
         Raises:
             UnsupportedCall: This protocol has no registry entry.
 
         """
-        if self is None:
+        if self is None or self._info.type not in self.PACKET_TYPES:
             raise UnsupportedCall("'PCAPNG' object cannot be interpreted as an integer")
         return self._fnum
 
