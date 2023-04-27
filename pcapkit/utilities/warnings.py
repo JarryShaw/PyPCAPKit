@@ -30,6 +30,8 @@ __all__ = [
     # ResourceWarning
     'DPKTWarning', 'ScapyWarning', 'PySharkWarning', 'EmojiWarning',
     'VendorWarning',
+    # DeprecationWarning
+    'DeprecatedFormatWarning',
 ]
 
 
@@ -149,3 +151,12 @@ class EmojiWarning(BaseWarning, ResourceWarning):
 
 class VendorWarning(BaseWarning, ResourceWarning):
     """Warnings on vendor usage."""
+
+
+##############################################################################
+# DeprecationWarning session.
+##############################################################################
+
+
+class DeprecatedFormatWarning(BaseWarning, DeprecationWarning):
+    """Warning on deprecated formats."""
