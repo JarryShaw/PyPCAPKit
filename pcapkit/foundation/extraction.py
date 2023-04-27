@@ -56,15 +56,6 @@ if TYPE_CHECKING:
 
 __all__ = ['Extractor']
 
-
-class EOFType:
-    """End of file marker."""
-
-    def __repr__(self) -> 'str':
-        return 'EOF'
-
-
-EOF = EOFType()
 P = TypeVar('P')
 
 
@@ -456,7 +447,7 @@ class Extractor(Generic[P]):
             return engine
         raise FormatError(f'unknown PCAP file format: {self._magic!r}')
 
-    def record_frames(self) -> 'P | EOFType':
+    def record_frames(self) -> 'None':
         """Read packet frames.
 
         The method calls :meth:`self._exeng.read_frame <pcapkit.foundation.engine.engine.Engin.read_frame>`
@@ -472,12 +463,11 @@ class Extractor(Generic[P]):
         if self._flag_a:
             while True:
                 try:
-                    return self._exeng.read_frame()
+                    self._exeng.read_frame()
                 except (EOFError, StopIteration):
                     # quit when EOF
                     break
             self._cleanup()
-        return EOF
 
     ##########################################################################
     # Data models.
