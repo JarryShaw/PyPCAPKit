@@ -261,7 +261,7 @@ class UnknownBlock(BlockType):
     length2: 'int' = UInt32Field(callback=byteorder_callback)
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_BlockType', length: 'int', body: 'bytes', length2: 'int') -> 'None': ...
+        def __init__(self, length: 'int', body: 'bytes', length2: 'int') -> 'None': ...
 
 
 class Option(Schema):
@@ -336,7 +336,7 @@ class SectionHeaderBlock(BlockType):
     length2: 'int' = UInt32Field(callback=byteorder_callback)
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_BlockType', length: 'int', magic: 'int', major: 'int',
+        def __init__(self, length: 'int', magic: 'int', major: 'int',
                      minor: 'int', section_length: 'int', options: 'list[Option | bytes] | bytes', length2: 'int') -> 'None': ...
 
 
@@ -596,7 +596,7 @@ class InterfaceDescriptionBlock(BlockType):
     length2: 'int' = UInt32Field(callback=byteorder_callback)
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_BlockType', length: 'int', linktype: 'int', reserved: 'int',
+        def __init__(self, length: 'int', linktype: 'int', reserved: 'int',
                      snaplen: 'int', options: 'list[Option | bytes] | bytes', length2: 'int') -> 'None': ...
 
 
@@ -730,7 +730,7 @@ class EnhancedPacketBlock(BlockType):
     length2: 'int' = UInt32Field(callback=byteorder_callback)
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_BlockType', length: 'int', interface_id: 'int', timestamp_high: 'int',
+        def __init__(self, length: 'int', interface_id: 'int', timestamp_high: 'int',
                      timestamp_low: 'int', captured_len: 'int', original_len: 'int', packet_data: 'bytes',
                      padding: 'bytes', options: 'list[Option | bytes] | bytes', length2: 'int') -> 'None': ...
 
@@ -752,7 +752,7 @@ class SimplePacketBlock(BlockType):
     length2: 'int' = UInt32Field(callback=byteorder_callback)
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_BlockType', length: 'int', original_len: 'int', packet_data: 'bytes',
+        def __init__(self, length: 'int', original_len: 'int', packet_data: 'bytes',
                      padding: 'bytes', length2: 'int') -> 'None': ...
 
 
@@ -937,7 +937,7 @@ class NameResolutionBlock(BlockType):
         #: Name resolution mapping (name -> IP address).
         reverse_mapping: 'MultiDict[str, IPv4Address | IPv6Address]'
 
-        def __init__(self, type: 'Enum_BlockType', length: 'int',
+        def __init__(self, length: 'int',
                      records: 'list[NameResolutionRecord | bytes] | bytes',
                      options: 'list[Option | bytes] | bytes', length2: 'int') -> 'None': ...
 
@@ -1049,7 +1049,7 @@ class InterfaceStatisticsBlock(BlockType):
     length2: 'int' = UInt32Field(callback=byteorder_callback)
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_BlockType', length: 'int', interface_id: 'int',
+        def __init__(self, length: 'int', interface_id: 'int',
                      timestamp_high: 'int', timestamp_low: 'int',
                      options: 'list[Option | bytes] | bytes', length2: 'int') -> 'None': ...
 
@@ -1102,7 +1102,7 @@ class SystemdJournalExportBlock(BlockType):
         #: Journal entry (decoded).
         data: 'list[OrderedMultiDict[str, str | bytes]]'
 
-        def __init__(self, type: 'Enum_BlockType', length: 'int', entry: 'bytes', length2: 'int') -> 'None': ...
+        def __init__(self, length: 'int', entry: 'bytes', length2: 'int') -> 'None': ...
 
 
 class DSBSecrets(Schema):
@@ -1259,7 +1259,7 @@ class DecryptionSecretsBlock(BlockType):
     length2: 'int' = UInt32Field(callback=byteorder_callback)
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_BlockType', length: 'int', secrets_type: 'Enum_SecretsType',
+        def __init__(self, length: 'int', secrets_type: 'Enum_SecretsType',
                      secrets_length: 'int', secrets_data: 'DSBSecrets | bytes', padding: 'bytes',
                      options: 'list[Option | bytes] | bytes', length2: 'int') -> 'None': ...
 
@@ -1277,7 +1277,7 @@ class CustomBlock(BlockType):
     length2: 'int' = UInt32Field(callback=byteorder_callback)
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_BlockType', length: 'int', pen: 'int', data: 'bytes', length2: 'int') -> 'None': ...
+        def __init__(self, length: 'int', pen: 'int', data: 'bytes', length2: 'int') -> 'None': ...
 
 
 class PacketBlock(BlockType):
@@ -1320,6 +1320,6 @@ class PacketBlock(BlockType):
     length2: 'int' = UInt32Field(callback=byteorder_callback)
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_BlockType', length: 'int', interface_id: 'int', drop_count: 'int',
+        def __init__(self, length: 'int', interface_id: 'int', drop_count: 'int',
                      timestamp_high: 'int', timestamp_low: 'int', captured_length: 'int', original_length: 'int',
                      packet_data: 'bytes', padding: 'bytes', options: 'list[Option | bytes] | bytes', length2: 'int') -> 'None': ...
