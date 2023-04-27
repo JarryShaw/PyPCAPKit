@@ -971,3 +971,60 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
     ##########################################################################
     # Utilities.
     ##########################################################################
+
+    @classmethod
+    def _make_data(cls, data: 'Data_PCAPNG') -> 'dict[str, Any]':  # type: ignore[override]
+        """Create key-value pairs from ``data`` for protocol construction.
+
+        Args:
+            data: protocol data
+
+        Returns:
+            Key-value pairs for protocol construction.
+
+        """
+        return {
+            'type': data.type,
+            'block': data,
+        }
+
+    def _decode_next_layer(self, dict_: 'Data_PCAPNG', proto: 'Optional[int]' = None,
+                           length: 'Optional[int]' = None, *, packet: 'Optional[dict[str, Any]]' = None) -> 'Data_PCAPNG':  # pylint: disable=arguments-differ
+        r"""Decode next layer protocol.
+
+        Arguments:
+            dict\_: info buffer
+            proto: next layer protocol index
+            length: valid (*non-padding*) length
+            packet: packet info (passed from :meth:`self.unpack <pcapkit.protocols.protocol.Protocol.unpack>`)
+
+        Returns:
+            Current protocol with packet extracted.
+
+        Notes:
+            We added a new key ``__next_type__`` to ``dict_`` to store the
+            next layer protocol type, and a new key ``__next_name__`` to
+            store the next layer protocol name. These two keys will **NOT**
+            be included when :meth:`Info.to_dict <pcapkit.corekit.infoclass.Info.to_dict>` is called.
+
+            We also added a new key ``protocols`` to ``dict_`` to store the
+            protocol chain of the current packet (frame).
+
+        """
+        next_ = cast('Protocol', self._import_next_layer(proto, length, packet=packet))  # type: ignore[misc,call-arg,redundant-cast]
+        info, chain = next_.info, next_.protochain
+
+        # make next layer protocol name
+        layer = next_.info_name
+        # proto = next_.__class__.__name__
+
+        # write info and protocol chain into dict
+        dict_.__update__({
+            layer: info,
+            'protocols': chain.chain if chain else '',
+            '__next_type__': type(next_),
+            '__next_name__': layer,
+        })
+        self._next = next_  # pylint: disable=attribute-defined-outside-init
+        self._protos = chain  # pylint: disable=attribute-defined-outside-init
+        return dict_
