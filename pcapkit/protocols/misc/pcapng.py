@@ -1028,3 +1028,47 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
         self._next = next_  # pylint: disable=attribute-defined-outside-init
         self._protos = chain  # pylint: disable=attribute-defined-outside-init
         return dict_
+
+    def _read_block_unknown(self, schema: 'Schema_UnknownBlock', *,
+                            header: 'Schema_PCAPNG') -> 'Data_UnknownBlock':
+        """Read unknown PCAP-NG block.
+
+        Args:
+            schema: Parsed block schema.
+            header: Parsed PCAP-NG header schema.
+
+        Returns:
+            Parsed packet data.
+
+        """
+        data = Data_UnknownBlock(
+            type=header.type,
+            length=schema.length,
+            body=schema.body,
+        )
+        return data
+
+    def _make_block_unknown(self, block: 'Optional[Data_UnknownBlock]' = None, *,
+                            data: 'bytes' = b'',
+                            **kwargs: 'Any') -> 'Schema_UnknownBlock':
+        """Make unknown PCAP-NG block.
+
+        Args:
+            block: Block data model.
+            data: Unspecified block data.
+            **kwargs: Arbitrary keyword arguments.
+
+        Returns:
+            Constructed block schema.
+
+        """
+        if block is not None:
+            data = block.body
+
+        length = len(data)
+
+        return Schema_UnknownBlock(
+            length=length,
+            body=data,
+            length2=length,
+        )
