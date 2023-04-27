@@ -23,3 +23,21 @@ support, as is used by :class:`pcapkit.foundation.extraction.Extractor`.
 
    .. automethod:: run
    .. automethod:: read_frame
+
+PCAP-NG Support
+===============
+
+.. module:: pcapkit.foundation.engines.pcapng
+
+This module contains the implementation for PCAP-NG file extraction
+support, as is used by :class:`pcapkit.foundation.extraction.Extractor`.
+
+.. autoclass:: pcapkit.foundation.engines.pcapng.PCAPNG
+   :no-members:
+   :show-inheritance:
+
+   .. autoproperty:: name
+   .. autoproperty:: module
+
+   .. automethod:: run
+   .. automethod:: read_frame
