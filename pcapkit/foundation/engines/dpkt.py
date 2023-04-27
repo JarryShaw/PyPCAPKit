@@ -13,7 +13,6 @@ support, as is used by :class:`pcapkit.foundation.extraction.Extractor`.
 from typing import TYPE_CHECKING, cast
 
 from pcapkit.const.reg.linktype import LinkType as Enum_LinkType
-from pcapkit.foundation.engines import engine
 from pcapkit.foundation.engines.engine import Engine
 from pcapkit.utilities.exceptions import FormatError, stacklevel
 from pcapkit.utilities.warnings import AttributeWarning, DPKTWarning, warn
@@ -90,6 +89,7 @@ class DPKT(Engine['DPKTPacket']):
 
         """
         from pcapkit.foundation.engines.pcap import PCAP
+        from pcapkit.foundation.engines.pcapng import PCAPNG
 
         ext = self._extractor
         dpkt = self._expkg
@@ -106,12 +106,13 @@ class DPKT(Engine['DPKTPacket']):
                 f'Frame {e._frnum:>3d}: {packet2chain(f)}'  # pylint: disable=protected-access
             )  # pylint: disable=logging-fstring-interpolation
 
-        # extract global header
-        engine = ext.record_header()
-        if not isinstance(engine, PCAP):
-            raise FormatError(f'unsupported file format: {engine.name}')
-        self._gbhdr = engine.header
-        self._dlink = self._gbhdr.protocol
+        if ext.magic_number in PCAP.MAGIC_NUMBER:
+            reader = dpkt.pcap.Reader(ext._ifile)
+        elif ext.magic_number in PCAPNG.MAGIC_NUMBER:
+            reader = dpkt.pcapng.Reader(ext._ifile)
+        else:
+            raise FormatError(f'unsupported file format: {ext.magic_number!r}')
+        self._dlink = Enum_LinkType.get(reader.datalink())
 
         if self._dlink == Enum_LinkType.ETHERNET:
             pkg = dpkt.ethernet.Ethernet
@@ -139,7 +140,7 @@ class DPKT(Engine['DPKTPacket']):
 
         # extract & analyse file
         self._expkg = pkg
-        self._extmp = iter(dpkt.pcap.Reader(ext._ifile))
+        self._extmp = reader
 
     def read_frame(self) -> 'DPKTPacket':
         """Read frames with DPKT engine.
@@ -172,6 +173,8 @@ class DPKT(Engine['DPKTPacket']):
                 ofile(info, name=frnum)
             else:
                 ext._ofile(info, name=frnum)
+                ofile = ext._ofile
+            ext._offmt = ofile.kind
 
         # record fragments
         if ext._flag_r:

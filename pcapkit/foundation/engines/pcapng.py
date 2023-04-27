@@ -92,7 +92,9 @@ class PCAPNG(Engine[P_PCAPNG]):
         #: File context storage.
         _ctx_list: 'list[Context]'
 
-    MAGIC_NUMBER = b'\x0a\x0d\x0d\x0a'
+    MAGIC_NUMBER = (
+        b'\x0a\x0d\x0d\x0a',
+    )
 
     ##########################################################################
     # Properties.

@@ -10,7 +10,6 @@ support, as is used by :class:`pcapkit.foundation.extraction.Extractor`.
 .. _PyShark: https://kiminewt.github.io/pyshark
 
 """
-#import os
 from typing import TYPE_CHECKING, cast
 
 from pcapkit.foundation.engines.engine import Engine
@@ -101,10 +100,6 @@ class PyShark(Engine['PySharkPacket']):
                 f'Frame {e._frnum:>3d}: {f.frame_info.protocols}'  # pylint: disable=protected-access
             )  # pylint: disable=logging-fstring-interpolation
 
-        # extract global header
-        #ext.record_header()
-        #ext._ifile.seek(0, os.SEEK_SET)
-
         # extract & analyse file
         self._extmp = self._expkg.FileCapture(ext._ifnm, keep_packets=False)
 
@@ -137,6 +132,8 @@ class PyShark(Engine['PySharkPacket']):
                 ofile(info, name=frnum)
             else:
                 ext._ofile(info, name=frnum)
+                ofile = ext._ofile
+            ext._offmt = ofile.kind
 
         # trace flows
         if ext._flag_t:
