@@ -20,7 +20,7 @@ from pcapkit.utilities.warnings import AttributeWarning, DPKTWarning, warn
 __all__ = ['DPKT']
 
 if TYPE_CHECKING:
-    from typing import Type, Union, Optional
+    from typing import Optional, Type, Union
 
     from dpkt.dpkt import Packet as DPKTPacket
     from dpkt.pcap import Reader as PCAPReader
