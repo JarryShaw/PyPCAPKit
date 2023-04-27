@@ -24,7 +24,6 @@ from pcapkit.dumpkit.common import make_dumper
 from pcapkit.foundation.engines.pcap import PCAP as PCAP_Engine
 from pcapkit.foundation.reassembly import ReassemblyManager
 from pcapkit.foundation.traceflow import TraceFlowManager
-from pcapkit.protocols.misc.pcap.frame import Frame
 from pcapkit.utilities.exceptions import (CallableError, FileNotFound, FormatError, IterableError,
                                           UnsupportedCall, stacklevel)
 from pcapkit.utilities.warnings import EngineWarning, FormatWarning, warn
@@ -39,18 +38,21 @@ if TYPE_CHECKING:
     from scapy.packet import Packet as ScapyPacket
     from typing_extensions import Literal
 
-    from pcapkit.corekit.version import VersionInfo
     from pcapkit.foundation.engines.engine import Engine
     from pcapkit.foundation.reassembly.data import ReassemblyData
     from pcapkit.foundation.traceflow.data import TraceFlowData
+    from pcapkit.protocols.misc.pcap.frame import Frame
+    from pcapkit.protocols.misc.pcapng import PCAPNG
     from pcapkit.protocols.protocol import Protocol
 
     Formats = Literal['pcap', 'json', 'tree', 'plist']
     Engines = Literal['default', 'pcapkit', 'dpkt', 'scapy', 'pyshark']
     Layers = Literal['link', 'internet', 'transport', 'application', 'none']
 
+    Packet = Union[Frame, PCAPNG, ScapyPacket, DPKTPacket, PySharkPacket]
+
     Protocols = Union[str, Protocol, Type[Protocol]]
-    VerboseHandler = Callable[['Extractor', Union[Frame, ScapyPacket, DPKTPacket, PySharkPacket]], Any]
+    VerboseHandler = Callable[['Extractor', Packet], Any]
 
 __all__ = ['Extractor']
 
@@ -103,7 +105,7 @@ class Extractor(Generic[P]):
         #: Frame number.
         _frnum: 'int'
         #: Frame records.
-        _frame: 'list[Frame | ScapyPacket | DPKTPacket]'
+        _frame: 'list[Packet]'
 
         #: Frame record for reassembly.
         _reasm: 'ReassemblyManager'
@@ -206,7 +208,7 @@ class Extractor(Generic[P]):
         return cast('str', self._ofnm)
 
     @property
-    def frame(self) -> 'tuple[Frame, ...]':
+    def frame(self) -> 'tuple[Packet, ...]':
         """Extracted frames.
 
         Raises:
