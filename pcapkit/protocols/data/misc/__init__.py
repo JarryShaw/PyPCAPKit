@@ -66,6 +66,7 @@ from pcapkit.protocols.data.misc.pcapng import TLSKeyLog as PCAPNG_TLSKeyLog
 from pcapkit.protocols.data.misc.pcapng import UnknownBlock as PCAPNG_UnknownBlock
 from pcapkit.protocols.data.misc.pcapng import UnknownOption as PCAPNG_UnknownOption
 from pcapkit.protocols.data.misc.pcapng import UnknownRecord as PCAPNG_UnknownRecord
+from pcapkit.protocols.data.misc.pcapng import UnknownSecrets as PCAPNG_UnknownSecrets
 from pcapkit.protocols.data.misc.pcapng import WireGuardKeyLog as PCAPNG_WireGuardKeyLog
 from pcapkit.protocols.data.misc.pcapng import ZigBeeAPSKey as PCAPNG_ZigBeeAPSKey
 from pcapkit.protocols.data.misc.pcapng import ZigBeeNWKKey as PCAPNG_ZigBeeNWKKey
@@ -93,7 +94,7 @@ __all__ = [
     'PCAPNG_ISB_StartTimeOption', 'PCAPNG_ISB_EndTimeOption', 'PCAPNG_ISB_IFRecvOption', 'PCAPNG_ISB_IFDropOption',
     'PCAPNG_ISB_FilterAcceptOption', 'PCAPNG_ISB_OSDropOption', 'PCAPNG_ISB_UsrDelivOption',
     'PCAPNG_NameResolutionRecord', 'PCAPNG_UnknownRecord', 'PCAPNG_EndRecord', 'PCAPNG_IPv4Record', 'PCAPNG_IPv6Record',
-    'PCAPNG_DSBSecrets', 'UnknownSecrets', 'PCAPNG_TLSKeyLog', 'PCAPNG_WireGuardKeyLog', 'PCAPNG_ZigBeeNWKKey',
+    'PCAPNG_DSBSecrets', 'PCAPNG_UnknownSecrets', 'PCAPNG_TLSKeyLog', 'PCAPNG_WireGuardKeyLog', 'PCAPNG_ZigBeeNWKKey',
     'PCAPNG_ZigBeeAPSKey',
     'PCAPNG_UnknownBlock', 'PCAPNG_SectionHeaderBlock', 'PCAPNG_InterfaceDescriptionBlock',
     'PCAPNG_EnhancedPacketBlock', 'PCAPNG_SimplePacketBlock', 'PCAPNG_NameResolutionBlock',
