@@ -367,15 +367,12 @@
     <span class="kn">from</span> <span class="nn">pcapkit.protocols.data.misc.pcapng</span> <span class="kn">import</span> <span class="n">CustomBlock</span> <span class="k">as</span> <span class="n">Data_CustomBlock</span>
     <span class="kn">from</span> <span class="nn">pcapkit.protocols.data.misc.pcapng</span> <span class="kn">import</span> \
         <span class="n">DecryptionSecretsBlock</span> <span class="k">as</span> <span class="n">Data_DecryptionSecretsBlock</span>
-    <span class="kn">from</span> <span class="nn">pcapkit.protocols.data.misc.pcapng</span> <span class="kn">import</span> <span class="n">EnhancedPacketBlock</span> <span class="k">as</span> <span class="n">Data_EnhancedPacketBlock</span>
     <span class="kn">from</span> <span class="nn">pcapkit.protocols.data.misc.pcapng</span> <span class="kn">import</span> \
         <span class="n">InterfaceDescriptionBlock</span> <span class="k">as</span> <span class="n">Data_InterfaceDescriptionBlock</span>
     <span class="kn">from</span> <span class="nn">pcapkit.protocols.data.misc.pcapng</span> <span class="kn">import</span> \
         <span class="n">InterfaceStatisticsBlock</span> <span class="k">as</span> <span class="n">Data_InterfaceStatisticsBlock</span>
     <span class="kn">from</span> <span class="nn">pcapkit.protocols.data.misc.pcapng</span> <span class="kn">import</span> <span class="n">NameResolutionBlock</span> <span class="k">as</span> <span class="n">Data_NameResolutionBlock</span>
-    <span class="kn">from</span> <span class="nn">pcapkit.protocols.data.misc.pcapng</span> <span class="kn">import</span> <span class="n">PacketBlock</span> <span class="k">as</span> <span class="n">Data_PacketBlock</span>
     <span class="kn">from</span> <span class="nn">pcapkit.protocols.data.misc.pcapng</span> <span class="kn">import</span> <span class="n">SectionHeaderBlock</span> <span class="k">as</span> <span class="n">Data_SectionHeaderBlock</span>
-    <span class="kn">from</span> <span class="nn">pcapkit.protocols.data.misc.pcapng</span> <span class="kn">import</span> <span class="n">SimplePacketBlock</span> <span class="k">as</span> <span class="n">Data_SimplePacketBlock</span>
     <span class="kn">from</span> <span class="nn">pcapkit.protocols.data.misc.pcapng</span> <span class="kn">import</span> \
         <span class="n">SystemdJournalExportBlock</span> <span class="k">as</span> <span class="n">Data_SystemdJournalExportBlock</span>
     <span class="kn">from</span> <span class="nn">pcapkit.protocols.data.misc.pcapng</span> <span class="kn">import</span> <span class="n">UnknownBlock</span> <span class="k">as</span> <span class="n">Data_UnknownBlock</span>
@@ -391,7 +388,7 @@
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Post initialisation hook.&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__update__</span><span class="p">(</span>
             <span class="n">interfaces</span><span class="o">=</span><span class="p">[],</span>
-            <span class="n">packets</span><span class="o">=</span><span class="p">[],</span>
+            <span class="c1">#packets=[],</span>
             <span class="n">names</span><span class="o">=</span><span class="p">[],</span>
             <span class="n">journals</span><span class="o">=</span><span class="p">[],</span>
             <span class="n">secrets</span><span class="o">=</span><span class="p">[],</span>
@@ -404,7 +401,7 @@
         <span class="c1">#: Interface descriptions.</span>
         <span class="n">interfaces</span><span class="p">:</span> <span class="s1">&#39;list[Data_InterfaceDescriptionBlock]&#39;</span>
         <span class="c1">#: Packets.</span>
-        <span class="n">packets</span><span class="p">:</span> <span class="s1">&#39;list[Data_PacketBlock | Data_SimplePacketBlock | Data_EnhancedPacketBlock]&#39;</span>
+        <span class="c1">#packets: &#39;list[Data_PacketBlock | Data_SimplePacketBlock | Data_EnhancedPacketBlock]&#39;</span>
         <span class="c1">#: Name resolution records.</span>
         <span class="n">names</span><span class="p">:</span> <span class="s1">&#39;list[Data_NameResolutionBlock]&#39;</span>
         <span class="c1">#: :manpage:`systemd(1)` journal export records.</span>
