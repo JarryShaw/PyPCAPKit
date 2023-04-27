@@ -167,6 +167,8 @@ __all__ = ['PCAPNG']
 if TYPE_CHECKING:
     from decimal import Decimal
     from typing import IO, Any, Callable, DefaultDict, Optional, Type, Union
+    from enum import IntEnum as StdlibEnum
+    from aenum import IntEnum as AenumEnum
 
     from mypy_extensions import DefaultArg, KwArg, NamedArg
     from typing_extensions import Literal
@@ -250,7 +252,7 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
     """PCAP-NG file block extractor.
 
     The class currently supports parsing of the following protocols, which are
-    registered in the :attr:`self.__proto__ <pcapkit.protocols.misc.pcap.frame.Frame.__proto__>`
+    registered in the :attr:`self.__proto__ <pcapkit.protocols.misc.pcapng.PCAPNG.__proto__>`
     attribute:
 
     .. list-table::
@@ -792,16 +794,53 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
         return block
 
     def make(self,
+             type: 'Enum_BlockType | StdlibEnum | AenumEnum | str | int' = Enum_BlockType.Simple_Packet_Block,
+             type_default: 'Optional[int]' = None,
+             type_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
+             type_reversed: 'bool' = False,
+             block: 'bytes | Data_PCAPNG | Schema_BlockType | dict[str, Any]' = b'',
              **kwargs: 'Any') -> 'Schema_PCAPNG':
-        """Make frame packet data.
+        """Make PCAP-NG block data.
 
         Args:
+            type: Block type.
+            type_default: Default block type.
+            type_namespace: Block type namespace.
+            type_reversed: Whether to reverse block type namespace.
+            block: Block data.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
             Constructed packet data.
 
         """
+        type_val = self._make_index(type, type_default, namespace=type_namespace,  # type: ignore[call-overload]
+                                    reversed=type_reversed, pack=False)
+
+        if isinstance(block, bytes):
+            block_val = block  # type: bytes | Schema_BlockType
+        elif isinstance(block, (dict, Data_PCAPNG)):
+            name = self.__block__[type_val]
+            if isinstance(name, str):
+                meth_name = f'_make_block_{name}'
+                meth = cast('BlockConstructor',
+                            getattr(self, meth_name, self._make_block_unknown))
+            else:
+                meth = name[1]
+
+            if isinstance(block, dict):
+                block_val = meth(type_val, **block)
+            else:
+                block_val = meth(type_val, block)
+        elif isinstance(block, Schema):
+            block_val = block
+        else:
+            raise ProtocolError(f'PCAP-NG: [Type {type_val}] invalid format')
+
+        return Schema_PCAPNG(
+            type=type_val,
+            block=block_val,
+        )
 
     ##########################################################################
     # Data models.
@@ -833,7 +872,7 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
             For construction argument, please refer to :meth:`make`.
 
         """
-        #: int: frame index number
+        #: int: Block index number.
         self._fnum = num
         #: pcapkit.foundation.engins.pcapng.Context: Context of the PCAP-NG file.
         self._ctx = ctx
@@ -860,15 +899,15 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
     # NOTE: This is a hack to make the ``__index__`` method work both as a
     # class method and an instance method.
     def __index__(self: 'Optional[PCAPNG]' = None) -> 'int':  # type: ignore[override]
-        """Index of the frame.
+        """Index of the block.
 
         Args:
             self: :class:`PCAPNG` object or :obj:`None`.
 
         Returns:
-            If the object is initiated, i.e. :attr:`self._fnum <pcapkit.protocols.misc.pcap.frame.Frame._fnum>`
+            If the object is initiated, i.e. :attr:`self._fnum <pcapkit.protocols.misc.pcapng.PCAPNG._fnum>`
             exists, and is of a packet block (EPB, ISB or Packet), returns the
-            frame index number of itself; else raises :exc:`UnsupportedCall`.
+            block index number of itself; else raises :exc:`UnsupportedCall`.
 
         Raises:
             UnsupportedCall: This protocol has no registry entry.

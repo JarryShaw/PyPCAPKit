@@ -221,7 +221,7 @@ class PCAPNG(Schema):
     )
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_BlockType', block: 'BlockType') -> 'None': ...
+        def __init__(self, type: 'Enum_BlockType', block: 'BlockType | bytes') -> 'None': ...
 
 
 class BlockType(Schema):
@@ -1260,7 +1260,7 @@ class DecryptionSecretsBlock(BlockType):
 
     if TYPE_CHECKING:
         def __init__(self, type: 'Enum_BlockType', length: 'int', secrets_type: 'Enum_SecretsType',
-                     secrets_length: 'int', secrets_data: 'bytes', padding: 'bytes',
+                     secrets_length: 'int', secrets_data: 'DSBSecrets | bytes', padding: 'bytes',
                      options: 'list[Option | bytes] | bytes', length2: 'int') -> 'None': ...
 
 
