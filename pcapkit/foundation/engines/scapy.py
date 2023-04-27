@@ -91,9 +91,6 @@ class Scapy(Engine['ScapyPacket']):
                 f'Frame {e._frnum:>3d}: {packet2chain(f)}'  # pylint: disable=protected-access
             )  # pylint: disable=logging-fstring-interpolation
 
-        # extract global header
-        ext.record_header()
-
         # extract & analyse file
         self._extmp = iter(self._expkg.sniff(offline=ext._ifnm))
 
