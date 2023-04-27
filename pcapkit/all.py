@@ -79,12 +79,14 @@ __all__ = [
 
     # pcapkit.foundation.registry
     'register_protocol',
-    'register_linktype', 'register_pcap',
+    'register_linktype', 'register_pcap', 'register_pcapng',
     'register_ethertype', 'register_transtype',
     'register_port', 'register_tcp_port', 'register_udp_port',
     'register_output',
     'register_extractor_dumper', 'register_extractor_engine',
     'register_traceflow',
+    'register_pcapng_block', 'register_pcapng_option', 'register_pcapng_secrets',
+    'register_pcapng_record',
     'register_hopopt', 'register_ipv6_opts', 'register_ipv6_route',
     'register_ipv4', 'register_hip',
     'register_tcp', 'register_mptcp',

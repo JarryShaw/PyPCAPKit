@@ -666,6 +666,58 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
             warn(f'protocol {code} already registered, overwriting', RegistryWarning)
         cls.__proto__[code] = (module, class_)
 
+    @classmethod
+    def register_block(cls, code: 'Enum_BlockType', meth: 'str | tuple[BlockParser, BlockConstructor]') -> 'None':
+        """Register a block parser.
+
+        Args:
+            code: PCAP-NG block type code.
+            meth: Method name or callable to parse and/or construct the block.
+
+        """
+        if code in cls.__block__:
+            warn(f'PCAP-NG: [Type {code}] block already registered', RegistryWarning)
+        cls.__block__[code] = meth
+
+    @classmethod
+    def register_option(cls, code: 'Enum_OptionType', meth: 'str | tuple[OptionParser, OptionConstructor]') -> 'None':
+        """Register a option parser.
+
+        Args:
+            code: PCAP-NG option type code.
+            meth: Method name or callable to parse and/or construct the option.
+
+        """
+        if code in cls.__option__:
+            warn(f'PCAP-NG: [Option {code}] option already registered', RegistryWarning)
+        cls.__option__[code] = meth
+
+    @classmethod
+    def register_record(cls, code: 'Enum_RecordType', meth: 'str | tuple[RecordParser, RecordConstructor]') -> 'None':
+        """Register a name resolution record parser.
+
+        Args:
+            code: PCAP-NG name resolution record type code.
+            meth: Method name or callable to parse and/or construct the name resolution record.
+
+        """
+        if code in cls.__record__:
+            warn(f'PCAP-NG: [Type {code}] name resolution record already registered', RegistryWarning)
+        cls.__record__[code] = meth
+
+    @classmethod
+    def register_secrets(cls, code: 'Enum_SecretsType', meth: 'str | tuple[SecretsParser, SecretsConstructor]') -> 'None':
+        """Register a decryption secrets parser.
+
+        Args:
+            code: PCAP-NG decryption secrets type code.
+            meth: Method name or callable to parse and/or construct the decryption secrets.
+
+        """
+        if code in cls.__secrets__:
+            warn(f'PCAP-NG: [Secrets {code}] decryption secrets already registered', RegistryWarning)
+        cls.__secrets__[code] = meth
+
     def index(self, name: 'str | Protocol | Type[Protocol]') -> 'int':
         """Call :meth:`ProtoChain.index <pcapkit.corekit.protochain.ProtoChain.index>`.
 

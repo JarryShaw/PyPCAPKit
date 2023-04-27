@@ -31,12 +31,17 @@ from pcapkit.protocols.transport.tcp import TCP
 from pcapkit.protocols.transport.udp import UDP
 from pcapkit.utilities.exceptions import RegistryError
 from pcapkit.utilities.logging import logger
+from pcapkit.protocols.misc.pcapng import PCAPNG
 
 if TYPE_CHECKING:
     from typing import Type
 
     from typing_extensions import Literal
 
+    from pcapkit.const.pcapng.block_type import BlockType as PCAPNG_BlockType
+    from pcapkit.const.pcapng.option_type import OptionType as PCAPNG_OptionType
+    from pcapkit.const.pcapng.secrets_type import SecretsType as PCAPNG_SecretsType
+    from pcapkit.const.pcapng.record_type import RecordType as PCAPNG_RecordType
     from pcapkit.const.hip.parameter import Parameter as HIP_Parameter
     from pcapkit.const.http.frame import Frame as HTTP_Frame
     from pcapkit.const.ipv4.option_number import OptionNumber as IPv4_OptionNumber
@@ -65,10 +70,19 @@ if TYPE_CHECKING:
     from pcapkit.protocols.transport.tcp import OptionConstructor as TCP_OptionConstructor
     from pcapkit.protocols.transport.tcp import OptionParser as TCP_OptionParser
 
+    from pcapkit.protocols.misc.pcapng import BlockParser as PCAPNG_BlockParser
+    from pcapkit.protocols.misc.pcapng import BlockConstructor as PCAPNG_BlockConstructor
+    from pcapkit.protocols.misc.pcapng import OptionParser as PCAPNG_OptionParser
+    from pcapkit.protocols.misc.pcapng import OptionConstructor as PCAPNG_OptionConstructor
+    from pcapkit.protocols.misc.pcapng import SecretsParser as PCAPNG_SecretsParser
+    from pcapkit.protocols.misc.pcapng import SecretsConstructor as PCAPNG_SecretsConstructor
+    from pcapkit.protocols.misc.pcapng import RecordParser as PCAPNG_RecordParser
+    from pcapkit.protocols.misc.pcapng import RecordConstructor as PCAPNG_RecordConstructor
+
 __all__ = [
     'register_protocol',
 
-    'register_linktype', 'register_pcap',
+    'register_linktype', 'register_pcap', 'register_pcapng',
     'register_ethertype', 'register_transtype',
     'register_port', 'register_tcp_port', 'register_udp_port',
 
@@ -76,6 +90,8 @@ __all__ = [
     'register_extractor_dumper', 'register_extractor_engine',
     'register_traceflow',
 
+    'register_pcapng_block', 'register_pcapng_option', 'register_pcapng_secrets',
+    'register_pcapng_record',
     'register_hopopt', 'register_ipv6_opts', 'register_ipv6_route',
     'register_ipv4', 'register_hip',
     'register_tcp', 'register_mptcp',
@@ -83,7 +99,7 @@ __all__ = [
 ]
 
 ###############################################################################
-# pcapkit.protocols.Protocol.__proto__
+# pcapkit.protocols.Protocol
 ###############################################################################
 
 
@@ -106,7 +122,7 @@ def register_protocol(protocol: 'Type[Protocol]') -> 'None':
 
 
 ###############################################################################
-# pcapkit.foundation.extraction.Extractor.__output__
+# pcapkit.foundation.extraction.Extractor
 ###############################################################################
 
 
@@ -135,11 +151,6 @@ def register_extractor_dumper(format: 'str', module: 'str', class_: 'str', ext: 
     logger.info('registered extractor output dumper: %s', format)
 
 
-###############################################################################
-# pcapkit.foundation.extraction.Extractor.__engine__
-###############################################################################
-
-
 def register_extractor_engine(engine: 'str', module: 'str', class_: 'str') -> 'None':  # pylint: disable=redefined-builtin
     r"""Registered a new engine class.
 
@@ -165,7 +176,7 @@ def register_extractor_engine(engine: 'str', module: 'str', class_: 'str') -> 'N
 
 
 ###############################################################################
-# pcapkit.foundation.traceflow.TraceFlow.__output__
+# pcapkit.foundation.traceflow.TraceFlow
 ###############################################################################
 
 
@@ -195,7 +206,7 @@ def register_traceflow(format: 'str', module: 'str', class_: 'str', ext: 'str') 
 
 
 ###############################################################################
-# pcapkit.protocols.application.httpv2.HTTPv2.__frame__
+# pcapkit.protocols.application.httpv2.HTTPv2
 ###############################################################################
 
 
@@ -243,7 +254,7 @@ def register_hip(code: 'HIP_Parameter', meth: 'str | tuple[HIP_ParameterParser, 
 
 
 ###############################################################################
-# pcapkit.protocols.internet.hopopt.HOPOPT.__option__
+# pcapkit.protocols.internet.hopopt.HOPOPT
 ###############################################################################
 
 
@@ -267,7 +278,7 @@ def register_hopopt(code: 'IPv6_Option', meth: 'str | tuple[HOPOPT_OptionParser,
 
 
 ###############################################################################
-# pcapkit.protocols.internet.internet.Internet.__proto__
+# pcapkit.protocols.internet.internet.Internet
 ###############################################################################
 
 
@@ -323,7 +334,7 @@ def register_ipv4(code: 'IPv4_OptionNumber', meth: 'str | tuple[IPv4_OptionParse
 
 
 ###############################################################################
-# pcapkit.protocols.internet.ipv6_opts.IPv6_Opts.__option__
+# pcapkit.protocols.internet.ipv6_opts.IPv6_Opts
 ###############################################################################
 
 
@@ -347,7 +358,7 @@ def register_ipv6_opts(code: 'IPv6_Option', meth: 'str | tuple[IPv6_Opts_OptionP
 
 
 ###############################################################################
-# pcapkit.protocols.internet.ipv6_route.IPv6_Route.__routing__
+# pcapkit.protocols.internet.ipv6_route.IPv6_Route
 ###############################################################################
 
 
@@ -371,7 +382,7 @@ def register_ipv6_route(code: 'IPv6_Routing', meth: 'str | tuple[IPv6_Route_Type
 
 
 ###############################################################################
-# pcapkit.protocols.link.link.Link.__proto__
+# pcapkit.protocols.link.link.Link
 ###############################################################################
 
 
@@ -403,7 +414,7 @@ def register_ethertype(code: 'EtherType', module: str, class_: str) -> 'None':
 
 
 ###############################################################################
-# pcapkit.protocols.misc.pcap.frame.Frame.__proto__
+# pcapkit.protocols.misc.pcap.frame.Frame
 ###############################################################################
 
 
@@ -428,14 +439,123 @@ def register_pcap(code: 'LinkType', module: str, class_: str) -> 'None':
         raise RegistryError('protocol must be a Protocol subclass')
 
     Frame.register(code, module, class_)
-    logger.info('registered PCAP frame protocol: %s', code.name)
+    logger.info('registered PCAP linktype protocol: %s', code.name)
 
     # register protocol to protocol registry
     register_protocol(protocol)
 
 
 ###############################################################################
-# pcapkit.protocols.transport.tcp.TCP.__option__
+# pcapkit.protocols.misc.pcapng.PCAPNG
+###############################################################################
+
+
+def register_pcapng(code: 'LinkType', module: str, class_: str) -> 'None':
+    r"""Register a new protocol class.
+
+    Notes:
+        The full qualified class name of the new protocol class
+        should be as ``{module}.{class_}``.
+
+    The function will register the given protocol class to the
+    :data:`pcapkit.protocols.misc.pcapng.PCAPNG.__proto__` registry.
+
+    Arguments:
+        code: protocol code as in :class:`~pcapkit.const.reg.linktype.LinkType`
+        module: module name
+        class\_: class name
+
+    """
+    protocol = getattr(importlib.import_module(module), class_)
+    if not issubclass(protocol, Protocol):
+        raise RegistryError('protocol must be a Protocol subclass')
+
+    PCAPNG.register(code, module, class_)
+    logger.info('registered PCAP-NG linktype protocol: %s', code.name)
+
+    # register protocol to protocol registry
+    register_protocol(protocol)
+
+
+def register_pcapng_block(code: 'PCAPNG_BlockType', meth: 'str | tuple[PCAPNG_BlockParser, PCAPNG_BlockConstructor]') -> 'None':
+    """Registered a block parser.
+
+    The function will register the given block parser to the
+    :data:`pcapkit.protocols.misc.pcapng.PCAPNG.__block__` registry.
+
+    Args:
+        code: :class:`HTTP/2 <pcapkit.protocols.misc.pcapng.PCAPNG>` block type
+            code as in :class:`~pcapkit.const.pcapng.block_type.BlockType`.
+        meth: Method name or callable to parse and/or construct the block.
+
+    """
+    if isinstance(meth, str) and not hasattr(PCAPNG, f'_read_block_{meth}'):
+        raise RegistryError('method must be a block parser function')
+
+    PCAPNG.register_block(code, meth)
+    logger.info('registered PCAP-NG block parser: %s', code.name)
+
+
+def register_pcapng_option(code: 'PCAPNG_OptionType', meth: 'str | tuple[PCAPNG_OptionParser, PCAPNG_OptionConstructor]') -> 'None':
+    """Registered a option parser.
+
+    The function will register the given option parser to the
+    :data:`pcapkit.protocols.misc.pcapng.PCAPNG.__option__` registry.
+
+    Args:
+        code: :class:`PCAPNG <pcapkit.protocols.misc.pcapng.PCAPNG>` option type
+            code as in :class:`~pcapkit.const.pcapng.option_type.OptionType`.
+        meth: Method name or callable to parse and/or construct the option.
+
+    """
+    if isinstance(meth, str) and not hasattr(PCAPNG, f'_read_option_{meth}'):
+        raise RegistryError('method must be a option parser function')
+
+    PCAPNG.register_option(code, meth)
+    logger.info('registered PCAP-NG option parser: %s', code.name)
+
+
+def register_pcapng_record(code: 'PCAPNG_RecordType', meth: 'str | tuple[PCAPNG_RecordParser, PCAPNG_RecordConstructor]') -> 'None':
+    """Registered a name resolution record parser.
+
+    The function will register the given name resolution record parser to the
+    :data:`pcapkit.protocols.misc.pcapng.PCAPNG.__record__` registry.
+
+    Args:
+        code: :class:`PCAPNG <pcapkit.protocols.misc.pcapng.PCAPNG>` name
+            resolution record type code as in :class:`~pcapkit.const.pcapng.record_type.RecordType`.
+        meth: Method name or callable to parse and/or construct the name
+            resolution record.
+
+    """
+    if isinstance(meth, str) and not hasattr(PCAPNG, f'_read_record_{meth}'):
+        raise RegistryError('method must be a name resolution record parser function')
+
+    PCAPNG.register_record(code, meth)
+    logger.info('registered PCAP-NG name resolution record parser: %s', code.name)
+
+
+def register_pcapng_secrets(code: 'PCAPNG_SecretsType', meth: 'str | tuple[PCAPNG_SecretsParser, PCAPNG_SecretsConstructor]') -> 'None':
+    """Registered a decryption secrets parser.
+
+    The function will register the given decryption secrets parser to the
+    :data:`pcapkit.protocols.misc.pcapng.PCAPNG.__secrets__` registry.
+
+    Args:
+        code: :class:`PCAPNG <pcapkit.protocols.misc.pcapng.PCAPNG>` decryption
+            secrets type code as in :class:`~pcapkit.const.pcapng.secrets_type.SecretsType`.
+        meth: Method name or callable to parse and/or construct the decryption secrets.
+
+    """
+    if isinstance(meth, str) and not hasattr(PCAPNG, f'_read_secrets_{meth}'):
+        raise RegistryError('method must be a decryption secrets parser function')
+
+    PCAPNG.register_secrets(code, meth)
+    logger.info('registered PCAP-NG decryption secrets parser: %s', code.name)
+
+
+###############################################################################
+# pcapkit.protocols.transport.tcp.TCP
 ###############################################################################
 
 
@@ -458,11 +578,6 @@ def register_tcp(code: 'TCP_Option', meth: 'str | tuple[TCP_OptionParser, TCP_Op
     logger.info('registered TCP option parser: %s', code.name)
 
 
-###############################################################################
-# pcapkit.protocols.transport.tcp.TCP.__mp_option__
-###############################################################################
-
-
 def register_mptcp(code: 'TCP_MPTCPOption', meth: 'str | tuple[TCP_MPOptionParser, TCP_MPOptionConstructor]') -> 'None':
     """Register an MPTCP option parser.
 
@@ -480,11 +595,6 @@ def register_mptcp(code: 'TCP_MPTCPOption', meth: 'str | tuple[TCP_MPOptionParse
 
     TCP.register_mp_option(code, meth)
     logger.info('registered MPTCP option parser: %s', code.name)
-
-
-###############################################################################
-# pcapkit.protocols.transport.tcp.TCP.__proto__
-###############################################################################
 
 
 def register_tcp_port(code: 'int', module: str, class_: str) -> 'None':
@@ -515,7 +625,7 @@ def register_tcp_port(code: 'int', module: str, class_: str) -> 'None':
 
 
 ###############################################################################
-# pcapkit.protocols.transport.udp.UDP.__proto__
+# pcapkit.protocols.transport.udp.UDP
 ###############################################################################
 
 
@@ -590,10 +700,14 @@ def register_linktype(code: 'LinkType', module: str, class_: str) -> 'None':
         should be as ``{module}.{class_}``.
 
     The function will register the given protocol class to the
-    :data:`pcapkit.protocols.misc.pcap.frame.Frame.__proto__` registry.
+    following registries:
+
+    - :data:`pcapkit.protocols.misc.pcap.frame.Frame.__proto__`
+    - :data:`pcapkit.protocols.misc.pcapng.PCAPNG.__proto__`
 
     See Also:
         * :func:`pcapkit.foundation.registry.register_pcap`
+        * :func:`pcapkit.foundation.registry.register_pcapng`
 
     Arguments:
         code: protocol code as in :class:`~pcapkit.const.reg.linktype.LinkType`
@@ -606,6 +720,7 @@ def register_linktype(code: 'LinkType', module: str, class_: str) -> 'None':
         raise RegistryError('protocol must be a Protocol subclass')
 
     Frame.register(code, module, class_)
+    PCAPNG.register(code, module, class_)
     logger.info('registered linktype protocol: %s', code.name)
 
     # register protocol to protocol registry
