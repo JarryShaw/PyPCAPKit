@@ -19,8 +19,6 @@ from pcapkit.utilities.exceptions import FormatError
 __all__ = ['PCAPNG']
 
 if TYPE_CHECKING:
-    from typing import Any, Optional
-
     from pcapkit.protocols.data.misc.pcapng import PCAPNG as Data_PCAPNG
     from pcapkit.protocols.data.misc.pcapng import CustomBlock as Data_CustomBlock
     from pcapkit.protocols.data.misc.pcapng import \
@@ -150,14 +148,14 @@ class PCAPNG(Engine[P_PCAPNG]):
             Parsed PCAP-NG block.
 
         """
-        from pcapkit.toolkit.pcap import (ipv4_reassembly, ipv6_reassembly, tcp_reassembly,
-                                          tcp_traceflow)
+        from pcapkit.toolkit.pcapng import (ipv4_reassembly, ipv6_reassembly, tcp_reassembly,
+                                            tcp_traceflow)
         ext = self._extractor
 
         while True:
             # read next block
             block = P_PCAPNG(ext._ifile, num=ext._frnum+1, ctx=self._ctx,
-                            layer=ext._exlyr, protocol=ext._exptl)
+                             layer=ext._exlyr, protocol=ext._exptl)
 
             # check block type
             if block.info.type == Enum_BlockType.Section_Header_Block:
@@ -214,8 +212,26 @@ class PCAPNG(Engine[P_PCAPNG]):
         self._write_file(block.info, name=f'Frame {ext._frnum}')
 
         # record fragments
+        if ext._flag_r:
+            if ext._ipv4:
+                data_ipv4 = ipv4_reassembly(block)
+                if data_ipv4 is not None:
+                    ext._reasm.ipv4(data_ipv4)
+            if ext._ipv6:
+                data_ipv6 = ipv6_reassembly(block)
+                if data_ipv6 is not None:
+                    ext._reasm.ipv6(data_ipv6)
+            if ext._tcp:
+                data_tcp = tcp_reassembly(block)
+                if data_tcp is not None:
+                    ext._reasm.tcp(data_tcp)
 
         # trace flows
+        if ext._flag_t:
+            if ext._tcp:
+                data_tf_tcp = tcp_traceflow(block, nanosecond=block.nanosecond)
+                if data_tf_tcp is not None:
+                    ext._trace.tcp(data_tf_tcp)
 
         # record blocks
         if ext._flag_d:
