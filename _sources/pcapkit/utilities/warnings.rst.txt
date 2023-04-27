@@ -139,3 +139,13 @@ User Defined Warnings
 
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
+
+:exc:`DeprecationWarning` Category
+----------------------------------
+
+.. autoexception:: pcapkit.utilities.warnings.DeprecatedFormatWarning
+   :no-members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
