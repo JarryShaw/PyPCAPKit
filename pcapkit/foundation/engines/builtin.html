@@ -445,6 +445,58 @@ the name of <code class="docutils literal notranslate"><span class="pre">Global<
 <span id="pcap-ng-support"></span><h2>PCAP-NG Support<a class="headerlink" href="#module-pcapkit.foundation.engines.pcapng" title="Permalink to this heading">#</a></h2>
 <p>This module contains the implementation for PCAP-NG file extraction
 support, as is used by <a class="reference internal" href="../extraction.html#pcapkit.foundation.extraction.Extractor" title="pcapkit.foundation.extraction.Extractor"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.foundation.extraction.Extractor</span></code></a>.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="pcapkit.foundation.engines.pcapng.PCAPNG">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.foundation.engines.pcapng.</span></span><span class="sig-name descname"><span class="pre">PCAPNG</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">extractor</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/foundation/engines/pcapng.html#PCAPNG"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.engines.pcapng.PCAPNG" title="Permalink to this definition">#</a></dt>
+<dd><p>Bases: <a class="reference internal" href="engine.html#pcapkit.foundation.engines.engine.Engine" title="pcapkit.foundation.engines.engine.Engine"><code class="xref py py-class docutils literal notranslate"><span class="pre">Engine</span></code></a>[<code class="xref py py-class docutils literal notranslate"><span class="pre">PCAPNG</span></code>]</p>
+<p>PCAP-NG file extraction support.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>extractor</strong> (<a class="reference internal" href="../extraction.html#pcapkit.foundation.extraction.Extractor" title="pcapkit.foundation.extraction.Extractor"><code class="xref py py-class docutils literal notranslate"><span class="pre">Extractor</span></code></a>) – <a class="reference internal" href="../extraction.html#pcapkit.foundation.extraction.Extractor" title="pcapkit.foundation.extraction.Extractor"><code class="xref py py-class docutils literal notranslate"><span class="pre">Extractor</span></code></a> instance.</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.foundation.engines.pcapng.PCAPNG.run">
+<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/foundation/engines/pcapng.html#PCAPNG.run"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.engines.pcapng.PCAPNG.run" title="Permalink to this definition">#</a></dt>
+<dd><p>Start extraction.</p>
+<p>This method is the entry point for PCAP-NG file extraction. It will
+directly extract the first block, which should be a section header
+block, and then save the related information into the internal
+context storage.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.foundation.engines.pcapng.PCAPNG.read_frame">
+<span class="sig-name descname"><span class="pre">read_frame</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/foundation/engines/pcapng.html#PCAPNG.read_frame"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.engines.pcapng.PCAPNG.read_frame" title="Permalink to this definition">#</a></dt>
+<dd><p>Read frames.</p>
+<p>This method performs following tasks:</p>
+<ul class="simple">
+<li><p>read the next block from input file;</p></li>
+<li><p>check if the block is a packet block;</p></li>
+<li><p>if not, save the block into the internal context storage and repeat;</p></li>
+<li><p>if yes, save the related information into the internal context storage;</p></li>
+<li><p>write the parsed block into output file.</p></li>
+<li><p>reassemble IP and/or TCP fragments;</p></li>
+<li><p>trace TCP flows if any;</p></li>
+<li><p>record frame information if any.</p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">PCAPNG</span></code></p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Parsed PCAP-NG block.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
 </section>
 </section>
 
@@ -515,7 +567,14 @@ support, as is used by <a class="reference internal" href="../extraction.html#pc
 </li>
 </ul>
 </li>
-<li><a class="reference internal" href="#module-pcapkit.foundation.engines.pcapng">PCAP-NG Support</a></li>
+<li><a class="reference internal" href="#module-pcapkit.foundation.engines.pcapng">PCAP-NG Support</a><ul>
+<li><a class="reference internal" href="#pcapkit.foundation.engines.pcapng.PCAPNG"><code class="docutils literal notranslate"><span class="pre">PCAPNG</span></code></a><ul>
+<li><a class="reference internal" href="#pcapkit.foundation.engines.pcapng.PCAPNG.run"><code class="docutils literal notranslate"><span class="pre">PCAPNG.run()</span></code></a></li>
+<li><a class="reference internal" href="#pcapkit.foundation.engines.pcapng.PCAPNG.read_frame"><code class="docutils literal notranslate"><span class="pre">PCAPNG.read_frame()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>

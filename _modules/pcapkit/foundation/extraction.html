@@ -364,6 +364,7 @@
 
 <span class="kn">from</span> <span class="nn">pcapkit.dumpkit.common</span> <span class="kn">import</span> <span class="n">make_dumper</span>
 <span class="kn">from</span> <span class="nn">pcapkit.foundation.engines.pcap</span> <span class="kn">import</span> <span class="n">PCAP</span> <span class="k">as</span> <span class="n">PCAP_Engine</span>
+<span class="kn">from</span> <span class="nn">pcapkit.foundation.engines.pcapng</span> <span class="kn">import</span> <span class="n">PCAPNG</span> <span class="k">as</span> <span class="n">PCAPNG_Engine</span>
 <span class="kn">from</span> <span class="nn">pcapkit.foundation.reassembly</span> <span class="kn">import</span> <span class="n">ReassemblyManager</span>
 <span class="kn">from</span> <span class="nn">pcapkit.foundation.traceflow</span> <span class="kn">import</span> <span class="n">TraceFlowManager</span>
 <span class="kn">from</span> <span class="nn">pcapkit.utilities.exceptions</span> <span class="kn">import</span> <span class="p">(</span><span class="n">CallableError</span><span class="p">,</span> <span class="n">FileNotFound</span><span class="p">,</span> <span class="n">FormatError</span><span class="p">,</span> <span class="n">IterableError</span><span class="p">,</span>
@@ -495,9 +496,9 @@
     <span class="c1">#: dict[str, tuple[str, str]]: Engine mapping for extracting frames.</span>
     <span class="c1">#: The values should be a tuple representing the module name and class name.</span>
     <span class="n">__engine__</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="s1">&#39;scapy&#39;</span><span class="p">:</span> <span class="p">(</span><span class="s1">&#39;pcapkit.foundation.engine.scapy&#39;</span><span class="p">,</span> <span class="s1">&#39;Scapy&#39;</span><span class="p">),</span>
-        <span class="s1">&#39;dpkt&#39;</span><span class="p">:</span> <span class="p">(</span><span class="s1">&#39;pcapkit.foundation.engine.dpkt&#39;</span><span class="p">,</span> <span class="s1">&#39;DPKT&#39;</span><span class="p">),</span>
-        <span class="s1">&#39;pyshark&#39;</span><span class="p">:</span> <span class="p">(</span><span class="s1">&#39;pcapkit.foundation.engine.pyshark&#39;</span><span class="p">,</span> <span class="s1">&#39;PyShark&#39;</span><span class="p">),</span>
+        <span class="s1">&#39;scapy&#39;</span><span class="p">:</span> <span class="p">(</span><span class="s1">&#39;pcapkit.foundation.engines.scapy&#39;</span><span class="p">,</span> <span class="s1">&#39;Scapy&#39;</span><span class="p">),</span>
+        <span class="s1">&#39;dpkt&#39;</span><span class="p">:</span> <span class="p">(</span><span class="s1">&#39;pcapkit.foundation.engines.dpkt&#39;</span><span class="p">,</span> <span class="s1">&#39;DPKT&#39;</span><span class="p">),</span>
+        <span class="s1">&#39;pyshark&#39;</span><span class="p">:</span> <span class="p">(</span><span class="s1">&#39;pcapkit.foundation.engines.pyshark&#39;</span><span class="p">,</span> <span class="s1">&#39;PyShark&#39;</span><span class="p">),</span>
     <span class="p">}</span>  <span class="c1"># type: dict[str, tuple[str, str]]</span>
 
     <span class="c1">##########################################################################</span>
@@ -582,6 +583,11 @@
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;PCAP extraction engine.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_exeng</span>
 
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">magic_number</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;bytes&#39;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Magic number of input PCAP file.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_magic</span>
+
     <span class="c1">##########################################################################</span>
     <span class="c1"># Methods.</span>
     <span class="c1">##########################################################################</span>
@@ -661,7 +667,12 @@
                  <span class="s1">&#39;using default engine instead&#39;</span><span class="p">,</span> <span class="n">EngineWarning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="n">stacklevel</span><span class="p">())</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_exnam</span> <span class="o">=</span> <span class="s1">&#39;default&#39;</span>  <span class="c1"># using default/pcapkit engine</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">_exeng</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">&#39;Engine[P]&#39;</span><span class="p">,</span> <span class="n">PCAP_Engine</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_magic</span> <span class="ow">in</span> <span class="n">PCAP_Engine</span><span class="o">.</span><span class="n">MAGIC_NUMBER</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_exeng</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">&#39;Engine[P]&#39;</span><span class="p">,</span> <span class="n">PCAP_Engine</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_magic</span> <span class="ow">in</span> <span class="n">PCAPNG_Engine</span><span class="o">.</span><span class="n">MAGIC_NUMBER</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_exeng</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">&#39;Engine[P]&#39;</span><span class="p">,</span> <span class="n">PCAPNG_Engine</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">FormatError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;unknown file format: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_magic</span><span class="si">!r}</span><span class="s1">&#39;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_exeng</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
 
         <span class="c1"># start iteration</span>
@@ -787,7 +798,15 @@
 
             <span class="bp">self</span><span class="o">.</span><span class="n">_ifile</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">SEEK_SET</span><span class="p">)</span>
             <span class="k">return</span> <span class="n">engine</span>
-        <span class="k">raise</span> <span class="n">FormatError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;unknown PCAP file format: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_magic</span><span class="si">!r}</span><span class="s1">&#39;</span><span class="p">)</span></div>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_magic</span> <span class="ow">in</span> <span class="n">PCAPNG_Engine</span><span class="o">.</span><span class="n">MAGIC_NUMBER</span><span class="p">:</span>
+            <span class="n">engine</span> <span class="o">=</span> <span class="n">PCAPNG_Engine</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>  <span class="c1"># type: ignore[assignment]</span>
+            <span class="n">engine</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">_ifile</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">SEEK_SET</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">engine</span>
+
+        <span class="k">raise</span> <span class="n">FormatError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;unknown file format: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_magic</span><span class="si">!r}</span><span class="s1">&#39;</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="Extractor.record_frames"><a class="viewcode-back" href="../../../pcapkit/foundation/extraction.html#pcapkit.foundation.extraction.Extractor.record_frames">[docs]</a>    <span class="k">def</span> <span class="nf">record_frames</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Read packet frames.</span>

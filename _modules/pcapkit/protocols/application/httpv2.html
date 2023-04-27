@@ -586,6 +586,13 @@
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Make (construct) packet data.</span>
 
 <span class="sd">        Args:</span>
+<span class="sd">            type: Type of HTTP/2 frame.</span>
+<span class="sd">            type_default: Default frame type.</span>
+<span class="sd">            type_namespace: Namespace of frame type.</span>
+<span class="sd">            type_reversed: Whether to reverse the namespace.</span>
+<span class="sd">            flags: Flags of HTTP/2 frame.</span>
+<span class="sd">            sid: Stream ID of HTTP/2 frame.</span>
+<span class="sd">            frame: Frame data of HTTP/2 frame.</span>
 <span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
 
 <span class="sd">        Returns:</span>

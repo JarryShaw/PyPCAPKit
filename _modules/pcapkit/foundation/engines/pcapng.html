@@ -5,7 +5,7 @@
     <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../../../genindex.html" /><link rel="search" title="Search" href="../../../../search.html" />
 
     <!-- Generated with Sphinx 6.2.0 and Furo 2023.03.27 -->
-        <title>pcapkit.foundation.engines.dpkt - PyPCAPKit</title>
+        <title>pcapkit.foundation.engines.pcapng - PyPCAPKit</title>
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../../../../_static/styles/furo.css?digest=fad236701ea90a88636c2a8c73b44ae642ed2a53" />
     <link rel="stylesheet" type="text/css" href="../../../../_static/copybutton.css" />
@@ -339,50 +339,104 @@
           </label>
         </div>
         <article role="main">
-          <h1>Source code for pcapkit.foundation.engines.dpkt</h1><div class="highlight"><pre>
+          <h1>Source code for pcapkit.foundation.engines.pcapng</h1><div class="highlight"><pre>
 <span></span><span class="c1"># -*- coding: utf-8 -*-</span>
-<span class="sd">&quot;&quot;&quot;DPKT Support</span>
-<span class="sd">==================</span>
+<span class="sd">&quot;&quot;&quot;PCAP-NG Support</span>
+<span class="sd">=====================</span>
 
-<span class="sd">.. module:: pcapkit.foundation.engines.dpkt</span>
+<span class="sd">.. module:: pcapkit.foundation.engines.pcapng</span>
 
-<span class="sd">This module contains the implementation for `DPKT`_ engine</span>
+<span class="sd">This module contains the implementation for PCAP-NG file extraction</span>
 <span class="sd">support, as is used by :class:`pcapkit.foundation.extraction.Extractor`.</span>
 
-<span class="sd">.. _DPKT: https://dpkt.readthedocs.io</span>
-
 <span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">logging</span> <span class="kn">import</span> <span class="n">warn</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">cast</span>
 
-<span class="kn">from</span> <span class="nn">pcapkit.const.reg.linktype</span> <span class="kn">import</span> <span class="n">LinkType</span> <span class="k">as</span> <span class="n">Enum_LinkType</span>
+<span class="kn">from</span> <span class="nn">pcapkit.const.pcapng.block_type</span> <span class="kn">import</span> <span class="n">BlockType</span> <span class="k">as</span> <span class="n">Enum_BlockType</span>
+<span class="kn">from</span> <span class="nn">pcapkit.corekit.infoclass</span> <span class="kn">import</span> <span class="n">Info</span>
 <span class="kn">from</span> <span class="nn">pcapkit.foundation.engines.engine</span> <span class="kn">import</span> <span class="n">Engine</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.misc.pcapng</span> <span class="kn">import</span> <span class="n">PCAPNG</span> <span class="k">as</span> <span class="n">P_PCAPNG</span>
 <span class="kn">from</span> <span class="nn">pcapkit.utilities.exceptions</span> <span class="kn">import</span> <span class="n">FormatError</span><span class="p">,</span> <span class="n">stacklevel</span>
-<span class="kn">from</span> <span class="nn">pcapkit.utilities.warnings</span> <span class="kn">import</span> <span class="n">AttributeWarning</span><span class="p">,</span> <span class="n">DPKTWarning</span><span class="p">,</span> <span class="n">warn</span>
+<span class="kn">from</span> <span class="nn">pcapkit.utilities.warnings</span> <span class="kn">import</span> <span class="n">DeprecatedFormatWarning</span>
 
-<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;DPKT&#39;</span><span class="p">]</span>
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;PCAPNG&#39;</span><span class="p">]</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-    <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Iterator</span>
+    <span class="kn">from</span> <span class="nn">pcapkit.protocols.data.misc.pcapng</span> <span class="kn">import</span> <span class="n">PCAPNG</span> <span class="k">as</span> <span class="n">Data_PCAPNG</span>
+    <span class="kn">from</span> <span class="nn">pcapkit.protocols.data.misc.pcapng</span> <span class="kn">import</span> <span class="n">CustomBlock</span> <span class="k">as</span> <span class="n">Data_CustomBlock</span>
+    <span class="kn">from</span> <span class="nn">pcapkit.protocols.data.misc.pcapng</span> <span class="kn">import</span> \
+        <span class="n">DecryptionSecretsBlock</span> <span class="k">as</span> <span class="n">Data_DecryptionSecretsBlock</span>
+    <span class="kn">from</span> <span class="nn">pcapkit.protocols.data.misc.pcapng</span> <span class="kn">import</span> <span class="n">EnhancedPacketBlock</span> <span class="k">as</span> <span class="n">Data_EnhancedPacketBlock</span>
+    <span class="kn">from</span> <span class="nn">pcapkit.protocols.data.misc.pcapng</span> <span class="kn">import</span> \
+        <span class="n">InterfaceDescriptionBlock</span> <span class="k">as</span> <span class="n">Data_InterfaceDescriptionBlock</span>
+    <span class="kn">from</span> <span class="nn">pcapkit.protocols.data.misc.pcapng</span> <span class="kn">import</span> \
+        <span class="n">InterfaceStatisticsBlock</span> <span class="k">as</span> <span class="n">Data_InterfaceStatisticsBlock</span>
+    <span class="kn">from</span> <span class="nn">pcapkit.protocols.data.misc.pcapng</span> <span class="kn">import</span> <span class="n">NameResolutionBlock</span> <span class="k">as</span> <span class="n">Data_NameResolutionBlock</span>
+    <span class="kn">from</span> <span class="nn">pcapkit.protocols.data.misc.pcapng</span> <span class="kn">import</span> <span class="n">PacketBlock</span> <span class="k">as</span> <span class="n">Data_PacketBlock</span>
+    <span class="kn">from</span> <span class="nn">pcapkit.protocols.data.misc.pcapng</span> <span class="kn">import</span> <span class="n">SectionHeaderBlock</span> <span class="k">as</span> <span class="n">Data_SectionHeaderBlock</span>
+    <span class="kn">from</span> <span class="nn">pcapkit.protocols.data.misc.pcapng</span> <span class="kn">import</span> <span class="n">SimplePacketBlock</span> <span class="k">as</span> <span class="n">Data_SimplePacketBlock</span>
+    <span class="kn">from</span> <span class="nn">pcapkit.protocols.data.misc.pcapng</span> <span class="kn">import</span> \
+        <span class="n">SystemdJournalExportBlock</span> <span class="k">as</span> <span class="n">Data_SystemdJournalExportBlock</span>
+    <span class="kn">from</span> <span class="nn">pcapkit.protocols.data.misc.pcapng</span> <span class="kn">import</span> <span class="n">UnknownBlock</span> <span class="k">as</span> <span class="n">Data_UnknownBlock</span>
 
-    <span class="kn">from</span> <span class="nn">dpkt.dpkt</span> <span class="kn">import</span> <span class="n">Packet</span> <span class="k">as</span> <span class="n">DPKTPacket</span>
 
-    <span class="kn">from</span> <span class="nn">pcapkit.foundation.extraction</span> <span class="kn">import</span> <span class="n">Extractor</span>
-    <span class="kn">from</span> <span class="nn">pcapkit.protocols.misc.pcap.header</span> <span class="kn">import</span> <span class="n">Header</span>
+<span class="k">class</span> <span class="nc">Context</span><span class="p">(</span><span class="n">Info</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Context manager for PCAP-NG file format.&quot;&quot;&quot;</span>
+
+    <span class="c1">#: Section header.</span>
+    <span class="n">section</span><span class="p">:</span> <span class="s1">&#39;Data_SectionHeaderBlock&#39;</span>
+
+    <span class="k">def</span> <span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Post initialisation hook.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__update__</span><span class="p">(</span>
+            <span class="n">interfaces</span><span class="o">=</span><span class="p">[],</span>
+            <span class="n">packets</span><span class="o">=</span><span class="p">[],</span>
+            <span class="n">names</span><span class="o">=</span><span class="p">[],</span>
+            <span class="n">journals</span><span class="o">=</span><span class="p">[],</span>
+            <span class="n">secrets</span><span class="o">=</span><span class="p">[],</span>
+            <span class="n">custom</span><span class="o">=</span><span class="p">[],</span>
+            <span class="n">statistics</span><span class="o">=</span><span class="p">[],</span>
+            <span class="n">unknown</span><span class="o">=</span><span class="p">[],</span>
+        <span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+        <span class="c1">#: Interface descriptions.</span>
+        <span class="n">interfaces</span><span class="p">:</span> <span class="s1">&#39;list[Data_InterfaceDescriptionBlock]&#39;</span>
+        <span class="c1">#: Packets.</span>
+        <span class="n">packets</span><span class="p">:</span> <span class="s1">&#39;list[Data_PacketBlock | Data_SimplePacketBlock | Data_EnhancedPacketBlock]&#39;</span>
+        <span class="c1">#: Name resolution records.</span>
+        <span class="n">names</span><span class="p">:</span> <span class="s1">&#39;list[Data_NameResolutionBlock]&#39;</span>
+        <span class="c1">#: :manpage:`systemd(1)` journal export records.</span>
+        <span class="n">journals</span><span class="p">:</span> <span class="s1">&#39;list[Data_SystemdJournalExportBlock]&#39;</span>
+        <span class="c1">#: Decryption secrets.</span>
+        <span class="n">secrets</span><span class="p">:</span> <span class="s1">&#39;list[Data_DecryptionSecretsBlock]&#39;</span>
+        <span class="c1">#: Custom blocks.</span>
+        <span class="n">custom</span><span class="p">:</span> <span class="s1">&#39;list[Data_CustomBlock]&#39;</span>
+        <span class="c1">#: Interface statistics.</span>
+        <span class="n">statistics</span><span class="p">:</span> <span class="s1">&#39;list[Data_InterfaceStatisticsBlock]&#39;</span>
+        <span class="c1">#: Unknown blocks.</span>
+        <span class="n">unknown</span><span class="p">:</span> <span class="s1">&#39;list[Data_UnknownBlock]&#39;</span>
+
+        <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">section</span><span class="p">:</span> <span class="s1">&#39;Data_SectionHeaderBlock&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>
 
 
-<div class="viewcode-block" id="DPKT"><a class="viewcode-back" href="../../../../pcapkit/foundation/engines/3rdparty.html#pcapkit.foundation.engines.dpkt.DPKT">[docs]</a><span class="k">class</span> <span class="nc">DPKT</span><span class="p">(</span><span class="n">Engine</span><span class="p">[</span><span class="s1">&#39;DPKTPacket&#39;</span><span class="p">]):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;DPKT engine support.</span>
+<div class="viewcode-block" id="PCAPNG"><a class="viewcode-back" href="../../../../pcapkit/foundation/engines/builtin.html#pcapkit.foundation.engines.pcapng.PCAPNG">[docs]</a><span class="k">class</span> <span class="nc">PCAPNG</span><span class="p">(</span><span class="n">Engine</span><span class="p">[</span><span class="n">P_PCAPNG</span><span class="p">]):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;PCAP-NG file extraction support.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        extractor: :class:`~pcapkit.foundation.extraction.Extractor` instance.</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
-
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="c1">#: Global header.</span>
-        <span class="n">_gbhdr</span><span class="p">:</span> <span class="s1">&#39;Header&#39;</span>
-        <span class="c1">#: Data link layer protocol.</span>
-        <span class="n">_dlink</span><span class="p">:</span> <span class="s1">&#39;Enum_LinkType&#39;</span>
+        <span class="c1">#: Current context.</span>
+        <span class="n">_ctx</span><span class="p">:</span> <span class="s1">&#39;Context&#39;</span>
+        <span class="c1">#: File context storage.</span>
+        <span class="n">_ctx_list</span><span class="p">:</span> <span class="s1">&#39;list[Context]&#39;</span>
+
+    <span class="n">MAGIC_NUMBER</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="sa">b</span><span class="s1">&#39;</span><span class="se">\x0a\x0d\x0d\x0a</span><span class="s1">&#39;</span><span class="p">,</span>
+    <span class="p">)</span>
 
     <span class="c1">##########################################################################</span>
     <span class="c1"># Properties.</span>
@@ -391,163 +445,183 @@
     <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">name</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;str&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Engine name.&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="s1">&#39;DPKT&#39;</span>
+        <span class="k">return</span> <span class="s1">&#39;PCAP-NG&#39;</span>
 
     <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">module</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;str&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Engine module name.&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="s1">&#39;dpkt&#39;</span>
-
-    <span class="c1">##########################################################################</span>
-    <span class="c1"># Data models.</span>
-    <span class="c1">##########################################################################</span>
-
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">extractor</span><span class="p">:</span> <span class="s1">&#39;Extractor&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
-        <span class="kn">import</span> <span class="nn">dpkt</span>  <span class="c1"># isort:skip</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">_expkg</span> <span class="o">=</span> <span class="n">dpkt</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_extmp</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">&#39;Iterator[tuple[float, DPKTPacket]]&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
-
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">extractor</span><span class="p">)</span>
+        <span class="k">return</span> <span class="s1">&#39;pcapkit.foundation.engine.pcapng&#39;</span>
 
     <span class="c1">##########################################################################</span>
     <span class="c1"># Methods.</span>
     <span class="c1">##########################################################################</span>
 
-<div class="viewcode-block" id="DPKT.run"><a class="viewcode-back" href="../../../../pcapkit/foundation/engines/3rdparty.html#pcapkit.foundation.engines.dpkt.DPKT.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Call :class:`dpkt.pcap.Reader` to extract PCAP files.</span>
+<div class="viewcode-block" id="PCAPNG.run"><a class="viewcode-back" href="../../../../pcapkit/foundation/engines/builtin.html#pcapkit.foundation.engines.pcapng.PCAPNG.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Start extraction.</span>
 
-<span class="sd">        This method assigns :attr:`self._expkg &lt;Extractor._expkg&gt;` as :mod:`dpkt` and</span>
-<span class="sd">        :attr:`self._extmp &lt;Extractor._extmp&gt;` as an iterator from :class:`dpkt.pcap.Reader`.</span>
-
-<span class="sd">        Warns:</span>
-<span class="sd">            AttributeWarning: If :attr:`self._exlyr &lt;Extractor._exlyr&gt;` and/or</span>
-<span class="sd">                :attr:`self._exptl &lt;Extractor._exptl&gt;` is provided as the DPKT</span>
-<span class="sd">                engine currently does not support such operations.</span>
-
-<span class="sd">        Raises:</span>
-<span class="sd">            FormatError: If the file format is not supported, i.e., not a PCAP</span>
-<span class="sd">                file.</span>
+<span class="sd">        This method is the entry point for PCAP-NG file extraction. It will</span>
+<span class="sd">        directly extract the first block, which should be a section header</span>
+<span class="sd">        block, and then save the related information into the internal</span>
+<span class="sd">        context storage.</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="kn">from</span> <span class="nn">pcapkit.foundation.engines.pcap</span> <span class="kn">import</span> <span class="n">PCAP</span>
-        <span class="kn">from</span> <span class="nn">pcapkit.foundation.engines.pcapng</span> <span class="kn">import</span> <span class="n">PCAPNG</span>
-
         <span class="n">ext</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_extractor</span>
-        <span class="n">dpkt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_expkg</span>
 
-        <span class="k">if</span> <span class="n">ext</span><span class="o">.</span><span class="n">_exlyr</span> <span class="o">!=</span> <span class="s1">&#39;none&#39;</span> <span class="ow">or</span> <span class="n">ext</span><span class="o">.</span><span class="n">_exptl</span> <span class="o">!=</span> <span class="s1">&#39;null&#39;</span><span class="p">:</span>
-            <span class="n">warn</span><span class="p">(</span><span class="s2">&quot;&#39;Extractor(engine=dpkt)&#39; does not support protocol and layer threshold; &quot;</span>
-                 <span class="sa">f</span><span class="s2">&quot;&#39;layer=</span><span class="si">{</span><span class="n">ext</span><span class="o">.</span><span class="n">_exlyr</span><span class="si">}</span><span class="s2">&#39; and &#39;protocol=</span><span class="si">{</span><span class="n">ext</span><span class="o">.</span><span class="n">_exptl</span><span class="si">}</span><span class="s2">&#39; ignored&quot;</span><span class="p">,</span>
-                 <span class="n">AttributeWarning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="n">stacklevel</span><span class="p">())</span>
+        <span class="n">shb</span> <span class="o">=</span> <span class="n">P_PCAPNG</span><span class="p">(</span><span class="n">ext</span><span class="o">.</span><span class="n">_ifile</span><span class="p">,</span> <span class="n">num</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">ctx</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">shb</span><span class="o">.</span><span class="n">info</span><span class="o">.</span><span class="n">type</span> <span class="o">!=</span> <span class="n">Enum_BlockType</span><span class="o">.</span><span class="n">Section_Header_Block</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">FormatError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;PCAP-NG: [SHB] invalid block type: </span><span class="si">{</span><span class="n">shb</span><span class="o">.</span><span class="n">info</span><span class="o">.</span><span class="n">type</span><span class="si">!r}</span><span class="s1">&#39;</span><span class="p">)</span>
 
-        <span class="c1"># setup verbose handler</span>
-        <span class="k">if</span> <span class="n">ext</span><span class="o">.</span><span class="n">_flag_v</span><span class="p">:</span>
-            <span class="kn">from</span> <span class="nn">pcapkit.toolkit.dpkt</span> <span class="kn">import</span> <span class="n">packet2chain</span>  <span class="c1"># isort:skip</span>
-            <span class="n">ext</span><span class="o">.</span><span class="n">_vfunc</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">e</span><span class="p">,</span> <span class="n">f</span><span class="p">:</span> <span class="nb">print</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s1">&#39;Frame </span><span class="si">{</span><span class="n">e</span><span class="o">.</span><span class="n">_frnum</span><span class="si">:</span><span class="s1">&gt;3d</span><span class="si">}</span><span class="s1">: </span><span class="si">{</span><span class="n">packet2chain</span><span class="p">(</span><span class="n">f</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span>  <span class="c1"># pylint: disable=protected-access</span>
-            <span class="p">)</span>  <span class="c1"># pylint: disable=logging-fstring-interpolation</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_ctx</span> <span class="o">=</span> <span class="n">Context</span><span class="p">(</span><span class="n">cast</span><span class="p">(</span><span class="s1">&#39;Data_SectionHeaderBlock&#39;</span><span class="p">,</span> <span class="n">shb</span><span class="o">.</span><span class="n">info</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_ctx_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ctx</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="n">ext</span><span class="o">.</span><span class="n">magic_number</span> <span class="ow">in</span> <span class="n">PCAP</span><span class="o">.</span><span class="n">MAGIC_NUMBER</span><span class="p">:</span>
-            <span class="n">reader</span> <span class="o">=</span> <span class="n">dpkt</span><span class="o">.</span><span class="n">pcap</span><span class="o">.</span><span class="n">Reader</span><span class="p">(</span><span class="n">ext</span><span class="o">.</span><span class="n">_ifile</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="n">ext</span><span class="o">.</span><span class="n">magic_number</span> <span class="ow">in</span> <span class="n">PCAPNG</span><span class="o">.</span><span class="n">MAGIC_NUMBER</span><span class="p">:</span>
-            <span class="n">reader</span> <span class="o">=</span> <span class="n">dpkt</span><span class="o">.</span><span class="n">pcapng</span><span class="o">.</span><span class="n">Reader</span><span class="p">(</span><span class="n">ext</span><span class="o">.</span><span class="n">_ifile</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">FormatError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;unsupported file format: </span><span class="si">{</span><span class="n">ext</span><span class="o">.</span><span class="n">magic_number</span><span class="si">!r}</span><span class="s1">&#39;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_dlink</span> <span class="o">=</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">reader</span><span class="o">.</span><span class="n">datalink</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_write_file</span><span class="p">(</span><span class="n">shb</span><span class="o">.</span><span class="n">info</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;Section Header </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ctx_list</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span></div>
 
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dlink</span> <span class="o">==</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">ETHERNET</span><span class="p">:</span>
-            <span class="n">pkg</span> <span class="o">=</span> <span class="n">dpkt</span><span class="o">.</span><span class="n">ethernet</span><span class="o">.</span><span class="n">Ethernet</span>
-        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dlink</span><span class="o">.</span><span class="n">value</span> <span class="o">==</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">IPV4</span><span class="p">:</span>
-            <span class="n">pkg</span> <span class="o">=</span> <span class="n">dpkt</span><span class="o">.</span><span class="n">ip</span><span class="o">.</span><span class="n">IP</span>
-        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dlink</span><span class="o">.</span><span class="n">value</span> <span class="o">==</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">IPV6</span><span class="p">:</span>
-            <span class="n">pkg</span> <span class="o">=</span> <span class="n">dpkt</span><span class="o">.</span><span class="n">ip6</span><span class="o">.</span><span class="n">IP6</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">warn</span><span class="p">(</span><span class="s1">&#39;unrecognised link layer protocol; all analysis functions ignored&#39;</span><span class="p">,</span>
-                 <span class="n">DPKTWarning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="n">stacklevel</span><span class="p">())</span>
+<div class="viewcode-block" id="PCAPNG.read_frame"><a class="viewcode-back" href="../../../../pcapkit/foundation/engines/builtin.html#pcapkit.foundation.engines.pcapng.PCAPNG.read_frame">[docs]</a>    <span class="k">def</span> <span class="nf">read_frame</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;P_PCAPNG&#39;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read frames.</span>
 
-            <span class="k">class</span> <span class="nc">RawPacket</span><span class="p">(</span><span class="n">dpkt</span><span class="o">.</span><span class="n">dpkt</span><span class="o">.</span><span class="n">Packet</span><span class="p">):</span>  <span class="c1"># type: ignore[name-defined]</span>
-<span class="w">                </span><span class="sd">&quot;&quot;&quot;Raw packet.&quot;&quot;&quot;</span>
+<span class="sd">        This method performs following tasks:</span>
 
-                <span class="k">def</span> <span class="fm">__len__</span><span class="p">(</span><span class="n">ext</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;int&#39;</span><span class="p">:</span>
-                    <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">ext</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
-
-                <span class="k">def</span> <span class="fm">__bytes__</span><span class="p">(</span><span class="n">ext</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;bytes&#39;</span><span class="p">:</span>
-                    <span class="k">return</span> <span class="n">ext</span><span class="o">.</span><span class="n">data</span>
-
-                <span class="k">def</span> <span class="nf">unpack</span><span class="p">(</span><span class="n">ext</span><span class="p">,</span> <span class="n">buf</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
-                    <span class="n">ext</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">buf</span>
-
-            <span class="n">pkg</span> <span class="o">=</span> <span class="n">RawPacket</span>
-
-        <span class="c1"># extract &amp; analyse file</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_expkg</span> <span class="o">=</span> <span class="n">pkg</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_extmp</span> <span class="o">=</span> <span class="n">reader</span></div>
-
-<div class="viewcode-block" id="DPKT.read_frame"><a class="viewcode-back" href="../../../../pcapkit/foundation/engines/3rdparty.html#pcapkit.foundation.engines.dpkt.DPKT.read_frame">[docs]</a>    <span class="k">def</span> <span class="nf">read_frame</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DPKTPacket&#39;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read frames with DPKT engine.</span>
+<span class="sd">        - read the next block from input file;</span>
+<span class="sd">        - check if the block is a packet block;</span>
+<span class="sd">        - if not, save the block into the internal context storage and repeat;</span>
+<span class="sd">        - if yes, save the related information into the internal context storage;</span>
+<span class="sd">        - write the parsed block into output file.</span>
+<span class="sd">        - reassemble IP and/or TCP fragments;</span>
+<span class="sd">        - trace TCP flows if any;</span>
+<span class="sd">        - record frame information if any.</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            dpkt.dpkt.Packet: Parsed frame instance.</span>
-
-<span class="sd">        See Also:</span>
-<span class="sd">            Please refer to :meth:`_default_read_frame` for more operational information.</span>
+<span class="sd">            Parsed PCAP-NG block.</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="kn">from</span> <span class="nn">pcapkit.toolkit.dpkt</span> <span class="kn">import</span> <span class="p">(</span><span class="n">ipv4_reassembly</span><span class="p">,</span> <span class="n">ipv6_reassembly</span><span class="p">,</span> <span class="n">packet2dict</span><span class="p">,</span>
-                                          <span class="n">tcp_reassembly</span><span class="p">,</span> <span class="n">tcp_traceflow</span><span class="p">)</span>
+        <span class="kn">from</span> <span class="nn">pcapkit.toolkit.pcapng</span> <span class="kn">import</span> <span class="p">(</span><span class="n">ipv4_reassembly</span><span class="p">,</span> <span class="n">ipv6_reassembly</span><span class="p">,</span> <span class="n">tcp_reassembly</span><span class="p">,</span>
+                                            <span class="n">tcp_traceflow</span><span class="p">)</span>
         <span class="n">ext</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_extractor</span>
 
-        <span class="c1"># fetch DPKT packet</span>
-        <span class="n">timestamp</span><span class="p">,</span> <span class="n">pkt</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">&#39;tuple[float, bytes]&#39;</span><span class="p">,</span> <span class="nb">next</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_extmp</span><span class="p">))</span>
-        <span class="n">packet</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_expkg</span><span class="p">(</span><span class="n">pkt</span><span class="p">)</span>  <span class="c1"># type: DPKTPacket</span>
+        <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="c1"># read next block</span>
+            <span class="n">block</span> <span class="o">=</span> <span class="n">P_PCAPNG</span><span class="p">(</span><span class="n">ext</span><span class="o">.</span><span class="n">_ifile</span><span class="p">,</span> <span class="n">num</span><span class="o">=</span><span class="n">ext</span><span class="o">.</span><span class="n">_frnum</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">ctx</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_ctx</span><span class="p">,</span>
+                             <span class="n">layer</span><span class="o">=</span><span class="n">ext</span><span class="o">.</span><span class="n">_exlyr</span><span class="p">,</span> <span class="n">protocol</span><span class="o">=</span><span class="n">ext</span><span class="o">.</span><span class="n">_exptl</span><span class="p">)</span>
+
+            <span class="c1"># check block type</span>
+            <span class="k">if</span> <span class="n">block</span><span class="o">.</span><span class="n">info</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="n">Enum_BlockType</span><span class="o">.</span><span class="n">Section_Header_Block</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_ctx</span> <span class="o">=</span> <span class="n">Context</span><span class="p">(</span><span class="n">cast</span><span class="p">(</span><span class="s1">&#39;Data_SectionHeaderBlock&#39;</span><span class="p">,</span> <span class="n">block</span><span class="o">.</span><span class="n">info</span><span class="p">))</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_ctx_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ctx</span><span class="p">)</span>
+
+                <span class="bp">self</span><span class="o">.</span><span class="n">_write_file</span><span class="p">(</span><span class="n">block</span><span class="o">.</span><span class="n">info</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;Section Header </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ctx_list</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+
+            <span class="k">elif</span> <span class="n">block</span><span class="o">.</span><span class="n">info</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="n">Enum_BlockType</span><span class="o">.</span><span class="n">Interface_Description_Block</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_ctx</span><span class="o">.</span><span class="n">interfaces</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cast</span><span class="p">(</span><span class="s1">&#39;Data_InterfaceDescriptionBlock&#39;</span><span class="p">,</span> <span class="n">block</span><span class="o">.</span><span class="n">info</span><span class="p">))</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_write_file</span><span class="p">(</span><span class="n">block</span><span class="o">.</span><span class="n">info</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;Interface Description </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ctx</span><span class="o">.</span><span class="n">interfaces</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+
+            <span class="k">elif</span> <span class="n">block</span><span class="o">.</span><span class="n">info</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="n">Enum_BlockType</span><span class="o">.</span><span class="n">Name_Resolution_Block</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_ctx</span><span class="o">.</span><span class="n">names</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cast</span><span class="p">(</span><span class="s1">&#39;Data_NameResolutionBlock&#39;</span><span class="p">,</span> <span class="n">block</span><span class="o">.</span><span class="n">info</span><span class="p">))</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_write_file</span><span class="p">(</span><span class="n">block</span><span class="o">.</span><span class="n">info</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;Name Resolution </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ctx</span><span class="o">.</span><span class="n">names</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+
+            <span class="k">elif</span> <span class="n">block</span><span class="o">.</span><span class="n">info</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="n">Enum_BlockType</span><span class="o">.</span><span class="n">systemd_Journal_Export_Block</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_ctx</span><span class="o">.</span><span class="n">journals</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cast</span><span class="p">(</span><span class="s1">&#39;Data_SystemdJournalExportBlock&#39;</span><span class="p">,</span> <span class="n">block</span><span class="o">.</span><span class="n">info</span><span class="p">))</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_write_file</span><span class="p">(</span><span class="n">block</span><span class="o">.</span><span class="n">info</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;systemd Journal Export </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ctx</span><span class="o">.</span><span class="n">journals</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+
+            <span class="k">elif</span> <span class="n">block</span><span class="o">.</span><span class="n">info</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="n">Enum_BlockType</span><span class="o">.</span><span class="n">Decryption_Secrets_Block</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_ctx</span><span class="o">.</span><span class="n">secrets</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cast</span><span class="p">(</span><span class="s1">&#39;Data_DecryptionSecretsBlock&#39;</span><span class="p">,</span> <span class="n">block</span><span class="o">.</span><span class="n">info</span><span class="p">))</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_write_file</span><span class="p">(</span><span class="n">block</span><span class="o">.</span><span class="n">info</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;Decryption Secrets </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ctx</span><span class="o">.</span><span class="n">secrets</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+
+            <span class="k">elif</span> <span class="n">block</span><span class="o">.</span><span class="n">info</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="n">Enum_BlockType</span><span class="o">.</span><span class="n">Interface_Statistics_Block</span><span class="p">:</span>
+                <span class="n">info</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">&#39;Data_InterfaceStatisticsBlock&#39;</span><span class="p">,</span> <span class="n">block</span><span class="o">.</span><span class="n">info</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">info</span><span class="o">.</span><span class="n">interface_id</span> <span class="o">&gt;=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ctx</span><span class="o">.</span><span class="n">interfaces</span><span class="p">):</span>
+                    <span class="k">raise</span> <span class="n">FormatError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;PCAP-NG: [ISB] invalid interface ID: </span><span class="si">{</span><span class="n">info</span><span class="o">.</span><span class="n">interface_id</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_ctx</span><span class="o">.</span><span class="n">statistics</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">info</span><span class="p">)</span>
+
+                <span class="bp">self</span><span class="o">.</span><span class="n">_write_file</span><span class="p">(</span><span class="n">block</span><span class="o">.</span><span class="n">info</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;Interface Statistics </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ctx</span><span class="o">.</span><span class="n">statistics</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+
+            <span class="k">elif</span> <span class="n">block</span><span class="o">.</span><span class="n">info</span><span class="o">.</span><span class="n">type</span> <span class="ow">in</span> <span class="p">(</span><span class="n">Enum_BlockType</span><span class="o">.</span><span class="n">Custom_Block_that_rewriters_can_copy_into_new_files</span><span class="p">,</span>
+                                    <span class="n">Enum_BlockType</span><span class="o">.</span><span class="n">Custom_Block_that_rewriters_should_not_copy_into_new_files</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_ctx</span><span class="o">.</span><span class="n">custom</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cast</span><span class="p">(</span><span class="s1">&#39;Data_CustomBlock&#39;</span><span class="p">,</span> <span class="n">block</span><span class="o">.</span><span class="n">info</span><span class="p">))</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_write_file</span><span class="p">(</span><span class="n">block</span><span class="o">.</span><span class="n">info</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;Custom </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ctx</span><span class="o">.</span><span class="n">custom</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+
+            <span class="k">elif</span> <span class="n">block</span><span class="o">.</span><span class="n">info</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="n">Enum_BlockType</span><span class="o">.</span><span class="n">Enhanced_Packet_Block</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">info</span><span class="o">.</span><span class="n">interface_id</span> <span class="o">&gt;=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ctx</span><span class="o">.</span><span class="n">interfaces</span><span class="p">):</span>
+                    <span class="k">raise</span> <span class="n">FormatError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;PCAP-NG: [EPB] invalid interface ID: </span><span class="si">{</span><span class="n">info</span><span class="o">.</span><span class="n">interface_id</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+                <span class="k">break</span>
+
+            <span class="k">elif</span> <span class="n">block</span><span class="o">.</span><span class="n">info</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="n">Enum_BlockType</span><span class="o">.</span><span class="n">Simple_Packet_Block</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ctx</span><span class="o">.</span><span class="n">interfaces</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="n">FormatError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;PCAP-NG: [SPB] invalid section with </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ctx</span><span class="o">.</span><span class="n">interfaces</span><span class="p">)</span><span class="si">}</span><span class="s1"> interfaces&#39;</span><span class="p">)</span>
+                <span class="k">break</span>
+
+            <span class="k">elif</span> <span class="n">block</span><span class="o">.</span><span class="n">info</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="n">Enum_BlockType</span><span class="o">.</span><span class="n">Packet_Block</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">info</span><span class="o">.</span><span class="n">interface_id</span> <span class="o">&gt;=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ctx</span><span class="o">.</span><span class="n">interfaces</span><span class="p">):</span>
+                    <span class="k">raise</span> <span class="n">FormatError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;PCAP-NG: [Packet] invalid interface ID: </span><span class="si">{</span><span class="n">info</span><span class="o">.</span><span class="n">interface_id</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+
+                <span class="n">warn</span><span class="p">(</span><span class="s1">&#39;PCAP-NG: [Packet] deprecated block type&#39;</span><span class="p">,</span> <span class="n">DeprecatedFormatWarning</span><span class="p">,</span>
+                     <span class="n">stacklevel</span><span class="o">=</span><span class="n">stacklevel</span><span class="p">())</span>
+                <span class="k">break</span>
+
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_ctx</span><span class="o">.</span><span class="n">unknown</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cast</span><span class="p">(</span><span class="s1">&#39;Data_UnknownBlock&#39;</span><span class="p">,</span> <span class="n">block</span><span class="o">.</span><span class="n">info</span><span class="p">))</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_write_file</span><span class="p">(</span><span class="n">block</span><span class="o">.</span><span class="n">info</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;Unknown </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ctx</span><span class="o">.</span><span class="n">unknown</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+
+        <span class="c1"># increment frame number</span>
+        <span class="n">ext</span><span class="o">.</span><span class="n">_frnum</span> <span class="o">+=</span> <span class="mi">1</span>
 
         <span class="c1"># verbose output</span>
-        <span class="n">ext</span><span class="o">.</span><span class="n">_frnum</span> <span class="o">+=</span> <span class="mi">1</span>
-        <span class="n">ext</span><span class="o">.</span><span class="n">_vfunc</span><span class="p">(</span><span class="n">ext</span><span class="p">,</span> <span class="n">packet</span><span class="p">)</span>
+        <span class="n">ext</span><span class="o">.</span><span class="n">_vfunc</span><span class="p">(</span><span class="n">ext</span><span class="p">,</span> <span class="n">block</span><span class="p">)</span>
 
         <span class="c1"># write plist</span>
-        <span class="n">frnum</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;Frame </span><span class="si">{</span><span class="n">ext</span><span class="o">.</span><span class="n">_frnum</span><span class="si">}</span><span class="s1">&#39;</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">ext</span><span class="o">.</span><span class="n">_flag_q</span><span class="p">:</span>
-            <span class="n">info</span> <span class="o">=</span> <span class="n">packet2dict</span><span class="p">(</span><span class="n">packet</span><span class="p">,</span> <span class="n">timestamp</span><span class="p">,</span> <span class="n">data_link</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_dlink</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">ext</span><span class="o">.</span><span class="n">_flag_f</span><span class="p">:</span>
-                <span class="n">ofile</span> <span class="o">=</span> <span class="n">ext</span><span class="o">.</span><span class="n">_ofile</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">ext</span><span class="o">.</span><span class="n">_ofnm</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">frnum</span><span class="si">}</span><span class="s1">.</span><span class="si">{</span><span class="n">ext</span><span class="o">.</span><span class="n">_fext</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
-                <span class="n">ofile</span><span class="p">(</span><span class="n">info</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">frnum</span><span class="p">)</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">ext</span><span class="o">.</span><span class="n">_ofile</span><span class="p">(</span><span class="n">info</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">frnum</span><span class="p">)</span>
-                <span class="n">ofile</span> <span class="o">=</span> <span class="n">ext</span><span class="o">.</span><span class="n">_ofile</span>
-            <span class="n">ext</span><span class="o">.</span><span class="n">_offmt</span> <span class="o">=</span> <span class="n">ofile</span><span class="o">.</span><span class="n">kind</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_write_file</span><span class="p">(</span><span class="n">block</span><span class="o">.</span><span class="n">info</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;Frame </span><span class="si">{</span><span class="n">ext</span><span class="o">.</span><span class="n">_frnum</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
 
         <span class="c1"># record fragments</span>
         <span class="k">if</span> <span class="n">ext</span><span class="o">.</span><span class="n">_flag_r</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">ext</span><span class="o">.</span><span class="n">_ipv4</span><span class="p">:</span>
-                <span class="n">data_ipv4</span> <span class="o">=</span> <span class="n">ipv4_reassembly</span><span class="p">(</span><span class="n">packet</span><span class="p">,</span> <span class="n">count</span><span class="o">=</span><span class="n">ext</span><span class="o">.</span><span class="n">_frnum</span><span class="p">)</span>
+                <span class="n">data_ipv4</span> <span class="o">=</span> <span class="n">ipv4_reassembly</span><span class="p">(</span><span class="n">block</span><span class="p">)</span>
                 <span class="k">if</span> <span class="n">data_ipv4</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                     <span class="n">ext</span><span class="o">.</span><span class="n">_reasm</span><span class="o">.</span><span class="n">ipv4</span><span class="p">(</span><span class="n">data_ipv4</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">ext</span><span class="o">.</span><span class="n">_ipv6</span><span class="p">:</span>
-                <span class="n">data_ipv6</span> <span class="o">=</span> <span class="n">ipv6_reassembly</span><span class="p">(</span><span class="n">packet</span><span class="p">,</span> <span class="n">count</span><span class="o">=</span><span class="n">ext</span><span class="o">.</span><span class="n">_frnum</span><span class="p">)</span>
+                <span class="n">data_ipv6</span> <span class="o">=</span> <span class="n">ipv6_reassembly</span><span class="p">(</span><span class="n">block</span><span class="p">)</span>
                 <span class="k">if</span> <span class="n">data_ipv6</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                     <span class="n">ext</span><span class="o">.</span><span class="n">_reasm</span><span class="o">.</span><span class="n">ipv6</span><span class="p">(</span><span class="n">data_ipv6</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">ext</span><span class="o">.</span><span class="n">_tcp</span><span class="p">:</span>
-                <span class="n">data_tcp</span> <span class="o">=</span> <span class="n">tcp_reassembly</span><span class="p">(</span><span class="n">packet</span><span class="p">,</span> <span class="n">count</span><span class="o">=</span><span class="n">ext</span><span class="o">.</span><span class="n">_frnum</span><span class="p">)</span>
+                <span class="n">data_tcp</span> <span class="o">=</span> <span class="n">tcp_reassembly</span><span class="p">(</span><span class="n">block</span><span class="p">)</span>
                 <span class="k">if</span> <span class="n">data_tcp</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                     <span class="n">ext</span><span class="o">.</span><span class="n">_reasm</span><span class="o">.</span><span class="n">tcp</span><span class="p">(</span><span class="n">data_tcp</span><span class="p">)</span>
 
         <span class="c1"># trace flows</span>
         <span class="k">if</span> <span class="n">ext</span><span class="o">.</span><span class="n">_flag_t</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">ext</span><span class="o">.</span><span class="n">_tcp</span><span class="p">:</span>
-                <span class="n">data_tf_tcp</span> <span class="o">=</span> <span class="n">tcp_traceflow</span><span class="p">(</span><span class="n">packet</span><span class="p">,</span> <span class="n">timestamp</span><span class="p">,</span> <span class="n">data_link</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_dlink</span><span class="p">,</span> <span class="n">count</span><span class="o">=</span><span class="n">ext</span><span class="o">.</span><span class="n">_frnum</span><span class="p">)</span>
+                <span class="n">data_tf_tcp</span> <span class="o">=</span> <span class="n">tcp_traceflow</span><span class="p">(</span><span class="n">block</span><span class="p">,</span> <span class="n">nanosecond</span><span class="o">=</span><span class="n">block</span><span class="o">.</span><span class="n">nanosecond</span><span class="p">)</span>
                 <span class="k">if</span> <span class="n">data_tf_tcp</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                     <span class="n">ext</span><span class="o">.</span><span class="n">_trace</span><span class="o">.</span><span class="n">tcp</span><span class="p">(</span><span class="n">data_tf_tcp</span><span class="p">)</span>
 
-        <span class="c1"># record frames</span>
+        <span class="c1"># record blocks</span>
         <span class="k">if</span> <span class="n">ext</span><span class="o">.</span><span class="n">_flag_d</span><span class="p">:</span>
-            <span class="c1"># setattr(packet, &#39;packet2dict&#39;, packet2dict)</span>
-            <span class="c1"># setattr(packet, &#39;packet2chain&#39;, packet2chain)</span>
-            <span class="n">ext</span><span class="o">.</span><span class="n">_frame</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span>
+            <span class="n">ext</span><span class="o">.</span><span class="n">_frame</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">block</span><span class="p">)</span>
 
-        <span class="c1"># return frame record</span>
-        <span class="k">return</span> <span class="n">packet</span></div></div>
+        <span class="c1"># return block record</span>
+        <span class="k">return</span> <span class="n">block</span></div>
+
+    <span class="c1">##########################################################################</span>
+    <span class="c1"># Utilities.</span>
+    <span class="c1">##########################################################################</span>
+
+    <span class="k">def</span> <span class="nf">_write_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">block</span><span class="p">:</span> <span class="s1">&#39;Data_PCAPNG&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Write the parsed block into output file.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            block: The parsed block.</span>
+<span class="sd">            name: The name of the block.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">ext</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_extractor</span>
+        <span class="k">if</span> <span class="n">ext</span><span class="o">.</span><span class="n">_flag_q</span><span class="p">:</span>
+            <span class="k">return</span>
+
+        <span class="k">if</span> <span class="n">ext</span><span class="o">.</span><span class="n">_flag_f</span><span class="p">:</span>
+            <span class="n">ofile</span> <span class="o">=</span> <span class="n">ext</span><span class="o">.</span><span class="n">_ofile</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">ext</span><span class="o">.</span><span class="n">_ofnm</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1">.</span><span class="si">{</span><span class="n">ext</span><span class="o">.</span><span class="n">_fext</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="n">ofile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ctx</span><span class="o">.</span><span class="n">to_dict</span><span class="p">(),</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">ext</span><span class="o">.</span><span class="n">_ofile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ctx</span><span class="o">.</span><span class="n">to_dict</span><span class="p">(),</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
+            <span class="n">ofile</span> <span class="o">=</span> <span class="n">ext</span><span class="o">.</span><span class="n">_ofile</span>
+        <span class="n">ext</span><span class="o">.</span><span class="n">_offmt</span> <span class="o">=</span> <span class="n">ofile</span><span class="o">.</span><span class="n">kind</span></div>
 </pre></div>
         </article>
       </div>

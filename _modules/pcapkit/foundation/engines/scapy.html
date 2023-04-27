@@ -433,9 +433,6 @@
                 <span class="sa">f</span><span class="s1">&#39;Frame </span><span class="si">{</span><span class="n">e</span><span class="o">.</span><span class="n">_frnum</span><span class="si">:</span><span class="s1">&gt;3d</span><span class="si">}</span><span class="s1">: </span><span class="si">{</span><span class="n">packet2chain</span><span class="p">(</span><span class="n">f</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span>  <span class="c1"># pylint: disable=protected-access</span>
             <span class="p">)</span>  <span class="c1"># pylint: disable=logging-fstring-interpolation</span>
 
-        <span class="c1"># extract global header</span>
-        <span class="n">ext</span><span class="o">.</span><span class="n">record_header</span><span class="p">()</span>
-
         <span class="c1"># extract &amp; analyse file</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_extmp</span> <span class="o">=</span> <span class="nb">iter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_expkg</span><span class="o">.</span><span class="n">sniff</span><span class="p">(</span><span class="n">offline</span><span class="o">=</span><span class="n">ext</span><span class="o">.</span><span class="n">_ifnm</span><span class="p">))</span></div>
 

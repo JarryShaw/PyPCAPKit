@@ -409,6 +409,31 @@ should be as <code class="docutils literal notranslate"><span class="pre">{modul
 </dl>
 </dd></dl>
 
+<dl class="py function">
+<dt class="sig sig-object py" id="pcapkit.foundation.registry.register_pcapng">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.foundation.registry.</span></span><span class="sig-name descname"><span class="pre">register_pcapng</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">code</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">module</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">class_</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/foundation/registry.html#register_pcapng"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.registry.register_pcapng" title="Permalink to this definition">#</a></dt>
+<dd><p>Register a new protocol class.</p>
+<div class="admonition-notes admonition">
+<p class="admonition-title">Notes</p>
+<p>The full qualified class name of the new protocol class
+should be as <code class="docutils literal notranslate"><span class="pre">{module}.{class_}</span></code>.</p>
+</div>
+<p>The function will register the given protocol class to the
+<code class="xref py py-data docutils literal notranslate"><span class="pre">pcapkit.protocols.misc.pcapng.PCAPNG.__proto__</span></code> registry.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>code</strong> (<a class="reference internal" href="../const/reg.html#pcapkit.const.reg.linktype.LinkType" title="pcapkit.const.reg.linktype.LinkType"><code class="xref py py-class docutils literal notranslate"><span class="pre">LinkType</span></code></a>) – protocol code as in <a class="reference internal" href="../const/reg.html#pcapkit.const.reg.linktype.LinkType" title="pcapkit.const.reg.linktype.LinkType"><code class="xref py py-class docutils literal notranslate"><span class="pre">LinkType</span></code></a></p></li>
+<li><p><strong>module</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>) – module name</p></li>
+<li><p><strong>class_</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>) – class name</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
 </section>
 <section id="link-layer-registries">
 <h2>Link Layer Registries<a class="headerlink" href="#link-layer-registries" title="Permalink to this heading">#</a></h2>
@@ -644,6 +669,90 @@ code as in <a class="reference internal" href="../const/http.html#pcapkit.const.
 </section>
 <section id="miscellaneous-registries">
 <h2>Miscellaneous Registries<a class="headerlink" href="#miscellaneous-registries" title="Permalink to this heading">#</a></h2>
+<section id="pcap-ng-registries">
+<h3>PCAP-NG Registries<a class="headerlink" href="#pcap-ng-registries" title="Permalink to this heading">#</a></h3>
+<dl class="py function">
+<dt class="sig sig-object py" id="pcapkit.foundation.registry.register_pcapng_block">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.foundation.registry.</span></span><span class="sig-name descname"><span class="pre">register_pcapng_block</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">code</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">meth</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/foundation/registry.html#register_pcapng_block"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.registry.register_pcapng_block" title="Permalink to this definition">#</a></dt>
+<dd><p>Registered a block parser.</p>
+<p>The function will register the given block parser to the
+<code class="xref py py-data docutils literal notranslate"><span class="pre">pcapkit.protocols.misc.pcapng.PCAPNG.__block__</span></code> registry.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>code</strong> (<em>PCAPNG_BlockType</em>) – <code class="xref py py-class docutils literal notranslate"><span class="pre">HTTP/2</span></code> block type
+code as in <a class="reference internal" href="../const/pcapng.html#pcapkit.const.pcapng.block_type.BlockType" title="pcapkit.const.pcapng.block_type.BlockType"><code class="xref py py-class docutils literal notranslate"><span class="pre">BlockType</span></code></a>.</p></li>
+<li><p><strong>meth</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em> | </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.11)"><em>tuple</em></a><em>[</em><em>PCAPNG_BlockParser</em><em>, </em><em>PCAPNG_BlockConstructor</em><em>]</em>) – Method name or callable to parse and/or construct the block.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pcapkit.foundation.registry.register_pcapng_option">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.foundation.registry.</span></span><span class="sig-name descname"><span class="pre">register_pcapng_option</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">code</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">meth</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/foundation/registry.html#register_pcapng_option"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.registry.register_pcapng_option" title="Permalink to this definition">#</a></dt>
+<dd><p>Registered a option parser.</p>
+<p>The function will register the given option parser to the
+<code class="xref py py-data docutils literal notranslate"><span class="pre">pcapkit.protocols.misc.pcapng.PCAPNG.__option__</span></code> registry.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>code</strong> (<em>PCAPNG_OptionType</em>) – <code class="xref py py-class docutils literal notranslate"><span class="pre">PCAPNG</span></code> option type
+code as in <a class="reference internal" href="../const/pcapng.html#pcapkit.const.pcapng.option_type.OptionType" title="pcapkit.const.pcapng.option_type.OptionType"><code class="xref py py-class docutils literal notranslate"><span class="pre">OptionType</span></code></a>.</p></li>
+<li><p><strong>meth</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em> | </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.11)"><em>tuple</em></a><em>[</em><em>PCAPNG_OptionParser</em><em>, </em><em>PCAPNG_OptionConstructor</em><em>]</em>) – Method name or callable to parse and/or construct the option.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pcapkit.foundation.registry.register_pcapng_record">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.foundation.registry.</span></span><span class="sig-name descname"><span class="pre">register_pcapng_record</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">code</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">meth</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/foundation/registry.html#register_pcapng_record"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.registry.register_pcapng_record" title="Permalink to this definition">#</a></dt>
+<dd><p>Registered a name resolution record parser.</p>
+<p>The function will register the given name resolution record parser to the
+<code class="xref py py-data docutils literal notranslate"><span class="pre">pcapkit.protocols.misc.pcapng.PCAPNG.__record__</span></code> registry.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>code</strong> (<em>PCAPNG_RecordType</em>) – <code class="xref py py-class docutils literal notranslate"><span class="pre">PCAPNG</span></code> name
+resolution record type code as in <a class="reference internal" href="../const/pcapng.html#pcapkit.const.pcapng.record_type.RecordType" title="pcapkit.const.pcapng.record_type.RecordType"><code class="xref py py-class docutils literal notranslate"><span class="pre">RecordType</span></code></a>.</p></li>
+<li><p><strong>meth</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em> | </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.11)"><em>tuple</em></a><em>[</em><em>PCAPNG_RecordParser</em><em>, </em><em>PCAPNG_RecordConstructor</em><em>]</em>) – Method name or callable to parse and/or construct the name
+resolution record.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pcapkit.foundation.registry.register_pcapng_secrets">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.foundation.registry.</span></span><span class="sig-name descname"><span class="pre">register_pcapng_secrets</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">code</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">meth</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/foundation/registry.html#register_pcapng_secrets"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.registry.register_pcapng_secrets" title="Permalink to this definition">#</a></dt>
+<dd><p>Registered a decryption secrets parser.</p>
+<p>The function will register the given decryption secrets parser to the
+<code class="xref py py-data docutils literal notranslate"><span class="pre">pcapkit.protocols.misc.pcapng.PCAPNG.__secrets__</span></code> registry.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>code</strong> (<em>PCAPNG_SecretsType</em>) – <code class="xref py py-class docutils literal notranslate"><span class="pre">PCAPNG</span></code> decryption
+secrets type code as in <a class="reference internal" href="../const/pcapng.html#pcapkit.const.pcapng.secrets_type.SecretsType" title="pcapkit.const.pcapng.secrets_type.SecretsType"><code class="xref py py-class docutils literal notranslate"><span class="pre">SecretsType</span></code></a>.</p></li>
+<li><p><strong>meth</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em> | </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.11)"><em>tuple</em></a><em>[</em><em>PCAPNG_SecretsParser</em><em>, </em><em>PCAPNG_SecretsConstructor</em><em>]</em>) – Method name or callable to parse and/or construct the decryption secrets.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
 <section id="engine-registries">
 <h3>Engine Registries<a class="headerlink" href="#engine-registries" title="Permalink to this heading">#</a></h3>
 <dl class="py function">
@@ -773,11 +882,16 @@ should be as <code class="docutils literal notranslate"><span class="pre">{modul
 should be as <code class="docutils literal notranslate"><span class="pre">{module}.{class_}</span></code>.</p>
 </div>
 <p>The function will register the given protocol class to the
-<a class="reference internal" href="../protocols/misc/pcap.html#pcapkit.protocols.misc.pcap.frame.Frame.__proto__" title="pcapkit.protocols.misc.pcap.frame.Frame.__proto__"><code class="xref py py-data docutils literal notranslate"><span class="pre">pcapkit.protocols.misc.pcap.frame.Frame.__proto__</span></code></a> registry.</p>
+following registries:</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="../protocols/misc/pcap.html#pcapkit.protocols.misc.pcap.frame.Frame.__proto__" title="pcapkit.protocols.misc.pcap.frame.Frame.__proto__"><code class="xref py py-data docutils literal notranslate"><span class="pre">pcapkit.protocols.misc.pcap.frame.Frame.__proto__</span></code></a></p></li>
+<li><p><code class="xref py py-data docutils literal notranslate"><span class="pre">pcapkit.protocols.misc.pcapng.PCAPNG.__proto__</span></code></p></li>
+</ul>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
 <ul class="simple">
 <li><p><a class="reference internal" href="#pcapkit.foundation.registry.register_pcap" title="pcapkit.foundation.registry.register_pcap"><code class="xref py py-func docutils literal notranslate"><span class="pre">pcapkit.foundation.registry.register_pcap()</span></code></a></p></li>
+<li><p><a class="reference internal" href="#pcapkit.foundation.registry.register_pcapng" title="pcapkit.foundation.registry.register_pcapng"><code class="xref py py-func docutils literal notranslate"><span class="pre">pcapkit.foundation.registry.register_pcapng()</span></code></a></p></li>
 </ul>
 </div>
 <dl class="field-list simple">
@@ -891,6 +1005,7 @@ should be as <code class="docutils literal notranslate"><span class="pre">{modul
 <li><a class="reference internal" href="#protocol-registries">Protocol Registries</a><ul>
 <li><a class="reference internal" href="#pcapkit.foundation.registry.register_protocol"><code class="docutils literal notranslate"><span class="pre">register_protocol()</span></code></a></li>
 <li><a class="reference internal" href="#pcapkit.foundation.registry.register_pcap"><code class="docutils literal notranslate"><span class="pre">register_pcap()</span></code></a></li>
+<li><a class="reference internal" href="#pcapkit.foundation.registry.register_pcapng"><code class="docutils literal notranslate"><span class="pre">register_pcapng()</span></code></a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#link-layer-registries">Link Layer Registries</a><ul>
@@ -916,6 +1031,13 @@ should be as <code class="docutils literal notranslate"><span class="pre">{modul
 </ul>
 </li>
 <li><a class="reference internal" href="#miscellaneous-registries">Miscellaneous Registries</a><ul>
+<li><a class="reference internal" href="#pcap-ng-registries">PCAP-NG Registries</a><ul>
+<li><a class="reference internal" href="#pcapkit.foundation.registry.register_pcapng_block"><code class="docutils literal notranslate"><span class="pre">register_pcapng_block()</span></code></a></li>
+<li><a class="reference internal" href="#pcapkit.foundation.registry.register_pcapng_option"><code class="docutils literal notranslate"><span class="pre">register_pcapng_option()</span></code></a></li>
+<li><a class="reference internal" href="#pcapkit.foundation.registry.register_pcapng_record"><code class="docutils literal notranslate"><span class="pre">register_pcapng_record()</span></code></a></li>
+<li><a class="reference internal" href="#pcapkit.foundation.registry.register_pcapng_secrets"><code class="docutils literal notranslate"><span class="pre">register_pcapng_secrets()</span></code></a></li>
+</ul>
+</li>
 <li><a class="reference internal" href="#engine-registries">Engine Registries</a><ul>
 <li><a class="reference internal" href="#pcapkit.foundation.registry.register_extractor_engine"><code class="docutils literal notranslate"><span class="pre">register_extractor_engine()</span></code></a></li>
 </ul>

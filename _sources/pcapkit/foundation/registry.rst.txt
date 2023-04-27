@@ -14,6 +14,8 @@ Protocol Registries
 
 .. autofunction:: pcapkit.foundation.registry.register_pcap
 
+.. autofunction:: pcapkit.foundation.registry.register_pcapng
+
 Link Layer Registries
 ---------------------
 
@@ -48,6 +50,17 @@ Application Layer Registries
 
 Miscellaneous Registries
 ------------------------
+
+PCAP-NG Registries
+~~~~~~~~~~~~~~~~~~
+
+.. autofunction:: pcapkit.foundation.registry.register_pcapng_block
+
+.. autofunction:: pcapkit.foundation.registry.register_pcapng_option
+
+.. autofunction:: pcapkit.foundation.registry.register_pcapng_record
+
+.. autofunction:: pcapkit.foundation.registry.register_pcapng_secrets
 
 Engine Registries
 ~~~~~~~~~~~~~~~~~
