@@ -8,13 +8,15 @@ This module contains the implementation for PCAP-NG file extraction
 support, as is used by :class:`pcapkit.foundation.extraction.Extractor`.
 
 """
+from logging import warn
 from typing import TYPE_CHECKING, cast
 
 from pcapkit.const.pcapng.block_type import BlockType as Enum_BlockType
 from pcapkit.corekit.infoclass import Info
 from pcapkit.foundation.engines.engine import Engine
 from pcapkit.protocols.misc.pcapng import PCAPNG as P_PCAPNG
-from pcapkit.utilities.exceptions import FormatError
+from pcapkit.utilities.exceptions import FormatError, stacklevel
+from pcapkit.utilities.warnings import DeprecatedFormatWarning
 
 __all__ = ['PCAPNG']
 
@@ -193,9 +195,22 @@ class PCAPNG(Engine[P_PCAPNG]):
                 self._ctx.custom.append(cast('Data_CustomBlock', block.info))
                 self._write_file(block.info, name=f'Custom {len(self._ctx.custom)}')
 
-            elif block.info.type in (Enum_BlockType.Enhanced_Packet_Block,
-                                    Enum_BlockType.Simple_Packet_Block,
-                                    Enum_BlockType.Packet_Block):
+            elif block.info.type == Enum_BlockType.Enhanced_Packet_Block:
+                if info.interface_id >= len(self._ctx.interfaces):
+                    raise FormatError(f'PCAP-NG: [EPB] invalid interface ID: {info.interface_id}')
+                break
+
+            elif block.info.type == Enum_BlockType.Simple_Packet_Block:
+                if len(self._ctx.interfaces) != 1:
+                    raise FormatError(f'PCAP-NG: [SPB] invalid section with {len(self._ctx.interfaces)} interfaces')
+                break
+
+            elif block.info.type == Enum_BlockType.Packet_Block:
+                if info.interface_id >= len(self._ctx.interfaces):
+                    raise FormatError(f'PCAP-NG: [Packet] invalid interface ID: {info.interface_id}')
+
+                warn('PCAP-NG: [Packet] deprecated block type', DeprecatedFormatWarning,
+                     stacklevel=stacklevel())
                 break
 
             else:
