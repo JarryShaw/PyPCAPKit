@@ -159,7 +159,7 @@ from pcapkit.protocols.schema.misc.pcapng import WireGuardKeyLog as Schema_WireG
 from pcapkit.protocols.schema.misc.pcapng import ZigBeeAPSKey as Schema_ZigBeeAPSKey
 from pcapkit.protocols.schema.misc.pcapng import ZigBeeNWKKey as Schema_ZigBeeNWKKey
 from pcapkit.utilities.compat import StrEnum
-from pcapkit.utilities.exceptions import EndianError, FileError, UnsupportedCall
+from pcapkit.utilities.exceptions import EndianError, FileError, ProtocolError, UnsupportedCall
 from pcapkit.utilities.warnings import RegistryWarning, warn
 
 __all__ = ['PCAPNG']
@@ -725,7 +725,8 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
             self.__header__ = cast('Schema_PCAPNG', self.__schema__.unpack(self._file, length, packet))  # type: ignore[call-arg,misc]
         return self.read(length, **kwargs)
 
-    def read(self, length: 'Optional[int]' = None, **kwargs: 'Any') -> 'Data_PCAPNG':
+    def read(self, length: 'Optional[int]' = None, *, _read: 'bool' = True,
+             _seek_set: 'int' = 0, **kwargs: 'Any') -> 'Data_PCAPNG':
         r"""Read PCAP-NG file blocks.
 
         Structure of PCAP-NG file blocks:
@@ -746,12 +747,49 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
 
         Args:
             length: Length of data to be read.
+            \_read: If the class is called in a parsing scenario.
+            \_seek_set: File offset before reading.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
             Parsed packet data.
 
         """
+        schema = self.__header__
+
+        if schema.block.length < 12 or schema.block.length % 4 != 0:
+            raise ProtocolError(f'PCAP-NG: [Block {schema.type}] invalid length: {schema.block.length}')
+
+        name = self.__block__[schema.type]
+        if isinstance(name, str):
+            meth_name = f'_read_block_{name}'
+            meth = cast('BlockParser',
+                        getattr(self, meth_name, self._read_block_unknown))
+        else:
+            meth = name[0]
+        block = meth(schema.block, header=schema)
+
+        if not _read:
+            # move backward to the beginning of the packet
+            self._file.seek(0, io.SEEK_SET)
+        else:
+            # NOTE: We create a copy of the block data here for parsing
+            # scenarios to keep the original packet data intact.
+            seek_cur = self._file.tell()
+
+            # move backward to the beginning of the block
+            self._file.seek(_seek_set, io.SEEK_SET)
+
+            #: bytes: Raw block data.
+            self._data = self._read_fileng(schema.block.length)
+
+            # move backward to the beginning of next block
+            self._file.seek(seek_cur, io.SEEK_SET)
+
+            #: io.BytesIO: Source packet stream.
+            self._file = io.BytesIO(self._data)
+
+        return block
 
     def make(self,
              **kwargs: 'Any') -> 'Schema_PCAPNG':
@@ -801,16 +839,19 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
         self._ctx = ctx
 
         if file is None:
+            _read = False
             #: bytes: Raw packet data.
             self._data = self.pack(**kwargs)
             #: io.BytesIO: Source packet stream.
             self._file = io.BytesIO(self._data)
         else:
+            _read = True
             #: io.BytesIO: Source packet stream.
             self._file = io.BytesIO(file) if isinstance(file, bytes) else file
+        _seek_set = self._file.tell()
 
         #: pcapkit.corekit.infoclass.Info: Parsed packet data.
-        self._info = self.unpack(length, **kwargs)
+        self._info = self.unpack(length, _read=_read, _seek_set=_seek_set, **kwargs)
 
     def __length_hint__(self) -> 'Literal[12]':
         """Return an estimated length for the object."""
