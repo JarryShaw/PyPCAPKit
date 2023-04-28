@@ -33,7 +33,7 @@ __all__ = [
     'PCAPNG',
 
     'Option', 'UnknownOption',
-    'EndOfOption', 'CommentOption',
+    'EndOfOption', 'CommentOption', 'CustomOption',
     'IF_NameOption', 'IF_DescriptionOption', 'IF_IPv4AddrOption', 'IF_IPv6AddrOption',
     'IF_MACAddrOption', 'IF_EUIAddrOption', 'IF_SpeedOption', 'IF_TSResolOption',
     'IF_TZoneOption', 'IF_FilterOption', 'IF_OSOption', 'IF_FCSLenOption',
@@ -283,7 +283,7 @@ class UnknownOption(Option):
     padding: 'bytes' = PaddingField(length=lambda pkt: (4 - pkt['length'] % 4) % 4)
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'int', length: 'int', data: 'bytes', padding: 'bytes') -> 'None': ...
+        def __init__(self, type: 'int', length: 'int', data: 'bytes') -> 'None': ...
 
 
 class EndOfOption(Option):
@@ -302,7 +302,21 @@ class CommentOption(Option):
     padding: 'bytes' = PaddingField(length=lambda pkt: (4 - pkt['length'] % 4) % 4)
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'int', length: 'int', comment: 'str', padding: 'bytes') -> 'None': ...
+        def __init__(self, type: 'int', length: 'int', comment: 'str') -> 'None': ...
+
+
+class CustomOption(Option):
+    """Header schema for PCAP-NG file ``opt_custom`` options."""
+
+    #: Private enterprise number (PEN).
+    pen: 'int' = UInt32Field(callback=byteorder_callback)
+    #: Custom data.
+    data: 'bytes' = BytesField(length=lambda pkt: pkt['length'] - 4)
+    #: Padding.
+    padding: 'bytes' = PaddingField(length=lambda pkt: (4 - pkt['length'] % 4) % 4)
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'int', length: 'int', pen: 'int', data: 'bytes') -> 'None': ...
 
 
 class SectionHeaderBlock(BlockType):
@@ -315,7 +329,7 @@ class SectionHeaderBlock(BlockType):
     #: Block total length.
     length: 'int' = UInt32Field(callback=shb_byteorder_callback)
     #: Byte order magic number.
-    magic: 'int' = UInt32Field(callback=shb_byteorder_callback)
+    magic: 'Literal[0x1A2B3C4D]' = UInt32Field(callback=shb_byteorder_callback)
     #: Major version number.
     major: 'int' = UInt16Field(callback=shb_byteorder_callback, default=1)
     #: Minor version number.
@@ -382,8 +396,9 @@ class SectionHeaderBlock(BlockType):
         #: Byteorder.
         byteorder: Literal['big', 'little']
 
-        def __init__(self, length: 'int', magic: 'int', major: 'int',
-                     minor: 'int', section_length: 'int', options: 'list[Option | bytes] | bytes', length2: 'int') -> 'None': ...
+        def __init__(self, length: 'int', magic: 'Literal[0x1A2B3C4D]', major: 'int',
+                     minor: 'int', section_length: 'int', options: 'list[Option | bytes] | bytes',
+                     length2: 'int') -> 'None': ...
 
 
 class IF_NameOption(Option):
@@ -395,7 +410,7 @@ class IF_NameOption(Option):
     padding: 'bytes' = PaddingField(length=lambda pkt: (4 - pkt['length'] % 4) % 4)
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'int', length: 'int', name: 'str', padding: 'bytes') -> 'None': ...
+        def __init__(self, type: 'int', length: 'int', name: 'str') -> 'None': ...
 
 
 class IF_DescriptionOption(Option):
@@ -407,7 +422,7 @@ class IF_DescriptionOption(Option):
     padding: 'bytes' = PaddingField(length=lambda pkt: (4 - pkt['length'] % 4) % 4)
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'int', length: 'int', description: 'str', padding: 'bytes') -> 'None': ...
+        def __init__(self, type: 'int', length: 'int', description: 'str') -> 'None': ...
 
 
 class IF_IPv4AddrOption(Option):
@@ -860,7 +875,7 @@ class IPv4Record(NameResolutionRecord):
         #: Name resolution records.
         names: 'list[str]'
 
-        def __init__(self, type: 'Enum_RecordType', length: 'int', ip: 'IPv4Address', resol: 'str', padding: 'bytes') -> 'None': ...
+        def __init__(self, type: 'Enum_RecordType', length: 'int', ip: 'IPv4Address', resol: 'str') -> 'None': ...
 
 
 class IPv6Record(NameResolutionRecord):
@@ -890,7 +905,7 @@ class IPv6Record(NameResolutionRecord):
         #: Name resolution records.
         names: 'list[str]'
 
-        def __init__(self, type: 'Enum_RecordType', length: 'int', ip: 'IPv4Address', resol: 'str', padding: 'bytes') -> 'None': ...
+        def __init__(self, type: 'Enum_RecordType', length: 'int', ip: 'IPv4Address', resol: 'str') -> 'None': ...
 
 
 class NS_DNSNameOption(Option):

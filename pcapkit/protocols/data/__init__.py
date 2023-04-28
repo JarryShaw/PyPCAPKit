@@ -34,7 +34,7 @@ __all__ = [
     # PCAP-NG file format
     'PCAPNG',
     'PCAPNG_Option', 'PCAPNG_UnknownOption',
-    'PCAPNG_EndOfOption', 'PCAPNG_CommentOption',
+    'PCAPNG_EndOfOption', 'PCAPNG_CommentOption', 'PCAPNG_CustomOption',
     'PCAPNG_IF_NameOption', 'PCAPNG_IF_DescriptionOption', 'PCAPNG_IF_IPv4AddrOption', 'PCAPNG_IF_IPv6AddrOption',
     'PCAPNG_IF_MACAddrOption', 'PCAPNG_IF_EUIAddrOption', 'PCAPNG_IF_SpeedOption', 'PCAPNG_IF_TSResolOption',
     'PCAPNG_IF_TZoneOption', 'PCAPNG_IF_FilterOption', 'PCAPNG_IF_OSOption', 'PCAPNG_IF_FCSLenOption',

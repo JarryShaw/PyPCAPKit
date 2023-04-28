@@ -9,6 +9,7 @@ from pcapkit.protocols.data.misc.pcapng import UnknownSecrets as PCAPNG_UnknownS
 from pcapkit.protocols.data.misc.pcapng import PCAPNG
 from pcapkit.protocols.data.misc.pcapng import CommentOption as PCAPNG_CommentOption
 from pcapkit.protocols.data.misc.pcapng import CustomBlock as PCAPNG_CustomBlock
+from pcapkit.protocols.data.misc.pcapng import CustomOption as PCAPNG_CustomOption
 from pcapkit.protocols.data.misc.pcapng import \
     DecryptionSecretsBlock as PCAPNG_DecryptionSecretsBlock
 from pcapkit.protocols.data.misc.pcapng import DSBSecrets as PCAPNG_DSBSecrets
@@ -83,7 +84,7 @@ __all__ = [
     # PCAP-NG file format
     'PCAPNG',
     'PCAPNG_Option', 'PCAPNG_UnknownOption',
-    'PCAPNG_EndOfOption', 'PCAPNG_CommentOption',
+    'PCAPNG_EndOfOption', 'PCAPNG_CommentOption', 'PCAPNG_CustomOption',
     'PCAPNG_IF_NameOption', 'PCAPNG_IF_DescriptionOption', 'PCAPNG_IF_IPv4AddrOption', 'PCAPNG_IF_IPv6AddrOption',
     'PCAPNG_IF_MACAddrOption', 'PCAPNG_IF_EUIAddrOption', 'PCAPNG_IF_SpeedOption', 'PCAPNG_IF_TSResolOption',
     'PCAPNG_IF_TZoneOption', 'PCAPNG_IF_FilterOption', 'PCAPNG_IF_OSOption', 'PCAPNG_IF_FCSLenOption',

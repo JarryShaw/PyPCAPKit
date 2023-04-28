@@ -10,7 +10,7 @@ __all__ = [
     'PCAPNG',
 
     'Option', 'UnknownOption',
-    'EndOfOption', 'CommentOption',
+    'EndOfOption', 'CommentOption', 'CustomOption',
     'IF_NameOption', 'IF_DescriptionOption', 'IF_IPv4AddrOption', 'IF_IPv6AddrOption',
     'IF_MACAddrOption', 'IF_EUIAddrOption', 'IF_SpeedOption', 'IF_TSResolOption',
     'IF_TZoneOption', 'IF_FilterOption', 'IF_OSOption', 'IF_FCSLenOption',
@@ -105,6 +105,18 @@ class CommentOption(Option):
 
     #: Comment text.
     comment: 'str'
+
+
+class CustomOption(Option):
+    """Data model for PCAP-NG file ``opt_custom`` options."""
+
+    #: Private enterprise number (PEN).
+    pen: 'int'
+    #: Custom data.
+    data: 'bytes'
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_OptionType', length: 'int', pen: 'int', data: 'bytes') -> None: ...
 
 
 class SectionHeaderBlock(PCAPNG):
