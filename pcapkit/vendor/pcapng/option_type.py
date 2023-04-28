@@ -90,10 +90,11 @@ class OptionType(Vendor):
             except ValueError:
                 opts = tuple(map(lambda x: int(x), temp.split('/')))
 
-                miss.append(f'if value in {opts!r}:')
-                miss.append(f'    #: {name}')
-                miss.append(f"    extend_enum(cls, '{self.safe_name(name)}_%d' % value, value)")
-                miss.append('    return cls(value)')
+                for code in opts:
+                    pref = f'{name}_{code} = {code}'
+                    sufs = self.wrap_comment(name)
+
+                    enum.append(f'#: {sufs}\n    {pref}')
 
         for content in data['table-3']:
             name = content.select('td')[0].text.strip()

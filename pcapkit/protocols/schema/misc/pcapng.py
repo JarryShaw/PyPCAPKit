@@ -344,6 +344,10 @@ class SectionHeaderBlock(BlockType):
         registry=collections.defaultdict(lambda: UnknownOption, {
             Enum_OptionType.opt_endofopt: EndOfOption,
             Enum_OptionType.opt_comment: CommentOption,
+            Enum_OptionType.opt_custom_2988: CustomOption,
+            Enum_OptionType.opt_custom_2989: CustomOption,
+            Enum_OptionType.opt_custom_19372: CustomOption,
+            Enum_OptionType.opt_custom_19373: CustomOption,
         }),
         eool=Enum_OptionType.opt_endofopt,
     )
@@ -634,6 +638,10 @@ class InterfaceDescriptionBlock(BlockType):
         registry=collections.defaultdict(lambda: UnknownOption, {
             Enum_OptionType.opt_endofopt: EndOfOption,
             Enum_OptionType.opt_comment: CommentOption,
+            Enum_OptionType.opt_custom_2988: CustomOption,
+            Enum_OptionType.opt_custom_2989: CustomOption,
+            Enum_OptionType.opt_custom_19372: CustomOption,
+            Enum_OptionType.opt_custom_19373: CustomOption,
             Enum_OptionType.if_name: IF_NameOption,
             Enum_OptionType.if_description: IF_DescriptionOption,
             Enum_OptionType.if_IPv4addr: IF_IPv4AddrOption,
@@ -778,6 +786,10 @@ class EnhancedPacketBlock(BlockType):
         registry=collections.defaultdict(lambda: UnknownOption, {
             Enum_OptionType.opt_endofopt: EndOfOption,
             Enum_OptionType.opt_comment: CommentOption,
+            Enum_OptionType.opt_custom_2988: CustomOption,
+            Enum_OptionType.opt_custom_2989: CustomOption,
+            Enum_OptionType.opt_custom_19372: CustomOption,
+            Enum_OptionType.opt_custom_19373: CustomOption,
             Enum_OptionType.epb_flags: EPB_FlagsOption,
             Enum_OptionType.epb_hash: EPB_HashOption,
             Enum_OptionType.epb_dropcount: EPB_DropCountOption,
@@ -963,6 +975,10 @@ class NameResolutionBlock(BlockType):
         registry=collections.defaultdict(lambda: UnknownOption, {
             Enum_OptionType.opt_endofopt: EndOfOption,
             Enum_OptionType.opt_comment: CommentOption,
+            Enum_OptionType.opt_custom_2988: CustomOption,
+            Enum_OptionType.opt_custom_2989: CustomOption,
+            Enum_OptionType.opt_custom_19372: CustomOption,
+            Enum_OptionType.opt_custom_19373: CustomOption,
             Enum_OptionType.ns_dnsname: NS_DNSNameOption,
             Enum_OptionType.ns_dnsIP4addr: NS_DNSIP4AddrOption,
             Enum_OptionType.ns_dnsIP6addr: NS_DNSIP6AddrOption,
@@ -1099,6 +1115,10 @@ class InterfaceStatisticsBlock(BlockType):
         registry=collections.defaultdict(lambda: UnknownOption, {
             Enum_OptionType.opt_endofopt: EndOfOption,
             Enum_OptionType.opt_comment: CommentOption,
+            Enum_OptionType.opt_custom_2988: CustomOption,
+            Enum_OptionType.opt_custom_2989: CustomOption,
+            Enum_OptionType.opt_custom_19372: CustomOption,
+            Enum_OptionType.opt_custom_19373: CustomOption,
             Enum_OptionType.isb_starttime: ISB_StartTimeOption,
             Enum_OptionType.isb_endtime: ISB_EndTimeOption,
             Enum_OptionType.isb_ifrecv: ISB_IFRecvOption,
@@ -1316,6 +1336,10 @@ class DecryptionSecretsBlock(BlockType):
         registry=collections.defaultdict(lambda: UnknownOption, {
             Enum_OptionType.opt_endofopt: EndOfOption,
             Enum_OptionType.opt_comment: CommentOption,
+            Enum_OptionType.opt_custom_2988: CustomOption,
+            Enum_OptionType.opt_custom_2989: CustomOption,
+            Enum_OptionType.opt_custom_19372: CustomOption,
+            Enum_OptionType.opt_custom_19373: CustomOption,
         }),
         eool=Enum_OptionType.opt_endofopt,
     )
@@ -1375,6 +1399,10 @@ class PacketBlock(BlockType):
         registry=collections.defaultdict(lambda: UnknownOption, {
             Enum_OptionType.opt_endofopt: EndOfOption,
             Enum_OptionType.opt_comment: CommentOption,
+            Enum_OptionType.opt_custom_2988: CustomOption,
+            Enum_OptionType.opt_custom_2989: CustomOption,
+            Enum_OptionType.opt_custom_19372: CustomOption,
+            Enum_OptionType.opt_custom_19373: CustomOption,
             Enum_OptionType.pack_flags: EPB_FlagsOption,
             Enum_OptionType.pack_hash: EPB_HashOption,
         }),

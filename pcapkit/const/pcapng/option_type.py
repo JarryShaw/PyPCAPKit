@@ -24,6 +24,18 @@ class OptionType(IntEnum):
     #: opt_comment
     opt_comment = 1
 
+    #: opt_custom
+    opt_custom_2988 = 2988
+
+    #: opt_custom
+    opt_custom_2989 = 2989
+
+    #: opt_custom
+    opt_custom_19372 = 19372
+
+    #: opt_custom
+    opt_custom_19373 = 19373
+
     #: if_name
     if_name = 2
 
@@ -152,8 +164,4 @@ class OptionType(IntEnum):
         """
         if not (isinstance(value, int) and 0 <= value <= 0xFFFF):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))
-        if value in (2988, 2989, 19372, 19373):
-            #: opt_custom
-            extend_enum(cls, 'opt_custom_%d' % value, value)
-            return cls(value)
         return super()._missing_(value)
