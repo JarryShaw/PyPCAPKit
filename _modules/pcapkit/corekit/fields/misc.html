@@ -804,6 +804,7 @@
 <span class="sd">            an integer value and accept the current packet as its only argument.</span>
 <span class="sd">        schema: Field schema.</span>
 <span class="sd">        default: Default value for field.</span>
+<span class="sd">        packet: Optional packet data for unpacking and/or packing purposes.</span>
 <span class="sd">        callback: Callback function to process field value, which should accept</span>
 <span class="sd">            the current field and the current packet as its arguments.</span>
 
@@ -822,9 +823,14 @@
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int | Callable[[dict[str, Any]], int]&#39;</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">_</span><span class="p">:</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span>
                  <span class="n">schema</span><span class="p">:</span> <span class="s1">&#39;Optional[Type[_TS]]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                  <span class="n">default</span><span class="p">:</span> <span class="s1">&#39;_TS | NoValueType | bytes&#39;</span> <span class="o">=</span> <span class="n">NoValue</span><span class="p">,</span>
+                 <span class="n">packet</span><span class="p">:</span> <span class="s1">&#39;Optional[dict[str, Any]]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                  <span class="n">callback</span><span class="p">:</span> <span class="s1">&#39;Callable[[Self, dict[str, Any]], None]&#39;</span> <span class="o">=</span> <span class="k">lambda</span> <span class="o">*</span><span class="n">_</span><span class="p">:</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_name</span> <span class="o">=</span> <span class="s1">&#39;&lt;schema&gt;&#39;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_callback</span> <span class="o">=</span> <span class="n">callback</span>
+
+        <span class="k">if</span> <span class="n">packet</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">packet</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_packet</span> <span class="o">=</span> <span class="n">packet</span>
 
         <span class="k">if</span> <span class="n">schema</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">FieldError</span><span class="p">(</span><span class="s1">&#39;Schema field must have a schema.&#39;</span><span class="p">)</span>
@@ -871,6 +877,11 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            Packed field value.</span>
 
+<span class="sd">        Notes:</span>
+<span class="sd">            We will use ``packet`` as a ``__packet__`` key in the packet context</span>
+<span class="sd">            passed to the underlying :class:`~pcapkit.protocols.schema.schema.Schema`</span>
+<span class="sd">            for packing purposes.</span>
+
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_default</span> <span class="ow">is</span> <span class="n">NoValue</span><span class="p">:</span>
@@ -879,7 +890,11 @@
 
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">):</span>
             <span class="k">return</span> <span class="n">value</span>
-        <span class="k">return</span> <span class="n">value</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span>
+
+        <span class="n">packet</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_packet</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">value</span><span class="o">.</span><span class="n">pack</span><span class="p">({</span>
+            <span class="s1">&#39;__packet__&#39;</span><span class="p">:</span> <span class="n">packet</span><span class="p">,</span>
+        <span class="p">})</span>
 
     <span class="k">def</span> <span class="nf">unpack</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">buffer</span><span class="p">:</span> <span class="s1">&#39;bytes | IO[bytes]&#39;</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">&#39;dict[str, Any]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;_TS&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Unpack field value from :obj:`bytes`.</span>
@@ -891,12 +906,21 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            Unpacked field value.</span>
 
+<span class="sd">        Notes:</span>
+<span class="sd">            We will use ``packet`` as a ``__packet__`` key in the packet context</span>
+<span class="sd">            passed to the underlying :class:`~pcapkit.protocols.schema.schema.Schema`</span>
+<span class="sd">            for unpacking purposes.</span>
+
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">buffer</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">):</span>
             <span class="n">file</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">BytesIO</span><span class="p">(</span><span class="n">buffer</span><span class="p">)</span>  <span class="c1"># type: IO[bytes]</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">file</span> <span class="o">=</span> <span class="n">buffer</span>
-        <span class="k">return</span> <span class="n">cast</span><span class="p">(</span><span class="s1">&#39;_TS&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_schema</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">length</span><span class="p">,</span> <span class="n">packet</span><span class="p">))</span>  <span class="c1"># type: ignore[call-arg,misc]</span>
+
+        <span class="n">packet</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_packet</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">cast</span><span class="p">(</span><span class="s1">&#39;_TS&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_schema</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">length</span><span class="p">,</span> <span class="p">{</span>  <span class="c1"># type: ignore[call-arg,misc]</span>
+            <span class="s1">&#39;__packet__&#39;</span><span class="p">:</span> <span class="n">packet</span><span class="p">,</span>
+        <span class="p">}))</span>
 
 
 <div class="viewcode-block" id="ForwardMatchField"><a class="viewcode-back" href="../../../../pcapkit/corekit/fields.html#pcapkit.corekit.fields.misc.ForwardMatchField">[docs]</a><span class="k">class</span> <span class="nc">ForwardMatchField</span><span class="p">(</span><span class="n">_Field</span><span class="p">[</span><span class="n">_TC</span><span class="p">]):</span>

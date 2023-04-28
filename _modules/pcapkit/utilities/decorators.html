@@ -520,7 +520,7 @@
         <span class="c1"># call the user customised preparation method</span>
         <span class="c1"># then proceed with the unpacking process</span>
         <span class="c1"># and eventually revise the schema data</span>
-        <span class="bp">cls</span><span class="o">.</span><span class="n">pre_process</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span>
+        <span class="bp">cls</span><span class="o">.</span><span class="n">pre_unpack</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span>
         <span class="n">schema</span> <span class="o">=</span> <span class="n">func</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="n">packet</span><span class="p">)</span>
         <span class="n">ret</span> <span class="o">=</span> <span class="n">schema</span><span class="o">.</span><span class="n">post_process</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span>
 

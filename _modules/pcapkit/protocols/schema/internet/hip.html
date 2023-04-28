@@ -792,39 +792,44 @@
     <span class="c1">#: Padding.</span>
     <span class="n">padding</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span> <span class="o">=</span> <span class="n">PaddingField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="p">(</span><span class="mi">8</span> <span class="o">-</span> <span class="p">(</span><span class="n">pkt</span><span class="p">[</span><span class="s1">&#39;len&#39;</span><span class="p">]</span> <span class="o">%</span> <span class="mi">8</span><span class="p">))</span> <span class="o">%</span> <span class="mi">8</span><span class="p">)</span>
 
-<div class="viewcode-block" id="EncryptedParameter.pre_process"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.schema.internet.hip.EncryptedParameter.pre_process">[docs]</a>    <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">pre_process</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">&#39;dict[str, Any]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
+<div class="viewcode-block" id="EncryptedParameter.pre_unpack"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hip.html#pcapkit.protocols.schema.internet.hip.EncryptedParameter.pre_unpack">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">pre_unpack</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">&#39;dict[str, Any]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Prepare ``packet`` data for unpacking process.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            packet: packet data</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">cipher_list</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">&#39;list[Data_HIPCipherParameter]&#39;</span><span class="p">,</span>
-                           <span class="n">packet</span><span class="p">[</span><span class="s1">&#39;options&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">getlist</span><span class="p">(</span><span class="n">Enum_Parameter</span><span class="o">.</span><span class="n">HIP_CIPHER</span><span class="p">))</span>
-        <span class="k">if</span> <span class="n">cipher_list</span><span class="p">:</span>
-            <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;HIPv</span><span class="si">{</span><span class="n">packet</span><span class="p">[</span><span class="s2">&quot;ver&quot;</span><span class="p">][</span><span class="s2">&quot;version&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">: [ParamNo </span><span class="si">{</span><span class="n">Enum_Parameter</span><span class="o">.</span><span class="n">ENCRYPTED</span><span class="si">}</span><span class="s1">] &#39;</span>
-                 <span class="s1">&#39;missing HIP_CIPHER parameter&#39;</span><span class="p">,</span> <span class="n">ProtocolWarning</span><span class="p">)</span>
-            <span class="c1"># raise ProtocolError(f&#39;HIPv{version}: [ParamNo {schema.type}] invalid format&#39;)</span>
-
-            <span class="n">cipher_id</span> <span class="o">=</span> <span class="n">Enum_Cipher</span><span class="p">(</span><span class="mh">0xffff</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">cipher_ids</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: list[Enum_Cipher]</span>
-            <span class="k">for</span> <span class="n">cipher</span> <span class="ow">in</span> <span class="n">cipher_list</span><span class="p">:</span>
-                <span class="n">cipher_ids</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">cipher</span><span class="o">.</span><span class="n">cipher_id</span><span class="p">)</span>
-
-            <span class="n">encrypted_list</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">&#39;list[Data_EncryptedParameter]&#39;</span><span class="p">,</span>
-                                  <span class="n">packet</span><span class="p">[</span><span class="s1">&#39;options&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">getlist</span><span class="p">(</span><span class="n">Enum_Parameter</span><span class="o">.</span><span class="n">ENCRYPTED</span><span class="p">))</span>
-            <span class="n">encrypted_index</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">encrypted_list</span><span class="p">)</span>
-
-            <span class="k">if</span> <span class="n">encrypted_index</span> <span class="o">&gt;=</span> <span class="nb">len</span><span class="p">(</span><span class="n">cipher_ids</span><span class="p">):</span>
-                <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;HIPv</span><span class="si">{</span><span class="n">packet</span><span class="p">[</span><span class="s2">&quot;ver&quot;</span><span class="p">][</span><span class="s2">&quot;version&quot;</span><span class="p">]</span><span class="si">}</span><span class="s1">: [ParamNo </span><span class="si">{</span><span class="n">Enum_Parameter</span><span class="o">.</span><span class="n">ENCRYPTED</span><span class="si">}</span><span class="s1">] &#39;</span>
-                     <span class="s1">&#39;too many ENCRYPTED parameters&#39;</span><span class="p">,</span> <span class="n">ProtocolWarning</span><span class="p">)</span>
+        <span class="k">if</span> <span class="s1">&#39;options&#39;</span> <span class="ow">in</span> <span class="n">packet</span><span class="p">:</span>
+            <span class="n">cipher_list</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">&#39;list[Data_HIPCipherParameter]&#39;</span><span class="p">,</span>
+                            <span class="n">packet</span><span class="p">[</span><span class="s1">&#39;options&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">getlist</span><span class="p">(</span><span class="n">Enum_Parameter</span><span class="o">.</span><span class="n">HIP_CIPHER</span><span class="p">))</span>
+            <span class="k">if</span> <span class="n">cipher_list</span><span class="p">:</span>
+                <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;HIP: [ParamNo </span><span class="si">{</span><span class="n">Enum_Parameter</span><span class="o">.</span><span class="n">ENCRYPTED</span><span class="si">}</span><span class="s1">] &#39;</span>
+                    <span class="s1">&#39;missing HIP_CIPHER parameter&#39;</span><span class="p">,</span> <span class="n">ProtocolWarning</span><span class="p">)</span>
                 <span class="c1"># raise ProtocolError(f&#39;HIPv{version}: [ParamNo {schema.type}] invalid format&#39;)</span>
 
-                <span class="n">cipher_id</span> <span class="o">=</span> <span class="n">Enum_Cipher</span><span class="p">(</span><span class="mh">0xfffe</span><span class="p">)</span>
+                <span class="n">cipher_id</span> <span class="o">=</span> <span class="n">Enum_Cipher</span><span class="p">(</span><span class="mh">0xffff</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">cipher_id</span> <span class="o">=</span> <span class="n">cipher_ids</span><span class="p">[</span><span class="n">encrypted_index</span><span class="p">]</span>
+                <span class="n">cipher_ids</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: list[Enum_Cipher]</span>
+                <span class="k">for</span> <span class="n">cipher</span> <span class="ow">in</span> <span class="n">cipher_list</span><span class="p">:</span>
+                    <span class="n">cipher_ids</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">cipher</span><span class="o">.</span><span class="n">cipher_id</span><span class="p">)</span>
+
+                <span class="n">encrypted_list</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">&#39;list[Data_EncryptedParameter]&#39;</span><span class="p">,</span>
+                                    <span class="n">packet</span><span class="p">[</span><span class="s1">&#39;options&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">getlist</span><span class="p">(</span><span class="n">Enum_Parameter</span><span class="o">.</span><span class="n">ENCRYPTED</span><span class="p">))</span>
+                <span class="n">encrypted_index</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">encrypted_list</span><span class="p">)</span>
+
+                <span class="k">if</span> <span class="n">encrypted_index</span> <span class="o">&gt;=</span> <span class="nb">len</span><span class="p">(</span><span class="n">cipher_ids</span><span class="p">):</span>
+                    <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;HIP: [ParamNo </span><span class="si">{</span><span class="n">Enum_Parameter</span><span class="o">.</span><span class="n">ENCRYPTED</span><span class="si">}</span><span class="s1">] &#39;</span>
+                        <span class="s1">&#39;too many ENCRYPTED parameters&#39;</span><span class="p">,</span> <span class="n">ProtocolWarning</span><span class="p">)</span>
+                    <span class="c1"># raise ProtocolError(f&#39;HIPv{version}: [ParamNo {schema.type}] invalid format&#39;)</span>
+
+                    <span class="n">cipher_id</span> <span class="o">=</span> <span class="n">Enum_Cipher</span><span class="p">(</span><span class="mh">0xfffe</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">cipher_id</span> <span class="o">=</span> <span class="n">cipher_ids</span><span class="p">[</span><span class="n">encrypted_index</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;HIP: [ParamNo </span><span class="si">{</span><span class="n">Enum_Parameter</span><span class="o">.</span><span class="n">ENCRYPTED</span><span class="si">}</span><span class="s1">] &#39;</span>
+                 <span class="s1">&#39;missing HIP_CIPHER parameter&#39;</span><span class="p">,</span> <span class="n">ProtocolWarning</span><span class="p">)</span>
+            <span class="n">cipher_id</span> <span class="o">=</span> <span class="n">Enum_Cipher</span><span class="p">(</span><span class="mh">0xffff</span><span class="p">)</span>
 
         <span class="n">packet</span><span class="p">[</span><span class="s1">&#39;__cipher__&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">cipher_id</span></div>
 

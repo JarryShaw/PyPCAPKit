@@ -673,7 +673,7 @@
         <span class="n">selector</span><span class="o">=</span><span class="n">smf_dpd_data_selector</span><span class="p">,</span>
     <span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">post_process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">&#39;dict[str, Any]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Schema&#39;</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">post_process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">&#39;dict[str, Any]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;SMFDPDOption&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Revise ``schema`` data after unpacking process.</span>
 
 <span class="sd">        Args:</span>
@@ -684,7 +684,6 @@
 
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">ret</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span>
-        <span class="n">ret</span><span class="o">.</span><span class="n">mode</span> <span class="o">=</span> <span class="n">Enum_SMFDPDMode</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">test</span><span class="p">[</span><span class="s1">&#39;mode&#39;</span><span class="p">])</span>
         <span class="k">return</span> <span class="n">ret</span>
 
 
@@ -699,9 +698,6 @@
 <div class="viewcode-block" id="SMFIdentificationBasedDPDOption"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hopopt.html#pcapkit.protocols.schema.internet.hopopt.SMFIdentificationBasedDPDOption">[docs]</a><span class="k">class</span> <span class="nc">SMFIdentificationBasedDPDOption</span><span class="p">(</span><span class="n">SMFDPDOption</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for HOPOPT SMF identification-based DPD options.&quot;&quot;&quot;</span>
 
-    <span class="n">test</span><span class="p">:</span> <span class="s1">&#39;SMFDPDTestFlag&#39;</span> <span class="o">=</span> <span class="n">ForwardMatchField</span><span class="p">(</span><span class="n">BitField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="p">{</span>
-        <span class="s1">&#39;mode&#39;</span><span class="p">:</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
-    <span class="p">}))</span>
     <span class="c1">#: TaggerID information.</span>
     <span class="n">info</span><span class="p">:</span> <span class="s1">&#39;TaggerIDInfo&#39;</span> <span class="o">=</span> <span class="n">BitField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="p">{</span>
         <span class="s1">&#39;mode&#39;</span><span class="p">:</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
@@ -719,6 +715,20 @@
         <span class="mi">1</span> <span class="k">if</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">&#39;info&#39;</span><span class="p">][</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span> <span class="k">else</span> <span class="p">(</span><span class="n">pkt</span><span class="p">[</span><span class="s1">&#39;info&#39;</span><span class="p">][</span><span class="s1">&#39;len&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="mi">2</span><span class="p">)</span>
     <span class="p">))</span>
 
+<div class="viewcode-block" id="SMFIdentificationBasedDPDOption.post_process"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hopopt.html#pcapkit.protocols.schema.internet.hopopt.SMFIdentificationBasedDPDOption.post_process">[docs]</a>    <span class="k">def</span> <span class="nf">post_process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">&#39;dict[str, Any]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;SMFIdentificationBasedDPDOption&#39;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Revise ``schema`` data after unpacking process.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            packet: Unpacked data.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Revised schema.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">ret</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">post_process</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span>  <span class="c1"># type: SMFIdentificationBasedDPDOption</span>
+        <span class="n">ret</span><span class="o">.</span><span class="n">mode</span> <span class="o">=</span> <span class="n">Enum_SMFDPDMode</span><span class="o">.</span><span class="n">I_DPD</span>
+        <span class="k">return</span> <span class="n">ret</span></div>
+
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
         <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span><span class="p">,</span> <span class="nb">len</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">info</span><span class="p">:</span> <span class="s1">&#39;TaggerIDInfo&#39;</span><span class="p">,</span>
                      <span class="n">tid</span><span class="p">:</span> <span class="s1">&#39;Optional[bytes]&#39;</span><span class="p">,</span> <span class="nb">id</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
@@ -729,6 +739,20 @@
 
     <span class="c1">#: Hash assist value (HAV).</span>
     <span class="n">hav</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span> <span class="o">=</span> <span class="n">BytesField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">&#39;len&#39;</span><span class="p">])</span>
+
+<div class="viewcode-block" id="SMFHashBasedDPDOption.post_process"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hopopt.html#pcapkit.protocols.schema.internet.hopopt.SMFHashBasedDPDOption.post_process">[docs]</a>    <span class="k">def</span> <span class="nf">post_process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">&#39;dict[str, Any]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;SMFIdentificationBasedDPDOption&#39;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Revise ``schema`` data after unpacking process.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            packet: Unpacked data.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Revised schema.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">ret</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">post_process</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span>  <span class="c1"># type: SMFIdentificationBasedDPDOption</span>
+        <span class="n">ret</span><span class="o">.</span><span class="n">mode</span> <span class="o">=</span> <span class="n">Enum_SMFDPDMode</span><span class="o">.</span><span class="n">H_DPD</span>
+        <span class="k">return</span> <span class="n">ret</span></div>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
         <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span><span class="p">,</span> <span class="nb">len</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">hav</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
@@ -768,7 +792,7 @@
         <span class="n">selector</span><span class="o">=</span><span class="n">quick_start_data_selector</span><span class="p">,</span>
     <span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">post_process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">&#39;dict[str, Any]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Schema&#39;</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">post_process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">&#39;dict[str, Any]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;QuickStartOption&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Revise ``schema`` data after unpacking process.</span>
 
 <span class="sd">        Args:</span>

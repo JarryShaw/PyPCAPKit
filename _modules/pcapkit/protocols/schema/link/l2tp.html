@@ -394,7 +394,7 @@
     <span class="c1">#: Length of L2TP packet.</span>
     <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span> <span class="o">=</span> <span class="n">ConditionalField</span><span class="p">(</span>
         <span class="n">UInt16Field</span><span class="p">(),</span>
-        <span class="k">lambda</span> <span class="n">packet</span><span class="p">:</span> <span class="n">packet</span><span class="p">[</span><span class="s1">&#39;flags&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;length&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">),</span>
+        <span class="k">lambda</span> <span class="n">packet</span><span class="p">:</span> <span class="n">packet</span><span class="p">[</span><span class="s1">&#39;flags&#39;</span><span class="p">][</span><span class="s1">&#39;len&#39;</span><span class="p">],</span>
     <span class="p">)</span>
     <span class="c1">#: Tunnel ID of L2TP packet.</span>
     <span class="n">tunnel_id</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span> <span class="o">=</span> <span class="n">UInt16Field</span><span class="p">()</span>
@@ -403,22 +403,22 @@
     <span class="c1">#: Sequence number of L2TP packet.</span>
     <span class="n">ns</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span> <span class="o">=</span> <span class="n">ConditionalField</span><span class="p">(</span>
         <span class="n">UInt16Field</span><span class="p">(),</span>
-        <span class="k">lambda</span> <span class="n">packet</span><span class="p">:</span> <span class="n">packet</span><span class="p">[</span><span class="s1">&#39;flags&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;seq&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">),</span>
+        <span class="k">lambda</span> <span class="n">packet</span><span class="p">:</span> <span class="n">packet</span><span class="p">[</span><span class="s1">&#39;flags&#39;</span><span class="p">][</span><span class="s1">&#39;seq&#39;</span><span class="p">],</span>
     <span class="p">)</span>
     <span class="c1">#: Next sequence number of L2TP packet.</span>
     <span class="n">nr</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span> <span class="o">=</span> <span class="n">ConditionalField</span><span class="p">(</span>
         <span class="n">UInt16Field</span><span class="p">(),</span>
-        <span class="k">lambda</span> <span class="n">packet</span><span class="p">:</span> <span class="n">packet</span><span class="p">[</span><span class="s1">&#39;flags&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;seq&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">),</span>
+        <span class="k">lambda</span> <span class="n">packet</span><span class="p">:</span> <span class="n">packet</span><span class="p">[</span><span class="s1">&#39;flags&#39;</span><span class="p">][</span><span class="s1">&#39;seq&#39;</span><span class="p">],</span>
     <span class="p">)</span>
     <span class="c1">#: Offset size of L2TP packet.</span>
     <span class="n">offset</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span> <span class="o">=</span> <span class="n">ConditionalField</span><span class="p">(</span>
         <span class="n">UInt16Field</span><span class="p">(),</span>
-        <span class="k">lambda</span> <span class="n">packet</span><span class="p">:</span> <span class="n">packet</span><span class="p">[</span><span class="s1">&#39;flags&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;offset&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">),</span>
+        <span class="k">lambda</span> <span class="n">packet</span><span class="p">:</span> <span class="n">packet</span><span class="p">[</span><span class="s1">&#39;flags&#39;</span><span class="p">][</span><span class="s1">&#39;offset&#39;</span><span class="p">],</span>
     <span class="p">)</span>
     <span class="c1">#: Padding of L2TP packet.</span>
     <span class="n">padding</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span> <span class="o">=</span> <span class="n">ConditionalField</span><span class="p">(</span>
-        <span class="n">PaddingField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;offset&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)),</span>
-        <span class="k">lambda</span> <span class="n">packet</span><span class="p">:</span> <span class="n">packet</span><span class="p">[</span><span class="s1">&#39;flags&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;offset&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">),</span>
+        <span class="n">PaddingField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">&#39;offset&#39;</span><span class="p">]),</span>
+        <span class="k">lambda</span> <span class="n">packet</span><span class="p">:</span> <span class="n">packet</span><span class="p">[</span><span class="s1">&#39;flags&#39;</span><span class="p">][</span><span class="s1">&#39;offset&#39;</span><span class="p">],</span>
     <span class="p">)</span>
     <span class="c1">#: Payload of L2TP packet.</span>
     <span class="n">payload</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span> <span class="o">=</span> <span class="n">PayloadField</span><span class="p">()</span>

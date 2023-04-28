@@ -1557,6 +1557,13 @@ options and/or parameters in a protocol.</p>
 <dd class="field-odd"><p>Unpacked field value.</p>
 </dd>
 </dl>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p>If the option list ended before the specified size limit,
+inject <code class="docutils literal notranslate"><span class="pre">__option_padding__</span></code> as the remaining length to
+the <code class="docutils literal notranslate"><span class="pre">packet</span></code> argument such that the next fields can be
+aware of such informations.</p>
+</div>
 </dd></dl>
 
 </dd></dl>

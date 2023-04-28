@@ -503,12 +503,7 @@
         <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">field</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__fields__</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="ow">in</span> <span class="p">(</span><span class="n">NoValue</span><span class="p">,</span> <span class="kc">None</span><span class="p">):</span>
                 <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="o">.</span><span class="n">default</span>
-
-        <span class="k">if</span> <span class="n">packet</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">packet</span> <span class="o">=</span> <span class="p">{}</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">pre_process</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">post_process</span><span class="p">(</span><span class="n">packet</span><span class="p">,</span> <span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">__update__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dict_</span><span class="p">:</span> <span class="s1">&#39;Optional[Mapping[str, VT] | Iterable[tuple[str, VT]]]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                    <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;VT&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
@@ -711,7 +706,9 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">packet</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">packet</span> <span class="o">=</span> <span class="p">{}</span>
+
         <span class="n">packet</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pre_unpack</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="s1">&#39;__length__&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">packet</span><span class="p">:</span>
             <span class="n">packet</span><span class="p">[</span><span class="s1">&#39;__length__&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>  <span class="c1"># reasonable default value</span>
@@ -756,7 +753,7 @@
                 <span class="k">if</span> <span class="ow">not</span> <span class="n">field</span><span class="o">.</span><span class="n">test</span><span class="p">(</span><span class="n">packet</span><span class="p">):</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">__buffer__</span><span class="p">[</span><span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">&#39;&#39;</span>
                     <span class="k">continue</span>
-                <span class="n">field</span> <span class="o">=</span> <span class="n">field</span><span class="o">.</span><span class="n">field</span>
+                <span class="n">field</span> <span class="o">=</span> <span class="n">field</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span>
 
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="n">ForwardMatchField</span><span class="p">):</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">__buffer__</span><span class="p">[</span><span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">&#39;&#39;</span>
@@ -769,8 +766,21 @@
                 <span class="n">temp</span> <span class="o">=</span> <span class="nb">bytes</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">length</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">__buffer__</span><span class="p">[</span><span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">temp</span>
 
+        <span class="bp">self</span><span class="o">.</span><span class="n">post_process</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__updated__</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="fm">__bytes__</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="Schema.pre_pack"><a class="viewcode-back" href="../../../../pcapkit/protocols/index.html#pcapkit.protocols.schema.schema.Schema.pre_pack">[docs]</a>    <span class="k">def</span> <span class="nf">pre_pack</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">&#39;dict[str, Any]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Prepare ``packet`` data for packing process.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            packet: packet data</span>
+
+<span class="sd">        Note:</span>
+<span class="sd">            This method is expected to directly modify any data stored</span>
+<span class="sd">            in the ``packet`` and thus no return is required.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span></div>
 
 <div class="viewcode-block" id="Schema.unpack"><a class="viewcode-back" href="../../../../pcapkit/protocols/index.html#pcapkit.protocols.schema.schema.Schema.unpack">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="nd">@prepare</span>
@@ -831,12 +841,12 @@
                     <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
                     <span class="n">packet</span><span class="p">[</span><span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">NoValue</span>
                     <span class="k">continue</span>
-                <span class="n">field</span> <span class="o">=</span> <span class="n">field</span><span class="o">.</span><span class="n">field</span>
+                <span class="n">field</span> <span class="o">=</span> <span class="n">field</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span>
 
             <span class="n">byte</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">length</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">__buffer__</span><span class="p">[</span><span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">byte</span>
 
-            <span class="n">value</span> <span class="o">=</span> <span class="n">field</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">byte</span><span class="p">,</span> <span class="n">packet</span><span class="o">.</span><span class="n">copy</span><span class="p">())</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="n">field</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">byte</span><span class="p">,</span> <span class="n">packet</span><span class="p">)</span>
             <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
 
             <span class="n">packet</span><span class="p">[</span><span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
@@ -849,8 +859,8 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">__updated__</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="k">return</span> <span class="bp">self</span></div>
 
-<div class="viewcode-block" id="Schema.pre_process"><a class="viewcode-back" href="../../../../pcapkit/protocols/index.html#pcapkit.protocols.schema.schema.Schema.pre_process">[docs]</a>    <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">pre_process</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">&#39;dict[str, Any]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
+<div class="viewcode-block" id="Schema.pre_unpack"><a class="viewcode-back" href="../../../../pcapkit/protocols/index.html#pcapkit.protocols.schema.schema.Schema.pre_unpack">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">pre_unpack</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">&#39;dict[str, Any]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Prepare ``packet`` data for unpacking process.</span>
 
 <span class="sd">        Args:</span>
@@ -863,7 +873,7 @@
 <span class="sd">        &quot;&quot;&quot;</span></div>
 
 <div class="viewcode-block" id="Schema.post_process"><a class="viewcode-back" href="../../../../pcapkit/protocols/index.html#pcapkit.protocols.schema.schema.Schema.post_process">[docs]</a>    <span class="k">def</span> <span class="nf">post_process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">&#39;dict[str, Any]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Schema&#39;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Revise ``schema`` data after unpacking process.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Revise ``schema`` data after packing and/or unpacking process.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            packet: Unpacked data.</span>

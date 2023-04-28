@@ -597,6 +597,25 @@ please provide the <code class="docutils literal notranslate"><span class="pre">
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.protocols.schema.schema.Schema.pre_pack">
+<span class="sig-name descname"><span class="pre">pre_pack</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">packet</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/protocols/schema/schema.html#Schema.pre_pack"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.schema.schema.Schema.pre_pack" title="Permalink to this definition">#</a></dt>
+<dd><p>Prepare <code class="docutils literal notranslate"><span class="pre">packet</span></code> data for packing process.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>packet</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>]) – packet data</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></p>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This method is expected to directly modify any data stored
+in the <code class="docutils literal notranslate"><span class="pre">packet</span></code> and thus no return is required.</p>
+</div>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.schema.Schema.unpack">
 <em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">unpack</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cls</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">packet</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/protocols/schema/schema.html#Schema.unpack"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.schema.schema.Schema.unpack" title="Permalink to this definition">#</a></dt>
 <dd><p>Unpack <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bytes</span></code></a> into <a class="reference internal" href="#pcapkit.protocols.schema.schema.Schema" title="pcapkit.protocols.schema.schema.Schema"><code class="xref py py-class docutils literal notranslate"><span class="pre">Schema</span></code></a>.</p>
@@ -624,8 +643,8 @@ the payload field.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.protocols.schema.schema.Schema.pre_process">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">pre_process</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">packet</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/protocols/schema/schema.html#Schema.pre_process"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.schema.schema.Schema.pre_process" title="Permalink to this definition">#</a></dt>
+<dt class="sig sig-object py" id="pcapkit.protocols.schema.schema.Schema.pre_unpack">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">pre_unpack</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">packet</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/protocols/schema/schema.html#Schema.pre_unpack"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.schema.schema.Schema.pre_unpack" title="Permalink to this definition">#</a></dt>
 <dd><p>Prepare <code class="docutils literal notranslate"><span class="pre">packet</span></code> data for unpacking process.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -645,7 +664,7 @@ in the <code class="docutils literal notranslate"><span class="pre">packet</span
 <dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.schema.Schema.post_process">
 <span class="sig-name descname"><span class="pre">post_process</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">packet</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/protocols/schema/schema.html#Schema.post_process"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.schema.schema.Schema.post_process" title="Permalink to this definition">#</a></dt>
-<dd><p>Revise <code class="docutils literal notranslate"><span class="pre">schema</span></code> data after unpacking process.</p>
+<dd><p>Revise <code class="docutils literal notranslate"><span class="pre">schema</span></code> data after packing and/or unpacking process.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>packet</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>]) – Unpacked data.</p>
@@ -767,8 +786,9 @@ for more information with the inserted names to be excluded.</p>
 <li><a class="reference internal" href="#pcapkit.protocols.schema.schema.Schema.to_bytes"><code class="docutils literal notranslate"><span class="pre">Schema.to_bytes()</span></code></a></li>
 <li><a class="reference internal" href="#pcapkit.protocols.schema.schema.Schema.get_payload"><code class="docutils literal notranslate"><span class="pre">Schema.get_payload()</span></code></a></li>
 <li><a class="reference internal" href="#pcapkit.protocols.schema.schema.Schema.pack"><code class="docutils literal notranslate"><span class="pre">Schema.pack()</span></code></a></li>
+<li><a class="reference internal" href="#pcapkit.protocols.schema.schema.Schema.pre_pack"><code class="docutils literal notranslate"><span class="pre">Schema.pre_pack()</span></code></a></li>
 <li><a class="reference internal" href="#pcapkit.protocols.schema.schema.Schema.unpack"><code class="docutils literal notranslate"><span class="pre">Schema.unpack()</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.schema.schema.Schema.pre_process"><code class="docutils literal notranslate"><span class="pre">Schema.pre_process()</span></code></a></li>
+<li><a class="reference internal" href="#pcapkit.protocols.schema.schema.Schema.pre_unpack"><code class="docutils literal notranslate"><span class="pre">Schema.pre_unpack()</span></code></a></li>
 <li><a class="reference internal" href="#pcapkit.protocols.schema.schema.Schema.post_process"><code class="docutils literal notranslate"><span class="pre">Schema.post_process()</span></code></a></li>
 </ul>
 </li>
