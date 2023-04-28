@@ -504,7 +504,7 @@ class Schema(Mapping[str, VT], Generic[VT]):
             byte = data.read(field.length)
             self.__buffer__[field.name] = byte
 
-            value = field.unpack(byte, packet.copy())
+            value = field.unpack(byte, packet)
             setattr(self, field.name, value)
 
             packet[field.name] = value

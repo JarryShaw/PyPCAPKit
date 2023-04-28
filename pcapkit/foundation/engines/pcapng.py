@@ -156,7 +156,10 @@ class PCAPNG(Engine[P_PCAPNG]):
         while True:
             # read next block
             block = P_PCAPNG(ext._ifile, num=ext._frnum+1, ctx=self._ctx,
-                             layer=ext._exlyr, protocol=ext._exptl)
+                             layer=ext._exlyr, protocol=ext._exptl,
+                             __packet__={
+                                 'snaplen': self._get_snaplen(),
+                             })
 
             # check block type
             if block.info.type == Enum_BlockType.Section_Header_Block:
@@ -277,3 +280,17 @@ class PCAPNG(Engine[P_PCAPNG]):
             ext._ofile(self._ctx.to_dict(), name=name)
             ofile = ext._ofile
         ext._offmt = ofile.kind
+
+    def _get_snaplen(self) -> 'int':
+        """Get snapshot length from the current context.
+
+        This method is used for providing the snapshot length to the ``__packet__``
+        argument when parsing a Simple Packet Block (SPB).
+
+        Notes:
+            If there is no interface, return ``0xFFFFFFFFFFFFFFFF``.
+
+        """
+        if self._ctx.interfaces:
+            return self._ctx.interfaces[0].snaplen
+        return 0xFFFFFFFFFFFFFFFF

@@ -458,34 +458,36 @@ class EncryptedParameter(Parameter):
             packet: packet data
 
         """
-        if 'options' not in packet:
-            return
-
-        cipher_list = cast('list[Data_HIPCipherParameter]',
-                           packet['options'].getlist(Enum_Parameter.HIP_CIPHER))
-        if cipher_list:
-            warn(f'HIP: [ParamNo {Enum_Parameter.ENCRYPTED}] '
-                 'missing HIP_CIPHER parameter', ProtocolWarning)
-            # raise ProtocolError(f'HIPv{version}: [ParamNo {schema.type}] invalid format')
-
-            cipher_id = Enum_Cipher(0xffff)
-        else:
-            cipher_ids = []  # type: list[Enum_Cipher]
-            for cipher in cipher_list:
-                cipher_ids.extend(cipher.cipher_id)
-
-            encrypted_list = cast('list[Data_EncryptedParameter]',
-                                  packet['options'].getlist(Enum_Parameter.ENCRYPTED))
-            encrypted_index = len(encrypted_list)
-
-            if encrypted_index >= len(cipher_ids):
+        if 'options' in packet:
+            cipher_list = cast('list[Data_HIPCipherParameter]',
+                            packet['options'].getlist(Enum_Parameter.HIP_CIPHER))
+            if cipher_list:
                 warn(f'HIP: [ParamNo {Enum_Parameter.ENCRYPTED}] '
-                     'too many ENCRYPTED parameters', ProtocolWarning)
+                    'missing HIP_CIPHER parameter', ProtocolWarning)
                 # raise ProtocolError(f'HIPv{version}: [ParamNo {schema.type}] invalid format')
 
-                cipher_id = Enum_Cipher(0xfffe)
+                cipher_id = Enum_Cipher(0xffff)
             else:
-                cipher_id = cipher_ids[encrypted_index]
+                cipher_ids = []  # type: list[Enum_Cipher]
+                for cipher in cipher_list:
+                    cipher_ids.extend(cipher.cipher_id)
+
+                encrypted_list = cast('list[Data_EncryptedParameter]',
+                                    packet['options'].getlist(Enum_Parameter.ENCRYPTED))
+                encrypted_index = len(encrypted_list)
+
+                if encrypted_index >= len(cipher_ids):
+                    warn(f'HIP: [ParamNo {Enum_Parameter.ENCRYPTED}] '
+                        'too many ENCRYPTED parameters', ProtocolWarning)
+                    # raise ProtocolError(f'HIPv{version}: [ParamNo {schema.type}] invalid format')
+
+                    cipher_id = Enum_Cipher(0xfffe)
+                else:
+                    cipher_id = cipher_ids[encrypted_index]
+        else:
+            warn(f'HIP: [ParamNo {Enum_Parameter.ENCRYPTED}] '
+                 'missing HIP_CIPHER parameter', ProtocolWarning)
+            cipher_id = Enum_Cipher(0xffff)
 
         packet['__cipher__'] = cipher_id
 

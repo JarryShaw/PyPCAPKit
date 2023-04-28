@@ -331,7 +331,7 @@ class _SMFDPDOption(Schema):
         selector=smf_dpd_data_selector,
     )
 
-    def post_process(self, packet: 'dict[str, Any]') -> 'Schema':
+    def post_process(self, packet: 'dict[str, Any]') -> 'SMFDPDOption':
         """Revise ``schema`` data after unpacking process.
 
         Args:
@@ -342,7 +342,6 @@ class _SMFDPDOption(Schema):
 
         """
         ret = self.data
-        ret.mode = Enum_SMFDPDMode.get(self.test['mode'])
         return ret
 
 
@@ -377,6 +376,20 @@ class SMFIdentificationBasedDPDOption(SMFDPDOption):
         1 if pkt['info']['type'] == 0 else (pkt['info']['len'] + 2)
     ))
 
+    def post_process(self, packet: 'dict[str, Any]') -> 'SMFIdentificationBasedDPDOption':
+        """Revise ``schema`` data after unpacking process.
+
+        Args:
+            packet: Unpacked data.
+
+        Returns:
+            Revised schema.
+
+        """
+        ret = super().post_process(packet)  # type: SMFIdentificationBasedDPDOption
+        ret.mode = Enum_SMFDPDMode.I_DPD
+        return ret
+
     if TYPE_CHECKING:
         def __init__(self, type: 'Enum_Option', len: 'int', info: 'TaggerIDInfo',
                      tid: 'Optional[bytes]', id: 'bytes') -> 'None': ...
@@ -387,6 +400,20 @@ class SMFHashBasedDPDOption(SMFDPDOption):
 
     #: Hash assist value (HAV).
     hav: 'bytes' = BytesField(length=lambda pkt: pkt['len'])
+
+    def post_process(self, packet: 'dict[str, Any]') -> 'SMFIdentificationBasedDPDOption':
+        """Revise ``schema`` data after unpacking process.
+
+        Args:
+            packet: Unpacked data.
+
+        Returns:
+            Revised schema.
+
+        """
+        ret = super().post_process(packet)  # type: SMFIdentificationBasedDPDOption
+        ret.mode = Enum_SMFDPDMode.H_DPD
+        return ret
 
     if TYPE_CHECKING:
         def __init__(self, type: 'Enum_Option', len: 'int', hav: 'bytes') -> 'None': ...
@@ -426,7 +453,7 @@ class _QuickStartOption(Schema):
         selector=quick_start_data_selector,
     )
 
-    def post_process(self, packet: 'dict[str, Any]') -> 'Schema':
+    def post_process(self, packet: 'dict[str, Any]') -> 'QuickStartOption':
         """Revise ``schema`` data after unpacking process.
 
         Args:

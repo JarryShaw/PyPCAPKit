@@ -462,6 +462,7 @@ class SchemaField(_Field[_TS]):
             an integer value and accept the current packet as its only argument.
         schema: Field schema.
         default: Default value for field.
+        packet: Optional packet data for unpacking and/or packing purposes.
         callback: Callback function to process field value, which should accept
             the current field and the current packet as its arguments.
 
@@ -480,9 +481,14 @@ class SchemaField(_Field[_TS]):
     def __init__(self, length: 'int | Callable[[dict[str, Any]], int]' = lambda _: -1,
                  schema: 'Optional[Type[_TS]]' = None,
                  default: '_TS | NoValueType | bytes' = NoValue,
+                 packet: 'Optional[dict[str, Any]]' = None,
                  callback: 'Callable[[Self, dict[str, Any]], None]' = lambda *_: None) -> 'None':
         self._name = '<schema>'
         self._callback = callback
+
+        if packet is None:
+            packet = {}
+        self._packet = packet
 
         if schema is None:
             raise FieldError('Schema field must have a schema.')
@@ -529,6 +535,11 @@ class SchemaField(_Field[_TS]):
         Returns:
             Packed field value.
 
+        Notes:
+            We will use ``packet`` as a ``__packet__`` key in the packet context
+            passed to the underlying :class:`~pcapkit.protocols.schema.schema.Schema`
+            for packing purposes.
+
         """
         if value is None:
             if self._default is NoValue:
@@ -537,7 +548,11 @@ class SchemaField(_Field[_TS]):
 
         if isinstance(value, bytes):
             return value
-        return value.pack(packet)
+
+        packet.update(self._packet)
+        return value.pack({
+            '__packet__': packet,
+        })
 
     def unpack(self, buffer: 'bytes | IO[bytes]', packet: 'dict[str, Any]') -> '_TS':
         """Unpack field value from :obj:`bytes`.
@@ -549,12 +564,21 @@ class SchemaField(_Field[_TS]):
         Returns:
             Unpacked field value.
 
+        Notes:
+            We will use ``packet`` as a ``__packet__`` key in the packet context
+            passed to the underlying :class:`~pcapkit.protocols.schema.schema.Schema`
+            for unpacking purposes.
+
         """
         if isinstance(buffer, bytes):
             file = io.BytesIO(buffer)  # type: IO[bytes]
         else:
             file = buffer
-        return cast('_TS', self._schema.unpack(file, self.length, packet))  # type: ignore[call-arg,misc]
+
+        packet.update(self._packet)
+        return cast('_TS', self._schema.unpack(file, self.length, {  # type: ignore[call-arg,misc]
+            '__packet__': packet,
+        }))
 
 
 class ForwardMatchField(_Field[_TC]):

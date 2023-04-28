@@ -64,6 +64,7 @@ if TYPE_CHECKING:
 
     from pcapkit.corekit.fields.field import _Field as Field
     from pcapkit.protocols.misc.pcapng import TLSKeyLabel, WireGuardKeyLabel
+    from pcapkit.protocols.protocol import Protocol
 
 if SPHINX_TYPE_CHECKING:
     from typing_extensions import TypedDict
@@ -256,7 +257,7 @@ class UnknownBlock(BlockType):
     #: Block total length.
     length: 'int' = UInt32Field(callback=byteorder_callback)
     #: Block body (including padding).
-    body: 'bytes' = PayloadField(length=lambda pkt: pkt['length'] - 12)
+    body: 'bytes' = BytesField(length=lambda pkt: pkt['length'] - 12)
     #: Block total length.
     length2: 'int' = UInt32Field(callback=byteorder_callback)
 
@@ -277,7 +278,7 @@ class UnknownOption(Option):
     """Header schema for unknown PCAP-NG file options."""
 
     #: Option value.
-    data: 'bytes' = PayloadField(length=lambda pkt: pkt['length'])
+    data: 'bytes' = BytesField(length=lambda pkt: pkt['length'])
     #: Padding.
     padding: 'bytes' = PaddingField(length=lambda pkt: (4 - pkt['length'] % 4) % 4)
 
@@ -751,7 +752,7 @@ class EnhancedPacketBlock(BlockType):
     #: Original packet length.
     original_len: 'int' = UInt32Field(callback=byteorder_callback)
     #: Packet data.
-    packet_data: 'bytes' = BytesField(length=lambda pkt: pkt['captured_len'])
+    packet_data: 'bytes' = PayloadField(length=lambda pkt: pkt['captured_len'])
     #: Padding.
     padding: 'bytes' = PaddingField(length=lambda pkt: (4 - pkt['captured_len'] % 4) % 4)
     #: Options.
@@ -776,8 +777,9 @@ class EnhancedPacketBlock(BlockType):
 
     if TYPE_CHECKING:
         def __init__(self, length: 'int', interface_id: 'int', timestamp_high: 'int',
-                     timestamp_low: 'int', captured_len: 'int', original_len: 'int', packet_data: 'bytes',
-                     padding: 'bytes', options: 'list[Option | bytes] | bytes', length2: 'int') -> 'None': ...
+                     timestamp_low: 'int', captured_len: 'int', original_len: 'int',
+                     packet_data: 'bytes | Protocol | Schema',
+                     options: 'list[Option | bytes] | bytes', length2: 'int') -> 'None': ...
 
 
 class SimplePacketBlock(BlockType):
@@ -790,15 +792,17 @@ class SimplePacketBlock(BlockType):
     #: Original packet length.
     original_len: 'int' = UInt32Field(callback=byteorder_callback)
     #: Packet data.
-    packet_data: 'bytes' = BytesField(length=lambda pkt: min(pkt.get('snaplen', 0xFFFFFFFFFFFFFFFF), pkt['original_len']))
+    packet_data: 'bytes' = PayloadField(length=lambda pkt: min(pkt.get('snaplen', 0xFFFFFFFFFFFFFFFF),
+                                                               pkt['original_len']))
     #: Padding.
     padding: 'bytes' = PaddingField(length=lambda pkt: (4 - len(pkt['packet_data']) % 4) % 4)
     #: Block total length.
     length2: 'int' = UInt32Field(callback=byteorder_callback)
 
     if TYPE_CHECKING:
-        def __init__(self, length: 'int', original_len: 'int', packet_data: 'bytes',
-                     padding: 'bytes', length2: 'int') -> 'None': ...
+        def __init__(self, length: 'int', original_len: 'int',
+                     packet_data: 'bytes | Protocol | Schema',
+                     length2: 'int') -> 'None': ...
 
 
 class NameResolutionRecord(Schema):
@@ -1305,7 +1309,7 @@ class DecryptionSecretsBlock(BlockType):
 
     if TYPE_CHECKING:
         def __init__(self, length: 'int', secrets_type: 'Enum_SecretsType',
-                     secrets_length: 'int', secrets_data: 'DSBSecrets | bytes', padding: 'bytes',
+                     secrets_length: 'int', secrets_data: 'DSBSecrets | bytes',
                      options: 'list[Option | bytes] | bytes', length2: 'int') -> 'None': ...
 
 
@@ -1345,7 +1349,7 @@ class PacketBlock(BlockType):
     #: Original packet length.
     original_length: 'int' = UInt32Field(callback=byteorder_callback)
     #: Packet data.
-    packet_data: 'bytes' = BytesField(length=lambda pkt: pkt['captured_length'])
+    packet_data: 'bytes' = PayloadField(length=lambda pkt: pkt['captured_length'])
     #: Padding.
     padding: 'bytes' = BytesField(length=lambda pkt: (4 - pkt['captured_length'] % 4) % 4)
     #: Options.
@@ -1366,5 +1370,6 @@ class PacketBlock(BlockType):
 
     if TYPE_CHECKING:
         def __init__(self, length: 'int', interface_id: 'int', drop_count: 'int',
-                     timestamp_high: 'int', timestamp_low: 'int', captured_length: 'int', original_length: 'int',
-                     packet_data: 'bytes', padding: 'bytes', options: 'list[Option | bytes] | bytes', length2: 'int') -> 'None': ...
+                     timestamp_high: 'int', timestamp_low: 'int', captured_length: 'int',
+                     original_length: 'int', packet_data: 'bytes | Protocol | Schema',
+                     options: 'list[Option | bytes] | bytes', length2: 'int') -> 'None': ...

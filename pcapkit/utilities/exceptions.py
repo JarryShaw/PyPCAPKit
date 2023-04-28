@@ -43,7 +43,7 @@ __all__ = [
     'ProtocolNotFound',                                             # IndexError
     'VersionError', 'IndexNotFound', 'ProtocolError',               # ValueError
     'EndianError', 'KeyExists', 'NoDefaultValue',                   # ValueError
-    'FieldValueError',                                              # ValueError
+    'FieldValueError', 'SchemaError',                               # ValueError
     'ProtocolNotImplemented', 'VendorNotImplemented',               # NotImplementedError
     'StructError',                                                  # struct.error
     'MissingKeyError', 'FragmentError', 'PacketError',              # KeyError
@@ -286,6 +286,10 @@ class NoDefaultValue(BaseError, ValueError):
 
 class FieldValueError(BaseError, ValueError):
     """Invalid field value."""
+
+
+class SchemaError(BaseError, ValueError):
+    """Invalid schema."""
 
 
 ##############################################################################

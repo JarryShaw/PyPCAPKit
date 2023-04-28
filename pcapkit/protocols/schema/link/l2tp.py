@@ -52,7 +52,7 @@ class L2TP(Schema):
     #: Length of L2TP packet.
     length: 'int' = ConditionalField(
         UInt16Field(),
-        lambda packet: packet['flags'].get('length', False),
+        lambda packet: packet['flags']['len'],
     )
     #: Tunnel ID of L2TP packet.
     tunnel_id: 'int' = UInt16Field()
@@ -61,22 +61,22 @@ class L2TP(Schema):
     #: Sequence number of L2TP packet.
     ns: 'int' = ConditionalField(
         UInt16Field(),
-        lambda packet: packet['flags'].get('seq', False),
+        lambda packet: packet['flags']['seq'],
     )
     #: Next sequence number of L2TP packet.
     nr: 'int' = ConditionalField(
         UInt16Field(),
-        lambda packet: packet['flags'].get('seq', False),
+        lambda packet: packet['flags']['seq'],
     )
     #: Offset size of L2TP packet.
     offset: 'int' = ConditionalField(
         UInt16Field(),
-        lambda packet: packet['flags'].get('offset', False),
+        lambda packet: packet['flags']['offset'],
     )
     #: Padding of L2TP packet.
     padding: 'bytes' = ConditionalField(
-        PaddingField(length=lambda pkt: pkt.get('offset', 0)),
-        lambda packet: packet['flags'].get('offset', False),
+        PaddingField(length=lambda pkt: pkt['offset']),
+        lambda packet: packet['flags']['offset'],
     )
     #: Payload of L2TP packet.
     payload: 'bytes' = PayloadField()

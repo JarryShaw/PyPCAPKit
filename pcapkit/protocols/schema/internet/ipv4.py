@@ -440,7 +440,7 @@ class _QSOption(Schema):
         selector=quick_start_data_selector,
     )
 
-    def post_process(self, packet: 'dict[str, Any]') -> 'Schema':
+    def post_process(self, packet: 'dict[str, Any]') -> 'QSOption':
         """Revise ``schema`` data after unpacking process.
 
         Args:

@@ -227,6 +227,12 @@ class OptionField(ListField):
         Returns:
             Unpacked field value.
 
+        Important:
+            If the option list ended before the specified size limit,
+            inject ``__option_padding__`` as the remaining length to
+            the ``packet`` argument such that the next fields can be
+            aware of such informations.
+
         """
         length = self.length
         if isinstance(buffer, bytes):
