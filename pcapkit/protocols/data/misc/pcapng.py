@@ -106,6 +106,9 @@ class CommentOption(Option):
     #: Comment text.
     comment: 'str'
 
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_OptionType', length: 'int', comment: 'str') -> None: ...
+
 
 class CustomOption(Option):
     """Data model for PCAP-NG file ``opt_custom`` options."""

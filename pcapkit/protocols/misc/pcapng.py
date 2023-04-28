@@ -32,6 +32,7 @@ from pcapkit.corekit.version import VersionInfo
 from pcapkit.protocols.data.misc.pcapng import PCAPNG as Data_PCAPNG
 from pcapkit.protocols.data.misc.pcapng import CommentOption as Data_CommentOption
 from pcapkit.protocols.data.misc.pcapng import CustomBlock as Data_CustomBlock
+from pcapkit.protocols.data.misc.pcapng import CustomOption as Data_CustomOption
 from pcapkit.protocols.data.misc.pcapng import DecryptionSecretsBlock as Data_DecryptionSecretsBlock
 from pcapkit.protocols.data.misc.pcapng import DSBSecrets as Data_DSBSecrets
 from pcapkit.protocols.data.misc.pcapng import EndOfOption as Data_EndOfOption
@@ -96,6 +97,7 @@ from pcapkit.protocols.schema.misc.pcapng import PCAPNG as Schema_PCAPNG
 from pcapkit.protocols.schema.misc.pcapng import BlockType as Schema_BlockType
 from pcapkit.protocols.schema.misc.pcapng import CommentOption as Schema_CommentOption
 from pcapkit.protocols.schema.misc.pcapng import CustomBlock as Schema_CustomBlock
+from pcapkit.protocols.schema.misc.pcapng import CustomOption as Schema_CustomOption
 from pcapkit.protocols.schema.misc.pcapng import \
     DecryptionSecretsBlock as Schema_DecryptionSecretsBlock
 from pcapkit.protocols.schema.misc.pcapng import DSBSecrets as Schema_DSBSecrets
@@ -166,7 +168,7 @@ __all__ = ['PCAPNG']
 if TYPE_CHECKING:
     from decimal import Decimal
     from enum import IntEnum as StdlibEnum
-    from typing import IO, Any, Callable, DefaultDict, Optional, Type, Union
+    from typing import IO, Any, Callable, Counter, DefaultDict, Optional, Type, Union
 
     from aenum import IntEnum as AenumEnum
     from mypy_extensions import DefaultArg, KwArg, NamedArg
@@ -956,6 +958,8 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
         self._fnum = num
         #: pcapkit.foundation.engins.pcapng.Context: Context of the PCAP-NG file.
         self._ctx = ctx
+        #: collections.Counter: Counter for option types.
+        self._opt = collections.Counter()  # type: Counter[Enum_OptionType]
 
         if file is None:
             _read = False
@@ -1155,6 +1159,7 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
 
             # record option data
             options.add(type, data)
+            self._opt[type] += 1
 
             # brea when ``opt_endofopt`` is reached
             if type == Enum_OptionType.opt_endofopt:
@@ -1168,6 +1173,7 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
 
         Args:
             schema: Parsed option schema.
+            options: Parsed PCAP-NG options.
 
         Returns:
             Constructed option data.
@@ -1176,6 +1182,67 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
         option = Data_UnknownOption(
             type=schema.type,
             length=schema.length,
+            data=schema.data,
+        )
+        return option
+
+    def _read_option_endofopt(self, schema: 'Schema_EndOfOption', *,
+                              options: 'Option') -> 'Data_EndOfOption':
+        """Read PCAP-NG ``opt_endofopt`` option.
+
+        Args:
+            schema: Parsed option schema.
+            options: Parsed PCAP-NG options.
+
+        Returns:
+            Constructed option data.
+
+        """
+        if self._opt[schema.type] > 0:
+            raise ProtocolError(f'PCAP-NG: [opt_endofopt] option must be only one, '
+                                f'but {self._opt[schema.type] + 1} found.')
+
+        option = Data_EndOfOption(
+            type=schema.type,
+            length=schema.length,
+        )
+        return option
+
+    def _read_option_comment(self, schema: 'Schema_CommentOption', *,
+                             options: 'Option') -> 'Data_CommentOption':
+        """Read PCAP-NG ``opt_comment`` option.
+
+        Args:
+            schema: Parsed option schema.
+            options: Parsed PCAP-NG options.
+
+        Returns:
+            Constructed option data.
+
+        """
+        option = Data_CommentOption(
+            type=schema.type,
+            length=schema.length,
+            comment=schema.comment,
+        )
+        return option
+
+    def _read_option_custom(self, schema: 'Schema_CustomOption', *,
+                            options: 'Option') -> 'Data_CustomOption':
+        """Read PCAP-NG ``opt_custom`` option.
+
+        Args:
+            schema: Parsed option schema.
+            options: Parsed PCAP-NG options.
+
+        Returns:
+            Constructed option data.
+
+        """
+        option = Data_CustomOption(
+            type=schema.type,
+            length=schema.length,
+            pen=schema.pen,
             data=schema.data,
         )
         return option
@@ -1305,6 +1372,7 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
 
                 options_list.append(data)
                 total_length += data_len
+                self._opt[code] += 1
 
             if has_endofopt:
                 opt_endofopt = self._make_option_endofopt(Enum_OptionType.opt_endofopt)  # type: ignore[arg-type]
@@ -1331,6 +1399,7 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
 
             options_list.append(data)
             total_length += data_len
+            self._opt[code] += 1
 
         if has_endofopt:
             opt_endofopt = self._make_option_endofopt(Enum_OptionType.opt_endofopt)  # type: ignore[arg-type]
@@ -1377,7 +1446,63 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
             Constructed option schema.
 
         """
+        if self._opt[type] > 0:
+            raise ProtocolError(f'PCAP-NG: [opt_endofopt] option must be only one, '
+                                f'but {self._opt[type] + 1} found.')
+
         return Schema_EndOfOption(
             type=type,
             length=0,
+        )
+
+    def _make_option_comment(self, type: 'Enum_OptionType', option: 'Optional[Data_CommentOption]' = None, *,
+                             comment: 'str' = '',
+                             **kwargs: 'Any') -> 'Schema_CommentOption':
+        """Make PCAP-NG ``opt_comment`` option.
+
+        Args:
+            type: Option type.
+            option: Option data model.
+            comment: Comment text.
+            **kwargs: Arbitrary keyword arguments.
+
+        Returns:
+            Constructed option schema.
+
+        """
+        if option is not None:
+            comment = option.comment
+
+        return Schema_CommentOption(
+            type=type,
+            length=len(comment),
+            comment=comment,
+        )
+
+    def _make_option_custom(self, type: 'Enum_OptionType', option: 'Optional[Data_CustomOption]' = None, *,
+                            pen: 'int' = 0xFFFFFFFF,
+                            data: 'bytes' = b'',
+                            **kwargs: 'Any') -> 'Schema_CustomOption':
+        """Make PCAP-NG ``opt_custom`` option.
+
+        Args:
+            type: Option type.
+            option: Option data model.
+            pen: Private enterprise number.
+            data: Custom data.
+            **kwargs: Arbitrary keyword arguments.
+
+        Returns:
+            Constructed option schema.
+
+        """
+        if option is not None:
+            pen = option.pen
+            data = option.data
+
+        return Schema_CustomOption(
+            type=type,
+            length=len(data) + 4,
+            pen=pen,
+            data=data
         )
