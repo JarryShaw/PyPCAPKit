@@ -17,6 +17,8 @@ import decimal
 import enum
 import io
 import math
+import os
+import platform
 import re
 import sys
 import textwrap
@@ -1582,6 +1584,144 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
         )
         return option
 
+    def _read_option_if_os(self, schema: 'Schema_IF_OSOption', *,
+                           options: 'Option') -> 'Data_IF_OSOption':
+        """Read PCAP-NG ``if_os`` option.
+
+        Args:
+            schema: Parsed option schema.
+            options: Parsed PCAP-NG options.
+
+        Returns:
+            Constructed option data.
+
+        """
+        if self._opt[schema.type] > 0:
+            raise ProtocolError(f'PCAP-NG: [if_os] option must be only one, '
+                                f'but {self._opt[schema.type] + 1} found.')
+
+        option = Data_IF_OSOption(
+            type=schema.type,
+            length=schema.length,
+            os=schema.os,
+        )
+        return option
+
+    def _read_option_if_fcslen(self, schema: 'Schema_IF_FCSLenOption', *,
+                           options: 'Option') -> 'Data_IF_FCSLenOption':
+        """Read PCAP-NG ``if_fcslen`` option.
+
+        Args:
+            schema: Parsed option schema.
+            options: Parsed PCAP-NG options.
+
+        Returns:
+            Constructed option data.
+
+        """
+        if self._opt[schema.type] > 0:
+            raise ProtocolError(f'PCAP-NG: [if_fcslen] option must be only one, '
+                                f'but {self._opt[schema.type] + 1} found.')
+
+        option = Data_IF_FCSLenOption(
+            type=schema.type,
+            length=schema.length,
+            fcs_length=schema.fcslen,
+        )
+        return option
+
+    def _read_option_if_tsoffset(self, schema: 'Schema_IF_TSOffsetOption', *,
+                               options: 'Option') -> 'Data_IF_TSOffsetOption':
+        """Read PCAP-NG ``if_tsoffset`` option.
+
+        Args:
+            schema: Parsed option schema.
+            options: Parsed PCAP-NG options.
+
+        Returns:
+            Constructed option data.
+
+        """
+        if self._opt[schema.type] > 0:
+            raise ProtocolError(f'PCAP-NG: [if_tsoffset] option must be only one, '
+                                f'but {self._opt[schema.type] + 1} found.')
+
+        option = Data_IF_TSOffsetOption(
+            type=schema.type,
+            length=schema.length,
+            offset=schema.tsoffset,
+        )
+        return option
+
+    def _read_option_if_hardware(self, schema: 'Schema_IF_HardwareOption', *,
+                                 options: 'Option') -> 'Data_IF_HardwareOption':
+        """Read PCAP-NG ``if_hardware`` option.
+
+        Args:
+            schema: Parsed option schema.
+            options: Parsed PCAP-NG options.
+
+        Returns:
+            Constructed option data.
+
+        """
+        if self._opt[schema.type] > 0:
+            raise ProtocolError(f'PCAP-NG: [if_hardware] option must be only one, '
+                                f'but {self._opt[schema.type] + 1} found.')
+
+        option = Data_IF_HardwareOption(
+            type=schema.type,
+            length=schema.length,
+            hardware=schema.hardware,
+        )
+        return option
+
+    def _read_option_if_txspeed(self, schema: 'Schema_IF_TxSpeedOption', *,
+                                options: 'Option') -> 'Data_IF_TxSpeedOption':
+        """Read PCAP-NG ``if_txspeed`` option.
+
+        Args:
+            schema: Parsed option schema.
+            options: Parsed PCAP-NG options.
+
+        Returns:
+            Constructed option data.
+
+        """
+        if self._opt[schema.type] > 0:
+            raise ProtocolError(f'PCAP-NG: [if_txspeed] option must be only one, '
+                                f'but {self._opt[schema.type] + 1} found.')
+
+        option = Data_IF_TxSpeedOption(
+            type=schema.type,
+            length=schema.length,
+            speed=schema.tx_speed,
+        )
+        return option
+
+    def _read_option_if_rxspeed(self, schema: 'Schema_IF_RxSpeedOption', *,
+                                options: 'Option') -> 'Data_IF_RxSpeedOption':
+        """Read PCAP-NG ``if_rxspeed`` option.
+
+        Args:
+            schema: Parsed option schema.
+            options: Parsed PCAP-NG options.
+
+        Returns:
+            Constructed option data.
+
+        """
+        if self._opt[schema.type] > 0:
+            raise ProtocolError(f'PCAP-NG: [if_rxspeed] option must be only one, '
+                                f'but {self._opt[schema.type] + 1} found.')
+
+        option = Data_IF_RxSpeedOption(
+            type=schema.type,
+            length=schema.length,
+            speed=schema.rx_speed,
+        )
+        return option
+
     def _make_block_unknown(self, block: 'Optional[Data_UnknownBlock]' = None, *,
                             data: 'bytes' = b'',
                             **kwargs: 'Any') -> 'Schema_UnknownBlock':
@@ -2108,7 +2248,7 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
 
         return Schema_IF_TZoneOption(
             type=type,
-            length=1,
+            length=4,
             tzone=tzone_val,
         )
 
@@ -2148,4 +2288,144 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
             length=8,
             code=filter_val,
             filter=expr_val,
+        )
+
+    def _make_option_if_os(self, type: 'Enum_OptionType', option: 'Optional[Data_IF_OSOption]' = None, *,
+                           os: 'str' = platform.platform(),
+                           **kwargs: 'Any') -> 'Schema_IF_OSOption':
+        """Make PCAP-NG ``if_os`` option.
+
+        Args:
+            type: Option type.
+            option: Option data model.
+            os: Operating system name.
+            **kwargs: Arbitrary keyword arguments.
+
+        Returns:
+            Constructed option schema.
+
+        """
+        if self._opt[type] > 0:
+            raise ProtocolError(f'PCAP-NG: [if_os] option must be only one, '
+                                f'but {self._opt[type] + 1} found.')
+
+        if option is not None:
+            os = option.os
+
+        return Schema_IF_OSOption(
+            type=type,
+            length=len(os),
+            os=os,
+        )
+
+    def _make_option_if_fcslen(self, type: 'Enum_OptionType', option: 'Optional[Data_IF_FCSLenOption]' = None, *,
+                               fcs_length: 'int' = 4,
+                               **kwargs: 'Any') -> 'Schema_IF_FCSLenOption':
+        """Make PCAP-NG ``if_fcslen`` option.
+
+        Args:
+            type: Option type.
+            option: Option data model.
+            fcs_length: FCS length, in bytes.
+            **kwargs: Arbitrary keyword arguments.
+
+        Returns:
+            Constructed option schema.
+
+        """
+        if self._opt[type] > 0:
+            raise ProtocolError(f'PCAP-NG: [if_fcslen] option must be only one, '
+                                f'but {self._opt[type] + 1} found.')
+
+        if option is not None:
+            fcs_length = option.fcs_length
+
+        return Schema_IF_FCSLenOption(
+            type=type,
+            length=1,
+            fcslen=fcs_length,
+        )
+
+    def _make_option_if_hardware(self, type: 'Enum_OptionType', option: 'Optional[Data_IF_HardwareOption]' = None, *,
+                                 hardware: 'str' = platform.processor(),
+                                 **kwargs: 'Any') -> 'Schema_IF_HardwareOption':
+        """Make PCAP-NG ``if_hardware`` option.
+
+        Args:
+            type: Option type.
+            option: Option data model.
+            os: Operating system name.
+            **kwargs: Arbitrary keyword arguments.
+
+        Returns:
+            Constructed option schema.
+
+        """
+        if self._opt[type] > 0:
+            raise ProtocolError(f'PCAP-NG: [if_hardware] option must be only one, '
+                                f'but {self._opt[type] + 1} found.')
+
+        if option is not None:
+            hardware = option.hardware
+
+        return Schema_IF_HardwareOption(
+            type=type,
+            length=len(hardware),
+            hardware=hardware,
+        )
+
+    def _make_option_if_txspeed(self, type: 'Enum_OptionType', option: 'Optional[Data_IF_TxSpeedOption]' = None, *,
+                                speed: 'int' = 100000000,
+                                **kwargs: 'Any') -> 'Schema_IF_TxSpeedOption':
+        """Make PCAP-NG ``if_txspeed`` option.
+
+        Args:
+            type: Option type.
+            option: Option data model.
+            speed: Interface transmit speed, in bits per second.
+            **kwargs: Arbitrary keyword arguments.
+
+        Returns:
+            Constructed option schema.
+
+        """
+        if self._opt[type] > 0:
+            raise ProtocolError(f'PCAP-NG: [if_txspeed] option must be only one, '
+                                f'but {self._opt[type] + 1} found.')
+
+        if option is not None:
+            speed = option.speed
+
+        return Schema_IF_TxSpeedOption(
+            type=type,
+            length=8,
+            tx_speed=speed,
+        )
+
+    def _make_option_if_rxspeed(self, type: 'Enum_OptionType', option: 'Optional[Data_IF_RxSpeedOption]' = None, *,
+                                speed: 'int' = 100000000,
+                                **kwargs: 'Any') -> 'Schema_IF_RxSpeedOption':
+        """Make PCAP-NG ``if_rxspeed`` option.
+
+        Args:
+            type: Option type.
+            option: Option data model.
+            speed: Interface receive speed, in bits per second.
+            **kwargs: Arbitrary keyword arguments.
+
+        Returns:
+            Constructed option schema.
+
+        """
+        if self._opt[type] > 0:
+            raise ProtocolError(f'PCAP-NG: [if_txspeed] option must be only one, '
+                                f'but {self._opt[type] + 1} found.')
+
+        if option is not None:
+            speed = option.speed
+
+        return Schema_IF_RxSpeedOption(
+            type=type,
+            length=8,
+            rx_speed=speed,
         )
