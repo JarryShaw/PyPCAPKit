@@ -16,11 +16,15 @@ import datetime
 import decimal
 import enum
 import io
+import math
+import re
 import sys
+import textwrap
 import time
 from typing import TYPE_CHECKING, cast, overload
 
 from pcapkit.const.pcapng.block_type import BlockType as Enum_BlockType
+from pcapkit.const.pcapng.filter_type import FilterType as Enum_FilterType
 from pcapkit.const.pcapng.hash_algorithm import HashAlgorithm as Enum_HashAlgorithm
 from pcapkit.const.pcapng.option_type import OptionType as Enum_OptionType
 from pcapkit.const.pcapng.record_type import RecordType as Enum_RecordType
@@ -166,8 +170,10 @@ from pcapkit.utilities.warnings import RegistryWarning, warn
 __all__ = ['PCAPNG']
 
 if TYPE_CHECKING:
+    from datetime import timedelta, timezone
     from decimal import Decimal
     from enum import IntEnum as StdlibEnum
+    from ipaddress import IPv4Address, IPv4Interface, IPv6Address, IPv6Interface
     from typing import IO, Any, Callable, Counter, DefaultDict, Optional, Type, Union
 
     from aenum import IntEnum as AenumEnum
@@ -197,6 +203,14 @@ if TYPE_CHECKING:
                             Data_NameResolutionRecord]
     RecordConstructor = Callable[[Enum_RecordType, DefaultArg(Optional[Data_NameResolutionRecord]),
                                   KwArg(Any)], Schema_NameResolutionRecord]
+
+# check Python version
+py38 = ((version_info := sys.version_info).major >= 3 and version_info.minor >= 8)
+
+# Ethernet address pattern
+PAT_MAC_ADDR = re.compile(rb'(?i)(?:[0-9a-f]{2}[:-]){5}[0-9a-f]{2}')
+# EUI address pattern
+PAT_EUI_ADDR = re.compile(rb'(?i)(?:[0-9a-f]{2}[:-]){7}[0-9a-f]{2}')
 
 
 class PacketDirection(enum.IntEnum):
@@ -1021,6 +1035,70 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
             'block': data,
         }
 
+    def _read_mac_addr(self, addr: 'bytes') -> 'str':
+        """Read MAC address.
+
+        Args:
+            addr: MAC address.
+
+        Returns:
+            Colon (``:``) seperated *hex* encoded MAC address.
+
+        """
+        if py38:
+            _addr = addr.hex(':')
+        else:
+            _addr = ':'.join(textwrap.wrap(addr.hex(), 2))
+        return _addr
+
+    def _read_eui_addr(self, addr: 'bytes') -> 'str':
+        """Read EUI address.
+
+        Args:
+            addr: EUI address.
+
+        Returns:
+            Colon (``:``) seperated *hex* encoded EUI address.
+
+        """
+        if py38:
+            _addr = addr.hex(':')
+        else:
+            _addr = ':'.join(textwrap.wrap(addr.hex(), 2))
+        return _addr
+
+    def _make_mac_addr(self, addr: 'str | bytes | bytearray') -> 'bytes':
+        """Make MAC address.
+
+        Args:
+            addr: MAC address.
+
+        Returns:
+            MAC address.
+
+        """
+        _addr = addr.encode() if isinstance(addr, str) else addr
+
+        if PAT_MAC_ADDR.fullmatch(_addr) is not None:
+            return _addr.replace(b':', b'').replace(b'-', b'')
+        raise ProtocolError(f'invalid MAC address: {addr!r}')
+
+    def _make_eui_addr(self, addr: 'str | bytes | bytearray') -> 'bytes':
+        """Make EUI address.
+
+        Args:
+            addr: EUI address.
+
+        Returns:
+            EUI address.
+
+        """
+        _addr = addr.encode() if isinstance(addr, str) else addr
+
+        if PAT_EUI_ADDR.fullmatch(_addr) is not None:
+            return _addr.replace(b':', b'').replace(b'-', b'')
+        raise ProtocolError(f'invalid EUI address: {addr!r}')
+
     def _decode_next_layer(self, dict_: 'Data_PCAPNG', proto: 'Optional[int]' = None,
                            length: 'Optional[int]' = None, *, packet: 'Optional[dict[str, Any]]' = None) -> 'Data_PCAPNG':  # pylint: disable=arguments-differ
         r"""Decode next layer protocol.
@@ -1085,7 +1163,7 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
                         header: 'Schema_PCAPNG') -> 'Data_SectionHeaderBlock':
         """Read PCAP-NG section header block (SHB).
 
-        Structure of Section Header Block::
+        Structure of Section Header Block:
 
         .. code-block:: text
 
@@ -1135,6 +1213,25 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
 
     def _read_pcapng_options(self, options_schema: 'list[Schema_Option]') -> 'Option':
         """Read PCAP-NG options.
+
+        Structure of PCAP-NG option:
+
+        .. code-block:: text
+
+                                1                   2                   3
+            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |      Option Code              |         Option Length         |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           /                       Option Value                            /
+           /              variable length, padded to 32 bits               /
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           /                                                               /
+           /                 . . . other options . . .                     /
+           /                                                               /
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |   Option Code == opt_endofopt |   Option Length == 0          |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
             options_schema: Parsed PCAP-NG options.
@@ -1231,6 +1328,21 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
                             options: 'Option') -> 'Data_CustomOption':
         """Read PCAP-NG ``opt_custom`` option.
 
+        Structure of PCAP-NG ``opt_custom`` option:
+
+        .. code-block:: text
+
+                                1                   2                   3
+            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |     Custom Option Code        |         Option Length         |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |                Private Enterprise Number (PEN)                |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           /                        Custom Data                            /
+           /              variable length, padded to 32 bits               /
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
         Args:
             schema: Parsed option schema.
             options: Parsed PCAP-NG options.
@@ -1244,6 +1356,229 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
             length=schema.length,
             pen=schema.pen,
             data=schema.data,
+        )
+        return option
+
+    def _read_option_if_name(self, schema: 'Schema_IF_NameOption', *,
+                             options: 'Option') -> 'Data_IF_NameOption':
+        """Read PCAP-NG ``if_name`` option.
+
+        Args:
+            schema: Parsed option schema.
+            options: Parsed PCAP-NG options.
+
+        Returns:
+            Constructed option data.
+
+        """
+        if self._opt[schema.type] > 0:
+            raise ProtocolError(f'PCAP-NG: [if_name] option must be only one, '
+                                f'but {self._opt[schema.type] + 1} found.')
+
+        option = Data_IF_NameOption(
+            type=schema.type,
+            length=schema.length,
+            name=schema.name,
+        )
+        return option
+
+    def _read_option_if_description(self, schema: 'Schema_IF_DescriptionOption', *,
+                                    options: 'Option') -> 'Data_IF_DescriptionOption':
+        """Read PCAP-NG ``if_description`` option.
+
+        Args:
+            schema: Parsed option schema.
+            options: Parsed PCAP-NG options.
+
+        Returns:
+            Constructed option data.
+
+        """
+        if self._opt[schema.type] > 0:
+            raise ProtocolError(f'PCAP-NG: [if_description] option must be only one, '
+                                f'but {self._opt[schema.type] + 1} found.')
+
+        option = Data_IF_DescriptionOption(
+            type=schema.type,
+            length=schema.length,
+            description=schema.description,
+        )
+        return option
+
+    def _read_option_if_ipv4(self, schema: 'Schema_IF_IPv4AddrOption', *,
+                                    options: 'Option') -> 'Data_IF_IPv4AddrOption':
+        """Read PCAP-NG ``if_IPv4addr`` option.
+
+        Args:
+            schema: Parsed option schema.
+            options: Parsed PCAP-NG options.
+
+        Returns:
+            Constructed option data.
+
+        """
+        option = Data_IF_IPv4AddrOption(
+            type=schema.type,
+            length=schema.length,
+            interface=schema.interface,
+        )
+        return option
+
+    def _read_option_if_ipv6(self, schema: 'Schema_IF_IPv6AddrOption', *,
+                             options: 'Option') -> 'Data_IF_IPv6AddrOption':
+        """Read PCAP-NG ``if_IPv6addr`` option.
+
+        Args:
+            schema: Parsed option schema.
+            options: Parsed PCAP-NG options.
+
+        Returns:
+            Constructed option data.
+
+        """
+        option = Data_IF_IPv6AddrOption(
+            type=schema.type,
+            length=schema.length,
+            interface=schema.interface,
+        )
+        return option
+
+    def _read_option_if_mac(self, schema: 'Schema_IF_MACAddrOption', *,
+                            options: 'Option') -> 'Data_IF_MACAddrOption':
+        """Read PCAP-NG ``if_MACaddr`` option.
+
+        Args:
+            schema: Parsed option schema.
+            options: Parsed PCAP-NG options.
+
+        Returns:
+            Constructed option data.
+
+        """
+        if self._opt[schema.type] > 0:
+            raise ProtocolError(f'PCAP-NG: [if_MACaddr] option must be only one, '
+                                f'but {self._opt[schema.type] + 1} found.')
+
+        option = Data_IF_MACAddrOption(
+            type=schema.type,
+            length=schema.length,
+            interface=self._read_mac_addr(schema.interface),
+        )
+        return option
+
+    def _read_option_if_eui(self, schema: 'Schema_IF_EUIAddrOption', *,
+                            options: 'Option') -> 'Data_IF_EUIAddrOption':
+        """Read PCAP-NG ``if_EUIaddr`` option.
+
+        Args:
+            schema: Parsed option schema.
+            options: Parsed PCAP-NG options.
+
+        Returns:
+            Constructed option data.
+
+        """
+        if self._opt[schema.type] > 0:
+            raise ProtocolError(f'PCAP-NG: [if_EUIaddr] option must be only one, '
+                                f'but {self._opt[schema.type] + 1} found.')
+
+        option = Data_IF_EUIAddrOption(
+            type=schema.type,
+            length=schema.length,
+            interface=self._read_eui_addr(schema.interface),
+        )
+        return option
+
+    def _read_option_if_speed(self, schema: 'Schema_IF_SpeedOption', *,
+                              options: 'Option') -> 'Data_IF_SpeedOption':
+        """Read PCAP-NG ``if_speed`` option.
+
+        Args:
+            schema: Parsed option schema.
+            options: Parsed PCAP-NG options.
+
+        Returns:
+            Constructed option data.
+
+        """
+        if self._opt[schema.type] > 0:
+            raise ProtocolError(f'PCAP-NG: [if_speed] option must be only one, '
+                                f'but {self._opt[schema.type] + 1} found.')
+
+        option = Data_IF_SpeedOption(
+            type=schema.type,
+            length=schema.length,
+            speed=schema.speed,
+        )
+        return option
+
+    def _read_option_if_tsresol(self, schema: 'Schema_IF_TSResolOption', *,
+                              options: 'Option') -> 'Data_IF_TSResolOption':
+        """Read PCAP-NG ``if_tsresol`` option.
+
+        Args:
+            schema: Parsed option schema.
+            options: Parsed PCAP-NG options.
+
+        Returns:
+            Constructed option data.
+
+        """
+        if self._opt[schema.type] > 0:
+            raise ProtocolError(f'PCAP-NG: [if_tsresol] option must be only one, '
+                                f'but {self._opt[schema.type] + 1} found.')
+
+        option = Data_IF_TSResolOption(
+            type=schema.type,
+            length=schema.length,
+            resolution=schema.resolution,
+        )
+        return option
+
+    def _read_option_if_tzone(self, schema: 'Schema_IF_TZoneOption', *,
+                              options: 'Option') -> 'Data_IF_TZoneOption':
+        """Read PCAP-NG ``if_tzone`` option.
+
+        Args:
+            schema: Parsed option schema.
+            options: Parsed PCAP-NG options.
+
+        Returns:
+            Constructed option data.
+
+        """
+        if self._opt[schema.type] > 0:
+            raise ProtocolError(f'PCAP-NG: [if_tzone] option must be only one, '
+                                f'but {self._opt[schema.type] + 1} found.')
+
+        option = Data_IF_TZoneOption(
+            type=schema.type,
+            length=schema.length,
+            timezone=datetime.timezone(datetime.timedelta(seconds=schema.tzone)),
+        )
+        return option
+
+    def _read_option_if_filter(self, schema: 'Schema_IF_FilterOption', *,
+                               options: 'Option') -> 'Data_IF_FilterOption':
+        """Read PCAP-NG ``if_filter`` option.
+
+        Args:
+            schema: Parsed option schema.
+            options: Parsed PCAP-NG options.
+
+        Returns:
+            Constructed option data.
+
+        """
+        if self._opt[schema.type] > 0:
+            raise ProtocolError(f'PCAP-NG: [if_filter] option must be only one, '
+                                f'but {self._opt[schema.type] + 1} found.')
+
+        option = Data_IF_FilterOption(
+            type=schema.type,
+            length=schema.length,
+            code=schema.code,
+            expression=schema.filter,
         )
         return option
 
@@ -1505,4 +1840,312 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
             length=len(data) + 4,
             pen=pen,
             data=data
+        )
+
+    def _make_option_if_name(self, type: 'Enum_OptionType', option: 'Optional[Data_IF_NameOption]' = None, *,
+                             name: 'str' = '',
+                             **kwargs: 'Any') -> 'Schema_IF_NameOption':
+        """Make PCAP-NG ``if_name`` option.
+
+        Args:
+            type: Option type.
+            option: Option data model.
+            name: Interface name.
+            **kwargs: Arbitrary keyword arguments.
+
+        Returns:
+            Constructed option schema.
+
+        """
+        if self._opt[type] > 0:
+            raise ProtocolError(f'PCAP-NG: [if_name] option must be only one, '
+                                f'but {self._opt[type] + 1} found.')
+
+        if option is not None:
+            name = option.name
+
+        return Schema_IF_NameOption(
+            type=type,
+            length=len(name),
+            name=name,
+        )
+
+    def _make_option_if_description(self, type: 'Enum_OptionType', option: 'Optional[Data_IF_DescriptionOption]' = None, *,
+                                    description: 'str' = '',
+                                    **kwargs: 'Any') -> 'Schema_IF_DescriptionOption':
+        """Make PCAP-NG ``if_description`` option.
+
+        Args:
+            type: Option type.
+            option: Option data model.
+            description: Interface description.
+            **kwargs: Arbitrary keyword arguments.
+
+        Returns:
+            Constructed option schema.
+
+        """
+        if self._opt[type] > 0:
+            raise ProtocolError(f'PCAP-NG: [if_description] option must be only one, '
+                                f'but {self._opt[type] + 1} found.')
+
+        if option is not None:
+            description = option.description
+
+        return Schema_IF_DescriptionOption(
+            type=type,
+            length=len(description),
+            description=description,
+        )
+
+    def _make_option_if_ipv4(self, type: 'Enum_OptionType', option: 'Optional[Data_IF_IPv4AddrOption]' = None, *,
+                             interface: 'IPv4Interface | str' = '192.168.1.1/255.255.255.0',
+                             **kwargs: 'Any') -> 'Schema_IF_IPv4AddrOption':
+        """Make PCAP-NG ``if_IPv4addr`` option.
+
+        Args:
+            type: Option type.
+            option: Option data model.
+            interface: IPv4 interface.
+            **kwargs: Arbitrary keyword arguments.
+
+        Returns:
+            Constructed option schema.
+
+        """
+        if option is not None:
+            interface = option.interface
+
+        return Schema_IF_IPv4AddrOption(
+            type=type,
+            length=8,
+            interface=interface,
+        )
+
+    def _make_option_if_ipv6(self, type: 'Enum_OptionType', option: 'Optional[Data_IF_IPv6AddrOption]' = None, *,
+                             interface: 'IPv6Interface | str' = '2001:0db8:85a3:08d3:1319:8a2e:0370:7344/64',
+                             **kwargs: 'Any') -> 'Schema_IF_IPv6AddrOption':
+        """Make PCAP-NG ``if_IPv6addr`` option.
+
+        Args:
+            type: Option type.
+            option: Option data model.
+            interface: IPv6 interface.
+            **kwargs: Arbitrary keyword arguments.
+
+        Returns:
+            Constructed option schema.
+
+        """
+        if option is not None:
+            interface = option.interface
+
+        return Schema_IF_IPv6AddrOption(
+            type=type,
+            length=8,
+            interface=interface,
+        )
+
+    def _make_option_if_mac(self, type: 'Enum_OptionType', option: 'Optional[Data_IF_MACAddrOption]' = None, *,
+                            interface: 'str | bytes | bytearray' = '00:01:02:03:04:05',
+                            **kwargs: 'Any') -> 'Schema_IF_MACAddrOption':
+        """Make PCAP-NG ``if_MACaddr`` option.
+
+        Args:
+            type: Option type.
+            option: Option data model.
+            interface: MAC interface address.
+            **kwargs: Arbitrary keyword arguments.
+
+        Returns:
+            Constructed option schema.
+
+        """
+        if self._opt[type] > 0:
+            raise ProtocolError(f'PCAP-NG: [if_MACaddr] option must be only one, '
+                                f'but {self._opt[type] + 1} found.')
+
+        if option is not None:
+            interface = option.interface
+
+        return Schema_IF_MACAddrOption(
+            type=type,
+            length=6,
+            interface=self._make_mac_addr(interface),
+        )
+
+    def _make_option_if_eui(self, type: 'Enum_OptionType', option: 'Optional[Data_IF_EUIAddrOption]' = None, *,
+                            interface: 'str | bytes | bytearray' = '02:34:56:FF:FE:78:9A:BC',
+                            **kwargs: 'Any') -> 'Schema_IF_EUIAddrOption':
+        """Make PCAP-NG ``if_EUIaddr`` option.
+
+        Args:
+            type: Option type.
+            option: Option data model.
+            interface: Hardware EUI address.
+            **kwargs: Arbitrary keyword arguments.
+
+        Returns:
+            Constructed option schema.
+
+        """
+        if self._opt[type] > 0:
+            raise ProtocolError(f'PCAP-NG: [if_EUIaddr] option must be only one, '
+                                f'but {self._opt[type] + 1} found.')
+
+        if option is not None:
+            interface = option.interface
+
+        return Schema_IF_EUIAddrOption(
+            type=type,
+            length=8,
+            interface=self._make_eui_addr(interface),
+        )
+
+    def _make_option_if_speed(self, type: 'Enum_OptionType', option: 'Optional[Data_IF_SpeedOption]' = None, *,
+                              speed: 'int' = 100000000,
+                              **kwargs: 'Any') -> 'Schema_IF_SpeedOption':
+        """Make PCAP-NG ``if_speed`` option.
+
+        Args:
+            type: Option type.
+            option: Option data model.
+            speed: Interface speed, in bits per second.
+            **kwargs: Arbitrary keyword arguments.
+
+        Returns:
+            Constructed option schema.
+
+        """
+        if self._opt[type] > 0:
+            raise ProtocolError(f'PCAP-NG: [if_speed] option must be only one, '
+                                f'but {self._opt[type] + 1} found.')
+
+        if option is not None:
+            speed = option.speed
+
+        return Schema_IF_SpeedOption(
+            type=type,
+            length=8,
+            speed=speed,
+        )
+
+    def _make_option_if_tsresol(self, type: 'Enum_OptionType', option: 'Optional[Data_IF_TSResolOption]' = None, *,
+                                resolution: 'int' = 1000000,
+                                **kwargs: 'Any') -> 'Schema_IF_TSResolOption':
+        """Make PCAP-NG ``if_tsresol`` option.
+
+        Args:
+            type: Option type.
+            option: Option data model.
+            resolution: Resolution of timestamps, in units per second.
+            **kwargs: Arbitrary keyword arguments.
+
+        Returns:
+            Constructed option schema.
+
+        """
+        if self._opt[type] > 0:
+            raise ProtocolError(f'PCAP-NG: [if_tsresol] option must be only one, '
+                                f'but {self._opt[type] + 1} found.')
+
+        if option is not None:
+            resolution = option.resolution
+
+        test = math.log10(resolution).as_integer_ratio()[1]
+        if test == 1:
+            flag = 0
+            resl = int(math.log10(resolution))
+        else:
+            test = math.log2(resolution).as_integer_ratio()[1]
+            if test == 1:
+                flag = 1
+                resl = int(math.log2(resolution))
+            else:
+                raise ProtocolError(f'PCAP-NG: [if_tsresol] option resolution must be power of 10 or 2, '
+                                    f'but {resolution} found.')
+
+        return Schema_IF_TSResolOption(
+            type=type,
+            length=1,
+            tsresol={
+                'flag': flag,
+                'resolution': resl,
+            },
+        )
+
+    def _make_option_if_tzone(self, type: 'Enum_OptionType', option: 'Optional[Data_IF_TZoneOption]' = None, *,
+                              tzone: 'timezone | timedelta | int' = 0,
+                              **kwargs: 'Any') -> 'Schema_IF_TZoneOption':
+        """Make PCAP-NG ``if_tsresol`` option.
+
+        Args:
+            type: Option type.
+            option: Option data model.
+            tzone: Timezone offset, in seconds.
+            **kwargs: Arbitrary keyword arguments.
+
+        Returns:
+            Constructed option schema.
+
+        """
+        if self._opt[type] > 0:
+            raise ProtocolError(f'PCAP-NG: [if_tzone] option must be only one, '
+                                f'but {self._opt[type] + 1} found.')
+
+        if option is not None:
+            tzone = option.timezone
+
+        if isinstance(tzone, int):
+            tzone_val = tzone
+        elif isinstance(tzone, datetime.timedelta):
+            tzone_val = int(tzone.total_seconds())
+        elif isinstance(tzone, datetime.timezone):
+            tzone_val = int(tzone.utcoffset(None).total_seconds())
+        else:
+            raise ProtocolError(f'PCAP-NG: [if_tzone] option timezone must be int, timedelta or timezone, '
+                                f'but {type(tzone).__name__} found.')
+
+        return Schema_IF_TZoneOption(
+            type=type,
+            length=1,
+            tzone=tzone_val,
+        )
+
+    def _make_option_if_filter(self, type: 'Enum_OptionType', option: 'Optional[Data_IF_FilterOption]' = None, *,
+                               filter: 'Enum_FilterType  | StdlibEnum | AenumEnum | str | int' = Enum_FilterType(0),
+                               filter_default: 'Optional[int]' = None,
+                               filter_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
+                               filter_reversed: 'bool' = False,
+                               expression: 'bytes | str' = b'',
+                               **kwargs: 'Any') -> 'Schema_IF_FilterOption':
+        """Make PCAP-NG ``if_filter`` option.
+
+        Args:
+            type: Option type.
+            option: Option data model.
+            speed: Interface speed, in bits per second.
+            **kwargs: Arbitrary keyword arguments.
+
+        Returns:
+            Constructed option schema.
+
+        """
+        if self._opt[type] > 0:
+            raise ProtocolError(f'PCAP-NG: [if_filter] option must be only one, '
+                                f'but {self._opt[type] + 1} found.')
+
+        if option is not None:
+            filter_val = option.code
+            expr_val = option.expression
+        else:
+            filter_val = self._make_index(filter, filter_default, namespace=filter_namespace,  # type: ignore[call-overload]
+                                          reversed=filter_reversed, pack=False)
+            expr_val = expression if isinstance(expression, bytes) else expression.encode()
+
+        return Schema_IF_FilterOption(
+            type=type,
+            length=8,
+            code=filter_val,
+            filter=expr_val,
         )

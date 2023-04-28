@@ -145,6 +145,9 @@ class IF_NameOption(Option):
     #: Interface name.
     name: 'str'
 
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_OptionType', length: 'int', name: 'str') -> None: ...
+
 
 class IF_DescriptionOption(Option):
     """Data model for PCAP-NG file ``if_description`` options."""

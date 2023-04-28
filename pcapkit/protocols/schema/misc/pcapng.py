@@ -438,7 +438,7 @@ class IF_IPv4AddrOption(Option):
     padding: 'bytes' = PaddingField(length=lambda pkt: (4 - pkt['length'] % 4) % 4)
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'int', length: 'int', interface: 'IPv4Interface') -> 'None': ...
+        def __init__(self, type: 'int', length: 'int', interface: 'IPv4Interface | str') -> 'None': ...
 
 
 class IF_IPv6AddrOption(Option):
@@ -450,7 +450,7 @@ class IF_IPv6AddrOption(Option):
     padding: 'bytes' = PaddingField(length=lambda pkt: (4 - pkt['length'] % 4) % 4)
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'int', length: 'int', interface: 'IPv6Interface') -> 'None': ...
+        def __init__(self, type: 'int', length: 'int', interface: 'IPv6Interface | str') -> 'None': ...
 
 
 class IF_MACAddrOption(Option):
