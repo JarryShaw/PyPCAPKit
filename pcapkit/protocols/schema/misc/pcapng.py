@@ -60,7 +60,7 @@ if TYPE_CHECKING:
     from ipaddress import IPv4Address, IPv4Interface, IPv6Address, IPv6Interface
     from typing import Any
 
-    from typing_extensions import Self, Literal
+    from typing_extensions import Literal, Self
 
     from pcapkit.corekit.fields.field import _Field as Field
     from pcapkit.protocols.misc.pcapng import TLSKeyLabel, WireGuardKeyLabel

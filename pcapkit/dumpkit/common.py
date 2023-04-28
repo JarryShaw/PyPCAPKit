@@ -26,7 +26,7 @@ from pcapkit.utilities.logging import logger
 __all__ = ['make_dumper']
 
 if TYPE_CHECKING:
-    from typing import Any, TextIO, Type, DefaultDict
+    from typing import Any, DefaultDict, TextIO, Type
 
     from dictdumper.dumper import Dumper
     from typing_extensions import Literal
