@@ -60,7 +60,7 @@ if TYPE_CHECKING:
     from ipaddress import IPv4Address, IPv4Interface, IPv6Address, IPv6Interface
     from typing import Any
 
-    from typing_extensions import Self
+    from typing_extensions import Self, Literal
 
     from pcapkit.corekit.fields.field import _Field as Field
     from pcapkit.protocols.misc.pcapng import TLSKeyLabel, WireGuardKeyLabel
@@ -320,7 +320,7 @@ class SectionHeaderBlock(BlockType):
     #: Minor version number.
     minor: 'int' = UInt16Field(callback=shb_byteorder_callback, default=0)
     #: Section length.
-    section_length: 'int' = UInt64Field(callback=shb_byteorder_callback, default=0xFFFFFFFFFFFFFFFF)
+    section_length: 'int' = Int64Field(callback=shb_byteorder_callback, default=0xFFFFFFFFFFFFFFFF)
     #: Options.
     options: 'list[Option]' = OptionField(
         length=lambda pkt: pkt['length'] - 28,
@@ -335,7 +335,52 @@ class SectionHeaderBlock(BlockType):
     #: Block total length.
     length2: 'int' = UInt32Field(callback=byteorder_callback)
 
+    def pre_pack(self, packet: 'dict[str, Any]') -> 'None':
+        """Prepare ``packet`` data for packing process.
+
+        Args:
+            packet: packet data
+
+        Note:
+            This method is expected to directly modify any data stored
+            in the ``packet`` and thus no return is required.
+
+        """
+        if 'match' in packet:
+            return
+
+        packet['match'] = {
+            'byteorder': 0x1A2B3C4D if sys.byteorder == 'big' else 0x4D3C2B1A,
+        }
+
+    def post_process(self, packet: 'dict[str, Any]') -> 'SectionHeaderBlock':
+        """Revise ``schema`` data after unpacking process.
+
+        This method calculate the byteorder value based on
+        the parsed schema.
+
+        Args:
+            packet: Unpacked data.
+
+        Returns:
+            Revised schema.
+
+        """
+        self = super().post_process(packet)
+
+        magic = packet['match']['byteorder']  # type: int
+        if magic == 0x1A2B3C4D:
+            self.byteorder = 'big'
+        elif magic == 0x4D3C2B1A:
+            self.byteorder = 'little'
+        else:
+            raise ProtocolError(f'unknown byteorder magic: {magic:#x}')
+        return self
+
     if TYPE_CHECKING:
+        #: Byteorder.
+        byteorder: Literal['big', 'little']
+
         def __init__(self, length: 'int', magic: 'int', major: 'int',
                      minor: 'int', section_length: 'int', options: 'list[Option | bytes] | bytes', length2: 'int') -> 'None': ...
 

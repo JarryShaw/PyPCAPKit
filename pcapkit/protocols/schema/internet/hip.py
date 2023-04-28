@@ -451,17 +451,20 @@ class EncryptedParameter(Parameter):
     padding: 'bytes' = PaddingField(length=lambda pkt: (8 - (pkt['len'] % 8)) % 8)
 
     @classmethod
-    def pre_process(cls, packet: 'dict[str, Any]') -> 'None':
+    def pre_unpack(cls, packet: 'dict[str, Any]') -> 'None':
         """Prepare ``packet`` data for unpacking process.
 
         Args:
             packet: packet data
 
         """
+        if 'options' not in packet:
+            return
+
         cipher_list = cast('list[Data_HIPCipherParameter]',
                            packet['options'].getlist(Enum_Parameter.HIP_CIPHER))
         if cipher_list:
-            warn(f'HIPv{packet["ver"]["version"]}: [ParamNo {Enum_Parameter.ENCRYPTED}] '
+            warn(f'HIP: [ParamNo {Enum_Parameter.ENCRYPTED}] '
                  'missing HIP_CIPHER parameter', ProtocolWarning)
             # raise ProtocolError(f'HIPv{version}: [ParamNo {schema.type}] invalid format')
 
@@ -476,7 +479,7 @@ class EncryptedParameter(Parameter):
             encrypted_index = len(encrypted_list)
 
             if encrypted_index >= len(cipher_ids):
-                warn(f'HIPv{packet["ver"]["version"]}: [ParamNo {Enum_Parameter.ENCRYPTED}] '
+                warn(f'HIP: [ParamNo {Enum_Parameter.ENCRYPTED}] '
                      'too many ENCRYPTED parameters', ProtocolWarning)
                 # raise ProtocolError(f'HIPv{version}: [ParamNo {schema.type}] invalid format')
 

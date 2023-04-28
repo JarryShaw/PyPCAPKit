@@ -178,7 +178,7 @@ def prepare(func: 'Callable[Concatenate[Type[R_prepare], bytes | IO[bytes], Opti
         # call the user customised preparation method
         # then proceed with the unpacking process
         # and eventually revise the schema data
-        cls.pre_process(packet)
+        cls.pre_unpack(packet)
         schema = func(cls, data, length, packet)
         ret = schema.post_process(packet)
 

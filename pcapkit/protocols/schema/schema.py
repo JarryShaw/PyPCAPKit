@@ -161,12 +161,7 @@ class Schema(Mapping[str, VT], Generic[VT]):
         for name, field in self.__fields__.items():
             if self.__dict__[name] in (NoValue, None):
                 self.__dict__[name] = field.default
-
-        if packet is None:
-            packet = {}
-        self.pre_process(packet)
         self.pack(packet)
-        self.post_process(packet, )
 
     def __update__(self, dict_: 'Optional[Mapping[str, VT] | Iterable[tuple[str, VT]]]' = None,
                    **kwargs: 'VT') -> 'None':
@@ -369,7 +364,9 @@ class Schema(Mapping[str, VT], Generic[VT]):
         """
         if packet is None:
             packet = {}
+
         packet.update(self.__dict__)
+        self.pre_unpack(packet)
 
         if '__length__' not in packet:
             packet['__length__'] = -1  # reasonable default value
@@ -414,7 +411,7 @@ class Schema(Mapping[str, VT], Generic[VT]):
                 if not field.test(packet):
                     self.__buffer__[field.name] = b''
                     continue
-                field = field.field
+                field = field.field(packet)
 
             if isinstance(field, ForwardMatchField):
                 self.__buffer__[field.name] = b''
@@ -427,8 +424,21 @@ class Schema(Mapping[str, VT], Generic[VT]):
                 temp = bytes(field.length)
             self.__buffer__[field.name] = temp
 
+        self.post_process(packet)
         self.__updated__ = False
         return self.__bytes__()
+
+    def pre_pack(self, packet: 'dict[str, Any]') -> 'None':
+        """Prepare ``packet`` data for packing process.
+
+        Args:
+            packet: packet data
+
+        Note:
+            This method is expected to directly modify any data stored
+            in the ``packet`` and thus no return is required.
+
+        """
 
     @classmethod
     @prepare
@@ -489,7 +499,7 @@ class Schema(Mapping[str, VT], Generic[VT]):
                     setattr(self, field.name, None)
                     packet[field.name] = NoValue
                     continue
-                field = field.field
+                field = field.field(packet)
 
             byte = data.read(field.length)
             self.__buffer__[field.name] = byte
@@ -508,7 +518,7 @@ class Schema(Mapping[str, VT], Generic[VT]):
         return self
 
     @classmethod
-    def pre_process(cls, packet: 'dict[str, Any]') -> 'None':
+    def pre_unpack(cls, packet: 'dict[str, Any]') -> 'None':
         """Prepare ``packet`` data for unpacking process.
 
         Args:
@@ -521,7 +531,7 @@ class Schema(Mapping[str, VT], Generic[VT]):
         """
 
     def post_process(self, packet: 'dict[str, Any]') -> 'Schema':
-        """Revise ``schema`` data after unpacking process.
+        """Revise ``schema`` data after packing and/or unpacking process.
 
         Args:
             packet: Unpacked data.

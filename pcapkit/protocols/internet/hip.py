@@ -3433,7 +3433,7 @@ class HIP(Internet[Data_HIP, Schema_HIP],
             data = param.data
         else:
             cipher_id = self._make_index(cipher, cipher_default, namespace=cipher_namespace,  # type: ignore[call-overload]
-                                      reversed=cipher_reversed, pack=False)
+                                         reversed=cipher_reversed, pack=False)
 
         if cipher_id in (Enum_Cipher.AES_128_CBC, Enum_Cipher.AES_256_CBC):
             if iv is None:
