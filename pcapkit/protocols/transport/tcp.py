@@ -1932,7 +1932,7 @@ class TCP(Transport[Data_TCP, Schema_TCP],
         """Make options for TCP.
 
         Args:
-            option: TCP options
+            options: TCP options
 
         Returns:
             Tuple of options and total length of options.
