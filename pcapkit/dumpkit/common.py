@@ -10,6 +10,7 @@ generally the customised hooks for :class:`dictdumper.Dumper`
 classes.
 
 """
+import collections
 import datetime
 import decimal
 import enum
@@ -19,12 +20,13 @@ from typing import TYPE_CHECKING
 import aenum
 
 from pcapkit.corekit.infoclass import Info
+from pcapkit.corekit.multidict import MultiDict, OrderedMultiDict
 from pcapkit.utilities.logging import logger
 
 __all__ = ['make_dumper']
 
 if TYPE_CHECKING:
-    from typing import Any, TextIO, Type
+    from typing import Any, TextIO, Type, DefaultDict
 
     from dictdumper.dumper import Dumper
     from typing_extensions import Literal
@@ -62,14 +64,21 @@ def make_dumper(output: 'Type[Dumper]') -> 'Type[Dumper]':
                 return o.to_dict()
             if isinstance(o, (ipaddress.IPv4Address, ipaddress.IPv6Address)):
                 return str(o)
+            if isinstance(o, (MultiDict, OrderedMultiDict)):
+                temp = collections.defaultdict(list)  # type: DefaultDict[str, list[Any]]
+                for key, val in o.items(multi=True):
+                    if isinstance(key, (enum.Enum, aenum.Enum)):
+                        key = f'{type(key).__name__}::{key.name} [{key.value}]'
+                    temp[key].append(val)
+                return temp
             if isinstance(o, (enum.Enum, aenum.Enum)):
                 addon = {key: val for key, val in o.__dict__.items() if not key.startswith('_')}
                 if addon:
                     return {
-                        'enum': f'<{type(o).__name__}::{o.name} ({o.value})',
+                        'enum': f'{type(o).__name__}::{o.name} [{o.value}]',
                         **addon,
                     }
-                return f'{type(o).__name__}::{o.name} ({o.value})'
+                return f'{type(o).__name__}::{o.name} [{o.value}]'
             return super(type(self), self).object_hook(o)  # type: ignore[unreachable]
 
         def default(self, o: 'Any') -> 'Literal["fallback"]':  # pylint: disable=unused-argument
