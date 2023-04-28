@@ -474,6 +474,15 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
 
     """
 
+    if TYPE_CHECKING:
+        #: PCAP-NG context manager.
+        _ctx: 'Optional[Context]'
+
+        #: PCAP-NG block type.
+        _type: Enum_BlockType
+        #: PCAP-NG block byteorder.
+        _byte: 'Literal["little", "big"]'
+
     PACKET_TYPES = (Enum_BlockType.Enhanced_Packet_Block,
                     Enum_BlockType.Simple_Packet_Block,
                     Enum_BlockType.Packet_Block)
@@ -612,12 +621,19 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
     @property
     def context(self) -> 'Context':
         """Context of current PCAP-NG block."""
+        if self._ctx is None:
+            raise UnsupportedCall(f"'{self.__class__.__name__}' object has no attribute 'context'")
         return self._ctx
+
+    @property
+    def byteorder(self) -> 'Literal["big", "little"]':
+        """Byteorder of the current block."""
+        return self._byte
 
     @property
     def nanosecond(self) -> 'bool':
         """Whether the timestamp is in nanosecond."""
-        if self._info.type not in self.PACKET_TYPES:
+        if self._ctx is None or self._info.type not in self.PACKET_TYPES:
             raise UnsupportedCall(f"'{self.__class__.__name__}' object has no attribute 'nanosecond'")
 
         info = cast('Packet', self._info)
@@ -637,11 +653,16 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
                 EPB, ISB or obsolete Packet Block.
 
         """
-        if self._info.type not in self.PACKET_TYPES:
+        if self._ctx is None or self._info.type not in self.PACKET_TYPES:
             raise UnsupportedCall(f"'{self.__class__.__name__}' object has no attribute 'linktype'")
 
         info = cast('Packet', self._info)
         return self._ctx.interfaces[info.interface_id].linktype
+
+    @property
+    def block(self) -> 'Enum_BlockType':
+        """PCAP-NG block type."""
+        return self._type
 
     ##########################################################################
     # Methods.
@@ -751,7 +772,8 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
         packet = kwargs.get('__packet__', {})  # packet data
 
         if self._ctx is not None:
-            packet['byteorder'] = self._ctx.section.byteorder
+            self._byte = self._ctx.section.byteorder
+            packet['byteorder'] = self._byte
         return self.__header__.pack(packet)
 
     def unpack(self, length: 'Optional[int]' = None, **kwargs: 'Any') -> 'Data_PCAPNG':
@@ -774,7 +796,8 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
             packet = kwargs.get('__packet__', {})  # packet data
 
             if self._ctx is not None:
-                packet['bytesorder'] = self._ctx.section.byteorder
+                self._byte = self._ctx.section.byteorder
+                packet['byteorder'] = self._byte
             self.__header__ = cast('Schema_PCAPNG', self.__schema__.unpack(self._file, length, packet))  # type: ignore[call-arg,misc]
         return self.read(length, **kwargs)
 
@@ -812,6 +835,7 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
 
         if schema.block.length < 12 or schema.block.length % 4 != 0:
             raise ProtocolError(f'PCAP-NG: [Block {schema.type}] invalid length: {schema.block.length}')
+        self._type = schema.type
 
         name = self.__block__[schema.type]
         if isinstance(name, str):
@@ -867,6 +891,7 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
         """
         type_val = self._make_index(type, type_default, namespace=type_namespace,  # type: ignore[call-overload]
                                     reversed=type_reversed, pack=False)
+        self._type = type_val
 
         if isinstance(block, bytes):
             block_val = block  # type: bytes | Schema_BlockType
@@ -1048,6 +1073,109 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
         )
         return data
 
+    def _read_block_shb(self, schema: 'Schema_SectionHeaderBlock', *,
+                        header: 'Schema_PCAPNG') -> 'Data_SectionHeaderBlock':
+        """Read PCAP-NG section header block (SHB).
+
+        Structure of Section Header Block::
+
+        .. code-block:: text
+
+               0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+              +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+            0 |                   Block Type = 0x0A0D0D0A                     |
+              +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+            4 |                      Block Total Length                       |
+              +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+            8 |                      Byte-Order Magic                         |
+              +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           12 |          Major Version        |         Minor Version         |
+              +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           16 |                                                               |
+              |                          Section Length                       |
+              |                                                               |
+              +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           24 /                                                               /
+              /                      Options (variable)                       /
+              /                                                               /
+              +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+              |                      Block Total Length                       |
+              +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+        Args:
+            schema: Parsed block schema.
+            header: Parsed PCAP-NG header schema.
+
+        Returns:
+            Parsed packet data.
+
+        """
+        self._byte = schema.byteorder
+
+        data = Data_SectionHeaderBlock(
+            type=header.type,
+            length=schema.length,
+            byteorder=schema.byteorder,
+            version=VersionInfo(
+                major=schema.major,
+                minor=schema.minor,
+            ),
+            section_length=schema.section_length,
+            options=self._read_pcapng_options(schema.options),
+        )
+        return data
+
+    def _read_pcapng_options(self, options_schema: 'list[Schema_Option]') -> 'Option':
+        """Read PCAP-NG options.
+
+        Args:
+            options_schema: Parsed PCAP-NG options.
+
+        Returns:
+            Parsed PCAP-NG options data.
+
+        """
+        options = OrderedMultiDict()  # type: Option
+
+        for schema in options_schema:
+            type = schema.type
+            name = self.__option__[type]
+
+            if isinstance(name, str):
+                meth_name = f'_read_option_{name}'
+                meth = cast('OptionParser',
+                            getattr(self, meth_name, self._read_option_unknown))
+            else:
+                meth = name[0]
+            data = meth(schema, options=options)
+
+            # record option data
+            options.add(type, data)
+
+            # brea when ``opt_endofopt`` is reached
+            if type == Enum_OptionType.opt_endofopt:
+                break
+
+        return options
+
+    def _read_option_unknown(self, schema: 'Schema_UnknownOption', *,
+                             options: 'Option') -> 'Data_UnknownOption':
+        """Read unknown PCAP-NG option.
+
+        Args:
+            schema: Parsed option schema.
+
+        Returns:
+            Constructed option data.
+
+        """
+        option = Data_UnknownOption(
+            type=schema.type,
+            length=schema.length,
+            data=schema.data,
+        )
+        return option
+
     def _make_block_unknown(self, block: 'Optional[Data_UnknownBlock]' = None, *,
                             data: 'bytes' = b'',
                             **kwargs: 'Any') -> 'Schema_UnknownBlock':
@@ -1071,4 +1199,181 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
             length=length,
             body=data,
             length2=length,
+        )
+
+    def _make_block_shb(self, block: 'Optional[Data_SectionHeaderBlock]' = None, *,
+                        version: 'tuple[int, int] | VersionInfo' = (1, 0),
+                        major_version: 'Optional[int]' = None,
+                        minor_version: 'Optional[int]' = None,
+                        section_length: 'int' = -1,
+                        options: 'Optional[Option | list[Schema_Option | tuple[Enum_OptionType, dict[str, Any]] | bytes]]' = None,
+                        **kwargs: 'Any') -> 'Schema_SectionHeaderBlock':
+        """Make PCAP-NG section header block (SHB).
+
+        Args:
+            block: Block data model.
+            version: Version information.
+            major_version: Major version number.
+            minor_version: Minor version number.
+            section_length: Section length.
+            options: Block options.
+            **kwargs: Arbitrary keyword arguments.
+
+        Returns:
+            Constructed block schema.
+
+        """
+        self._byte = sys.byteorder
+
+        if block is not None:
+            major_version = cast('int', block.version.major)
+            minor_version = cast('int', block.version.minor)
+            section_length = block.section_length
+            options = block.options
+        else:
+            if major_version is None:
+                major_version = cast('int', version[0])
+            if minor_version is None:
+                minor_version = cast('int', version[1])
+
+        if options is not None:
+            options_value, total_length = self._make_pcapng_options(options)
+        else:
+            options_value, total_length = [], 0
+
+        return Schema_SectionHeaderBlock(
+            length=total_length + 28,
+            magic=0x1A2B3C4D,
+            major=major_version,
+            minor=minor_version,
+            section_length=section_length,
+            options=options_value,
+            length2=total_length + 28,
+        )
+
+    def _make_pcapng_options(self, options: 'Option | list[Schema_Option | tuple[Enum_OptionType, dict[str, Any]] | bytes]') -> 'tuple[list[Schema_Option | bytes], int]':
+        """Make options for PCAP-NG.
+
+        Args:
+            options: PCAP-NG options.
+
+        Returns:
+            Tuple of options and total length of options.
+
+        """
+        has_endofopt = False
+        total_length = 0
+        if isinstance(options, list):
+            options_list = []  # type: list[Schema_Option | bytes]
+            for schema in options:
+                if isinstance(schema, bytes):
+                    code = Enum_OptionType.get(int.from_bytes(schema[0:2], self._byte, signed=False))
+                    if code == Enum_OptionType.opt_endofopt:  # ignore opt_endofopt by default
+                        has_endofopt = True
+                        continue
+
+                    data = schema  # type: Schema_Option | bytes
+                    data_len = len(data)
+                elif isinstance(schema, Schema):
+                    code = schema.type
+                    if code == Enum_OptionType.opt_endofopt:  # ignore opt_endofopt by default
+                        has_endofopt = True
+                        continue
+
+                    data = schema
+                    data_len = len(schema.pack())
+                else:
+                    code, args = cast('tuple[Enum_OptionType, dict[str, Any]]', schema)
+                    if code == Enum_OptionType.opt_endofopt:  # ignore opt_endofopt by default
+                        has_endofopt = True
+                        continue
+
+                    name = self.__option__[code]
+                    if isinstance(name, str):
+                        meth_name = f'_make_option_{name}'
+                        meth = cast('OptionConstructor',
+                                    getattr(self, meth_name, self._make_option_unknown))
+                    else:
+                        meth = name[1]
+
+                    data = meth(code, **args)
+                    data_len = len(data.pack())
+
+                options_list.append(data)
+                total_length += data_len
+
+            if has_endofopt:
+                opt_endofopt = self._make_option_endofopt(Enum_OptionType.opt_endofopt)  # type: ignore[arg-type]
+                total_length += len(opt_endofopt.pack())
+                options_list.append(opt_endofopt)
+            return options_list, total_length
+
+        options_list = []
+        for code, option in options.items(multi=True):
+            if code == Enum_OptionType.opt_endofopt:  # ignore opt_endofopt by default
+                has_endofopt = True
+                continue
+
+            name = self.__option__[code]
+            if isinstance(name, str):
+                meth_name = f'_make_option_{name}'
+                meth = cast('OptionConstructor',
+                            getattr(self, meth_name, self._make_option_unknown))
+            else:
+                meth = name[1]
+
+            data = meth(code, option)
+            data_len = len(data.pack())
+
+            options_list.append(data)
+            total_length += data_len
+
+        if has_endofopt:
+            opt_endofopt = self._make_option_endofopt(Enum_OptionType.opt_endofopt)  # type: ignore[arg-type]
+            total_length += len(opt_endofopt.pack())
+            options_list.append(opt_endofopt)
+        return options_list, total_length
+
+    def _make_option_unknown(self, type: 'Enum_OptionType', option: 'Optional[Data_UnknownOption]' = None, *,
+                             data: 'bytes' = b'',
+                             **kwargs: 'Any') -> 'Schema_UnknownOption':
+        """Make unknown PCAP-NG option.
+
+        Args:
+            type: Option type.
+            option: Option data model.
+            data: Unspecified option data.
+            **kwargs: Arbitrary keyword arguments.
+
+        Returns:
+            Constructed option schema.
+
+        """
+        if option is not None:
+            data = option.data
+
+        length = len(data)
+
+        return Schema_UnknownOption(
+            type=type,
+            length=length,
+            data=data,
+        )
+
+    def _make_option_endofopt(self, type: 'Enum_OptionType', option: 'Optional[Data_EndOfOption]' = None,
+                              **kwargs: 'Any') -> 'Schema_EndOfOption':
+        """Make PCAP-NG ``opt_endofopt`` option.
+
+        Args:
+            type: Option type.
+            option: Option data model.
+            **kwargs: Arbitrary keyword arguments.
+
+        Returns:
+            Constructed option schema.
+
+        """
+        return Schema_EndOfOption(
+            type=type,
+            length=0,
         )
