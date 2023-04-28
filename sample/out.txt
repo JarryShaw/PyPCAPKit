@@ -11,7 +11,7 @@ Global Header
   |-- thiszone -> 0
   |-- sigfigs -> 0
   |-- snaplen -> 262144
-  |-- network -> LinkType::ETHERNET (1)
+  |-- network -> LinkType::ETHERNET [1]
 
 Frame 1
   |-- frame_info 
@@ -29,21 +29,21 @@ Frame 1
   |     |-- src -> a4:5e:60:d9:6b:97
   |     |-- type 
   |     |     |--> EtherType::Internet_Protocol_version_6
-  |     |          (34525)
+  |     |          [34525]
   |     |-- ipv6 
   |           |-- version -> 6
   |           |-- class -> 0
   |           |-- label -> 0
   |           |-- payload -> 32
-  |           |-- next -> TransType::IPv6_ICMP (58)
+  |           |-- next -> TransType::IPv6_ICMP [58]
   |           |-- limit -> 255
   |           |-- src -> fe80::a6:87f9:2793:16ee
   |           |-- dst -> fe80::1ccd:7c77:bac7:46b7
   |           |-- hdr_len -> 40
   |           |-- raw_len -> 32
-  |           |-- protocol -> TransType::IPv6_ICMP (58)
+  |           |-- protocol -> TransType::IPv6_ICMP [58]
   |           |-- raw 
-  |                 |-- protocol -> TransType::IPv6_ICMP (58)
+  |                 |-- protocol -> TransType::IPv6_ICMP [58]
   |                 |-- packet 
   |                 |     |--> 87 00 0e aa 00 00 00 00 fe 80 00 00 00 00 00 00
   |                 |          1c cd 7c 77 ba c7 46 b7 01 01 a4 5e 60 d9 6b 97
@@ -66,21 +66,21 @@ Frame 2
   |     |-- src -> 40:33:1a:d1:85:1c
   |     |-- type 
   |     |     |--> EtherType::Internet_Protocol_version_6
-  |     |          (34525)
+  |     |          [34525]
   |     |-- ipv6 
   |           |-- version -> 6
   |           |-- class -> 0
   |           |-- label -> 0
   |           |-- payload -> 24
-  |           |-- next -> TransType::IPv6_ICMP (58)
+  |           |-- next -> TransType::IPv6_ICMP [58]
   |           |-- limit -> 255
   |           |-- src -> fe80::1ccd:7c77:bac7:46b7
   |           |-- dst -> fe80::a6:87f9:2793:16ee
   |           |-- hdr_len -> 40
   |           |-- raw_len -> 24
-  |           |-- protocol -> TransType::IPv6_ICMP (58)
+  |           |-- protocol -> TransType::IPv6_ICMP [58]
   |           |-- raw 
-  |                 |-- protocol -> TransType::IPv6_ICMP (58)
+  |                 |-- protocol -> TransType::IPv6_ICMP [58]
   |                 |-- packet 
   |                 |     |--> 88 00 3f 82 40 00 00 00 fe 80 00 00 00 00 00 00
   |                 |          1c cd 7c 77 ba c7 46 b7
@@ -103,16 +103,16 @@ Frame 3
   |     |-- src -> b8:f8:83:a5:f9:47
   |     |-- type 
   |     |     |--> EtherType::Internet_Protocol_version_4
-  |     |          (2048)
+  |     |          [2048]
   |     |-- ipv4 
   |           |-- version -> 4
   |           |-- hdr_len -> 20
   |           |-- tos 
-  |           |     |-- pre -> ToSPrecedence::Routine (0)
-  |           |     |-- del -> ToSDelay::NORMAL (0)
-  |           |     |-- thr -> ToSThroughput::NORMAL (0)
-  |           |     |-- rel -> ToSReliability::NORMAL (0)
-  |           |     |-- ecn -> ToSECN::Not_ECT (0)
+  |           |     |-- pre -> ToSPrecedence::Routine [0]
+  |           |     |-- del -> ToSDelay::NORMAL [0]
+  |           |     |-- thr -> ToSThroughput::NORMAL [0]
+  |           |     |-- rel -> ToSReliability::NORMAL [0]
+  |           |     |-- ecn -> ToSECN::Not_ECT [0]
   |           |-- len -> 40
   |           |-- id -> 50484
   |           |-- flags 
@@ -120,7 +120,7 @@ Frame 3
   |           |     |-- mf -> False
   |           |-- offset -> 0
   |           |-- ttl -> 43.0
-  |           |-- protocol -> TransType::TCP (6)
+  |           |-- protocol -> TransType::TCP [6]
   |           |-- checksum -> 7a 86
   |           |-- src -> 123.129.210.135
   |           |-- dst -> 192.168.1.100
@@ -143,7 +143,7 @@ Frame 3
   |                 |-- window_size -> 31920
   |                 |-- checksum -> 7c 8e
   |                 |-- urgent_pointer -> 0
-  |                 |-- connection -> Flags::FIN|ACK (17)
+  |                 |-- connection -> Flags::FIN|ACK [17]
   |                 |-- nopayload  -> NIL
   |-- protocols -> Ethernet:IPv4:TCP
 
@@ -163,16 +163,16 @@ Frame 4
   |     |-- src -> a4:5e:60:d9:6b:97
   |     |-- type 
   |     |     |--> EtherType::Internet_Protocol_version_4
-  |     |          (2048)
+  |     |          [2048]
   |     |-- ipv4 
   |           |-- version -> 4
   |           |-- hdr_len -> 20
   |           |-- tos 
-  |           |     |-- pre -> ToSPrecedence::Routine (0)
-  |           |     |-- del -> ToSDelay::NORMAL (0)
-  |           |     |-- thr -> ToSThroughput::NORMAL (0)
-  |           |     |-- rel -> ToSReliability::NORMAL (0)
-  |           |     |-- ecn -> ToSECN::Not_ECT (0)
+  |           |     |-- pre -> ToSPrecedence::Routine [0]
+  |           |     |-- del -> ToSDelay::NORMAL [0]
+  |           |     |-- thr -> ToSThroughput::NORMAL [0]
+  |           |     |-- rel -> ToSReliability::NORMAL [0]
+  |           |     |-- ecn -> ToSECN::Not_ECT [0]
   |           |-- len -> 40
   |           |-- id -> 0
   |           |-- flags 
@@ -180,7 +180,7 @@ Frame 4
   |           |     |-- mf -> False
   |           |-- offset -> 0
   |           |-- ttl -> 64.0
-  |           |-- protocol -> TransType::TCP (6)
+  |           |-- protocol -> TransType::TCP [6]
   |           |-- checksum -> 2a bb
   |           |-- src -> 192.168.1.100
   |           |-- dst -> 123.129.210.135
@@ -203,7 +203,7 @@ Frame 4
   |                 |-- window_size -> 65535
   |                 |-- checksum -> f9 3e
   |                 |-- urgent_pointer -> 0
-  |                 |-- connection -> Flags::ACK (16)
+  |                 |-- connection -> Flags::ACK [16]
   |                 |-- nopayload  -> NIL
   |-- protocols -> Ethernet:IPv4:TCP
 
@@ -223,16 +223,16 @@ Frame 5
   |     |-- src -> a4:5e:60:d9:6b:97
   |     |-- type 
   |     |     |--> EtherType::Internet_Protocol_version_4
-  |     |          (2048)
+  |     |          [2048]
   |     |-- ipv4 
   |           |-- version -> 4
   |           |-- hdr_len -> 20
   |           |-- tos 
-  |           |     |-- pre -> ToSPrecedence::Routine (0)
-  |           |     |-- del -> ToSDelay::NORMAL (0)
-  |           |     |-- thr -> ToSThroughput::NORMAL (0)
-  |           |     |-- rel -> ToSReliability::NORMAL (0)
-  |           |     |-- ecn -> ToSECN::Not_ECT (0)
+  |           |     |-- pre -> ToSPrecedence::Routine [0]
+  |           |     |-- del -> ToSDelay::NORMAL [0]
+  |           |     |-- thr -> ToSThroughput::NORMAL [0]
+  |           |     |-- rel -> ToSReliability::NORMAL [0]
+  |           |     |-- ecn -> ToSECN::Not_ECT [0]
   |           |-- len -> 40
   |           |-- id -> 0
   |           |-- flags 
@@ -240,7 +240,7 @@ Frame 5
   |           |     |-- mf -> False
   |           |-- offset -> 0
   |           |-- ttl -> 64.0
-  |           |-- protocol -> TransType::TCP (6)
+  |           |-- protocol -> TransType::TCP [6]
   |           |-- checksum -> 2a bb
   |           |-- src -> 192.168.1.100
   |           |-- dst -> 123.129.210.135
@@ -263,7 +263,7 @@ Frame 5
   |                 |-- window_size -> 65535
   |                 |-- checksum -> 2a f4
   |                 |-- urgent_pointer -> 0
-  |                 |-- connection -> Flags::FIN|ACK (17)
+  |                 |-- connection -> Flags::FIN|ACK [17]
   |                 |-- nopayload  -> NIL
   |-- protocols -> Ethernet:IPv4:TCP
 
@@ -283,16 +283,16 @@ Frame 6
   |     |-- src -> b8:f8:83:a5:f9:47
   |     |-- type 
   |     |     |--> EtherType::Internet_Protocol_version_4
-  |     |          (2048)
+  |     |          [2048]
   |     |-- ipv4 
   |           |-- version -> 4
   |           |-- hdr_len -> 20
   |           |-- tos 
-  |           |     |-- pre -> ToSPrecedence::Routine (0)
-  |           |     |-- del -> ToSDelay::NORMAL (0)
-  |           |     |-- thr -> ToSThroughput::NORMAL (0)
-  |           |     |-- rel -> ToSReliability::NORMAL (0)
-  |           |     |-- ecn -> ToSECN::Not_ECT (0)
+  |           |     |-- pre -> ToSPrecedence::Routine [0]
+  |           |     |-- del -> ToSDelay::NORMAL [0]
+  |           |     |-- thr -> ToSThroughput::NORMAL [0]
+  |           |     |-- rel -> ToSReliability::NORMAL [0]
+  |           |     |-- ecn -> ToSECN::Not_ECT [0]
   |           |-- len -> 145
   |           |-- id -> 0
   |           |-- flags 
@@ -300,7 +300,7 @@ Frame 6
   |           |     |-- mf -> False
   |           |-- offset -> 0
   |           |-- ttl -> 64.0
-  |           |-- protocol -> TransType::UDP (17)
+  |           |-- protocol -> TransType::UDP [17]
   |           |-- checksum -> 78 b3
   |           |-- src -> 192.168.1.1
   |           |-- dst -> 255.255.255.255
