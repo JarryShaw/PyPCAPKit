@@ -415,7 +415,7 @@
 <span class="s1">        if isinstance(key, int):</span>
 <span class="s1">            return </span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">(key)</span>
 <span class="s1">        if key not in </span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">._member_map_:  # pylint: disable=no-member</span>
-<span class="s1">            extend_enum(</span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">, key, default)</span>
+<span class="s1">            return extend_enum(</span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">, key, default)</span>
 <span class="s1">        return </span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">[key]  # type: ignore[misc]</span>
 
 <span class="s1">    @classmethod</span>
@@ -429,7 +429,7 @@
 <span class="s1">        if not (</span><span class="si">{</span><span class="n">FLAG</span><span class="si">}</span><span class="s1">):</span>
 <span class="s1">            raise ValueError(&#39;%r is not a valid %s&#39; % (value, cls.__name__))</span>
 <span class="s1">        </span><span class="si">{</span><span class="n">MISS</span><span class="si">}</span>
-<span class="s1">        </span><span class="si">{</span><span class="s1">&#39;&#39;</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="s1">&#39;        return cls(value)&#39;</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">MISS</span><span class="o">.</span><span class="n">splitlines</span><span class="p">()[</span><span class="o">-</span><span class="mi">1</span><span class="p">:]</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="s1">&#39;return super()._missing_(value)&#39;</span><span class="si">}</span>
+<span class="s1">        </span><span class="si">{</span><span class="s1">&#39;&#39;</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">MISS</span><span class="o">.</span><span class="n">splitlines</span><span class="p">()[</span><span class="o">-</span><span class="mi">1</span><span class="p">:])</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;return&#39;</span><span class="p">)</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="s1">&#39;return super()._missing_(value)&#39;</span><span class="si">}</span>
 <span class="s1">&#39;&#39;&#39;</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>  <span class="c1"># type: Callable[[str, str, str, str, str, str], str]</span>
 
 
@@ -600,8 +600,7 @@
 
                 <span class="n">miss</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;if </span><span class="si">{</span><span class="n">start</span><span class="si">}</span><span class="s1"> &lt;= value &lt;= </span><span class="si">{</span><span class="n">stop</span><span class="si">}</span><span class="s1">:&#39;</span><span class="p">)</span>
                 <span class="n">miss</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;    #: </span><span class="si">{</span><span class="n">desc</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
-                <span class="n">miss</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;    extend_enum(cls, &#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">safe_name</span><span class="p">(</span><span class="n">name</span><span class="p">)</span><span class="si">}</span><span class="s2">_%d&#39; % value, value)&quot;</span><span class="p">)</span>
-                <span class="n">miss</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;    return cls(value)&#39;</span><span class="p">)</span>
+                <span class="n">miss</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;    return extend_enum(cls, &#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">safe_name</span><span class="p">(</span><span class="n">name</span><span class="p">)</span><span class="si">}</span><span class="s2">_%d&#39; % value, value)&quot;</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">enum</span><span class="p">,</span> <span class="n">miss</span></div>
 
 <div class="viewcode-block" id="Vendor.count"><a class="viewcode-back" href="../../../pcapkit/vendor/default.html#pcapkit.vendor.default.Vendor.count">[docs]</a>    <span class="k">def</span> <span class="nf">count</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">&#39;list[str]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Counter[str]&#39;</span><span class="p">:</span>

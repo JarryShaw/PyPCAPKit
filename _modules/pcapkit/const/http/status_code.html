@@ -365,11 +365,14 @@
 <div class="viewcode-block" id="StatusCode"><a class="viewcode-back" href="../../../../pcapkit/const/http.html#pcapkit.const.http.status_code.StatusCode">[docs]</a><span class="k">class</span> <span class="nc">StatusCode</span><span class="p">(</span><span class="n">IntEnum</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;[StatusCode] HTTP Status Code&quot;&quot;&quot;</span>
 
+    <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+        <span class="c1">#: Status message.</span>
+        <span class="n">message</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span>
+
     <span class="k">def</span> <span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">message</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Type[StatusCode]&#39;</span><span class="p">:</span>
         <span class="n">obj</span> <span class="o">=</span> <span class="nb">int</span><span class="o">.</span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
         <span class="n">obj</span><span class="o">.</span><span class="n">_value_</span> <span class="o">=</span> <span class="n">value</span>
 
-        <span class="c1">#: Status message.</span>
         <span class="n">obj</span><span class="o">.</span><span class="n">message</span> <span class="o">=</span> <span class="n">message</span>
 
         <span class="k">return</span> <span class="n">obj</span>
@@ -630,8 +633,7 @@
         <span class="k">if</span> <span class="mi">512</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mi">599</span><span class="p">:</span>
             <span class="c1">#: Unassigned</span>
             <span class="n">extend_enum</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s1">&#39;Unassigned_</span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">value</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
-            <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
-        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_missing_</span><span class="p">(</span><span class="n">value</span><span class="p">)</span></div></div>
+            <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">value</span><span class="p">)</span></div></div>
 </pre></div>
         </article>
       </div>

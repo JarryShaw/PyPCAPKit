@@ -390,11 +390,14 @@
 <span class="s1">class </span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">(IntEnum):</span>
 <span class="s1">    &quot;&quot;&quot;[</span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">] </span><span class="si">{</span><span class="n">DOCS</span><span class="si">}</span><span class="s1">&quot;&quot;&quot;</span>
 
+<span class="s1">    if TYPE_CHECKING:</span>
+<span class="s1">        #: Status message.</span>
+<span class="s1">        message: &#39;str&#39;</span>
+
 <span class="s1">    def __new__(cls, value: &#39;int&#39;, message: &#39;str&#39; = &#39;&#39;) -&gt; &#39;Type[</span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">]&#39;:</span>
 <span class="s1">        obj = int.__new__(cls, value)</span>
 <span class="s1">        obj._value_ = value</span>
 
-<span class="s1">        #: Status message.</span>
 <span class="s1">        obj.message = message</span>
 
 <span class="s1">        return obj</span>
@@ -428,7 +431,7 @@
 <span class="s1">        if not (</span><span class="si">{</span><span class="n">FLAG</span><span class="si">}</span><span class="s1">):</span>
 <span class="s1">            raise ValueError(&#39;%r is not a valid %s&#39; % (value, cls.__name__))</span>
 <span class="s1">        </span><span class="si">{</span><span class="n">MISS</span><span class="si">}</span>
-<span class="s1">        </span><span class="si">{</span><span class="s1">&#39;&#39;</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="s1">&#39;        return cls(value)&#39;</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">MISS</span><span class="o">.</span><span class="n">splitlines</span><span class="p">()[</span><span class="o">-</span><span class="mi">1</span><span class="p">:]</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="s1">&#39;return super()._missing_(value)&#39;</span><span class="si">}</span>
+<span class="s1">        </span><span class="si">{</span><span class="s1">&#39;&#39;</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="s1">&#39;return&#39;</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">MISS</span><span class="o">.</span><span class="n">splitlines</span><span class="p">()[</span><span class="o">-</span><span class="mi">1</span><span class="p">:])</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="s1">&#39;return super()._missing_(value)&#39;</span><span class="si">}</span>
 <span class="s1">&#39;&#39;&#39;</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>  <span class="c1"># type: Callable[[str, str, str, str, str, str], str]</span>
 
 

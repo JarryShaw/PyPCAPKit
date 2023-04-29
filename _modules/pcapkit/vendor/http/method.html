@@ -388,14 +388,18 @@
 <span class="s1">class </span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">(StrEnum):</span>
 <span class="s1">    &quot;&quot;&quot;[</span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">] </span><span class="si">{</span><span class="n">DOCS</span><span class="si">}</span><span class="s1">&quot;&quot;&quot;</span>
 
+<span class="s1">    if TYPE_CHECKING:</span>
+<span class="s1">        #: Safe method.</span>
+<span class="s1">        safe: &#39;bool&#39;</span>
+<span class="s1">        #: Idempotent method.</span>
+<span class="s1">        idempotent: &#39;bool&#39;</span>
+
 <span class="s1">    def __new__(cls, value: &#39;str&#39;, safe: &#39;bool&#39; = False,</span>
 <span class="s1">                idempotent: &#39;bool&#39; = False) -&gt; &#39;Type[</span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">]&#39;:</span>
 <span class="s1">        obj = str.__new__(cls)</span>
 <span class="s1">        obj._value_ = value</span>
 
-<span class="s1">        #: Safe method.</span>
 <span class="s1">        obj.safe = safe</span>
-<span class="s1">        #: Idempotent method.</span>
 <span class="s1">        obj.idempotent = idempotent</span>
 
 <span class="s1">        return obj</span>
@@ -416,7 +420,7 @@
 <span class="s1">        :meta private:</span>
 <span class="s1">        &quot;&quot;&quot;</span>
 <span class="s1">        if key not in </span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">._member_map_:  # pylint: disable=no-member</span>
-<span class="s1">            extend_enum(</span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">, key.upper(), default if default is not None else key)</span>
+<span class="s1">            return extend_enum(</span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">, key.upper(), default if default is not None else key)</span>
 <span class="s1">        return </span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">[key]  # type: ignore[misc]</span>
 
 <span class="s1">    @classmethod</span>
@@ -427,8 +431,7 @@
 <span class="s1">            value: Value to get enum item.</span>
 
 <span class="s1">        &quot;&quot;&quot;</span>
-<span class="s1">        extend_enum(cls, value.upper(), value)</span>
-<span class="s1">        return cls(value)</span>
+<span class="s1">        return extend_enum(cls, value.upper(), value)</span>
 <span class="s1">&#39;&#39;&#39;</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>  <span class="c1"># type: Callable[[str, str, str, str], str]</span>
 
 

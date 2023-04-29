@@ -363,8 +363,93 @@
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
     <span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">Counter</span>
+    <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Callable</span>
 
     <span class="kn">from</span> <span class="nn">bs4.element</span> <span class="kn">import</span> <span class="n">Tag</span>
+
+<span class="n">LINE</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">NAME</span><span class="p">,</span> <span class="n">DOCS</span><span class="p">,</span> <span class="n">FLAG</span><span class="p">,</span> <span class="n">ENUM</span><span class="p">,</span> <span class="n">MISS</span><span class="p">,</span> <span class="n">MODL</span><span class="p">:</span> <span class="sa">f</span><span class="s1">&#39;&#39;&#39;</span><span class="se">\</span>
+<span class="s1"># -*- coding: utf-8 -*-</span>
+<span class="s1"># mypy: disable-error-code=assignment</span>
+<span class="s1"># pylint: disable=line-too-long,consider-using-f-string</span>
+<span class="s1">&quot;&quot;&quot;</span><span class="si">{</span><span class="p">(</span><span class="n">name</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="n">DOCS</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39; [&#39;</span><span class="p">,</span><span class="w"> </span><span class="n">maxsplit</span><span class="o">=</span><span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span><span class="si">}</span>
+<span class="si">{</span><span class="s1">&#39;=&#39;</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">name</span><span class="p">)</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">6</span><span class="p">)</span><span class="si">}</span>
+
+<span class="s1">.. module:: </span><span class="si">{</span><span class="n">MODL</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;vendor&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;const&#39;</span><span class="p">)</span><span class="si">}</span>
+
+<span class="s1">This module contains the constant enumeration for **</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1">**,</span>
+<span class="s1">which is automatically generated from :class:`</span><span class="si">{</span><span class="n">MODL</span><span class="si">}</span><span class="s1">.</span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">`.</span>
+
+<span class="s1">&quot;&quot;&quot;</span>
+<span class="s1">from typing import TYPE_CHECKING</span>
+
+<span class="s1">from aenum import StrEnum, extend_enum</span>
+
+<span class="s1">__all__ = [&#39;</span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">&#39;]</span>
+
+<span class="s1">if TYPE_CHECKING:</span>
+<span class="s1">    from typing import Optional, Type</span>
+
+
+<span class="s1">class </span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">(StrEnum):</span>
+<span class="s1">    &quot;&quot;&quot;[</span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">] </span><span class="si">{</span><span class="n">DOCS</span><span class="si">}</span><span class="s1">&quot;&quot;&quot;</span>
+
+<span class="s1">    if TYPE_CHECKING:</span>
+<span class="s1">        #: Short name of the option type.</span>
+<span class="s1">        opt_name: &#39;str&#39;</span>
+<span class="s1">        #: Numeric value of the option type.</span>
+<span class="s1">        opt_value: &#39;int&#39;</span>
+
+<span class="s1">    def __new__(cls, value: &#39;int&#39;, name: &#39;Optional[str]&#39; = None) -&gt; &#39;Type[</span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">]&#39;:</span>
+<span class="s1">        if name is None:</span>
+<span class="s1">            name = &#39;opt_unknown&#39;</span>
+<span class="s1">        temp = &#39;%d_%s&#39; % (value, name)</span>
+
+<span class="s1">        obj = str.__new__(cls, temp)</span>
+<span class="s1">        obj._value_ = temp</span>
+
+<span class="s1">        obj.opt_name = name</span>
+<span class="s1">        obj.opt_value = value</span>
+
+<span class="s1">        return obj</span>
+
+<span class="s1">    def __repr__(self) -&gt; &#39;str&#39;:</span>
+<span class="s1">        return &quot;&lt;%s.%s: %d&gt;&quot; % (self.__class__.__name__, self.opt_name, self.opt_value)</span>
+
+<span class="s1">    </span><span class="si">{</span><span class="n">ENUM</span><span class="si">}</span>
+
+<span class="s1">    @staticmethod</span>
+<span class="s1">    def get(key: &#39;int | str&#39;, default: &#39;int&#39; = -1, *, namespace: &#39;str&#39; = &#39;opt&#39;) -&gt; &#39;</span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">&#39;:</span>
+<span class="s1">        &quot;&quot;&quot;Backport support for original codes.</span>
+
+<span class="s1">        Args:</span>
+<span class="s1">            key: Key to get enum item.</span>
+<span class="s1">            default: Default value if not found.</span>
+<span class="s1">            namespace: Namespace of the enum item.</span>
+
+<span class="s1">        :meta private:</span>
+<span class="s1">        &quot;&quot;&quot;</span>
+<span class="s1">        if isinstance(key, int):</span>
+<span class="s1">            for enum_key, enum_val in </span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">.__members__.items():</span>
+<span class="s1">                if (enum_key.startswith(namespace) or enum_key.startswith(&#39;opt&#39;)) and enum_val.opt_value == key:</span>
+<span class="s1">                    return enum_val</span>
+<span class="s1">            return extend_enum(</span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">, &#39;opt_unknown_%d&#39; % key, key, &#39;opt_unknown&#39;)</span>
+<span class="s1">        if key not in </span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">._member_map_:  # pylint: disable=no-member</span>
+<span class="s1">            return extend_enum(</span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">, key, default)</span>
+<span class="s1">        return </span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">[key]  # type: ignore[misc]</span>
+
+<span class="s1">    @classmethod</span>
+<span class="s1">    def _missing_(cls, value: &#39;int&#39;) -&gt; &#39;</span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">&#39;:</span>
+<span class="s1">        &quot;&quot;&quot;Lookup function used when value is not found.</span>
+
+<span class="s1">        Args:</span>
+<span class="s1">            value: Value to get enum item.</span>
+
+<span class="s1">        &quot;&quot;&quot;</span>
+<span class="s1">        if not (</span><span class="si">{</span><span class="n">FLAG</span><span class="si">}</span><span class="s1">):</span>
+<span class="s1">            raise ValueError(&#39;%r is not a valid %s&#39; % (value, cls.__name__))</span>
+<span class="s1">        </span><span class="si">{</span><span class="n">MISS</span><span class="si">}</span>
+<span class="s1">        </span><span class="si">{</span><span class="s1">&#39;&#39;</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">MISS</span><span class="o">.</span><span class="n">splitlines</span><span class="p">()[</span><span class="o">-</span><span class="mi">1</span><span class="p">:])</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;return&#39;</span><span class="p">)</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="s1">&#39;return super()._missing_(value)&#39;</span><span class="si">}</span>
+<span class="s1">&#39;&#39;&#39;</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>  <span class="c1"># type: Callable[[str, str, str, str, str, str], str]</span>
 
 
 <div class="viewcode-block" id="OptionType"><a class="viewcode-back" href="../../../../pcapkit/vendor/pcapng.html#pcapkit.vendor.pcapng.option_type.OptionType">[docs]</a><span class="k">class</span> <span class="nc">OptionType</span><span class="p">(</span><span class="n">Vendor</span><span class="p">):</span>
@@ -416,7 +501,9 @@
 
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">enum</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: list[str]</span>
-        <span class="n">miss</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: list[str]</span>
+        <span class="n">miss</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="s2">&quot;return extend_enum(cls, &#39;opt_unknown_</span><span class="si">%d</span><span class="s2">&#39; % value, value, &#39;opt_unknown&#39;)&quot;</span><span class="p">,</span>
+        <span class="p">]</span>  <span class="c1"># type: list[str]</span>
 
         <span class="k">for</span> <span class="n">content</span> <span class="ow">in</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;table-1&#39;</span><span class="p">]:</span>
             <span class="n">name</span> <span class="o">=</span> <span class="n">content</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s1">&#39;td&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">text</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
@@ -425,7 +512,7 @@
             <span class="k">try</span><span class="p">:</span>
                 <span class="n">code</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">temp</span><span class="p">)</span>
 
-                <span class="n">pref</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1"> = </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1">&#39;</span>
+                <span class="n">pref</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">: &#39;OptionType&#39; = </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">name</span><span class="si">!r}</span><span class="s2">&quot;</span>
                 <span class="n">sufs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">wrap_comment</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
 
                 <span class="n">enum</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;#: </span><span class="si">{</span><span class="n">sufs</span><span class="si">}</span><span class="se">\n</span><span class="s1">    </span><span class="si">{</span><span class="n">pref</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
@@ -433,7 +520,7 @@
                 <span class="n">opts</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="n">temp</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)))</span>
 
                 <span class="k">for</span> <span class="n">code</span> <span class="ow">in</span> <span class="n">opts</span><span class="p">:</span>
-                    <span class="n">pref</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1">_</span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1"> = </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1">&#39;</span>
+                    <span class="n">pref</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s2">: &#39;OptionType&#39; = </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">name</span><span class="si">!r}</span><span class="s2">&quot;</span>
                     <span class="n">sufs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">wrap_comment</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
 
                     <span class="n">enum</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;#: </span><span class="si">{</span><span class="n">sufs</span><span class="si">}</span><span class="se">\n</span><span class="s1">    </span><span class="si">{</span><span class="n">pref</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
@@ -442,7 +529,7 @@
             <span class="n">name</span> <span class="o">=</span> <span class="n">content</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s1">&#39;td&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">text</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
             <span class="n">code</span> <span class="o">=</span> <span class="n">content</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s1">&#39;td&#39;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">text</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
 
-            <span class="n">pref</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1"> = </span><span class="si">{</span><span class="nb">int</span><span class="p">(</span><span class="n">code</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span>
+            <span class="n">pref</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">: &#39;OptionType&#39; = </span><span class="si">{</span><span class="nb">int</span><span class="p">(</span><span class="n">code</span><span class="p">)</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">name</span><span class="si">!r}</span><span class="s2">&quot;</span>
             <span class="n">sufs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">wrap_comment</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
 
             <span class="n">enum</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;#: </span><span class="si">{</span><span class="n">sufs</span><span class="si">}</span><span class="se">\n</span><span class="s1">    </span><span class="si">{</span><span class="n">pref</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
@@ -451,7 +538,7 @@
             <span class="n">name</span> <span class="o">=</span> <span class="n">content</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s1">&#39;td&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">text</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
             <span class="n">code</span> <span class="o">=</span> <span class="n">content</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s1">&#39;td&#39;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">text</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
 
-            <span class="n">pref</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1"> = </span><span class="si">{</span><span class="nb">int</span><span class="p">(</span><span class="n">code</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span>
+            <span class="n">pref</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">: &#39;OptionType&#39; = </span><span class="si">{</span><span class="nb">int</span><span class="p">(</span><span class="n">code</span><span class="p">)</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">name</span><span class="si">!r}</span><span class="s2">&quot;</span>
             <span class="n">sufs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">wrap_comment</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
 
             <span class="n">enum</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;#: </span><span class="si">{</span><span class="n">sufs</span><span class="si">}</span><span class="se">\n</span><span class="s1">    </span><span class="si">{</span><span class="n">pref</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
@@ -460,7 +547,7 @@
             <span class="n">name</span> <span class="o">=</span> <span class="n">content</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s1">&#39;td&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">text</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
             <span class="n">code</span> <span class="o">=</span> <span class="n">content</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s1">&#39;td&#39;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">text</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
 
-            <span class="n">pref</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1"> = </span><span class="si">{</span><span class="nb">int</span><span class="p">(</span><span class="n">code</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span>
+            <span class="n">pref</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">: &#39;OptionType&#39; = </span><span class="si">{</span><span class="nb">int</span><span class="p">(</span><span class="n">code</span><span class="p">)</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">name</span><span class="si">!r}</span><span class="s2">&quot;</span>
             <span class="n">sufs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">wrap_comment</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
 
             <span class="n">enum</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;#: </span><span class="si">{</span><span class="n">sufs</span><span class="si">}</span><span class="se">\n</span><span class="s1">    </span><span class="si">{</span><span class="n">pref</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
@@ -469,7 +556,7 @@
             <span class="n">name</span> <span class="o">=</span> <span class="n">content</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s1">&#39;td&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">text</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
             <span class="n">code</span> <span class="o">=</span> <span class="n">content</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s1">&#39;td&#39;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">text</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
 
-            <span class="n">pref</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1"> = </span><span class="si">{</span><span class="nb">int</span><span class="p">(</span><span class="n">code</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span>
+            <span class="n">pref</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">: &#39;OptionType&#39; = </span><span class="si">{</span><span class="nb">int</span><span class="p">(</span><span class="n">code</span><span class="p">)</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">name</span><span class="si">!r}</span><span class="s2">&quot;</span>
             <span class="n">sufs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">wrap_comment</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
 
             <span class="n">enum</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;#: </span><span class="si">{</span><span class="n">sufs</span><span class="si">}</span><span class="se">\n</span><span class="s1">    </span><span class="si">{</span><span class="n">pref</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
@@ -478,12 +565,29 @@
             <span class="n">name</span> <span class="o">=</span> <span class="n">content</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s1">&#39;td&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">text</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
             <span class="n">code</span> <span class="o">=</span> <span class="n">content</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s1">&#39;td&#39;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">text</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
 
-            <span class="n">pref</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1"> = </span><span class="si">{</span><span class="nb">int</span><span class="p">(</span><span class="n">code</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span>
+            <span class="n">pref</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">: &#39;OptionType&#39; = </span><span class="si">{</span><span class="nb">int</span><span class="p">(</span><span class="n">code</span><span class="p">)</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">name</span><span class="si">!r}</span><span class="s2">&quot;</span>
             <span class="n">sufs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">wrap_comment</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
 
             <span class="n">enum</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;#: </span><span class="si">{</span><span class="n">sufs</span><span class="si">}</span><span class="se">\n</span><span class="s1">    </span><span class="si">{</span><span class="n">pref</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="n">enum</span><span class="p">,</span> <span class="n">miss</span></div>
+        <span class="k">return</span> <span class="n">enum</span><span class="p">,</span> <span class="n">miss</span>
+
+    <span class="k">def</span> <span class="nf">context</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">soup</span><span class="p">:</span> <span class="s1">&#39;dict[str, list[Tag]]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;str&#39;</span><span class="p">:</span>  <span class="c1"># type: ignore[override]</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Generate constant context.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            data: CSV data.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Constant context.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">enum</span><span class="p">,</span> <span class="n">miss</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">process</span><span class="p">(</span><span class="n">soup</span><span class="p">)</span>
+
+        <span class="n">ENUM</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="se">\n\n</span><span class="s1">    &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">s</span><span class="p">:</span> <span class="n">s</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(),</span> <span class="n">enum</span><span class="p">))</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+        <span class="n">MISS</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">        &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">s</span><span class="p">:</span> <span class="n">s</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(),</span> <span class="n">miss</span><span class="p">))</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="n">LINE</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">NAME</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">DOCS</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">FLAG</span><span class="p">,</span> <span class="n">ENUM</span><span class="p">,</span> <span class="n">MISS</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__module__</span><span class="p">)</span></div>
 
 
 <span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>

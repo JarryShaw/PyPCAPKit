@@ -420,8 +420,7 @@
         <span class="n">enum</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: list[str]</span>
         <span class="n">miss</span> <span class="o">=</span> <span class="p">[</span>
             <span class="s1">&#39;temp = bin(value)[2:].upper().zfill(8)&#39;</span><span class="p">,</span>
-            <span class="s2">&quot;extend_enum(cls, &#39;Unassigned_0b</span><span class="si">%s</span><span class="s2">&#39; % (temp[:4]+&#39;_&#39;+temp[4:]), value)&quot;</span><span class="p">,</span>
-            <span class="s1">&#39;return cls(value)&#39;</span>
+            <span class="s2">&quot;return extend_enum(cls, &#39;Unassigned_0b</span><span class="si">%s</span><span class="s2">&#39; % (temp[:4]+&#39;_&#39;+temp[4:]), value)&quot;</span><span class="p">,</span>
         <span class="p">]</span>
         <span class="k">for</span> <span class="n">code</span><span class="p">,</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="n">bncd</span> <span class="o">=</span> <span class="n">binary</span><span class="p">(</span><span class="n">code</span><span class="p">)</span>
