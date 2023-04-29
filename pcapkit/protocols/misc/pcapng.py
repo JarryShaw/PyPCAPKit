@@ -661,7 +661,7 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
         info = cast('Packet', self._info)
         options = self._ctx.interfaces[info.interface_id].options
         tsresol = cast('Optional[Data_IF_TSResolOption]',
-                       options.get(Enum_OptionType.if_tsresol))  # type: ignore[call-overload]
+                       options.get(Enum_OptionType.if_tsresol))
         if tsresol is None:
             return False
         return tsresol.resolution > 1_000_000
@@ -1373,6 +1373,9 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
             Constructed option data.
 
         """
+        if self._type != Enum_BlockType.Interface_Description_Block:
+            raise ProtocolError(f'PCAP-NG: [if_name] option must be in Interface Description Block, '
+                                f'but found in {self._type} block.')
         if self._opt[schema.type] > 0:
             raise ProtocolError(f'PCAP-NG: [if_name] option must be only one, '
                                 f'but {self._opt[schema.type] + 1} found.')
@@ -1396,6 +1399,9 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
             Constructed option data.
 
         """
+        if self._type != Enum_BlockType.Interface_Description_Block:
+            raise ProtocolError(f'PCAP-NG: [if_description] option must be in Interface Description Block, '
+                                f'but found in {self._type} block.')
         if self._opt[schema.type] > 0:
             raise ProtocolError(f'PCAP-NG: [if_description] option must be only one, '
                                 f'but {self._opt[schema.type] + 1} found.')
@@ -1419,6 +1425,10 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
             Constructed option data.
 
         """
+        if self._type != Enum_BlockType.Interface_Description_Block:
+            raise ProtocolError(f'PCAP-NG: [if_IPv4addr] option must be in Interface Description Block, '
+                                f'but found in {self._type} block.')
+
         option = Data_IF_IPv4AddrOption(
             type=schema.type,
             length=schema.length,
@@ -1438,6 +1448,10 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
             Constructed option data.
 
         """
+        if self._type != Enum_BlockType.Interface_Description_Block:
+            raise ProtocolError(f'PCAP-NG: [if_IPv6addr] option must be in Interface Description Block, '
+                                f'but found in {self._type} block.')
+
         option = Data_IF_IPv6AddrOption(
             type=schema.type,
             length=schema.length,
@@ -1457,6 +1471,9 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
             Constructed option data.
 
         """
+        if self._type != Enum_BlockType.Interface_Description_Block:
+            raise ProtocolError(f'PCAP-NG: [if_MACaddr] option must be in Interface Description Block, '
+                                f'but found in {self._type} block.')
         if self._opt[schema.type] > 0:
             raise ProtocolError(f'PCAP-NG: [if_MACaddr] option must be only one, '
                                 f'but {self._opt[schema.type] + 1} found.')
@@ -1480,6 +1497,9 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
             Constructed option data.
 
         """
+        if self._type != Enum_BlockType.Interface_Description_Block:
+            raise ProtocolError(f'PCAP-NG: [if_EUIaddr] option must be in Interface Description Block, '
+                                f'but found in {self._type} block.')
         if self._opt[schema.type] > 0:
             raise ProtocolError(f'PCAP-NG: [if_EUIaddr] option must be only one, '
                                 f'but {self._opt[schema.type] + 1} found.')
@@ -1503,6 +1523,9 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
             Constructed option data.
 
         """
+        if self._type != Enum_BlockType.Interface_Description_Block:
+            raise ProtocolError(f'PCAP-NG: [if_speed] option must be in Interface Description Block, '
+                                f'but found in {self._type} block.')
         if self._opt[schema.type] > 0:
             raise ProtocolError(f'PCAP-NG: [if_speed] option must be only one, '
                                 f'but {self._opt[schema.type] + 1} found.')
@@ -1526,6 +1549,9 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
             Constructed option data.
 
         """
+        if self._type != Enum_BlockType.Interface_Description_Block:
+            raise ProtocolError(f'PCAP-NG: [if_tsresol] option must be in Interface Description Block, '
+                                f'but found in {self._type} block.')
         if self._opt[schema.type] > 0:
             raise ProtocolError(f'PCAP-NG: [if_tsresol] option must be only one, '
                                 f'but {self._opt[schema.type] + 1} found.')
@@ -1549,6 +1575,9 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
             Constructed option data.
 
         """
+        if self._type != Enum_BlockType.Interface_Description_Block:
+            raise ProtocolError(f'PCAP-NG: [if_tzone] option must be in Interface Description Block, '
+                                f'but found in {self._type} block.')
         if self._opt[schema.type] > 0:
             raise ProtocolError(f'PCAP-NG: [if_tzone] option must be only one, '
                                 f'but {self._opt[schema.type] + 1} found.')
@@ -1572,6 +1601,9 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
             Constructed option data.
 
         """
+        if self._type != Enum_BlockType.Interface_Description_Block:
+            raise ProtocolError(f'PCAP-NG: [if_filter] option must be in Interface Description Block, '
+                                f'but found in {self._type} block.')
         if self._opt[schema.type] > 0:
             raise ProtocolError(f'PCAP-NG: [if_filter] option must be only one, '
                                 f'but {self._opt[schema.type] + 1} found.')
@@ -1596,6 +1628,9 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
             Constructed option data.
 
         """
+        if self._type != Enum_BlockType.Interface_Description_Block:
+            raise ProtocolError(f'PCAP-NG: [if_os] option must be in Interface Description Block, '
+                                f'but found in {self._type} block.')
         if self._opt[schema.type] > 0:
             raise ProtocolError(f'PCAP-NG: [if_os] option must be only one, '
                                 f'but {self._opt[schema.type] + 1} found.')
@@ -1619,6 +1654,9 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
             Constructed option data.
 
         """
+        if self._type != Enum_BlockType.Interface_Description_Block:
+            raise ProtocolError(f'PCAP-NG: [if_fcslen] option must be in Interface Description Block, '
+                                f'but found in {self._type} block.')
         if self._opt[schema.type] > 0:
             raise ProtocolError(f'PCAP-NG: [if_fcslen] option must be only one, '
                                 f'but {self._opt[schema.type] + 1} found.')
@@ -1642,6 +1680,9 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
             Constructed option data.
 
         """
+        if self._type != Enum_BlockType.Interface_Description_Block:
+            raise ProtocolError(f'PCAP-NG: [if_tsoffset] option must be in Interface Description Block, '
+                                f'but found in {self._type} block.')
         if self._opt[schema.type] > 0:
             raise ProtocolError(f'PCAP-NG: [if_tsoffset] option must be only one, '
                                 f'but {self._opt[schema.type] + 1} found.')
@@ -1665,6 +1706,9 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
             Constructed option data.
 
         """
+        if self._type != Enum_BlockType.Interface_Description_Block:
+            raise ProtocolError(f'PCAP-NG: [if_hardware] option must be in Interface Description Block, '
+                                f'but found in {self._type} block.')
         if self._opt[schema.type] > 0:
             raise ProtocolError(f'PCAP-NG: [if_hardware] option must be only one, '
                                 f'but {self._opt[schema.type] + 1} found.')
@@ -1688,6 +1732,9 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
             Constructed option data.
 
         """
+        if self._type != Enum_BlockType.Interface_Description_Block:
+            raise ProtocolError(f'PCAP-NG: [if_txspeed] option must be in Interface Description Block, '
+                                f'but found in {self._type} block.')
         if self._opt[schema.type] > 0:
             raise ProtocolError(f'PCAP-NG: [if_txspeed] option must be only one, '
                                 f'but {self._opt[schema.type] + 1} found.')
@@ -1711,6 +1758,9 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
             Constructed option data.
 
         """
+        if self._type != Enum_BlockType.Interface_Description_Block:
+            raise ProtocolError(f'PCAP-NG: [if_rxspeed] option must be in Interface Description Block, '
+                                f'but found in {self._type} block.')
         if self._opt[schema.type] > 0:
             raise ProtocolError(f'PCAP-NG: [if_rxspeed] option must be only one, '
                                 f'but {self._opt[schema.type] + 1} found.')
@@ -1850,7 +1900,7 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
                 self._opt[code] += 1
 
             if has_endofopt:
-                opt_endofopt = self._make_option_endofopt(Enum_OptionType.opt_endofopt)  # type: ignore[arg-type]
+                opt_endofopt = self._make_option_endofopt(Enum_OptionType.opt_endofopt)
                 total_length += len(opt_endofopt.pack())
                 options_list.append(opt_endofopt)
             return options_list, total_length
@@ -1877,7 +1927,7 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
             self._opt[code] += 1
 
         if has_endofopt:
-            opt_endofopt = self._make_option_endofopt(Enum_OptionType.opt_endofopt)  # type: ignore[arg-type]
+            opt_endofopt = self._make_option_endofopt(Enum_OptionType.opt_endofopt)
             total_length += len(opt_endofopt.pack())
             options_list.append(opt_endofopt)
         return options_list, total_length
@@ -1997,6 +2047,9 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
             Constructed option schema.
 
         """
+        if self._type != Enum_BlockType.Interface_Description_Block:
+            raise ProtocolError(f'PCAP-NG: [if_name] option must be in Interface Description Block, '
+                                f'but found in {self._type} block.')
         if self._opt[type] > 0:
             raise ProtocolError(f'PCAP-NG: [if_name] option must be only one, '
                                 f'but {self._opt[type] + 1} found.')
@@ -2025,6 +2078,9 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
             Constructed option schema.
 
         """
+        if self._type != Enum_BlockType.Interface_Description_Block:
+            raise ProtocolError(f'PCAP-NG: [if_description] option must be in Interface Description Block, '
+                                f'but found in {self._type} block.')
         if self._opt[type] > 0:
             raise ProtocolError(f'PCAP-NG: [if_description] option must be only one, '
                                 f'but {self._opt[type] + 1} found.')
@@ -2053,6 +2109,10 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
             Constructed option schema.
 
         """
+        if self._type != Enum_BlockType.Interface_Description_Block:
+            raise ProtocolError(f'PCAP-NG: [if_IPv4addr] option must be in Interface Description Block, '
+                                f'but found in {self._type} block.')
+
         if option is not None:
             interface = option.interface
 
@@ -2077,6 +2137,10 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
             Constructed option schema.
 
         """
+        if self._type != Enum_BlockType.Interface_Description_Block:
+            raise ProtocolError(f'PCAP-NG: [if_IPv6addr] option must be in Interface Description Block, '
+                                f'but found in {self._type} block.')
+
         if option is not None:
             interface = option.interface
 
@@ -2101,6 +2165,9 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
             Constructed option schema.
 
         """
+        if self._type != Enum_BlockType.Interface_Description_Block:
+            raise ProtocolError(f'PCAP-NG: [if_MACaddr] option must be in Interface Description Block, '
+                                f'but found in {self._type} block.')
         if self._opt[type] > 0:
             raise ProtocolError(f'PCAP-NG: [if_MACaddr] option must be only one, '
                                 f'but {self._opt[type] + 1} found.')
@@ -2129,6 +2196,9 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
             Constructed option schema.
 
         """
+        if self._type != Enum_BlockType.Interface_Description_Block:
+            raise ProtocolError(f'PCAP-NG: [if_EUIaddr] option must be in Interface Description Block, '
+                                f'but found in {self._type} block.')
         if self._opt[type] > 0:
             raise ProtocolError(f'PCAP-NG: [if_EUIaddr] option must be only one, '
                                 f'but {self._opt[type] + 1} found.')
@@ -2157,6 +2227,9 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
             Constructed option schema.
 
         """
+        if self._type != Enum_BlockType.Interface_Description_Block:
+            raise ProtocolError(f'PCAP-NG: [if_speed] option must be in Interface Description Block, '
+                                f'but found in {self._type} block.')
         if self._opt[type] > 0:
             raise ProtocolError(f'PCAP-NG: [if_speed] option must be only one, '
                                 f'but {self._opt[type] + 1} found.')
@@ -2185,6 +2258,9 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
             Constructed option schema.
 
         """
+        if self._type != Enum_BlockType.Interface_Description_Block:
+            raise ProtocolError(f'PCAP-NG: [if_tsresol] option must be in Interface Description Block, '
+                                f'but found in {self._type} block.')
         if self._opt[type] > 0:
             raise ProtocolError(f'PCAP-NG: [if_tsresol] option must be only one, '
                                 f'but {self._opt[type] + 1} found.')
@@ -2217,7 +2293,7 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
     def _make_option_if_tzone(self, type: 'Enum_OptionType', option: 'Optional[Data_IF_TZoneOption]' = None, *,
                               tzone: 'timezone | timedelta | int' = 0,
                               **kwargs: 'Any') -> 'Schema_IF_TZoneOption':
-        """Make PCAP-NG ``if_tsresol`` option.
+        """Make PCAP-NG ``if_tzone`` option.
 
         Args:
             type: Option type.
@@ -2229,6 +2305,9 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
             Constructed option schema.
 
         """
+        if self._type != Enum_BlockType.Interface_Description_Block:
+            raise ProtocolError(f'PCAP-NG: [if_tzone] option must be in Interface Description Block, '
+                                f'but found in {self._type} block.')
         if self._opt[type] > 0:
             raise ProtocolError(f'PCAP-NG: [if_tzone] option must be only one, '
                                 f'but {self._opt[type] + 1} found.')
@@ -2271,6 +2350,9 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
             Constructed option schema.
 
         """
+        if self._type != Enum_BlockType.Interface_Description_Block:
+            raise ProtocolError(f'PCAP-NG: [if_filter] option must be in Interface Description Block, '
+                                f'but found in {self._type} block.')
         if self._opt[type] > 0:
             raise ProtocolError(f'PCAP-NG: [if_filter] option must be only one, '
                                 f'but {self._opt[type] + 1} found.')
@@ -2305,6 +2387,9 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
             Constructed option schema.
 
         """
+        if self._type != Enum_BlockType.Interface_Description_Block:
+            raise ProtocolError(f'PCAP-NG: [if_os] option must be in Interface Description Block, '
+                                f'but found in {self._type} block.')
         if self._opt[type] > 0:
             raise ProtocolError(f'PCAP-NG: [if_os] option must be only one, '
                                 f'but {self._opt[type] + 1} found.')
@@ -2333,6 +2418,9 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
             Constructed option schema.
 
         """
+        if self._type != Enum_BlockType.Interface_Description_Block:
+            raise ProtocolError(f'PCAP-NG: [if_fcslen] option must be in Interface Description Block, '
+                                f'but found in {self._type} block.')
         if self._opt[type] > 0:
             raise ProtocolError(f'PCAP-NG: [if_fcslen] option must be only one, '
                                 f'but {self._opt[type] + 1} found.')
@@ -2361,6 +2449,9 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
             Constructed option schema.
 
         """
+        if self._type != Enum_BlockType.Interface_Description_Block:
+            raise ProtocolError(f'PCAP-NG: [if_hardware] option must be in Interface Description Block, '
+                                f'but found in {self._type} block.')
         if self._opt[type] > 0:
             raise ProtocolError(f'PCAP-NG: [if_hardware] option must be only one, '
                                 f'but {self._opt[type] + 1} found.')
@@ -2389,6 +2480,9 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
             Constructed option schema.
 
         """
+        if self._type != Enum_BlockType.Interface_Description_Block:
+            raise ProtocolError(f'PCAP-NG: [if_txspeed] option must be in Interface Description Block, '
+                                f'but found in {self._type} block.')
         if self._opt[type] > 0:
             raise ProtocolError(f'PCAP-NG: [if_txspeed] option must be only one, '
                                 f'but {self._opt[type] + 1} found.')
@@ -2417,6 +2511,9 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
             Constructed option schema.
 
         """
+        if self._type != Enum_BlockType.Interface_Description_Block:
+            raise ProtocolError(f'PCAP-NG: [if_txspeed] option must be in Interface Description Block, '
+                                f'but found in {self._type} block.')
         if self._opt[type] > 0:
             raise ProtocolError(f'PCAP-NG: [if_txspeed] option must be only one, '
                                 f'but {self._opt[type] + 1} found.')
