@@ -210,6 +210,42 @@ def dsb_secrets_selector(packet: 'dict[str, Any]') -> 'Field':
     return SchemaField(length=packet['secrets_length'], schema=UnknownSecrets)
 
 
+class OptionEnumField(EnumField):
+    """Enumerated value for protocol fields.
+
+    Args:
+        length: Field size (in bytes); if a callable is given, it should return
+            an integer value and accept the current packet as its only argument.
+        default: Field default value, if any.
+        signed: Whether the field is signed.
+        byteorder: Field byte order.
+        bit_length: Field bit length.
+        namespace: Field namespace (a :class:`enum.IntEnum` class).
+        callback: Callback function to be called upon
+            :meth:`self.__call__ <pcapkit.corekit.fields.field._Field.__call__>`.
+
+    Important:
+        This class is specifically designed for :class:`~pcapkit.const.pcapng.option_type.OptionType`
+        as it is actually a :class:`~enum.StrEnum` class.
+
+    """
+
+    def pre_process(self, value: 'int | Enum_OptionType', packet: 'dict[str, Any]') -> 'int | bytes':
+        """Process field value before construction (packing).
+
+        Arguments:
+            value: Field value.
+            packet: Packet data.
+
+        Returns:
+            Processed field value.
+
+        """
+        if isinstance(value, Enum_OptionType):
+            value = value.opt_value
+        return super().pre_process(value, packet)
+
+
 class PCAPNG(Schema):
     """Header schema for PCAP-NG file blocks."""
 
@@ -269,7 +305,7 @@ class Option(Schema):
     """Header schema for PCAP-NG file options."""
 
     #: Option type.
-    type: 'Enum_OptionType' = EnumField(length=2, namespace=Enum_OptionType, callback=byteorder_callback)
+    type: 'Enum_OptionType' = OptionEnumField(length=2, namespace=Enum_OptionType, callback=byteorder_callback)
     #: Option data length.
     length: 'int' = UInt16Field(callback=byteorder_callback)
 
@@ -283,7 +319,7 @@ class UnknownOption(Option):
     padding: 'bytes' = PaddingField(length=lambda pkt: (4 - pkt['length'] % 4) % 4)
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'int', length: 'int', data: 'bytes') -> 'None': ...
+        def __init__(self, type: 'Enum_OptionType', length: 'int', data: 'bytes') -> 'None': ...
 
 
 class EndOfOption(Option):
@@ -302,7 +338,7 @@ class CommentOption(Option):
     padding: 'bytes' = PaddingField(length=lambda pkt: (4 - pkt['length'] % 4) % 4)
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'int', length: 'int', comment: 'str') -> 'None': ...
+        def __init__(self, type: 'Enum_OptionType', length: 'int', comment: 'str') -> 'None': ...
 
 
 class CustomOption(Option):
@@ -405,6 +441,26 @@ class SectionHeaderBlock(BlockType):
                      length2: 'int') -> 'None': ...
 
 
+class _IF_Option(Option):
+    """Header schema for ``if_*`` options."""
+
+    def post_process(self, packet: 'dict[str, Any]') -> '_IF_Option':
+        """Revise ``schema`` data after unpacking process.
+
+        This method revise the ``type`` value of the current option
+        based on its namespace group.s
+
+        Args:
+            packet: Unpacked data.
+
+        Returns:
+            Revised schema.
+
+        """
+        self.type = Enum_OptionType.get(self.type.opt_value, namespace='if')
+        return self
+
+
 class IF_NameOption(Option):
     """Header schema for PCAP-NG file ``if_name`` options."""
 
@@ -414,10 +470,10 @@ class IF_NameOption(Option):
     padding: 'bytes' = PaddingField(length=lambda pkt: (4 - pkt['length'] % 4) % 4)
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'int', length: 'int', name: 'str') -> 'None': ...
+        def __init__(self, type: 'Enum_OptionType', length: 'int', name: 'str') -> 'None': ...
 
 
-class IF_DescriptionOption(Option):
+class IF_DescriptionOption(_IF_Option):
     """Header schema for PCAP-NG file ``if_description`` options."""
 
     #: Interface description.
@@ -426,10 +482,10 @@ class IF_DescriptionOption(Option):
     padding: 'bytes' = PaddingField(length=lambda pkt: (4 - pkt['length'] % 4) % 4)
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'int', length: 'int', description: 'str') -> 'None': ...
+        def __init__(self, type: 'Enum_OptionType', length: 'int', description: 'str') -> 'None': ...
 
 
-class IF_IPv4AddrOption(Option):
+class IF_IPv4AddrOption(_IF_Option):
     """Header schema for PCAP-NG file ``if_IPv4addr`` options."""
 
     #: IPv4 interface.
@@ -438,10 +494,10 @@ class IF_IPv4AddrOption(Option):
     padding: 'bytes' = PaddingField(length=lambda pkt: (4 - pkt['length'] % 4) % 4)
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'int', length: 'int', interface: 'IPv4Interface | str') -> 'None': ...
+        def __init__(self, type: 'Enum_OptionType', length: 'int', interface: 'IPv4Interface | str') -> 'None': ...
 
 
-class IF_IPv6AddrOption(Option):
+class IF_IPv6AddrOption(_IF_Option):
     """Header schema for PCAP-NG file ``if_IPv6addr`` options."""
 
     #: IPv6 interface.
@@ -450,10 +506,10 @@ class IF_IPv6AddrOption(Option):
     padding: 'bytes' = PaddingField(length=lambda pkt: (4 - pkt['length'] % 4) % 4)
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'int', length: 'int', interface: 'IPv6Interface | str') -> 'None': ...
+        def __init__(self, type: 'Enum_OptionType', length: 'int', interface: 'IPv6Interface | str') -> 'None': ...
 
 
-class IF_MACAddrOption(Option):
+class IF_MACAddrOption(_IF_Option):
     """Header schema for PCAP-NG file ``if_MACaddr`` options."""
 
     #: MAC interface.
@@ -462,10 +518,10 @@ class IF_MACAddrOption(Option):
     padding: 'bytes' = PaddingField(length=lambda pkt: (4 - pkt['length'] % 4) % 4)
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'int', length: 'int', interface: 'bytes') -> 'None': ...
+        def __init__(self, type: 'Enum_OptionType', length: 'int', interface: 'bytes') -> 'None': ...
 
 
-class IF_EUIAddrOption(Option):
+class IF_EUIAddrOption(_IF_Option):
     """Header schema for PCAP-NG file ``if_EUIaddr`` options."""
 
     #: EUI interface.
@@ -474,10 +530,10 @@ class IF_EUIAddrOption(Option):
     padding: 'bytes' = PaddingField(length=lambda pkt: (4 - pkt['length'] % 4) % 4)
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'int', length: 'int', interface: 'bytes') -> 'None': ...
+        def __init__(self, type: 'Enum_OptionType', length: 'int', interface: 'bytes') -> 'None': ...
 
 
-class IF_SpeedOption(Option):
+class IF_SpeedOption(_IF_Option):
     """Header schema for PCAP-NG file ``if_speed`` options."""
 
     #: Interface speed, in bits per second.
@@ -486,10 +542,10 @@ class IF_SpeedOption(Option):
     padding: 'bytes' = PaddingField(length=lambda pkt: (4 - pkt['length'] % 4) % 4)
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'int', length: 'int', speed: 'int') -> 'None': ...
+        def __init__(self, type: 'Enum_OptionType', length: 'int', speed: 'int') -> 'None': ...
 
 
-class IF_TSResolOption(Option):
+class IF_TSResolOption(_IF_Option):
     """Header schema for PCAP-NG file ``if_tsresol`` options."""
 
     #: Interface timestamp resolution, in units per second.
@@ -500,7 +556,7 @@ class IF_TSResolOption(Option):
     #: Padding.
     padding: 'bytes' = PaddingField(length=lambda pkt: (4 - pkt['length'] % 4) % 4)
 
-    def post_process(self, packet: 'dict[str, Any]') -> 'Schema':
+    def post_process(self, packet: 'dict[str, Any]') -> 'IF_TSResolOption':
         """Revise ``schema`` data after unpacking process.
 
         Args:
@@ -518,10 +574,10 @@ class IF_TSResolOption(Option):
         #: Interface timestamp resolution, in units per second.
         resolution: 'int'
 
-        def __init__(self, type: 'int', length: 'int', tsresol: 'ResolutionData') -> 'None': ...
+        def __init__(self, type: 'Enum_OptionType', length: 'int', tsresol: 'ResolutionData') -> 'None': ...
 
 
-class IF_TZoneOption(Option):
+class IF_TZoneOption(_IF_Option):
     """Header schema for PCAP-NG file ``if_tzone`` options."""
 
     #: Interface time zone (as in seconds difference from GMT).
@@ -530,10 +586,10 @@ class IF_TZoneOption(Option):
     padding: 'bytes' = PaddingField(length=lambda pkt: (4 - pkt['length'] % 4) % 4)
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'int', length: 'int', tzone: 'int') -> 'None': ...
+        def __init__(self, type: 'Enum_OptionType', length: 'int', tzone: 'int') -> 'None': ...
 
 
-class IF_FilterOption(Option):
+class IF_FilterOption(_IF_Option):
     """Header schema for PCAP-NG file ``if_filter`` options."""
 
     #: Filter code.
@@ -544,10 +600,10 @@ class IF_FilterOption(Option):
     padding: 'bytes' = PaddingField(length=lambda pkt: (4 - pkt['length'] % 4) % 4)
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'int', length: 'int', code: 'Enum_FilterType', filter: 'bytes') -> 'None': ...
+        def __init__(self, type: 'Enum_OptionType', length: 'int', code: 'Enum_FilterType', filter: 'bytes') -> 'None': ...
 
 
-class IF_OSOption(Option):
+class IF_OSOption(_IF_Option):
     """Header schema for PCAP-NG file ``if_os`` options."""
 
     #: OS information.
@@ -556,10 +612,10 @@ class IF_OSOption(Option):
     padding: 'bytes' = PaddingField(length=lambda pkt: (4 - pkt['length'] % 4) % 4)
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'int', length: 'int', os: 'str') -> 'None': ...
+        def __init__(self, type: 'Enum_OptionType', length: 'int', os: 'str') -> 'None': ...
 
 
-class IF_FCSLenOption(Option):
+class IF_FCSLenOption(_IF_Option):
     """Header schema for PCAP-NG file ``if_fcslen`` options."""
 
     #: FCS length.
@@ -568,10 +624,10 @@ class IF_FCSLenOption(Option):
     padding: 'bytes' = PaddingField(length=lambda pkt: (4 - pkt['length'] % 4) % 4)
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'int', length: 'int', fcslen: 'int') -> 'None': ...
+        def __init__(self, type: 'Enum_OptionType', length: 'int', fcslen: 'int') -> 'None': ...
 
 
-class IF_TSOffsetOption(Option):
+class IF_TSOffsetOption(_IF_Option):
     """Header schema for PCAP-NG file ``if_tsoffset`` options."""
 
     #: Timestamp offset (in seconds).
@@ -580,10 +636,10 @@ class IF_TSOffsetOption(Option):
     padding: 'bytes' = PaddingField(length=lambda pkt: (4 - pkt['length'] % 4) % 4)
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'int', length: 'int', tsoffset: 'int') -> 'None': ...
+        def __init__(self, type: 'Enum_OptionType', length: 'int', tsoffset: 'int') -> 'None': ...
 
 
-class IF_HardwareOption(Option):
+class IF_HardwareOption(_IF_Option):
     """Header schema for PCAP-NG file ``if_hardware`` options."""
 
     #: Hardware information.
@@ -592,10 +648,10 @@ class IF_HardwareOption(Option):
     padding: 'bytes' = PaddingField(length=lambda pkt: (4 - pkt['length'] % 4) % 4)
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'int', length: 'int', hardware: 'str') -> 'None': ...
+        def __init__(self, type: 'Enum_OptionType', length: 'int', hardware: 'str') -> 'None': ...
 
 
-class IF_TxSpeedOption(Option):
+class IF_TxSpeedOption(_IF_Option):
     """Header schema for PCAP-NG file ``if_txspeed`` options."""
 
     #: Interface transmit speed, in bits per second.
@@ -604,10 +660,10 @@ class IF_TxSpeedOption(Option):
     padding: 'bytes' = PaddingField(length=lambda pkt: (4 - pkt['length'] % 4) % 4)
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'int', length: 'int', tx_speed: 'int') -> 'None': ...
+        def __init__(self, type: 'Enum_OptionType', length: 'int', tx_speed: 'int') -> 'None': ...
 
 
-class IF_RxSpeedOption(Option):
+class IF_RxSpeedOption(_IF_Option):
     """Header schema for PCAP-NG file ``if_rxspeed`` options."""
 
     #: Interface receive speed, in bits per second.
@@ -616,7 +672,7 @@ class IF_RxSpeedOption(Option):
     padding: 'bytes' = PaddingField(length=lambda pkt: (4 - pkt['length'] % 4) % 4)
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'int', length: 'int', rx_speed: 'int') -> 'None': ...
+        def __init__(self, type: 'Enum_OptionType', length: 'int', rx_speed: 'int') -> 'None': ...
 
 
 class InterfaceDescriptionBlock(BlockType):
@@ -669,7 +725,27 @@ class InterfaceDescriptionBlock(BlockType):
                      snaplen: 'int', options: 'list[Option | bytes] | bytes', length2: 'int') -> 'None': ...
 
 
-class EPB_FlagsOption(Option):
+class _EPB_Option(Option):
+    """Header schema for ``epb_*`` options."""
+
+    def post_process(self, packet: 'dict[str, Any]') -> '_EPB_Option':
+        """Revise ``schema`` data after unpacking process.
+
+        This method revise the ``type`` value of the current option
+        based on its namespace group.s
+
+        Args:
+            packet: Unpacked data.
+
+        Returns:
+            Revised schema.
+
+        """
+        self.type = Enum_OptionType.get(self.type.opt_value, namespace='epb')
+        return self
+
+
+class EPB_FlagsOption(_EPB_Option):
     """Header schema for PCAP-NG ``epb_flags`` options."""
 
     #: Flags.
@@ -690,10 +766,10 @@ class EPB_FlagsOption(Option):
     padding: 'bytes' = PaddingField(length=lambda pkt: (4 - pkt['length'] % 4) % 4)
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'int', length: 'int', flags: 'EPBFlags') -> 'None': ...
+        def __init__(self, type: 'Enum_OptionType', length: 'int', flags: 'EPBFlags') -> 'None': ...
 
 
-class EPB_HashOption(Option):
+class EPB_HashOption(_EPB_Option):
     """Header schema for PCAP-NG ``epb_hash`` options."""
 
     #: Hash algorithm.
@@ -704,10 +780,10 @@ class EPB_HashOption(Option):
     padding: 'bytes' = PaddingField(length=lambda pkt: (4 - pkt['length'] % 4) % 4)
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'int', length: 'int', func: 'Enum_HashAlgorithm', data: 'bytes') -> 'None': ...
+        def __init__(self, type: 'Enum_OptionType', length: 'int', func: 'Enum_HashAlgorithm', data: 'bytes') -> 'None': ...
 
 
-class EPB_DropCountOption(Option):
+class EPB_DropCountOption(_EPB_Option):
     """Header schema for PCAP-NG ``epb_dropcount`` options."""
 
     #: Number of packets dropped by the interface.
@@ -716,10 +792,10 @@ class EPB_DropCountOption(Option):
     padding: 'bytes' = PaddingField(length=lambda pkt: (4 - pkt['length'] % 4) % 4)
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'int', length: 'int', drop_count: 'int') -> 'None': ...
+        def __init__(self, type: 'Enum_OptionType', length: 'int', drop_count: 'int') -> 'None': ...
 
 
-class EPB_PacketIDOption(Option):
+class EPB_PacketIDOption(_EPB_Option):
     """Header schema for PCAP-NG ``epb_packetid`` options."""
 
     #: Packet ID.
@@ -728,10 +804,10 @@ class EPB_PacketIDOption(Option):
     padding: 'bytes' = PaddingField(length=lambda pkt: (4 - pkt['length'] % 4) % 4)
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'int', length: 'int', packet_id: 'int') -> 'None': ...
+        def __init__(self, type: 'Enum_OptionType', length: 'int', packet_id: 'int') -> 'None': ...
 
 
-class EPB_QueueOption(Option):
+class EPB_QueueOption(_EPB_Option):
     """Header schema for PCAP-NG ``epb_queue`` options."""
 
     #: Queue ID.
@@ -740,10 +816,10 @@ class EPB_QueueOption(Option):
     padding: 'bytes' = PaddingField(length=lambda pkt: (4 - pkt['length'] % 4) % 4)
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'int', length: 'int', queue_id: 'int') -> 'None': ...
+        def __init__(self, type: 'Enum_OptionType', length: 'int', queue_id: 'int') -> 'None': ...
 
 
-class EPB_VerdictOption(Option):
+class EPB_VerdictOption(_EPB_Option):
     """Header schema for PCAP-NG ``epb_verdict`` options."""
 
     #: Verdict type.
@@ -754,7 +830,7 @@ class EPB_VerdictOption(Option):
     padding: 'bytes' = PaddingField(length=lambda pkt: (4 - pkt['length'] % 4) % 4)
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'int', length: 'int', verdict: 'Enum_VerdictType', value: 'bytes') -> 'None': ...
+        def __init__(self, type: 'Enum_OptionType', length: 'int', verdict: 'Enum_VerdictType', value: 'bytes') -> 'None': ...
 
 
 class EnhancedPacketBlock(BlockType):
@@ -920,7 +996,27 @@ class IPv6Record(NameResolutionRecord):
         def __init__(self, type: 'Enum_RecordType', length: 'int', ip: 'IPv4Address', resol: 'str') -> 'None': ...
 
 
-class NS_DNSNameOption(Option):
+class _NS_Option(Option):
+    """Header schema for ``ns_*`` options."""
+
+    def post_process(self, packet: 'dict[str, Any]') -> '_NS_Option':
+        """Revise ``schema`` data after unpacking process.
+
+        This method revise the ``type`` value of the current option
+        based on its namespace group.s
+
+        Args:
+            packet: Unpacked data.
+
+        Returns:
+            Revised schema.
+
+        """
+        self.type = Enum_OptionType.get(self.type.opt_value, namespace='ns')
+        return self
+
+
+class NS_DNSNameOption(_NS_Option):
     """Header schema for PCAP-NG ``ns_dnsname`` option."""
 
     #: DNS name.
@@ -930,7 +1026,7 @@ class NS_DNSNameOption(Option):
         def __init__(self, code: 'Enum_OptionType', length: 'int', name: 'str') -> 'None': ...
 
 
-class NS_DNSIP4AddrOption(Option):
+class NS_DNSIP4AddrOption(_NS_Option):
     """Header schema for PCAP-NG ``ns_dnsIP4addr`` option."""
 
     #: IPv4 address.
@@ -940,7 +1036,7 @@ class NS_DNSIP4AddrOption(Option):
         def __init__(self, code: 'Enum_OptionType', length: 'int', ip: 'IPv4Address') -> 'None': ...
 
 
-class NS_DNSIP6AddrOption(Option):
+class NS_DNSIP6AddrOption(_NS_Option):
     """Header schema for PCAP-NG ``ns_dnsIP6addr`` option."""
 
     #: IPv6 address.
@@ -1022,7 +1118,27 @@ class NameResolutionBlock(BlockType):
                      options: 'list[Option | bytes] | bytes', length2: 'int') -> 'None': ...
 
 
-class ISB_StartTimeOption(Option):
+class _ISB_Option(Option):
+    """Header schema for ``isb_*`` options."""
+
+    def post_process(self, packet: 'dict[str, Any]') -> '_ISB_Option':
+        """Revise ``schema`` data after unpacking process.
+
+        This method revise the ``type`` value of the current option
+        based on its namespace group.s
+
+        Args:
+            packet: Unpacked data.
+
+        Returns:
+            Revised schema.
+
+        """
+        self.type = Enum_OptionType.get(self.type.opt_value, namespace='isb')
+        return self
+
+
+class ISB_StartTimeOption(_ISB_Option):
     """Header schema for PCAP-NG ``isb_starttime`` option."""
 
     #: Timestamp (higher 32 bits).
@@ -1034,7 +1150,7 @@ class ISB_StartTimeOption(Option):
         def __init__(self, code: 'Enum_OptionType', length: 'int', timestamp_high: 'int', timestamp_low: 'int') -> 'None': ...
 
 
-class ISB_EndTimeOption(Option):
+class ISB_EndTimeOption(_ISB_Option):
     """Header schema for PCAP-NG ``isb_endtime`` option."""
 
     #: Timestamp (higher 32 bits).
@@ -1046,7 +1162,7 @@ class ISB_EndTimeOption(Option):
         def __init__(self, code: 'Enum_OptionType', length: 'int', timestamp_high: 'int', timestamp_low: 'int') -> 'None': ...
 
 
-class ISB_IFRecvOption(Option):
+class ISB_IFRecvOption(_ISB_Option):
     """Header schema for PCAP-NG ``isb_ifrecv`` option."""
 
     #: Number of packets received.
@@ -1056,7 +1172,7 @@ class ISB_IFRecvOption(Option):
         def __init__(self, code: 'Enum_OptionType', length: 'int', packets: 'int', bytes: 'int') -> 'None': ...
 
 
-class ISB_IFDropOption(Option):
+class ISB_IFDropOption(_ISB_Option):
     """Header schema for PCAP-NG ``isb_ifdrop`` option."""
 
     #: Number of packets dropped.
@@ -1066,7 +1182,7 @@ class ISB_IFDropOption(Option):
         def __init__(self, code: 'Enum_OptionType', length: 'int', packets: 'int', bytes: 'int') -> 'None': ...
 
 
-class ISB_FilterAcceptOption(Option):
+class ISB_FilterAcceptOption(_ISB_Option):
     """Header schema for PCAP-NG ``isb_filteraccept`` option."""
 
     #: Number of packets accepted by filter.
@@ -1076,7 +1192,7 @@ class ISB_FilterAcceptOption(Option):
         def __init__(self, code: 'Enum_OptionType', length: 'int', packets: 'int', bytes: 'int') -> 'None': ...
 
 
-class ISB_OSDropOption(Option):
+class ISB_OSDropOption(_ISB_Option):
     """Header schema for PCAP-NG ``isb_osdrop`` option."""
 
     #: Number of packets dropped by OS.
@@ -1086,7 +1202,7 @@ class ISB_OSDropOption(Option):
         def __init__(self, code: 'Enum_OptionType', length: 'int', packets: 'int', bytes: 'int') -> 'None': ...
 
 
-class ISB_UsrDelivOption(Option):
+class ISB_UsrDelivOption(_ISB_Option):
     """Header schema for PCAP-NG ``isb_usrdeliv`` option."""
 
     #: Number of packets delivered to user.
