@@ -1970,6 +1970,88 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
         )
         return option
 
+    def _read_option_ns_dnsname(self, schema: 'Schema_NS_DNSNameOption', *,
+                                options: 'Option') -> 'Data_NS_DNSNameOption':
+        """Read PCAP-NG ``ns_dnsname`` option.
+
+        Args:
+            schema: Parsed option schema.
+            options: Parsed PCAP-NG options.
+
+        Returns:
+            Constructed option data.
+
+        """
+        if self._type != Enum_BlockType.Name_Resolution_Block:
+            raise ProtocolError(f'PCAP-NG: [ns_dnsname] option must be in Name Resolution Block, '
+                                f'but found in {self._type} block.')
+        if self._opt[schema.type] > 0:
+            raise ProtocolError(f'PCAP-NG: [ns_dnsname] option must be only one, '
+                                f'but {self._opt[schema.type] + 1} found.')
+
+        option = Data_NS_DNSNameOption(
+            type=schema.type,
+            length=schema.length,
+            name=schema.name,
+        )
+        return option
+
+    def _read_option_ns_dnsipv4(self, schema: 'Schema_NS_DNSIP4AddrOption', *,
+                                options: 'Option') -> 'Data_NS_DNSIP4AddrOption':
+        """Read PCAP-NG ``ns_dnsIP4addr`` option.
+
+        Args:
+            schema: Parsed option schema.
+            options: Parsed PCAP-NG options.
+
+        Returns:
+            Constructed option data.
+
+        """
+        if self._type != Enum_BlockType.Name_Resolution_Block:
+            raise ProtocolError(f'PCAP-NG: [ns_dnsIP4addr] option must be in Name Resolution Block, '
+                                f'but found in {self._type} block.')
+        if self._opt[schema.type] > 0:
+            raise ProtocolError(f'PCAP-NG: [ns_dnsIP4addr] option must be only one, '
+                                f'but {self._opt[schema.type] + 1} found.')
+        if schema.length != 4:
+            raise ProtocolError(f'PCAP-NG [ns_dnsIP4addr] invalid length (expected 4, got {schema.length})')
+
+        option = Data_NS_DNSIP4AddrOption(
+            type=schema.type,
+            length=schema.length,
+            ip=schema.ip,
+        )
+        return option
+
+    def _read_option_ns_dnsipv6(self, schema: 'Schema_NS_DNSIP6AddrOption', *,
+                                options: 'Option') -> 'Data_NS_DNSIP6AddrOption':
+        """Read PCAP-NG ``ns_dnsIP6addr`` option.
+
+        Args:
+            schema: Parsed option schema.
+            options: Parsed PCAP-NG options.
+
+        Returns:
+            Constructed option data.
+
+        """
+        if self._type != Enum_BlockType.Name_Resolution_Block:
+            raise ProtocolError(f'PCAP-NG: [ns_dnsIP6addr] option must be in Name Resolution Block, '
+                                f'but found in {self._type} block.')
+        if self._opt[schema.type] > 0:
+            raise ProtocolError(f'PCAP-NG: [ns_dnsIP6addr] option must be only one, '
+                                f'but {self._opt[schema.type] + 1} found.')
+        if schema.length != 16:
+            raise ProtocolError(f'PCAP-NG [ns_dnsIP6addr] invalid length (expected 16, got {schema.length})')
+
+        option = Data_NS_DNSIP6AddrOption(
+            type=schema.type,
+            length=schema.length,
+            ip=schema.ip,
+        )
+        return option
+
 
 
     def _make_block_unknown(self, block: 'Optional[Data_UnknownBlock]' = None, *,
@@ -2999,4 +3081,97 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
             length=1 + len(value),
             verdict=verdict_val,
             value=value,
+        )
+
+    def _make_option_ns_dnsname(self, type: 'Enum_OptionType', option: 'Optional[Data_NS_DNSNameOption]' = None, *,
+                                name: 'str' = '',
+                                **kwargs: 'Any') -> 'Schema_NS_DNSNameOption':
+        """Make PCAP-NG ``ns_dnsname`` option.
+
+        Args:
+            type: Option type.
+            option: Option data model.
+            name: DNS server name.
+            **kwargs: Arbitrary keyword arguments.
+
+        Returns:
+            Constructed option schema.
+
+        """
+        if self._type != Enum_BlockType.Name_Resolution_Block:
+            raise ProtocolError(f'PCAP-NG: [ns_dnsname] option must be in Name Resolution Block, '
+                                f'but found in {self._type} block.')
+        if self._opt[type] > 0:
+            raise ProtocolError(f'PCAP-NG: [ns_dnsname] option must be only one, '
+                                f'but {self._opt[type] + 1} found.')
+
+        if option is not None:
+            name = option.name
+
+        return Schema_NS_DNSNameOption(
+            type=type,
+            length=len(name),
+            name=name,
+        )
+
+    def _make_option_ns_dnsipv4(self, type: 'Enum_OptionType', option: 'Optional[Data_NS_DNSIP4AddrOption]' = None, *,
+                                ip: 'str | bytes | IPv4Address | int' = '8.8.8.8',
+                                **kwargs: 'Any') -> 'Schema_NS_DNSIP4AddrOption':
+        """Make PCAP-NG ``ns_dnsip4addr`` option.
+
+        Args:
+            type: Option type.
+            option: Option data model.
+            ip: DNS server IPv4 address.
+            **kwargs: Arbitrary keyword arguments.
+
+        Returns:
+            Constructed option schema.
+
+        """
+        if self._type != Enum_BlockType.Name_Resolution_Block:
+            raise ProtocolError(f'PCAP-NG: [ns_dnsip4addr] option must be in Name Resolution Block, '
+                                f'but found in {self._type} block.')
+        if self._opt[type] > 0:
+            raise ProtocolError(f'PCAP-NG: [ns_dnsip4addr] option must be only one, '
+                                f'but {self._opt[type] + 1} found.')
+
+        if option is not None:
+            ip = option.ip
+
+        return Schema_NS_DNSIP4AddrOption(
+            type=type,
+            length=4,
+            ip=ip,
+        )
+
+    def _make_option_ns_dnsipv6(self, type: 'Enum_OptionType', option: 'Optional[Data_NS_DNSIP6AddrOption]' = None, *,
+                                ip: 'str | bytes | IPv6Address | int' = '8.8.8.8',
+                                **kwargs: 'Any') -> 'Schema_NS_DNSIP6AddrOption':
+        """Make PCAP-NG ``ns_dnsip6addr`` option.
+
+        Args:
+            type: Option type.
+            option: Option data model.
+            ip: DNS server IPv6 address.
+            **kwargs: Arbitrary keyword arguments.
+
+        Returns:
+            Constructed option schema.
+
+        """
+        if self._type != Enum_BlockType.Name_Resolution_Block:
+            raise ProtocolError(f'PCAP-NG: [ns_dnsip6addr] option must be in Name Resolution Block, '
+                                f'but found in {self._type} block.')
+        if self._opt[type] > 0:
+            raise ProtocolError(f'PCAP-NG: [ns_dnsip6addr] option must be only one, '
+                                f'but {self._opt[type] + 1} found.')
+
+        if option is not None:
+            ip = option.ip
+
+        return Schema_NS_DNSIP6AddrOption(
+            type=type,
+            length=16,
+            ip=ip,
         )

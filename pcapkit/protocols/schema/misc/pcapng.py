@@ -1023,7 +1023,7 @@ class NS_DNSNameOption(_NS_Option):
     name: 'str' = StringField(length=lambda pkt: pkt['length'])
 
     if TYPE_CHECKING:
-        def __init__(self, code: 'Enum_OptionType', length: 'int', name: 'str') -> 'None': ...
+        def __init__(self, type: 'Enum_OptionType', length: 'int', name: 'str') -> 'None': ...
 
 
 class NS_DNSIP4AddrOption(_NS_Option):
@@ -1033,7 +1033,7 @@ class NS_DNSIP4AddrOption(_NS_Option):
     ip: 'IPv4Address' = IPv4AddressField()
 
     if TYPE_CHECKING:
-        def __init__(self, code: 'Enum_OptionType', length: 'int', ip: 'IPv4Address') -> 'None': ...
+        def __init__(self, type: 'Enum_OptionType', length: 'int', ip: 'IPv4Address | str | bytes | int') -> 'None': ...
 
 
 class NS_DNSIP6AddrOption(_NS_Option):
@@ -1043,7 +1043,7 @@ class NS_DNSIP6AddrOption(_NS_Option):
     ip: 'IPv6Address' = IPv6AddressField()
 
     if TYPE_CHECKING:
-        def __init__(self, code: 'Enum_OptionType', length: 'int', ip: 'IPv6Address') -> 'None': ...
+        def __init__(self, type: 'Enum_OptionType', length: 'int', ip: 'IPv6Address | bytes | str | int') -> 'None': ...
 
 
 class NameResolutionBlock(BlockType):
