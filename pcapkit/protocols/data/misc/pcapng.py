@@ -321,7 +321,7 @@ class EPB_FlagsOption(Option):
     #: Reception type.
     reception: 'PacketReception'
     #: FCS length.
-    fcs_len: 'Optional[int]'
+    fcs_len: 'int'
     #: Link-layer-dependent error - CRC error (bit 24).
     crc_error: 'bool'
     #: Link-layer-dependent error - packet too long error (bit 25).
@@ -341,9 +341,9 @@ class EPB_FlagsOption(Option):
 
     if TYPE_CHECKING:
         def __init__(self, type: 'Enum_OptionType', length: 'int', direction: 'PacketDirection',
-                     reception: 'PacketReception', fcs_len: 'Optional[int]', crc_error: 'bool',
-                     too_long: 'bool', gap_error: 'bool', unaligned_error: 'bool', delimiter_error: 'bool',
-                     preamble_error: 'bool', symbole_error: 'bool') -> 'None': ...
+                     reception: 'PacketReception', fcs_len: 'int', crc_error: 'bool',
+                     too_long: 'bool', too_short: 'bool', gap_error: 'bool', unaligned_error: 'bool',
+                     delimiter_error: 'bool', preamble_error: 'bool', symbol_error: 'bool') -> 'None': ...
 
 
 class EPB_HashOption(Option):

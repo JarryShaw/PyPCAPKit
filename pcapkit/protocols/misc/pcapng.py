@@ -1213,6 +1213,8 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
         )
         return data
 
+
+
     def _read_pcapng_options(self, options_schema: 'list[Schema_Option]') -> 'Option':
         """Read PCAP-NG options.
 
@@ -1428,6 +1430,8 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
         if self._type != Enum_BlockType.Interface_Description_Block:
             raise ProtocolError(f'PCAP-NG: [if_IPv4addr] option must be in Interface Description Block, '
                                 f'but found in {self._type} block.')
+        if schema.length != 8:
+            raise ProtocolError(f'PCAP-NG [if_IPv4addr] invalid length (expected 8, got {schema.length})')
 
         option = Data_IF_IPv4AddrOption(
             type=schema.type,
@@ -1451,6 +1455,8 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
         if self._type != Enum_BlockType.Interface_Description_Block:
             raise ProtocolError(f'PCAP-NG: [if_IPv6addr] option must be in Interface Description Block, '
                                 f'but found in {self._type} block.')
+        if schema.length != 17:
+            raise ProtocolError(f'PCAP-NG [if_IPv6addr] invalid length (expected 17, got {schema.length})')
 
         option = Data_IF_IPv6AddrOption(
             type=schema.type,
@@ -1477,6 +1483,8 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
         if self._opt[schema.type] > 0:
             raise ProtocolError(f'PCAP-NG: [if_MACaddr] option must be only one, '
                                 f'but {self._opt[schema.type] + 1} found.')
+        if schema.length != 6:
+            raise ProtocolError(f'PCAP-NG [if_MACaddr] invalid length (expected 6, got {schema.length})')
 
         option = Data_IF_MACAddrOption(
             type=schema.type,
@@ -1503,6 +1511,8 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
         if self._opt[schema.type] > 0:
             raise ProtocolError(f'PCAP-NG: [if_EUIaddr] option must be only one, '
                                 f'but {self._opt[schema.type] + 1} found.')
+        if schema.length != 8:
+            raise ProtocolError(f'PCAP-NG [if_EUIaddr] invalid length (expected 8, got {schema.length})')
 
         option = Data_IF_EUIAddrOption(
             type=schema.type,
@@ -1529,6 +1539,8 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
         if self._opt[schema.type] > 0:
             raise ProtocolError(f'PCAP-NG: [if_speed] option must be only one, '
                                 f'but {self._opt[schema.type] + 1} found.')
+        if schema.length != 8:
+            raise ProtocolError(f'PCAP-NG [if_speed] invalid length (expected 8, got {schema.length})')
 
         option = Data_IF_SpeedOption(
             type=schema.type,
@@ -1555,6 +1567,8 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
         if self._opt[schema.type] > 0:
             raise ProtocolError(f'PCAP-NG: [if_tsresol] option must be only one, '
                                 f'but {self._opt[schema.type] + 1} found.')
+        if schema.length != 1:
+            raise ProtocolError(f'PCAP-NG [if_tsresol] invalid length (expected 1, got {schema.length})')
 
         option = Data_IF_TSResolOption(
             type=schema.type,
@@ -1581,6 +1595,8 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
         if self._opt[schema.type] > 0:
             raise ProtocolError(f'PCAP-NG: [if_tzone] option must be only one, '
                                 f'but {self._opt[schema.type] + 1} found.')
+        if schema.length != 4:
+            raise ProtocolError(f'PCAP-NG [if_tzone] invalid length (expected 4, got {schema.length})')
 
         option = Data_IF_TZoneOption(
             type=schema.type,
@@ -1607,6 +1623,8 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
         if self._opt[schema.type] > 0:
             raise ProtocolError(f'PCAP-NG: [if_filter] option must be only one, '
                                 f'but {self._opt[schema.type] + 1} found.')
+        if schema.length < 1:
+            raise ProtocolError(f'PCAP-NG [if_filter] invalid length (expected 1+, got {schema.length})')
 
         option = Data_IF_FilterOption(
             type=schema.type,
@@ -1660,6 +1678,8 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
         if self._opt[schema.type] > 0:
             raise ProtocolError(f'PCAP-NG: [if_fcslen] option must be only one, '
                                 f'but {self._opt[schema.type] + 1} found.')
+        if schema.length != 1:
+            raise ProtocolError(f'PCAP-NG [if_fcslen] invalid length (expected 1, got {schema.length})')
 
         option = Data_IF_FCSLenOption(
             type=schema.type,
@@ -1686,6 +1706,8 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
         if self._opt[schema.type] > 0:
             raise ProtocolError(f'PCAP-NG: [if_tsoffset] option must be only one, '
                                 f'but {self._opt[schema.type] + 1} found.')
+        if schema.length != 8:
+            raise ProtocolError(f'PCAP-NG [if_tsoffset] invalid length (expected 8, got {schema.length})')
 
         option = Data_IF_TSOffsetOption(
             type=schema.type,
@@ -1738,6 +1760,8 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
         if self._opt[schema.type] > 0:
             raise ProtocolError(f'PCAP-NG: [if_txspeed] option must be only one, '
                                 f'but {self._opt[schema.type] + 1} found.')
+        if schema.length != 8:
+            raise ProtocolError(f'PCAP-NG [if_txspeed] invalid length (expected 8, got {schema.length})')
 
         option = Data_IF_TxSpeedOption(
             type=schema.type,
@@ -1764,6 +1788,8 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
         if self._opt[schema.type] > 0:
             raise ProtocolError(f'PCAP-NG: [if_rxspeed] option must be only one, '
                                 f'but {self._opt[schema.type] + 1} found.')
+        if schema.length != 8:
+            raise ProtocolError(f'PCAP-NG [if_rxspeed] invalid length (expected 8, got {schema.length})')
 
         option = Data_IF_RxSpeedOption(
             type=schema.type,
@@ -1771,6 +1797,180 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
             speed=schema.rx_speed,
         )
         return option
+
+    def _read_option_epb_flags(self, schema: 'Schema_EPB_FlagsOption', *,
+                               options: 'Option') -> 'Data_EPB_FlagsOption':
+        """Read PCAP-NG ``epb_flags`` option.
+
+        Args:
+            schema: Parsed option schema.
+            options: Parsed PCAP-NG options.
+
+        Returns:
+            Constructed option data.
+
+        """
+        if self._type != Enum_BlockType.Enhanced_Packet_Block:
+            raise ProtocolError(f'PCAP-NG: [epb_flags] option must be in Enhanced Packet Block, '
+                                f'but found in {self._type} block.')
+        if self._opt[schema.type] > 0:
+            raise ProtocolError(f'PCAP-NG: [epb_flags] option must be only one, '
+                                f'but {self._opt[schema.type] + 1} found.')
+        if schema.length != 4:
+            raise ProtocolError(f'PCAP-NG [epb_dropcount] invalid length (expected 8, got {schema.length})')
+
+        option = Data_EPB_FlagsOption(
+            type=schema.type,
+            length=schema.length,
+            direction=PacketDirection(schema.flags['direction']),
+            reception=PacketReception(schema.flags['reception']),
+            fcs_len=schema.flags['fcs_len'],
+            crc_error=bool(schema.flags['crc_error']),
+            too_long=bool(schema.flags['too_long']),
+            too_short=bool(schema.flags['too_short']),
+            gap_error=bool(schema.flags['gap_error']),
+            unaligned_error=bool(schema.flags['unaligned_error']),
+            delimiter_error=bool(schema.flags['delimiter_error']),
+            preamble_error=bool(schema.flags['preamble_error']),
+            symbol_error=bool(schema.flags['symbol_error']),
+        )
+        return option
+
+    def _read_option_epb_hash(self, schema: 'Schema_EPB_HashOption', *,
+                              options: 'Option') -> 'Data_EPB_HashOption':
+        """Read PCAP-NG ``epb_hash`` option.
+
+        Args:
+            schema: Parsed option schema.
+            options: Parsed PCAP-NG options.
+
+        Returns:
+            Constructed option data.
+
+        """
+        if self._type != Enum_BlockType.Enhanced_Packet_Block:
+            raise ProtocolError(f'PCAP-NG: [epb_hash] option must be in Enhanced Packet Block, '
+                                f'but found in {self._type} block.')
+
+        option = Data_EPB_HashOption(
+            type=schema.type,
+            length=schema.length,
+            algorithm=schema.func,
+            hash=schema.data,
+        )
+        return option
+
+    def _read_option_epb_dropcount(self, schema: 'Schema_EPB_DropCountOption', *,
+                                   options: 'Option') -> 'Data_EPB_DropCountOption':
+        """Read PCAP-NG ``epb_dropcount`` option.
+
+        Args:
+            schema: Parsed option schema.
+            options: Parsed PCAP-NG options.
+
+        Returns:
+            Constructed option data.
+
+        """
+        if self._type != Enum_BlockType.Enhanced_Packet_Block:
+            raise ProtocolError(f'PCAP-NG: [epb_dropcount] option must be in Enhanced Packet Block, '
+                                f'but found in {self._type} block.')
+        if self._opt[schema.type] > 0:
+            raise ProtocolError(f'PCAP-NG: [epb_dropcount] option must be only one, '
+                                f'but {self._opt[schema.type] + 1} found.')
+        if schema.length != 8:
+            raise ProtocolError(f'PCAP-NG [epb_dropcount] invalid length (expected 8, got {schema.length})')
+
+        option = Data_EPB_DropCountOption(
+            type=schema.type,
+            length=schema.length,
+            drop_count=schema.drop_count,
+        )
+        return option
+
+    def _read_option_epb_packetid(self, schema: 'Schema_EPB_PacketIDOption', *,
+                                  options: 'Option') -> 'Data_EPB_PacketIDOption':
+        """Read PCAP-NG ``epb_packetid`` option.
+
+        Args:
+            schema: Parsed option schema.
+            options: Parsed PCAP-NG options.
+
+        Returns:
+            Constructed option data.
+
+        """
+        if self._type != Enum_BlockType.Enhanced_Packet_Block:
+            raise ProtocolError(f'PCAP-NG: [epb_packetid] option must be in Enhanced Packet Block, '
+                                f'but found in {self._type} block.')
+        if self._opt[schema.type] > 0:
+            raise ProtocolError(f'PCAP-NG: [epb_packetid] option must be only one, '
+                                f'but {self._opt[schema.type] + 1} found.')
+        if schema.length != 8:
+            raise ProtocolError(f'PCAP-NG [epb_packetid] invalid length (expected 8, got {schema.length})')
+
+        option = Data_EPB_PacketIDOption(
+            type=schema.type,
+            length=schema.length,
+            packet_id=schema.packet_id,
+        )
+        return option
+
+    def _read_option_epb_queue(self, schema: 'Schema_EPB_QueueOption', *,
+                               options: 'Option') -> 'Data_EPB_QueueOption':
+        """Read PCAP-NG ``epb_queue`` option.
+
+        Args:
+            schema: Parsed option schema.
+            options: Parsed PCAP-NG options.
+
+        Returns:
+            Constructed option data.
+
+        """
+        if self._type != Enum_BlockType.Enhanced_Packet_Block:
+            raise ProtocolError(f'PCAP-NG: [epb_queue] option must be in Enhanced Packet Block, '
+                                f'but found in {self._type} block.')
+        if self._opt[schema.type] > 0:
+            raise ProtocolError(f'PCAP-NG: [epb_queue] option must be only one, '
+                                f'but {self._opt[schema.type] + 1} found.')
+        if schema.length != 4:
+            raise ProtocolError(f'PCAP-NG [epb_packetid] invalid length (expected 4, got {schema.length})')
+
+        option = Data_EPB_QueueOption(
+            type=schema.type,
+            length=schema.length,
+            queue_id=schema.queue_id,
+        )
+        return option
+
+    def _read_option_epb_verdict(self, schema: 'Schema_EPB_VerdictOption', *,
+                                 options: 'Option') -> 'Data_EPB_VerdictOption':
+        """Read PCAP-NG ``epb_verdict`` option.
+
+        Args:
+            schema: Parsed option schema.
+            options: Parsed PCAP-NG options.
+
+        Returns:
+            Constructed option data.
+
+        """
+        if self._type != Enum_BlockType.Enhanced_Packet_Block:
+            raise ProtocolError(f'PCAP-NG: [epb_verdict] option must be in Enhanced Packet Block, '
+                                f'but found in {self._type} block.')
+        if schema.length < 1:
+            raise ProtocolError(f'PCAP-NG [epb_verdict] invalid length (expected 1+, got {schema.length})')
+
+        option = Data_EPB_VerdictOption(
+            type=schema.type,
+            length=schema.length,
+            verdict=schema.verdict,
+            value=schema.value,
+        )
+        return option
+
+
 
     def _make_block_unknown(self, block: 'Optional[Data_UnknownBlock]' = None, *,
                             data: 'bytes' = b'',
@@ -1846,6 +2046,8 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
             options=options_value,
             length2=total_length + 28,
         )
+
+
 
     def _make_pcapng_options(self, options: 'Option | list[Schema_Option | tuple[Enum_OptionType, dict[str, Any]] | bytes]') -> 'tuple[list[Schema_Option | bytes], int]':
         """Make options for PCAP-NG.
@@ -2343,7 +2545,11 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
         Args:
             type: Option type.
             option: Option data model.
-            speed: Interface speed, in bits per second.
+            filter: Filter type.
+            filter_default: Default filter value.
+            filter_namespace: Filter namespace.
+            filter_reversed: Whether filter namespace is reversed.
+            expression: Filter expression.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
@@ -2367,7 +2573,7 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
 
         return Schema_IF_FilterOption(
             type=type,
-            length=8,
+            length=1 + len(expr_val),
             code=filter_val,
             filter=expr_val,
         )
@@ -2525,4 +2731,272 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
             type=type,
             length=8,
             rx_speed=speed,
+        )
+
+    def _make_option_epb_flags(self, type: 'Enum_OptionType', option: 'Optional[Data_EPB_FlagsOption]' = None, *,
+                               direction: 'PacketDirection | StdlibEnum | AenumEnum | str | int' = PacketDirection.UNKNOWN,
+                               direction_default: 'Optional[int]' = None,
+                               direction_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
+                               direction_reversed: 'bool' = False,
+                               reception: 'PacketReception | StdlibEnum | AenumEnum | str | int' = PacketReception.UNKNOWN,
+                               reception_default: 'Optional[int]' = None,
+                               reception_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
+                               reception_reversed: 'bool' = False,
+                               fcs_len: 'int' = 0,
+                               crc_error: 'bool' = False,
+                               too_long: 'bool' = False,
+                               too_short: 'bool' = False,
+                               gap_error: 'bool' = False,
+                               unaligned_error: 'bool' = False,
+                               delimiter_error: 'bool' = False,
+                               preamble_error: 'bool' = False,
+                               symbol_error: 'bool' = False,
+                               **kwargs: 'Any') -> 'Schema_EPB_FlagsOption':
+        """Make PCAP-NG ``epb_flags`` option.
+
+        Args:
+            type: Option type.
+            option: Option data model.
+            direction: Packet direction.
+            direction_default: Default value of packet direction.
+            direction_namespace: Namespace of packet direction.
+            direction_reversed: Whether to reverse packet direction namespace.
+            reception: Packet reception.
+            reception_default: Default value of packet reception.
+            reception_namespace: Namespace of packet reception.
+            reception_reversed: Whether to reverse packet reception namespace.
+            fcs_len: Length of FCS field, in bytes.
+            crc_error: Whether CRC error occurred.
+            too_long: Whether packet is too long.
+            too_short: Whether packet is too short.
+            gap_error: Whether gap error occurred.
+            unaligned_error: Whether unaligned error occurred.
+            delimiter_error: Whether delimiter error occurred.
+            preamble_error: Whether preamble error occurred.
+            symbol_error: Whether symbol error occurred.
+            **kwargs: Arbitrary keyword arguments.
+
+        Returns:
+            Constructed option schema.
+
+        """
+        if self._type != Enum_BlockType.Enhanced_Packet_Block:
+            raise ProtocolError(f'PCAP-NG: [epb_flags] option must be in Enhanced Packet Block, '
+                                f'but found in {self._type} block.')
+        if self._opt[type] > 0:
+            raise ProtocolError(f'PCAP-NG: [epb_flags] option must be only one, '
+                                f'but {self._opt[type] + 1} found.')
+
+        if option is not None:
+            direction_val = option.direction
+            reception_val = option.reception
+            fcs_len = option.fcs_len
+            crc_error = option.crc_error
+            too_long = option.too_long
+            too_short = option.too_short
+            gap_error = option.gap_error
+            unaligned_error = option.unaligned_error
+            delimiter_error = option.delimiter_error
+            preamble_error = option.preamble_error
+            symbol_error = option.symbol_error
+        else:
+            direction_val = self._make_index(direction, direction_default, namespace=direction_namespace,  # type: ignore[call-overload]
+                                             reversed=direction_reversed, unpack=False)
+            reception_val = self._make_index(reception, reception_default, namespace=reception_namespace,  # type: ignore[call-overload]
+                                             reversed=reception_reversed, unpack=False)
+
+        return Schema_EPB_FlagsOption(
+            type=type,
+            length=4,
+            flags={
+                'direction': direction_val.value,
+                'reception': reception_val.value,
+                'fcs_len': fcs_len,
+                'crc_error': int(crc_error),
+                'too_long': int(too_long),
+                'too_short': int(too_short),
+                'gap_error': int(gap_error),
+                'unaligned_error': int(unaligned_error),
+                'delimiter_error': int(delimiter_error),
+                'preamble_error': int(preamble_error),
+                'symbol_error': int(symbol_error),
+            },
+        )
+
+    def _make_option_epb_hash(self, type: 'Enum_OptionType', option: 'Optional[Data_EPB_HashOption]' = None, *,
+                              algorithm: 'Enum_HashAlgorithm | StdlibEnum | AenumEnum | int | str' = Enum_HashAlgorithm.two_s_complement,
+                              algorithm_default: 'Optional[int]' = None,
+                              algorithm_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
+                              algorithm_reversed: 'bool' = False,
+                              hash: 'bytes' = b'',
+                              **kwargs: 'Any') -> 'Schema_EPB_HashOption':
+        """Make PCAP-NG ``epb_hash`` option.
+
+        Args:
+            type: Option type.
+            option: Option data model.
+            algorithm: Hash algorithm.
+            algorithm_default: Default value of hash algorithm.
+            algorithm_namespace: Namespace of hash algorithm.
+            algorithm_reversed: Whether to reverse hash algorithm namespace.
+            hash: Hash value.
+            **kwargs: Arbitrary keyword arguments.
+
+        Returns:
+            Constructed option schema.
+
+        """
+        if self._type != Enum_BlockType.Enhanced_Packet_Block:
+            raise ProtocolError(f'PCAP-NG: [epb_hash] option must be in Enhanced Packet Block, '
+                                f'but found in {self._type} block.')
+
+        if option is not None:
+            algo_val = option.algorithm
+            hash = option.hash
+        else:
+            algo_val = self._make_index(algorithm, algorithm_default, namespace=algorithm_namespace,  # type: ignore[call-overload]
+                                        reversed=algorithm_reversed, unpack=False)
+
+        return Schema_EPB_HashOption(
+            type=type,
+            length=1 + len(hash),
+            func=algo_val,
+            data=hash,
+        )
+
+    def _make_option_epb_dropcount(self, type: 'Enum_OptionType', option: 'Optional[Data_EPB_DropCountOption]' = None, *,
+                                   drop_count: 'int' = 0,
+                                   **kwargs: 'Any') -> 'Schema_EPB_DropCountOption':
+        """Make PCAP-NG ``epb_dropcount`` option.
+
+        Args:
+            type: Option type.
+            option: Option data model.
+            drop_count: Number of dropped packets.
+            **kwargs: Arbitrary keyword arguments.
+
+        Returns:
+            Constructed option schema.
+
+        """
+        if self._type != Enum_BlockType.Enhanced_Packet_Block:
+            raise ProtocolError(f'PCAP-NG: [epb_dropcount] option must be in Enhanced Packet Block, '
+                                f'but found in {self._type} block.')
+        if self._opt[type] > 0:
+            raise ProtocolError(f'PCAP-NG: [epb_dropcount] option must be only one, '
+                                f'but {self._opt[type] + 1} found.')
+
+        if option is not None:
+            drop_count = option.drop_count
+
+        return Schema_EPB_DropCountOption(
+            type=type,
+            length=8,
+            drop_count=drop_count,
+        )
+
+    def _make_option_epb_packetid(self, type: 'Enum_OptionType', option: 'Optional[Data_EPB_PacketIDOption]' = None, *,
+                                  packet_id: 'int' = 0,
+                                  **kwargs: 'Any') -> 'Schema_EPB_PacketIDOption':
+        """Make PCAP-NG ``epb_packetid`` option.
+
+        Args:
+            type: Option type.
+            option: Option data model.
+            packet_id: Packet ID.
+            **kwargs: Arbitrary keyword arguments.
+
+        Returns:
+            Constructed option schema.
+
+        """
+        if self._type != Enum_BlockType.Enhanced_Packet_Block:
+            raise ProtocolError(f'PCAP-NG: [epb_packetid] option must be in Enhanced Packet Block, '
+                                f'but found in {self._type} block.')
+        if self._opt[type] > 0:
+            raise ProtocolError(f'PCAP-NG: [epb_packetid] option must be only one, '
+                                f'but {self._opt[type] + 1} found.')
+
+        if option is not None:
+            packet_id = option.packet_id
+
+        return Schema_EPB_PacketIDOption(
+            type=type,
+            length=8,
+            packet_id=packet_id,
+        )
+
+    def _make_option_epb_queue(self, type: 'Enum_OptionType', option: 'Optional[Data_EPB_QueueOption]' = None, *,
+                               queue_id: 'int' = 0,
+                               **kwargs: 'Any') -> 'Schema_EPB_QueueOption':
+        """Make PCAP-NG ``epb_queue`` option.
+
+        Args:
+            type: Option type.
+            option: Option data model.
+            queue_id: Queue ID.
+            **kwargs: Arbitrary keyword arguments.
+
+        Returns:
+            Constructed option schema.
+
+        """
+        if self._type != Enum_BlockType.Enhanced_Packet_Block:
+            raise ProtocolError(f'PCAP-NG: [epb_queue] option must be in Enhanced Packet Block, '
+                                f'but found in {self._type} block.')
+        if self._opt[type] > 0:
+            raise ProtocolError(f'PCAP-NG: [epb_queue] option must be only one, '
+                                f'but {self._opt[type] + 1} found.')
+
+        if option is not None:
+            queue_id = option.queue_id
+
+        return Schema_EPB_QueueOption(
+            type=type,
+            length=4,
+            queue_id=queue_id,
+        )
+
+    def _make_option_epb_verdict(self, type: 'Enum_OptionType', option: 'Optional[Data_EPB_VerdictOption]' = None, *,
+                                 verdict: 'Enum_VerdictType  | StdlibEnum | AenumEnum | str | int' = Enum_VerdictType.Hardware,
+                                 verdict_default: 'Optional[int]' = None,
+                                 verdict_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
+                                 verdict_reversed: 'bool' = False,
+                                 value: 'bytes' = b'',
+                                 **kwargs: 'Any') -> 'Schema_EPB_VerdictOption':
+        """Make PCAP-NG ``epb_verdict`` option.
+
+        Args:
+            type: Option type.
+            option: Option data model.
+            verdict: Verdict type.
+            verdict_default: Default value for verdict.
+            verdict_namespace: Namespace for verdict.
+            verdict_reversed: Whether to reverse the namespace.
+            value: Verdict value.
+            **kwargs: Arbitrary keyword arguments.
+
+        Returns:
+            Constructed option schema.
+
+        """
+        if self._type != Enum_BlockType.Enhanced_Packet_Block:
+            raise ProtocolError(f'PCAP-NG: [epb_verdict] option must be in Enhanced Packet Block, '
+                                f'but found in {self._type} block.')
+        if self._opt[type] > 0:
+            raise ProtocolError(f'PCAP-NG: [epb_verdict] option must be only one, '
+                                f'but {self._opt[type] + 1} found.')
+
+        if option is not None:
+            verdict_val = option.verdict
+            value = option.value
+        else:
+            verdict_val = self._make_index(verdict, verdict_default, namespace=verdict_namespace,  # type: ignore[call-overload]
+                                          reversed=verdict_reversed, pack=False)
+
+        return Schema_EPB_VerdictOption(
+            type=type,
+            length=1 + len(value),
+            verdict=verdict_val,
+            value=value,
         )
