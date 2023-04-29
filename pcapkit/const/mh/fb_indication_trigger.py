@@ -43,7 +43,7 @@ class FlowBindingIndicationTrigger(IntEnum):
         if isinstance(key, int):
             return FlowBindingIndicationTrigger(key)
         if key not in FlowBindingIndicationTrigger._member_map_:  # pylint: disable=no-member
-            extend_enum(FlowBindingIndicationTrigger, key, default)
+            return extend_enum(FlowBindingIndicationTrigger, key, default)
         return FlowBindingIndicationTrigger[key]  # type: ignore[misc]
 
     @classmethod
@@ -58,10 +58,8 @@ class FlowBindingIndicationTrigger(IntEnum):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))
         if 4 <= value <= 249:
             #: Unassigned
-            extend_enum(cls, 'Unassigned_%d' % value, value)
-            return cls(value)
+            return extend_enum(cls, 'Unassigned_%d' % value, value)
         if 250 <= value <= 255:
             #: Reserved for Testing Purposes Only [:rfc:`7109`]
-            extend_enum(cls, 'Reserved_for_Testing_Purposes_Only_%d' % value, value)
-            return cls(value)
+            return extend_enum(cls, 'Reserved_for_Testing_Purposes_Only_%d' % value, value)
         return super()._missing_(value)

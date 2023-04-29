@@ -37,7 +37,7 @@ class AuthSubtype(IntEnum):
         if isinstance(key, int):
             return AuthSubtype(key)
         if key not in AuthSubtype._member_map_:  # pylint: disable=no-member
-            extend_enum(AuthSubtype, key, default)
+            return extend_enum(AuthSubtype, key, default)
         return AuthSubtype[key]  # type: ignore[misc]
 
     @classmethod
@@ -50,5 +50,4 @@ class AuthSubtype(IntEnum):
         """
         if not (isinstance(value, int) and 0 <= value <= 255):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))
-        extend_enum(cls, 'Unassigned_%d' % value, value)
-        return cls(value)
+        return extend_enum(cls, 'Unassigned_%d' % value, value)

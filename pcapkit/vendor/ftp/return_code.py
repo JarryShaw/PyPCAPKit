@@ -71,16 +71,21 @@ INFO = {{
 class {NAME}(IntEnum):
     """[{NAME}] {DOCS}"""
 
+    if TYPE_CHECKING:
+        #: Description of the return code.
+        description: 'Optional[str]'
+        #: Response kind.
+        kind: 'str'
+        #: Grouping information.
+        group: 'str'
+
     def __new__(cls, value: 'int', description: 'Optional[str]' = None) -> 'Type[{NAME}]':
         obj = int.__new__(cls, value)
         obj._value_ = value
 
         code = str(value)
-        #: Description of the return code.
         obj.description = description
-        #: Response kind.
         obj.kind = KIND.get(str(value)[0], 'Reserved')
-        #: Grouping information.
         obj.group = INFO.get(str(value)[1], 'Reserved')
 
         return obj
@@ -103,7 +108,7 @@ class {NAME}(IntEnum):
         if isinstance(key, int):
             return {NAME}(key)
         if key not in {NAME}._member_map_:  # pylint: disable=no-member
-            extend_enum({NAME}, key, default)
+            return extend_enum({NAME}, key, default)
         return {NAME}[key]  # type: ignore[misc]
 
     @classmethod
@@ -116,8 +121,7 @@ class {NAME}(IntEnum):
         """
         if not ({FLAG}):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))
-        extend_enum(cls, 'CODE_%s' % value, value)
-        return cls(value)
+        return extend_enum(cls, 'CODE_%s' % value, value)
 '''  # type: Callable[[str, str, str, str, str], str]
 
 

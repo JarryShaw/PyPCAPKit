@@ -40,7 +40,7 @@ class TrafficSelector(IntEnum):
         if isinstance(key, int):
             return TrafficSelector(key)
         if key not in TrafficSelector._member_map_:  # pylint: disable=no-member
-            extend_enum(TrafficSelector, key, default)
+            return extend_enum(TrafficSelector, key, default)
         return TrafficSelector[key]  # type: ignore[misc]
 
     @classmethod
@@ -55,10 +55,8 @@ class TrafficSelector(IntEnum):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))
         if 3 <= value <= 250:
             #: Unassigned
-            extend_enum(cls, 'Unassigned_%d' % value, value)
-            return cls(value)
+            return extend_enum(cls, 'Unassigned_%d' % value, value)
         if 251 <= value <= 255:
             #: Reserved for Experimental Use [:rfc:`6089`]
-            extend_enum(cls, 'Reserved_for_Experimental_Use_%d' % value, value)
-            return cls(value)
+            return extend_enum(cls, 'Reserved_for_Experimental_Use_%d' % value, value)
         return super()._missing_(value)

@@ -75,7 +75,7 @@ class ErrorCode(IntEnum):
         if isinstance(key, int):
             return ErrorCode(key)
         if key not in ErrorCode._member_map_:  # pylint: disable=no-member
-            extend_enum(ErrorCode, key, default)
+            return extend_enum(ErrorCode, key, default)
         return ErrorCode[key]  # type: ignore[misc]
 
     @classmethod
@@ -91,6 +91,5 @@ class ErrorCode(IntEnum):
         if 0x0000000E <= value <= 0xFFFFFFFF:
             #: Unassigned
             temp = hex(value)[2:].upper().zfill(8)
-            extend_enum(cls, 'Unassigned_0x%s' % (temp[:4]+'_'+temp[4:]), value)
-            return cls(value)
+            return extend_enum(cls, 'Unassigned_0x%s' % (temp[:4]+'_'+temp[4:]), value)
         return super()._missing_(value)

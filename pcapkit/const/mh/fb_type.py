@@ -40,7 +40,7 @@ class FlowBindingType(IntEnum):
         if isinstance(key, int):
             return FlowBindingType(key)
         if key not in FlowBindingType._member_map_:  # pylint: disable=no-member
-            extend_enum(FlowBindingType, key, default)
+            return extend_enum(FlowBindingType, key, default)
         return FlowBindingType[key]  # type: ignore[misc]
 
     @classmethod
@@ -55,6 +55,5 @@ class FlowBindingType(IntEnum):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))
         if 3 <= value <= 255:
             #: Unassigned
-            extend_enum(cls, 'Unassigned_%d' % value, value)
-            return cls(value)
+            return extend_enum(cls, 'Unassigned_%d' % value, value)
         return super()._missing_(value)

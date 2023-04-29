@@ -40,7 +40,7 @@ class LMAControlledMAGSuboption(IntEnum):
         if isinstance(key, int):
             return LMAControlledMAGSuboption(key)
         if key not in LMAControlledMAGSuboption._member_map_:  # pylint: disable=no-member
-            extend_enum(LMAControlledMAGSuboption, key, default)
+            return extend_enum(LMAControlledMAGSuboption, key, default)
         return LMAControlledMAGSuboption[key]  # type: ignore[misc]
 
     @classmethod
@@ -55,6 +55,5 @@ class LMAControlledMAGSuboption(IntEnum):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))
         if 3 <= value <= 255:
             #: Unassigned
-            extend_enum(cls, 'Unassigned_%d' % value, value)
-            return cls(value)
+            return extend_enum(cls, 'Unassigned_%d' % value, value)
         return super()._missing_(value)

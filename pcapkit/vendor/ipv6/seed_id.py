@@ -68,8 +68,7 @@ class SeedID(Vendor):
         """
         enum = []  # type: list[str]
         miss = [
-            "extend_enum(cls, 'Unassigned_0b%s' % bin(value)[2:].zfill(2), value)",
-            'return cls(value)'
+            "return extend_enum(cls, 'Unassigned_0b%s' % bin(value)[2:].zfill(2), value)",
         ]
         for code, name in data.items():
             bncd = f'0b{bin(code)[2:].zfill(2)}'

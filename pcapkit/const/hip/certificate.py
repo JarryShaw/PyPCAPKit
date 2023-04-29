@@ -58,7 +58,7 @@ class Certificate(IntEnum):
         if isinstance(key, int):
             return Certificate(key)
         if key not in Certificate._member_map_:  # pylint: disable=no-member
-            extend_enum(Certificate, key, default)
+            return extend_enum(Certificate, key, default)
         return Certificate[key]  # type: ignore[misc]
 
     @classmethod
@@ -73,6 +73,5 @@ class Certificate(IntEnum):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))
         if 9 <= value <= 255:
             #: Unassigned
-            extend_enum(cls, 'Unassigned_%d' % value, value)
-            return cls(value)
+            return extend_enum(cls, 'Unassigned_%d' % value, value)
         return super()._missing_(value)

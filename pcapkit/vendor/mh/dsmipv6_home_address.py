@@ -79,8 +79,7 @@ class DSMIPv6HomeAddress(Vendor):
 
                 miss.append(f'if {start} <= value <= {stop}:')
                 miss.append(f'    #: {desc}')
-                miss.append(f"    extend_enum(cls, '{self.safe_name(name)}_%d' % value, value)")
-                miss.append('    return cls(value)')
+                miss.append(f"    return extend_enum(cls, '{self.safe_name(name)}_%d' % value, value)")
         return enum, miss
 
 

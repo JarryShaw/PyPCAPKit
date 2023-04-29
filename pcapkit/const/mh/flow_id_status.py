@@ -52,7 +52,7 @@ class FlowIDStatus(IntEnum):
         if isinstance(key, int):
             return FlowIDStatus(key)
         if key not in FlowIDStatus._member_map_:  # pylint: disable=no-member
-            extend_enum(FlowIDStatus, key, default)
+            return extend_enum(FlowIDStatus, key, default)
         return FlowIDStatus[key]  # type: ignore[misc]
 
     @classmethod
@@ -67,14 +67,11 @@ class FlowIDStatus(IntEnum):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))
         if 1 <= value <= 127:
             #: Unassigned; available for success codes
-            extend_enum(cls, 'Unassigned_available_for_success_codes_%d' % value, value)
-            return cls(value)
+            return extend_enum(cls, 'Unassigned_available_for_success_codes_%d' % value, value)
         if 134 <= value <= 250:
             #: Unassigned; available for reject codes
-            extend_enum(cls, 'Unassigned_available_for_reject_codes_%d' % value, value)
-            return cls(value)
+            return extend_enum(cls, 'Unassigned_available_for_reject_codes_%d' % value, value)
         if 251 <= value <= 255:
             #: Reserved for Experimental Use [:rfc:`6089`]
-            extend_enum(cls, 'Reserved_for_Experimental_Use_%d' % value, value)
-            return cls(value)
+            return extend_enum(cls, 'Reserved_for_Experimental_Use_%d' % value, value)
         return super()._missing_(value)

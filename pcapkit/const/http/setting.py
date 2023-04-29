@@ -71,7 +71,7 @@ class Setting(IntEnum):
         if isinstance(key, int):
             return Setting(key)
         if key not in Setting._member_map_:  # pylint: disable=no-member
-            extend_enum(Setting, key, default)
+            return extend_enum(Setting, key, default)
         return Setting[key]  # type: ignore[misc]
 
     @classmethod
@@ -86,14 +86,11 @@ class Setting(IntEnum):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))
         if 0x000A <= value <= 0x000F:
             #: ``Unassigned``
-            extend_enum(cls, 'Unassigned_0x%s' % hex(value)[2:].upper().zfill(4), value)
-            return cls(value)
+            return extend_enum(cls, 'Unassigned_0x%s' % hex(value)[2:].upper().zfill(4), value)
         if 0x0011 <= value <= 0x4D43:
             #: ``Unassigned``
-            extend_enum(cls, 'Unassigned_0x%s' % hex(value)[2:].upper().zfill(4), value)
-            return cls(value)
+            return extend_enum(cls, 'Unassigned_0x%s' % hex(value)[2:].upper().zfill(4), value)
         if 0x4D45 <= value <= 0xFFFF:
             #: ``Unassigned``
-            extend_enum(cls, 'Unassigned_0x%s' % hex(value)[2:].upper().zfill(4), value)
-            return cls(value)
+            return extend_enum(cls, 'Unassigned_0x%s' % hex(value)[2:].upper().zfill(4), value)
         return super()._missing_(value)

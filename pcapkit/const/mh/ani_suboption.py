@@ -55,7 +55,7 @@ class ANISuboption(IntEnum):
         if isinstance(key, int):
             return ANISuboption(key)
         if key not in ANISuboption._member_map_:  # pylint: disable=no-member
-            extend_enum(ANISuboption, key, default)
+            return extend_enum(ANISuboption, key, default)
         return ANISuboption[key]  # type: ignore[misc]
 
     @classmethod
@@ -70,6 +70,5 @@ class ANISuboption(IntEnum):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))
         if 7 <= value <= 254:
             #: Unassigned
-            extend_enum(cls, 'Unassigned_%d' % value, value)
-            return cls(value)
+            return extend_enum(cls, 'Unassigned_%d' % value, value)
         return super()._missing_(value)

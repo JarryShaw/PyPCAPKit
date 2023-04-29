@@ -47,7 +47,7 @@ class ClassificationLevel(IntEnum):
         if isinstance(key, int):
             return ClassificationLevel(key)
         if key not in ClassificationLevel._member_map_:  # pylint: disable=no-member
-            extend_enum(ClassificationLevel, key, default)
+            return extend_enum(ClassificationLevel, key, default)
         return ClassificationLevel[key]  # type: ignore[misc]
 
     @classmethod
@@ -61,5 +61,5 @@ class ClassificationLevel(IntEnum):
         if not (isinstance(value, int) and 0b00000000 <= value <= 0b11111111):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))
         temp = bin(value)[2:].upper().zfill(8)
-        extend_enum(cls, 'Unassigned_0b%s' % (temp[:4]+'_'+temp[4:]), value)
-        return cls(value)
+        return extend_enum(cls, 'Unassigned_0b%s' % (temp[:4]+'_'+temp[4:]), value)
+        return super()._missing_(value)

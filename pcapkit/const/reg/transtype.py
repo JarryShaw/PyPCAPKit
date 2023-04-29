@@ -498,7 +498,7 @@ class TransType(IntEnum):
         if isinstance(key, int):
             return TransType(key)
         if key not in TransType._member_map_:  # pylint: disable=no-member
-            extend_enum(TransType, key, default)
+            return extend_enum(TransType, key, default)
         return TransType[key]  # type: ignore[misc]
 
     @classmethod

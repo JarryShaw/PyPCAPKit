@@ -55,7 +55,7 @@ class PriorityLevel(IntEnum):
         if isinstance(key, int):
             return PriorityLevel(key)
         if key not in PriorityLevel._member_map_:  # pylint: disable=no-member
-            extend_enum(PriorityLevel, key, default)
+            return extend_enum(PriorityLevel, key, default)
         return PriorityLevel[key]  # type: ignore[misc]
 
     @classmethod
@@ -68,5 +68,4 @@ class PriorityLevel(IntEnum):
         """
         if not (isinstance(value, int) and 0b000 <= value <= 0b111):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))
-        extend_enum(cls, 'Unassigned [0b%s]' % bin(value)[2:].zfill(3), value)
-        return cls(value)
+        return extend_enum(cls, 'Unassigned [0b%s]' % bin(value)[2:].zfill(3), value)

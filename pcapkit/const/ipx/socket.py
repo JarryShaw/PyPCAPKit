@@ -73,7 +73,7 @@ class Socket(IntEnum):
         if isinstance(key, int):
             return Socket(key)
         if key not in Socket._member_map_:  # pylint: disable=no-member
-            extend_enum(Socket, key, default)
+            return extend_enum(Socket, key, default)
         return Socket[key]  # type: ignore[misc]
 
     @classmethod
@@ -88,22 +88,17 @@ class Socket(IntEnum):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))
         if 0x0001 <= value <= 0x0BB8:
             #: Registered by Xerox
-            extend_enum(cls, 'Registered by Xerox_0x%s' % hex(value)[2:].upper().zfill(4), value)
-            return cls(value)
+            return extend_enum(cls, 'Registered by Xerox_0x%s' % hex(value)[2:].upper().zfill(4), value)
         if 0x0020 <= value <= 0x003F:
             #: Experimental
-            extend_enum(cls, 'Experimental_0x%s' % hex(value)[2:].upper().zfill(4), value)
-            return cls(value)
+            return extend_enum(cls, 'Experimental_0x%s' % hex(value)[2:].upper().zfill(4), value)
         if 0x0BB9 <= value <= 0xFFFF:
             #: Dynamically Assigned
-            extend_enum(cls, 'Dynamically Assigned_0x%s' % hex(value)[2:].upper().zfill(4), value)
-            return cls(value)
+            return extend_enum(cls, 'Dynamically Assigned_0x%s' % hex(value)[2:].upper().zfill(4), value)
         if 0x4000 <= value <= 0x4FFF:
             #: Dynamically Assigned Socket Numbers
-            extend_enum(cls, 'Dynamically Assigned Socket Numbers_0x%s' % hex(value)[2:].upper().zfill(4), value)
-            return cls(value)
+            return extend_enum(cls, 'Dynamically Assigned Socket Numbers_0x%s' % hex(value)[2:].upper().zfill(4), value)
         if 0x8000 <= value <= 0xFFFF:
             #: Statically Assigned Socket Numbers
-            extend_enum(cls, 'Statically Assigned Socket Numbers_0x%s' % hex(value)[2:].upper().zfill(4), value)
-            return cls(value)
+            return extend_enum(cls, 'Statically Assigned Socket Numbers_0x%s' % hex(value)[2:].upper().zfill(4), value)
         return super()._missing_(value)

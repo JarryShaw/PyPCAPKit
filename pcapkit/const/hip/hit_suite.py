@@ -49,7 +49,7 @@ class HITSuite(IntEnum):
         if isinstance(key, int):
             return HITSuite(key)
         if key not in HITSuite._member_map_:  # pylint: disable=no-member
-            extend_enum(HITSuite, key, default)
+            return extend_enum(HITSuite, key, default)
         return HITSuite[key]  # type: ignore[misc]
 
     @classmethod
@@ -64,6 +64,5 @@ class HITSuite(IntEnum):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))
         if 6 <= value <= 15:
             #: Unassigned
-            extend_enum(cls, 'Unassigned_%d' % value, value)
-            return cls(value)
+            return extend_enum(cls, 'Unassigned_%d' % value, value)
         return super()._missing_(value)

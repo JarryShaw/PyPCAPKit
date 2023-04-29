@@ -159,7 +159,7 @@ class Hardware(IntEnum):
         if isinstance(key, int):
             return Hardware(key)
         if key not in Hardware._member_map_:  # pylint: disable=no-member
-            extend_enum(Hardware, key, default)
+            return extend_enum(Hardware, key, default)
         return Hardware[key]  # type: ignore[misc]
 
     @classmethod
@@ -174,10 +174,8 @@ class Hardware(IntEnum):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))
         if 39 <= value <= 255:
             #: Unassigned
-            extend_enum(cls, 'Unassigned_%d' % value, value)
-            return cls(value)
+            return extend_enum(cls, 'Unassigned_%d' % value, value)
         if 258 <= value <= 65534:
             #: Unassigned
-            extend_enum(cls, 'Unassigned_%d' % value, value)
-            return cls(value)
+            return extend_enum(cls, 'Unassigned_%d' % value, value)
         return super()._missing_(value)

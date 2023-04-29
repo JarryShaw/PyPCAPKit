@@ -35,7 +35,7 @@ class ToSDelay(IntEnum):
         if isinstance(key, int):
             return ToSDelay(key)
         if key not in ToSDelay._member_map_:  # pylint: disable=no-member
-            extend_enum(ToSDelay, key, default)
+            return extend_enum(ToSDelay, key, default)
         return ToSDelay[key]  # type: ignore[misc]
 
     @classmethod
@@ -48,5 +48,4 @@ class ToSDelay(IntEnum):
         """
         if not (isinstance(value, int) and 0 <= value <= 1):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))
-        extend_enum(cls, 'Unassigned_%d' % value, value)
-        return cls(value)
+        return extend_enum(cls, 'Unassigned_%d' % value, value)

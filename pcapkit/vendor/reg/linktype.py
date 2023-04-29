@@ -64,8 +64,7 @@ class LinkType(Vendor):
         """
         enum = []  # type: list[str]
         miss = [
-            "extend_enum(cls, 'Unassigned_%d' % value, value)",
-            'return cls(value)'
+            "return extend_enum(cls, 'Unassigned_%d' % value, value)",
         ]
         for content in data:
             name = content.select('td.symbol')[0].text.strip()[9:].strip()

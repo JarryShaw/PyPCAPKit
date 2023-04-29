@@ -125,7 +125,7 @@ class Option(IntEnum):
         if isinstance(key, int):
             return Option(key)
         if key not in Option._member_map_:  # pylint: disable=no-member
-            extend_enum(Option, key, default)
+            return extend_enum(Option, key, default)
         return Option[key]  # type: ignore[misc]
 
     @classmethod
@@ -138,5 +138,4 @@ class Option(IntEnum):
         """
         if not (isinstance(value, int) and 0x00 <= value <= 0xFF):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))
-        extend_enum(cls, 'Unassigned_0x%s' % hex(value)[2:].upper().zfill(2), value)
-        return cls(value)
+        return extend_enum(cls, 'Unassigned_0x%s' % hex(value)[2:].upper().zfill(2), value)

@@ -63,21 +63,28 @@ __all__ = ['{NAME}']
 class {NAME}(StrEnum):
     """[{NAME}] {DOCS}"""
 
+    if TYPE_CHECKING:
+        #: Feature of command.
+        feat: 'Optional[str]'
+        #: Description of command.
+        desc: 'Optional[str]'
+        #: Type of command.
+        type: 'Optional[tuple[str, ...]]'
+        #: Conformance of command.
+        conf: 'Optional[str]'
+        #: Note of command.
+        note: 'Optional[tuple[str, ...]]'
+
     def __new__(cls, name: 'str', feat: 'Optional[str]' = None, desc: 'Optional[str]' = None,
                 type: 'Optional[tuple[str, ...]]' = None, conf: 'Optional[str]' = None,
                 note: 'Optional[tuple[str, ...]]' = None) -> 'Type[{NAME}]':
         obj = str.__new__(cls, name)
         obj._value_ = name
 
-        #: Feature of command.
         obj.feat = feat
-        #: Description of command.
         obj.desc = desc
-        #: Type of command.
         obj.type = type
-        #: Conformance of command.
         obj.conf = conf
-        #: Note of command.
         obj.note = note
 
         return obj
@@ -98,7 +105,7 @@ class {NAME}(StrEnum):
         :meta private:
         """
         if key not in {NAME}._member_map_:  # pylint: disable=no-member
-            extend_enum({NAME}, key.upper(), default if default is not None else key)
+            return extend_enum({NAME}, key.upper(), default if default is not None else key)
         return {NAME}[key]  # type: ignore[misc]
 
     @classmethod
@@ -109,8 +116,7 @@ class {NAME}(StrEnum):
             value: Value to get enum item.
 
         """
-        extend_enum(cls, value.upper(), value)
-        return cls(value)
+        return extend_enum(cls, value.upper(), value)
 '''.strip()  # type: Callable[[str, str, str, str], str]
 
 

@@ -61,7 +61,7 @@ class RevocationTrigger(IntEnum):
         if isinstance(key, int):
             return RevocationTrigger(key)
         if key not in RevocationTrigger._member_map_:  # pylint: disable=no-member
-            extend_enum(RevocationTrigger, key, default)
+            return extend_enum(RevocationTrigger, key, default)
         return RevocationTrigger[key]  # type: ignore[misc]
 
     @classmethod
@@ -76,14 +76,11 @@ class RevocationTrigger(IntEnum):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))
         if 8 <= value <= 127:
             #: Unassigned
-            extend_enum(cls, 'Unassigned_%d' % value, value)
-            return cls(value)
+            return extend_enum(cls, 'Unassigned_%d' % value, value)
         if 130 <= value <= 249:
             #: Unassigned
-            extend_enum(cls, 'Unassigned_%d' % value, value)
-            return cls(value)
+            return extend_enum(cls, 'Unassigned_%d' % value, value)
         if 250 <= value <= 255:
             #: Reserved for Testing Purposes Only [:rfc:`5846`]
-            extend_enum(cls, 'Reserved_for_Testing_Purposes_Only_%d' % value, value)
-            return cls(value)
+            return extend_enum(cls, 'Reserved_for_Testing_Purposes_Only_%d' % value, value)
         return super()._missing_(value)

@@ -73,7 +73,7 @@ class {NAME}(IntEnum):
         if isinstance(key, int):
             return {NAME}(key)
         if key not in {NAME}._member_map_:  # pylint: disable=no-member
-            extend_enum({NAME}, key, default)
+            return extend_enum({NAME}, key, default)
         return {NAME}[key]  # type: ignore[misc]
 
     @classmethod
@@ -87,7 +87,7 @@ class {NAME}(IntEnum):
         if not ({FLAG}):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))
         {MISS}
-        {'' if '        return cls(value)' in MISS.splitlines()[-1:] else 'return super()._missing_(value)'}
+        {'' if ''.join(MISS.splitlines()[-1:]).startswith('return') else 'return super()._missing_(value)'}
 '''.strip()  # type: Callable[[str, str, str, str, str, str], str]
 
 
@@ -258,8 +258,7 @@ class Vendor(metaclass=abc.ABCMeta):
 
                 miss.append(f'if {start} <= value <= {stop}:')
                 miss.append(f'    #: {desc}')
-                miss.append(f"    extend_enum(cls, '{self.safe_name(name)}_%d' % value, value)")
-                miss.append('    return cls(value)')
+                miss.append(f"    return extend_enum(cls, '{self.safe_name(name)}_%d' % value, value)")
         return enum, miss
 
     def count(self, data: 'list[str]') -> 'Counter[str]':

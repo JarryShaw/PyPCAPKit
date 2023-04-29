@@ -52,7 +52,7 @@ class DSMIPv6HomeAddress(IntEnum):
         if isinstance(key, int):
             return DSMIPv6HomeAddress(key)
         if key not in DSMIPv6HomeAddress._member_map_:  # pylint: disable=no-member
-            extend_enum(DSMIPv6HomeAddress, key, default)
+            return extend_enum(DSMIPv6HomeAddress, key, default)
         return DSMIPv6HomeAddress[key]  # type: ignore[misc]
 
     @classmethod
@@ -67,10 +67,8 @@ class DSMIPv6HomeAddress(IntEnum):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))
         if 1 <= value <= 127:
             #: Unassigned
-            extend_enum(cls, 'Unassigned_%d' % value, value)
-            return cls(value)
+            return extend_enum(cls, 'Unassigned_%d' % value, value)
         if 134 <= value <= 255:
             #: Unassigned
-            extend_enum(cls, 'Unassigned_%d' % value, value)
-            return cls(value)
+            return extend_enum(cls, 'Unassigned_%d' % value, value)
         return super()._missing_(value)

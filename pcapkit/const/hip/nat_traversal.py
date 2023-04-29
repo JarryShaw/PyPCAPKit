@@ -43,7 +43,7 @@ class NATTraversal(IntEnum):
         if isinstance(key, int):
             return NATTraversal(key)
         if key not in NATTraversal._member_map_:  # pylint: disable=no-member
-            extend_enum(NATTraversal, key, default)
+            return extend_enum(NATTraversal, key, default)
         return NATTraversal[key]  # type: ignore[misc]
 
     @classmethod
@@ -58,6 +58,5 @@ class NATTraversal(IntEnum):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))
         if 4 <= value <= 65535:
             #: Unassigned
-            extend_enum(cls, 'Unassigned_%d' % value, value)
-            return cls(value)
+            return extend_enum(cls, 'Unassigned_%d' % value, value)
         return super()._missing_(value)

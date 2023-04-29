@@ -61,7 +61,7 @@ class UpdateNotificationReason(IntEnum):
         if isinstance(key, int):
             return UpdateNotificationReason(key)
         if key not in UpdateNotificationReason._member_map_:  # pylint: disable=no-member
-            extend_enum(UpdateNotificationReason, key, default)
+            return extend_enum(UpdateNotificationReason, key, default)
         return UpdateNotificationReason[key]  # type: ignore[misc]
 
     @classmethod
@@ -76,6 +76,5 @@ class UpdateNotificationReason(IntEnum):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))
         if 9 <= value <= 254:
             #: Unassigned
-            extend_enum(cls, 'Unassigned_%d' % value, value)
-            return cls(value)
+            return extend_enum(cls, 'Unassigned_%d' % value, value)
         return super()._missing_(value)

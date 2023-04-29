@@ -40,7 +40,7 @@ class FlowBindingACKStatus(IntEnum):
         if isinstance(key, int):
             return FlowBindingACKStatus(key)
         if key not in FlowBindingACKStatus._member_map_:  # pylint: disable=no-member
-            extend_enum(FlowBindingACKStatus, key, default)
+            return extend_enum(FlowBindingACKStatus, key, default)
         return FlowBindingACKStatus[key]  # type: ignore[misc]
 
     @classmethod
@@ -55,10 +55,8 @@ class FlowBindingACKStatus(IntEnum):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))
         if 1 <= value <= 127:
             #: Unassigned
-            extend_enum(cls, 'Unassigned_%d' % value, value)
-            return cls(value)
+            return extend_enum(cls, 'Unassigned_%d' % value, value)
         if 130 <= value <= 255:
             #: Unassigned
-            extend_enum(cls, 'Unassigned_%d' % value, value)
-            return cls(value)
+            return extend_enum(cls, 'Unassigned_%d' % value, value)
         return super()._missing_(value)

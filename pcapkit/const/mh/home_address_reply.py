@@ -49,7 +49,7 @@ class HomeAddressReply(IntEnum):
         if isinstance(key, int):
             return HomeAddressReply(key)
         if key not in HomeAddressReply._member_map_:  # pylint: disable=no-member
-            extend_enum(HomeAddressReply, key, default)
+            return extend_enum(HomeAddressReply, key, default)
         return HomeAddressReply[key]  # type: ignore[misc]
 
     @classmethod
@@ -64,10 +64,8 @@ class HomeAddressReply(IntEnum):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))
         if 1 <= value <= 127:
             #: Unassigned
-            extend_enum(cls, 'Unassigned_%d' % value, value)
-            return cls(value)
+            return extend_enum(cls, 'Unassigned_%d' % value, value)
         if 133 <= value <= 255:
             #: Unassigned
-            extend_enum(cls, 'Unassigned_%d' % value, value)
-            return cls(value)
+            return extend_enum(cls, 'Unassigned_%d' % value, value)
         return super()._missing_(value)

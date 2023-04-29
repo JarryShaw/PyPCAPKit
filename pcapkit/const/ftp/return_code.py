@@ -43,16 +43,21 @@ INFO = {
 class ReturnCode(IntEnum):
     """[ReturnCode] FTP Server Return Code"""
 
+    if TYPE_CHECKING:
+        #: Description of the return code.
+        description: 'Optional[str]'
+        #: Response kind.
+        kind: 'str'
+        #: Grouping information.
+        group: 'str'
+
     def __new__(cls, value: 'int', description: 'Optional[str]' = None) -> 'Type[ReturnCode]':
         obj = int.__new__(cls, value)
         obj._value_ = value
 
         code = str(value)
-        #: Description of the return code.
         obj.description = description
-        #: Response kind.
         obj.kind = KIND.get(str(value)[0], 'Reserved')
-        #: Grouping information.
         obj.group = INFO.get(str(value)[1], 'Reserved')
 
         return obj
@@ -255,7 +260,7 @@ class ReturnCode(IntEnum):
         if isinstance(key, int):
             return ReturnCode(key)
         if key not in ReturnCode._member_map_:  # pylint: disable=no-member
-            extend_enum(ReturnCode, key, default)
+            return extend_enum(ReturnCode, key, default)
         return ReturnCode[key]  # type: ignore[misc]
 
     @classmethod
@@ -268,5 +273,4 @@ class ReturnCode(IntEnum):
         """
         if not (isinstance(value, int) and 100 <= value <= 659):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))
-        extend_enum(cls, 'CODE_%s' % value, value)
-        return cls(value)
+        return extend_enum(cls, 'CODE_%s' % value, value)

@@ -79,13 +79,11 @@ class StatusCode(Vendor):
 
                 miss.append(f'if {start} <= value <= {stop}:')
                 miss.append(f'    #: {desc}')
-                miss.append(f"    extend_enum(cls, '{self.safe_name(name)}_%d' % value, value)")
-                miss.append('    return cls(value)')
+                miss.append(f"    return extend_enum(cls, '{self.safe_name(name)}_%d' % value, value)")
 
         # TODO: figure out how to handle this programmatically
         miss.append('#: Unspecified in the IANA registry')
-        miss.append("extend_enum(cls, 'Unassigned_%d' % value, value)")
-        miss.append('return cls(value)')
+        miss.append("return extend_enum(cls, 'Unassigned_%d' % value, value)")
         return enum, miss
 
 

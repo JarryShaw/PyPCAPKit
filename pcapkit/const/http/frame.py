@@ -73,7 +73,7 @@ class Frame(IntEnum):
         if isinstance(key, int):
             return Frame(key)
         if key not in Frame._member_map_:  # pylint: disable=no-member
-            extend_enum(Frame, key, default)
+            return extend_enum(Frame, key, default)
         return Frame[key]  # type: ignore[misc]
 
     @classmethod
@@ -88,10 +88,8 @@ class Frame(IntEnum):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))
         if 0x0D <= value <= 0x0F:
             #: ``Unassigned``
-            extend_enum(cls, 'Unassigned_0x%s' % hex(value)[2:].upper().zfill(2), value)
-            return cls(value)
+            return extend_enum(cls, 'Unassigned_0x%s' % hex(value)[2:].upper().zfill(2), value)
         if 0x11 <= value <= 0xFF:
             #: ``Unassigned``
-            extend_enum(cls, 'Unassigned_0x%s' % hex(value)[2:].upper().zfill(2), value)
-            return cls(value)
+            return extend_enum(cls, 'Unassigned_0x%s' % hex(value)[2:].upper().zfill(2), value)
         return super()._missing_(value)

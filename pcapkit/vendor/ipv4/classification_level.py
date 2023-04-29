@@ -78,8 +78,7 @@ class ClassificationLevel(Vendor):
         enum = []  # type: list[str]
         miss = [
             'temp = bin(value)[2:].upper().zfill(8)',
-            "extend_enum(cls, 'Unassigned_0b%s' % (temp[:4]+'_'+temp[4:]), value)",
-            'return cls(value)'
+            "return extend_enum(cls, 'Unassigned_0b%s' % (temp[:4]+'_'+temp[4:]), value)",
         ]
         for code, name in data.items():
             bncd = binary(code)

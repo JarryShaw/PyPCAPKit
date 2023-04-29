@@ -86,9 +86,8 @@ class ErrorCode(Vendor):
 
                 miss.append(f'if {hexlify(start)} <= value <= {hexlify(stop)}:')
                 miss.append(f'    #: {desc}')
-                miss.append('    temp = hex(value)[2:].upper().zfill(8)')
-                miss.append(f"    extend_enum(cls, '{self.safe_name(name)}_0x%s' % (temp[:4]+'_'+temp[4:]), value)")
-                miss.append('    return cls(value)')
+                miss.append(f'    temp = hex(value)[2:].upper().zfill(8)')
+                miss.append(f"    return extend_enum(cls, '{self.safe_name(name)}_0x%s' % (temp[:4]+'_'+temp[4:]), value)")
         return enum, miss
 
 

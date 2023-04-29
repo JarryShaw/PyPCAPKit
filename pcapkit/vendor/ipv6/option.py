@@ -60,8 +60,7 @@ class Option(Vendor):
 
         enum = []  # type: list[str]
         miss = [
-            "extend_enum(cls, 'Unassigned_0x%s' % hex(value)[2:].upper().zfill(2), value)",
-            'return cls(value)'
+            "return extend_enum(cls, 'Unassigned_0x%s' % hex(value)[2:].upper().zfill(2), value)",
         ]
         for item in reader:
             if not item[0]:

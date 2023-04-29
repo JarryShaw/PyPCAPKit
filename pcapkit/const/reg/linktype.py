@@ -908,7 +908,7 @@ class LinkType(IntEnum):
         if isinstance(key, int):
             return LinkType(key)
         if key not in LinkType._member_map_:  # pylint: disable=no-member
-            extend_enum(LinkType, key, default)
+            return extend_enum(LinkType, key, default)
         return LinkType[key]  # type: ignore[misc]
 
     @classmethod
@@ -921,5 +921,4 @@ class LinkType(IntEnum):
         """
         if not (isinstance(value, int) and 0x00000000 <= value <= 0xFFFFFFFF):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))
-        extend_enum(cls, 'Unassigned_%d' % value, value)
-        return cls(value)
+        return extend_enum(cls, 'Unassigned_%d' % value, value)

@@ -23,11 +23,14 @@ __all__ = ['StatusCode']
 class StatusCode(IntEnum):
     """[StatusCode] HTTP Status Code"""
 
+    if TYPE_CHECKING:
+        #: Status message.
+        message: 'str'
+
     def __new__(cls, value: 'int', message: 'str' = '') -> 'Type[StatusCode]':
         obj = int.__new__(cls, value)
         obj._value_ = value
 
-        #: Status message.
         obj.message = message
 
         return obj
@@ -289,4 +292,3 @@ class StatusCode(IntEnum):
             #: Unassigned
             extend_enum(cls, 'Unassigned_%d' % value, value)
             return cls(value)
-        return super()._missing_(value)

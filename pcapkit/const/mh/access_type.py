@@ -73,7 +73,7 @@ class AccessType(IntEnum):
         if isinstance(key, int):
             return AccessType(key)
         if key not in AccessType._member_map_:  # pylint: disable=no-member
-            extend_enum(AccessType, key, default)
+            return extend_enum(AccessType, key, default)
         return AccessType[key]  # type: ignore[misc]
 
     @classmethod
@@ -88,6 +88,5 @@ class AccessType(IntEnum):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))
         if 14 <= value <= 255:
             #: Unassigned
-            extend_enum(cls, 'Unassigned_%d' % value, value)
-            return cls(value)
+            return extend_enum(cls, 'Unassigned_%d' % value, value)
         return super()._missing_(value)

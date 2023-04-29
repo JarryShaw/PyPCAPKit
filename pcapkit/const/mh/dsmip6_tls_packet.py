@@ -40,7 +40,7 @@ class DSMIP6TLSPacket(IntEnum):
         if isinstance(key, int):
             return DSMIP6TLSPacket(key)
         if key not in DSMIP6TLSPacket._member_map_:  # pylint: disable=no-member
-            extend_enum(DSMIP6TLSPacket, key, default)
+            return extend_enum(DSMIP6TLSPacket, key, default)
         return DSMIP6TLSPacket[key]  # type: ignore[misc]
 
     @classmethod
@@ -55,10 +55,8 @@ class DSMIP6TLSPacket(IntEnum):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))
         if 2 <= value <= 7:
             #: Unassigned
-            extend_enum(cls, 'Unassigned_%d' % value, value)
-            return cls(value)
+            return extend_enum(cls, 'Unassigned_%d' % value, value)
         if 9 <= value <= 15:
             #: Unassigned
-            extend_enum(cls, 'Unassigned_%d' % value, value)
-            return cls(value)
+            return extend_enum(cls, 'Unassigned_%d' % value, value)
         return super()._missing_(value)

@@ -35,7 +35,7 @@ class QSFunction(IntEnum):
         if isinstance(key, int):
             return QSFunction(key)
         if key not in QSFunction._member_map_:  # pylint: disable=no-member
-            extend_enum(QSFunction, key, default)
+            return extend_enum(QSFunction, key, default)
         return QSFunction[key]  # type: ignore[misc]
 
     @classmethod
@@ -48,5 +48,4 @@ class QSFunction(IntEnum):
         """
         if not (isinstance(value, int) and 0 <= value <= 8):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))
-        extend_enum(cls, 'Unassigned_%d' % value, value)
-        return cls(value)
+        return extend_enum(cls, 'Unassigned_%d' % value, value)

@@ -64,7 +64,7 @@ class HIAlgorithm(IntEnum):
         if isinstance(key, int):
             return HIAlgorithm(key)
         if key not in HIAlgorithm._member_map_:  # pylint: disable=no-member
-            extend_enum(HIAlgorithm, key, default)
+            return extend_enum(HIAlgorithm, key, default)
         return HIAlgorithm[key]  # type: ignore[misc]
 
     @classmethod
@@ -79,10 +79,8 @@ class HIAlgorithm(IntEnum):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))
         if 10 <= value <= 12:
             #: Unassigned
-            extend_enum(cls, 'Unassigned_%d' % value, value)
-            return cls(value)
+            return extend_enum(cls, 'Unassigned_%d' % value, value)
         if 14 <= value <= 65535:
             #: Unassigned
-            extend_enum(cls, 'Unassigned_%d' % value, value)
-            return cls(value)
+            return extend_enum(cls, 'Unassigned_%d' % value, value)
         return super()._missing_(value)

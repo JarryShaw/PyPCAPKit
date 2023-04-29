@@ -48,11 +48,14 @@ __all__ = ['{NAME}']
 class {NAME}(IntEnum):
     """[{NAME}] {DOCS}"""
 
+    if TYPE_CHECKING:
+        #: Status message.
+        message: 'str'
+
     def __new__(cls, value: 'int', message: 'str' = '') -> 'Type[{NAME}]':
         obj = int.__new__(cls, value)
         obj._value_ = value
 
-        #: Status message.
         obj.message = message
 
         return obj
@@ -86,7 +89,7 @@ class {NAME}(IntEnum):
         if not ({FLAG}):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))
         {MISS}
-        {'' if '        return cls(value)' in MISS.splitlines()[-1:] else 'return super()._missing_(value)'}
+        {'' if 'return' in ''.join(MISS.splitlines()[-1:]) else 'return super()._missing_(value)'}
 '''.strip()  # type: Callable[[str, str, str, str, str, str], str]
 
 

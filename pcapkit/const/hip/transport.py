@@ -43,7 +43,7 @@ class Transport(IntEnum):
         if isinstance(key, int):
             return Transport(key)
         if key not in Transport._member_map_:  # pylint: disable=no-member
-            extend_enum(Transport, key, default)
+            return extend_enum(Transport, key, default)
         return Transport[key]  # type: ignore[misc]
 
     @classmethod

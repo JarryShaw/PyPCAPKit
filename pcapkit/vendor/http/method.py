@@ -46,14 +46,18 @@ __all__ = ['{NAME}']
 class {NAME}(StrEnum):
     """[{NAME}] {DOCS}"""
 
+    if TYPE_CHECKING:
+        #: Safe method.
+        safe: 'bool'
+        #: Idempotent method.
+        idempotent: 'bool'
+
     def __new__(cls, value: 'str', safe: 'bool' = False,
                 idempotent: 'bool' = False) -> 'Type[{NAME}]':
         obj = str.__new__(cls)
         obj._value_ = value
 
-        #: Safe method.
         obj.safe = safe
-        #: Idempotent method.
         obj.idempotent = idempotent
 
         return obj
@@ -74,7 +78,7 @@ class {NAME}(StrEnum):
         :meta private:
         """
         if key not in {NAME}._member_map_:  # pylint: disable=no-member
-            extend_enum({NAME}, key.upper(), default if default is not None else key)
+            return extend_enum({NAME}, key.upper(), default if default is not None else key)
         return {NAME}[key]  # type: ignore[misc]
 
     @classmethod
@@ -85,8 +89,7 @@ class {NAME}(StrEnum):
             value: Value to get enum item.
 
         """
-        extend_enum(cls, value.upper(), value)
-        return cls(value)
+        return extend_enum(cls, value.upper(), value)
 '''.strip()  # type: Callable[[str, str, str, str], str]
 
 

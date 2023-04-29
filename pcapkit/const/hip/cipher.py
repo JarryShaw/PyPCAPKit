@@ -46,7 +46,7 @@ class Cipher(IntEnum):
         if isinstance(key, int):
             return Cipher(key)
         if key not in Cipher._member_map_:  # pylint: disable=no-member
-            extend_enum(Cipher, key, default)
+            return extend_enum(Cipher, key, default)
         return Cipher[key]  # type: ignore[misc]
 
     @classmethod
@@ -61,6 +61,5 @@ class Cipher(IntEnum):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))
         if 5 <= value <= 65535:
             #: Unassigned
-            extend_enum(cls, 'Unassigned_%d' % value, value)
-            return cls(value)
+            return extend_enum(cls, 'Unassigned_%d' % value, value)
         return super()._missing_(value)

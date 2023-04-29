@@ -145,7 +145,7 @@ class NotifyMessage(IntEnum):
         if isinstance(key, int):
             return NotifyMessage(key)
         if key not in NotifyMessage._member_map_:  # pylint: disable=no-member
-            extend_enum(NotifyMessage, key, default)
+            return extend_enum(NotifyMessage, key, default)
         return NotifyMessage[key]  # type: ignore[misc]
 
     @classmethod
@@ -160,54 +160,41 @@ class NotifyMessage(IntEnum):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))
         if 2 <= value <= 6:
             #: Unassigned
-            extend_enum(cls, 'Unassigned_%d' % value, value)
-            return cls(value)
+            return extend_enum(cls, 'Unassigned_%d' % value, value)
         if 8 <= value <= 13:
             #: Unassigned
-            extend_enum(cls, 'Unassigned_%d' % value, value)
-            return cls(value)
+            return extend_enum(cls, 'Unassigned_%d' % value, value)
         if 21 <= value <= 23:
             #: Unassigned
-            extend_enum(cls, 'Unassigned_%d' % value, value)
-            return cls(value)
+            return extend_enum(cls, 'Unassigned_%d' % value, value)
         if 29 <= value <= 31:
             #: Unassigned
-            extend_enum(cls, 'Unassigned_%d' % value, value)
-            return cls(value)
+            return extend_enum(cls, 'Unassigned_%d' % value, value)
         if 33 <= value <= 39:
             #: Unassigned
-            extend_enum(cls, 'Unassigned_%d' % value, value)
-            return cls(value)
+            return extend_enum(cls, 'Unassigned_%d' % value, value)
         if 52 <= value <= 59:
             #: Unassigned
-            extend_enum(cls, 'Unassigned_%d' % value, value)
-            return cls(value)
+            return extend_enum(cls, 'Unassigned_%d' % value, value)
         if 65 <= value <= 69:
             #: Unassigned
-            extend_enum(cls, 'Unassigned_%d' % value, value)
-            return cls(value)
+            return extend_enum(cls, 'Unassigned_%d' % value, value)
         if 71 <= value <= 89:
             #: Unassigned
-            extend_enum(cls, 'Unassigned_%d' % value, value)
-            return cls(value)
+            return extend_enum(cls, 'Unassigned_%d' % value, value)
         if 91 <= value <= 99:
             #: Unassigned
-            extend_enum(cls, 'Unassigned_%d' % value, value)
-            return cls(value)
+            return extend_enum(cls, 'Unassigned_%d' % value, value)
         if 101 <= value <= 8191:
             #: Unassigned
-            extend_enum(cls, 'Unassigned_%d' % value, value)
-            return cls(value)
+            return extend_enum(cls, 'Unassigned_%d' % value, value)
         if 8192 <= value <= 16383:
             #: Reserved for Private Use [:rfc:`7401`]
-            extend_enum(cls, 'Reserved_for_Private_Use_%d' % value, value)
-            return cls(value)
+            return extend_enum(cls, 'Reserved_for_Private_Use_%d' % value, value)
         if 16386 <= value <= 40959:
             #: Unassigned
-            extend_enum(cls, 'Unassigned_%d' % value, value)
-            return cls(value)
+            return extend_enum(cls, 'Unassigned_%d' % value, value)
         if 40960 <= value <= 65535:
             #: Reserved for Private Use [:rfc:`7401`]
-            extend_enum(cls, 'Reserved_for_Private_Use_%d' % value, value)
-            return cls(value)
+            return extend_enum(cls, 'Reserved_for_Private_Use_%d' % value, value)
         return super()._missing_(value)

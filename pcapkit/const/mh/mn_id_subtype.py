@@ -55,7 +55,7 @@ class MNIDSubtype(IntEnum):
         if isinstance(key, int):
             return MNIDSubtype(key)
         if key not in MNIDSubtype._member_map_:  # pylint: disable=no-member
-            extend_enum(MNIDSubtype, key, default)
+            return extend_enum(MNIDSubtype, key, default)
         return MNIDSubtype[key]  # type: ignore[misc]
 
     @classmethod
@@ -70,10 +70,8 @@ class MNIDSubtype(IntEnum):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))
         if 9 <= value <= 15:
             #: Reserved [:rfc:`8371`]
-            extend_enum(cls, 'Reserved_%d' % value, value)
-            return cls(value)
+            return extend_enum(cls, 'Reserved_%d' % value, value)
         if 16 <= value <= 255:
             #: Unassigned
-            extend_enum(cls, 'Unassigned_%d' % value, value)
-            return cls(value)
+            return extend_enum(cls, 'Unassigned_%d' % value, value)
         return super()._missing_(value)

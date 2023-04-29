@@ -37,7 +37,7 @@ class ECDSALowCurve(IntEnum):
         if isinstance(key, int):
             return ECDSALowCurve(key)
         if key not in ECDSALowCurve._member_map_:  # pylint: disable=no-member
-            extend_enum(ECDSALowCurve, key, default)
+            return extend_enum(ECDSALowCurve, key, default)
         return ECDSALowCurve[key]  # type: ignore[misc]
 
     @classmethod
@@ -52,6 +52,5 @@ class ECDSALowCurve(IntEnum):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))
         if 2 <= value <= 65535:
             #: Unassigned
-            extend_enum(cls, 'Unassigned_%d' % value, value)
-            return cls(value)
+            return extend_enum(cls, 'Unassigned_%d' % value, value)
         return super()._missing_(value)

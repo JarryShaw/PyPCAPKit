@@ -22,14 +22,18 @@ __all__ = ['Method']
 class Method(StrEnum):
     """[Method] HTTP Method"""
 
+    if TYPE_CHECKING:
+        #: Safe method.
+        safe: 'bool'
+        #: Idempotent method.
+        idempotent: 'bool'
+
     def __new__(cls, value: 'str', safe: 'bool' = False,
                 idempotent: 'bool' = False) -> 'Type[Method]':
         obj = str.__new__(cls)
         obj._value_ = value
 
-        #: Safe method.
         obj.safe = safe
-        #: Idempotent method.
         obj.idempotent = idempotent
 
         return obj
@@ -166,7 +170,7 @@ class Method(StrEnum):
         :meta private:
         """
         if key not in Method._member_map_:  # pylint: disable=no-member
-            extend_enum(Method, key.upper(), default if default is not None else key)
+            return extend_enum(Method, key.upper(), default if default is not None else key)
         return Method[key]  # type: ignore[misc]
 
     @classmethod
@@ -177,5 +181,4 @@ class Method(StrEnum):
             value: Value to get enum item.
 
         """
-        extend_enum(cls, value.upper(), value)
-        return cls(value)
+        return extend_enum(cls, value.upper(), value)

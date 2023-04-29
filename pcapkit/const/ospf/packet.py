@@ -49,7 +49,7 @@ class Packet(IntEnum):
         if isinstance(key, int):
             return Packet(key)
         if key not in Packet._member_map_:  # pylint: disable=no-member
-            extend_enum(Packet, key, default)
+            return extend_enum(Packet, key, default)
         return Packet[key]  # type: ignore[misc]
 
     @classmethod
@@ -64,10 +64,8 @@ class Packet(IntEnum):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))
         if 6 <= value <= 127:
             #: Unassigned
-            extend_enum(cls, 'Unassigned_%d' % value, value)
-            return cls(value)
+            return extend_enum(cls, 'Unassigned_%d' % value, value)
         if 128 <= value <= 255:
             #: Reserved
-            extend_enum(cls, 'Reserved_%d' % value, value)
-            return cls(value)
+            return extend_enum(cls, 'Reserved_%d' % value, value)
         return super()._missing_(value)

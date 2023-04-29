@@ -86,8 +86,7 @@ class BlockType(Vendor):
 
                 miss.append(f'if 0x{start:08x} <= value <= 0x{stop:08x}:')
                 miss.append(f'    #: {desc}')
-                miss.append(f"    extend_enum(cls, '{self.safe_name(name)}_%08x' % value, value)")
-                miss.append('    return cls(value)')
+                miss.append(f"    return extend_enum(cls, '{self.safe_name(name)}_%08x' % value, value)")
         return enum, miss
 
 

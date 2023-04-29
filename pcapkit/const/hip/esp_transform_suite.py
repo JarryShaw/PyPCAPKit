@@ -79,7 +79,7 @@ class ESPTransformSuite(IntEnum):
         if isinstance(key, int):
             return ESPTransformSuite(key)
         if key not in ESPTransformSuite._member_map_:  # pylint: disable=no-member
-            extend_enum(ESPTransformSuite, key, default)
+            return extend_enum(ESPTransformSuite, key, default)
         return ESPTransformSuite[key]  # type: ignore[misc]
 
     @classmethod
@@ -94,6 +94,5 @@ class ESPTransformSuite(IntEnum):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))
         if 16 <= value <= 65535:
             #: Unassigned
-            extend_enum(cls, 'Unassigned_%d' % value, value)
-            return cls(value)
+            return extend_enum(cls, 'Unassigned_%d' % value, value)
         return super()._missing_(value)

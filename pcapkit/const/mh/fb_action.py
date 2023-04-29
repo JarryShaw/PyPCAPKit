@@ -49,7 +49,7 @@ class FlowBindingAction(IntEnum):
         if isinstance(key, int):
             return FlowBindingAction(key)
         if key not in FlowBindingAction._member_map_:  # pylint: disable=no-member
-            extend_enum(FlowBindingAction, key, default)
+            return extend_enum(FlowBindingAction, key, default)
         return FlowBindingAction[key]  # type: ignore[misc]
 
     @classmethod
@@ -64,10 +64,8 @@ class FlowBindingAction(IntEnum):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))
         if 0 <= value <= 10:
             #: Unassigned
-            extend_enum(cls, 'Unassigned_%d' % value, value)
-            return cls(value)
+            return extend_enum(cls, 'Unassigned_%d' % value, value)
         if 17 <= value <= 255:
             #: Unassigned
-            extend_enum(cls, 'Unassigned_%d' % value, value)
-            return cls(value)
+            return extend_enum(cls, 'Unassigned_%d' % value, value)
         return super()._missing_(value)

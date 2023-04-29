@@ -40,7 +40,7 @@ class DITypes(IntEnum):
         if isinstance(key, int):
             return DITypes(key)
         if key not in DITypes._member_map_:  # pylint: disable=no-member
-            extend_enum(DITypes, key, default)
+            return extend_enum(DITypes, key, default)
         return DITypes[key]  # type: ignore[misc]
 
     @classmethod
@@ -55,6 +55,5 @@ class DITypes(IntEnum):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))
         if 3 <= value <= 15:
             #: Unassigned
-            extend_enum(cls, 'Unassigned_%d' % value, value)
-            return cls(value)
+            return extend_enum(cls, 'Unassigned_%d' % value, value)
         return super()._missing_(value)

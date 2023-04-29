@@ -63,7 +63,7 @@ class Routing(IntEnum):
         if isinstance(key, int):
             return Routing(key)
         if key not in Routing._member_map_:  # pylint: disable=no-member
-            extend_enum(Routing, key, default)
+            return extend_enum(Routing, key, default)
         return Routing[key]  # type: ignore[misc]
 
     @classmethod
@@ -78,6 +78,5 @@ class Routing(IntEnum):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))
         if 7 <= value <= 252:
             #: Unassigned
-            extend_enum(cls, 'Unassigned_%d' % value, value)
-            return cls(value)
+            return extend_enum(cls, 'Unassigned_%d' % value, value)
         return super()._missing_(value)

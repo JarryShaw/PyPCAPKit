@@ -44,7 +44,7 @@ class OperatorID(IntEnum):
         if isinstance(key, int):
             return OperatorID(key)
         if key not in OperatorID._member_map_:  # pylint: disable=no-member
-            extend_enum(OperatorID, key, default)
+            return extend_enum(OperatorID, key, default)
         return OperatorID[key]  # type: ignore[misc]
 
     @classmethod
@@ -59,6 +59,5 @@ class OperatorID(IntEnum):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))
         if 3 <= value <= 254:
             #: Unassigned
-            extend_enum(cls, 'Unassigned_%d' % value, value)
-            return cls(value)
+            return extend_enum(cls, 'Unassigned_%d' % value, value)
         return super()._missing_(value)

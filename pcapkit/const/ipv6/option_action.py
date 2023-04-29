@@ -39,7 +39,7 @@ class OptionAction(IntEnum):
         if isinstance(key, int):
             return OptionAction(key)
         if key not in OptionAction._member_map_:  # pylint: disable=no-member
-            extend_enum(OptionAction, key, default)
+            return extend_enum(OptionAction, key, default)
         return OptionAction[key]  # type: ignore[misc]
 
     @classmethod
@@ -52,5 +52,4 @@ class OptionAction(IntEnum):
         """
         if not (isinstance(value, int) and 0 <= value <= 3):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))
-        extend_enum(cls, 'Unassigned_%d' % value, value)
-        return cls(value)
+        return extend_enum(cls, 'Unassigned_%d' % value, value)

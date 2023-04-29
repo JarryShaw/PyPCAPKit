@@ -40,7 +40,7 @@ class MNGroupID(IntEnum):
         if isinstance(key, int):
             return MNGroupID(key)
         if key not in MNGroupID._member_map_:  # pylint: disable=no-member
-            extend_enum(MNGroupID, key, default)
+            return extend_enum(MNGroupID, key, default)
         return MNGroupID[key]  # type: ignore[misc]
 
     @classmethod
@@ -55,6 +55,5 @@ class MNGroupID(IntEnum):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))
         if 2 <= value <= 254:
             #: Unassigned
-            extend_enum(cls, 'Unassigned_%d' % value, value)
-            return cls(value)
+            return extend_enum(cls, 'Unassigned_%d' % value, value)
         return super()._missing_(value)

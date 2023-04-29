@@ -112,7 +112,7 @@ class Operation(IntEnum):
         if isinstance(key, int):
             return Operation(key)
         if key not in Operation._member_map_:  # pylint: disable=no-member
-            extend_enum(Operation, key, default)
+            return extend_enum(Operation, key, default)
         return Operation[key]  # type: ignore[misc]
 
     @classmethod
@@ -127,6 +127,5 @@ class Operation(IntEnum):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))
         if 26 <= value <= 65534:
             #: Unassigned
-            extend_enum(cls, 'Unassigned_%d' % value, value)
-            return cls(value)
+            return extend_enum(cls, 'Unassigned_%d' % value, value)
         return super()._missing_(value)

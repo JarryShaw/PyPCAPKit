@@ -47,7 +47,7 @@ class ToSPrecedence(IntEnum):
         if isinstance(key, int):
             return ToSPrecedence(key)
         if key not in ToSPrecedence._member_map_:  # pylint: disable=no-member
-            extend_enum(ToSPrecedence, key, default)
+            return extend_enum(ToSPrecedence, key, default)
         return ToSPrecedence[key]  # type: ignore[misc]
 
     @classmethod
@@ -60,5 +60,4 @@ class ToSPrecedence(IntEnum):
         """
         if not (isinstance(value, int) and 0b000 <= value <= 0b111):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))
-        extend_enum(cls, 'Unassigned_%d' % value, value)
-        return cls(value)
+        return extend_enum(cls, 'Unassigned_%d' % value, value)

@@ -66,8 +66,7 @@ class PriorityLevel(Vendor):
 
         enum = []  # type: list[str]
         miss = [
-            "extend_enum(cls, 'Unassigned [0b%s]' % bin(value)[2:].zfill(3), value)",
-            'return cls(value)'
+            "return extend_enum(cls, 'Unassigned [0b%s]' % bin(value)[2:].zfill(3), value)",
         ]
         for item in content:
             line = item.find_all('td')

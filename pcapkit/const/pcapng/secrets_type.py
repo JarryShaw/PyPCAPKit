@@ -39,7 +39,7 @@ class SecretsType(IntEnum):
         if isinstance(key, int):
             return SecretsType(key)
         if key not in SecretsType._member_map_:  # pylint: disable=no-member
-            extend_enum(SecretsType, key, default)
+            return extend_enum(SecretsType, key, default)
         return SecretsType[key]  # type: ignore[misc]
 
     @classmethod
@@ -54,3 +54,4 @@ class SecretsType(IntEnum):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))
         extend_enum(cls, 'Unassigned_0x%08x' % value, value)
         return cls(value)
+        return super()._missing_(value)

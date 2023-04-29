@@ -229,7 +229,7 @@ class RouterAlert(IntEnum):
         if isinstance(key, int):
             return RouterAlert(key)
         if key not in RouterAlert._member_map_:  # pylint: disable=no-member
-            extend_enum(RouterAlert, key, default)
+            return extend_enum(RouterAlert, key, default)
         return RouterAlert[key]  # type: ignore[misc]
 
     @classmethod
@@ -244,10 +244,8 @@ class RouterAlert(IntEnum):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))
         if 66 <= value <= 65502:
             #: Unassigned
-            extend_enum(cls, 'Unassigned_%d' % value, value)
-            return cls(value)
+            return extend_enum(cls, 'Unassigned_%d' % value, value)
         if 65503 <= value <= 65534:
             #: Reserved for experimental use [:rfc:`5350`]
-            extend_enum(cls, 'Reserved for experimental use_%d' % value, value)
-            return cls(value)
+            return extend_enum(cls, 'Reserved for experimental use_%d' % value, value)
         return super()._missing_(value)

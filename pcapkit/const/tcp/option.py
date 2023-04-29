@@ -171,7 +171,7 @@ class Option(IntEnum):
         if isinstance(key, int):
             return Option(key)
         if key not in Option._member_map_:  # pylint: disable=no-member
-            extend_enum(Option, key, default)
+            return extend_enum(Option, key, default)
         return Option[key]  # type: ignore[misc]
 
     @classmethod
@@ -186,18 +186,14 @@ class Option(IntEnum):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))
         if 35 <= value <= 68:
             #: Reserved
-            extend_enum(cls, 'Reserved_%d' % value, value)
-            return cls(value)
+            return extend_enum(cls, 'Reserved_%d' % value, value)
         if 71 <= value <= 75:
             #: Reserved
-            extend_enum(cls, 'Reserved_%d' % value, value)
-            return cls(value)
+            return extend_enum(cls, 'Reserved_%d' % value, value)
         if 79 <= value <= 171:
             #: Reserved
-            extend_enum(cls, 'Reserved_%d' % value, value)
-            return cls(value)
+            return extend_enum(cls, 'Reserved_%d' % value, value)
         if 175 <= value <= 252:
             #: Reserved
-            extend_enum(cls, 'Reserved_%d' % value, value)
-            return cls(value)
+            return extend_enum(cls, 'Reserved_%d' % value, value)
         return super()._missing_(value)

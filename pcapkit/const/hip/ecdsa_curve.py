@@ -40,7 +40,7 @@ class ECDSACurve(IntEnum):
         if isinstance(key, int):
             return ECDSACurve(key)
         if key not in ECDSACurve._member_map_:  # pylint: disable=no-member
-            extend_enum(ECDSACurve, key, default)
+            return extend_enum(ECDSACurve, key, default)
         return ECDSACurve[key]  # type: ignore[misc]
 
     @classmethod
@@ -55,6 +55,5 @@ class ECDSACurve(IntEnum):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))
         if 3 <= value <= 65535:
             #: Unassigned
-            extend_enum(cls, 'Unassigned_%d' % value, value)
-            return cls(value)
+            return extend_enum(cls, 'Unassigned_%d' % value, value)
         return super()._missing_(value)

@@ -66,8 +66,7 @@ class ToSDelay(Vendor):
         """
         enum = []  # type: list[str]
         miss = [
-            "extend_enum(cls, 'Unassigned_%d' % value, value)",
-            'return cls(value)'
+            "return extend_enum(cls, 'Unassigned_%d' % value, value)",
         ]
         for code, name in DATA.items():
             renm = self.rename(name, code).upper()  # type: ignore[arg-type]

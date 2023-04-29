@@ -70,7 +70,7 @@ class QoSAttribute(IntEnum):
         if isinstance(key, int):
             return QoSAttribute(key)
         if key not in QoSAttribute._member_map_:  # pylint: disable=no-member
-            extend_enum(QoSAttribute, key, default)
+            return extend_enum(QoSAttribute, key, default)
         return QoSAttribute[key]  # type: ignore[misc]
 
     @classmethod
@@ -85,6 +85,5 @@ class QoSAttribute(IntEnum):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))
         if 12 <= value <= 254:
             #: Unassigned
-            extend_enum(cls, 'Unassigned_%d' % value, value)
-            return cls(value)
+            return extend_enum(cls, 'Unassigned_%d' % value, value)
         return super()._missing_(value)
