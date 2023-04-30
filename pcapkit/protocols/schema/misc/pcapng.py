@@ -43,6 +43,7 @@ __all__ = [
     'NS_DNSNameOption', 'NS_DNSIP4AddrOption', 'NS_DNSIP6AddrOption',
     'ISB_StartTimeOption', 'ISB_EndTimeOption', 'ISB_IFRecvOption', 'ISB_IFDropOption',
     'ISB_FilterAcceptOption', 'ISB_OSDropOption', 'ISB_UsrDelivOption',
+    'PACK_FlagsOption', 'PACK_HashOption',
 
     'NameResolutionRecord', 'UnknownRecord', 'EndRecord', 'IPv4Record', 'IPv6Record',
 
@@ -85,6 +86,37 @@ if SPHINX_TYPE_CHECKING:
 
     class EPBFlags(TypedDict):
         """EPB flags."""
+
+        #: Inbound / Outbound packet (``00`` = information not available,
+        #: ``01`` = inbound, ``10`` = outbound)
+        direction: int
+        #: Reception type (``000`` = not specified, ``001`` = unicast,
+        #: ``010`` = multicast, ``011`` = broadcast, ``100`` = promiscuous).
+        reception: int
+        #: FCS length, in octets (``0000`` if this information is not available).
+        #: This value overrides the ``if_fcslen`` option of the Interface Description
+        #: Block, and is used with those link layers (e.g. PPP) where the length of
+        #: the FCS can change during time.
+        fcs_len: int
+        #: Link-layer-dependent error - CRC error (bit 24).
+        crc_error: int
+        #: Link-layer-dependent error - packet too long error (bit 25).
+        too_long: int
+        #: Link-layer-dependent error - packet too short error (bit 26).
+        too_short: int
+        #: Link-layer-dependent error - wrong Inter Frame Gap error (bit 27).
+        gap_error: int
+        #: Link-layer-dependent error - unaligned frame error (bit 28).
+        unaligned_error: int
+        #: Link-layer-dependent error - Start Frame Delimiter error (bit 29).
+        delimiter_error: int
+        #: Link-layer-dependent error - preamble error (bit 30).
+        preamble_error: int
+        #: Link-layer-dependent error - symbol error (bit 31).
+        symbol_error: int
+
+    class PACKFlags(TypedDict):
+        """PACK flags."""
 
         #: Inbound / Outbound packet (``00`` = information not available,
         #: ``01`` = inbound, ``10`` = outbound)
@@ -448,7 +480,7 @@ class _IF_Option(Option):
         """Revise ``schema`` data after unpacking process.
 
         This method revise the ``type`` value of the current option
-        based on its namespace group.s
+        based on its namespace group.
 
         Args:
             packet: Unpacked data.
@@ -732,7 +764,7 @@ class _EPB_Option(Option):
         """Revise ``schema`` data after unpacking process.
 
         This method revise the ``type`` value of the current option
-        based on its namespace group.s
+        based on its namespace group.
 
         Args:
             packet: Unpacked data.
@@ -1003,7 +1035,7 @@ class _NS_Option(Option):
         """Revise ``schema`` data after unpacking process.
 
         This method revise the ``type`` value of the current option
-        based on its namespace group.s
+        based on its namespace group.
 
         Args:
             packet: Unpacked data.
@@ -1125,7 +1157,7 @@ class _ISB_Option(Option):
         """Revise ``schema`` data after unpacking process.
 
         This method revise the ``type`` value of the current option
-        based on its namespace group.s
+        based on its namespace group.
 
         Args:
             packet: Unpacked data.
@@ -1482,6 +1514,64 @@ class CustomBlock(BlockType):
 
     if TYPE_CHECKING:
         def __init__(self, length: 'int', pen: 'int', data: 'bytes', length2: 'int') -> 'None': ...
+
+
+class _PACK_Option(Option):
+    """Header schema for ``pack_*`` options."""
+
+    def post_process(self, packet: 'dict[str, Any]') -> '_PACK_Option':
+        """Revise ``schema`` data after unpacking process.
+
+        This method revise the ``type`` value of the current option
+        based on its namespace group.
+
+        Args:
+            packet: Unpacked data.
+
+        Returns:
+            Revised schema.
+
+        """
+        self.type = Enum_OptionType.get(self.type.opt_value, namespace='pack')
+        return self
+
+
+class PACK_FlagsOption(_PACK_Option):
+    """Header schema for PCAP-NG ``pack_flags`` options."""
+
+    #: Flags.
+    flags: 'PACKFlags' = BitField(length=4, namespace={
+        'direction': (0, 2),
+        'reception': (2, 3),
+        'fcs_len': (5, 4),
+        'crc_error': (24, 1),
+        'too_long': (25, 1),
+        'too_short': (26, 1),
+        'gap_error': (27, 1),
+        'unaligned_error': (28, 1),
+        'delimiter_error': (29, 1),
+        'preamble_error': (30, 1),
+        'symbol_error': (31, 1),
+    })
+    #: Padding.
+    padding: 'bytes' = PaddingField(length=lambda pkt: (4 - pkt['length'] % 4) % 4)
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_OptionType', length: 'int', flags: 'EPBFlags') -> 'None': ...
+
+
+class PACK_HashOption(_PACK_Option):
+    """Header schema for PCAP-NG ``pack_hash`` options."""
+
+    #: Hash algorithm.
+    func: 'Enum_HashAlgorithm' = EnumField(length=1, namespace=Enum_HashAlgorithm, callback=byteorder_callback)
+    #: Hash value.
+    data: 'bytes' = BytesField(length=lambda pkt: pkt['length'] - 1)
+    #: Padding.
+    padding: 'bytes' = PaddingField(length=lambda pkt: (4 - pkt['length'] % 4) % 4)
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_OptionType', length: 'int', func: 'Enum_HashAlgorithm', data: 'bytes') -> 'None': ...
 
 
 class PacketBlock(BlockType):

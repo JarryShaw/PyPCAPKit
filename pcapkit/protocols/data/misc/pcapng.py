@@ -20,6 +20,7 @@ __all__ = [
     'NS_DNSNameOption', 'NS_DNSIP4AddrOption', 'NS_DNSIP6AddrOption',
     'ISB_StartTimeOption', 'ISB_EndTimeOption', 'ISB_IFRecvOption', 'ISB_IFDropOption',
     'ISB_FilterAcceptOption', 'ISB_OSDropOption', 'ISB_UsrDelivOption',
+    'PACK_FlagsOption', 'PACK_HashOption',
 
     'NameResolutionRecord', 'UnknownRecord', 'EndRecord', 'IPv4Record', 'IPv6Record',
 
@@ -748,6 +749,51 @@ class CustomBlock(PCAPNG):
 
     if TYPE_CHECKING:
         def __init__(self, type: 'Enum_BlockType', length: 'int', pen: 'int', data: 'bytes') -> 'None': ...
+
+
+class PACK_FlagsOption(Option):
+    """Data model for PCAP-NG file ``pack_flags`` options."""
+
+    #: Inbound / Outbound packet.
+    direction: 'PacketDirection'
+    #: Reception type.
+    reception: 'PacketReception'
+    #: FCS length.
+    fcs_len: 'int'
+    #: Link-layer-dependent error - CRC error (bit 24).
+    crc_error: 'bool'
+    #: Link-layer-dependent error - packet too long error (bit 25).
+    too_long: 'bool'
+    #: Link-layer-dependent error - packet too short error (bit 26).
+    too_short: 'bool'
+    #: Link-layer-dependent error - wrong Inter Frame Gap error (bit 27).
+    gap_error: 'bool'
+    #: Link-layer-dependent error - unaligned frame error (bit 28).
+    unaligned_error: 'bool'
+    #: Link-layer-dependent error - Start Frame Delimiter error (bit 29).
+    delimiter_error: 'bool'
+    #: Link-layer-dependent error - preamble error (bit 30).
+    preamble_error: 'bool'
+    #: Link-layer-dependent error - symbol error (bit 31).
+    symbol_error: 'bool'
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_OptionType', length: 'int', direction: 'PacketDirection',
+                     reception: 'PacketReception', fcs_len: 'int', crc_error: 'bool',
+                     too_long: 'bool', too_short: 'bool', gap_error: 'bool', unaligned_error: 'bool',
+                     delimiter_error: 'bool', preamble_error: 'bool', symbol_error: 'bool') -> 'None': ...
+
+
+class PACK_HashOption(Option):
+    """Data model for PCAP-NG ``pack_hash`` options."""
+
+    #: Hash algorithm.
+    algorithm: 'Enum_HashAlgorithm'
+    #: Hash value.
+    hash: 'bytes'
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_OptionType', length: 'int', algorithm: 'Enum_HashAlgorithm', hash: 'bytes') -> 'None': ...
 
 
 class PacketBlock(PCAPNG):

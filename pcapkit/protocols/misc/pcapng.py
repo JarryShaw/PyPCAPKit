@@ -168,6 +168,10 @@ from pcapkit.protocols.schema.misc.pcapng import ZigBeeNWKKey as Schema_ZigBeeNW
 from pcapkit.utilities.compat import StrEnum
 from pcapkit.utilities.exceptions import EndianError, FileError, ProtocolError, UnsupportedCall
 from pcapkit.utilities.warnings import RegistryWarning, warn
+from pcapkit.protocols.schema.misc.pcapng import PACK_FlagsOption as Schema_PACK_FlagsOption
+from pcapkit.protocols.schema.misc.pcapng import PACK_HashOption as Schema_PACK_HashOption
+from pcapkit.protocols.data.misc.pcapng import PACK_FlagsOption as Data_PACK_FlagsOption
+from pcapkit.protocols.data.misc.pcapng import PACK_HashOption as Data_PACK_HashOption
 
 __all__ = ['PCAPNG']
 
@@ -590,8 +594,8 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
             Enum_OptionType.isb_filteraccept: 'isb_filteraccept',
             Enum_OptionType.isb_osdrop: 'isb_osdrop',
             Enum_OptionType.isb_usrdeliv: 'isb_usrdeliv',
-            Enum_OptionType.pack_flags: 'epb_flags',
-            Enum_OptionType.pack_hash: 'epb_hash',
+            Enum_OptionType.pack_flags: 'pack_flags',
+            Enum_OptionType.pack_hash: 'pack_hash',
         },
     )  # type: DefaultDict[Enum_OptionType | int, str | tuple[OptionParser, OptionConstructor]]
 
@@ -655,16 +659,49 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
     @property
     def nanosecond(self) -> 'bool':
         """Whether the timestamp is in nanosecond."""
-        if self._ctx is None or self._info.type not in self.PACKET_TYPES:
-            raise UnsupportedCall(f"'{self.__class__.__name__}' object has no attribute 'nanosecond'")
+        return self.ts_resolution > 1_000_000
+
+    @property
+    def ts_resolution(self) -> 'int':
+        """Timestamp resolution of the current block, in units per second."""
+        if self._ctx is None:
+            raise UnsupportedCall(f"'{self.__class__.__name__}' object has no attribute 'ts_resolution'")
 
         info = cast('Packet', self._info)
         options = self._ctx.interfaces[info.interface_id].options
         tsresol = cast('Optional[Data_IF_TSResolOption]',
                        options.get(Enum_OptionType.if_tsresol))
         if tsresol is None:
-            return False
-        return tsresol.resolution > 1_000_000
+            return 1_000_000
+        return tsresol.resolution
+
+    @property
+    def ts_offset(self) -> 'int':
+        """Timestamp offset of the current block, in seconds."""
+        if self._ctx is None:
+            raise UnsupportedCall(f"'{self.__class__.__name__}' object has no attribute 'ts_offset'")
+
+        info = cast('Packet', self._info)
+        options = self._ctx.interfaces[info.interface_id].options
+        tsoffset = cast('Optional[Data_IF_TSOffsetOption]',
+                        options.get(Enum_OptionType.if_tsoffset))
+        if tsoffset is None:
+            return 0
+        return tsoffset.offset
+
+    @property
+    def ts_timezone(self) -> 'Optional[timezone]':
+        """Timezone of the current block."""
+        if self._ctx is None:
+            raise UnsupportedCall(f"'{self.__class__.__name__}' object has no attribute 'ts_timezone'")
+
+        info = cast('Packet', self._info)
+        options = self._ctx.interfaces[info.interface_id].options
+        tzone = cast('Optional[Data_IF_TZoneOption]',
+                        options.get(Enum_OptionType.if_tzone))
+        if tzone is None:
+            return None
+        return tzone.timezone
 
     @property
     def linktype(self) -> 'Enum_LinkType':
@@ -1817,7 +1854,7 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
             raise ProtocolError(f'PCAP-NG: [epb_flags] option must be only one, '
                                 f'but {self._opt[schema.type] + 1} found.')
         if schema.length != 4:
-            raise ProtocolError(f'PCAP-NG [epb_dropcount] invalid length (expected 8, got {schema.length})')
+            raise ProtocolError(f'PCAP-NG [epb_flags] invalid length (expected 8, got {schema.length})')
 
         option = Data_EPB_FlagsOption(
             type=schema.type,
@@ -2052,7 +2089,273 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
         )
         return option
 
+    def _read_option_isb_starttime(self, schema: 'Schema_ISB_StartTimeOption', *,
+                                   options: 'Option') -> 'Data_ISB_StartTimeOption':
+        """Read PCAP-NG ``isb_starttime`` option.
 
+        Args:
+            schema: Parsed option schema.
+            options: Parsed PCAP-NG options.
+
+        Returns:
+            Constructed option data.
+
+        """
+        if self._type != Enum_BlockType.Interface_Statistics_Block:
+            raise ProtocolError(f'PCAP-NG: [isb_starttime] option must be in Interface Statistics Block, '
+                                f'but found in {self._type} block.')
+        if self._opt[schema.type] > 0:
+            raise ProtocolError(f'PCAP-NG: [isb_starttime] option must be only one, '
+                                f'but {self._opt[schema.type] + 1} found.')
+        if schema.length != 8:
+            raise ProtocolError(f'PCAP-NG [isb_starttime] invalid length (expected 8, got {schema.length})')
+
+        timestamp_raw = schema.timestamp_high << 32 | schema.timestamp_low
+        with decimal.localcontext(prec=64):
+            timestamp_epoch = decimal.Decimal(timestamp_raw) / self.ts_resolution + self.ts_offset
+
+        option = Data_ISB_StartTimeOption(
+            type=schema.type,
+            length=schema.length,
+            timestamp=datetime.datetime.fromtimestamp(float(timestamp_epoch), tz=self.ts_timezone),
+            timestamp_epoch=timestamp_epoch,
+        )
+        return option
+
+    def _read_option_isb_endtime(self, schema: 'Schema_ISB_EndTimeOption', *,
+                                 options: 'Option') -> 'Data_ISB_EndTimeOption':
+        """Read PCAP-NG ``isb_endtime`` option.
+
+        Args:
+            schema: Parsed option schema.
+            options: Parsed PCAP-NG options.
+
+        Returns:
+            Constructed option data.
+
+        """
+        if self._type != Enum_BlockType.Interface_Statistics_Block:
+            raise ProtocolError(f'PCAP-NG: [isb_endtime] option must be in Interface Statistics Block, '
+                                f'but found in {self._type} block.')
+        if self._opt[schema.type] > 0:
+            raise ProtocolError(f'PCAP-NG: [isb_endtime] option must be only one, '
+                                f'but {self._opt[schema.type] + 1} found.')
+        if schema.length != 8:
+            raise ProtocolError(f'PCAP-NG [isb_endtime] invalid length (expected 8, got {schema.length})')
+
+        timestamp_raw = schema.timestamp_high << 32 | schema.timestamp_low
+        with decimal.localcontext(prec=64):
+            timestamp_epoch = decimal.Decimal(timestamp_raw) / self.ts_resolution + self.ts_offset
+
+        option = Data_ISB_EndTimeOption(
+            type=schema.type,
+            length=schema.length,
+            timestamp=datetime.datetime.fromtimestamp(float(timestamp_epoch), tz=self.ts_timezone),
+            timestamp_epoch=timestamp_epoch,
+        )
+        return option
+
+    def _read_option_isb_ifrecv(self, schema: 'Schema_ISB_IFRecvOption', *,
+                                options: 'Option') -> 'Data_ISB_IFRecvOption':
+        """Read PCAP-NG ``isb_ifrecv`` option.
+
+        Args:
+            schema: Parsed option schema.
+            options: Parsed PCAP-NG options.
+
+        Returns:
+            Constructed option data.
+
+        """
+        if self._type != Enum_BlockType.Interface_Statistics_Block:
+            raise ProtocolError(f'PCAP-NG: [isb_ifrecv] option must be in Interface Statistics Block, '
+                                f'but found in {self._type} block.')
+        if self._opt[schema.type] > 0:
+            raise ProtocolError(f'PCAP-NG: [isb_ifrecv] option must be only one, '
+                                f'but {self._opt[schema.type] + 1} found.')
+        if schema.length != 8:
+            raise ProtocolError(f'PCAP-NG [isb_ifrecv] invalid length (expected 8, got {schema.length})')
+
+        option = Data_ISB_IFRecvOption(
+            type=schema.type,
+            length=schema.length,
+            packets=schema.packets,
+        )
+        return option
+
+    def _read_option_isb_ifdrop(self, schema: 'Schema_ISB_IFDropOption', *,
+                                options: 'Option') -> 'Data_ISB_IFDropOption':
+        """Read PCAP-NG ``isb_ifdrop`` option.
+
+        Args:
+            schema: Parsed option schema.
+            options: Parsed PCAP-NG options.
+
+        Returns:
+            Constructed option data.
+
+        """
+        if self._type != Enum_BlockType.Interface_Statistics_Block:
+            raise ProtocolError(f'PCAP-NG: [isb_ifdrop] option must be in Interface Statistics Block, '
+                                f'but found in {self._type} block.')
+        if self._opt[schema.type] > 0:
+            raise ProtocolError(f'PCAP-NG: [isb_ifdrop] option must be only one, '
+                                f'but {self._opt[schema.type] + 1} found.')
+        if schema.length != 8:
+            raise ProtocolError(f'PCAP-NG [isb_ifdrop] invalid length (expected 8, got {schema.length})')
+
+        option = Data_ISB_IFDropOption(
+            type=schema.type,
+            length=schema.length,
+            packets=schema.packets,
+        )
+        return option
+
+    def _read_option_isb_filteraccept(self, schema: 'Schema_ISB_FilterAcceptOption', *,
+                                      options: 'Option') -> 'Data_ISB_FilterAcceptOption':
+        """Read PCAP-NG ``isb_filteraccept`` option.
+
+        Args:
+            schema: Parsed option schema.
+            options: Parsed PCAP-NG options.
+
+        Returns:
+            Constructed option data.
+
+        """
+        if self._type != Enum_BlockType.Interface_Statistics_Block:
+            raise ProtocolError(f'PCAP-NG: [isb_filteraccept] option must be in Interface Statistics Block, '
+                                f'but found in {self._type} block.')
+        if self._opt[schema.type] > 0:
+            raise ProtocolError(f'PCAP-NG: [isb_filteraccept] option must be only one, '
+                                f'but {self._opt[schema.type] + 1} found.')
+        if schema.length != 8:
+            raise ProtocolError(f'PCAP-NG [isb_filteraccept] invalid length (expected 8, got {schema.length})')
+
+        option = Data_ISB_FilterAcceptOption(
+            type=schema.type,
+            length=schema.length,
+            packets=schema.packets,
+        )
+        return option
+
+    def _read_option_isb_osdrop(self, schema: 'Schema_ISB_OSDropOption', *,
+                                options: 'Option') -> 'Data_ISB_OSDropOption':
+        """Read PCAP-NG ``isb_osdrop`` option.
+
+        Args:
+            schema: Parsed option schema.
+            options: Parsed PCAP-NG options.
+
+        Returns:
+            Constructed option data.
+
+        """
+        if self._type != Enum_BlockType.Interface_Statistics_Block:
+            raise ProtocolError(f'PCAP-NG: [isb_osdrop] option must be in Interface Statistics Block, '
+                                f'but found in {self._type} block.')
+        if self._opt[schema.type] > 0:
+            raise ProtocolError(f'PCAP-NG: [isb_osdrop] option must be only one, '
+                                f'but {self._opt[schema.type] + 1} found.')
+        if schema.length != 8:
+            raise ProtocolError(f'PCAP-NG [isb_osdrop] invalid length (expected 8, got {schema.length})')
+
+        option = Data_ISB_OSDropOption(
+            type=schema.type,
+            length=schema.length,
+            packets=schema.packets,
+        )
+        return option
+
+    def _read_option_isb_usrdeliv(self, schema: 'Schema_ISB_UsrDelivOption', *,
+                                  options: 'Option') -> 'Data_ISB_UsrDelivOption':
+        """Read PCAP-NG ``isb_usrdeliv`` option.
+
+        Args:
+            schema: Parsed option schema.
+            options: Parsed PCAP-NG options.
+
+        Returns:
+            Constructed option data.
+
+        """
+        if self._type != Enum_BlockType.Interface_Statistics_Block:
+            raise ProtocolError(f'PCAP-NG: [isb_usrdeliv] option must be in Interface Statistics Block, '
+                                f'but found in {self._type} block.')
+        if self._opt[schema.type] > 0:
+            raise ProtocolError(f'PCAP-NG: [isb_usrdeliv] option must be only one, '
+                                f'but {self._opt[schema.type] + 1} found.')
+        if schema.length != 8:
+            raise ProtocolError(f'PCAP-NG [isb_usrdeliv] invalid length (expected 8, got {schema.length})')
+
+        option = Data_ISB_UsrDelivOption(
+            type=schema.type,
+            length=schema.length,
+            packets=schema.packets,
+        )
+        return option
+
+    def _read_option_pack_flags(self, schema: 'Schema_PACK_FlagsOption', *,
+                               options: 'Option') -> 'Data_PACK_FlagsOption':
+        """Read PCAP-NG ``pack_flags`` option.
+
+        Args:
+            schema: Parsed option schema.
+            options: Parsed PCAP-NG options.
+
+        Returns:
+            Constructed option data.
+
+        """
+        if self._type != Enum_BlockType.Packet_Block:
+            raise ProtocolError(f'PCAP-NG: [pack_flags] option must be in Packet Block, '
+                                f'but found in {self._type} block.')
+        if self._opt[schema.type] > 0:
+            raise ProtocolError(f'PCAP-NG: [pack_flags] option must be only one, '
+                                f'but {self._opt[schema.type] + 1} found.')
+        if schema.length != 4:
+            raise ProtocolError(f'PCAP-NG [pack_flags] invalid length (expected 8, got {schema.length})')
+
+        option = Data_PACK_FlagsOption(
+            type=schema.type,
+            length=schema.length,
+            direction=PacketDirection(schema.flags['direction']),
+            reception=PacketReception(schema.flags['reception']),
+            fcs_len=schema.flags['fcs_len'],
+            crc_error=bool(schema.flags['crc_error']),
+            too_long=bool(schema.flags['too_long']),
+            too_short=bool(schema.flags['too_short']),
+            gap_error=bool(schema.flags['gap_error']),
+            unaligned_error=bool(schema.flags['unaligned_error']),
+            delimiter_error=bool(schema.flags['delimiter_error']),
+            preamble_error=bool(schema.flags['preamble_error']),
+            symbol_error=bool(schema.flags['symbol_error']),
+        )
+        return option
+
+    def _read_option_pack_hash(self, schema: 'Schema_PACK_HashOption', *,
+                              options: 'Option') -> 'Data_PACK_HashOption':
+        """Read PCAP-NG ``pack_hash`` option.
+
+        Args:
+            schema: Parsed option schema.
+            options: Parsed PCAP-NG options.
+
+        Returns:
+            Constructed option data.
+
+        """
+        if self._type != Enum_BlockType.Packet_Block:
+            raise ProtocolError(f'PCAP-NG: [pack_hash] option must be in Packet Block, '
+                                f'but found in {self._type} block.')
+
+        option = Data_PACK_HashOption(
+            type=schema.type,
+            length=schema.length,
+            algorithm=schema.func,
+            hash=schema.data,
+        )
+        return option
 
     def _make_block_unknown(self, block: 'Optional[Data_UnknownBlock]' = None, *,
                             data: 'bytes' = b'',
@@ -2128,8 +2431,6 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
             options=options_value,
             length2=total_length + 28,
         )
-
-
 
     def _make_pcapng_options(self, options: 'Option | list[Schema_Option | tuple[Enum_OptionType, dict[str, Any]] | bytes]') -> 'tuple[list[Schema_Option | bytes], int]':
         """Make options for PCAP-NG.

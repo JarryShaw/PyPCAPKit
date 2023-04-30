@@ -119,7 +119,7 @@ __all__ = [
     'PCAPNG_UnknownBlock', 'PCAPNG_SectionHeaderBlock', 'PCAPNG_InterfaceDescriptionBlock',
     'PCAPNG_EnhancedPacketBlock', 'PCAPNG_SimplePacketBlock', 'PCAPNG_NameResolutionBlock',
     'PCAPNG_InterfaceStatisticsBlock', 'PCAPNG_SystemdJournalExportBlock', 'PCAPNG_DecryptionSecretsBlock',
-    'PCAPNG_CustomBlock', 'PCAPNG_PacketBlock',
+    'PCAPNG_CustomBlock',
 
     # misc protocols
     'NoPayload',

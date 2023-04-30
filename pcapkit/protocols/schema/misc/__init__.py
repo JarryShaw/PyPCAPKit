@@ -59,7 +59,6 @@ from pcapkit.protocols.schema.misc.pcapng import NS_DNSIP4AddrOption as PCAPNG_N
 from pcapkit.protocols.schema.misc.pcapng import NS_DNSIP6AddrOption as PCAPNG_NS_DNSIP6AddrOption
 from pcapkit.protocols.schema.misc.pcapng import NS_DNSNameOption as PCAPNG_NS_DNSNameOption
 from pcapkit.protocols.schema.misc.pcapng import Option as PCAPNG_Option
-from pcapkit.protocols.schema.misc.pcapng import PacketBlock as PCAPNG_PacketBlock
 from pcapkit.protocols.schema.misc.pcapng import SectionHeaderBlock as PCAPNG_SectionHeaderBlock
 from pcapkit.protocols.schema.misc.pcapng import SimplePacketBlock as PCAPNG_SimplePacketBlock
 from pcapkit.protocols.schema.misc.pcapng import \
@@ -101,7 +100,7 @@ __all__ = [
     'PCAPNG_UnknownBlock', 'PCAPNG_SectionHeaderBlock', 'PCAPNG_InterfaceDescriptionBlock',
     'PCAPNG_EnhancedPacketBlock', 'PCAPNG_SimplePacketBlock', 'PCAPNG_NameResolutionBlock',
     'PCAPNG_InterfaceStatisticsBlock', 'PCAPNG_SystemdJournalExportBlock', 'PCAPNG_DecryptionSecretsBlock',
-    'PCAPNG_CustomBlock', 'PCAPNG_PacketBlock',
+    'PCAPNG_CustomBlock',
 
     # misc protocols
     'NoPayload',
