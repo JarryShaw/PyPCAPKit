@@ -2296,7 +2296,7 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
         return option
 
     def _read_option_pack_flags(self, schema: 'Schema_PACK_FlagsOption', *,
-                               options: 'Option') -> 'Data_PACK_FlagsOption':
+                                options: 'Option') -> 'Data_PACK_FlagsOption':
         """Read PCAP-NG ``pack_flags`` option.
 
         Args:
@@ -2334,7 +2334,7 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
         return option
 
     def _read_option_pack_hash(self, schema: 'Schema_PACK_HashOption', *,
-                              options: 'Option') -> 'Data_PACK_HashOption':
+                               options: 'Option') -> 'Data_PACK_HashOption':
         """Read PCAP-NG ``pack_hash`` option.
 
         Args:
@@ -3475,4 +3475,137 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
             type=type,
             length=16,
             ip=ip,
+        )
+
+
+
+    def _make_option_pack_flags(self, type: 'Enum_OptionType', option: 'Optional[Data_PACK_FlagsOption]' = None, *,
+                                direction: 'PacketDirection | StdlibEnum | AenumEnum | str | int' = PacketDirection.UNKNOWN,
+                                direction_default: 'Optional[int]' = None,
+                                direction_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
+                                direction_reversed: 'bool' = False,
+                                reception: 'PacketReception | StdlibEnum | AenumEnum | str | int' = PacketReception.UNKNOWN,
+                                reception_default: 'Optional[int]' = None,
+                                reception_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
+                                reception_reversed: 'bool' = False,
+                                fcs_len: 'int' = 0,
+                                crc_error: 'bool' = False,
+                                too_long: 'bool' = False,
+                                too_short: 'bool' = False,
+                                gap_error: 'bool' = False,
+                                unaligned_error: 'bool' = False,
+                                delimiter_error: 'bool' = False,
+                                preamble_error: 'bool' = False,
+                                symbol_error: 'bool' = False,
+                                **kwargs: 'Any') -> 'Schema_PACK_FlagsOption':
+        """Make PCAP-NG ``pack_flags`` option.
+
+        Args:
+            type: Option type.
+            option: Option data model.
+            direction: Packet direction.
+            direction_default: Default value of packet direction.
+            direction_namespace: Namespace of packet direction.
+            direction_reversed: Whether to reverse packet direction namespace.
+            reception: Packet reception.
+            reception_default: Default value of packet reception.
+            reception_namespace: Namespace of packet reception.
+            reception_reversed: Whether to reverse packet reception namespace.
+            fcs_len: Length of FCS field, in bytes.
+            crc_error: Whether CRC error occurred.
+            too_long: Whether packet is too long.
+            too_short: Whether packet is too short.
+            gap_error: Whether gap error occurred.
+            unaligned_error: Whether unaligned error occurred.
+            delimiter_error: Whether delimiter error occurred.
+            preamble_error: Whether preamble error occurred.
+            symbol_error: Whether symbol error occurred.
+            **kwargs: Arbitrary keyword arguments.
+
+        Returns:
+            Constructed option schema.
+
+        """
+        if self._type != Enum_BlockType.Packet_Block:
+            raise ProtocolError(f'PCAP-NG: [pack_flags] option must be in Packet Block, '
+                                f'but found in {self._type} block.')
+        if self._opt[type] > 0:
+            raise ProtocolError(f'PCAP-NG: [pack_flags] option must be only one, '
+                                f'but {self._opt[type] + 1} found.')
+
+        if option is not None:
+            direction_val = option.direction
+            reception_val = option.reception
+            fcs_len = option.fcs_len
+            crc_error = option.crc_error
+            too_long = option.too_long
+            too_short = option.too_short
+            gap_error = option.gap_error
+            unaligned_error = option.unaligned_error
+            delimiter_error = option.delimiter_error
+            preamble_error = option.preamble_error
+            symbol_error = option.symbol_error
+        else:
+            direction_val = self._make_index(direction, direction_default, namespace=direction_namespace,  # type: ignore[call-overload]
+                                             reversed=direction_reversed, unpack=False)
+            reception_val = self._make_index(reception, reception_default, namespace=reception_namespace,  # type: ignore[call-overload]
+                                             reversed=reception_reversed, unpack=False)
+
+        return Schema_PACK_FlagsOption(
+            type=type,
+            length=4,
+            flags={
+                'direction': direction_val.value,
+                'reception': reception_val.value,
+                'fcs_len': fcs_len,
+                'crc_error': int(crc_error),
+                'too_long': int(too_long),
+                'too_short': int(too_short),
+                'gap_error': int(gap_error),
+                'unaligned_error': int(unaligned_error),
+                'delimiter_error': int(delimiter_error),
+                'preamble_error': int(preamble_error),
+                'symbol_error': int(symbol_error),
+            },
+        )
+
+    def _make_option_pack_hash(self, type: 'Enum_OptionType', option: 'Optional[Data_PACK_HashOption]' = None, *,
+                               algorithm: 'Enum_HashAlgorithm | StdlibEnum | AenumEnum | int | str' = Enum_HashAlgorithm.two_s_complement,
+                               algorithm_default: 'Optional[int]' = None,
+                               algorithm_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
+                               algorithm_reversed: 'bool' = False,
+                               hash: 'bytes' = b'',
+                               **kwargs: 'Any') -> 'Schema_PACK_HashOption':
+        """Make PCAP-NG ``pack_hash`` option.
+
+        Args:
+            type: Option type.
+            option: Option data model.
+            algorithm: Hash algorithm.
+            algorithm_default: Default value of hash algorithm.
+            algorithm_namespace: Namespace of hash algorithm.
+            algorithm_reversed: Whether to reverse hash algorithm namespace.
+            hash: Hash value.
+            **kwargs: Arbitrary keyword arguments.
+
+        Returns:
+            Constructed option schema.
+
+        """
+        if self._type != Enum_BlockType.Packet_Block:
+            raise ProtocolError(f'PCAP-NG: [pack_hash] option must be in Packet Block, '
+                                f'but found in {self._type} block.')
+
+        if option is not None:
+            algo_val = option.algorithm
+            hash = option.hash
+        else:
+            algo_val = self._make_index(algorithm, algorithm_default, namespace=algorithm_namespace,  # type: ignore[call-overload]
+                                        reversed=algorithm_reversed, unpack=False)
+
+        return Schema_PACK_HashOption(
+            type=type,
+            length=1 + len(hash),
+            func=algo_val,
+            data=hash,
         )
