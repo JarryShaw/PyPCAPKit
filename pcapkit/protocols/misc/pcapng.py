@@ -170,13 +170,15 @@ from pcapkit.protocols.schema.misc.pcapng import WireGuardKeyLog as Schema_WireG
 from pcapkit.protocols.schema.misc.pcapng import ZigBeeAPSKey as Schema_ZigBeeAPSKey
 from pcapkit.protocols.schema.misc.pcapng import ZigBeeNWKKey as Schema_ZigBeeNWKKey
 from pcapkit.utilities.compat import StrEnum
-from pcapkit.utilities.exceptions import EndianError, FileError, ProtocolError, UnsupportedCall, stacklevel
+from pcapkit.utilities.exceptions import (EndianError, FileError, ProtocolError, UnsupportedCall,
+                                          stacklevel)
 from pcapkit.utilities.warnings import AttributeWarning, RegistryWarning, warn
 
 __all__ = ['PCAPNG']
 
 if TYPE_CHECKING:
-    from datetime import timedelta, timezone, datetime as dt_type
+    from datetime import datetime as dt_type
+    from datetime import timedelta, timezone
     from decimal import Decimal
     from enum import IntEnum as StdlibEnum
     from ipaddress import IPv4Address, IPv4Interface, IPv6Address, IPv6Interface
