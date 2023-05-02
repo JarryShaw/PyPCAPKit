@@ -171,8 +171,7 @@ from pcapkit.protocols.schema.misc.pcapng import WireGuardKeyLog as Schema_WireG
 from pcapkit.protocols.schema.misc.pcapng import ZigBeeAPSKey as Schema_ZigBeeAPSKey
 from pcapkit.protocols.schema.misc.pcapng import ZigBeeNWKKey as Schema_ZigBeeNWKKey
 from pcapkit.utilities.compat import StrEnum
-from pcapkit.utilities.exceptions import (EndianError, FileError, ProtocolError, UnsupportedCall,
-                                          stacklevel)
+from pcapkit.utilities.exceptions import ProtocolError, UnsupportedCall, stacklevel
 from pcapkit.utilities.warnings import AttributeWarning, RegistryWarning, warn
 
 __all__ = ['PCAPNG']
