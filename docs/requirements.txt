@@ -1,10 +1,10 @@
-Sphinx==7.0.0
+Sphinx
 
 # extentions
-sphinx-autodoc-typehints==1.23.4
-furo==2023.3.27
-sphinxext-opengraph==0.8.2
-sphinx-copybutton==0.5.2
+sphinx-autodoc-typehints
+furo
+sphinxext-opengraph
+sphinx-copybutton
 
 # auxiliary
-typing-extensions==4.5.0
+typing-extensions
