@@ -1294,6 +1294,49 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
         )
         return data
 
+    def _read_block_idb(self, schema: 'Schema_InterfaceDescriptionBlock', *,
+                        header: 'Schema_PCAPNG') -> 'Data_InterfaceDescriptionBlock':
+        """Read PCAP-NG interface description block (IDB).
+
+        Structure of Interface Description Block:
+
+        .. code-block:: text
+
+                                   1                   2                   3
+               0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+              +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+            0 |                    Block Type = 0x00000001                    |
+              +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+            4 |                      Block Total Length                       |
+              +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+            8 |           LinkType            |           Reserved            |
+              +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           12 |                            SnapLen                            |
+              +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           16 /                                                               /
+              /                      Options (variable)                       /
+              /                                                               /
+              +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+              |                      Block Total Length                       |
+              +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+        Args:
+            schema: Parsed block schema.
+            header: Parsed PCAP-NG header schema.
+
+        Returns:
+            Parsed packet data.
+
+        """
+        data = Data_InterfaceDescriptionBlock(
+            type=header.type,
+            length=schema.length,
+            linktype=schema.linktype,
+            snaplen=schema.snaplen,
+            options=self._read_pcapng_options(schema.options),
+        )
+        return data
+
 
 
     def _read_pcapng_options(self, options_schema: 'list[Schema_Option]') -> 'Option':
@@ -2569,6 +2612,35 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
                                  block: 'Schema_DecryptionSecretsBlock') -> 'Data_ZigBeeNWKKey':
         """Read PCAP-NG ZigBee NWK Key secrets.
 
+        Structure of ZigBee NWK Key secrets:
+
+        .. code-block::
+
+              0                   1                   2                   3
+              0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+              +---------------------------------------------------------------+
+            0 |                   Block Type = 0x0000000A                     |
+              +---------------------------------------------------------------+
+            4 |                      Block Total Length                       |
+              +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+            8 |                  Secrets Type = 0x5a4e574b                    |
+              +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           12 |                         Secrets Length                        |
+              +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           16 |                            AES-128                            |
+              |                            NKW Key                            |
+              |                          (16 octets)                          |
+              |                           (128 bits)                          |
+              +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           32 |          PAN ID               |           padding (0)         |
+              +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           36 /                                                               /
+              /                       Options (variable)                      /
+              /                                                               /
+              +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+              /                       Block Total Length                      /
+              +---------------------------------------------------------------+
+
         Args:
             schema: Parsed secret schema.
             block: Parsed PCAP-NG decryption secrets block.
@@ -2586,6 +2658,37 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
     def _read_secrets_zigbee_aps(self, schema: 'Schema_ZigBeeAPSKey', *,
                                  block: 'Schema_DecryptionSecretsBlock') -> 'Data_ZigBeeAPSKey':
         """Read PCAP-NG ZigBee APS Key secrets.
+
+        Structure of ZigBee APS Key secrets:
+
+        .. code-block:: text
+
+              0                   1                   2                   3
+              0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+              +---------------------------------------------------------------+
+            0 |                   Block Type = 0x0000000A                     |
+              +---------------------------------------------------------------+
+            4 |                      Block Total Length                       |
+              +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+            8 |                  Secrets Type = 0x5a415053                    |
+              +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           12 |                         Secrets Length                        |
+              +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           16 |                            AES-128                            |
+              |                            APS Key                            |
+              |                          (16 octets)                          |
+              |                           (128 bits)                          |
+              +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           32 |           PAN ID              |     Low Node Short Address    |
+              +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           36 |    High Node Short Address    |         padding (0)           |
+              +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           40 /                                                               /
+              /                       Options (variable)                      /
+              /                                                               /
+              +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+              /                       Block Total Length                      /
+              +---------------------------------------------------------------+
 
         Args:
             schema: Parsed secret schema.
