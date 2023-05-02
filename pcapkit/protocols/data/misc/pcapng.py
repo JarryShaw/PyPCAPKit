@@ -500,7 +500,11 @@ class IPv4Record(NameResolutionRecord):
     #: IPv4 address.
     ip: 'IPv4Address'
     #: Name resolution data.
-    records: 'tuple[str]'
+    records: 'tuple[str, ...]'
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_RecordType', length: 'int', ip: 'IPv4Address',
+                     records: 'tuple[str, ...]') -> 'None': ...
 
 
 class IPv6Record(NameResolutionRecord):
@@ -509,7 +513,11 @@ class IPv6Record(NameResolutionRecord):
     #: IPv6 address.
     ip: 'IPv6Address'
     #: Name resolution data.
-    records: 'tuple[str]'
+    records: 'tuple[str, ...]'
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_RecordType', length: 'int', ip: 'IPv6Address',
+                     records: 'tuple[str, ...]') -> 'None': ...
 
 
 class NS_DNSNameOption(Option):
@@ -679,10 +687,10 @@ class TLSKeyLog(DSBSecrets):
     """Data model for TLS key log DSB secrets."""
 
     #: TLS key log entries.
-    entries: 'OrderedMultiDict[TLSKeyLabel, bytes]'
+    entries: 'dict[TLSKeyLabel, OrderedMultiDict[bytes, bytes]]'
 
     if TYPE_CHECKING:
-        def __init__(self, entries: 'OrderedMultiDict[TLSKeyLabel, bytes]') -> 'None': ...
+        def __init__(self, entries: 'dict[TLSKeyLabel, OrderedMultiDict[bytes, bytes]]') -> 'None': ...
 
 
 class WireGuardKeyLog(DSBSecrets):

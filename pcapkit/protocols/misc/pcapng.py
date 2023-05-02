@@ -25,6 +25,7 @@ import textwrap
 import time
 from typing import TYPE_CHECKING, cast, overload
 
+from pcapkit import __version__
 from pcapkit.const.pcapng.block_type import BlockType as Enum_BlockType
 from pcapkit.const.pcapng.filter_type import FilterType as Enum_FilterType
 from pcapkit.const.pcapng.hash_algorithm import HashAlgorithm as Enum_HashAlgorithm
@@ -193,6 +194,7 @@ if TYPE_CHECKING:
 
     Packet = Union[Data_EnhancedPacketBlock, Data_SimplePacketBlock, Data_PacketBlock]
     Option = OrderedMultiDict[Enum_OptionType, Data_Option]
+    Record = OrderedMultiDict[Enum_RecordType, Data_NameResolutionRecord]
 
     BlockParser = Callable[[Schema_BlockType, NamedArg(Schema_PCAPNG, 'header')], Data_PCAPNG]
     BlockConstructor = Callable[[Enum_BlockType, DefaultArg(Optional[Data_PCAPNG]),
@@ -202,15 +204,13 @@ if TYPE_CHECKING:
     OptionConstructor = Callable[[Enum_OptionType, DefaultArg(Optional[Data_Option]),
                                   KwArg(Any)], Schema_Option]
 
-    SecretsParser = Callable[[Schema_DSBSecrets, NamedArg(Schema_DecryptionSecretsBlock, 'dsb')],
-                             Data_DSBSecrets]
-    SecretsConstructor = Callable[[Enum_SecretsType, DefaultArg(Optional[Data_DSBSecrets]),
-                                   KwArg(Any)], Schema_DSBSecrets]
-
-    RecordParser = Callable[[Schema_NameResolutionRecord, NamedArg(Schema_NameResolutionBlock, 'nrb')],
-                            Data_NameResolutionRecord]
+    RecordParser = Callable[[Schema_NameResolutionRecord, NamedArg(Record, 'records')], Data_NameResolutionRecord]
     RecordConstructor = Callable[[Enum_RecordType, DefaultArg(Optional[Data_NameResolutionRecord]),
                                   KwArg(Any)], Schema_NameResolutionRecord]
+
+    SecretsParser = Callable[[Schema_DSBSecrets, NamedArg(Schema_DecryptionSecretsBlock, 'block')], Data_DSBSecrets]
+    SecretsConstructor = Callable[[Enum_SecretsType, DefaultArg(Optional[Data_DSBSecrets]),
+                                   KwArg(Any)], Schema_DSBSecrets]
 
 # check Python version
 py37 = ((version_info := sys.version_info).major >= 3 and version_info.minor >= 7)
@@ -1345,7 +1345,7 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
             options.add(type, data)
             self._opt[type] += 1
 
-            # brea when ``opt_endofopt`` is reached
+            # break when ``opt_endofopt`` is reached
             if type == Enum_OptionType.opt_endofopt:
                 break
 
@@ -1385,6 +1385,8 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
         if self._opt[schema.type] > 0:
             raise ProtocolError(f'PCAP-NG: [opt_endofopt] option must be only one, '
                                 f'but {self._opt[schema.type] + 1} found.')
+        if schema.length != 0:
+            raise ProtocolError(f'PCAP-NG: [opt_endofopt] invalid length (expected 0, got {schema.length})')
 
         option = Data_EndOfOption(
             type=schema.type,
@@ -1514,7 +1516,7 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
             raise ProtocolError(f'PCAP-NG: [if_IPv4addr] option must be in Interface Description Block, '
                                 f'but found in {self._type} block.')
         if schema.length != 8:
-            raise ProtocolError(f'PCAP-NG [if_IPv4addr] invalid length (expected 8, got {schema.length})')
+            raise ProtocolError(f'PCAP-NG: [if_IPv4addr] invalid length (expected 8, got {schema.length})')
 
         option = Data_IF_IPv4AddrOption(
             type=schema.type,
@@ -1539,7 +1541,7 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
             raise ProtocolError(f'PCAP-NG: [if_IPv6addr] option must be in Interface Description Block, '
                                 f'but found in {self._type} block.')
         if schema.length != 17:
-            raise ProtocolError(f'PCAP-NG [if_IPv6addr] invalid length (expected 17, got {schema.length})')
+            raise ProtocolError(f'PCAP-NG: [if_IPv6addr] invalid length (expected 17, got {schema.length})')
 
         option = Data_IF_IPv6AddrOption(
             type=schema.type,
@@ -1567,7 +1569,7 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
             raise ProtocolError(f'PCAP-NG: [if_MACaddr] option must be only one, '
                                 f'but {self._opt[schema.type] + 1} found.')
         if schema.length != 6:
-            raise ProtocolError(f'PCAP-NG [if_MACaddr] invalid length (expected 6, got {schema.length})')
+            raise ProtocolError(f'PCAP-NG: [if_MACaddr] invalid length (expected 6, got {schema.length})')
 
         option = Data_IF_MACAddrOption(
             type=schema.type,
@@ -1595,7 +1597,7 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
             raise ProtocolError(f'PCAP-NG: [if_EUIaddr] option must be only one, '
                                 f'but {self._opt[schema.type] + 1} found.')
         if schema.length != 8:
-            raise ProtocolError(f'PCAP-NG [if_EUIaddr] invalid length (expected 8, got {schema.length})')
+            raise ProtocolError(f'PCAP-NG: [if_EUIaddr] invalid length (expected 8, got {schema.length})')
 
         option = Data_IF_EUIAddrOption(
             type=schema.type,
@@ -1623,7 +1625,7 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
             raise ProtocolError(f'PCAP-NG: [if_speed] option must be only one, '
                                 f'but {self._opt[schema.type] + 1} found.')
         if schema.length != 8:
-            raise ProtocolError(f'PCAP-NG [if_speed] invalid length (expected 8, got {schema.length})')
+            raise ProtocolError(f'PCAP-NG: [if_speed] invalid length (expected 8, got {schema.length})')
 
         option = Data_IF_SpeedOption(
             type=schema.type,
@@ -1651,7 +1653,7 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
             raise ProtocolError(f'PCAP-NG: [if_tsresol] option must be only one, '
                                 f'but {self._opt[schema.type] + 1} found.')
         if schema.length != 1:
-            raise ProtocolError(f'PCAP-NG [if_tsresol] invalid length (expected 1, got {schema.length})')
+            raise ProtocolError(f'PCAP-NG: [if_tsresol] invalid length (expected 1, got {schema.length})')
 
         option = Data_IF_TSResolOption(
             type=schema.type,
@@ -1679,7 +1681,7 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
             raise ProtocolError(f'PCAP-NG: [if_tzone] option must be only one, '
                                 f'but {self._opt[schema.type] + 1} found.')
         if schema.length != 4:
-            raise ProtocolError(f'PCAP-NG [if_tzone] invalid length (expected 4, got {schema.length})')
+            raise ProtocolError(f'PCAP-NG: [if_tzone] invalid length (expected 4, got {schema.length})')
 
         option = Data_IF_TZoneOption(
             type=schema.type,
@@ -1707,7 +1709,7 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
             raise ProtocolError(f'PCAP-NG: [if_filter] option must be only one, '
                                 f'but {self._opt[schema.type] + 1} found.')
         if schema.length < 1:
-            raise ProtocolError(f'PCAP-NG [if_filter] invalid length (expected 1+, got {schema.length})')
+            raise ProtocolError(f'PCAP-NG: [if_filter] invalid length (expected 1+, got {schema.length})')
 
         option = Data_IF_FilterOption(
             type=schema.type,
@@ -1762,7 +1764,7 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
             raise ProtocolError(f'PCAP-NG: [if_fcslen] option must be only one, '
                                 f'but {self._opt[schema.type] + 1} found.')
         if schema.length != 1:
-            raise ProtocolError(f'PCAP-NG [if_fcslen] invalid length (expected 1, got {schema.length})')
+            raise ProtocolError(f'PCAP-NG: [if_fcslen] invalid length (expected 1, got {schema.length})')
 
         option = Data_IF_FCSLenOption(
             type=schema.type,
@@ -1790,7 +1792,7 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
             raise ProtocolError(f'PCAP-NG: [if_tsoffset] option must be only one, '
                                 f'but {self._opt[schema.type] + 1} found.')
         if schema.length != 8:
-            raise ProtocolError(f'PCAP-NG [if_tsoffset] invalid length (expected 8, got {schema.length})')
+            raise ProtocolError(f'PCAP-NG: [if_tsoffset] invalid length (expected 8, got {schema.length})')
 
         option = Data_IF_TSOffsetOption(
             type=schema.type,
@@ -1844,7 +1846,7 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
             raise ProtocolError(f'PCAP-NG: [if_txspeed] option must be only one, '
                                 f'but {self._opt[schema.type] + 1} found.')
         if schema.length != 8:
-            raise ProtocolError(f'PCAP-NG [if_txspeed] invalid length (expected 8, got {schema.length})')
+            raise ProtocolError(f'PCAP-NG: [if_txspeed] invalid length (expected 8, got {schema.length})')
 
         option = Data_IF_TxSpeedOption(
             type=schema.type,
@@ -1872,7 +1874,7 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
             raise ProtocolError(f'PCAP-NG: [if_rxspeed] option must be only one, '
                                 f'but {self._opt[schema.type] + 1} found.')
         if schema.length != 8:
-            raise ProtocolError(f'PCAP-NG [if_rxspeed] invalid length (expected 8, got {schema.length})')
+            raise ProtocolError(f'PCAP-NG: [if_rxspeed] invalid length (expected 8, got {schema.length})')
 
         option = Data_IF_RxSpeedOption(
             type=schema.type,
@@ -1900,7 +1902,7 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
             raise ProtocolError(f'PCAP-NG: [epb_flags] option must be only one, '
                                 f'but {self._opt[schema.type] + 1} found.')
         if schema.length != 4:
-            raise ProtocolError(f'PCAP-NG [epb_flags] invalid length (expected 8, got {schema.length})')
+            raise ProtocolError(f'PCAP-NG: [epb_flags] invalid length (expected 8, got {schema.length})')
 
         option = Data_EPB_FlagsOption(
             type=schema.type,
@@ -1962,7 +1964,7 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
             raise ProtocolError(f'PCAP-NG: [epb_dropcount] option must be only one, '
                                 f'but {self._opt[schema.type] + 1} found.')
         if schema.length != 8:
-            raise ProtocolError(f'PCAP-NG [epb_dropcount] invalid length (expected 8, got {schema.length})')
+            raise ProtocolError(f'PCAP-NG: [epb_dropcount] invalid length (expected 8, got {schema.length})')
 
         option = Data_EPB_DropCountOption(
             type=schema.type,
@@ -1990,7 +1992,7 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
             raise ProtocolError(f'PCAP-NG: [epb_packetid] option must be only one, '
                                 f'but {self._opt[schema.type] + 1} found.')
         if schema.length != 8:
-            raise ProtocolError(f'PCAP-NG [epb_packetid] invalid length (expected 8, got {schema.length})')
+            raise ProtocolError(f'PCAP-NG: [epb_packetid] invalid length (expected 8, got {schema.length})')
 
         option = Data_EPB_PacketIDOption(
             type=schema.type,
@@ -2018,7 +2020,7 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
             raise ProtocolError(f'PCAP-NG: [epb_queue] option must be only one, '
                                 f'but {self._opt[schema.type] + 1} found.')
         if schema.length != 4:
-            raise ProtocolError(f'PCAP-NG [epb_packetid] invalid length (expected 4, got {schema.length})')
+            raise ProtocolError(f'PCAP-NG: [epb_packetid] invalid length (expected 4, got {schema.length})')
 
         option = Data_EPB_QueueOption(
             type=schema.type,
@@ -2043,7 +2045,7 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
             raise ProtocolError(f'PCAP-NG: [epb_verdict] option must be in Enhanced Packet Block, '
                                 f'but found in {self._type} block.')
         if schema.length < 1:
-            raise ProtocolError(f'PCAP-NG [epb_verdict] invalid length (expected 1+, got {schema.length})')
+            raise ProtocolError(f'PCAP-NG: [epb_verdict] invalid length (expected 1+, got {schema.length})')
 
         option = Data_EPB_VerdictOption(
             type=schema.type,
@@ -2098,7 +2100,7 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
             raise ProtocolError(f'PCAP-NG: [ns_dnsIP4addr] option must be only one, '
                                 f'but {self._opt[schema.type] + 1} found.')
         if schema.length != 4:
-            raise ProtocolError(f'PCAP-NG [ns_dnsIP4addr] invalid length (expected 4, got {schema.length})')
+            raise ProtocolError(f'PCAP-NG: [ns_dnsIP4addr] invalid length (expected 4, got {schema.length})')
 
         option = Data_NS_DNSIP4AddrOption(
             type=schema.type,
@@ -2126,7 +2128,7 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
             raise ProtocolError(f'PCAP-NG: [ns_dnsIP6addr] option must be only one, '
                                 f'but {self._opt[schema.type] + 1} found.')
         if schema.length != 16:
-            raise ProtocolError(f'PCAP-NG [ns_dnsIP6addr] invalid length (expected 16, got {schema.length})')
+            raise ProtocolError(f'PCAP-NG: [ns_dnsIP6addr] invalid length (expected 16, got {schema.length})')
 
         option = Data_NS_DNSIP6AddrOption(
             type=schema.type,
@@ -2154,7 +2156,7 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
             raise ProtocolError(f'PCAP-NG: [isb_starttime] option must be only one, '
                                 f'but {self._opt[schema.type] + 1} found.')
         if schema.length != 8:
-            raise ProtocolError(f'PCAP-NG [isb_starttime] invalid length (expected 8, got {schema.length})')
+            raise ProtocolError(f'PCAP-NG: [isb_starttime] invalid length (expected 8, got {schema.length})')
 
         timestamp_raw = schema.timestamp_high << 32 | schema.timestamp_low
         with decimal.localcontext(prec=64):
@@ -2189,7 +2191,7 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
             raise ProtocolError(f'PCAP-NG: [isb_endtime] option must be only one, '
                                 f'but {self._opt[schema.type] + 1} found.')
         if schema.length != 8:
-            raise ProtocolError(f'PCAP-NG [isb_endtime] invalid length (expected 8, got {schema.length})')
+            raise ProtocolError(f'PCAP-NG: [isb_endtime] invalid length (expected 8, got {schema.length})')
 
         timestamp_raw = schema.timestamp_high << 32 | schema.timestamp_low
         with decimal.localcontext(prec=64):
@@ -2224,7 +2226,7 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
             raise ProtocolError(f'PCAP-NG: [isb_ifrecv] option must be only one, '
                                 f'but {self._opt[schema.type] + 1} found.')
         if schema.length != 8:
-            raise ProtocolError(f'PCAP-NG [isb_ifrecv] invalid length (expected 8, got {schema.length})')
+            raise ProtocolError(f'PCAP-NG: [isb_ifrecv] invalid length (expected 8, got {schema.length})')
 
         option = Data_ISB_IFRecvOption(
             type=schema.type,
@@ -2252,7 +2254,7 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
             raise ProtocolError(f'PCAP-NG: [isb_ifdrop] option must be only one, '
                                 f'but {self._opt[schema.type] + 1} found.')
         if schema.length != 8:
-            raise ProtocolError(f'PCAP-NG [isb_ifdrop] invalid length (expected 8, got {schema.length})')
+            raise ProtocolError(f'PCAP-NG: [isb_ifdrop] invalid length (expected 8, got {schema.length})')
 
         option = Data_ISB_IFDropOption(
             type=schema.type,
@@ -2280,7 +2282,7 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
             raise ProtocolError(f'PCAP-NG: [isb_filteraccept] option must be only one, '
                                 f'but {self._opt[schema.type] + 1} found.')
         if schema.length != 8:
-            raise ProtocolError(f'PCAP-NG [isb_filteraccept] invalid length (expected 8, got {schema.length})')
+            raise ProtocolError(f'PCAP-NG: [isb_filteraccept] invalid length (expected 8, got {schema.length})')
 
         option = Data_ISB_FilterAcceptOption(
             type=schema.type,
@@ -2308,7 +2310,7 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
             raise ProtocolError(f'PCAP-NG: [isb_osdrop] option must be only one, '
                                 f'but {self._opt[schema.type] + 1} found.')
         if schema.length != 8:
-            raise ProtocolError(f'PCAP-NG [isb_osdrop] invalid length (expected 8, got {schema.length})')
+            raise ProtocolError(f'PCAP-NG: [isb_osdrop] invalid length (expected 8, got {schema.length})')
 
         option = Data_ISB_OSDropOption(
             type=schema.type,
@@ -2336,7 +2338,7 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
             raise ProtocolError(f'PCAP-NG: [isb_usrdeliv] option must be only one, '
                                 f'but {self._opt[schema.type] + 1} found.')
         if schema.length != 8:
-            raise ProtocolError(f'PCAP-NG [isb_usrdeliv] invalid length (expected 8, got {schema.length})')
+            raise ProtocolError(f'PCAP-NG: [isb_usrdeliv] invalid length (expected 8, got {schema.length})')
 
         option = Data_ISB_UsrDelivOption(
             type=schema.type,
@@ -2364,7 +2366,7 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
             raise ProtocolError(f'PCAP-NG: [pack_flags] option must be only one, '
                                 f'but {self._opt[schema.type] + 1} found.')
         if schema.length != 4:
-            raise ProtocolError(f'PCAP-NG [pack_flags] invalid length (expected 8, got {schema.length})')
+            raise ProtocolError(f'PCAP-NG: [pack_flags] invalid length (expected 8, got {schema.length})')
 
         option = Data_PACK_FlagsOption(
             type=schema.type,
@@ -2406,6 +2408,201 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
             hash=schema.data,
         )
         return option
+
+    def _read_nrb_records(self, records_schema: 'list[Schema_NameResolutionRecord]') -> 'Record':
+        """Read PCAP-NG name resolution records.
+
+        Args:
+            records_schema: Parsed name resolution records.
+
+        Returns:
+            Parsed PCAP-NG name resolution records data.
+
+        """
+        records = OrderedMultiDict()  # type: Record
+
+        for schema in records_schema:
+            type = schema.type
+            name = self.__record__[type]
+
+            if isinstance(name, str):
+                meth_name = f'_read_record_{name}'
+                meth = cast('RecordParser',
+                            getattr(self, meth_name, self._read_record_unknown))
+            else:
+                meth = name[0]
+            data = meth(schema, records=records)
+
+            # record option data
+            records.add(type, data)
+
+            # break when ``nrb_record_end`` is reached
+            if type == Enum_RecordType.nrb_record_end:
+                break
+
+        return records
+
+    def _read_record_unknown(self, schema: 'Schema_UnknownRecord', *,
+                             records: 'Record') -> 'Data_UnknownRecord':
+        """Read PCAP-MG unknown name resolution records.
+
+        Args:
+            schema: Parsed name resolution record schema.
+            records: Parsed PCAP-NG records.
+
+        Returns:
+            Constructed name resolution record data.
+
+        """
+        record = Data_UnknownRecord(
+            type=schema.type,
+            length=schema.length,
+            data=schema.data,
+        )
+        return record
+
+    def _read_record_end(self, schema: 'Schema_EndRecord', *,
+                         records: 'Record') -> 'Data_EndRecord':
+        """Read PCAP-MG ``nrb_record_end`` name resolution records.
+
+        Args:
+            schema: Parsed name resolution record schema.
+            records: Parsed PCAP-NG records.
+
+        Returns:
+            Constructed name resolution record data.
+
+        """
+        if schema.length != 0:
+            raise ProtocolError(f'PCAP-NG: [nrb_record_end] invalid length (expected 0, got {schema.length})')
+
+        record = Data_EndRecord(
+            type=schema.type,
+            length=schema.length,
+        )
+        return record
+
+    def _read_record_ipv4(self, schema: 'Schema_IPv4Record', *,
+                          records: 'Record') -> 'Data_IPv4Record':
+        """Read PCAP-MG ``nrb_record_ipv4`` name resolution records.
+
+        Args:
+            schema: Parsed name resolution record schema.
+            records: Parsed PCAP-NG records.
+
+        Returns:
+            Constructed name resolution record data.
+
+        """
+        record = Data_IPv4Record(
+            type=schema.type,
+            length=schema.length,
+            ip=schema.ip,
+            records=tuple(schema.names),
+        )
+        return record
+
+    def _read_record_ipv6(self, schema: 'Schema_IPv6Record', *,
+                          records: 'Record') -> 'Data_IPv6Record':
+        """Read PCAP-MG ``nrb_record_ipv6`` name resolution records.
+
+        Args:
+            schema: Parsed name resolution record schema.
+            records: Parsed PCAP-NG records.
+
+        Returns:
+            Constructed name resolution record data.
+
+        """
+        record = Data_IPv6Record(
+            type=schema.type,
+            length=schema.length,
+            ip=schema.ip,
+            records=tuple(schema.names),
+        )
+        return record
+
+    def _read_secrest_unknown(self, schema: 'Schema_UnknownSecrets', *,
+                              block: 'Schema_DecryptionSecretsBlock') -> 'Data_UnknownSecrets':
+        """Read PCAP-NG unknown secrets.
+
+        Args:
+            schema: Parsed secret schema.
+            block: Parsed PCAP-NG decryption secrets block.
+
+        """
+        secrets = Data_UnknownSecrets(
+            data=schema.data,
+        )
+        return secrets
+
+    def _read_secrets_tls(self, schema: 'Schema_TLSKeyLog', *,
+                          block: 'Schema_DecryptionSecretsBlock') -> 'Data_TLSKeyLog':
+        """Read PCAP-NG TLS key log secrets.
+
+        Args:
+            schema: Parsed secret schema.
+            block: Parsed PCAP-NG decryption secrets block.
+
+        """
+        secrets = Data_TLSKeyLog(
+            entries=schema.entries,
+        )
+        return secrets
+
+    def _read_secrets_wireguard(self, schema: 'Schema_WireGuardKeyLog', *,
+                                block: 'Schema_DecryptionSecretsBlock') -> 'Data_WireGuardKeyLog':
+        """Read PCAP-NG WireGuard key log secrets.
+
+        Args:
+            schema: Parsed secret schema.
+            block: Parsed PCAP-NG decryption secrets block.
+
+        Returns:
+            Constructed decryption secrets data.
+
+        """
+        secrets = Data_WireGuardKeyLog(
+            entries=schema.entries,
+        )
+        return secrets
+
+    def _read_secrets_zigbee_nwk(self, schema: 'Schema_ZigBeeNWKKey', *,
+                                 block: 'Schema_DecryptionSecretsBlock') -> 'Data_ZigBeeNWKKey':
+        """Read PCAP-NG ZigBee NWK Key secrets.
+
+        Args:
+            schema: Parsed secret schema.
+            block: Parsed PCAP-NG decryption secrets block.
+
+        Returns:
+            Constructed decryption secrets data.
+
+        """
+        secrets = Data_ZigBeeNWKKey(
+            nwk_key=schema.key,
+            pan_id=schema.panid,
+        )
+        return secrets
+
+    def _read_secrets_zigbee_aps(self, schema: 'Schema_ZigBeeAPSKey', *,
+                                 block: 'Schema_DecryptionSecretsBlock') -> 'Data_ZigBeeAPSKey':
+        """Read PCAP-NG ZigBee APS Key secrets.
+
+        Args:
+            schema: Parsed secret schema.
+            block: Parsed PCAP-NG decryption secrets block.
+
+        Returns:
+            Constructed decryption secrets data.
+
+        """
+        secrets = Data_ZigBeeAPSKey(
+            aps_key=schema.key,
+            pan_id=schema.panid,
+            short_address=schema.addr_high << 16 | schema.addr_low,
+        )
+        return secrets
 
     def _make_block_unknown(self, block: 'Optional[Data_UnknownBlock]' = None, *,
                             data: 'bytes' = b'',
@@ -2481,6 +2678,8 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
             options=options_value,
             length2=total_length + 28,
         )
+
+
 
     def _make_pcapng_options(self, options: 'Option | list[Schema_Option | tuple[Enum_OptionType, dict[str, Any]] | bytes]') -> 'tuple[list[Schema_Option | bytes], int]':
         """Make options for PCAP-NG.
@@ -3877,4 +4076,331 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
             length=1 + len(hash),
             func=algo_val,
             data=hash,
+        )
+
+    def _make_nrb_records(self, records: 'Record | list[Schema_NameResolutionRecord | tuple[Enum_RecordType, dict[str, Any]] | bytes]') -> 'tuple[list[Schema_NameResolutionRecord | bytes], int]':
+        """Make name resolution records for PCAP-NG.
+
+        Args:
+            records: PCAP-NG name resolution records.
+
+        Returns:
+            Tuple of name resolution records and total length of the records.
+
+        """
+        has_record_end = False
+        total_length = 0
+        if isinstance(records, list):
+            records_list = []  # type: list[Schema_NameResolutionRecord | bytes]
+            for schema in records:
+                if isinstance(schema, bytes):
+                    code = Enum_RecordType.get(int.from_bytes(schema[0:2], self._byte, signed=False))
+                    if code == Enum_RecordType.nrb_record_end:  # ignore nrb_record_end by default
+                        has_record_end = True
+                        continue
+
+                    data = schema  # type: Schema_NameResolutionRecord | bytes
+                    data_len = len(data)
+                elif isinstance(schema, Schema):
+                    code = schema.type
+                    if code == Enum_RecordType.nrb_record_end:  # ignore nrb_record_end by default
+                        has_record_end = True
+                        continue
+
+                    data = schema
+                    data_len = len(schema.pack())
+                else:
+                    code, args = cast('tuple[Enum_RecordType, dict[str, Any]]', schema)
+                    if code == Enum_RecordType.nrb_record_end:  # ignore nrb_record_end by default
+                        has_record_end = True
+                        continue
+
+                    name = self.__record__[code]
+                    if isinstance(name, str):
+                        meth_name = f'_make_record_{name}'
+                        meth = cast('RecordConstructor',
+                                    getattr(self, meth_name, self._make_record_unknown))
+                    else:
+                        meth = name[1]
+
+                    data = meth(code, **args)
+                    data_len = len(data.pack())
+
+                records_list.append(data)
+                total_length += data_len
+
+            if has_record_end:
+                nrb_record_end = self._make_record_end(Enum_RecordType.nrb_record_end)  # type: ignore[arg-type]
+                total_length += len(nrb_record_end.pack())
+                records_list.append(nrb_record_end)
+            return records_list, total_length
+
+        records_list = []
+        for code, record in records.items(multi=True):
+            if code == Enum_RecordType.nrb_record_end:  # ignore nrb_record_end by default
+                has_record_end = True
+                continue
+
+            name = self.__record__[code]
+            if isinstance(name, str):
+                meth_name = f'_make_record_{name}'
+                meth = cast('RecordConstructor',
+                            getattr(self, meth_name, self._make_record_unknown))
+            else:
+                meth = name[1]
+
+            data = meth(code, record)
+            data_len = len(data.pack())
+
+            records_list.append(data)
+            total_length += data_len
+
+        if has_record_end:
+            nrb_record_end = self._make_record_end(Enum_RecordType.nrb_record_end)  # type: ignore[arg-type]
+            total_length += len(nrb_record_end.pack())
+            records_list.append(nrb_record_end)
+        return records_list, total_length
+
+    def _make_record_unknown(self, type: 'Enum_RecordType', record: 'Optional[Data_UnknownRecord]', *,
+                             data: 'bytes' = b'',
+                             **kwargs: 'Any') -> 'Schema_UnknownRecord':
+        """Make PCAP-NG unknown name resolution record.
+
+        Args:
+            type: Record type.
+            record: Record data model.
+            data: Record data.
+            **kwargs: Arbitrary keyword arguments.
+
+        Returns:
+            Constructed record schema.
+
+        """
+        if record is not None:
+            data = record.data
+
+        return Schema_UnknownRecord(
+            type=type,
+            length=len(data),
+            data=data,
+        )
+
+    def _make_record_end(self, type: 'Enum_RecordType', record: 'Optional[Data_EndRecord]' = None,
+                         **kwargs: 'Any') -> 'Schema_EndRecord':
+        """Make PCAP-NG ``nrb_record_end`` name resolution record.
+
+        Args:
+            type: Record type.
+            record: Record data model.
+            **kwargs: Arbitrary keyword arguments.
+
+        Returns:
+            Constructed record schema.
+
+        """
+        return Schema_EndRecord(
+            type=type,
+            length=0,
+        )
+
+    def _make_record_ipv4(self, type: 'Enum_RecordType', record: 'Optional[Data_IPv4Record]', *,
+                          ip: 'IPv4Address | str | bytes | int' = '127.0.0.1',
+                          names: 'Optional[list[str]]' = None,
+                          **kwargs: 'Any') -> 'Schema_IPv4Record':
+        """Make PCAP-NG ``nrb_record_ipv4`` name resolution record.
+
+        Args:
+            type: Record type.
+            record: Record data model.
+            ip: IPv4 address.
+            names: Host names.
+            **kwargs: Arbitrary keyword arguments.
+
+        Returns:
+            Constructed record schema.
+
+        """
+        if record is not None:
+            ip = record.ip
+            names = cast('list[str]', record.records)
+
+        if names is None:
+            names = []
+        records = '\x00'.join(names) + '\x00'
+
+        return Schema_IPv4Record(
+            type=type,
+            length=4 + len(records),
+            ip=ip,
+            resol=records,
+        )
+
+    def _make_record_ipv6(self, type: 'Enum_RecordType', record: 'Optional[Data_IPv6Record]', *,
+                          ip: 'IPv6Address | str | bytes | int' = '127.0.0.1',
+                          names: 'Optional[list[str]]' = None,
+                          **kwargs: 'Any') -> 'Schema_IPv6Record':
+        """Make PCAP-NG ``nrb_record_ipv6`` name resolution record.
+
+        Args:
+            type: Record type.
+            record: Record data model.
+            ip: IPv6 address.
+            names: Host names.
+            **kwargs: Arbitrary keyword arguments.
+
+        Returns:
+            Constructed record schema.
+
+        """
+        if record is not None:
+            ip = record.ip
+            names = cast('list[str]', record.records)
+
+        if names is None:
+            names = []
+        records = '\x00'.join(names) + '\x00'
+
+        return Schema_IPv6Record(
+            type=type,
+            length=16 + len(records),
+            ip=ip,
+            resol=records,
+        )
+
+    def _make_secrets_unknown(self, type: 'Enum_SecretsType', secrets: 'Optional[Data_UnknownSecrets]' = None, *,
+                              data: 'bytes' = b'',
+                              **kwargs: 'Any') -> 'Schema_UnknownSecrets':
+        """Make PCAP-NG unknown secrets.
+
+        Args:
+            type: Secrets type.
+            secrets: Secrets data model.
+            data: Secrets data.
+            **kwargs: Arbitrary keyword arguments.
+
+        Returns:
+            Constructed secrets schema.
+
+        """
+        if secrets is not None:
+            data = secrets.data
+
+        return Schema_UnknownSecrets(
+            data=data,
+        )
+
+    def _make_secrets_tls(self, type: 'Enum_SecretsType', secrets: 'Optional[Data_TLSKeyLog]' = None, *,
+                          entries: 'Optional[dict[TLSKeyLabel, OrderedMultiDict[bytes, bytes]]]' = None,
+                          **kwargs: 'Any') -> 'Schema_TLSKeyLog':
+        """Make PCAP-NG TLS Key Log secrets.
+
+        Args:
+            type: Secrets type.
+            secrets: Secrets data model.
+            entries: TLS Key Log entries.
+            **kwargs: Arbitrary keyword arguments.
+
+        Returns:
+            Constructed secrets schema.
+
+        """
+        if secrets is not None:
+            entries = secrets.entries
+
+        if entries is None:
+            entries = {}
+
+        data = [f'# generated by PyPCAPKit version {__version__}{os.sep}']  # type: list[str]
+        for label, entry in entries.items():
+            for k, v in entry.items(multi=True):
+                data.append(f'{label.name} {k.hex()} {v.hex()}{os.sep}')
+
+        return Schema_TLSKeyLog(
+            data=''.join(data),
+        )
+
+    def _make_secrets_wireguard(self, type: 'Enum_SecretsType', secrets: 'Optional[Data_WireGuardKeyLog]' = None, *,
+                                entries: 'Optional[OrderedMultiDict[WireGuardKeyLabel, bytes]]' = None,
+                                **kwargs: 'Any') -> 'Schema_WireGuardKeyLog':
+        """Make PCAP-NG WireGuard secrets.
+
+        Args:
+            type: Secrets type.
+            secrets: Secrets data model.
+            data: Secrets data.
+            **kwargs: Arbitrary keyword arguments.
+
+        Returns:
+            Constructed secrets schema.
+
+        """
+        if secrets is not None:
+            entries = secrets.entries
+
+        if entries is None:
+            entries = OrderedMultiDict()
+
+        data = [f'# generated by PyPCAPKit version {__version__}{os.sep}']  # type: list[str]
+        for label, value in entries:
+            data.append(f'{label} = {value}{os.sep}')
+
+        return Schema_WireGuardKeyLog(
+            data=''.join(data),
+        )
+
+    def _make_secrets_zigbee_nwk(self, type: 'Enum_SecretsType', secrets: 'Optional[Data_ZigBeeNWKKey]' = None, *,
+                                 nwk_key: 'bytes' = b'',
+                                 pan_id: 'int' = 0,
+                                 **kwargs: 'Any') -> 'Schema_ZigBeeNWKKey':
+        """Make PCAP-NG ZigBee NWK Key secrets.
+
+        Args:
+            type: Secrets type.
+            secrets: Secrets data model.
+            nwk_key: NWK key.
+            pan_id: PAN ID.
+            **kwargs: Arbitrary keyword arguments.
+
+        Returns:
+            Constructed secrets schema.
+
+        """
+        if secrets is not None:
+            nwk_key = secrets.nwk_key
+            pan_id = secrets.pan_id
+
+        return Schema_ZigBeeNWKKey(
+            key=nwk_key,
+            panid=pan_id,
+        )
+
+    def _make_secrets_zigbee_aps(self, type: 'Enum_SecretsType', secrets: 'Optional[Data_ZigBeeAPSKey]' = None, *,
+                                 aps_key: 'bytes' = b'',
+                                 pan_id: 'int' = 0,
+                                 short_address: 'int' = 0,
+                                 **kwargs: 'Any') -> 'Schema_ZigBeeAPSKey':
+        """Make PCAP-NG ZigBee APS Key secrets.
+
+        Args:
+            type: Secrets type.
+            secrets: Secrets data model.
+            aps_key: APS key.
+            pan_id: PAN ID.
+            short_address: Short address.
+            **kwargs: Arbitrary keyword arguments.
+
+        Returns:
+            Constructed secrets schema.
+
+        """
+        if secrets is not None:
+            aps_key = secrets.aps_key
+            pan_id = secrets.pan_id
+            short_address = secrets.short_address
+
+        return Schema_ZigBeeAPSKey(
+            key=aps_key,
+            panid=pan_id,
+            addr_high=short_address >> 16,
+            addr_low=short_address & 0xFFFF,
         )

@@ -995,7 +995,7 @@ class IPv4Record(NameResolutionRecord):
         #: Name resolution records.
         names: 'list[str]'
 
-        def __init__(self, type: 'Enum_RecordType', length: 'int', ip: 'IPv4Address', resol: 'str') -> 'None': ...
+        def __init__(self, type: 'Enum_RecordType', length: 'int', ip: 'IPv4Address | str | bytes | int', resol: 'str') -> 'None': ...
 
 
 class IPv6Record(NameResolutionRecord):
@@ -1025,7 +1025,7 @@ class IPv6Record(NameResolutionRecord):
         #: Name resolution records.
         names: 'list[str]'
 
-        def __init__(self, type: 'Enum_RecordType', length: 'int', ip: 'IPv4Address', resol: 'str') -> 'None': ...
+        def __init__(self, type: 'Enum_RecordType', length: 'int', ip: 'IPv6Address | str | bytes | int', resol: 'str') -> 'None': ...
 
 
 class _NS_Option(Option):
