@@ -38,6 +38,7 @@ from pcapkit.utilities.exceptions import UnsupportedCall
 from pcapkit.utilities.warnings import RegistryWarning, warn
 
 if TYPE_CHECKING:
+    from datetime import datetime as dt_type
     from decimal import Decimal
     from typing import IO, Any, DefaultDict, Optional, Type
 
@@ -212,7 +213,8 @@ class Frame(Protocol[Data_Frame, Schema_Frame],
             _epch = _tsss + decimal.Decimal(_tsus) / 1_000_000_000
         else:
             _epch = _tsss + decimal.Decimal(_tsus) / 1_000_000
-        _time = datetime.datetime.fromtimestamp(float(_epch))
+        _irat = _epch.as_integer_ratio()
+        _time = datetime.datetime.fromtimestamp(_irat[0] / _irat[1])
 
         frame = Data_Frame(
             frame_info=Data_FrameInfo(
@@ -251,7 +253,7 @@ class Frame(Protocol[Data_Frame, Schema_Frame],
         return self._decode_next_layer(frame, self._ghdr.network, frame.len)
 
     def make(self,
-             timestamp: 'Optional[float | Decimal]' = None,
+             timestamp: 'Optional[float | Decimal | int | dt_type]' = None,
              ts_sec: 'Optional[int]' = None,
              ts_usec: 'Optional[int]' = None,
              incl_len: 'Optional[int]' = None,
@@ -387,7 +389,7 @@ class Frame(Protocol[Data_Frame, Schema_Frame],
             'packet': cls._make_payload(data),
         }
 
-    def _make_timestamp(self, timestamp: 'Optional[float | Decimal]' = None, ts_sec: 'Optional[int]' = None,
+    def _make_timestamp(self, timestamp: 'Optional[float | Decimal | dt_type | int]' = None, ts_sec: 'Optional[int]' = None,
                         ts_usec: 'Optional[int]' = None, nanosecond: 'bool' = False) -> 'tuple[int, int]':
         """Make timestamp.
 
@@ -407,13 +409,15 @@ class Frame(Protocol[Data_Frame, Schema_Frame],
             else:
                 timestamp = decimal.Decimal(time.time())
         else:
+            if isinstance(timestamp, datetime.datetime):
+                timestamp = timestamp.timestamp()
             timestamp = decimal.Decimal(timestamp)
 
         if ts_sec is None:
             ts_sec = int(timestamp)
 
         if ts_usec is None:
-            ts_usec = int(timestamp - ts_sec) * (1_000_000_000 if nanosecond else 1_000_000)
+            ts_usec = int((timestamp - ts_sec) * (1_000_000_000 if nanosecond else 1_000_000))
 
         return ts_sec, ts_usec
 
