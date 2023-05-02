@@ -170,13 +170,13 @@ from pcapkit.protocols.schema.misc.pcapng import WireGuardKeyLog as Schema_WireG
 from pcapkit.protocols.schema.misc.pcapng import ZigBeeAPSKey as Schema_ZigBeeAPSKey
 from pcapkit.protocols.schema.misc.pcapng import ZigBeeNWKKey as Schema_ZigBeeNWKKey
 from pcapkit.utilities.compat import StrEnum
-from pcapkit.utilities.exceptions import EndianError, FileError, ProtocolError, UnsupportedCall
-from pcapkit.utilities.warnings import RegistryWarning, warn
+from pcapkit.utilities.exceptions import EndianError, FileError, ProtocolError, UnsupportedCall, stacklevel
+from pcapkit.utilities.warnings import AttributeWarning, RegistryWarning, warn
 
 __all__ = ['PCAPNG']
 
 if TYPE_CHECKING:
-    from datetime import timedelta, timezone
+    from datetime import timedelta, timezone, datetime as dt_type
     from decimal import Decimal
     from enum import IntEnum as StdlibEnum
     from ipaddress import IPv4Address, IPv4Interface, IPv6Address, IPv6Interface
@@ -211,6 +211,7 @@ if TYPE_CHECKING:
                                   KwArg(Any)], Schema_NameResolutionRecord]
 
 # check Python version
+py37 = ((version_info := sys.version_info).major >= 3 and version_info.minor >= 7)
 py38 = ((version_info := sys.version_info).major >= 3 and version_info.minor >= 8)
 
 # Ethernet address pattern
@@ -665,7 +666,10 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
     def ts_resolution(self) -> 'int':
         """Timestamp resolution of the current block, in units per second."""
         if self._ctx is None:
-            raise UnsupportedCall(f"'{self.__class__.__name__}' object has no attribute 'ts_resolution'")
+            #raise UnsupportedCall(f"'{self.__class__.__name__}' object has no attribute 'ts_resolution'")
+            warn(f"'{self.__class__.__name__}' object has no attribute 'ts_resolution'",
+                 AttributeWarning, stacklevel=stacklevel())
+            return 1_000_000
 
         info = cast('Packet', self._info)
         options = self._ctx.interfaces[info.interface_id].options
@@ -679,7 +683,10 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
     def ts_offset(self) -> 'int':
         """Timestamp offset of the current block, in seconds."""
         if self._ctx is None:
-            raise UnsupportedCall(f"'{self.__class__.__name__}' object has no attribute 'ts_offset'")
+            #raise UnsupportedCall(f"'{self.__class__.__name__}' object has no attribute 'ts_offset'")
+            warn(f"'{self.__class__.__name__}' object has no attribute 'ts_offset'",
+                 AttributeWarning, stacklevel=stacklevel())
+            return 0
 
         info = cast('Packet', self._info)
         options = self._ctx.interfaces[info.interface_id].options
@@ -690,17 +697,20 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
         return tsoffset.offset
 
     @property
-    def ts_timezone(self) -> 'Optional[timezone]':
+    def ts_timezone(self) -> 'timezone':
         """Timezone of the current block."""
         if self._ctx is None:
-            raise UnsupportedCall(f"'{self.__class__.__name__}' object has no attribute 'ts_timezone'")
+            #raise UnsupportedCall(f"'{self.__class__.__name__}' object has no attribute 'ts_timezone'")
+            warn(f"'{self.__class__.__name__}' object has no attribute 'ts_timezone'",
+                 AttributeWarning, stacklevel=stacklevel())
+            return self._get_timezone()
 
         info = cast('Packet', self._info)
         options = self._ctx.interfaces[info.interface_id].options
         tzone = cast('Optional[Data_IF_TZoneOption]',
                         options.get(Enum_OptionType.if_tzone))
         if tzone is None:
-            return None
+            return self._get_timezone()
         return tzone.timezone
 
     @property
@@ -1073,6 +1083,40 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
             'type': data.type,
             'block': data,
         }
+
+    @staticmethod
+    def _get_timezone() -> 'timezone':
+        """Get local timezone."""
+        tzinfo = datetime.datetime.now(datetime.timezone.utc).astimezone().tzinfo
+        if tzinfo is None:
+            return datetime.timezone.utc
+        return cast('timezone', tzinfo)
+
+    def _make_timestamp(self, timestamp: 'Optional[float | Decimal | dt_type | int]' = None) -> 'tuple[int, int]':
+        """Make timestamp.
+
+        Args:
+            timestamp: Timestamp in seconds.
+
+        Returns:
+            Tuple of timestamp in higher and lower 32-bit integer value
+            based on the given offset and timezone conversion.
+
+        """
+        if timestamp is None:
+            if py37 and self.nanosecond:
+                timestamp = decimal.Decimal(time.time_ns()) / 1_000_000_000
+            else:
+                timestamp = decimal.Decimal(time.time())
+        else:
+            if isinstance(timestamp, datetime.datetime):
+                timestamp = timestamp.timestamp()
+            timestamp = decimal.Decimal(timestamp)
+
+        with decimal.localcontext(prec=64):
+            ts_info = int((timestamp - self.ts_offset - \
+                 decimal.Decimal(self.ts_timezone.utcoffset(None).total_seconds())) * self.ts_resolution)
+        return (ts_info >> 32) & 0xFFFF_FFFF, ts_info & 0xFFFF_FFFF
 
     def _read_mac_addr(self, addr: 'bytes') -> 'str':
         """Read MAC address.
@@ -2112,12 +2156,14 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
 
         timestamp_raw = schema.timestamp_high << 32 | schema.timestamp_low
         with decimal.localcontext(prec=64):
-            timestamp_epoch = decimal.Decimal(timestamp_raw) / self.ts_resolution + self.ts_offset
+            timestamp_epoch = decimal.Decimal(timestamp_raw) / self.ts_resolution + self.ts_offset + \
+                decimal.Decimal(self.ts_timezone.utcoffset(None).total_seconds())
+        ts_ratio = timestamp_epoch.as_integer_ratio()
 
         option = Data_ISB_StartTimeOption(
             type=schema.type,
             length=schema.length,
-            timestamp=datetime.datetime.fromtimestamp(float(timestamp_epoch), tz=self.ts_timezone),
+            timestamp=datetime.datetime.fromtimestamp(ts_ratio[0] / ts_ratio[1], tz=self.ts_timezone),
             timestamp_epoch=timestamp_epoch,
         )
         return option
@@ -2145,12 +2191,14 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
 
         timestamp_raw = schema.timestamp_high << 32 | schema.timestamp_low
         with decimal.localcontext(prec=64):
-            timestamp_epoch = decimal.Decimal(timestamp_raw) / self.ts_resolution + self.ts_offset
+            timestamp_epoch = decimal.Decimal(timestamp_raw) / self.ts_resolution + self.ts_offset + \
+                decimal.Decimal(self.ts_timezone.utcoffset(None).total_seconds())
+        ts_ratio = timestamp_epoch.as_integer_ratio()
 
         option = Data_ISB_EndTimeOption(
             type=schema.type,
             length=schema.length,
-            timestamp=datetime.datetime.fromtimestamp(float(timestamp_epoch), tz=self.ts_timezone),
+            timestamp=datetime.datetime.fromtimestamp(ts_ratio[0] / ts_ratio[1], tz=self.ts_timezone),
             timestamp_epoch=timestamp_epoch,
         )
         return option
@@ -3477,7 +3525,226 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
             ip=ip,
         )
 
+    def _make_option_isb_starttime(self, type: 'Enum_OptionType', option: 'Optional[Data_ISB_StartTimeOption]' = None, *,
+                                   timestamp: 'Optional[int | float | dt_type | Decimal]' = 0,
+                                   **kwargs: 'Any') -> 'Schema_ISB_StartTimeOption':
+        """Make PCAP-NG ``isb_starttime`` option.
 
+        Args:
+            type: Option type.
+            option: Option data model.
+            ip: DNS server IPv6 address.
+            **kwargs: Arbitrary keyword arguments.
+
+        Returns:
+            Constructed option schema.
+
+        """
+        if self._type != Enum_BlockType.Interface_Statistics_Block:
+            raise ProtocolError(f'PCAP-NG: [isb_starttime] option must be in Interface Statistics Block, '
+                                f'but found in {self._type} block.')
+        if self._opt[type] > 0:
+            raise ProtocolError(f'PCAP-NG: [isb_starttime] option must be only one, '
+                                f'but {self._opt[type] + 1} found.')
+
+        if option is not None:
+            timestamp = option.timestamp_epoch
+        ts_high, ts_low = self._make_timestamp(timestamp)
+
+        return Schema_ISB_StartTimeOption(
+            type=type,
+            length=8,
+            timestamp_high=ts_high,
+            timestamp_low=ts_low,
+        )
+
+    def _make_option_isb_endtime(self, type: 'Enum_OptionType', option: 'Optional[Data_ISB_EndTimeOption]' = None, *,
+                                 timestamp: 'Optional[int | float | dt_type | Decimal]' = 0,
+                                 **kwargs: 'Any') -> 'Schema_ISB_EndTimeOption':
+        """Make PCAP-NG ``isb_endtime`` option.
+
+        Args:
+            type: Option type.
+            option: Option data model.
+            ip: DNS server IPv6 address.
+            **kwargs: Arbitrary keyword arguments.
+
+        Returns:
+            Constructed option schema.
+
+        """
+        if self._type != Enum_BlockType.Interface_Statistics_Block:
+            raise ProtocolError(f'PCAP-NG: [isb_endtime] option must be in Interface Statistics Block, '
+                                f'but found in {self._type} block.')
+        if self._opt[type] > 0:
+            raise ProtocolError(f'PCAP-NG: [isb_endtime] option must be only one, '
+                                f'but {self._opt[type] + 1} found.')
+
+        if option is not None:
+            timestamp = option.timestamp_epoch
+        ts_high, ts_low = self._make_timestamp(timestamp)
+
+        return Schema_ISB_EndTimeOption(
+            type=type,
+            length=8,
+            timestamp_high=ts_high,
+            timestamp_low=ts_low,
+        )
+
+    def _make_option_isb_ifrecv(self, type: 'Enum_OptionType', option: 'Optional[Data_ISB_IFRecvOption]' = None, *,
+                                packets: 'int' = 0,
+                                **kwargs: 'Any') -> 'Schema_ISB_IFRecvOption':
+        """Make PCAP-NG ``isb_ifrecv`` option.
+
+        Args:
+            type: Option type.
+            option: Option data model.
+            packets: Number of received packets.
+            **kwargs: Arbitrary keyword arguments.
+
+        Returns:
+            Constructed option schema.
+
+        """
+        if self._type != Enum_BlockType.Interface_Statistics_Block:
+            raise ProtocolError(f'PCAP-NG: [isb_ifrecv] option must be in Interface Statistics Block, '
+                                f'but found in {self._type} block.')
+        if self._opt[type] > 0:
+            raise ProtocolError(f'PCAP-NG: [isb_ifrecv] option must be only one, '
+                                f'but {self._opt[type] + 1} found.')
+
+        if option is not None:
+            packets = option.packets
+
+        return Schema_ISB_IFRecvOption(
+            type=type,
+            length=8,
+            packets=packets,
+        )
+
+    def _make_option_isb_ifdrop(self, type: 'Enum_OptionType', option: 'Optional[Data_ISB_IFDropOption]' = None, *,
+                                packets: 'int' = 0,
+                                **kwargs: 'Any') -> 'Schema_ISB_IFDropOption':
+        """Make PCAP-NG ``isb_ifdrop`` option.
+
+        Args:
+            type: Option type.
+            option: Option data model.
+            packets: Number of dropped packets.
+            **kwargs: Arbitrary keyword arguments.
+
+        Returns:
+            Constructed option schema.
+
+        """
+        if self._type != Enum_BlockType.Interface_Statistics_Block:
+            raise ProtocolError(f'PCAP-NG: [isb_ifdrop] option must be in Interface Statistics Block, '
+                                f'but found in {self._type} block.')
+        if self._opt[type] > 0:
+            raise ProtocolError(f'PCAP-NG: [isb_ifdrop] option must be only one, '
+                                f'but {self._opt[type] + 1} found.')
+
+        if option is not None:
+            packets = option.packets
+
+        return Schema_ISB_IFDropOption(
+            type=type,
+            length=8,
+            packets=packets,
+        )
+
+    def _make_option_isb_filteraccept(self, type: 'Enum_OptionType', option: 'Optional[Data_ISB_FilterAcceptOption]' = None, *,
+                                      packets: 'int' = 0,
+                                      **kwargs: 'Any') -> 'Schema_ISB_FilterAcceptOption':
+        """Make PCAP-NG ``isb_filteraccept`` option.
+
+        Args:
+            type: Option type.
+            option: Option data model.
+            packets: Number of packets accepted by the filter.
+            **kwargs: Arbitrary keyword arguments.
+
+        Returns:
+            Constructed option schema.
+
+        """
+        if self._type != Enum_BlockType.Interface_Statistics_Block:
+            raise ProtocolError(f'PCAP-NG: [isb_filteraccept] option must be in Interface Statistics Block, '
+                                f'but found in {self._type} block.')
+        if self._opt[type] > 0:
+            raise ProtocolError(f'PCAP-NG: [isb_filteraccept] option must be only one, '
+                                f'but {self._opt[type] + 1} found.')
+
+        if option is not None:
+            packets = option.packets
+
+        return Schema_ISB_FilterAcceptOption(
+            type=type,
+            length=8,
+            packets=packets,
+        )
+
+    def _make_option_isb_osdrop(self, type: 'Enum_OptionType', option: 'Optional[Data_ISB_OSDropOption]' = None, *,
+                                packets: 'int' = 0,
+                                **kwargs: 'Any') -> 'Schema_ISB_OSDropOption':
+        """Make PCAP-NG ``isb_osdrop`` option.
+
+        Args:
+            type: Option type.
+            option: Option data model.
+            packets: Number of packets dropped by the OS.
+            **kwargs: Arbitrary keyword arguments.
+
+        Returns:
+            Constructed option schema.
+
+        """
+        if self._type != Enum_BlockType.Interface_Statistics_Block:
+            raise ProtocolError(f'PCAP-NG: [isb_osdrop] option must be in Interface Statistics Block, '
+                                f'but found in {self._type} block.')
+        if self._opt[type] > 0:
+            raise ProtocolError(f'PCAP-NG: [isb_osdrop] option must be only one, '
+                                f'but {self._opt[type] + 1} found.')
+
+        if option is not None:
+            packets = option.packets
+
+        return Schema_ISB_OSDropOption(
+            type=type,
+            length=8,
+            packets=packets,
+        )
+
+    def _make_option_isb_usrdeliv(self, type: 'Enum_OptionType', option: 'Optional[Data_ISB_UsrDelivOption]' = None, *,
+                                  packets: 'int' = 0,
+                                  **kwargs: 'Any') -> 'Schema_ISB_UsrDelivOption':
+        """Make PCAP-NG ``isb_usrdeliv`` option.
+
+        Args:
+            type: Option type.
+            option: Option data model.
+            packets: Number of dropped packets.
+            **kwargs: Arbitrary keyword arguments.
+
+        Returns:
+            Constructed option schema.
+
+        """
+        if self._type != Enum_BlockType.Interface_Statistics_Block:
+            raise ProtocolError(f'PCAP-NG: [isb_usrdeliv] option must be in Interface Statistics Block, '
+                                f'but found in {self._type} block.')
+        if self._opt[type] > 0:
+            raise ProtocolError(f'PCAP-NG: [isb_usrdeliv] option must be only one, '
+                                f'but {self._opt[type] + 1} found.')
+
+        if option is not None:
+            packets = option.packets
+
+        return Schema_ISB_UsrDelivOption(
+            type=type,
+            length=8,
+            packets=packets,
+        )
 
     def _make_option_pack_flags(self, type: 'Enum_OptionType', option: 'Optional[Data_PACK_FlagsOption]' = None, *,
                                 direction: 'PacketDirection | StdlibEnum | AenumEnum | str | int' = PacketDirection.UNKNOWN,

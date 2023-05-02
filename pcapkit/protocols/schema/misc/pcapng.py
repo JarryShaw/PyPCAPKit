@@ -1179,7 +1179,7 @@ class ISB_StartTimeOption(_ISB_Option):
     timestamp_low: 'int' = UInt32Field(callback=byteorder_callback)
 
     if TYPE_CHECKING:
-        def __init__(self, code: 'Enum_OptionType', length: 'int', timestamp_high: 'int', timestamp_low: 'int') -> 'None': ...
+        def __init__(self, type: 'Enum_OptionType', length: 'int', timestamp_high: 'int', timestamp_low: 'int') -> 'None': ...
 
 
 class ISB_EndTimeOption(_ISB_Option):
@@ -1191,7 +1191,7 @@ class ISB_EndTimeOption(_ISB_Option):
     timestamp_low: 'int' = UInt32Field(callback=byteorder_callback)
 
     if TYPE_CHECKING:
-        def __init__(self, code: 'Enum_OptionType', length: 'int', timestamp_high: 'int', timestamp_low: 'int') -> 'None': ...
+        def __init__(self, type: 'Enum_OptionType', length: 'int', timestamp_high: 'int', timestamp_low: 'int') -> 'None': ...
 
 
 class ISB_IFRecvOption(_ISB_Option):
@@ -1201,7 +1201,7 @@ class ISB_IFRecvOption(_ISB_Option):
     packets: 'int' = UInt64Field(callback=byteorder_callback)
 
     if TYPE_CHECKING:
-        def __init__(self, code: 'Enum_OptionType', length: 'int', packets: 'int', bytes: 'int') -> 'None': ...
+        def __init__(self, type: 'Enum_OptionType', length: 'int', packets: 'int') -> 'None': ...
 
 
 class ISB_IFDropOption(_ISB_Option):
@@ -1211,7 +1211,7 @@ class ISB_IFDropOption(_ISB_Option):
     packets: 'int' = UInt64Field(callback=byteorder_callback)
 
     if TYPE_CHECKING:
-        def __init__(self, code: 'Enum_OptionType', length: 'int', packets: 'int', bytes: 'int') -> 'None': ...
+        def __init__(self, type: 'Enum_OptionType', length: 'int', packets: 'int') -> 'None': ...
 
 
 class ISB_FilterAcceptOption(_ISB_Option):
@@ -1221,7 +1221,7 @@ class ISB_FilterAcceptOption(_ISB_Option):
     packets: 'int' = UInt64Field(callback=byteorder_callback)
 
     if TYPE_CHECKING:
-        def __init__(self, code: 'Enum_OptionType', length: 'int', packets: 'int', bytes: 'int') -> 'None': ...
+        def __init__(self, type: 'Enum_OptionType', length: 'int', packets: 'int') -> 'None': ...
 
 
 class ISB_OSDropOption(_ISB_Option):
@@ -1231,7 +1231,7 @@ class ISB_OSDropOption(_ISB_Option):
     packets: 'int' = UInt64Field(callback=byteorder_callback)
 
     if TYPE_CHECKING:
-        def __init__(self, code: 'Enum_OptionType', length: 'int', packets: 'int', bytes: 'int') -> 'None': ...
+        def __init__(self, type: 'Enum_OptionType', length: 'int', packets: 'int') -> 'None': ...
 
 
 class ISB_UsrDelivOption(_ISB_Option):
@@ -1241,7 +1241,7 @@ class ISB_UsrDelivOption(_ISB_Option):
     packets: 'int' = UInt64Field(callback=byteorder_callback)
 
     if TYPE_CHECKING:
-        def __init__(self, code: 'Enum_OptionType', length: 'int', packets: 'int', bytes: 'int') -> 'None': ...
+        def __init__(self, type: 'Enum_OptionType', length: 'int', packets: 'int') -> 'None': ...
 
 
 class InterfaceStatisticsBlock(BlockType):
