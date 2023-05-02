@@ -380,6 +380,7 @@
 <span class="kn">from</span> <span class="nn">pcapkit.utilities.warnings</span> <span class="kn">import</span> <span class="n">RegistryWarning</span><span class="p">,</span> <span class="n">warn</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span> <span class="k">as</span> <span class="n">dt_type</span>
     <span class="kn">from</span> <span class="nn">decimal</span> <span class="kn">import</span> <span class="n">Decimal</span>
     <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">IO</span><span class="p">,</span> <span class="n">Any</span><span class="p">,</span> <span class="n">DefaultDict</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Type</span>
 
@@ -554,7 +555,8 @@
             <span class="n">_epch</span> <span class="o">=</span> <span class="n">_tsss</span> <span class="o">+</span> <span class="n">decimal</span><span class="o">.</span><span class="n">Decimal</span><span class="p">(</span><span class="n">_tsus</span><span class="p">)</span> <span class="o">/</span> <span class="mi">1_000_000_000</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">_epch</span> <span class="o">=</span> <span class="n">_tsss</span> <span class="o">+</span> <span class="n">decimal</span><span class="o">.</span><span class="n">Decimal</span><span class="p">(</span><span class="n">_tsus</span><span class="p">)</span> <span class="o">/</span> <span class="mi">1_000_000</span>
-        <span class="n">_time</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">fromtimestamp</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">_epch</span><span class="p">))</span>
+        <span class="n">_irat</span> <span class="o">=</span> <span class="n">_epch</span><span class="o">.</span><span class="n">as_integer_ratio</span><span class="p">()</span>
+        <span class="n">_time</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">fromtimestamp</span><span class="p">(</span><span class="n">_irat</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="n">_irat</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
 
         <span class="n">frame</span> <span class="o">=</span> <span class="n">Data_Frame</span><span class="p">(</span>
             <span class="n">frame_info</span><span class="o">=</span><span class="n">Data_FrameInfo</span><span class="p">(</span>
@@ -593,7 +595,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_decode_next_layer</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ghdr</span><span class="o">.</span><span class="n">network</span><span class="p">,</span> <span class="n">frame</span><span class="o">.</span><span class="n">len</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="Frame.make"><a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcap.html#pcapkit.protocols.misc.pcap.frame.Frame.make">[docs]</a>    <span class="k">def</span> <span class="nf">make</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
-             <span class="n">timestamp</span><span class="p">:</span> <span class="s1">&#39;Optional[float | Decimal]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+             <span class="n">timestamp</span><span class="p">:</span> <span class="s1">&#39;Optional[float | Decimal | int | dt_type]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
              <span class="n">ts_sec</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
              <span class="n">ts_usec</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
              <span class="n">incl_len</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -729,7 +731,7 @@
             <span class="s1">&#39;packet&#39;</span><span class="p">:</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_make_payload</span><span class="p">(</span><span class="n">data</span><span class="p">),</span>
         <span class="p">}</span></div>
 
-    <span class="k">def</span> <span class="nf">_make_timestamp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timestamp</span><span class="p">:</span> <span class="s1">&#39;Optional[float | Decimal]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">ts_sec</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="k">def</span> <span class="nf">_make_timestamp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timestamp</span><span class="p">:</span> <span class="s1">&#39;Optional[float | Decimal | dt_type | int]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">ts_sec</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                         <span class="n">ts_usec</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">nanosecond</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;tuple[int, int]&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Make timestamp.</span>
 
@@ -749,13 +751,15 @@
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">timestamp</span> <span class="o">=</span> <span class="n">decimal</span><span class="o">.</span><span class="n">Decimal</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">())</span>
         <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">timestamp</span><span class="p">,</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="p">):</span>
+                <span class="n">timestamp</span> <span class="o">=</span> <span class="n">timestamp</span><span class="o">.</span><span class="n">timestamp</span><span class="p">()</span>
             <span class="n">timestamp</span> <span class="o">=</span> <span class="n">decimal</span><span class="o">.</span><span class="n">Decimal</span><span class="p">(</span><span class="n">timestamp</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">ts_sec</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">ts_sec</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">timestamp</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">ts_usec</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">ts_usec</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">timestamp</span> <span class="o">-</span> <span class="n">ts_sec</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1_000_000_000</span> <span class="k">if</span> <span class="n">nanosecond</span> <span class="k">else</span> <span class="mi">1_000_000</span><span class="p">)</span>
+            <span class="n">ts_usec</span> <span class="o">=</span> <span class="nb">int</span><span class="p">((</span><span class="n">timestamp</span> <span class="o">-</span> <span class="n">ts_sec</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1_000_000_000</span> <span class="k">if</span> <span class="n">nanosecond</span> <span class="k">else</span> <span class="mi">1_000_000</span><span class="p">))</span>
 
         <span class="k">return</span> <span class="n">ts_sec</span><span class="p">,</span> <span class="n">ts_usec</span>
 
