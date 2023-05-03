@@ -551,10 +551,11 @@
         <span class="n">_ilen</span> <span class="o">=</span> <span class="n">schema</span><span class="o">.</span><span class="n">incl_len</span>
         <span class="n">_olen</span> <span class="o">=</span> <span class="n">schema</span><span class="o">.</span><span class="n">orig_len</span>
 
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_nsec</span><span class="p">:</span>
-            <span class="n">_epch</span> <span class="o">=</span> <span class="n">_tsss</span> <span class="o">+</span> <span class="n">decimal</span><span class="o">.</span><span class="n">Decimal</span><span class="p">(</span><span class="n">_tsus</span><span class="p">)</span> <span class="o">/</span> <span class="mi">1_000_000_000</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">_epch</span> <span class="o">=</span> <span class="n">_tsss</span> <span class="o">+</span> <span class="n">decimal</span><span class="o">.</span><span class="n">Decimal</span><span class="p">(</span><span class="n">_tsus</span><span class="p">)</span> <span class="o">/</span> <span class="mi">1_000_000</span>
+        <span class="k">with</span> <span class="n">decimal</span><span class="o">.</span><span class="n">localcontext</span><span class="p">(</span><span class="n">prec</span><span class="o">=</span><span class="mi">64</span><span class="p">):</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_nsec</span><span class="p">:</span>
+                <span class="n">_epch</span> <span class="o">=</span> <span class="n">_tsss</span> <span class="o">+</span> <span class="n">decimal</span><span class="o">.</span><span class="n">Decimal</span><span class="p">(</span><span class="n">_tsus</span><span class="p">)</span> <span class="o">/</span> <span class="mi">1_000_000_000</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">_epch</span> <span class="o">=</span> <span class="n">_tsss</span> <span class="o">+</span> <span class="n">decimal</span><span class="o">.</span><span class="n">Decimal</span><span class="p">(</span><span class="n">_tsus</span><span class="p">)</span> <span class="o">/</span> <span class="mi">1_000_000</span>
         <span class="n">_irat</span> <span class="o">=</span> <span class="n">_epch</span><span class="o">.</span><span class="n">as_integer_ratio</span><span class="p">()</span>
         <span class="n">_time</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">fromtimestamp</span><span class="p">(</span><span class="n">_irat</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="n">_irat</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
 
@@ -745,15 +746,16 @@
 <span class="sd">            Second and microsecond/nanosecond value of timestamp.</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="n">timestamp</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">py37</span> <span class="ow">and</span> <span class="n">nanosecond</span><span class="p">:</span>
-                <span class="n">timestamp</span> <span class="o">=</span> <span class="n">decimal</span><span class="o">.</span><span class="n">Decimal</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time_ns</span><span class="p">())</span> <span class="o">/</span> <span class="mi">1_000_000_000</span>
+        <span class="k">with</span> <span class="n">decimal</span><span class="o">.</span><span class="n">localcontext</span><span class="p">(</span><span class="n">prec</span><span class="o">=</span><span class="mi">64</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">timestamp</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">py37</span> <span class="ow">and</span> <span class="n">nanosecond</span><span class="p">:</span>
+                    <span class="n">timestamp</span> <span class="o">=</span> <span class="n">decimal</span><span class="o">.</span><span class="n">Decimal</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time_ns</span><span class="p">())</span> <span class="o">/</span> <span class="mi">1_000_000_000</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">timestamp</span> <span class="o">=</span> <span class="n">decimal</span><span class="o">.</span><span class="n">Decimal</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">())</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">timestamp</span> <span class="o">=</span> <span class="n">decimal</span><span class="o">.</span><span class="n">Decimal</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">())</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">timestamp</span><span class="p">,</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="p">):</span>
-                <span class="n">timestamp</span> <span class="o">=</span> <span class="n">timestamp</span><span class="o">.</span><span class="n">timestamp</span><span class="p">()</span>
-            <span class="n">timestamp</span> <span class="o">=</span> <span class="n">decimal</span><span class="o">.</span><span class="n">Decimal</span><span class="p">(</span><span class="n">timestamp</span><span class="p">)</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">timestamp</span><span class="p">,</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="p">):</span>
+                    <span class="n">timestamp</span> <span class="o">=</span> <span class="n">timestamp</span><span class="o">.</span><span class="n">timestamp</span><span class="p">()</span>
+                <span class="n">timestamp</span> <span class="o">=</span> <span class="n">decimal</span><span class="o">.</span><span class="n">Decimal</span><span class="p">(</span><span class="n">timestamp</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">ts_sec</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">ts_sec</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">timestamp</span><span class="p">)</span>
