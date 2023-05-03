@@ -130,6 +130,9 @@ class Extractor(Generic[P]):
         #: Output format.
         _offmt: 'Formats'
 
+    #: List of potential PCAP file extentions.
+    PCAP_EXT = ['.pcap', '.cap', '.pcapng']
+
     ##########################################################################
     # Defaults.
     ##########################################################################
@@ -405,7 +408,7 @@ class Extractor(Generic[P]):
 
         """
         if extension:  # pylint: disable=else-if-used
-            ifnm = fin if os.path.splitext(fin)[1] == '.pcap' else f'{fin}.pcap'
+            ifnm = fin if os.path.splitext(fin)[1] in cls.PCAP_EXT else f'{fin}.pcap'
         else:
             ifnm = fin
 
