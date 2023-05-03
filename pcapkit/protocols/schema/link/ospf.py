@@ -74,7 +74,6 @@ class OSPF(Schema):
     auth_type: 'Enum_Authentication' = EnumField(length=2, namespace=Enum_Authentication)
     #: Authentication data.
     auth_data: 'bytes | CrytographicAuthentication' = SwitchField(
-        length=8,
         selector=ospf_auth_data_selector,
     )
     #: Payload.

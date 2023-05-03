@@ -146,7 +146,7 @@ class ConditionalField(_Field[_TC]):
         """
         new_self = copy.copy(self)
         if new_self._condition(packet):
-            new_self._field(packet)
+            new_self._field = new_self._field(packet)
         return new_self
 
     def pre_process(self, value: '_TC', packet: 'dict[str, Any]') -> 'Any':  # pylint: disable=unused-argument
@@ -356,20 +356,57 @@ class SwitchField(_Field[_TC]):
     """Conditional type-switching field for protocol schema.
 
     Args:
-        length: Field size (in bytes); if a callable is given, it should return
-            an integer value and accept the current packet as its only argument.
         selector: Callable function to select field type, which should accept
             the current packet as its only argument and return a field instance.
 
     """
 
     @property
+    def name(self) -> 'str':
+        """Field name."""
+        return self._field.name
+
+    @name.setter
+    def name(self, value: 'str') -> 'None':
+        """Set field name."""
+        self._field.name = value
+
+    @property
+    def default(self) -> '_TC | NoValueType':
+        """Field default value."""
+        return self._field.default
+
+    @default.setter
+    def default(self, value: '_TC | NoValueType') -> 'None':
+        """Set field default value."""
+        self._field.default = value
+
+    @default.deleter
+    def default(self) -> 'None':
+        """Delete field default value."""
+        self._field.default = NoValue
+
+    @property
+    def template(self) -> 'str':
+        """Field template."""
+        return self._field.template
+
+    @property
+    def length(self) -> 'int':
+        """Field size."""
+        return self._field.length
+
+    @property
     def optional(self) -> 'bool':
         """Field is optional."""
         return True
 
-    def __init__(self, length: 'int | Callable[[dict[str, Any]], int]' = lambda _: -1,
-                 selector: 'Callable[[dict[str, Any]], _Field[_TC]]' = lambda _: NoValueField()) -> 'None':  # type: ignore[assignment,return-value]
+    @property
+    def field(self) -> '_Field[_TC]':
+        """Field instance."""
+        return self._field
+
+    def __init__(self, selector: 'Callable[[dict[str, Any]], _Field[_TC]]' = lambda _: NoValueField()) -> 'None':  # type: ignore[assignment,return-value]
         self._name = '<switch>'
         self._field = cast('_Field[_TC]', NoValueField())
         self._selector = selector
@@ -390,7 +427,6 @@ class SwitchField(_Field[_TC]):
         """
         new_self = copy.copy(self)
         new_self._field = self._selector(packet)(packet)
-        new_self._template = new_self._field.template
         return new_self
 
     def pre_process(self, value: '_TC', packet: 'dict[str, Any]') -> 'Any':  # pylint: disable=unused-argument
@@ -522,7 +558,7 @@ class SchemaField(_Field[_TS]):
         new_self._callback(new_self, packet)
         if new_self._length_callback is not None:
             new_self._length = new_self._length_callback(packet)
-            new_self._template = f'{new_self._length}s'
+            new_self._template = f'{new_self._length}s' if self._length >= 0 else '1024s'  # use a reasonable default
         return new_self
 
     def pack(self, value: 'Optional[_TS | bytes]', packet: 'dict[str, Any]') -> 'bytes':
@@ -637,6 +673,24 @@ class ForwardMatchField(_Field[_TC]):
     def __init__(self, field: '_Field[_TC]') -> 'None':
         self._name = '<forward_match>'
         self._field = field
+
+    def __call__(self, packet: 'dict[str, Any]') -> 'Self':
+        """Update field attributes.
+
+        Arguments:
+            packet: Packet data.
+
+        Returns:
+            Updated field instance.
+
+        Notes:
+            This method will return a new instance of :class:`ConditionalField`
+            instead of updating the current instance.
+
+        """
+        new_self = copy.copy(self)
+        new_self._field = new_self._field(packet)
+        return new_self
 
     def pack(self, value: 'Optional[_TC]', packet: 'dict[str, Any]') -> 'bytes':
         """Pack field value into :obj:`bytes`.

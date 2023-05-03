@@ -123,9 +123,9 @@ def quick_start_data_selector(pkt: 'dict[str, Any]') -> 'Field':
     pkt['flags']['func'] = func
 
     if func == Enum_QSFunction.Quick_Start_Request:
-        return SchemaField(schema=QuickStartRequestOption)
+        return SchemaField(length=5, schema=QuickStartRequestOption)
     if func == Enum_QSFunction.Report_of_Approved_Rate:
-        return SchemaField(schema=QuickStartReportOption)
+        return SchemaField(length=5, schema=QuickStartReportOption)
     raise FieldValueError(f'HOPOPT: invalid QS function: {func}')
 
 
@@ -436,7 +436,6 @@ class _QSOption(Schema):
     }))
     #: QS data.
     data: 'QuickStartRequestOption | QuickStartReportOption' = SwitchField(
-        length=5,
         selector=quick_start_data_selector,
     )
 

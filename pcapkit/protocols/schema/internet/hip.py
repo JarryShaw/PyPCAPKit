@@ -158,11 +158,11 @@ def host_id_hi_selector(pkt: 'dict[str, Any]') -> 'Field':
 
     """
     if pkt['algorithm'] == Enum_HIAlgorithm.ECDSA:
-        return SchemaField(schema=ECDSACurveHostIdentity)
+        return SchemaField(length=pkt['hi_len'], schema=ECDSACurveHostIdentity)
     if pkt['algorithm'] == Enum_HIAlgorithm.ECDSA_LOW:
-        return SchemaField(schema=ECDSALowCurveHostIdentity)
+        return SchemaField(length=pkt['hi_len'], schema=ECDSALowCurveHostIdentity)
     if pkt['algorithm'] == Enum_HIAlgorithm.EdDSA:
-        return SchemaField(schema=EdDSACurveHostIdentity)
+        return SchemaField(length=pkt['hi_len'], schema=EdDSACurveHostIdentity)
     return BytesField(length=pkt['hi_len'])
 
 
@@ -239,7 +239,6 @@ class Locator(Schema):
     lifetime: 'int' = UInt32Field()
     #: Locator value.
     value: 'IPv6Address | LocatorData' = SwitchField(
-        length=lambda pkt: pkt['len'] * 4,
         selector=locator_value_selector,
     )
 
@@ -528,9 +527,7 @@ class HostIDParameter(Parameter):
     #: Algorithm type.
     algorithm: 'Enum_HIAlgorithm' = EnumField(length=2, namespace=Enum_HIAlgorithm)
     #: Host ID.
-    hi: 'bytes | HostIdentity' = SwitchField(
-        length=lambda pkt: pkt['hi_len'],
-        selector=host_id_hi_selector)
+    hi: 'bytes | HostIdentity' = SwitchField(selector=host_id_hi_selector)
     #: Domain ID.
     di: 'bytes' = BytesField(length=lambda pkt: pkt['di_data']['len'])
     #: Padding.

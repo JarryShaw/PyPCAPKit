@@ -189,28 +189,28 @@ def pcapng_block_selector(packet: 'dict[str, Any]') -> 'Field':
     """
     block_type = packet['type']  # type: Enum_BlockType
     if block_type == Enum_BlockType.Section_Header_Block:
-        return SchemaField(schema=SectionHeaderBlock)
+        return SchemaField(length=packet['__length__'], schema=SectionHeaderBlock)
     elif block_type == Enum_BlockType.Interface_Description_Block:
-        return SchemaField(schema=InterfaceDescriptionBlock)
+        return SchemaField(length=packet['__length__'], schema=InterfaceDescriptionBlock)
     elif block_type == Enum_BlockType.Enhanced_Packet_Block:
-        return SchemaField(schema=EnhancedPacketBlock)
+        return SchemaField(length=packet['__length__'], schema=EnhancedPacketBlock)
     elif block_type == Enum_BlockType.Simple_Packet_Block:
-        return SchemaField(schema=SimplePacketBlock)
+        return SchemaField(length=packet['__length__'], schema=SimplePacketBlock)
     elif block_type == Enum_BlockType.Name_Resolution_Block:
-        return SchemaField(schema=NameResolutionBlock)
+        return SchemaField(length=packet['__length__'], schema=NameResolutionBlock)
     elif block_type == Enum_BlockType.Interface_Statistics_Block:
-        return SchemaField(schema=InterfaceStatisticsBlock)
+        return SchemaField(length=packet['__length__'], schema=InterfaceStatisticsBlock)
     elif block_type == Enum_BlockType.systemd_Journal_Export_Block:
-        return SchemaField(schema=SystemdJournalExportBlock)
+        return SchemaField(length=packet['__length__'], schema=SystemdJournalExportBlock)
     elif block_type == Enum_BlockType.Decryption_Secrets_Block:
-        return SchemaField(schema=DecryptionSecretsBlock)
+        return SchemaField(length=packet['__length__'], schema=DecryptionSecretsBlock)
     elif block_type == Enum_BlockType.Custom_Block_that_rewriters_can_copy_into_new_files:
-        return SchemaField(schema=CustomBlock)
+        return SchemaField(length=packet['__length__'], schema=CustomBlock)
     elif block_type == Enum_BlockType.Custom_Block_that_rewriters_should_not_copy_into_new_files:
-        return SchemaField(schema=CustomBlock)
+        return SchemaField(length=packet['__length__'], schema=CustomBlock)
     elif block_type == Enum_BlockType.Packet_Block:
-        return SchemaField(schema=PacketBlock)
-    return SchemaField(schema=UnknownBlock)
+        return SchemaField(length=packet['__length__'], schema=PacketBlock)
+    return SchemaField(length=packet['__length__'], schema=UnknownBlock)
 
 
 def dsb_secrets_selector(packet: 'dict[str, Any]') -> 'Field':
@@ -285,7 +285,6 @@ class PCAPNG(Schema):
     type: 'Enum_BlockType' = EnumField(length=4, namespace=Enum_BlockType)
     #: Block specific data.
     block: 'BlockType' = SwitchField(
-        length=lambda pkt: pkt['__length__'],
         selector=pcapng_block_selector,
     )
 
@@ -1471,7 +1470,6 @@ class DecryptionSecretsBlock(BlockType):
     secrets_length: 'int' = UInt32Field(callback=byteorder_callback)
     #: Secrets data.
     secrets_data: 'DSBSecrets' = SwitchField(
-        length=lambda pkt: pkt['secrets_length'],
         selector=dsb_secrets_selector,
     )
     #: Padding.

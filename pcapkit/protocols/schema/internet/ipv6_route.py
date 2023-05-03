@@ -58,12 +58,12 @@ def ipv6_route_data_selector(pkt: 'dict[str, Any]') -> 'Field':
     """
     type = cast('Enum_Routing', pkt['type'])
     if type == Enum_Routing.Source_Route:
-        return SchemaField(schema=SourceRoute)
+        return SchemaField(length=pkt['length'] * 8 - 4, schema=SourceRoute)
     if type == Enum_Routing.Type_2_Routing_Header:
-        return SchemaField(schema=Type2)
+        return SchemaField(length=pkt['length'] * 8 - 4, schema=Type2)
     if type == Enum_Routing.RPL_Source_Route_Header:
-        return SchemaField(schema=RPL)
-    return SchemaField(schema=UnknownType)
+        return SchemaField(length=pkt['length'] * 8 - 4, schema=RPL)
+    return SchemaField(length=pkt['length'] * 8 - 4, schema=UnknownType)
 
 
 class IPv6_Route(Schema):
@@ -79,7 +79,6 @@ class IPv6_Route(Schema):
     seg_left: 'int' = UInt8Field()
     #: Routing data.
     data: 'RoutingType' = SwitchField(
-        length=lambda pkt: pkt['length'] * 8 - 4,
         selector=ipv6_route_data_selector,
     )
     #: Payload.

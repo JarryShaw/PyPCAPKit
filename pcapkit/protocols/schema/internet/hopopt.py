@@ -158,9 +158,9 @@ def smf_dpd_data_selector(pkt: 'dict[str, Any]') -> 'Field':
     """
     mode = Enum_SMFDPDMode.get(pkt['test']['mode'])
     if mode == Enum_SMFDPDMode.I_DPD:
-        return SchemaField(schema=SMFIdentificationBasedDPDOption)
+        return SchemaField(length=pkt['test']['len'], schema=SMFIdentificationBasedDPDOption)
     if mode == Enum_SMFDPDMode.H_DPD:
-        return SchemaField(schema=SMFHashBasedDPDOption)
+        return SchemaField(length=pkt['test']['len'], schema=SMFHashBasedDPDOption)
     raise FieldValueError(f'HOPOPT: invalid SMF DPD mode: {mode}')
 
 
@@ -220,9 +220,9 @@ def quick_start_data_selector(pkt: 'dict[str, Any]') -> 'Field':
     pkt['flags']['func'] = func
 
     if func == Enum_QSFunction.Quick_Start_Request:
-        return SchemaField(schema=QuickStartRequestOption)
+        return SchemaField(length=5, schema=QuickStartRequestOption)
     if func == Enum_QSFunction.Report_of_Approved_Rate:
-        return SchemaField(schema=QuickStartReportOption)
+        return SchemaField(length=5, schema=QuickStartReportOption)
     raise FieldValueError(f'HOPOPT: invalid QS function: {func}')
 
 
@@ -327,7 +327,6 @@ class _SMFDPDOption(Schema):
     }))
     #: SMF DPD data.
     data: 'SMFIdentificationBasedDPDOption | SMFHashBasedDPDOption' = SwitchField(
-        length=lambda pkt: pkt['test']['len'],
         selector=smf_dpd_data_selector,
     )
 
@@ -364,8 +363,7 @@ class SMFIdentificationBasedDPDOption(SMFDPDOption):
     })
     #: TaggerID.
     tid: 'bytes | IPv4Address | IPv6Address' = ConditionalField(
-        SwitchField(length=lambda pkt: pkt['info']['len'] + 1,
-                    selector=smf_i_dpd_tid_selector),
+        SwitchField(selector=smf_i_dpd_tid_selector),
         lambda pkt: pkt['info']['type'] != 0,
     )
     #: Identifier.
@@ -446,7 +444,6 @@ class _QuickStartOption(Schema):
     }))
     #: QS data.
     data: 'QuickStartRequestOption | QuickStartReportOption' = SwitchField(
-        length=5,
         selector=quick_start_data_selector,
     )
 

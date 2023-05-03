@@ -79,26 +79,26 @@ def http_frame_selector(pkt: 'dict[str, Any]') -> 'Field':
     """
     type = cast('Enum_Frame', pkt['type'])
     if type == Enum_Frame.DATA:
-        return SchemaField(schema=DataFrame)
+        return SchemaField(length=pkt['__length__'], schema=DataFrame)
     if type == Enum_Frame.HEADERS:
-        return SchemaField(schema=HeadersFrame)
+        return SchemaField(length=pkt['__length__'], schema=HeadersFrame)
     if type == Enum_Frame.PRIORITY:
-        return SchemaField(schema=PriorityFrame)
+        return SchemaField(length=pkt['__length__'], schema=PriorityFrame)
     if type == Enum_Frame.RST_STREAM:
-        return SchemaField(schema=RSTStreamFrame)
+        return SchemaField(length=pkt['__length__'], schema=RSTStreamFrame)
     if type == Enum_Frame.SETTINGS:
-        return SchemaField(schema=SettingsFrame)
+        return SchemaField(length=pkt['__length__'], schema=SettingsFrame)
     if type == Enum_Frame.PUSH_PROMISE:
-        return SchemaField(schema=PushPromiseFrame)
+        return SchemaField(length=pkt['__length__'], schema=PushPromiseFrame)
     if type == Enum_Frame.PING:
-        return SchemaField(schema=PingFrame)
+        return SchemaField(length=pkt['__length__'], schema=PingFrame)
     if type == Enum_Frame.GOAWAY:
-        return SchemaField(schema=GoawayFrame)
+        return SchemaField(length=pkt['__length__'], schema=GoawayFrame)
     if type == Enum_Frame.WINDOW_UPDATE:
-        return SchemaField(schema=WindowUpdateFrame)
+        return SchemaField(length=pkt['__length__'], schema=WindowUpdateFrame)
     if type == Enum_Frame.CONTINUATION:
-        return SchemaField(schema=ContinuationFrame)
-    return SchemaField(schema=UnassignedFrame)
+        return SchemaField(length=pkt['__length__'], schema=ContinuationFrame)
+    return SchemaField(length=pkt['__length__'], schema=UnassignedFrame)
 
 
 class HTTP(Schema):
@@ -125,7 +125,6 @@ class HTTP(Schema):
     })
     #: Frame payload.
     frame: 'FrameType' = SwitchField(
-        length=lambda pkt: pkt['__length__'],
         selector=http_frame_selector,
     )
 

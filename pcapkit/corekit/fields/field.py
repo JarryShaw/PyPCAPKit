@@ -194,11 +194,6 @@ class Field(_Field[_T], Generic[_T]):
         """Field template."""
         return self._template
 
-    @property
-    def length(self) -> 'int':
-        """Field size."""
-        return struct.calcsize(self.template)
-
     def __init__(self, length: 'int | Callable[[dict[str, Any]], int]',
                  default: '_T | NoValueType' = NoValue,
                  callback: 'Callable[[Self, dict[str, Any]], None]' = lambda *_: None) -> 'None':

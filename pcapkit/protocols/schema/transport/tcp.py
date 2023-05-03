@@ -201,45 +201,28 @@ def mptcp_data_selector(pkt: 'dict[str, Any]') -> 'Field':
     pkt['test']['subtype'] = subtype
 
     if subtype == Enum_MPTCPOption.MP_CAPABLE:
-        return SchemaField(schema=MPTCPCapable)
+        return SchemaField(length=pkt['test']['length'], schema=MPTCPCapable)
     if subtype == Enum_MPTCPOption.MP_JOIN:
         if pkt['flags']['syn'] == 1 and pkt['flags']['ack'] == 0:
-            return SchemaField(schema=MPTCPJoinSYN)
+            return SchemaField(length=pkt['test']['length'], schema=MPTCPJoinSYN)
         if pkt['flags']['syn'] == 1 and pkt['flags']['ack'] == 1:
-            return SchemaField(schema=MPTCPJoinSYNACK)
+            return SchemaField(length=pkt['test']['length'], schema=MPTCPJoinSYNACK)
         if pkt['flags']['syn'] == 0 and pkt['flags']['ack'] == 1:
-            return SchemaField(schema=MPTCPJoinACK)
+            return SchemaField(length=pkt['test']['length'], schema=MPTCPJoinACK)
         raise FieldError(f'TCP: [OptNo {Enum_Option.Multipath_TCP}] {Enum_MPTCPOption.MP_JOIN} invalid flags')
     if subtype == Enum_MPTCPOption.DSS:
-        return SchemaField(schema=MPTCPDSS)
+        return SchemaField(length=pkt['test']['length'], schema=MPTCPDSS)
     if subtype == Enum_MPTCPOption.ADD_ADDR:
-        return SchemaField(schema=MPTCPAddAddress)
+        return SchemaField(length=pkt['test']['length'], schema=MPTCPAddAddress)
     if subtype == Enum_MPTCPOption.REMOVE_ADDR:
-        return SchemaField(schema=MPTCPRemoveAddress)
+        return SchemaField(length=pkt['test']['length'], schema=MPTCPRemoveAddress)
     if subtype == Enum_MPTCPOption.MP_PRIO:
-        return SchemaField(schema=MPTCPPriority)
+        return SchemaField(length=pkt['test']['length'], schema=MPTCPPriority)
     if subtype == Enum_MPTCPOption.MP_FAIL:
-        return SchemaField(schema=MPTCPFallback)
+        return SchemaField(length=pkt['test']['length'], schema=MPTCPFallback)
     if subtype == Enum_MPTCPOption.MP_FASTCLOSE:
-        return SchemaField(schema=MPTCPFastclose)
-    return SchemaField(schema=MPTCPUnknown)
-
-
-def mptcp_add_address_length(pkt: 'dict[str, Any]') -> 'Literal[4, 16]':
-    """Length callback function for :attr:`MPTCPAddAddress.address` field.
-
-    Args:
-        pkt: Packet data.
-
-    Returns:
-        Length of :attr:`MPTCPAddAddress.address` field.
-
-    """
-    if pkt['test']['version'] == 4:
-        return 4
-    if pkt['test']['version'] == 6:
-        return 16
-    raise FieldError(f'TCP: [OptNo {Enum_Option.Multipath_TCP}] {Enum_MPTCPOption.ADD_ADDR} invalid IP version')
+        return SchemaField(length=pkt['test']['length'], schema=MPTCPFastclose)
+    return SchemaField(length=pkt['test']['length'], schema=MPTCPUnknown)
 
 
 def mptcp_add_address_selector(pkt: 'dict[str, Any]') -> 'Field':
@@ -532,7 +515,6 @@ class _MPTCP(Schema):
     }))
     #: Subtype-specific data.
     data: 'MPTCP' = SwitchField(
-        length=lambda pkt: pkt['test']['length'],
         selector=mptcp_data_selector,
     )
 
@@ -715,7 +697,6 @@ class MPTCPAddAddress(MPTCP):
     addr_id: 'int' = UInt8Field()
     #: Address.
     address: 'IPv4Address | IPv6Address' = SwitchField(
-        length=mptcp_add_address_length,
         selector=mptcp_add_address_selector,
     )
     #: Port.
