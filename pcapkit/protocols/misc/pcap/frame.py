@@ -209,10 +209,11 @@ class Frame(Protocol[Data_Frame, Schema_Frame],
         _ilen = schema.incl_len
         _olen = schema.orig_len
 
-        if self._nsec:
-            _epch = _tsss + decimal.Decimal(_tsus) / 1_000_000_000
-        else:
-            _epch = _tsss + decimal.Decimal(_tsus) / 1_000_000
+        with decimal.localcontext(prec=64):
+            if self._nsec:
+                _epch = _tsss + decimal.Decimal(_tsus) / 1_000_000_000
+            else:
+                _epch = _tsss + decimal.Decimal(_tsus) / 1_000_000
         _irat = _epch.as_integer_ratio()
         _time = datetime.datetime.fromtimestamp(_irat[0] / _irat[1])
 
@@ -403,15 +404,16 @@ class Frame(Protocol[Data_Frame, Schema_Frame],
             Second and microsecond/nanosecond value of timestamp.
 
         """
-        if timestamp is None:
-            if py37 and nanosecond:
-                timestamp = decimal.Decimal(time.time_ns()) / 1_000_000_000
+        with decimal.localcontext(prec=64):
+            if timestamp is None:
+                if py37 and nanosecond:
+                    timestamp = decimal.Decimal(time.time_ns()) / 1_000_000_000
+                else:
+                    timestamp = decimal.Decimal(time.time())
             else:
-                timestamp = decimal.Decimal(time.time())
-        else:
-            if isinstance(timestamp, datetime.datetime):
-                timestamp = timestamp.timestamp()
-            timestamp = decimal.Decimal(timestamp)
+                if isinstance(timestamp, datetime.datetime):
+                    timestamp = timestamp.timestamp()
+                timestamp = decimal.Decimal(timestamp)
 
         if ts_sec is None:
             ts_sec = int(timestamp)
