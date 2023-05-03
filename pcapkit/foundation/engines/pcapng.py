@@ -122,12 +122,13 @@ class PCAPNG(Engine[P_PCAPNG]):
         """
         ext = self._extractor
 
-        shb = P_PCAPNG(ext._ifile, num=0, ctx=None)
+        shb = P_PCAPNG(ext._ifile, num=0, sct=1, ctx=None)
         if shb.info.type != Enum_BlockType.Section_Header_Block:
             raise FormatError(f'PCAP-NG: [SHB] invalid block type: {shb.info.type!r}')
 
         self._ctx = Context(cast('Data_SectionHeaderBlock', shb.info))
         self._ctx_list.append(self._ctx)
+        shb._ctx = self._ctx
 
         self._write_file(shb.info, name=f'Section Header {len(self._ctx_list)}')
 
@@ -155,8 +156,8 @@ class PCAPNG(Engine[P_PCAPNG]):
 
         while True:
             # read next block
-            block = P_PCAPNG(ext._ifile, num=ext._frnum+1, ctx=self._ctx,
-                             layer=ext._exlyr, protocol=ext._exptl,
+            block = P_PCAPNG(ext._ifile, num=ext._frnum+1, sct=len(self._ctx_list),
+                             ctx=self._ctx, layer=ext._exlyr, protocol=ext._exptl,
                              __packet__={
                                  'snaplen': self._get_snaplen(),
                              })
@@ -165,6 +166,7 @@ class PCAPNG(Engine[P_PCAPNG]):
             if block.info.type == Enum_BlockType.Section_Header_Block:
                 self._ctx = Context(cast('Data_SectionHeaderBlock', block.info))
                 self._ctx_list.append(self._ctx)
+                block._ctx = self._ctx
 
                 self._write_file(block.info, name=f'Section Header {len(self._ctx_list)}')
 
@@ -288,9 +290,9 @@ class PCAPNG(Engine[P_PCAPNG]):
         argument when parsing a Simple Packet Block (SPB).
 
         Notes:
-            If there is no interface, return ``0xFFFFFFFFFFFFFFFF``.
+            If there is no interface, return ``0xFFFF_FFFF_FFFF_FFFF``.
 
         """
         if self._ctx.interfaces:
             return self._ctx.interfaces[0].snaplen
-        return 0xFFFFFFFFFFFFFFFF
+        return 0xFFFF_FFFF_FFFF_FFFF

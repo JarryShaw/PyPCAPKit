@@ -452,7 +452,7 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
          - :meth:`~pcapkit.protocols.misc.pcapng.PCAPNG._read_option_epb_hash`
          - :meth:`~pcapkit.protocols.misc.pcapng.PCAPNG._make_option_epb_hash`
 
-    The class currently supports parsing of the following name resolution
+    The class currently supports parsing of the following :manpage:`systemd(1)` journal export
     record types, which are registered in the :attr:`self.__record__ <pcapkit.protocols.misc.pcapng.PCAPNG.__record__>`
     attribute:
 
@@ -601,7 +601,7 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
     )  # type: DefaultDict[Enum_OptionType | int, str | tuple[OptionParser, OptionConstructor]]
 
     #: DefaultDict[Enum_RecordType, str | tuple[RecordParser, RecordConstructor]]:
-    #: Name resolution record type to method mapping. Method names are expected
+    #: :manpage:`systemd(1)` Journal Export record type to method mapping. Method names are expected
     #: to be referred to the class by ``_read_record_${name}`` and/or ``_make_record_${name}``,
     #: and if such name not found, the value should then be a method that can
     #: parse the name record by itself.
@@ -637,8 +637,8 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
     def name(self) -> 'str':
         """Name of corresponding protocol."""
         if self._info.type not in self.PACKET_TYPES:
-            return f'PCAP-NG {self._info.type!r}'
-        return f'Frame {self._fnum}'
+            return f'PCAP-NG {self._info.type!r} - Section {self._sect}'
+        return f'Frame {self._sect}-{self._fnum}'
 
     @property
     def length(self) -> 'int':
@@ -783,15 +783,15 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
 
     @classmethod
     def register_record(cls, code: 'Enum_RecordType', meth: 'str | tuple[RecordParser, RecordConstructor]') -> 'None':
-        """Register a name resolution record parser.
+        """Register a :manpage:`systemd(1)` journal export record parser.
 
         Args:
-            code: PCAP-NG name resolution record type code.
-            meth: Method name or callable to parse and/or construct the name resolution record.
+            code: PCAP-NG :manpage:`systemd(1)` journal export record type code.
+            meth: Method name or callable to parse and/or construct the :manpage:`systemd(1)` journal export record.
 
         """
         if code in cls.__record__:
-            warn(f'PCAP-NG: [Type {code}] name resolution record already registered', RegistryWarning)
+            warn(f'PCAP-NG: [Type {code}] :manpage:`systemd(1)` journal export record already registered', RegistryWarning)
         cls.__record__[code] = meth
 
     @classmethod
@@ -906,6 +906,10 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
             raise ProtocolError(f'PCAP-NG: [Block {schema.type}] invalid length: {schema.block.length}')
         self._type = schema.type
 
+        if schema.type == Enum_BlockType.Section_Header_Block:
+            self._sect += 1
+            self._ctx = None
+
         name = self.__block__[schema.type]
         if isinstance(name, str):
             meth_name = f'_read_block_{name}'
@@ -993,19 +997,20 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
 
     @overload  # type: ignore[override]
     def __post_init__(self, file: 'IO[bytes] | bytes', length: 'Optional[int]' = ..., *,  # pylint: disable=arguments-differ
-                      num: 'int', ctx: 'Context', **kwargs: 'Any') -> 'None': ...
+                      num: 'int', sct: 'int', ctx: 'Context', **kwargs: 'Any') -> 'None': ...
     @overload
-    def __post_init__(self, *, num: 'int', ctx: 'Context',  # pylint: disable=arguments-differ
+    def __post_init__(self, *, num: 'int', sct: 'int',  ctx: 'Context',  # pylint: disable=arguments-differ
                       **kwargs: 'Any') -> 'None': ...
 
     def __post_init__(self, file: 'Optional[IO[bytes] | bytes]' = None, length: 'Optional[int]' = None, *,  # pylint: disable=arguments-differ
-                      num: 'int', ctx: 'Context', **kwargs: 'Any') -> 'None':
+                      num: 'int', sct: 'int', ctx: 'Context', **kwargs: 'Any') -> 'None':
         """Initialisation.
 
         Args:
             file: Source packet stream.
             length: Length of packet data.
             num: Frame index number.
+            sct: Section index number.
             ctx: Section context of the PCAP-NG file.
             **kwargs: Arbitrary keyword arguments.
 
@@ -1017,6 +1022,8 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
             For construction argument, please refer to :meth:`make`.
 
         """
+        #: int: Section index number.
+        self._sect = sct
         #: int: Block index number.
         self._fnum = num
         #: pcapkit.foundation.engins.pcapng.Context: Context of the PCAP-NG file.
@@ -1092,30 +1099,52 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
             return datetime.timezone.utc
         return cast('timezone', tzinfo)
 
+    def _read_timestamp(self, timestamp_high: 'int', timestamp_low: 'int') -> 'tuple[dt_type, Decimal]':
+        """Read timestmap.
+
+        Args:
+            timestamp_high: Higher 32-bit integer value of timestamp.
+            timestamp_low: Lower 32-bit integer value of timestamp.
+
+        Returns:
+            Tuple of timestamp in :class:`~datetime.datetime` object with
+            timezone information and :class:`decimal.Decimal` object since
+            UNIX-Epoch in UTC timezone.
+
+        """
+        timestamp_raw = (timestamp_high << 32) | timestamp_low
+        with decimal.localcontext(prec=64):
+            timestamp_epoch = decimal.Decimal(timestamp_raw) / self.ts_resolution + self.ts_offset
+            ts_decimal = timestamp_epoch + decimal.Decimal(self.ts_timezone.utcoffset(None).total_seconds())
+
+        ts_ratio = timestamp_epoch.as_integer_ratio()
+        ts_datetime = datetime.datetime.fromtimestamp(ts_ratio[0] / ts_ratio[1], self.ts_timezone)
+
+        return (ts_datetime, ts_decimal)
+
     def _make_timestamp(self, timestamp: 'Optional[float | Decimal | dt_type | int]' = None) -> 'tuple[int, int]':
         """Make timestamp.
 
         Args:
-            timestamp: Timestamp in seconds.
+            timestamp: Timestamp in seconds since UNIX-Epoch.
 
         Returns:
             Tuple of timestamp in higher and lower 32-bit integer value
             based on the given offset and timezone conversion.
 
         """
-        if timestamp is None:
-            if py37 and self.nanosecond:
-                timestamp = decimal.Decimal(time.time_ns()) / 1_000_000_000
-            else:
-                timestamp = decimal.Decimal(time.time())
-        else:
-            if isinstance(timestamp, datetime.datetime):
-                timestamp = timestamp.timestamp()
-            timestamp = decimal.Decimal(timestamp)
-
         with decimal.localcontext(prec=64):
-            ts_info = int((timestamp - self.ts_offset - \
-                 decimal.Decimal(self.ts_timezone.utcoffset(None).total_seconds())) * self.ts_resolution)
+            if timestamp is None:
+                if py37 and self.nanosecond:
+                    timestamp = decimal.Decimal(time.time_ns()) / 1_000_000_000
+                else:
+                    timestamp = decimal.Decimal(time.time())
+            else:
+                if isinstance(timestamp, datetime.datetime):
+                    timestamp = timestamp.timestamp()
+                timestamp = decimal.Decimal(timestamp)
+
+            ts_info = int((timestamp - self.ts_offset) * self.ts_resolution)
         return (ts_info >> 32) & 0xFFFF_FFFF, ts_info & 0xFFFF_FFFF
 
     def _read_mac_addr(self, addr: 'bytes') -> 'str':
@@ -1337,7 +1366,412 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
         )
         return data
 
+    def _read_block_epb(self, schema: 'Schema_EnhancedPacketBlock', *,
+                        header: 'Schema_PCAPNG') -> 'Data_EnhancedPacketBlock':
+        """Read PCAP-NG enhanced packet block (EPB).
 
+        Structure of Enhanced Packet Block:
+
+        .. code-block:: text
+
+                                   1                   2                   3
+               0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+              +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+            0 |                    Block Type = 0x00000006                    |
+              +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+            4 |                      Block Total Length                       |
+              +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+            8 |                         Interface ID                          |
+              +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           12 |                        Timestamp (High)                       |
+              +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           16 |                        Timestamp (Low)                        |
+              +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           20 |                    Captured Packet Length                     |
+              +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           24 |                    Original Packet Length                     |
+              +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           28 /                                                               /
+              /                          Packet Data                          /
+              /              variable length, padded to 32 bits               /
+              /                                                               /
+              +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+              /                                                               /
+              /                      Options (variable)                       /
+              /                                                               /
+              +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+              |                      Block Total Length                       |
+              +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+        Args:
+            schema: Parsed block schema.
+            header: Parsed PCAP-NG header schema.
+
+        Returns:
+            Parsed packet data.
+
+        """
+        timestamp, timestamp_epoch = self._read_timestamp(schema.timestamp_high, schema.timestamp_low)
+
+        data = Data_EnhancedPacketBlock(
+            type=header.type,
+            length=schema.length,
+            section_number=self._sect,
+            number=self._fnum,
+            interface_id=schema.interface_id,
+            timestamp=timestamp,
+            timestamp_epoch=timestamp_epoch,
+            captured_len=schema.captured_len,
+            original_len=schema.original_len,
+            options=self._read_pcapng_options(schema.options),
+        )
+        return self._decode_next_layer(data, self.linktype, schema.captured_len)  # type: ignore[return-value]
+
+    def _read_block_spb(self, schema: 'Schema_SimplePacketBlock', *,
+                        header: 'Schema_PCAPNG') -> 'Data_SimplePacketBlock':
+        """Read PCAP-NG simple packet block (SPB).
+
+        Structure of Simple Packet Block:
+
+        .. code-block:: text
+
+                                   1                   2                   3
+               0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+              +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+            0 |                    Block Type = 0x00000003                    |
+              +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+            4 |                      Block Total Length                       |
+              +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+            8 |                    Original Packet Length                     |
+              +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           12 /                                                               /
+              /                          Packet Data                          /
+              /              variable length, padded to 32 bits               /
+              /                                                               /
+              +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+              |                      Block Total Length                       |
+              +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+        Args:
+            schema: Parsed block schema.
+            header: Parsed PCAP-NG header schema.
+
+        Returns:
+            Parsed packet data.
+
+        """
+        data = Data_SimplePacketBlock(
+            type=header.type,
+            length=schema.length,
+            section_number=self._sect,
+            number=self._fnum,
+            captured_len=len(schema.packet_data),
+            original_len=schema.original_len,
+        )
+        return self._decode_next_layer(data, self.linktype, data.captured_len)  # type: ignore[return-value]
+
+    def _read_block_nrb(self, schema: 'Schema_NameResolutionBlock', *,
+                        header: 'Schema_PCAPNG') -> 'Data_NameResolutionBlock':
+        """Read PCAP-NG name resolution block (NRB).
+
+        Structure of Name Resolution Block:
+
+        .. code-block:: text
+
+                                   1                   2                   3
+               0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+              +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+            0 |                    Block Type = 0x00000004                    |
+              +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+            4 |                      Block Total Length                       |
+              +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+            8 |      Record Type              |      Record Value Length      |
+              +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           12 /                       Record Value                            /
+              /              variable length, padded to 32 bits               /
+              +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+              .                                                               .
+              .                  . . . other records . . .                    .
+              .                                                               .
+              +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+              |  Record Type = nrb_record_end |   Record Value Length = 0     |
+              +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+              /                                                               /
+              /                      Options (variable)                       /
+              /                                                               /
+              +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+              |                      Block Total Length                       |
+              +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+        Args:
+            schema: Parsed block schema.
+            header: Parsed PCAP-NG header schema.
+
+        Returns:
+            Parsed packet data.
+
+        """
+        data = Data_NameResolutionBlock(
+            type=header.type,
+            length=schema.length,
+            records=self._read_nrb_records(schema.records),
+            options=self._read_pcapng_options(schema.options),
+        )
+        return data
+
+    def _read_block_isb(self, schema: 'Schema_InterfaceStatisticsBlock', *,
+                        header: 'Schema_PCAPNG') -> 'Data_InterfaceStatisticsBlock':
+        """Read PCAP-NG interface statistics block (ISB).
+
+        Structure of Interface Statistics Block:
+
+        .. code-block:: text
+
+                                   1                   2                   3
+               0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+              +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+            0 |                   Block Type = 0x00000005                     |
+              +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+            4 |                      Block Total Length                       |
+              +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+            8 |                         Interface ID                          |
+              +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           12 |                        Timestamp (High)                       |
+              +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           16 |                        Timestamp (Low)                        |
+              +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           20 /                                                               /
+              /                      Options (variable)                       /
+              /                                                               /
+              +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+              |                      Block Total Length                       |
+              +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+        Args:
+            schema: Parsed block schema.
+            header: Parsed PCAP-NG header schema.
+
+        Returns:
+            Parsed packet data.
+
+        """
+        timestamp, timestamp_epoch = self._read_timestamp(schema.timestamp_high, schema.timestamp_low)
+
+        data = Data_InterfaceStatisticsBlock(
+            type=header.type,
+            length=schema.length,
+            interface_id=schema.interface_id,
+            timestamp=timestamp,
+            timestamp_epoch=timestamp_epoch,
+            options=self._read_pcapng_options(schema.options),
+        )
+        return data
+
+    def _read_block_systemd(self, schema: 'Schema_SystemdJournalExportBlock', *,
+                            header: 'Schema_PCAPNG') -> 'Data_SystemdJournalExportBlock':
+        """Read PCAP-NG :manpage:`systemd(1)` journal export block.
+
+        Structure of :manpage:`systemd(1)` Journal Export Block:
+
+        .. code-block:: text
+
+                                  1                   2                   3
+              0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           0 |                    Block Type = 0x00000009                    |
+             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           4 |                      Block Total Length                       |
+             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           8 /                                                               /
+             /                         Journal Entry                         /
+             /              variable length, padded to 32 bits               /
+             /                                                               /
+             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+             |                      Block Total Length                       |
+             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+        Args:
+            schema: Parsed block schema.
+            header: Parsed PCAP-NG header schema.
+
+        Returns:
+            Parsed packet data.
+
+        """
+        data = Data_SystemdJournalExportBlock(
+            type=header.type,
+            length=schema.length,
+            data=tuple(schema.data),
+        )
+        return data
+
+    def _read_block_dsb(self, schema: 'Schema_DecryptionSecretsBlock', *,
+                        header: 'Schema_PCAPNG') -> 'Data_DecryptionSecretsBlock':
+        """Read PCAP-NG decryption secrets block (DSB).
+
+        Structure of Decryption Secrets Block:
+
+        .. code-block:: text
+
+                                   1                   2                   3
+               0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+              +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+            0 |                   Block Type = 0x0000000A                     |
+              +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+            4 |                      Block Total Length                       |
+              +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+            8 |                          Secrets Type                         |
+              +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           12 |                         Secrets Length                        |
+              +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           16 /                                                               /
+              /                          Secrets Data                         /
+              /              (variable length, padded to 32 bits)             /
+              /                                                               /
+              +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+              /                                                               /
+              /                       Options (variable)                      /
+              /                                                               /
+              +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+              /                       Block Total Length                      /
+              +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+        Args:
+            schema: Parsed block schema.
+            header: Parsed PCAP-NG header schema.
+
+        Returns:
+            Parsed packet data.
+
+        """
+        name = self.__secrets__[schema.secrets_type]
+        if isinstance(name, str):
+            meth_name = f'_read_secrets_{name}'
+            meth = cast('SecretsParser',
+                        getattr(self, meth_name, self._read_secrest_unknown))
+        else:
+            meth = name[0]
+        secrets_data = meth(schema.secrets_data, block=schema)
+
+        data = Data_DecryptionSecretsBlock(
+            type=header.type,
+            length=schema.length,
+            secrets_type=schema.secrets_type,
+            secrets_length=schema.secrets_length,
+            secrets_data=secrets_data,
+            options=self._read_pcapng_options(schema.options),
+        )
+        return data
+
+    def _read_block_cb(self, schema: 'Schema_CustomBlock', *,
+                       header: 'Schema_PCAPNG') -> 'Data_CustomBlock':
+        """Read PCAP-NG custom block (CB).
+
+        Structure of Custom Block:
+
+        .. code-block:: text
+
+                                   1                   2                   3
+               0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+              +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+            0 |             Block Type = 0x00000BAD or 0x40000BAD             |
+              +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+            4 |                      Block Total Length                       |
+              +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+            8 |                Private Enterprise Number (PEN)                |
+              +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           12 /                                                               /
+              /                          Custom Data                          /
+              /              variable length, padded to 32 bits               /
+              /                                                               /
+              +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+              /                                                               /
+              /                      Options (variable)                       /
+              /                                                               /
+              +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+              |                      Block Total Length                       |
+              +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+        Args:
+            schema: Parsed block schema.
+            header: Parsed PCAP-NG header schema.
+
+        Returns:
+            Parsed packet data.
+
+        """
+        data = Data_CustomBlock(
+            type=header.type,
+            length=schema.length,
+            pen=schema.pen,
+            data=schema.data,
+        )
+        return data
+
+    def _read_block_packet(self, schema: 'Schema_PacketBlock', *,
+                           header: 'Schema_PCAPNG') -> 'Data_PacketBlock':
+        """Read PCAP-NG packet block (obsolete).
+
+        Structure of Packet Block:
+
+        .. code-block:: text
+
+                                   1                   2                   3
+               0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+              +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+            0 |                    Block Type = 0x00000002                    |
+              +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+            4 |                      Block Total Length                       |
+              +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+            8 |         Interface ID          |          Drops Count          |
+              +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           12 |                        Timestamp (High)                       |
+              +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           16 |                        Timestamp (Low)                        |
+              +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           20 |                    Captured Packet Length                     |
+              +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           24 |                    Original Packet Length                     |
+              +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           28 /                                                               /
+              /                          Packet Data                          /
+              /              variable length, padded to 32 bits               /
+              /                                                               /
+              +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+              /                                                               /
+              /                      Options (variable)                       /
+              /                                                               /
+              +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+              |                      Block Total Length                       |
+              +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+        Args:
+            schema: Parsed block schema.
+            header: Parsed PCAP-NG header schema.
+
+        Returns:
+            Parsed packet data.
+
+        """
+        warn('PCAP-NG: Packet Block has been obsolete! Please use Enhanced Packet Block and/or '
+             'Simple Packet Block instead.', DeprecationWarning, stacklevel=stacklevel())
+
+        timestamp, timestamp_epoch = self._read_timestamp(schema.timestamp_high, schema.timestamp_low)
+
+        data = Data_PacketBlock(
+            type=header.type,
+            length=schema.length,
+            section_number=self._sect,
+            number=self._fnum,
+            interface_id=schema.interface_id,
+            drop_count=schema.drop_count,
+            timestamp=timestamp,
+            timestamp_epoch=timestamp_epoch,
+            captured_length=schema.captured_length,
+            original_length=schema.original_length,
+            options=self._read_pcapng_options(schema.options),
+        )
+        return self._decode_next_layer(data, self.linktype, schema.captured_length)  # type: ignore[return-value]
 
     def _read_pcapng_options(self, options_schema: 'list[Schema_Option]') -> 'Option':
         """Read PCAP-NG options.
@@ -2109,7 +2543,7 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
 
         """
         if self._type != Enum_BlockType.Name_Resolution_Block:
-            raise ProtocolError(f'PCAP-NG: [ns_dnsname] option must be in Name Resolution Block, '
+            raise ProtocolError(f'PCAP-NG: [ns_dnsname] option must be in :manpage:`systemd(1)` Journal Export Block, '
                                 f'but found in {self._type} block.')
         if self._opt[schema.type] > 0:
             raise ProtocolError(f'PCAP-NG: [ns_dnsname] option must be only one, '
@@ -2135,7 +2569,7 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
 
         """
         if self._type != Enum_BlockType.Name_Resolution_Block:
-            raise ProtocolError(f'PCAP-NG: [ns_dnsIP4addr] option must be in Name Resolution Block, '
+            raise ProtocolError(f'PCAP-NG: [ns_dnsIP4addr] option must be in :manpage:`systemd(1)` Journal Export Block, '
                                 f'but found in {self._type} block.')
         if self._opt[schema.type] > 0:
             raise ProtocolError(f'PCAP-NG: [ns_dnsIP4addr] option must be only one, '
@@ -2163,7 +2597,7 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
 
         """
         if self._type != Enum_BlockType.Name_Resolution_Block:
-            raise ProtocolError(f'PCAP-NG: [ns_dnsIP6addr] option must be in Name Resolution Block, '
+            raise ProtocolError(f'PCAP-NG: [ns_dnsIP6addr] option must be in :manpage:`systemd(1)` Journal Export Block, '
                                 f'but found in {self._type} block.')
         if self._opt[schema.type] > 0:
             raise ProtocolError(f'PCAP-NG: [ns_dnsIP6addr] option must be only one, '
@@ -2199,16 +2633,12 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
         if schema.length != 8:
             raise ProtocolError(f'PCAP-NG: [isb_starttime] invalid length (expected 8, got {schema.length})')
 
-        timestamp_raw = schema.timestamp_high << 32 | schema.timestamp_low
-        with decimal.localcontext(prec=64):
-            timestamp_epoch = decimal.Decimal(timestamp_raw) / self.ts_resolution + self.ts_offset + \
-                decimal.Decimal(self.ts_timezone.utcoffset(None).total_seconds())
-        ts_ratio = timestamp_epoch.as_integer_ratio()
+        timestamp, timestamp_epoch = self._read_timestamp(schema.timestamp_high, schema.timestamp_low)
 
         option = Data_ISB_StartTimeOption(
             type=schema.type,
             length=schema.length,
-            timestamp=datetime.datetime.fromtimestamp(ts_ratio[0] / ts_ratio[1], tz=self.ts_timezone),
+            timestamp=timestamp,
             timestamp_epoch=timestamp_epoch,
         )
         return option
@@ -2234,16 +2664,12 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
         if schema.length != 8:
             raise ProtocolError(f'PCAP-NG: [isb_endtime] invalid length (expected 8, got {schema.length})')
 
-        timestamp_raw = schema.timestamp_high << 32 | schema.timestamp_low
-        with decimal.localcontext(prec=64):
-            timestamp_epoch = decimal.Decimal(timestamp_raw) / self.ts_resolution + self.ts_offset + \
-                decimal.Decimal(self.ts_timezone.utcoffset(None).total_seconds())
-        ts_ratio = timestamp_epoch.as_integer_ratio()
+        timestamp, timestamp_epoch = self._read_timestamp(schema.timestamp_high, schema.timestamp_low)
 
         option = Data_ISB_EndTimeOption(
             type=schema.type,
             length=schema.length,
-            timestamp=datetime.datetime.fromtimestamp(ts_ratio[0] / ts_ratio[1], tz=self.ts_timezone),
+            timestamp=timestamp,
             timestamp_epoch=timestamp_epoch,
         )
         return option
@@ -2451,13 +2877,13 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
         return option
 
     def _read_nrb_records(self, records_schema: 'list[Schema_NameResolutionRecord]') -> 'Record':
-        """Read PCAP-NG name resolution records.
+        """Read PCAP-NG :manpage:`systemd(1)` journal export records.
 
         Args:
-            records_schema: Parsed name resolution records.
+            records_schema: Parsed :manpage:`systemd(1)` journal export records.
 
         Returns:
-            Parsed PCAP-NG name resolution records data.
+            Parsed PCAP-NG :manpage:`systemd(1)` journal export records data.
 
         """
         records = OrderedMultiDict()  # type: Record
@@ -2485,14 +2911,14 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
 
     def _read_record_unknown(self, schema: 'Schema_UnknownRecord', *,
                              records: 'Record') -> 'Data_UnknownRecord':
-        """Read PCAP-MG unknown name resolution records.
+        """Read PCAP-MG unknown :manpage:`systemd(1)` journal export records.
 
         Args:
-            schema: Parsed name resolution record schema.
+            schema: Parsed :manpage:`systemd(1)` journal export record schema.
             records: Parsed PCAP-NG records.
 
         Returns:
-            Constructed name resolution record data.
+            Constructed :manpage:`systemd(1)` journal export record data.
 
         """
         record = Data_UnknownRecord(
@@ -2504,14 +2930,14 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
 
     def _read_record_end(self, schema: 'Schema_EndRecord', *,
                          records: 'Record') -> 'Data_EndRecord':
-        """Read PCAP-MG ``nrb_record_end`` name resolution records.
+        """Read PCAP-MG ``nrb_record_end`` :manpage:`systemd(1)` journal export records.
 
         Args:
-            schema: Parsed name resolution record schema.
+            schema: Parsed :manpage:`systemd(1)` journal export record schema.
             records: Parsed PCAP-NG records.
 
         Returns:
-            Constructed name resolution record data.
+            Constructed :manpage:`systemd(1)` journal export record data.
 
         """
         if schema.length != 0:
@@ -2525,14 +2951,14 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
 
     def _read_record_ipv4(self, schema: 'Schema_IPv4Record', *,
                           records: 'Record') -> 'Data_IPv4Record':
-        """Read PCAP-MG ``nrb_record_ipv4`` name resolution records.
+        """Read PCAP-MG ``nrb_record_ipv4`` :manpage:`systemd(1)` journal export records.
 
         Args:
-            schema: Parsed name resolution record schema.
+            schema: Parsed :manpage:`systemd(1)` journal export record schema.
             records: Parsed PCAP-NG records.
 
         Returns:
-            Constructed name resolution record data.
+            Constructed :manpage:`systemd(1)` journal export record data.
 
         """
         record = Data_IPv4Record(
@@ -2545,14 +2971,14 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
 
     def _read_record_ipv6(self, schema: 'Schema_IPv6Record', *,
                           records: 'Record') -> 'Data_IPv6Record':
-        """Read PCAP-MG ``nrb_record_ipv6`` name resolution records.
+        """Read PCAP-MG ``nrb_record_ipv6`` :manpage:`systemd(1)` journal export records.
 
         Args:
-            schema: Parsed name resolution record schema.
+            schema: Parsed :manpage:`systemd(1)` journal export record schema.
             records: Parsed PCAP-NG records.
 
         Returns:
-            Constructed name resolution record data.
+            Constructed :manpage:`systemd(1)` journal export record data.
 
         """
         record = Data_IPv6Record(
@@ -3750,7 +4176,7 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
 
         """
         if self._type != Enum_BlockType.Name_Resolution_Block:
-            raise ProtocolError(f'PCAP-NG: [ns_dnsname] option must be in Name Resolution Block, '
+            raise ProtocolError(f'PCAP-NG: [ns_dnsname] option must be in :manpage:`systemd(1)` Journal Export Block, '
                                 f'but found in {self._type} block.')
         if self._opt[type] > 0:
             raise ProtocolError(f'PCAP-NG: [ns_dnsname] option must be only one, '
@@ -3781,7 +4207,7 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
 
         """
         if self._type != Enum_BlockType.Name_Resolution_Block:
-            raise ProtocolError(f'PCAP-NG: [ns_dnsip4addr] option must be in Name Resolution Block, '
+            raise ProtocolError(f'PCAP-NG: [ns_dnsip4addr] option must be in :manpage:`systemd(1)` Journal Export Block, '
                                 f'but found in {self._type} block.')
         if self._opt[type] > 0:
             raise ProtocolError(f'PCAP-NG: [ns_dnsip4addr] option must be only one, '
@@ -3812,7 +4238,7 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
 
         """
         if self._type != Enum_BlockType.Name_Resolution_Block:
-            raise ProtocolError(f'PCAP-NG: [ns_dnsip6addr] option must be in Name Resolution Block, '
+            raise ProtocolError(f'PCAP-NG: [ns_dnsip6addr] option must be in :manpage:`systemd(1)` Journal Export Block, '
                                 f'but found in {self._type} block.')
         if self._opt[type] > 0:
             raise ProtocolError(f'PCAP-NG: [ns_dnsip6addr] option must be only one, '
@@ -4180,13 +4606,13 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
         )
 
     def _make_nrb_records(self, records: 'Record | list[Schema_NameResolutionRecord | tuple[Enum_RecordType, dict[str, Any]] | bytes]') -> 'tuple[list[Schema_NameResolutionRecord | bytes], int]':
-        """Make name resolution records for PCAP-NG.
+        """Make :manpage:`systemd(1)` journal export records for PCAP-NG.
 
         Args:
-            records: PCAP-NG name resolution records.
+            records: PCAP-NG :manpage:`systemd(1)` journal export records.
 
         Returns:
-            Tuple of name resolution records and total length of the records.
+            Tuple of :manpage:`systemd(1)` journal export records and total length of the records.
 
         """
         has_record_end = False
@@ -4265,7 +4691,7 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
     def _make_record_unknown(self, type: 'Enum_RecordType', record: 'Optional[Data_UnknownRecord]', *,
                              data: 'bytes' = b'',
                              **kwargs: 'Any') -> 'Schema_UnknownRecord':
-        """Make PCAP-NG unknown name resolution record.
+        """Make PCAP-NG unknown :manpage:`systemd(1)` journal export record.
 
         Args:
             type: Record type.
@@ -4288,7 +4714,7 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
 
     def _make_record_end(self, type: 'Enum_RecordType', record: 'Optional[Data_EndRecord]' = None,
                          **kwargs: 'Any') -> 'Schema_EndRecord':
-        """Make PCAP-NG ``nrb_record_end`` name resolution record.
+        """Make PCAP-NG ``nrb_record_end`` :manpage:`systemd(1)` journal export record.
 
         Args:
             type: Record type.
@@ -4308,7 +4734,7 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
                           ip: 'IPv4Address | str | bytes | int' = '127.0.0.1',
                           names: 'Optional[list[str]]' = None,
                           **kwargs: 'Any') -> 'Schema_IPv4Record':
-        """Make PCAP-NG ``nrb_record_ipv4`` name resolution record.
+        """Make PCAP-NG ``nrb_record_ipv4`` :manpage:`systemd(1)` journal export record.
 
         Args:
             type: Record type.
@@ -4340,7 +4766,7 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
                           ip: 'IPv6Address | str | bytes | int' = '127.0.0.1',
                           names: 'Optional[list[str]]' = None,
                           **kwargs: 'Any') -> 'Schema_IPv6Record':
-        """Make PCAP-NG ``nrb_record_ipv6`` name resolution record.
+        """Make PCAP-NG ``nrb_record_ipv6`` :manpage:`systemd(1)` journal export record.
 
         Args:
             type: Record type.
