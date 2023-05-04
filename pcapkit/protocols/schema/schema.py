@@ -7,14 +7,14 @@ import io
 import itertools
 from typing import TYPE_CHECKING, Generic, TypeVar, cast
 
-from pcapkit.corekit.fields.collections import ListField
+from pcapkit.corekit.fields.collections import ListField, OptionField
 from pcapkit.corekit.fields.field import NoValue, _Field
 from pcapkit.corekit.fields.misc import ConditionalField, ForwardMatchField, PayloadField
 from pcapkit.corekit.fields.strings import PaddingField
 from pcapkit.utilities.compat import Mapping
 from pcapkit.utilities.decorators import prepare
-from pcapkit.utilities.exceptions import NoDefaultValue, ProtocolUnbound
-from pcapkit.utilities.warnings import UnknownFieldWarning, warn
+from pcapkit.utilities.exceptions import NoDefaultValue, ProtocolUnbound, stacklevel
+from pcapkit.utilities.warnings import SchemaWarning, UnknownFieldWarning, warn
 
 if TYPE_CHECKING:
     from collections import OrderedDict
@@ -419,7 +419,7 @@ class Schema(Mapping[str, VT], Generic[VT]):
 
             value = getattr(self, field.name)
             try:
-                temp = field.pack(value, self.__dict__)
+                temp = field.pack(value, packet)
             except NoDefaultValue:
                 temp = bytes(field.length)
             self.__buffer__[field.name] = temp
@@ -504,15 +504,22 @@ class Schema(Mapping[str, VT], Generic[VT]):
             byte = data.read(field.length)
             self.__buffer__[field.name] = byte
 
-            value = field.unpack(byte, packet)
+            value = field.unpack(byte, packet.copy())
             setattr(self, field.name, value)
 
             packet[field.name] = value
+
+            if isinstance(field, OptionField):
+                packet['__option_padding__'] = field.option_padding
 
             if isinstance(field, ForwardMatchField):
                 data.seek(-field.length, io.SEEK_CUR)
             else:
                 packet['__length__'] -= field.length
+
+            if packet['__length__'] < 0:
+                warn(f'packet length < 0: {packet["__length__"]}',
+                     SchemaWarning, stacklevel=stacklevel())
 
         self.__updated__ = False
         return self
