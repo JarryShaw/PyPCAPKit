@@ -50,13 +50,14 @@ jobs:
       PCAPKIT_VERSION: ${{ steps.get_version.outputs.PCAPKIT_VERSION }}
       PCAPKIT_PRERELEASE: ${{ steps.get_version.outputs.PCAPKIT_PRERELEASE }}
       PCAPKIT_TAG_EXISTS: ${{ steps.check_tag.outputs.exists }}
+      PCAPKIT_GITHUB_REF: ${{ github.ref }}
       PCAPKIT_CONDA_LABEL: ${{ steps.get_version.outputs.PCAPKIT_CONDA_LABEL }}
 
   pypi_github:
     name: PyPI & GitHub Release # with Python ${{ matrix.python-version }}
     runs-on: ubuntu-latest
     needs: [ version_check ]
-    if: ${{ startsWith(github.ref, 'v') || needs.version_check.outputs.PCAPKIT_TAG_EXISTS == 'false' }}
+    if: ${{ startsWith(needs.version_check.outputs.PCAPKIT_GITHUB_REF, 'v') || needs.version_check.outputs.PCAPKIT_TAG_EXISTS == 'false' }}
     # strategy:
     #   matrix:
     #     python-version:
@@ -158,7 +159,7 @@ jobs:
     name: Conda deployment of package with Python ${{ matrix.python-version }}
     runs-on: ubuntu-latest
     needs: [ version_check ]
-    if: ${{ startsWith(github.ref, 'v') || needs.version_check.outputs.PCAPKIT_TAG_EXISTS == 'false' }}
+    if: ${{ startsWith(needs.version_check.outputs.PCAPKIT_GITHUB_REF, 'v') || needs.version_check.outputs.PCAPKIT_TAG_EXISTS == 'false' }}
     strategy:
       matrix:
         python-version: [ "3.8", "3.9", "3.10", "3.11" ] # ignore 3.6/7 for now
