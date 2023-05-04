@@ -7,6 +7,8 @@ sample/*
 !sample/out.plist
 !sample/out.txt
 !sample/in.pcap
+!sample/dhcp.pcapng
+!sample/pcapng.txt
 
 src
 !requirements.txt

@@ -2,5 +2,5 @@
 
 import pcapkit
 
-plist = pcapkit.extract(fin='../sample/test.pcapng',
+plist = pcapkit.extract(fin='../sample/dhcp.pcapng',
                         fout='../sample/pcapng.txt', format='tree', verbose=True)
