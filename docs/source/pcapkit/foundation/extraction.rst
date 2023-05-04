@@ -47,12 +47,10 @@ extracts parametres from a PCAP file.
    :param ipv6: if perform IPv6 reassembly
    :param tcp: if perform TCP reassembly and/or flow tracing
 
-   .. autoproperty:: info
    .. autoproperty:: length
    .. autoproperty:: format
    .. autoproperty:: input
    .. autoproperty:: output
-   .. autoproperty:: header
    .. autoproperty:: frame
    .. autoproperty:: reassembly
    .. autoproperty:: trace

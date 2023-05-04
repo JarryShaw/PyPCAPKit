@@ -35,7 +35,7 @@ Octets      Bits        Name                    Description
 
    .. automethod:: __index__
 
-.. autoclass:: pcapkit.protocols.link.rarp.RARP
+.. autoclass:: pcapkit.protocols.link.rarp.DRARP
    :no-members:
    :show-inheritance:
 

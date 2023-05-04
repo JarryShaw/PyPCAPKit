@@ -32,8 +32,8 @@ which implements extractor for File Transfer Protocol
 
    .. autoproperty:: name
 
-Packet Type
------------
+Auxiliary Data
+--------------
 
 .. autoclass:: pcapkit.protocols.application.ftp.Type
    :members:

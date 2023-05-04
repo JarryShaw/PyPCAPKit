@@ -24,6 +24,4 @@ functions for :mod:`pcapkit.dumpkit` implementation, which is
 generally the customised hooks for :class:`dictdumper.Dumper`
 classes.
 
-.. autofunction:: pcapkit.dumpkit.common.object_hook
-.. autofunction:: pcapkit.dumpkit.common.default
-.. autofunction:: pcapkit.dumpkit.common._append_fallback
+.. autofunction:: pcapkit.dumpkit.common.make_dumper

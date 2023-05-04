@@ -148,7 +148,6 @@ Header Schemas
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
-
 Data Models
 -----------
 

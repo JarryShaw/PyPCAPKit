@@ -42,9 +42,6 @@ support, as is used by :class:`pcapkit.foundation.extraction.Extractor`.
    .. automethod:: run
    .. automethod:: read_frame
 
-   .. autoattribute:: _gbhdr
-   .. autoattribute:: _dlink
-
 PyShark Support
 ===============
 

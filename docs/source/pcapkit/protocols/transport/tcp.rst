@@ -141,8 +141,8 @@ Octets      Bits        Name                    Description
 
    .. automethod:: __index__
 
-Connection Flags
-----------------
+Auxiliary Data
+--------------
 
 .. autoclass:: pcapkit.protocols.transport.tcp.Flags
    :members:
@@ -538,7 +538,6 @@ Auxiliary Functions
 ~~~~~~~~~~~~~~~~~~~
 
 .. autofunction:: pcapkit.protocols.schema.transport.tcp.mptcp_data_selector
-.. autofunction:: pcapkit.protocols.schema.transport.tcp.mptcp_add_address_length
 .. autofunction:: pcapkit.protocols.schema.transport.tcp.mptcp_add_address_selector
 
 Data Models
