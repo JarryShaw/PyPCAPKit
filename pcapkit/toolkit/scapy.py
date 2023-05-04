@@ -30,9 +30,9 @@ from pcapkit.utilities.exceptions import ModuleNotFound, stacklevel
 from pcapkit.utilities.warnings import ScapyWarning, warn
 
 try:
-    import scapy.all as scapy_all
+    import scapy
 except ModuleNotFoundError:
-    scapy_all = None
+    scapy = None
     warn("dependency package 'Scapy' not found",
          ScapyWarning, stacklevel=stacklevel())
 
@@ -41,7 +41,7 @@ if TYPE_CHECKING:
     from typing import Any
 
     from scapy.layers.inet import IP, TCP
-    from scapy.layers.inet6 import IPv6, IPv6ExtHdrFragment
+    from scapy.layers.inet6 import IPv6
     from scapy.packet import Packet
 
 __all__ = [
@@ -63,12 +63,13 @@ def packet2chain(packet: 'Packet') -> 'str':
         ModuleNotFound: If `Scapy`_ is not installed.
 
     """
-    if scapy_all is None:
+    if scapy is None:
         raise ModuleNotFound("No module named 'scapy'", name='scapy')
+    from scapy.packet import NoPayload
 
     chain = [packet.name]
     payload = packet.payload
-    while not isinstance(payload, scapy_all.packet.NoPayload):
+    while not isinstance(payload, NoPayload):
         chain.append(payload.name)
         payload = payload.payload
     return ':'.join(chain)
@@ -87,13 +88,14 @@ def packet2dict(packet: 'Packet') -> 'dict[str, Any]':
         ModuleNotFound: If `Scapy`_ is not installed.
 
     """
-    if scapy_all is None:
+    if scapy is None:
         raise ModuleNotFound("No module named 'scapy'", name='scapy')
+    from scapy.packet import NoPayload
 
     def wrapper(packet: 'Packet') -> 'dict[str, Any]':
         dict_ = packet.fields
         payload = packet.payload
-        if not isinstance(payload, scapy_all.packet.NoPayload):
+        if not isinstance(payload, NoPayload):
             dict_[payload.name] = wrapper(payload)
         return dict_
 
@@ -172,12 +174,13 @@ def ipv6_reassembly(packet: 'Packet', *, count: 'int' = -1) -> 'IP_Packet[IPv6Ad
         :class:`pcapkit.foundation.reassembly.ipv6.IPv6`
 
     """
-    if scapy_all is None:
+    if scapy is None:
         raise ModuleNotFound("No module named 'scapy'", name='scapy')
+    from scapy.layers.inet6 import IPv6ExtHdrFragment
 
     if 'IPv6' in packet:
         ipv6 = cast('IPv6', packet['IPv6'])
-        if scapy_all.IPv6ExtHdrFragment not in ipv6:  # pylint: disable=E1101
+        if IPv6ExtHdrFragment not in ipv6:  # pylint: disable=E1101
             return None                        # dismiss not fragmented packet
         ipv6_frag = cast('IPv6ExtHdrFragment', ipv6['IPv6ExtHdrFragment'])
 
