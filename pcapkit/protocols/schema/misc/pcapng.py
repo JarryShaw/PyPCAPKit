@@ -26,8 +26,9 @@ from pcapkit.corekit.fields.numbers import (EnumField, Int32Field, Int64Field, N
 from pcapkit.corekit.fields.strings import BitField, BytesField, PaddingField, StringField
 from pcapkit.corekit.multidict import MultiDict, OrderedMultiDict
 from pcapkit.protocols.schema.schema import Schema
-from pcapkit.utilities.exceptions import FieldValueError, ProtocolError
+from pcapkit.utilities.exceptions import FieldValueError, ProtocolError, stacklevel
 from pcapkit.utilities.logging import SPHINX_TYPE_CHECKING
+from pcapkit.utilities.warnings import ProtocolWarning, warn
 
 __all__ = [
     'PCAPNG',
@@ -59,7 +60,7 @@ __all__ = [
 
 if TYPE_CHECKING:
     from ipaddress import IPv4Address, IPv4Interface, IPv6Address, IPv6Interface
-    from typing import Any
+    from typing import Any, Callable, Optional, Type
 
     from typing_extensions import Literal, Self
 
@@ -155,7 +156,10 @@ def byteorder_callback(field: 'NumberField', packet: 'dict[str, Any]') -> 'None'
         packet: Packet data.
 
     """
-    field._byteorder = packet.get('byteorder', sys.byteorder)
+    if 'byteorder' not in packet and '__packet__' in packet:
+        field._byteorder = packet['__packet__'].get('byteorder', sys.byteorder)
+    else:
+        field._byteorder = packet.get('byteorder', sys.byteorder)
 
 
 def shb_byteorder_callback(field: 'NumberField', packet: 'dict[str, Any]') -> 'None':
@@ -252,7 +256,7 @@ class OptionEnumField(EnumField):
         signed: Whether the field is signed.
         byteorder: Field byte order.
         bit_length: Field bit length.
-        namespace: Field namespace (a :class:`enum.IntEnum` class).
+        namespace: Option namespace, i.e., namespace of the enum item.
         callback: Callback function to be called upon
             :meth:`self.__call__ <pcapkit.corekit.fields.field._Field.__call__>`.
 
@@ -261,6 +265,18 @@ class OptionEnumField(EnumField):
         as it is actually a :class:`~enum.StrEnum` class.
 
     """
+    if TYPE_CHECKING:
+        _namespace: 'Enum_OptionType'
+
+    def __init__(self, length: 'int | Callable[[dict[str, Any]], int]',
+                 default: 'Enum_OptionType' = Enum_OptionType.opt_endofopt, signed: 'bool' = False,
+                 byteorder: 'Literal["little", "big"]' = 'big',
+                 bit_length: 'Optional[int]' = None,
+                 namespace: 'str' = 'opt',
+                 callback: 'Callable[[Self, dict[str, Any]], None]' = lambda *_: None) -> 'None':
+        super().__init__(length, default, signed, byteorder, bit_length, Enum_OptionType, callback)
+
+        self._opt_ns = namespace
 
     def pre_process(self, value: 'int | Enum_OptionType', packet: 'dict[str, Any]') -> 'int | bytes':
         """Process field value before construction (packing).
@@ -277,12 +293,26 @@ class OptionEnumField(EnumField):
             value = value.opt_value
         return super().pre_process(value, packet)
 
+    def post_process(self, value: 'int | bytes', packet: 'dict[str, Any]') -> 'Enum_OptionType':
+        """Process field value after parsing (unpacked).
+
+        Args:
+            value: Field value.
+            packet: Packet data.
+
+        Returns:
+            Processed field value.
+
+        """
+        value = super(EnumField, self).post_process(value, packet)
+        return self._namespace.get(value, namespace=self._opt_ns)
+
 
 class PCAPNG(Schema):
     """Header schema for PCAP-NG file blocks."""
 
     #: Block type.
-    type: 'Enum_BlockType' = EnumField(length=4, namespace=Enum_BlockType)
+    type: 'Enum_BlockType' = EnumField(length=4, namespace=Enum_BlockType, callback=byteorder_callback)
     #: Block specific data.
     block: 'BlockType' = SwitchField(
         selector=pcapng_block_selector,
@@ -310,7 +340,10 @@ class BlockType(Schema):
 
         """
         if self.length != self.length2:
-            raise ProtocolError(f'block length mismatch: {self.length} != {self.length2}')
+            block_type = packet.get('__packet__', {}).get('type', 'N/A')
+            #raise ProtocolError(f'PCAP-NG: [Block {block_type}] block length mismatch: {self.length} != {self.length2}')
+            warn(f'PCAP-NG: [Block {block_type}] block length mismatch: {self.length} != {self.length2}',
+                 ProtocolWarning, stacklevel=stacklevel())
         return self
 
     if TYPE_CHECKING:
@@ -335,13 +368,23 @@ class UnknownBlock(BlockType):
 class Option(Schema):
     """Header schema for PCAP-NG file options."""
 
+    if TYPE_CHECKING:
+        #: Option type.
+        type: 'Enum_OptionType'
+        #: Option data length.
+        length: 'int'
+
+
+class _OPT_Option(Option):
+    """Header schema for ``opt_*`` options."""
+
     #: Option type.
-    type: 'Enum_OptionType' = OptionEnumField(length=2, namespace=Enum_OptionType, callback=byteorder_callback)
+    type: 'Enum_OptionType' = OptionEnumField(length=2, namespace='opt', callback=byteorder_callback)
     #: Option data length.
     length: 'int' = UInt16Field(callback=byteorder_callback)
 
 
-class UnknownOption(Option):
+class UnknownOption(_OPT_Option):
     """Header schema for unknown PCAP-NG file options."""
 
     #: Option value.
@@ -353,14 +396,14 @@ class UnknownOption(Option):
         def __init__(self, type: 'Enum_OptionType', length: 'int', data: 'bytes') -> 'None': ...
 
 
-class EndOfOption(Option):
+class EndOfOption(_OPT_Option):
     """Header schema for PCAP-NG file ``opt_endofopt`` options."""
 
     if TYPE_CHECKING:
         def __init__(self, type: 'Enum_OptionType', length: 'int') -> 'None': ...
 
 
-class CommentOption(Option):
+class CommentOption(_OPT_Option):
     """Header schema for PCAP-NG file ``opt_comment`` options."""
 
     #: Comment text.
@@ -372,7 +415,7 @@ class CommentOption(Option):
         def __init__(self, type: 'Enum_OptionType', length: 'int', comment: 'str') -> 'None': ...
 
 
-class CustomOption(Option):
+class CustomOption(_OPT_Option):
     """Header schema for PCAP-NG file ``opt_custom`` options."""
 
     #: Private enterprise number (PEN).
@@ -390,7 +433,7 @@ class SectionHeaderBlock(BlockType):
     """Header schema for PCAP-NG Section Header Block (SHB)."""
 
     #: Fast forward field to test the byteorder.
-    match: 'ByteorderTest' = ForwardMatchField(BitField(length=2, namespace={
+    match: 'ByteorderTest' = ForwardMatchField(BitField(length=8, namespace={
         'byteorder': (32, 32),
     }))
     #: Block total length.
@@ -406,7 +449,7 @@ class SectionHeaderBlock(BlockType):
     #: Options.
     options: 'list[Option]' = OptionField(
         length=lambda pkt: pkt['length'] - 28,
-        base_schema=Option,
+        base_schema=_OPT_Option,
         type_name='type',
         registry=collections.defaultdict(lambda: UnknownOption, {
             Enum_OptionType.opt_endofopt: EndOfOption,
@@ -418,8 +461,10 @@ class SectionHeaderBlock(BlockType):
         }),
         eool=Enum_OptionType.opt_endofopt,
     )
+    #: Padding.
+    padding: 'bytes' = PaddingField(length=lambda pkt: pkt['__option_padding__'])
     #: Block total length.
-    length2: 'int' = UInt32Field(callback=byteorder_callback)
+    length2: 'int' = UInt32Field(callback=shb_byteorder_callback)
 
     def pre_pack(self, packet: 'dict[str, Any]') -> 'None':
         """Prepare ``packet`` data for packing process.
@@ -475,24 +520,13 @@ class SectionHeaderBlock(BlockType):
 class _IF_Option(Option):
     """Header schema for ``if_*`` options."""
 
-    def post_process(self, packet: 'dict[str, Any]') -> '_IF_Option':
-        """Revise ``schema`` data after unpacking process.
-
-        This method revise the ``type`` value of the current option
-        based on its namespace group.
-
-        Args:
-            packet: Unpacked data.
-
-        Returns:
-            Revised schema.
-
-        """
-        self.type = Enum_OptionType.get(self.type.opt_value, namespace='if')
-        return self
+    #: Option type.
+    type: 'Enum_OptionType' = OptionEnumField(length=2, namespace='if', callback=byteorder_callback)
+    #: Option data length.
+    length: 'int' = UInt16Field(callback=byteorder_callback)
 
 
-class IF_NameOption(Option):
+class IF_NameOption(_IF_Option):
     """Header schema for PCAP-NG file ``if_name`` options."""
 
     #: Interface name.
@@ -720,7 +754,7 @@ class InterfaceDescriptionBlock(BlockType):
     #: Options.
     options: 'list[Option]' = OptionField(
         length=lambda pkt: pkt['length'] - 20,
-        base_schema=Option,
+        base_schema=_IF_Option,
         type_name='type',
         registry=collections.defaultdict(lambda: UnknownOption, {
             Enum_OptionType.opt_endofopt: EndOfOption,
@@ -748,6 +782,8 @@ class InterfaceDescriptionBlock(BlockType):
         }),
         eool=Enum_OptionType.opt_endofopt,
     )
+    #: Padding.
+    padding: 'bytes' = PaddingField(length=lambda pkt: pkt['__option_padding__'])
     #: Block total length.
     length2: 'int' = UInt32Field(callback=byteorder_callback)
 
@@ -759,21 +795,10 @@ class InterfaceDescriptionBlock(BlockType):
 class _EPB_Option(Option):
     """Header schema for ``epb_*`` options."""
 
-    def post_process(self, packet: 'dict[str, Any]') -> '_EPB_Option':
-        """Revise ``schema`` data after unpacking process.
-
-        This method revise the ``type`` value of the current option
-        based on its namespace group.
-
-        Args:
-            packet: Unpacked data.
-
-        Returns:
-            Revised schema.
-
-        """
-        self.type = Enum_OptionType.get(self.type.opt_value, namespace='epb')
-        return self
+    #: Option type.
+    type: 'Enum_OptionType' = OptionEnumField(length=2, namespace='epb', callback=byteorder_callback)
+    #: Option data length.
+    length: 'int' = UInt16Field(callback=byteorder_callback)
 
 
 class EPB_FlagsOption(_EPB_Option):
@@ -884,11 +909,11 @@ class EnhancedPacketBlock(BlockType):
     #: Packet data.
     packet_data: 'bytes' = PayloadField(length=lambda pkt: pkt['captured_len'])
     #: Padding.
-    padding: 'bytes' = PaddingField(length=lambda pkt: (4 - pkt['captured_len'] % 4) % 4)
+    padding_data: 'bytes' = PaddingField(length=lambda pkt: (4 - pkt['captured_len'] % 4) % 4)
     #: Options.
     options: 'list[Option]' = OptionField(
-        length=lambda pkt: pkt['length'] - 32 - pkt['captured_len'] - len(pkt['padding']),
-        base_schema=Option,
+        length=lambda pkt: pkt['length'] - 32 - pkt['captured_len'] - len(pkt['padding_data']),
+        base_schema=_EPB_Option,
         type_name='type',
         registry=collections.defaultdict(lambda: UnknownOption, {
             Enum_OptionType.opt_endofopt: EndOfOption,
@@ -906,6 +931,8 @@ class EnhancedPacketBlock(BlockType):
         }),
         eool=Enum_OptionType.opt_endofopt,
     )
+    #: Padding.
+    padding_opts: 'bytes' = PaddingField(length=lambda pkt: pkt['__option_padding__'])
     #: Block total length.
     length2: 'int' = UInt32Field(callback=byteorder_callback)
 
@@ -987,7 +1014,7 @@ class IPv4Record(NameResolutionRecord):
             Revised schema.
 
         """
-        self.names = self.resol.split('\x00')
+        self.names = self.resol.rstrip('\x00').split('\x00')
         return self
 
     if TYPE_CHECKING:
@@ -1017,7 +1044,7 @@ class IPv6Record(NameResolutionRecord):
             Revised schema.
 
         """
-        self.names = self.resol.split('\x00')
+        self.names = self.resol.rstrip('\x00').split('\x00')
         return self
 
     if TYPE_CHECKING:
@@ -1030,21 +1057,10 @@ class IPv6Record(NameResolutionRecord):
 class _NS_Option(Option):
     """Header schema for ``ns_*`` options."""
 
-    def post_process(self, packet: 'dict[str, Any]') -> '_NS_Option':
-        """Revise ``schema`` data after unpacking process.
-
-        This method revise the ``type`` value of the current option
-        based on its namespace group.
-
-        Args:
-            packet: Unpacked data.
-
-        Returns:
-            Revised schema.
-
-        """
-        self.type = Enum_OptionType.get(self.type.opt_value, namespace='ns')
-        return self
+    #: Option type.
+    type: 'Enum_OptionType' = OptionEnumField(length=2, namespace='ns', callback=byteorder_callback)
+    #: Option data length.
+    length: 'int' = UInt16Field(callback=byteorder_callback)
 
 
 class NS_DNSNameOption(_NS_Option):
@@ -1081,7 +1097,7 @@ class NameResolutionBlock(BlockType):
     """Header schema for PCAP-NG Name Resolution Block (NRB)."""
 
     #: Record total length.
-    length: 'int' = UInt16Field(callback=byteorder_callback)
+    length: 'int' = UInt32Field(callback=byteorder_callback)
     #: Name resolution records.
     records: 'list[NameResolutionRecord]' = OptionField(
         length=lambda pkt: pkt['length'] - 12,
@@ -1096,8 +1112,8 @@ class NameResolutionBlock(BlockType):
     )
     #: Options.
     options: 'list[Option]' = OptionField(
-        length=lambda pkt: pkt['__length__'] - 4,
-        base_schema=Option,
+        length=lambda pkt: pkt['__option_padding__'] - 4 if pkt['__option_padding__'] else 0,
+        base_schema=_NS_Option,
         type_name='type',
         registry=collections.defaultdict(lambda: UnknownOption, {
             Enum_OptionType.opt_endofopt: EndOfOption,
@@ -1112,6 +1128,8 @@ class NameResolutionBlock(BlockType):
         }),
         eool=Enum_OptionType.opt_endofopt,
     )
+    #: Padding.
+    padding: 'bytes' = PaddingField(length=lambda pkt: pkt['__option_padding__'])
     #: Block total length.
     length2: 'int' = UInt32Field(callback=byteorder_callback)
 
@@ -1125,6 +1143,8 @@ class NameResolutionBlock(BlockType):
             Revised schema.
 
         """
+        self = super().post_process(packet)
+
         mapping = MultiDict()  # type: MultiDict[IPv4Address | IPv6Address, str]
         reverse_mapping = MultiDict()  # type: MultiDict[str, IPv4Address | IPv6Address]
 
@@ -1152,21 +1172,10 @@ class NameResolutionBlock(BlockType):
 class _ISB_Option(Option):
     """Header schema for ``isb_*`` options."""
 
-    def post_process(self, packet: 'dict[str, Any]') -> '_ISB_Option':
-        """Revise ``schema`` data after unpacking process.
-
-        This method revise the ``type`` value of the current option
-        based on its namespace group.
-
-        Args:
-            packet: Unpacked data.
-
-        Returns:
-            Revised schema.
-
-        """
-        self.type = Enum_OptionType.get(self.type.opt_value, namespace='isb')
-        return self
+    #: Option type.
+    type: 'Enum_OptionType' = OptionEnumField(length=2, namespace='isb', callback=byteorder_callback)
+    #: Option data length.
+    length: 'int' = UInt16Field(callback=byteorder_callback)
 
 
 class ISB_StartTimeOption(_ISB_Option):
@@ -1256,8 +1265,8 @@ class InterfaceStatisticsBlock(BlockType):
     timestamp_low: 'int' = UInt32Field(callback=byteorder_callback)
     #: Options.
     options: 'list[Option]' = OptionField(
-        length=lambda pkt: pkt['length'] - 20 - pkt['captured_len'],
-        base_schema=Option,
+        length=lambda pkt: pkt['length'] - 20,
+        base_schema=_ISB_Option,
         type_name='type',
         registry=collections.defaultdict(lambda: UnknownOption, {
             Enum_OptionType.opt_endofopt: EndOfOption,
@@ -1276,6 +1285,8 @@ class InterfaceStatisticsBlock(BlockType):
         }),
         eool=Enum_OptionType.opt_endofopt,
     )
+    #: Padding.
+    padding: 'bytes' = PaddingField(length=lambda pkt: pkt['__option_padding__'])
     #: Block total length.
     length2: 'int' = UInt32Field(callback=byteorder_callback)
 
@@ -1305,8 +1316,9 @@ class SystemdJournalExportBlock(BlockType):
             Revised schema.
 
         """
-        data = []  # type: list[OrderedMultiDict[str, str | bytes]]
+        self = super().post_process(packet)
 
+        data = []  # type: list[OrderedMultiDict[str, str | bytes]]
         for entry_buffer in self.entry.split(b'\n\n'):
             entry = OrderedMultiDict()  # type: OrderedMultiDict[str, str | bytes]
 
@@ -1459,6 +1471,15 @@ class ZigBeeAPSKey(DSBSecrets):
         def __init__(self, key: 'bytes', panid: 'int', addr_low: 'int', addr_high: 'int') -> 'None': ...
 
 
+class _DSB_Option(Option):
+    """Header schema for ``dsb_*`` options."""
+
+    #: Option type.
+    type: 'Enum_OptionType' = OptionEnumField(length=2, namespace='dsb', callback=byteorder_callback)
+    #: Option data length.
+    length: 'int' = UInt16Field(callback=byteorder_callback)
+
+
 class DecryptionSecretsBlock(BlockType):
     """Header schema for PCAP-NG Decryption Secrets Block (DSB)."""
 
@@ -1473,11 +1494,11 @@ class DecryptionSecretsBlock(BlockType):
         selector=dsb_secrets_selector,
     )
     #: Padding.
-    padding: 'bytes' = BytesField(length=lambda pkt: (4 - pkt['secrets_length'] % 4) % 4)
+    padding_data: 'bytes' = BytesField(length=lambda pkt: (4 - pkt['secrets_length'] % 4) % 4)
     #: Options.
     options: 'list[Option]' = OptionField(
-        length=lambda pkt: pkt['length'] - 20 - pkt['secrets_length'] - len(pkt['padding']),
-        base_schema=Option,
+        length=lambda pkt: pkt['length'] - 20 - pkt['secrets_length'] - len(pkt['padding_data']),
+        base_schema=_DSB_Option,
         type_name='type',
         registry=collections.defaultdict(lambda: UnknownOption, {
             Enum_OptionType.opt_endofopt: EndOfOption,
@@ -1489,6 +1510,8 @@ class DecryptionSecretsBlock(BlockType):
         }),
         eool=Enum_OptionType.opt_endofopt,
     )
+    #: Padding.
+    padding_opts: 'bytes' = PaddingField(length=lambda pkt: pkt['__option_padding__'])
     #: Block total length.
     length2: 'int' = UInt32Field(callback=byteorder_callback)
 
@@ -1517,21 +1540,10 @@ class CustomBlock(BlockType):
 class _PACK_Option(Option):
     """Header schema for ``pack_*`` options."""
 
-    def post_process(self, packet: 'dict[str, Any]') -> '_PACK_Option':
-        """Revise ``schema`` data after unpacking process.
-
-        This method revise the ``type`` value of the current option
-        based on its namespace group.
-
-        Args:
-            packet: Unpacked data.
-
-        Returns:
-            Revised schema.
-
-        """
-        self.type = Enum_OptionType.get(self.type.opt_value, namespace='pack')
-        return self
+    #: Option type.
+    type: 'Enum_OptionType' = OptionEnumField(length=2, namespace='pack', callback=byteorder_callback)
+    #: Option data length.
+    length: 'int' = UInt16Field(callback=byteorder_callback)
 
 
 class PACK_FlagsOption(_PACK_Option):
@@ -1594,11 +1606,11 @@ class PacketBlock(BlockType):
     #: Packet data.
     packet_data: 'bytes' = PayloadField(length=lambda pkt: pkt['captured_length'])
     #: Padding.
-    padding: 'bytes' = BytesField(length=lambda pkt: (4 - pkt['captured_length'] % 4) % 4)
+    padding_data: 'bytes' = BytesField(length=lambda pkt: (4 - pkt['captured_length'] % 4) % 4)
     #: Options.
     options: 'list[Option]' = OptionField(
-        length=lambda pkt: pkt['length'] - 32 - pkt['captured_length'] - len(pkt['padding']),
-        base_schema=Option,
+        length=lambda pkt: pkt['length'] - 32 - pkt['captured_length'] - len(pkt['padding_data']),
+        base_schema=_PACK_Option,
         type_name='type',
         registry=collections.defaultdict(lambda: UnknownOption, {
             Enum_OptionType.opt_endofopt: EndOfOption,
@@ -1612,6 +1624,8 @@ class PacketBlock(BlockType):
         }),
         eool=Enum_OptionType.opt_endofopt,
     )
+    #: Padding.
+    padding_opts: 'bytes' = PaddingField(length=lambda pkt: pkt['__option_padding__'])
     #: Block total length.
     length2: 'int' = UInt32Field(callback=byteorder_callback)
 
