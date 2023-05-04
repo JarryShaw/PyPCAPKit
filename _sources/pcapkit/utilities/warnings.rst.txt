@@ -102,6 +102,13 @@ User Defined Warnings
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
+.. autoexception:: pcapkit.utilities.warnings.SchemaWarning
+   :no-members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
 :exc:`ResourceWarning` Category
 -------------------------------
 

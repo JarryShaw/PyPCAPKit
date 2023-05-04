@@ -472,6 +472,9 @@
         <span class="c1">#: Output format.</span>
         <span class="n">_offmt</span><span class="p">:</span> <span class="s1">&#39;Formats&#39;</span>
 
+    <span class="c1">#: List of potential PCAP file extentions.</span>
+    <span class="n">PCAP_EXT</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;.pcap&#39;</span><span class="p">,</span> <span class="s1">&#39;.cap&#39;</span><span class="p">,</span> <span class="s1">&#39;.pcapng&#39;</span><span class="p">]</span>
+
     <span class="c1">##########################################################################</span>
     <span class="c1"># Defaults.</span>
     <span class="c1">##########################################################################</span>
@@ -673,6 +676,8 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">_exeng</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">&#39;Engine[P]&#39;</span><span class="p">,</span> <span class="n">PCAPNG_Engine</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">FormatError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;unknown file format: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_magic</span><span class="si">!r}</span><span class="s1">&#39;</span><span class="p">)</span>
+
+        <span class="c1"># start engine</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_exeng</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
 
         <span class="c1"># start iteration</span>
@@ -747,7 +752,7 @@
 
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">extension</span><span class="p">:</span>  <span class="c1"># pylint: disable=else-if-used</span>
-            <span class="n">ifnm</span> <span class="o">=</span> <span class="n">fin</span> <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">fin</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;.pcap&#39;</span> <span class="k">else</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">fin</span><span class="si">}</span><span class="s1">.pcap&#39;</span>
+            <span class="n">ifnm</span> <span class="o">=</span> <span class="n">fin</span> <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">fin</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="n">PCAP_EXT</span> <span class="k">else</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">fin</span><span class="si">}</span><span class="s1">.pcap&#39;</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">ifnm</span> <span class="o">=</span> <span class="n">fin</span>
 

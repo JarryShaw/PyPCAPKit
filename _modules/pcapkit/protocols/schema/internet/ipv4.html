@@ -465,9 +465,9 @@
     <span class="n">pkt</span><span class="p">[</span><span class="s1">&#39;flags&#39;</span><span class="p">][</span><span class="s1">&#39;func&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">func</span>
 
     <span class="k">if</span> <span class="n">func</span> <span class="o">==</span> <span class="n">Enum_QSFunction</span><span class="o">.</span><span class="n">Quick_Start_Request</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">SchemaField</span><span class="p">(</span><span class="n">schema</span><span class="o">=</span><span class="n">QuickStartRequestOption</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">SchemaField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">schema</span><span class="o">=</span><span class="n">QuickStartRequestOption</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">func</span> <span class="o">==</span> <span class="n">Enum_QSFunction</span><span class="o">.</span><span class="n">Report_of_Approved_Rate</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">SchemaField</span><span class="p">(</span><span class="n">schema</span><span class="o">=</span><span class="n">QuickStartReportOption</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">SchemaField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">schema</span><span class="o">=</span><span class="n">QuickStartReportOption</span><span class="p">)</span>
     <span class="k">raise</span> <span class="n">FieldValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;HOPOPT: invalid QS function: </span><span class="si">{</span><span class="n">func</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span></div>
 
 
@@ -778,7 +778,6 @@
     <span class="p">}))</span>
     <span class="c1">#: QS data.</span>
     <span class="n">data</span><span class="p">:</span> <span class="s1">&#39;QuickStartRequestOption | QuickStartReportOption&#39;</span> <span class="o">=</span> <span class="n">SwitchField</span><span class="p">(</span>
-        <span class="n">length</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
         <span class="n">selector</span><span class="o">=</span><span class="n">quick_start_data_selector</span><span class="p">,</span>
     <span class="p">)</span>
 

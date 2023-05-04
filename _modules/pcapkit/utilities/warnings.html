@@ -368,7 +368,7 @@
     <span class="c1"># RuntimeWarning</span>
     <span class="s1">&#39;FileWarning&#39;</span><span class="p">,</span> <span class="s1">&#39;LayerWarning&#39;</span><span class="p">,</span> <span class="s1">&#39;ProtocolWarning&#39;</span><span class="p">,</span> <span class="s1">&#39;AttributeWarning&#39;</span><span class="p">,</span>
     <span class="s1">&#39;DevModeWarning&#39;</span><span class="p">,</span> <span class="s1">&#39;VendorRequestWarning&#39;</span><span class="p">,</span> <span class="s1">&#39;VendorRuntimeWarning&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;UnknownFieldWarning&#39;</span><span class="p">,</span> <span class="s1">&#39;RegistryWarning&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;UnknownFieldWarning&#39;</span><span class="p">,</span> <span class="s1">&#39;RegistryWarning&#39;</span><span class="p">,</span> <span class="s1">&#39;SchemaWarning&#39;</span><span class="p">,</span>
     <span class="c1"># ResourceWarning</span>
     <span class="s1">&#39;DPKTWarning&#39;</span><span class="p">,</span> <span class="s1">&#39;ScapyWarning&#39;</span><span class="p">,</span> <span class="s1">&#39;PySharkWarning&#39;</span><span class="p">,</span> <span class="s1">&#39;EmojiWarning&#39;</span><span class="p">,</span>
     <span class="s1">&#39;VendorWarning&#39;</span><span class="p">,</span>
@@ -403,10 +403,13 @@
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=useless-super-delegation</span>
         <span class="c1"># log warning</span>
         <span class="k">if</span> <span class="n">DEVMODE</span><span class="p">:</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="p">),</span> <span class="n">exc_info</span><span class="o">=</span><span class="bp">self</span><span class="p">,</span> <span class="n">stack_info</span><span class="o">=</span><span class="n">VERBOSE</span><span class="p">,</span>
-                           <span class="n">stacklevel</span><span class="o">=</span><span class="n">stacklevel_calculator</span><span class="p">())</span>
+            <span class="k">if</span> <span class="n">VERBOSE</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="p">),</span> <span class="n">exc_info</span><span class="o">=</span><span class="bp">self</span><span class="p">,</span> <span class="n">stack_info</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                            <span class="n">stacklevel</span><span class="o">=</span><span class="n">stacklevel_calculator</span><span class="p">())</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">simplefilter</span><span class="p">(</span><span class="s1">&#39;ignore&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span>
 
         <span class="c1"># warnings.simplefilter(&#39;default&#39;)</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
@@ -468,6 +471,10 @@
 
 <div class="viewcode-block" id="RegistryWarning"><a class="viewcode-back" href="../../../pcapkit/utilities/warnings.html#pcapkit.utilities.warnings.RegistryWarning">[docs]</a><span class="k">class</span> <span class="nc">RegistryWarning</span><span class="p">(</span><span class="n">BaseWarning</span><span class="p">,</span> <span class="ne">RuntimeWarning</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Registry warning.&quot;&quot;&quot;</span></div>
+
+
+<div class="viewcode-block" id="SchemaWarning"><a class="viewcode-back" href="../../../pcapkit/utilities/warnings.html#pcapkit.utilities.warnings.SchemaWarning">[docs]</a><span class="k">class</span> <span class="nc">SchemaWarning</span><span class="p">(</span><span class="n">BaseWarning</span><span class="p">,</span> <span class="ne">RuntimeWarning</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Schema warning.&quot;&quot;&quot;</span></div>
 
 
 <span class="c1">##############################################################################</span>

@@ -308,6 +308,14 @@ when exception raised on user's operation.
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
+.. autoexception:: pcapkit.utilities.exceptions.SchemaError
+   :no-members:
+   :show-inheritance:
+
+   :param quiet: If :data:`True`, suppress exception message.
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
 :exc:`NotImplementedError` Category
 -----------------------------------
 

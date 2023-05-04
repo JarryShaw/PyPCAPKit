@@ -416,7 +416,6 @@
     <span class="n">auth_type</span><span class="p">:</span> <span class="s1">&#39;Enum_Authentication&#39;</span> <span class="o">=</span> <span class="n">EnumField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="n">Enum_Authentication</span><span class="p">)</span>
     <span class="c1">#: Authentication data.</span>
     <span class="n">auth_data</span><span class="p">:</span> <span class="s1">&#39;bytes | CrytographicAuthentication&#39;</span> <span class="o">=</span> <span class="n">SwitchField</span><span class="p">(</span>
-        <span class="n">length</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span>
         <span class="n">selector</span><span class="o">=</span><span class="n">ospf_auth_data_selector</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="c1">#: Payload.</span>

@@ -363,6 +363,7 @@
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;PCAPNG&#39;</span><span class="p">]</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">pcapkit.foundation.extraction</span> <span class="kn">import</span> <span class="n">Extractor</span>
     <span class="kn">from</span> <span class="nn">pcapkit.protocols.data.misc.pcapng</span> <span class="kn">import</span> <span class="n">PCAPNG</span> <span class="k">as</span> <span class="n">Data_PCAPNG</span>
     <span class="kn">from</span> <span class="nn">pcapkit.protocols.data.misc.pcapng</span> <span class="kn">import</span> <span class="n">CustomBlock</span> <span class="k">as</span> <span class="n">Data_CustomBlock</span>
     <span class="kn">from</span> <span class="nn">pcapkit.protocols.data.misc.pcapng</span> <span class="kn">import</span> \
@@ -448,6 +449,16 @@
     <span class="k">def</span> <span class="nf">module</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;str&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Engine module name.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="s1">&#39;pcapkit.foundation.engine.pcapng&#39;</span>
+
+    <span class="c1">##########################################################################</span>
+    <span class="c1"># Data models.</span>
+    <span class="c1">##########################################################################</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">extractor</span><span class="p">:</span> <span class="s1">&#39;Extractor&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_ctx</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># type: ignore[assignment]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_ctx_list</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">extractor</span><span class="p">)</span>
 
     <span class="c1">##########################################################################</span>
     <span class="c1"># Methods.</span>
@@ -542,8 +553,8 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">_write_file</span><span class="p">(</span><span class="n">block</span><span class="o">.</span><span class="n">info</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;Custom </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ctx</span><span class="o">.</span><span class="n">custom</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
 
             <span class="k">elif</span> <span class="n">block</span><span class="o">.</span><span class="n">info</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="n">Enum_BlockType</span><span class="o">.</span><span class="n">Enhanced_Packet_Block</span><span class="p">:</span>
-                <span class="k">if</span> <span class="n">info</span><span class="o">.</span><span class="n">interface_id</span> <span class="o">&gt;=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ctx</span><span class="o">.</span><span class="n">interfaces</span><span class="p">):</span>
-                    <span class="k">raise</span> <span class="n">FormatError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;PCAP-NG: [EPB] invalid interface ID: </span><span class="si">{</span><span class="n">info</span><span class="o">.</span><span class="n">interface_id</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">block</span><span class="o">.</span><span class="n">info</span><span class="o">.</span><span class="n">interface_id</span> <span class="o">&gt;=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ctx</span><span class="o">.</span><span class="n">interfaces</span><span class="p">):</span>
+                    <span class="k">raise</span> <span class="n">FormatError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;PCAP-NG: [EPB] invalid interface ID: </span><span class="si">{</span><span class="n">block</span><span class="o">.</span><span class="n">info</span><span class="o">.</span><span class="n">interface_id</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
                 <span class="k">break</span>
 
             <span class="k">elif</span> <span class="n">block</span><span class="o">.</span><span class="n">info</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="n">Enum_BlockType</span><span class="o">.</span><span class="n">Simple_Packet_Block</span><span class="p">:</span>
@@ -552,8 +563,8 @@
                 <span class="k">break</span>
 
             <span class="k">elif</span> <span class="n">block</span><span class="o">.</span><span class="n">info</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="n">Enum_BlockType</span><span class="o">.</span><span class="n">Packet_Block</span><span class="p">:</span>
-                <span class="k">if</span> <span class="n">info</span><span class="o">.</span><span class="n">interface_id</span> <span class="o">&gt;=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ctx</span><span class="o">.</span><span class="n">interfaces</span><span class="p">):</span>
-                    <span class="k">raise</span> <span class="n">FormatError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;PCAP-NG: [Packet] invalid interface ID: </span><span class="si">{</span><span class="n">info</span><span class="o">.</span><span class="n">interface_id</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">block</span><span class="o">.</span><span class="n">info</span><span class="o">.</span><span class="n">interface_id</span> <span class="o">&gt;=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ctx</span><span class="o">.</span><span class="n">interfaces</span><span class="p">):</span>
+                    <span class="k">raise</span> <span class="n">FormatError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;PCAP-NG: [Packet] invalid interface ID: </span><span class="si">{</span><span class="n">block</span><span class="o">.</span><span class="n">info</span><span class="o">.</span><span class="n">interface_id</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
 
                 <span class="n">warn</span><span class="p">(</span><span class="s1">&#39;PCAP-NG: [Packet] deprecated block type&#39;</span><span class="p">,</span> <span class="n">DeprecatedFormatWarning</span><span class="p">,</span>
                      <span class="n">stacklevel</span><span class="o">=</span><span class="n">stacklevel</span><span class="p">())</span>
@@ -619,9 +630,9 @@
 
         <span class="k">if</span> <span class="n">ext</span><span class="o">.</span><span class="n">_flag_f</span><span class="p">:</span>
             <span class="n">ofile</span> <span class="o">=</span> <span class="n">ext</span><span class="o">.</span><span class="n">_ofile</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">ext</span><span class="o">.</span><span class="n">_ofnm</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1">.</span><span class="si">{</span><span class="n">ext</span><span class="o">.</span><span class="n">_fext</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
-            <span class="n">ofile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ctx</span><span class="o">.</span><span class="n">to_dict</span><span class="p">(),</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
+            <span class="n">ofile</span><span class="p">(</span><span class="n">block</span><span class="o">.</span><span class="n">to_dict</span><span class="p">(),</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">ext</span><span class="o">.</span><span class="n">_ofile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ctx</span><span class="o">.</span><span class="n">to_dict</span><span class="p">(),</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
+            <span class="n">ext</span><span class="o">.</span><span class="n">_ofile</span><span class="p">(</span><span class="n">block</span><span class="o">.</span><span class="n">to_dict</span><span class="p">(),</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
             <span class="n">ofile</span> <span class="o">=</span> <span class="n">ext</span><span class="o">.</span><span class="n">_ofile</span>
         <span class="n">ext</span><span class="o">.</span><span class="n">_offmt</span> <span class="o">=</span> <span class="n">ofile</span><span class="o">.</span><span class="n">kind</span>
 

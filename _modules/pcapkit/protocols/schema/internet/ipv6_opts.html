@@ -500,9 +500,9 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">mode</span> <span class="o">=</span> <span class="n">Enum_SMFDPDMode</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">pkt</span><span class="p">[</span><span class="s1">&#39;test&#39;</span><span class="p">][</span><span class="s1">&#39;mode&#39;</span><span class="p">])</span>
     <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="n">Enum_SMFDPDMode</span><span class="o">.</span><span class="n">I_DPD</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">SchemaField</span><span class="p">(</span><span class="n">schema</span><span class="o">=</span><span class="n">SMFIdentificationBasedDPDOption</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">SchemaField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="n">pkt</span><span class="p">[</span><span class="s1">&#39;test&#39;</span><span class="p">][</span><span class="s1">&#39;len&#39;</span><span class="p">],</span> <span class="n">schema</span><span class="o">=</span><span class="n">SMFIdentificationBasedDPDOption</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="n">Enum_SMFDPDMode</span><span class="o">.</span><span class="n">H_DPD</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">SchemaField</span><span class="p">(</span><span class="n">schema</span><span class="o">=</span><span class="n">SMFHashBasedDPDOption</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">SchemaField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="n">pkt</span><span class="p">[</span><span class="s1">&#39;test&#39;</span><span class="p">][</span><span class="s1">&#39;len&#39;</span><span class="p">],</span> <span class="n">schema</span><span class="o">=</span><span class="n">SMFHashBasedDPDOption</span><span class="p">)</span>
     <span class="k">raise</span> <span class="n">FieldValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;IPv6-Opts: invalid SMF DPD mode: </span><span class="si">{</span><span class="n">mode</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span></div>
 
 
@@ -562,9 +562,9 @@
     <span class="n">pkt</span><span class="p">[</span><span class="s1">&#39;flags&#39;</span><span class="p">][</span><span class="s1">&#39;func&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">func</span>
 
     <span class="k">if</span> <span class="n">func</span> <span class="o">==</span> <span class="n">Enum_QSFunction</span><span class="o">.</span><span class="n">Quick_Start_Request</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">SchemaField</span><span class="p">(</span><span class="n">schema</span><span class="o">=</span><span class="n">QuickStartRequestOption</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">SchemaField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">schema</span><span class="o">=</span><span class="n">QuickStartRequestOption</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">func</span> <span class="o">==</span> <span class="n">Enum_QSFunction</span><span class="o">.</span><span class="n">Report_of_Approved_Rate</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">SchemaField</span><span class="p">(</span><span class="n">schema</span><span class="o">=</span><span class="n">QuickStartReportOption</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">SchemaField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">schema</span><span class="o">=</span><span class="n">QuickStartReportOption</span><span class="p">)</span>
     <span class="k">raise</span> <span class="n">FieldValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;IPv6-Opts: invalid QS function: </span><span class="si">{</span><span class="n">func</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span></div>
 
 
@@ -669,7 +669,6 @@
     <span class="p">}))</span>
     <span class="c1">#: SMF DPD data.</span>
     <span class="n">data</span><span class="p">:</span> <span class="s1">&#39;SMFIdentificationBasedDPDOption | SMFHashBasedDPDOption&#39;</span> <span class="o">=</span> <span class="n">SwitchField</span><span class="p">(</span>
-        <span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">&#39;test&#39;</span><span class="p">][</span><span class="s1">&#39;len&#39;</span><span class="p">],</span>
         <span class="n">selector</span><span class="o">=</span><span class="n">smf_dpd_data_selector</span><span class="p">,</span>
     <span class="p">)</span>
 
@@ -709,8 +708,7 @@
     <span class="p">})</span>
     <span class="c1">#: TaggerID.</span>
     <span class="n">tid</span><span class="p">:</span> <span class="s1">&#39;bytes | IPv4Address | IPv6Address&#39;</span> <span class="o">=</span> <span class="n">ConditionalField</span><span class="p">(</span>
-        <span class="n">SwitchField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">&#39;info&#39;</span><span class="p">][</span><span class="s1">&#39;len&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span>
-                    <span class="n">selector</span><span class="o">=</span><span class="n">smf_i_dpd_tid_selector</span><span class="p">),</span>
+        <span class="n">SwitchField</span><span class="p">(</span><span class="n">selector</span><span class="o">=</span><span class="n">smf_i_dpd_tid_selector</span><span class="p">),</span>
         <span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">&#39;info&#39;</span><span class="p">][</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="c1">#: Identifier.</span>
@@ -791,7 +789,6 @@
     <span class="p">}))</span>
     <span class="c1">#: QS data.</span>
     <span class="n">data</span><span class="p">:</span> <span class="s1">&#39;QuickStartRequestOption | QuickStartReportOption&#39;</span> <span class="o">=</span> <span class="n">SwitchField</span><span class="p">(</span>
-        <span class="n">length</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
         <span class="n">selector</span><span class="o">=</span><span class="n">quick_start_data_selector</span><span class="p">,</span>
     <span class="p">)</span>
 

@@ -1067,6 +1067,25 @@ when exception raised on user’s operation.</p>
 </dl>
 </dd></dl>
 
+<dl class="py exception">
+<dt class="sig sig-object py" id="pcapkit.utilities.exceptions.SchemaError">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.utilities.exceptions.</span></span><span class="sig-name descname"><span class="pre">SchemaError</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">quiet</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/utilities/exceptions.html#SchemaError"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.utilities.exceptions.SchemaError" title="Permalink to this definition">#</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pcapkit.utilities.exceptions.BaseError" title="pcapkit.utilities.exceptions.BaseError"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseError</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ValueError</span></code></a></p>
+<p>Invalid schema.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>quiet</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a>) – If <a class="reference external" href="https://docs.python.org/3/library/constants.html#True" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">True</span></code></a>, suppress exception message.</p></li>
+<li><p><strong>*args</strong> (<em>Any</em>) – Arbitrary positional arguments.</p></li>
+<li><p><strong>**kwargs</strong> (<em>Any</em>) – Arbitrary keyword arguments.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
 </section>
 <section id="notimplementederror-category">
 <h2><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#NotImplementedError" title="(in Python v3.11)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">NotImplementedError</span></code></a> Category<a class="headerlink" href="#notimplementederror-category" title="Permalink to this heading">#</a></h2>
@@ -1333,6 +1352,7 @@ when exception raised on user’s operation.</p>
 <li><a class="reference internal" href="#pcapkit.utilities.exceptions.KeyExists"><code class="docutils literal notranslate"><span class="pre">KeyExists</span></code></a></li>
 <li><a class="reference internal" href="#pcapkit.utilities.exceptions.NoDefaultValue"><code class="docutils literal notranslate"><span class="pre">NoDefaultValue</span></code></a></li>
 <li><a class="reference internal" href="#pcapkit.utilities.exceptions.FieldValueError"><code class="docutils literal notranslate"><span class="pre">FieldValueError</span></code></a></li>
+<li><a class="reference internal" href="#pcapkit.utilities.exceptions.SchemaError"><code class="docutils literal notranslate"><span class="pre">SchemaError</span></code></a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#notimplementederror-category"><code class="xref py py-exc docutils literal notranslate"><span class="pre">NotImplementedError</span></code> Category</a><ul>
