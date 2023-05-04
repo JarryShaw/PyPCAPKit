@@ -744,6 +744,18 @@ class Protocol(Generic[PT, ST], metaclass=abc.ABCMeta):
     # Utilities.
     ##########################################################################
 
+    def _get_payload(self) -> 'bytes':
+        """Get payload of :attr:`self.__header__ <Protocol.__header__>`.
+
+        Returns:
+            Payload of :attr:`self.__header__ <Protocol.__header__>` as :obj:`bytes`.
+
+        See Also:
+            This is a wrapper function for :meth:`pcapkit.protocols.schema.Schema.get_payload`.
+
+        """
+        return self.__header__.get_payload()
+
     def _read_protos(self, size: int) -> 'Optional[StdlibEnum | AenumEnum]':  # pylint: disable=unused-argument
         """Read next layer protocol type.
 
@@ -1103,7 +1115,7 @@ class Protocol(Generic[PT, ST], metaclass=abc.ABCMeta):
         if TYPE_CHECKING:
             protocol: 'Type[Protocol]'
 
-        file_ = self.__header__.get_payload()
+        file_ = self._get_payload()
         if length is None:
             length = len(file_)
 
