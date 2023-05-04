@@ -46,16 +46,16 @@ class Scapy(Engine['ScapyPacket']):
     @classmethod
     def module(cls) -> 'str':
         """Engine module name."""
-        return 'scapy.all'
+        return 'scapy'
 
     ##########################################################################
     # Data models.
     ##########################################################################
 
     def __init__(self, extractor: 'Extractor') -> 'None':
-        from scapy import all as scapy_all  # isort:skip
+        from scapy import sendrecv as scapy  # isort:skip
 
-        self._expkg = scapy_all
+        self._expkg = scapy
         self._extmp = cast('Iterator[ScapyPacket]', None)
 
         super().__init__(extractor)
