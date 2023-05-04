@@ -26,7 +26,7 @@ __all__ = [
     # RuntimeWarning
     'FileWarning', 'LayerWarning', 'ProtocolWarning', 'AttributeWarning',
     'DevModeWarning', 'VendorRequestWarning', 'VendorRuntimeWarning',
-    'UnknownFieldWarning', 'RegistryWarning',
+    'UnknownFieldWarning', 'RegistryWarning', 'SchemaWarning',
     # ResourceWarning
     'DPKTWarning', 'ScapyWarning', 'PySharkWarning', 'EmojiWarning',
     'VendorWarning',
@@ -61,10 +61,13 @@ class BaseWarning(UserWarning):
     def __init__(self, *args: 'Any', **kwargs: 'Any') -> 'None':  # pylint: disable=useless-super-delegation
         # log warning
         if DEVMODE:
-            logger.warning(str(self), exc_info=self, stack_info=VERBOSE,
-                           stacklevel=stacklevel_calculator())
+            if VERBOSE:
+                logger.warning(str(self), exc_info=self, stack_info=True,
+                            stacklevel=stacklevel_calculator())
+            else:
+                logger.warning(str(self))
         else:
-            logger.warning(str(self))
+            warnings.simplefilter('ignore', type(self))
 
         # warnings.simplefilter('default')
         super().__init__(*args, **kwargs)
@@ -126,6 +129,10 @@ class UnknownFieldWarning(BaseWarning, RuntimeWarning):
 
 class RegistryWarning(BaseWarning, RuntimeWarning):
     """Registry warning."""
+
+
+class SchemaWarning(BaseWarning, RuntimeWarning):
+    """Schema warning."""
 
 
 ##############################################################################
