@@ -26,11 +26,13 @@ if TYPE_CHECKING:
     from pcapkit.protocols.data.misc.pcapng import CustomBlock as Data_CustomBlock
     from pcapkit.protocols.data.misc.pcapng import \
         DecryptionSecretsBlock as Data_DecryptionSecretsBlock
+    from pcapkit.protocols.data.misc.pcapng import EnhancedPacketBlock as Data_EnhancedPacketBlock
     from pcapkit.protocols.data.misc.pcapng import \
         InterfaceDescriptionBlock as Data_InterfaceDescriptionBlock
     from pcapkit.protocols.data.misc.pcapng import \
         InterfaceStatisticsBlock as Data_InterfaceStatisticsBlock
     from pcapkit.protocols.data.misc.pcapng import NameResolutionBlock as Data_NameResolutionBlock
+    from pcapkit.protocols.data.misc.pcapng import PacketBlock as Data_PacketBlock
     from pcapkit.protocols.data.misc.pcapng import SectionHeaderBlock as Data_SectionHeaderBlock
     from pcapkit.protocols.data.misc.pcapng import \
         SystemdJournalExportBlock as Data_SystemdJournalExportBlock
@@ -198,12 +200,12 @@ class PCAPNG(Engine[P_PCAPNG]):
                 self._write_file(block.info, name=f'Decryption Secrets {len(self._ctx.secrets)}')
 
             elif block.info.type == Enum_BlockType.Interface_Statistics_Block:
-                info = cast('Data_InterfaceStatisticsBlock', block.info)
-                if info.interface_id >= len(self._ctx.interfaces):
-                    raise FormatError(f'PCAP-NG: [ISB] invalid interface ID: {info.interface_id}')
-                self._ctx.statistics.append(info)
+                isb_info = cast('Data_InterfaceStatisticsBlock', block.info)
+                if isb_info.interface_id >= len(self._ctx.interfaces):
+                    raise FormatError(f'PCAP-NG: [ISB] invalid interface ID: {isb_info.interface_id}')
+                self._ctx.statistics.append(isb_info)
 
-                self._write_file(block.info, name=f'Interface Statistics {len(self._ctx.statistics)}')
+                self._write_file(isb_info, name=f'Interface Statistics {len(self._ctx.statistics)}')
 
             elif block.info.type in (Enum_BlockType.Custom_Block_that_rewriters_can_copy_into_new_files,
                                     Enum_BlockType.Custom_Block_that_rewriters_should_not_copy_into_new_files):
@@ -211,8 +213,9 @@ class PCAPNG(Engine[P_PCAPNG]):
                 self._write_file(block.info, name=f'Custom {len(self._ctx.custom)}')
 
             elif block.info.type == Enum_BlockType.Enhanced_Packet_Block:
-                if block.info.interface_id >= len(self._ctx.interfaces):
-                    raise FormatError(f'PCAP-NG: [EPB] invalid interface ID: {block.info.interface_id}')
+                epb_info = cast('Data_EnhancedPacketBlock', block.info)
+                if epb_info.interface_id >= len(self._ctx.interfaces):
+                    raise FormatError(f'PCAP-NG: [EPB] invalid interface ID: {epb_info.interface_id}')
                 break
 
             elif block.info.type == Enum_BlockType.Simple_Packet_Block:
@@ -221,8 +224,9 @@ class PCAPNG(Engine[P_PCAPNG]):
                 break
 
             elif block.info.type == Enum_BlockType.Packet_Block:
-                if block.info.interface_id >= len(self._ctx.interfaces):
-                    raise FormatError(f'PCAP-NG: [Packet] invalid interface ID: {block.info.interface_id}')
+                pack_info = cast('Data_PacketBlock', block.info)
+                if pack_info.interface_id >= len(self._ctx.interfaces):
+                    raise FormatError(f'PCAP-NG: [Packet] invalid interface ID: {pack_info.interface_id}')
 
                 warn('PCAP-NG: [Packet] deprecated block type', DeprecatedFormatWarning,
                      stacklevel=stacklevel())
