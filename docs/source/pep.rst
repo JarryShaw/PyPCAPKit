@@ -41,18 +41,6 @@ More over, :class:`~pcapkit.protocols.internet.mh.MH` requires some help to
 implement all the *message data* types, you can find more information in the
 specific file.
 
-`PCAPNG`_ Support
------------------
-
-As mentioned in #35, PyPCAPKit does not support parsing PCAPNG files with its
-builtin default engine at the moment -- *partly because I could not understand
-the file format specifications*.
-
-If you are to help with it, please refer to the implementation of PCAP format
-support in :mod:`pcapkit.protocols.misc.pcap` module.
-
-.. _PCAPNG: https://wiki.wireshark.org/Development/PcapNg
-
 Logging Integration
 -------------------
 
