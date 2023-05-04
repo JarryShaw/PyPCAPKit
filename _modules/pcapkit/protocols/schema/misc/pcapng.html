@@ -350,7 +350,7 @@
 <span class="kn">import</span> <span class="nn">io</span>
 <span class="kn">import</span> <span class="nn">struct</span>
 <span class="kn">import</span> <span class="nn">sys</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">Any</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">Any</span><span class="p">,</span> <span class="n">cast</span>
 
 <span class="kn">from</span> <span class="nn">pcapkit.const.pcapng.block_type</span> <span class="kn">import</span> <span class="n">BlockType</span> <span class="k">as</span> <span class="n">Enum_BlockType</span>
 <span class="kn">from</span> <span class="nn">pcapkit.const.pcapng.filter_type</span> <span class="kn">import</span> <span class="n">FilterType</span> <span class="k">as</span> <span class="n">Enum_FilterType</span>
@@ -403,7 +403,7 @@
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
     <span class="kn">from</span> <span class="nn">ipaddress</span> <span class="kn">import</span> <span class="n">IPv4Address</span><span class="p">,</span> <span class="n">IPv4Interface</span><span class="p">,</span> <span class="n">IPv6Address</span><span class="p">,</span> <span class="n">IPv6Interface</span>
-    <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Type</span>
+    <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Optional</span>
 
     <span class="kn">from</span> <span class="nn">typing_extensions</span> <span class="kn">import</span> <span class="n">Literal</span><span class="p">,</span> <span class="n">Self</span>
 
@@ -788,7 +788,7 @@
     <span class="c1">#: Minor version number.</span>
     <span class="n">minor</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span> <span class="o">=</span> <span class="n">UInt16Field</span><span class="p">(</span><span class="n">callback</span><span class="o">=</span><span class="n">shb_byteorder_callback</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
     <span class="c1">#: Section length.</span>
-    <span class="n">section_length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span> <span class="o">=</span> <span class="n">Int64Field</span><span class="p">(</span><span class="n">callback</span><span class="o">=</span><span class="n">shb_byteorder_callback</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="mh">0xFFFFFFFFFFFFFFFF</span><span class="p">)</span>
+    <span class="n">section_length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span> <span class="o">=</span> <span class="n">Int64Field</span><span class="p">(</span><span class="n">callback</span><span class="o">=</span><span class="n">shb_byteorder_callback</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="mh">0xFFFF_FFFF_FFFF_FFFF</span><span class="p">)</span>
     <span class="c1">#: Options.</span>
     <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;list[Option]&#39;</span> <span class="o">=</span> <span class="n">OptionField</span><span class="p">(</span>
         <span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">&#39;length&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="mi">28</span><span class="p">,</span>
@@ -840,7 +840,10 @@
 <span class="sd">            Revised schema.</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">post_process</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span>
+        <span class="bp">self</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">&#39;Self&#39;</span><span class="p">,</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">post_process</span><span class="p">(</span><span class="n">packet</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">section_length</span> <span class="o">==</span> <span class="mh">0xFFFF_FFFF_FFFF_FFFF</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">section_length</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
 
         <span class="n">magic</span> <span class="o">=</span> <span class="n">packet</span><span class="p">[</span><span class="s1">&#39;match&#39;</span><span class="p">][</span><span class="s1">&#39;byteorder&#39;</span><span class="p">]</span>  <span class="c1"># type: int</span>
         <span class="k">if</span> <span class="n">magic</span> <span class="o">==</span> <span class="mh">0x1A2B3C4D</span><span class="p">:</span>
@@ -1486,7 +1489,7 @@
 <span class="sd">            Revised schema.</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">post_process</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span>
+        <span class="bp">self</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">&#39;Self&#39;</span><span class="p">,</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">post_process</span><span class="p">(</span><span class="n">packet</span><span class="p">))</span>
 
         <span class="n">mapping</span> <span class="o">=</span> <span class="n">MultiDict</span><span class="p">()</span>  <span class="c1"># type: MultiDict[IPv4Address | IPv6Address, str]</span>
         <span class="n">reverse_mapping</span> <span class="o">=</span> <span class="n">MultiDict</span><span class="p">()</span>  <span class="c1"># type: MultiDict[str, IPv4Address | IPv6Address]</span>
@@ -1659,7 +1662,7 @@
 <span class="sd">            Revised schema.</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">post_process</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span>
+        <span class="bp">self</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">&#39;Self&#39;</span><span class="p">,</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">post_process</span><span class="p">(</span><span class="n">packet</span><span class="p">))</span>
 
         <span class="n">data</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: list[OrderedMultiDict[str, str | bytes]]</span>
         <span class="k">for</span> <span class="n">entry_buffer</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">entry</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="sa">b</span><span class="s1">&#39;</span><span class="se">\n\n</span><span class="s1">&#39;</span><span class="p">):</span>
