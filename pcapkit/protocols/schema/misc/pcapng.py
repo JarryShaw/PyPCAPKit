@@ -7,7 +7,7 @@ import collections
 import io
 import struct
 import sys
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, cast
 
 from pcapkit.const.pcapng.block_type import BlockType as Enum_BlockType
 from pcapkit.const.pcapng.filter_type import FilterType as Enum_FilterType
@@ -60,7 +60,7 @@ __all__ = [
 
 if TYPE_CHECKING:
     from ipaddress import IPv4Address, IPv4Interface, IPv6Address, IPv6Interface
-    from typing import Any, Callable, Optional, Type
+    from typing import Any, Callable, Optional
 
     from typing_extensions import Literal, Self
 
@@ -445,7 +445,7 @@ class SectionHeaderBlock(BlockType):
     #: Minor version number.
     minor: 'int' = UInt16Field(callback=shb_byteorder_callback, default=0)
     #: Section length.
-    section_length: 'int' = Int64Field(callback=shb_byteorder_callback, default=0xFFFFFFFFFFFFFFFF)
+    section_length: 'int' = Int64Field(callback=shb_byteorder_callback, default=0xFFFF_FFFF_FFFF_FFFF)
     #: Options.
     options: 'list[Option]' = OptionField(
         length=lambda pkt: pkt['length'] - 28,
@@ -497,7 +497,10 @@ class SectionHeaderBlock(BlockType):
             Revised schema.
 
         """
-        self = super().post_process(packet)
+        self = cast('Self', super().post_process(packet))
+
+        if self.section_length == 0xFFFF_FFFF_FFFF_FFFF:
+            self.section_length = -1
 
         magic = packet['match']['byteorder']  # type: int
         if magic == 0x1A2B3C4D:
@@ -1143,7 +1146,7 @@ class NameResolutionBlock(BlockType):
             Revised schema.
 
         """
-        self = super().post_process(packet)
+        self = cast('Self', super().post_process(packet))
 
         mapping = MultiDict()  # type: MultiDict[IPv4Address | IPv6Address, str]
         reverse_mapping = MultiDict()  # type: MultiDict[str, IPv4Address | IPv6Address]
@@ -1316,7 +1319,7 @@ class SystemdJournalExportBlock(BlockType):
             Revised schema.
 
         """
-        self = super().post_process(packet)
+        self = cast('Self', super().post_process(packet))
 
         data = []  # type: list[OrderedMultiDict[str, str | bytes]]
         for entry_buffer in self.entry.split(b'\n\n'):
