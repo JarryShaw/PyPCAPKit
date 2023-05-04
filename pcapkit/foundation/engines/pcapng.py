@@ -21,6 +21,7 @@ from pcapkit.utilities.warnings import DeprecatedFormatWarning
 __all__ = ['PCAPNG']
 
 if TYPE_CHECKING:
+    from pcapkit.foundation.extraction import Extractor
     from pcapkit.protocols.data.misc.pcapng import PCAPNG as Data_PCAPNG
     from pcapkit.protocols.data.misc.pcapng import CustomBlock as Data_CustomBlock
     from pcapkit.protocols.data.misc.pcapng import \
@@ -106,6 +107,16 @@ class PCAPNG(Engine[P_PCAPNG]):
     def module(cls) -> 'str':
         """Engine module name."""
         return 'pcapkit.foundation.engine.pcapng'
+
+    ##########################################################################
+    # Data models.
+    ##########################################################################
+
+    def __init__(self, extractor: 'Extractor') -> 'None':
+        self._ctx = None  # type: ignore[assignment]
+        self._ctx_list = []
+
+        super().__init__(extractor)
 
     ##########################################################################
     # Methods.
@@ -200,8 +211,8 @@ class PCAPNG(Engine[P_PCAPNG]):
                 self._write_file(block.info, name=f'Custom {len(self._ctx.custom)}')
 
             elif block.info.type == Enum_BlockType.Enhanced_Packet_Block:
-                if info.interface_id >= len(self._ctx.interfaces):
-                    raise FormatError(f'PCAP-NG: [EPB] invalid interface ID: {info.interface_id}')
+                if block.info.interface_id >= len(self._ctx.interfaces):
+                    raise FormatError(f'PCAP-NG: [EPB] invalid interface ID: {block.info.interface_id}')
                 break
 
             elif block.info.type == Enum_BlockType.Simple_Packet_Block:
@@ -210,8 +221,8 @@ class PCAPNG(Engine[P_PCAPNG]):
                 break
 
             elif block.info.type == Enum_BlockType.Packet_Block:
-                if info.interface_id >= len(self._ctx.interfaces):
-                    raise FormatError(f'PCAP-NG: [Packet] invalid interface ID: {info.interface_id}')
+                if block.info.interface_id >= len(self._ctx.interfaces):
+                    raise FormatError(f'PCAP-NG: [Packet] invalid interface ID: {block.info.interface_id}')
 
                 warn('PCAP-NG: [Packet] deprecated block type', DeprecatedFormatWarning,
                      stacklevel=stacklevel())
@@ -277,9 +288,9 @@ class PCAPNG(Engine[P_PCAPNG]):
 
         if ext._flag_f:
             ofile = ext._ofile(f'{ext._ofnm}/{name}.{ext._fext}')
-            ofile(self._ctx.to_dict(), name=name)
+            ofile(block.to_dict(), name=name)
         else:
-            ext._ofile(self._ctx.to_dict(), name=name)
+            ext._ofile(block.to_dict(), name=name)
             ofile = ext._ofile
         ext._offmt = ofile.kind
 

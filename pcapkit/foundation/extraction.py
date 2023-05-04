@@ -334,6 +334,8 @@ class Extractor(Generic[P]):
             self._exeng = cast('Engine[P]', PCAPNG_Engine(self))
         else:
             raise FormatError(f'unknown file format: {self._magic!r}')
+
+        # start engine
         self._exeng.run()
 
         # start iteration
