@@ -788,8 +788,8 @@ class InterfaceDescriptionBlock(BlockType):
     length2: 'int' = UInt32Field(callback=byteorder_callback)
 
     if TYPE_CHECKING:
-        def __init__(self, length: 'int', linktype: 'int', reserved: 'int',
-                     snaplen: 'int', options: 'list[Option | bytes] | bytes', length2: 'int') -> 'None': ...
+        def __init__(self, length: 'int', linktype: 'int', snaplen: 'int',
+                     options: 'list[Option | bytes] | bytes', length2: 'int') -> 'None': ...
 
 
 class _EPB_Option(Option):
@@ -1530,6 +1530,8 @@ class CustomBlock(BlockType):
     pen: 'int' = UInt32Field(callback=byteorder_callback)
     #: Custom data.
     data: 'bytes' = BytesField(length=lambda pkt: pkt['length'] - 16)
+    #: Padding.
+    padding: 'bytes' = BytesField(length=lambda pkt: (4 - pkt['data'] % 4) % 4)
     #: Block total length.
     length2: 'int' = UInt32Field(callback=byteorder_callback)
 

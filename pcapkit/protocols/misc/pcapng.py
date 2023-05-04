@@ -20,10 +20,13 @@ import math
 import os
 import platform
 import re
+import struct
 import sys
 import textwrap
 import time
 from typing import TYPE_CHECKING, cast, overload
+
+from numpy import isin
 
 from pcapkit.const.pcapng.block_type import BlockType as Enum_BlockType
 from pcapkit.const.pcapng.filter_type import FilterType as Enum_FilterType
@@ -171,7 +174,7 @@ from pcapkit.protocols.schema.misc.pcapng import ZigBeeAPSKey as Schema_ZigBeeAP
 from pcapkit.protocols.schema.misc.pcapng import ZigBeeNWKKey as Schema_ZigBeeNWKKey
 from pcapkit.utilities.compat import StrEnum
 from pcapkit.utilities.exceptions import ProtocolError, UnsupportedCall, stacklevel
-from pcapkit.utilities.warnings import AttributeWarning, ProtocolWarning, RegistryWarning, warn
+from pcapkit.utilities.warnings import AttributeWarning, DeprecatedFormatWarning, ProtocolWarning, RegistryWarning, warn
 
 __all__ = ['PCAPNG']
 
@@ -1857,7 +1860,7 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
 
         """
         warn('PCAP-NG: Packet Block has been obsolete! Please use Enhanced Packet Block and/or '
-             'Simple Packet Block instead.', DeprecationWarning, stacklevel=stacklevel())
+             'Simple Packet Block instead.', DeprecatedFormatWarning, stacklevel=stacklevel())
 
         timestamp, timestamp_epoch = self._read_timestamp(schema.timestamp_high, schema.timestamp_low,
                                                           interface_id=schema.interface_id)
@@ -3312,7 +3315,436 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
             length2=total_length + 28,
         )
 
+    def _make_block_idb(self, block: 'Optional[Data_InterfaceDescriptionBlock]' = None, *,
+                        linktype: 'Enum_LinkType | StdlibEnum | AenumEnum | str | int' = Enum_LinkType.NULL,
+                        linktype_default: 'Optional[int]' = None,
+                        linktype_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
+                        linktype_reversed: 'bool' = False,
+                        snaplen: 'int' = 0xFFFF_FFFF_FFFF_FFFF,
+                        options: 'Optional[Option | list[Schema_Option | tuple[Enum_OptionType, dict[str, Any]] | bytes]]' = None,
+                        **kwargs: 'Any') -> 'Schema_InterfaceDescriptionBlock':
+        """Make PCAP-NG interface description block (IDB).
 
+        Args:
+            block: Block data model.
+            linktype: Link layer protocol type.
+            linktype_default: Default value of link layer protocol type.
+            linktype_namespace: Namespace of link layer protocol type.
+            linktype_reversed: Reversed flag for link layer protocol type namespace.
+            snaplen: Snap length.
+            options: Block options.
+            **kwargs: Arbitrary keyword arguments.
+
+        Returns:
+            Constructed block schema.
+
+        """
+        if block is not None:
+            linktype_val = block.linktype
+            snaplen = block.snaplen
+            options = block.options
+        else:
+            linktype_val = self._make_index(linktype, linktype_default, namespace=linktype_namespace,  # type: ignore[call-overload]
+                                            reversed=linktype_reversed, pack=False)
+
+        if options is not None:
+            options_value, total_length = self._make_pcapng_options(options, namespace='shb')
+        else:
+            options_value, total_length = [], 0
+
+        return Schema_InterfaceDescriptionBlock(
+            length=total_length + 20,
+            linktype=linktype_val,
+            snaplen=snaplen,
+            options=options_value,
+            length2=total_length + 20,
+        )
+
+    def _make_block_epb(self, block: 'Optional[Data_EnhancedPacketBlock]' = None, *,
+                        interface_id: 'int' = 0,
+                        timestamp: 'Optional[dt_type | int | float | Decimal]' = None,
+                        captured_len: 'Optional[int]' = None,
+                        original_len: 'Optional[int]' = None,
+                        packet_data: 'bytes | Protocol | Schema' = b'',
+                        options: 'Optional[Option | list[Schema_Option | tuple[Enum_OptionType, dict[str, Any]] | bytes]]' = None,
+                        **kwargs: 'Any') -> 'Schema_EnhancedPacketBlock':
+        """Make PCAP-NG enhanced packet block (EPB).
+
+        Args:
+            block: Block data model.
+            interface_id: Interface ID.
+            timestmap: Packet timestamp.
+            captured_len: Captured length.
+            original_len: Original length.
+            packet_data: Payload of the block.
+            options: Block options.
+            **kwargs: Arbitrary keyword arguments.
+
+        Returns:
+            Constructed block schema.
+
+        """
+        if block is not None:
+            interface_id = block.interface_id
+            timestamp = block.timestamp_epoch
+            captured_len = block.captured_len
+            original_len = block.original_len
+            options = block.options
+
+        timestamp_high, timestamp_low = self._make_timestamp(timestamp, interface_id=interface_id)
+        if captured_len is None:
+            if self._ctx is None:
+                snaplen = 0xFFFF_FFFF_FFFF_FFFF
+            else:
+                snaplen = self._ctx.interfaces[interface_id].snaplen
+            captured_len = min(len(packet_data), snaplen)
+        if original_len is None:
+            original_len = len(packet_data)
+        packet_len = math.ceil(len(packet_data) / 4) * 4
+
+        if options is not None:
+            options_value, total_length = self._make_pcapng_options(options, namespace='shb')
+        else:
+            options_value, total_length = [], 0
+
+        return Schema_EnhancedPacketBlock(
+            length=total_length + 32 + packet_len,
+            interface_id=interface_id,
+            timestamp_high=timestamp_high,
+            timestamp_low=timestamp_low,
+            captured_len=captured_len,
+            original_len=original_len,
+            packet_data=packet_data,
+            options=options_value,
+            length2=total_length + 32 + packet_len,
+        )
+
+    def _make_block_spb(self, block: 'Optional[Data_SimplePacketBlock]' = None, *,
+                        original_len: 'Optional[int]' = None,
+                        packet_data: 'bytes | Protocol | Schema' = b'',
+                        **kwargs: 'Any') -> 'Schema_SimplePacketBlock':
+        """Make PCAP-NG simple packet block (SPB).
+
+        Args:
+            block: Block data model.
+            original_len: Original length.
+            packet_data: Payload of the block.
+            **kwargs: Arbitrary keyword arguments.
+
+        Returns:
+            Constructed block schema.
+
+        """
+        if block is not None:
+            original_len = block.original_len
+
+        if original_len is None:
+            original_len = len(packet_data)
+        packet_len = math.ceil(len(packet_data) / 4) * 4
+
+        return Schema_SimplePacketBlock(
+            length=packet_len + 16,
+            original_len=original_len,
+            packet_data=packet_data,
+            length2=packet_len + 16,
+        )
+
+    def _make_block_nrb(self, block: 'Optional[Data_NameResolutionBlock]' = None, *,
+                        records: 'Optional[Record | list[Schema_NameResolutionRecord | tuple[Enum_RecordType, dict[str, Any]] | bytes]]' = None,
+                        options: 'Optional[Option | list[Schema_Option | tuple[Enum_OptionType, dict[str, Any]] | bytes]]' = None,
+                        **kwargs: 'Any') -> 'Schema_NameResolutionBlock':
+        """Make PCAP-NG name resolution block (NRB).
+
+        Args:
+            block: Block data model.
+            records: Name resolution records.
+            options: Block options.
+            **kwargs: Arbitrary keyword arguments.
+
+        Returns:
+            Constructed block schema.
+
+        """
+        if block is not None:
+            records = block.records
+            options = block.options
+
+        if records is not None:
+            records_value, records_length = self._make_nrb_records(records)
+        else:
+            records_value, records_length = [], 0
+
+        if options is not None:
+            options_value, options_length = self._make_pcapng_options(options, namespace='shb')
+        else:
+            options_value, options_length = [], 0
+
+        return Schema_NameResolutionBlock(
+            length=options_length + records_length + 12,
+            records=records_value,
+            options=options_value,
+            length2=options_length + records_length + 12,
+        )
+
+    def _make_block_isb(self, block: 'Optional[Data_InterfaceStatisticsBlock]' = None, *,
+                        interface_id: 'int' = 0,
+                        timestamp: 'Optional[dt_type | int | float | Decimal]' = None,
+                        options: 'Optional[Option | list[Schema_Option | tuple[Enum_OptionType, dict[str, Any]] | bytes]]' = None,
+                        **kwargs: 'Any') -> 'Schema_InterfaceStatisticsBlock':
+        """Make PCAP-NG interface statistics block (ISB).
+
+        Args:
+            block: Block data model.
+            interface_id: Interface ID.
+            timestmap: Block timestamp.
+            options: Block options.
+            **kwargs: Arbitrary keyword arguments.
+
+        Returns:
+            Constructed block schema.
+
+        """
+        if block is not None:
+            interface_id = block.interface_id
+            timestamp = block.timestamp_epoch
+            options = block.options
+
+        timestamp_high, timestamp_low = self._make_timestamp(timestamp, interface_id=interface_id)
+
+        if options is not None:
+            options_value, total_length = self._make_pcapng_options(options, namespace='shb')
+        else:
+            options_value, total_length = [], 0
+
+        return Schema_InterfaceStatisticsBlock(
+            length=total_length + 24,
+            interface_id=interface_id,
+            timestamp_high=timestamp_high,
+            timestamp_low=timestamp_low,
+            options=options_value,
+            length2=total_length + 24,
+        )
+
+    def _make_block_systemd(self, block: 'Optional[Data_SystemdJournalExportBlock]' = None, *,
+                            entries: 'Optional[list[OrderedMultiDict[str, str | bytes]] | bytes]' = None,
+                            **kwargs: 'Any') -> 'Schema_SystemdJournalExportBlock':
+        """Make PCAP-NG :manpage:`systemd(1)` journal export block.
+
+        Args:
+            block: Block data model.
+            entries: :manpage:`systemd(1)` journal export entries.
+            options: Block options.
+            **kwargs: Arbitrary keyword arguments.
+
+        Returns:
+            Constructed block schema.
+
+        """
+        self._byte = sys.byteorder
+
+        if block is not None:
+            entries = cast('list[OrderedMultiDict[str, str | bytes]]', block.data)
+
+        if entries is None:
+            data = b''
+        elif isinstance(entries, bytes):
+            data = entries
+        else:
+            temp = []  # type: list[bytes]
+            for entry in entries:
+                tmp_buf = []  # type: list[bytes]
+
+                for key, val in entry.items(multi=True):
+                    if isinstance(val, str):
+                        buf = f'{key}={val}\n'.encode()
+                    else:
+                        buf = b'%s\n%s%s\n' % (
+                            key.encode(),
+                            struct.pack('<Q', len(val)),
+                            val,
+                        )
+                    tmp_buf.append(buf)
+
+                temp.append(b''.join(tmp_buf))
+            data = b'\n'.join(temp)
+
+        return Schema_SystemdJournalExportBlock(
+            length=len(data) + 12,
+            entry=data,
+            length2=len(data) + 12,
+        )
+
+    def _make_block_dsb(self, block: 'Optional[Data_DecryptionSecretsBlock]' = None, *,
+                        secrets_type: 'Enum_SecretsType | StdlibEnum | AenumEnum | str | int' = Enum_SecretsType.TLS_Key_Log,
+                        secrets_type_default: 'Optional[int]' = None,
+                        secrets_type_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
+                        secrets_type_reversed: 'bool' = False,
+                        secrets_data: 'Schema_DSBSecrets | Data_DSBSecrets | bytes | dict[str, Any]' = b'',
+                        options: 'Optional[Option | list[Schema_Option | tuple[Enum_OptionType, dict[str, Any]] | bytes]]' = None,
+                        **kwargs: 'Any') -> 'Schema_DecryptionSecretsBlock':
+        """Make PCAP-NG decryption secrets block (DSB).
+
+        Args:
+            block: Block data model.
+            secrets_type: Decryption secrets type.
+            secrets_type_default: Default value of decryption secrets type.
+            secrets_type_namespace: Namespace of decryption secrets type.
+            secrets_type_reversed: Reversed flag for namespace of decryption secrets type.
+            secrets_data: Decryption secrets data.
+            options: Block options.
+            **kwargs: Arbitrary keyword arguments.
+
+        Returns:
+            Constructed block schema.
+
+        """
+        if block is not None:
+            secrets_type_val = block.secrets_type
+            secrets_data = block.secrets_data
+            options = block.options
+        else:
+            secrets_type_val = self._make_index(secrets_type, secrets_type_default, namespace=secrets_type_namespace,  # type: ignore[call-overload]
+                                                reversed=secrets_type_reversed, pack=False)
+
+        if isinstance(secrets_data, bytes):
+            secrets_data_val = secrets_data  # type: bytes | Schema_DSBSecrets
+        elif isinstance(secrets_data, (dict, Data_DSBSecrets)):
+            name = self.__secrets__[secrets_type_val]
+            if isinstance(name, str):
+                meth_name = f'_make_secrets_{name}'
+                meth = cast('SecretsConstructor',
+                            getattr(self, meth_name, self._make_secrets_unknown))
+            else:
+                meth = name[1]
+
+            if isinstance(secrets_data, dict):
+                secrets_data_val = meth(secrets_type_val, **secrets_data)
+            else:
+                secrets_data_val = meth(secrets_type_val, secrets_data)
+        elif isinstance(secrets_data, Schema):
+            secrets_data_val = secrets_data
+        else:
+            raise ProtocolError(f'PCAP-NG: [DSB] secrets {secrets_type_val} invalid format')
+        secrets_length = len(secrets_data_val)
+
+        if options is not None:
+            options_value, total_length = self._make_pcapng_options(options, namespace='shb')
+        else:
+            options_value, total_length = [], 0
+
+        return Schema_DecryptionSecretsBlock(
+            length=total_length + secrets_length + 20,
+            secrets_type=secrets_type_val,
+            secrets_length=secrets_length,
+            secrets_data=secrets_data_val,
+            options=options_value,
+            length2=total_length + secrets_length + 20,
+        )
+
+    def _make_block_cb(self, block: 'Optional[Data_CustomBlock]' = None, *,
+                       pen: 'int' = 0,
+                       data: 'Schema | bytes' = b'',
+                       options: 'Optional[Option | list[Schema_Option | tuple[Enum_OptionType, dict[str, Any]] | bytes]]' = None,
+                       **kwargs: 'Any') -> 'Schema_CustomBlock':
+        """Make PCAP-NG custom block (CB).
+
+        Args:
+            block: Block data model.
+            pen: Private enterprise number.
+            data: Custom data.
+            options: Block options.
+            **kwargs: Arbitrary keyword arguments.
+
+        Returns:
+            Constructed block schema.
+
+        """
+        if block is not None:
+            pen = block.pen
+            data = block.data
+            options = cast('Option', getattr(block, 'options', None))
+
+        if options is not None:
+            options_value, _ = self._make_pcapng_options(options, namespace='shb')
+        else:
+            options_value, _ = [], 0
+
+        cb_data = data.pack() if isinstance(data, Schema) else data
+        for option in options_value:
+            cb_data += option.pack() if isinstance(option, Schema) else option
+
+        return Schema_CustomBlock(
+            length=len(cb_data) + 16,
+            pen=pen,
+            data=cb_data,
+            length2=len(cb_data) + 16,
+        )
+
+    def _make_block_packet(self, block: 'Optional[Data_PacketBlock]' = None, *,
+                           interface_id: 'int' = 0,
+                           drop_count: 'int' = 0,
+                           timestamp: 'Optional[dt_type | int | float | Decimal]' = None,
+                           captured_len: 'Optional[int]' = None,
+                           original_len: 'Optional[int]' = None,
+                           packet_data: 'bytes | Protocol | Schema' = b'',
+                           options: 'Optional[Option | list[Schema_Option | tuple[Enum_OptionType, dict[str, Any]] | bytes]]' = None,
+                           **kwargs: 'Any') -> 'Schema_PacketBlock':
+        """Make PCAP-NG packet block (obsolete).
+
+        Args:
+            block: Block data model.
+            interface_id: Interface ID.
+            drop_count: Drops count.
+            timestmap: Packet timestamp.
+            captured_len: Captured length.
+            original_len: Original length.
+            packet_data: Payload of the block.
+            options: Block options.
+            **kwargs: Arbitrary keyword arguments.
+
+        Returns:
+            Constructed block schema.
+
+        """
+        warn('PCAP-NG: Packet Block has been obsolete! Please use Enhanced Packet Block and/or '
+             'Simple Packet Block instead.', DeprecatedFormatWarning, stacklevel=stacklevel())
+
+        if block is not None:
+            interface_id = block.interface_id
+            drop_count = block.drop_count
+            timestamp = block.timestamp_epoch
+            captured_len = block.captured_len
+            original_len = block.original_len
+            options = block.options
+
+        timestamp_high, timestamp_low = self._make_timestamp(timestamp, interface_id=interface_id)
+        if captured_len is None:
+            if self._ctx is None:
+                snaplen = 0xFFFF_FFFF_FFFF_FFFF
+            else:
+                snaplen = self._ctx.interfaces[interface_id].snaplen
+            captured_len = min(len(packet_data), snaplen)
+        if original_len is None:
+            original_len = len(packet_data)
+        packet_len = math.ceil(len(packet_data) / 4) * 4
+
+        if options is not None:
+            options_value, total_length = self._make_pcapng_options(options, namespace='shb')
+        else:
+            options_value, total_length = [], 0
+
+        return Schema_PacketBlock(
+            length=total_length + 32 + packet_len,
+            interface_id=interface_id,
+            drop_count=drop_count,
+            timestamp_high=timestamp_high,
+            timestamp_low=timestamp_low,
+            captured_length=captured_len,
+            original_length=original_len,
+            packet_data=packet_data,
+            options=options_value,
+            length2=total_length + 32 + packet_len,
+        )
 
     def _make_pcapng_options(self, options: 'Option | list[Schema_Option | tuple[Enum_OptionType, dict[str, Any]] | bytes]',
                              namespace: 'str') -> 'tuple[list[Schema_Option | bytes], int]':
@@ -4363,7 +4795,7 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
         )
 
     def _make_option_isb_starttime(self, type: 'Enum_OptionType', option: 'Optional[Data_ISB_StartTimeOption]' = None, *,
-                                   timestamp: 'Optional[int | float | dt_type | Decimal]' = 0,
+                                   timestamp: 'Optional[int | float | dt_type | Decimal]' = None,
                                    **kwargs: 'Any') -> 'Schema_ISB_StartTimeOption':
         """Make PCAP-NG ``isb_starttime`` option.
 
@@ -4396,7 +4828,7 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
         )
 
     def _make_option_isb_endtime(self, type: 'Enum_OptionType', option: 'Optional[Data_ISB_EndTimeOption]' = None, *,
-                                 timestamp: 'Optional[int | float | dt_type | Decimal]' = 0,
+                                 timestamp: 'Optional[int | float | dt_type | Decimal]' = None,
                                  **kwargs: 'Any') -> 'Schema_ISB_EndTimeOption':
         """Make PCAP-NG ``isb_endtime`` option.
 
