@@ -864,6 +864,7 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
         Structure of PCAP-NG file blocks:
 
         .. code-block:: text
+
                                   1                   2                   3
               0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
              +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -1753,7 +1754,7 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
         if isinstance(name, str):
             meth_name = f'_read_secrets_{name}'
             meth = cast('SecretsParser',
-                        getattr(self, meth_name, self._read_secrest_unknown))
+                        getattr(self, meth_name, self._read_secrets_unknown))
         else:
             meth = name[0]
         secrets_data = meth(schema.secrets_data, block=schema)
@@ -3097,7 +3098,7 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
         )
         return record
 
-    def _read_secrest_unknown(self, schema: 'Schema_UnknownSecrets', *,
+    def _read_secrets_unknown(self, schema: 'Schema_UnknownSecrets', *,
                               block: 'Schema_DecryptionSecretsBlock') -> 'Data_UnknownSecrets':
         """Read PCAP-NG unknown secrets.
 
@@ -3148,7 +3149,7 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
 
         Structure of ZigBee NWK Key secrets:
 
-        .. code-block::
+        .. code-block:: text
 
               0                   1                   2                   3
               0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
@@ -4337,6 +4338,37 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
             type=type,
             length=1,
             fcslen=fcs_length,
+        )
+
+    def _make_option_if_tsoffset(self, type: 'Enum_OptionType', option: 'Optional[Data_IF_TSOffsetOption]' = None, *,
+                                 offset: 'int' = 0,
+                                 **kwargs: 'Any') -> 'Schema_IF_TSOffsetOption':
+        """Make PCAP-NG ``if_tsoffset`` option.
+
+        Args:
+            type: Option type.
+            option: Option data model.
+            offset: Timestamp offset in seconds.
+            **kwargs: Arbitrary keyword arguments.
+
+        Returns:
+            Constructed option schema.
+
+        """
+        if self._type != Enum_BlockType.Interface_Description_Block:
+            raise ProtocolError(f'PCAP-NG: [if_tsoffset] option must be in Interface Description Block, '
+                                f'but found in {self._type} block.')
+        if self._opt[type] > 0:
+            raise ProtocolError(f'PCAP-NG: [if_tsoffset] option must be only one, '
+                                f'but {self._opt[type] + 1} found.')
+
+        if option is not None:
+            offset = option.offset
+
+        return Schema_IF_TSOffsetOption(
+            type=type,
+            length=8,
+            tsoffset=offset,
         )
 
     def _make_option_if_hardware(self, type: 'Enum_OptionType', option: 'Optional[Data_IF_HardwareOption]' = None, *,
