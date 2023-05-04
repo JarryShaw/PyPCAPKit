@@ -417,9 +417,9 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
        * - :attr:`~pcapkit.const.pcapng.option_type.OptionType.epb_verdict`
          - :meth:`~pcapkit.protocols.misc.pcapng.PCAPNG._read_option_epb_verdict`
          - :meth:`~pcapkit.protocols.misc.pcapng.PCAPNG._make_option_epb_verdict`
-       * - :attr:`~pcapkit.const.pcapng.option_type.OptionType.ds_dnsname`
-         - :meth:`~pcapkit.protocols.misc.pcapng.PCAPNG._read_option_ds_dnsname`
-         - :meth:`~pcapkit.protocols.misc.pcapng.PCAPNG._make_option_ds_dnsname`
+       * - :attr:`~pcapkit.const.pcapng.option_type.OptionType.ns_dnsname`
+         - :meth:`~pcapkit.protocols.misc.pcapng.PCAPNG._read_option_ns_dnsname`
+         - :meth:`~pcapkit.protocols.misc.pcapng.PCAPNG._make_option_ns_dnsname`
        * - :attr:`~pcapkit.const.pcapng.option_type.OptionType.ns_dnsIP4addr`
          - :meth:`~pcapkit.protocols.misc.pcapng.PCAPNG._read_option_ns_dnsipv4`
          - :meth:`~pcapkit.protocols.misc.pcapng.PCAPNG._make_option_ns_dnsipv4`
@@ -490,10 +490,10 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
        * - :attr:`~pcapkit.const.pcapng.secrets_type.SecretsType.WireGuard_Key_Log`
          - :meth:`~pcapkit.protocols.misc.pcapng.PCAPNG._read_secrets_wireguard`
          - :meth:`~pcapkit.protocols.misc.pcapng.PCAPNG._make_secrets_wireguard`
-       * - :attr:`~pcapkit.const.pcapng.secrets_type.SecretsType.ZigBee_NWK_Key_Log`
+       * - :attr:`~pcapkit.const.pcapng.secrets_type.SecretsType.ZigBee_NWK_Key`
          - :meth:`~pcapkit.protocols.misc.pcapng.PCAPNG._read_secrets_zigbee_nwk`
          - :meth:`~pcapkit.protocols.misc.pcapng.PCAPNG._make_secrets_zigbee_nwk`
-       * - :attr:`~pcapkit.const.pcapng.secrets_type.SecretsType.ZigBee_APS_Key_Log`
+       * - :attr:`~pcapkit.const.pcapng.secrets_type.SecretsType.ZigBee_APS_Key`
          - :meth:`~pcapkit.protocols.misc.pcapng.PCAPNG._read_secrets_zigbee_aps`
          - :meth:`~pcapkit.protocols.misc.pcapng.PCAPNG._make_secrets_zigbee_aps`
 
