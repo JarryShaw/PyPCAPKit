@@ -26,8 +26,6 @@ import textwrap
 import time
 from typing import TYPE_CHECKING, cast, overload
 
-from numpy import isin
-
 from pcapkit.const.pcapng.block_type import BlockType as Enum_BlockType
 from pcapkit.const.pcapng.filter_type import FilterType as Enum_FilterType
 from pcapkit.const.pcapng.hash_algorithm import HashAlgorithm as Enum_HashAlgorithm
@@ -174,7 +172,8 @@ from pcapkit.protocols.schema.misc.pcapng import ZigBeeAPSKey as Schema_ZigBeeAP
 from pcapkit.protocols.schema.misc.pcapng import ZigBeeNWKKey as Schema_ZigBeeNWKKey
 from pcapkit.utilities.compat import StrEnum
 from pcapkit.utilities.exceptions import ProtocolError, UnsupportedCall, stacklevel
-from pcapkit.utilities.warnings import AttributeWarning, DeprecatedFormatWarning, ProtocolWarning, RegistryWarning, warn
+from pcapkit.utilities.warnings import (AttributeWarning, DeprecatedFormatWarning, ProtocolWarning,
+                                        RegistryWarning, warn)
 
 __all__ = ['PCAPNG']
 
