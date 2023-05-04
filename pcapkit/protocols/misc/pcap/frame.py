@@ -34,8 +34,8 @@ from pcapkit.protocols.data.misc.pcap.frame import Frame as Data_Frame
 from pcapkit.protocols.data.misc.pcap.frame import FrameInfo as Data_FrameInfo
 from pcapkit.protocols.protocol import Protocol
 from pcapkit.protocols.schema.misc.pcap.frame import Frame as Schema_Frame
-from pcapkit.utilities.exceptions import UnsupportedCall
-from pcapkit.utilities.warnings import RegistryWarning, warn
+from pcapkit.utilities.exceptions import UnsupportedCall, stacklevel
+from pcapkit.utilities.warnings import ProtocolWarning, RegistryWarning, warn
 
 if TYPE_CHECKING:
     from datetime import datetime as dt_type
@@ -215,7 +215,12 @@ class Frame(Protocol[Data_Frame, Schema_Frame],
             else:
                 _epch = _tsss + decimal.Decimal(_tsus) / 1_000_000
         _irat = _epch.as_integer_ratio()
-        _time = datetime.datetime.fromtimestamp(_irat[0] / _irat[1])
+
+        try:
+            _time = datetime.datetime.fromtimestamp(_irat[0] / _irat[1])
+        except ValueError:
+            warn(f'PCAP: invalid timestamp: {_epch}', ProtocolWarning, stacklevel=stacklevel())
+            _time = datetime.datetime.fromtimestamp(0, datetime.timezone.utc)
 
         frame = Data_Frame(
             frame_info=Data_FrameInfo(
