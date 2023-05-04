@@ -32,6 +32,8 @@ _TN = TypeVar('_TN', bound='NoValueType')
 class NoValueField(_Field[_TN]):
     """Schema field for no value type (or :obj:`None`)."""
 
+    _default = NoValue
+
     @property
     def template(self) -> 'str':
         """Field template."""
@@ -426,7 +428,8 @@ class SwitchField(_Field[_TC]):
 
         """
         new_self = copy.copy(self)
-        new_self._field = self._selector(packet)(packet)
+        new_self._field = new_self._selector(packet)(packet)
+        new_self._field.name = self.name
         return new_self
 
     def pre_process(self, value: '_TC', packet: 'dict[str, Any]') -> 'Any':  # pylint: disable=unused-argument
@@ -503,6 +506,11 @@ class SchemaField(_Field[_TS]):
             the current field and the current packet as its arguments.
 
     """
+
+    @property
+    def length(self) -> 'int':
+        """Field size."""
+        return self._length  # type: ignore[has-type]
 
     @property
     def optional(self) -> 'bool':

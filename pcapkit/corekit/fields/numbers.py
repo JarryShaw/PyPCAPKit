@@ -99,9 +99,9 @@ class NumberField(Field[int], Generic[_T]):
         """
         new_self = super().__call__(packet)
 
-        if self._bit_length < 0:
-            self._bit_length = self._length * 8
-            self._bit_mask = (1 << self._bit_length) - 1
+        if new_self._bit_length < 0:
+            new_self._bit_length = new_self._length * 8
+            new_self._bit_mask = (1 << new_self._bit_length) - 1
 
         endian = '>' if new_self._byteorder == 'big' else '<'
         struct_fmt = new_self.build_template(new_self._length, new_self._signed)

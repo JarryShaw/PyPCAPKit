@@ -43,6 +43,11 @@ class ListField(_Field[List[_TL]]):
     """
 
     @property
+    def length(self) -> 'int':
+        """Field size."""
+        return self._length
+
+    @property
     def optional(self) -> 'bool':
         """Field is optional."""
         return True
@@ -121,7 +126,7 @@ class ListField(_Field[List[_TL]]):
             Unpacked field value.
 
         """
-        length = self.length
+        length = self._length
         if isinstance(buffer, bytes):
             file = io.BytesIO(buffer)  # type: IO[bytes]
         else:
@@ -134,7 +139,7 @@ class ListField(_Field[List[_TL]]):
         is_schema = isinstance(self._item_type, SchemaField)
 
         temp = []  # type: list[_TL]
-        while length:
+        while length > 0:
             field = self._item_type(packet)
 
             if is_schema:
@@ -195,6 +200,11 @@ class OptionField(ListField):
         """EOOL option."""
         return self._eool
 
+    @property
+    def option_padding(self) -> 'int':
+        """Length option padding data."""
+        return self._option_padding
+
     def __init__(self, length: 'int | Callable[[dict[str, Any]], int]' = lambda _: -1,
                  base_schema: 'Optional[Type[Schema]]' = None,
                  type_name: 'str' = 'type',
@@ -204,6 +214,7 @@ class OptionField(ListField):
         super().__init__(length, None, callback)
         self._name = '<option>'
         self._eool = eool
+        self._option_padding = 0
 
         if base_schema is None:
             raise FieldValueError('Field <option> has no base schema.')
@@ -229,12 +240,12 @@ class OptionField(ListField):
 
         Important:
             If the option list ended before the specified size limit,
-            inject ``__option_padding__`` as the remaining length to
+            set :attr:`self.option_padding <OptionField.option_padding>` as the remaining length to
             the ``packet`` argument such that the next fields can be
             aware of such informations.
 
         """
-        length = self.length
+        length = self._length
         if isinstance(buffer, bytes):
             file = io.BytesIO(buffer)  # type: IO[bytes]
         else:
@@ -246,7 +257,7 @@ class OptionField(ListField):
         new_packet[self.name] = OrderedMultiDict()
 
         temp = []  # type: list[Schema]
-        while length:
+        while length > 0:
             # unpack option type using base schema
             meta = self._base_schema.unpack(file, length, packet)  # type: ignore[call-arg,misc,var-annotated]
             code = cast('int', meta[self._type_name])
@@ -265,6 +276,7 @@ class OptionField(ListField):
 
             # check for EOOL
             if code == self._eool:
-                packet['__option_padding__'] = length
                 break
+
+        self._option_padding = length
         return temp
