@@ -180,7 +180,7 @@ class MultiDict(dict, Generic[_KT, _VT]):
             lst = dict.__getitem__(self, key)
             if len(lst) > 0:
                 return lst[0]
-        raise MissingKeyError(key)
+        raise MissingKeyError(key, quiet=True)
 
     def __setitem__(self, key: '_KT', value: '_VT') -> 'None':
         """Like :meth:`add` but removes an existing key first.
@@ -511,7 +511,7 @@ class OrderedMultiDict(MultiDict[_KT, _VT]):
     def __getitem__(self, key: '_KT') -> '_VT':
         if key in self:
             return dict.__getitem__(self, key)[0].value
-        raise MissingKeyError(key)
+        raise MissingKeyError(key, quiet=True)
 
     def __setitem__(self, key: '_KT', value: '_VT') -> 'None':
         self.poplist(key)
