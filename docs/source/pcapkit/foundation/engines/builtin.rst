@@ -41,3 +41,11 @@ support, as is used by :class:`pcapkit.foundation.extraction.Extractor`.
 
    .. automethod:: run
    .. automethod:: read_frame
+
+File Block Context
+------------------
+
+.. autoclass:: pcapkit.foundation.engines.pcapng.Context
+   :members:
+   :undoc-members:
+   :show-inheritance:
