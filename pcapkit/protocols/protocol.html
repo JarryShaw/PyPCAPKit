@@ -210,6 +210,7 @@
 <li class="toctree-l3 current current-page"><a class="current reference internal" href="#">Root Protocol</a></li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="misc/index.html">Auxiliary Protocols</a><input class="toctree-checkbox" id="toctree-checkbox-9" name="toctree-checkbox-9" role="switch" type="checkbox"/><label for="toctree-checkbox-9"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="misc/pcap.html">PCAP File Headers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="misc/pcapng.html">PCAP-NG File Format</a></li>
 <li class="toctree-l4"><a class="reference internal" href="misc/raw.html">Raw Packet Data</a></li>
 <li class="toctree-l4"><a class="reference internal" href="misc/null.html">No-Payload Packet</a></li>
 </ul>
@@ -744,6 +745,24 @@ return the value itself.</p></li>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.protocols.protocol.Protocol._get_payload">
+<span class="sig-name descname"><span class="pre">_get_payload</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/protocols/protocol.html#Protocol._get_payload"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.protocol.Protocol._get_payload" title="Permalink to this definition">#</a></dt>
+<dd><p>Get payload of <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.__header__" title="pcapkit.protocols.protocol.Protocol.__header__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">self.__header__</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a></p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Payload of <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.__header__" title="pcapkit.protocols.protocol.Protocol.__header__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">self.__header__</span></code></a> as <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bytes</span></code></a>.</p>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p>This is a wrapper function for <code class="xref py py-meth docutils literal notranslate"><span class="pre">pcapkit.protocols.schema.Schema.get_payload()</span></code>.</p>
+</div>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.protocols.protocol.Protocol._make_data">
 <em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">_make_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/protocols/protocol.html#Protocol._make_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.protocol.Protocol._make_data" title="Permalink to this definition">#</a></dt>
 <dd><p>Create key-value pairs from <code class="docutils literal notranslate"><span class="pre">data</span></code> for protocol construction.</p>
@@ -1198,6 +1217,7 @@ to handle the <code class="docutils literal notranslate"><span class="pre">name<
 <li><a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.unquote"><code class="docutils literal notranslate"><span class="pre">Protocol.unquote()</span></code></a></li>
 <li><a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.expand_comp"><code class="docutils literal notranslate"><span class="pre">Protocol.expand_comp()</span></code></a></li>
 <li><a class="reference internal" href="#pcapkit.protocols.protocol.Protocol._read_packet"><code class="docutils literal notranslate"><span class="pre">Protocol._read_packet()</span></code></a></li>
+<li><a class="reference internal" href="#pcapkit.protocols.protocol.Protocol._get_payload"><code class="docutils literal notranslate"><span class="pre">Protocol._get_payload()</span></code></a></li>
 <li><a class="reference internal" href="#pcapkit.protocols.protocol.Protocol._make_data"><code class="docutils literal notranslate"><span class="pre">Protocol._make_data()</span></code></a></li>
 <li><a class="reference internal" href="#pcapkit.protocols.protocol.Protocol._make_index"><code class="docutils literal notranslate"><span class="pre">Protocol._make_index()</span></code></a></li>
 <li><a class="reference internal" href="#pcapkit.protocols.protocol.Protocol._make_payload"><code class="docutils literal notranslate"><span class="pre">Protocol._make_payload()</span></code></a></li>

@@ -7,12 +7,12 @@
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://pypcapkit.jarryshaw.me/pcapkit/protocols/application/httpv1.html" />
 <meta property="og:site_name" content="PyPCAPKit" />
-<meta property="og:description" content="pcapkit.protocols.application.httpv1 contains HTTP only, which implements extractor for Hypertext Transfer Protocol (HTTP/1.*)*, whose structure is described as below: Packet Type: Header Schemas: ..." />
+<meta property="og:description" content="pcapkit.protocols.application.httpv1 contains HTTP only, which implements extractor for Hypertext Transfer Protocol (HTTP/1.*)*, whose structure is described as below: Auxiliary Data: Header Schema..." />
 <meta property="og:image:width" content="1146" />
 <meta property="og:image:height" content="600" />
 <meta property="og:image" content="https://pypcapkit.jarryshaw.me/_images/social_previews/summary_pcapkit_protocols_application_httpv1_fade2407.png" />
 <meta property="og:image:alt" content="pcapkit.protocols.application.httpv1 contains HTTP only, which implements extractor for Hypertext Transfer Protocol (HTTP/1.*)*, whose structure is described..." />
-<meta name="description" content="pcapkit.protocols.application.httpv1 contains HTTP only, which implements extractor for Hypertext Transfer Protocol (HTTP/1.*)*, whose structure is described as below: Packet Type: Header Schemas: ..." />
+<meta name="description" content="pcapkit.protocols.application.httpv1 contains HTTP only, which implements extractor for Hypertext Transfer Protocol (HTTP/1.*)*, whose structure is described as below: Auxiliary Data: Header Schema..." />
 <meta name="twitter:card" content="summary_large_image" />
 <link rel="index" title="Index" href="../../../genindex.html" /><link rel="search" title="Search" href="../../../search.html" /><link rel="next" title="HTTP/2 - Hypertext Transfer Protocol" href="httpv2.html" /><link rel="prev" title="HTTP - Hypertext Transfer Protocol" href="http.html" />
 
@@ -210,6 +210,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../protocol.html">Root Protocol</a></li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../misc/index.html">Auxiliary Protocols</a><input class="toctree-checkbox" id="toctree-checkbox-9" name="toctree-checkbox-9" role="switch" type="checkbox"/><label for="toctree-checkbox-9"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../misc/pcap.html">PCAP File Headers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../misc/pcapng.html">PCAP-NG File Format</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../misc/raw.html">Raw Packet Data</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../misc/null.html">No-Payload Packet</a></li>
 </ul>
@@ -547,8 +548,8 @@ header-field    :==:    field-name &quot;:&quot; OWS field-value OWS
 
 </dd></dl>
 
-<section id="packet-type">
-<h2>Packet Type<a class="headerlink" href="#packet-type" title="Permalink to this heading">#</a></h2>
+<section id="auxiliary-data">
+<h2>Auxiliary Data<a class="headerlink" href="#auxiliary-data" title="Permalink to this heading">#</a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.protocols.application.httpv1.Type">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.application.httpv1.</span></span><span class="sig-name descname"><span class="pre">Type</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">names</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">module</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qualname</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">boundary</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/application/httpv1.html#Type"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.application.httpv1.Type" title="Permalink to this definition">#</a></dt>
@@ -834,7 +835,7 @@ header-field    :==:    field-name &quot;:&quot; OWS field-value OWS
 <li><a class="reference internal" href="#pcapkit.protocols.application.httpv1.HTTP._read_http_body"><code class="docutils literal notranslate"><span class="pre">HTTP._read_http_body()</span></code></a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#packet-type">Packet Type</a><ul>
+<li><a class="reference internal" href="#auxiliary-data">Auxiliary Data</a><ul>
 <li><a class="reference internal" href="#pcapkit.protocols.application.httpv1.Type"><code class="docutils literal notranslate"><span class="pre">Type</span></code></a><ul>
 <li><a class="reference internal" href="#pcapkit.protocols.application.httpv1.Type.REQUEST"><code class="docutils literal notranslate"><span class="pre">Type.REQUEST</span></code></a></li>
 <li><a class="reference internal" href="#pcapkit.protocols.application.httpv1.Type.RESPONSE"><code class="docutils literal notranslate"><span class="pre">Type.RESPONSE</span></code></a></li>

@@ -14,5 +14,6 @@ indication of empty payload, and PCAP header classes.
    :maxdepth: 2
 
    pcap
+   pcapng
    raw
    null

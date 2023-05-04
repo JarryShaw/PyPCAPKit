@@ -43,8 +43,8 @@ as below:
    .. automethod:: _read_http_header
    .. automethod:: _read_http_body
 
-Packet Type
------------
+Auxiliary Data
+--------------
 
 .. autoclass:: pcapkit.protocols.application.httpv1.Type
    :members:

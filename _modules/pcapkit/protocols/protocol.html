@@ -198,6 +198,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/protocols/protocol.html">Root Protocol</a></li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../../pcapkit/protocols/misc/index.html">Auxiliary Protocols</a><input class="toctree-checkbox" id="toctree-checkbox-9" name="toctree-checkbox-9" role="switch" type="checkbox"/><label for="toctree-checkbox-9"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/misc/pcap.html">PCAP File Headers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/misc/pcapng.html">PCAP-NG File Format</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/misc/raw.html">Raw Packet Data</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/misc/null.html">No-Payload Packet</a></li>
 </ul>
@@ -1086,7 +1087,7 @@
     <span class="c1"># Utilities.</span>
     <span class="c1">##########################################################################</span>
 
-    <span class="k">def</span> <span class="nf">_get_payload</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;bytes&#39;</span><span class="p">:</span>
+<div class="viewcode-block" id="Protocol._get_payload"><a class="viewcode-back" href="../../../pcapkit/protocols/protocol.html#pcapkit.protocols.protocol.Protocol._get_payload">[docs]</a>    <span class="k">def</span> <span class="nf">_get_payload</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;bytes&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Get payload of :attr:`self.__header__ &lt;Protocol.__header__&gt;`.</span>
 
 <span class="sd">        Returns:</span>
@@ -1096,7 +1097,7 @@
 <span class="sd">            This is a wrapper function for :meth:`pcapkit.protocols.schema.Schema.get_payload`.</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__header__</span><span class="o">.</span><span class="n">get_payload</span><span class="p">()</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__header__</span><span class="o">.</span><span class="n">get_payload</span><span class="p">()</span></div>
 
     <span class="k">def</span> <span class="nf">_read_protos</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">size</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Optional[StdlibEnum | AenumEnum]&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Read next layer protocol type.</span>

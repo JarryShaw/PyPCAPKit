@@ -47,6 +47,7 @@ utility arguments and methods of specified protocols.
    .. automethod:: expand_comp
 
    .. automethod:: _read_packet
+   .. automethod:: _get_payload
 
    .. automethod:: _make_data
    .. automethod:: _make_index
