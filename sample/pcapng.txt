@@ -9,7 +9,7 @@ Section Header 1
   |     |-- value 
   |           |--> 1
   |           |--> 0
-  |-- section_length -> 18446744073709551615
+  |-- section_length -> -1
   |-- options  -> NIL
 
 Interface Description 1
