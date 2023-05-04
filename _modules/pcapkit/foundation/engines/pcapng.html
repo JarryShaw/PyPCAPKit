@@ -382,13 +382,13 @@
     <span class="kn">from</span> <span class="nn">pcapkit.protocols.data.misc.pcapng</span> <span class="kn">import</span> <span class="n">UnknownBlock</span> <span class="k">as</span> <span class="n">Data_UnknownBlock</span>
 
 
-<span class="k">class</span> <span class="nc">Context</span><span class="p">(</span><span class="n">Info</span><span class="p">):</span>
+<div class="viewcode-block" id="Context"><a class="viewcode-back" href="../../../../pcapkit/foundation/engines/builtin.html#pcapkit.foundation.engines.pcapng.Context">[docs]</a><span class="k">class</span> <span class="nc">Context</span><span class="p">(</span><span class="n">Info</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Context manager for PCAP-NG file format.&quot;&quot;&quot;</span>
 
     <span class="c1">#: Section header.</span>
     <span class="n">section</span><span class="p">:</span> <span class="s1">&#39;Data_SectionHeaderBlock&#39;</span>
 
-    <span class="k">def</span> <span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<div class="viewcode-block" id="Context.__post_init__"><a class="viewcode-back" href="../../../../pcapkit/foundation/engines/builtin.html#pcapkit.foundation.engines.pcapng.Context.__post_init__">[docs]</a>    <span class="k">def</span> <span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Post initialisation hook.&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__update__</span><span class="p">(</span>
             <span class="n">interfaces</span><span class="o">=</span><span class="p">[],</span>
@@ -399,7 +399,7 @@
             <span class="n">custom</span><span class="o">=</span><span class="p">[],</span>
             <span class="n">statistics</span><span class="o">=</span><span class="p">[],</span>
             <span class="n">unknown</span><span class="o">=</span><span class="p">[],</span>
-        <span class="p">)</span>
+        <span class="p">)</span></div>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
         <span class="c1">#: Interface descriptions.</span>
@@ -419,7 +419,7 @@
         <span class="c1">#: Unknown blocks.</span>
         <span class="n">unknown</span><span class="p">:</span> <span class="s1">&#39;list[Data_UnknownBlock]&#39;</span>
 
-        <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">section</span><span class="p">:</span> <span class="s1">&#39;Data_SectionHeaderBlock&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>
+        <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">section</span><span class="p">:</span> <span class="s1">&#39;Data_SectionHeaderBlock&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
 
 
 <div class="viewcode-block" id="PCAPNG"><a class="viewcode-back" href="../../../../pcapkit/foundation/engines/builtin.html#pcapkit.foundation.engines.pcapng.PCAPNG">[docs]</a><span class="k">class</span> <span class="nc">PCAPNG</span><span class="p">(</span><span class="n">Engine</span><span class="p">[</span><span class="n">P_PCAPNG</span><span class="p">]):</span>
