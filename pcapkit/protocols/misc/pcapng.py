@@ -171,7 +171,7 @@ from pcapkit.protocols.schema.misc.pcapng import ZigBeeAPSKey as Schema_ZigBeeAP
 from pcapkit.protocols.schema.misc.pcapng import ZigBeeNWKKey as Schema_ZigBeeNWKKey
 from pcapkit.utilities.compat import StrEnum
 from pcapkit.utilities.exceptions import ProtocolError, UnsupportedCall, stacklevel
-from pcapkit.utilities.warnings import AttributeWarning, RegistryWarning, warn
+from pcapkit.utilities.warnings import AttributeWarning, ProtocolWarning, RegistryWarning, warn
 
 __all__ = ['PCAPNG']
 
@@ -672,12 +672,7 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
             return 1_000_000
 
         info = cast('Packet', self._info)
-        options = self._ctx.interfaces[info.interface_id].options
-        tsresol = cast('Optional[Data_IF_TSResolOption]',
-                       options.get(Enum_OptionType.if_tsresol))
-        if tsresol is None:
-            return 1_000_000
-        return tsresol.resolution
+        return self._get_resolution(info.interface_id)
 
     @property
     def ts_offset(self) -> 'int':
@@ -689,12 +684,7 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
             return 0
 
         info = cast('Packet', self._info)
-        options = self._ctx.interfaces[info.interface_id].options
-        tsoffset = cast('Optional[Data_IF_TSOffsetOption]',
-                        options.get(Enum_OptionType.if_tsoffset))
-        if tsoffset is None:
-            return 0
-        return tsoffset.offset
+        return self._get_offset(info.interface_id)
 
     @property
     def ts_timezone(self) -> 'timezone':
@@ -703,15 +693,10 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
             #raise UnsupportedCall(f"'{self.__class__.__name__}' object has no attribute 'ts_timezone'")
             warn(f"'{self.__class__.__name__}' object has no attribute 'ts_timezone'",
                  AttributeWarning, stacklevel=stacklevel())
-            return self._get_timezone()
+            return self._get_local_timezone()
 
         info = cast('Packet', self._info)
-        options = self._ctx.interfaces[info.interface_id].options
-        tzone = cast('Optional[Data_IF_TZoneOption]',
-                        options.get(Enum_OptionType.if_tzone))
-        if tzone is None:
-            return self._get_timezone()
-        return tzone.timezone
+        return self._get_timezone(info.interface_id)
 
     @property
     def linktype(self) -> 'Enum_LinkType':
@@ -722,11 +707,11 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
                 EPB, ISB or obsolete Packet Block.
 
         """
-        if self._ctx is None or self._info.type not in self.PACKET_TYPES:
+        if self._ctx is None or self._type not in self.PACKET_TYPES:
             raise UnsupportedCall(f"'{self.__class__.__name__}' object has no attribute 'linktype'")
 
         info = cast('Packet', self._info)
-        return self._ctx.interfaces[info.interface_id].linktype
+        return self._get_linktype(info.interface_id)
 
     @property
     def block(self) -> 'Enum_BlockType':
@@ -925,7 +910,7 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
         else:
             # NOTE: We create a copy of the block data here for parsing
             # scenarios to keep the original packet data intact.
-            seek_cur = self._file.tell()
+            seek_cur = _seek_set + block.length
 
             # move backward to the beginning of the block
             self._file.seek(_seek_set, io.SEEK_SET)
@@ -1075,6 +1060,147 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
     # Utilities.
     ##########################################################################
 
+    def _get_payload(self) -> 'bytes':
+        """Get payload of :attr:`self.__header__ <Protocol.__header__>`.
+
+        Returns:
+            Payload of :attr:`self.__header__ <Protocol.__header__>` as :obj:`bytes`.
+
+        See Also:
+            This is a wrapper function for :meth:`pcapkit.protocols.schema.Schema.get_payload`.
+
+        """
+        return self.__header__.block.get_payload()
+
+    @staticmethod
+    def _get_local_timezone() -> 'timezone':
+        """Get local timezone."""
+        tzinfo = datetime.datetime.now(datetime.timezone.utc).astimezone().tzinfo
+        if tzinfo is None:
+            return datetime.timezone.utc
+        return cast('timezone', tzinfo)
+
+    def _get_resolution(self, interface_id: 'int' = 0) -> 'int':
+        """Timestamp resolution of the current block, in units per second.
+
+        Args:
+            interface_id: Interface ID that the current block associates with.
+
+        Returns:
+            Timestamp resolution of the current block, in units per second.
+
+        """
+        if self._ctx is None:
+            # raise UnsupportedCall(f"'{self.__class__.__name__}' object has no attribute '_get_resolution'")
+            warn(f"'{self.__class__.__name__}' object has no attribute '_get_resolution'",
+                 AttributeWarning, stacklevel=stacklevel())
+            return 1_000_000
+
+        options = self._ctx.interfaces[interface_id].options
+        tsresol = cast('Optional[Data_IF_TSResolOption]',
+                       options.get(Enum_OptionType.if_tsresol))
+        if tsresol is None:
+            return 1_000_000
+        return tsresol.resolution
+
+    def _get_offset(self, interface_id: 'int' = 0) -> 'int':
+        """Timestamp offset of the current block, in seconds.
+
+        Args:
+            interface_id: Interface ID that the current block associates with.
+
+        Returns:
+            Timestamp offset of the current block, in seconds.
+
+        """
+        if self._ctx is None:
+            # raise UnsupportedCall(f"'{self.__class__.__name__}' object has no attribute '_get_offset'")
+            warn(f"'{self.__class__.__name__}' object has no attribute '_get_offset'",
+                 AttributeWarning, stacklevel=stacklevel())
+            return 0
+
+        options = self._ctx.interfaces[interface_id].options
+        tsoffset = cast('Optional[Data_IF_TSOffsetOption]',
+                        options.get(Enum_OptionType.if_tsoffset))
+        if tsoffset is None:
+            return 0
+        return tsoffset.offset
+
+    def _get_timezone(self, interface_id: 'int' = 0) -> 'timezone':
+        """Timezone of the current block.
+
+        Args:
+            interface_id: Interface ID that the current block associates with.
+
+        Returns:
+            Timezone of the current block.
+
+        """
+        if self._ctx is None:
+            # raise UnsupportedCall(f"'{self.__class__.__name__}' object has no attribute '_get_timezone'")
+            warn(f"'{self.__class__.__name__}' object has no attribute '_get_timezone'",
+                 AttributeWarning, stacklevel=stacklevel())
+            return self._get_timezone()
+
+        options = self._ctx.interfaces[interface_id].options
+        tzone = cast('Optional[Data_IF_TZoneOption]',
+                     options.get(Enum_OptionType.if_tzone))
+        if tzone is None:
+            return self._get_local_timezone()
+        return tzone.timezone
+
+    def _get_linktype(self, interface_id: 'int' = 0) -> 'Enum_LinkType':
+        """Data link layer protocol ty
+
+        Args:
+            interface_id: Interface ID that the current block associates with.
+
+        Returns:
+            Data link layer protocol type.
+
+        Raises:
+            UnsupportedCall: If current block is not a valid packet block, i.e.,
+                EPB, ISB or obsolete Packet Block.
+
+        """
+        if self._ctx is None or self._type not in self.PACKET_TYPES:
+            raise UnsupportedCall(f"'{self.__class__.__name__}' object has no attribute '_get_linktype'")
+        return self._ctx.interfaces[interface_id].linktype
+
+    def _read_timestamp(self, timestamp_high: 'int', timestamp_low: 'int', *,
+                        interface_id: 'int' = 0) -> 'tuple[dt_type, Decimal]':
+        """Read timestmap.
+
+        Args:
+            timestamp_high: Higher 32-bit integer value of timestamp.
+            timestamp_low: Lower 32-bit integer value of timestamp.
+            interface_id: Interface ID that the current block associates with.
+
+        Returns:
+            Tuple of timestamp in :class:`~datetime.datetime` object with
+            timezone information and :class:`decimal.Decimal` object since
+            UNIX-Epoch in UTC timezone.
+
+        """
+        tzone = self._get_timezone(interface_id)
+
+        timestamp_raw = (timestamp_high << 32) | timestamp_low
+        with decimal.localcontext(prec=64):
+            timestamp_epoch = decimal.Decimal(timestamp_raw) / self._get_resolution(interface_id) + \
+                self._get_offset(interface_id)
+            ts_decimal = timestamp_epoch + decimal.Decimal(
+                tzone.utcoffset(None).total_seconds())
+
+        ts_ratio = timestamp_epoch.as_integer_ratio()
+        try:
+            ts_datetime = datetime.datetime.fromtimestamp(ts_ratio[0] / ts_ratio[1], tzone)
+        except ValueError:
+            warn(f'PCAP-NG: [Block {self._type}] invalid timestamp: {ts_decimal}',
+                 ProtocolWarning, stacklevel=stacklevel())
+            ts_datetime = datetime.datetime.fromtimestamp(0, datetime.timezone.utc)
+
+        return (ts_datetime, ts_decimal)
+
     @classmethod
     def _make_data(cls, data: 'Data_PCAPNG') -> 'dict[str, Any]':  # type: ignore[override]
         """Create key-value pairs from ``data`` for protocol construction.
@@ -1091,42 +1217,13 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
             'block': data,
         }
 
-    @staticmethod
-    def _get_timezone() -> 'timezone':
-        """Get local timezone."""
-        tzinfo = datetime.datetime.now(datetime.timezone.utc).astimezone().tzinfo
-        if tzinfo is None:
-            return datetime.timezone.utc
-        return cast('timezone', tzinfo)
-
-    def _read_timestamp(self, timestamp_high: 'int', timestamp_low: 'int') -> 'tuple[dt_type, Decimal]':
-        """Read timestmap.
-
-        Args:
-            timestamp_high: Higher 32-bit integer value of timestamp.
-            timestamp_low: Lower 32-bit integer value of timestamp.
-
-        Returns:
-            Tuple of timestamp in :class:`~datetime.datetime` object with
-            timezone information and :class:`decimal.Decimal` object since
-            UNIX-Epoch in UTC timezone.
-
-        """
-        timestamp_raw = (timestamp_high << 32) | timestamp_low
-        with decimal.localcontext(prec=64):
-            timestamp_epoch = decimal.Decimal(timestamp_raw) / self.ts_resolution + self.ts_offset
-            ts_decimal = timestamp_epoch + decimal.Decimal(self.ts_timezone.utcoffset(None).total_seconds())
-
-        ts_ratio = timestamp_epoch.as_integer_ratio()
-        ts_datetime = datetime.datetime.fromtimestamp(ts_ratio[0] / ts_ratio[1], self.ts_timezone)
-
-        return (ts_datetime, ts_decimal)
-
-    def _make_timestamp(self, timestamp: 'Optional[float | Decimal | dt_type | int]' = None) -> 'tuple[int, int]':
+    def _make_timestamp(self, timestamp: 'Optional[float | Decimal | dt_type | int]' = None, *,
+                        interface_id: 'int' = 0) -> 'tuple[int, int]':
         """Make timestamp.
 
         Args:
             timestamp: Timestamp in seconds since UNIX-Epoch.
+            interface_id: Interface ID that the current block associates with.
 
         Returns:
             Tuple of timestamp in higher and lower 32-bit integer value
@@ -1144,7 +1241,9 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
                     timestamp = timestamp.timestamp()
                 timestamp = decimal.Decimal(timestamp)
 
-            ts_info = int((timestamp - self.ts_offset) * self.ts_resolution)
+            ts_info = int(
+                (timestamp - self._get_offset(interface_id)) * self._get_resolution(interface_id)
+            )
         return (ts_info >> 32) & 0xFFFF_FFFF, ts_info & 0xFFFF_FFFF
 
     def _read_mac_addr(self, addr: 'bytes') -> 'str':
@@ -1411,7 +1510,8 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
             Parsed packet data.
 
         """
-        timestamp, timestamp_epoch = self._read_timestamp(schema.timestamp_high, schema.timestamp_low)
+        timestamp, timestamp_epoch = self._read_timestamp(schema.timestamp_high, schema.timestamp_low,
+                                                          interface_id=schema.interface_id)
 
         data = Data_EnhancedPacketBlock(
             type=header.type,
@@ -1425,7 +1525,8 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
             original_len=schema.original_len,
             options=self._read_pcapng_options(schema.options),
         )
-        return self._decode_next_layer(data, self.linktype, schema.captured_len)  # type: ignore[return-value]
+        return self._decode_next_layer(data, self._get_linktype(schema.interface_id),
+                                       schema.captured_len)  # type: ignore[return-value]
 
     def _read_block_spb(self, schema: 'Schema_SimplePacketBlock', *,
                         header: 'Schema_PCAPNG') -> 'Data_SimplePacketBlock':
@@ -1468,7 +1569,7 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
             captured_len=len(schema.packet_data),
             original_len=schema.original_len,
         )
-        return self._decode_next_layer(data, self.linktype, data.captured_len)  # type: ignore[return-value]
+        return self._decode_next_layer(data, self._get_linktype(0), data.captured_len)  # type: ignore[return-value]
 
     def _read_block_nrb(self, schema: 'Schema_NameResolutionBlock', *,
                         header: 'Schema_PCAPNG') -> 'Data_NameResolutionBlock':
@@ -1555,7 +1656,9 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
             Parsed packet data.
 
         """
-        timestamp, timestamp_epoch = self._read_timestamp(schema.timestamp_high, schema.timestamp_low)
+        timestamp, timestamp_epoch = self._read_timestamp(schema.timestamp_high, schema.timestamp_low,
+                                                          interface_id=schema.interface_id)
+        self._isb_interface_id = schema.interface_id
 
         data = Data_InterfaceStatisticsBlock(
             type=header.type,
@@ -1756,7 +1859,8 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
         warn('PCAP-NG: Packet Block has been obsolete! Please use Enhanced Packet Block and/or '
              'Simple Packet Block instead.', DeprecationWarning, stacklevel=stacklevel())
 
-        timestamp, timestamp_epoch = self._read_timestamp(schema.timestamp_high, schema.timestamp_low)
+        timestamp, timestamp_epoch = self._read_timestamp(schema.timestamp_high, schema.timestamp_low,
+                                                          interface_id=schema.interface_id)
 
         data = Data_PacketBlock(
             type=header.type,
@@ -2633,7 +2737,8 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
         if schema.length != 8:
             raise ProtocolError(f'PCAP-NG: [isb_starttime] invalid length (expected 8, got {schema.length})')
 
-        timestamp, timestamp_epoch = self._read_timestamp(schema.timestamp_high, schema.timestamp_low)
+        timestamp, timestamp_epoch = self._read_timestamp(schema.timestamp_high, schema.timestamp_low,
+                                                          interface_id=self._isb_interface_id)
 
         option = Data_ISB_StartTimeOption(
             type=schema.type,
@@ -2664,7 +2769,8 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
         if schema.length != 8:
             raise ProtocolError(f'PCAP-NG: [isb_endtime] invalid length (expected 8, got {schema.length})')
 
-        timestamp, timestamp_epoch = self._read_timestamp(schema.timestamp_high, schema.timestamp_low)
+        timestamp, timestamp_epoch = self._read_timestamp(schema.timestamp_high, schema.timestamp_low,
+                                                          interface_id=self._isb_interface_id)
 
         option = Data_ISB_EndTimeOption(
             type=schema.type,
@@ -3192,7 +3298,7 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
                 minor_version = cast('int', version[1])
 
         if options is not None:
-            options_value, total_length = self._make_pcapng_options(options)
+            options_value, total_length = self._make_pcapng_options(options, namespace='shb')
         else:
             options_value, total_length = [], 0
 
@@ -3208,11 +3314,13 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
 
 
 
-    def _make_pcapng_options(self, options: 'Option | list[Schema_Option | tuple[Enum_OptionType, dict[str, Any]] | bytes]') -> 'tuple[list[Schema_Option | bytes], int]':
+    def _make_pcapng_options(self, options: 'Option | list[Schema_Option | tuple[Enum_OptionType, dict[str, Any]] | bytes]',
+                             namespace: 'str') -> 'tuple[list[Schema_Option | bytes], int]':
         """Make options for PCAP-NG.
 
         Args:
             options: PCAP-NG options.
+            namespace: Namespace of options.
 
         Returns:
             Tuple of options and total length of options.
@@ -3224,7 +3332,8 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
             options_list = []  # type: list[Schema_Option | bytes]
             for schema in options:
                 if isinstance(schema, bytes):
-                    code = Enum_OptionType.get(int.from_bytes(schema[0:2], self._byte, signed=False))
+                    code = Enum_OptionType.get(int.from_bytes(schema[0:2], self._byte, signed=False),
+                                               namespace=namespace)
                     if code == Enum_OptionType.opt_endofopt:  # ignore opt_endofopt by default
                         has_endofopt = True
                         continue
@@ -4277,7 +4386,7 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
 
         if option is not None:
             timestamp = option.timestamp_epoch
-        ts_high, ts_low = self._make_timestamp(timestamp)
+        ts_high, ts_low = self._make_timestamp(timestamp, interface_id=self._isb_interface_id)
 
         return Schema_ISB_StartTimeOption(
             type=type,
@@ -4310,7 +4419,7 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
 
         if option is not None:
             timestamp = option.timestamp_epoch
-        ts_high, ts_low = self._make_timestamp(timestamp)
+        ts_high, ts_low = self._make_timestamp(timestamp, interface_id=self._isb_interface_id)
 
         return Schema_ISB_EndTimeOption(
             type=type,
