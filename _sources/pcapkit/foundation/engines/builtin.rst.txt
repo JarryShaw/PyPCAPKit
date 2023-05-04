@@ -49,3 +49,6 @@ File Block Context
    :members:
    :undoc-members:
    :show-inheritance:
+   
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
