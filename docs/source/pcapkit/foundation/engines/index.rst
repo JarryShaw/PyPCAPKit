@@ -20,4 +20,4 @@ support.
 
    Implement support for `PCAP-NG`_ file format.
 
-.. _PCAPNG: https://wiki.wireshark.org/Development/PcapNg
+.. _PCAP-NG: https://wiki.wireshark.org/Development/PcapNg

@@ -88,7 +88,7 @@ class IPX(Internet[Data_IPX, Schema_IPX],
     def read(self, length: 'Optional[int]' = None, **kwargs: 'Any') -> 'Data_IPX':
         """Read Internetwork Packet Exchange.
 
-         Args:
+        Args:
             length: Length of packet data.
             **kwargs: Arbitrary keyword arguments.
 

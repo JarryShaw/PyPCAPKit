@@ -21,7 +21,7 @@ if TYPE_CHECKING:
 os.environ['PCAPKIT_SPHINX'] = '1'
 
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
+logger.setLevel(logging.INFO)
 
 # -- Path setup --------------------------------------------------------------
 
@@ -102,6 +102,8 @@ napoleon_use_param = True
 napoleon_use_rtype = True
 napoleon_use_keyword = True
 napoleon_custom_sections = None
+napoleon_preprocess_types = True
+napoleon_attr_annotations = True
 
 manpages_url = 'https://linux.die.net/man/{section}/{page}'
 
@@ -111,6 +113,8 @@ set_type_checking_flag = True
 typehints_fully_qualified = False
 always_document_param_types = False
 typehints_document_rtype = True
+
+toc_object_entries = False
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -200,7 +204,16 @@ def process_docstring(app: 'Sphinx', what: str, name: str,  # pylint: disable=un
         importlib.reload(module)
 
 
-def source_read(app: 'Sphinx', docname: str, source_text: str) -> None:  # pylint: disable=unused-argument
+def process_fields(app: 'Sphinx', what: str, name: str, obj: 'Any', options: 'Dict[str, Any]', lines: 'List[str]') -> 'None':
+    if what == 'attribute' \
+        and name.startswith('pcapkit.protocols.schema') \
+        and type(obj).__module__.startswith('pcapkit.corekit.fields'):
+
+        print(name, obj)
+        #lines.append(':param packet: Packet data.',)
+
+
+def source_read(app: 'Sphinx', docname: str, source_text: str) -> 'None':  # pylint: disable=unused-argument
     print(docname, source_text)
 
 
@@ -209,6 +222,7 @@ def setup(app: 'Sphinx') -> None:
     #app.connect("autodoc-process-docstring", remove_module_docstring)
     app.connect('autodoc-skip-member', maybe_skip_member)
     #app.connect('source-read', source_read)
+    #app.connect('autodoc-process-docstring', process_fields)
 
     # typing.TYPE_CHECKING = True
     # for name, module in sys.modules.copy().items():

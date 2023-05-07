@@ -107,6 +107,13 @@ class _Field(Generic[_T], metaclass=abc.ABCMeta):
         new_self._callback(new_self, packet)
         return new_self
 
+    # NOTE: This method is created as a placeholder for the necessary attributes.
+    def __init__(self, *args: 'Any', **kwargs: 'Any') -> 'None':
+        self._name = f'<{type(self).__name__[:-5].lower()}>'
+        self._default = NoValue
+        self._template = '0s'
+        self._callback = lambda *_: None
+
     def __repr__(self) -> 'str':
         if not self.name.isidentifier():
             return f'<{self.__class__.__name__}>'

@@ -40,7 +40,7 @@ docs:
 	PCAPKIT_SPHINX=1 pipenv run $(MAKE) -C docs html
 
 docs-clean:
-	rm -rf docs/build/html
+	PCAPKIT_SPHINX=1 pipenv run $(MAKE) -C docs clean
 
 isort:
 	pipenv run isort -l100 -ppcapkit --skip-glob '**/__init__.py' pcapkit temp/sort.py
