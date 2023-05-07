@@ -366,7 +366,7 @@
 <p><a class="reference internal" href="#module-pcapkit.protocols.internet.ipx" title="pcapkit.protocols.internet.ipx"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.internet.ipx</span></code></a> contains
 <a class="reference internal" href="#pcapkit.protocols.internet.ipx.IPX" title="pcapkit.protocols.internet.ipx.IPX"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPX</span></code></a> only,
 which implements extractor for Internetwork Packet
-Exchange (IPX) <a class="footnote-reference brackets" href="#id4" id="id1" role="doc-noteref"><span class="fn-bracket">[</span>*<span class="fn-bracket">]</span></a>, whose structure is described
+Exchange (IPX) <a class="footnote-reference brackets" href="#id2" id="id1" role="doc-noteref"><span class="fn-bracket">[</span>*<span class="fn-bracket">]</span></a>, whose structure is described
 as below:</p>
 <div class="table-wrapper docutils container">
 <table class="docutils align-default">
@@ -461,25 +461,18 @@ as below:</p>
 <dt class="sig sig-object py" id="pcapkit.protocols.internet.ipx.IPX.read">
 <span class="sig-name descname"><span class="pre">read</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/internet/ipx.html#IPX.read"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.ipx.IPX.read" title="Permalink to this definition">#</a></dt>
 <dd><p>Read Internetwork Packet Exchange.</p>
-<blockquote>
-<div><dl class="simple">
-<dt>Args:</dt><dd><p>length: Length of packet data.
-<a href="#id2"><span class="problematic" id="id3">**</span></a>kwargs: Arbitrary keyword arguments.</p>
-</dd>
-</dl>
-</div></blockquote>
 <dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference internal" href="#pcapkit.protocols.data.internet.ipx.IPX" title="pcapkit.protocols.data.internet.ipx.IPX"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPX</span></code></a></p>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>Parsed packet data.</p>
-</dd>
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>length</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a><em> | </em><em>None</em>) – </p></li>
-<li><p><strong>kwargs</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.11)"><em>Any</em></a>) – </p></li>
+<li><p><strong>length</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>]) – Length of packet data.</p></li>
+<li><p><strong>**kwargs</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>) – Arbitrary keyword arguments.</p></li>
 </ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#pcapkit.protocols.data.internet.ipx.IPX" title="pcapkit.protocols.data.internet.ipx.IPX"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPX</span></code></a></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Parsed packet data.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -763,7 +756,7 @@ as below:</p>
 </dd></dl>
 
 <hr /><aside class="footnote-list brackets">
-<aside class="footnote brackets" id="id4" role="note">
+<aside class="footnote brackets" id="id2" role="note">
 <span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id1">*</a><span class="fn-bracket">]</span></span>
 <p><a class="reference external" href="https://en.wikipedia.org/wiki/Internetwork_Packet_Exchange">https://en.wikipedia.org/wiki/Internetwork_Packet_Exchange</a></p>
 </aside>
@@ -827,50 +820,8 @@ as below:</p>
           <div class="toc-tree">
             <ul>
 <li><a class="reference internal" href="#">IPX - Internetwork Packet Exchange</a><ul>
-<li><a class="reference internal" href="#pcapkit.protocols.internet.ipx.IPX"><code class="docutils literal notranslate"><span class="pre">IPX</span></code></a><ul>
-<li><a class="reference internal" href="#pcapkit.protocols.internet.ipx.IPX.name"><code class="docutils literal notranslate"><span class="pre">IPX.name</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.internet.ipx.IPX.length"><code class="docutils literal notranslate"><span class="pre">IPX.length</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.internet.ipx.IPX.protocol"><code class="docutils literal notranslate"><span class="pre">IPX.protocol</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.internet.ipx.IPX.src"><code class="docutils literal notranslate"><span class="pre">IPX.src</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.internet.ipx.IPX.dst"><code class="docutils literal notranslate"><span class="pre">IPX.dst</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.internet.ipx.IPX.read"><code class="docutils literal notranslate"><span class="pre">IPX.read()</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.internet.ipx.IPX.make"><code class="docutils literal notranslate"><span class="pre">IPX.make()</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.internet.ipx.IPX._make_data"><code class="docutils literal notranslate"><span class="pre">IPX._make_data()</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.internet.ipx.IPX.__index__"><code class="docutils literal notranslate"><span class="pre">IPX.__index__()</span></code></a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#module-pcapkit.protocols.schema.internet.ipx">Header Schemas</a><ul>
-<li><a class="reference internal" href="#pcapkit.protocols.schema.internet.ipx.IPX"><code class="docutils literal notranslate"><span class="pre">IPX</span></code></a><ul>
-<li><a class="reference internal" href="#pcapkit.protocols.schema.internet.ipx.IPX.chksum"><code class="docutils literal notranslate"><span class="pre">IPX.chksum</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.schema.internet.ipx.IPX.len"><code class="docutils literal notranslate"><span class="pre">IPX.len</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.schema.internet.ipx.IPX.count"><code class="docutils literal notranslate"><span class="pre">IPX.count</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.schema.internet.ipx.IPX.type"><code class="docutils literal notranslate"><span class="pre">IPX.type</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.schema.internet.ipx.IPX.dst"><code class="docutils literal notranslate"><span class="pre">IPX.dst</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.schema.internet.ipx.IPX.src"><code class="docutils literal notranslate"><span class="pre">IPX.src</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.schema.internet.ipx.IPX.payload"><code class="docutils literal notranslate"><span class="pre">IPX.payload</span></code></a></li>
-</ul>
-</li>
-</ul>
-</li>
-<li><a class="reference internal" href="#module-pcapkit.protocols.data.internet.ipx">Data Models</a><ul>
-<li><a class="reference internal" href="#pcapkit.protocols.data.internet.ipx.IPX"><code class="docutils literal notranslate"><span class="pre">IPX</span></code></a><ul>
-<li><a class="reference internal" href="#pcapkit.protocols.data.internet.ipx.IPX.chksum"><code class="docutils literal notranslate"><span class="pre">IPX.chksum</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.data.internet.ipx.IPX.len"><code class="docutils literal notranslate"><span class="pre">IPX.len</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.data.internet.ipx.IPX.count"><code class="docutils literal notranslate"><span class="pre">IPX.count</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.data.internet.ipx.IPX.type"><code class="docutils literal notranslate"><span class="pre">IPX.type</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.data.internet.ipx.IPX.dst"><code class="docutils literal notranslate"><span class="pre">IPX.dst</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.data.internet.ipx.IPX.src"><code class="docutils literal notranslate"><span class="pre">IPX.src</span></code></a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#pcapkit.protocols.data.internet.ipx.Address"><code class="docutils literal notranslate"><span class="pre">Address</span></code></a><ul>
-<li><a class="reference internal" href="#pcapkit.protocols.data.internet.ipx.Address.network"><code class="docutils literal notranslate"><span class="pre">Address.network</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.data.internet.ipx.Address.node"><code class="docutils literal notranslate"><span class="pre">Address.node</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.data.internet.ipx.Address.socket"><code class="docutils literal notranslate"><span class="pre">Address.socket</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.data.internet.ipx.Address.addr"><code class="docutils literal notranslate"><span class="pre">Address.addr</span></code></a></li>
-</ul>
-</li>
-</ul>
-</li>
+<li><a class="reference internal" href="#module-pcapkit.protocols.schema.internet.ipx">Header Schemas</a></li>
+<li><a class="reference internal" href="#module-pcapkit.protocols.data.internet.ipx">Data Models</a></li>
 </ul>
 </li>
 </ul>

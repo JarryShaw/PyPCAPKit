@@ -476,8 +476,8 @@ error instance will be provided as in <code class="docutils literal notranslate"
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>file</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Union" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.IO" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">IO</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a>], <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a>]) – Source packet stream.</p></li>
 <li><p><strong>length</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>]) – Length of packet data.</p></li>
-<li><p><strong>error</strong> (<em>Optional</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#Exception" title="(in Python v3.11)"><em>Exception</em></a><em>]</em>) – Parsing errors if any (for parsing).</p></li>
-<li><p><strong>alias</strong> (<em>Optional</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a><em>]</em>) – Original enumeration of the unknown protocol.</p></li>
+<li><p><strong>error</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Optional[Exception]</span></code>) – Parsing errors if any (for parsing).</p></li>
+<li><p><strong>alias</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Optional[int]</span></code>) – Original enumeration of the unknown protocol.</p></li>
 <li><p><strong>**kwargs</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>) – Arbitrary keyword arguments.</p></li>
 </ul>
 </dd>
@@ -639,33 +639,8 @@ error instance will be provided as in <code class="docutils literal notranslate"
           <div class="toc-tree">
             <ul>
 <li><a class="reference internal" href="#">Raw Packet Data</a><ul>
-<li><a class="reference internal" href="#pcapkit.protocols.misc.raw.Raw"><code class="docutils literal notranslate"><span class="pre">Raw</span></code></a><ul>
-<li><a class="reference internal" href="#pcapkit.protocols.misc.raw.Raw.name"><code class="docutils literal notranslate"><span class="pre">Raw.name</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.misc.raw.Raw.length"><code class="docutils literal notranslate"><span class="pre">Raw.length</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.misc.raw.Raw.protocol"><code class="docutils literal notranslate"><span class="pre">Raw.protocol</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.misc.raw.Raw.read"><code class="docutils literal notranslate"><span class="pre">Raw.read()</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.misc.raw.Raw.make"><code class="docutils literal notranslate"><span class="pre">Raw.make()</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.misc.raw.Raw._make_data"><code class="docutils literal notranslate"><span class="pre">Raw._make_data()</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.misc.raw.Raw.__post_init__"><code class="docutils literal notranslate"><span class="pre">Raw.__post_init__()</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.misc.raw.Raw.__index__"><code class="docutils literal notranslate"><span class="pre">Raw.__index__()</span></code></a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#module-pcapkit.protocols.schema.misc.raw">Header Schemas</a><ul>
-<li><a class="reference internal" href="#pcapkit.protocols.schema.misc.raw.Raw"><code class="docutils literal notranslate"><span class="pre">Raw</span></code></a><ul>
-<li><a class="reference internal" href="#pcapkit.protocols.schema.misc.raw.Raw.packet"><code class="docutils literal notranslate"><span class="pre">Raw.packet</span></code></a></li>
-</ul>
-</li>
-</ul>
-</li>
-<li><a class="reference internal" href="#module-pcapkit.protocols.data.misc.raw">Data Models</a><ul>
-<li><a class="reference internal" href="#pcapkit.protocols.data.misc.raw.Raw"><code class="docutils literal notranslate"><span class="pre">Raw</span></code></a><ul>
-<li><a class="reference internal" href="#pcapkit.protocols.data.misc.raw.Raw.protocol"><code class="docutils literal notranslate"><span class="pre">Raw.protocol</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.data.misc.raw.Raw.packet"><code class="docutils literal notranslate"><span class="pre">Raw.packet</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.data.misc.raw.Raw.error"><code class="docutils literal notranslate"><span class="pre">Raw.error</span></code></a></li>
-</ul>
-</li>
-</ul>
-</li>
+<li><a class="reference internal" href="#module-pcapkit.protocols.schema.misc.raw">Header Schemas</a></li>
+<li><a class="reference internal" href="#module-pcapkit.protocols.data.misc.raw">Data Models</a></li>
 </ul>
 </li>
 </ul>

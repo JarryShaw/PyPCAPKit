@@ -366,7 +366,7 @@
 <p><a class="reference internal" href="#module-pcapkit.protocols.internet.hopopt" title="pcapkit.protocols.internet.hopopt"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.internet.hopopt</span></code></a> contains
 <a class="reference internal" href="#pcapkit.protocols.internet.hopopt.HOPOPT" title="pcapkit.protocols.internet.hopopt.HOPOPT"><code class="xref py py-class docutils literal notranslate"><span class="pre">HOPOPT</span></code></a>
 only, which implements extractor for IPv6 Hop-by-Hop
-Options header (HOPOPT) <a class="footnote-reference brackets" href="#id15" id="id1" role="doc-noteref"><span class="fn-bracket">[</span>*<span class="fn-bracket">]</span></a>, whose structure is
+Options header (HOPOPT) <a class="footnote-reference brackets" href="#id13" id="id1" role="doc-noteref"><span class="fn-bracket">[</span>*<span class="fn-bracket">]</span></a>, whose structure is
 described as below:</p>
 <div class="table-wrapper docutils container">
 <table class="docutils align-default">
@@ -1580,7 +1580,7 @@ attribute:</p>
 <dd><p>DefaultDict[Enum_Option, str | tuple[OptionParser, OptionConstructor]]:
 Option code to method mapping, c.f. <a class="reference internal" href="#pcapkit.protocols.internet.hopopt.HOPOPT._read_hopopt_options" title="pcapkit.protocols.internet.hopopt.HOPOPT._read_hopopt_options"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_read_hopopt_options()</span></code></a> and/or
 <a class="reference internal" href="#pcapkit.protocols.internet.hopopt.HOPOPT._make_hopopt_options" title="pcapkit.protocols.internet.hopopt.HOPOPT._make_hopopt_options"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_make_hopopt_options()</span></code></a>. Method names are expected to be referred
-to the class by <code class="docutils literal notranslate"><span class="pre">_read_opt_${name}</span></code> and/or <a href="#id2"><span class="problematic" id="id3">``</span></a>_make_opt_${name}, and
+to the class by <code class="docutils literal notranslate"><span class="pre">_read_opt_${name}</span></code> and/or <code class="docutils literal notranslate"><span class="pre">_make_opt_${name}</span></code>, and
 if such name not found, the value should then be a method that can parse
 the option by itself.</p>
 </dd></dl>
@@ -2044,7 +2044,7 @@ detection (<code class="docutils literal notranslate"><span class="pre">SMF_DPD<
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.internet.hopopt.SMFIdentificationBasedDPDOption.tid">
-<span class="sig-name descname"><span class="pre">tid</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bytes</span> <span class="pre">|</span> <span class="pre">IPv4Address</span> <span class="pre">|</span> <span class="pre">IPv6Address</span></em><a class="headerlink" href="#pcapkit.protocols.schema.internet.hopopt.SMFIdentificationBasedDPDOption.tid" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">tid</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bytes</span> <span class="pre">|</span> <span class="pre">IPv4Address</span> <span class="pre">|</span> <span class="pre">IPv6Address</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;ConditionalField&gt;</span></em><a class="headerlink" href="#pcapkit.protocols.schema.internet.hopopt.SMFIdentificationBasedDPDOption.tid" title="Permalink to this definition">#</a></dt>
 <dd><p>TaggerID.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -2790,28 +2790,28 @@ conforms to this specification.</p>
 </dd>
 </dl>
 <dl class="py attribute">
-<dt class="sig sig-object py" id="id4">
-<span class="sig-name descname"><span class="pre">down</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></em><a class="headerlink" href="#id4" title="Permalink to this definition">#</a></dt>
+<dt class="sig sig-object py" id="id2">
+<span class="sig-name descname"><span class="pre">down</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></em><a class="headerlink" href="#id2" title="Permalink to this definition">#</a></dt>
 <dd><p>Down flag.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="id5">
-<span class="sig-name descname"><span class="pre">rank_err</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></em><a class="headerlink" href="#id5" title="Permalink to this definition">#</a></dt>
+<dt class="sig sig-object py" id="id3">
+<span class="sig-name descname"><span class="pre">rank_err</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></em><a class="headerlink" href="#id3" title="Permalink to this definition">#</a></dt>
 <dd><p>Rank error flag.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="id6">
-<span class="sig-name descname"><span class="pre">fwd_err</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></em><a class="headerlink" href="#id6" title="Permalink to this definition">#</a></dt>
+<dt class="sig sig-object py" id="id4">
+<span class="sig-name descname"><span class="pre">fwd_err</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></em><a class="headerlink" href="#id4" title="Permalink to this definition">#</a></dt>
 <dd><p>Forwarding error flag.</p>
 </dd></dl>
 
 </dd></dl>
 
 <dl class="py class">
-<dt class="sig sig-object py" id="id7">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.schema.internet.hopopt.</span></span><span class="sig-name descname"><span class="pre">MPLFlags</span></span><a class="reference internal" href="../../../_modules/pcapkit/protocols/schema/internet/hopopt.html#MPLFlags"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id7" title="Permalink to this definition">#</a></dt>
+<dt class="sig sig-object py" id="id5">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.schema.internet.hopopt.</span></span><span class="sig-name descname"><span class="pre">MPLFlags</span></span><a class="reference internal" href="../../../_modules/pcapkit/protocols/schema/internet/hopopt.html#MPLFlags"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id5" title="Permalink to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.TypedDict" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">TypedDict</span></code></a></p>
 <p>MPL flags.</p>
 <dl class="field-list simple">
@@ -2823,23 +2823,23 @@ conforms to this specification.</p>
 </dd>
 </dl>
 <dl class="py attribute">
-<dt class="sig sig-object py" id="id8">
-<span class="sig-name descname"><span class="pre">type</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></em><a class="headerlink" href="#id8" title="Permalink to this definition">#</a></dt>
+<dt class="sig sig-object py" id="id6">
+<span class="sig-name descname"><span class="pre">type</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></em><a class="headerlink" href="#id6" title="Permalink to this definition">#</a></dt>
 <dd><p>Seed-ID type. Identifies the length of the
 Seed-ID.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="id9">
-<span class="sig-name descname"><span class="pre">max</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></em><a class="headerlink" href="#id9" title="Permalink to this definition">#</a></dt>
+<dt class="sig sig-object py" id="id7">
+<span class="sig-name descname"><span class="pre">max</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></em><a class="headerlink" href="#id7" title="Permalink to this definition">#</a></dt>
 <dd><p>Max flag. <code class="docutils literal notranslate"><span class="pre">1</span></code> indicates that the value in the
 sequence field is known to be the largest sequence
 number that was received from the MPL Seed.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="id10">
-<span class="sig-name descname"><span class="pre">drop</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></em><a class="headerlink" href="#id10" title="Permalink to this definition">#</a></dt>
+<dt class="sig sig-object py" id="id8">
+<span class="sig-name descname"><span class="pre">drop</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></em><a class="headerlink" href="#id8" title="Permalink to this definition">#</a></dt>
 <dd><p>Verification flag. <code class="docutils literal notranslate"><span class="pre">0</span></code> indicates that the MPL Option
 conforms to this specification.</p>
 </dd></dl>
@@ -2847,8 +2847,8 @@ conforms to this specification.</p>
 </dd></dl>
 
 <dl class="py class">
-<dt class="sig sig-object py" id="id11">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.schema.internet.hopopt.</span></span><span class="sig-name descname"><span class="pre">DFFFlags</span></span><a class="reference internal" href="../../../_modules/pcapkit/protocols/schema/internet/hopopt.html#DFFFlags"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id11" title="Permalink to this definition">#</a></dt>
+<dt class="sig sig-object py" id="id9">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.schema.internet.hopopt.</span></span><span class="sig-name descname"><span class="pre">DFFFlags</span></span><a class="reference internal" href="../../../_modules/pcapkit/protocols/schema/internet/hopopt.html#DFFFlags"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id9" title="Permalink to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.TypedDict" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">TypedDict</span></code></a></p>
 <p><code class="docutils literal notranslate"><span class="pre">IP_DFF</span></code> flags.</p>
 <dl class="field-list simple">
@@ -2860,20 +2860,20 @@ conforms to this specification.</p>
 </dd>
 </dl>
 <dl class="py attribute">
-<dt class="sig sig-object py" id="id12">
-<span class="sig-name descname"><span class="pre">ver</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></em><a class="headerlink" href="#id12" title="Permalink to this definition">#</a></dt>
+<dt class="sig sig-object py" id="id10">
+<span class="sig-name descname"><span class="pre">ver</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></em><a class="headerlink" href="#id10" title="Permalink to this definition">#</a></dt>
 <dd><p>Version.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="id13">
-<span class="sig-name descname"><span class="pre">dup</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></em><a class="headerlink" href="#id13" title="Permalink to this definition">#</a></dt>
+<dt class="sig sig-object py" id="id11">
+<span class="sig-name descname"><span class="pre">dup</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></em><a class="headerlink" href="#id11" title="Permalink to this definition">#</a></dt>
 <dd><p>Duplicate flag.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="id14">
-<span class="sig-name descname"><span class="pre">ret</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></em><a class="headerlink" href="#id14" title="Permalink to this definition">#</a></dt>
+<dt class="sig sig-object py" id="id12">
+<span class="sig-name descname"><span class="pre">ret</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></em><a class="headerlink" href="#id12" title="Permalink to this definition">#</a></dt>
 <dd><p>Retune flag.</p>
 </dd></dl>
 
@@ -3752,7 +3752,7 @@ instance.</p></li>
 </dd></dl>
 
 <hr /><aside class="footnote-list brackets">
-<aside class="footnote brackets" id="id15" role="note">
+<aside class="footnote brackets" id="id13" role="note">
 <span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id1">*</a><span class="fn-bracket">]</span></span>
 <p><a class="reference external" href="https://en.wikipedia.org/wiki/IPv6_packet#Hop-by-hop_options_and_destination_options">https://en.wikipedia.org/wiki/IPv6_packet#Hop-by-hop_options_and_destination_options</a></p>
 </aside>
@@ -3816,344 +3816,12 @@ instance.</p></li>
           <div class="toc-tree">
             <ul>
 <li><a class="reference internal" href="#">HOPOPT - IPv6 Hop-by-Hop Options</a><ul>
-<li><a class="reference internal" href="#pcapkit.protocols.internet.hopopt.HOPOPT"><code class="docutils literal notranslate"><span class="pre">HOPOPT</span></code></a><ul>
-<li><a class="reference internal" href="#pcapkit.protocols.internet.hopopt.HOPOPT.name"><code class="docutils literal notranslate"><span class="pre">HOPOPT.name</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.internet.hopopt.HOPOPT.length"><code class="docutils literal notranslate"><span class="pre">HOPOPT.length</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.internet.hopopt.HOPOPT.payload"><code class="docutils literal notranslate"><span class="pre">HOPOPT.payload</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.internet.hopopt.HOPOPT.protocol"><code class="docutils literal notranslate"><span class="pre">HOPOPT.protocol</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.internet.hopopt.HOPOPT.protochain"><code class="docutils literal notranslate"><span class="pre">HOPOPT.protochain</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.internet.hopopt.HOPOPT.register_option"><code class="docutils literal notranslate"><span class="pre">HOPOPT.register_option()</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.internet.hopopt.HOPOPT.read"><code class="docutils literal notranslate"><span class="pre">HOPOPT.read()</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.internet.hopopt.HOPOPT.make"><code class="docutils literal notranslate"><span class="pre">HOPOPT.make()</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.internet.hopopt.HOPOPT._make_data"><code class="docutils literal notranslate"><span class="pre">HOPOPT._make_data()</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.internet.hopopt.HOPOPT._read_hopopt_options"><code class="docutils literal notranslate"><span class="pre">HOPOPT._read_hopopt_options()</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.internet.hopopt.HOPOPT._read_opt_none"><code class="docutils literal notranslate"><span class="pre">HOPOPT._read_opt_none()</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.internet.hopopt.HOPOPT._read_opt_pad"><code class="docutils literal notranslate"><span class="pre">HOPOPT._read_opt_pad()</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.internet.hopopt.HOPOPT._read_opt_tun"><code class="docutils literal notranslate"><span class="pre">HOPOPT._read_opt_tun()</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.internet.hopopt.HOPOPT._read_opt_ra"><code class="docutils literal notranslate"><span class="pre">HOPOPT._read_opt_ra()</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.internet.hopopt.HOPOPT._read_opt_calipso"><code class="docutils literal notranslate"><span class="pre">HOPOPT._read_opt_calipso()</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.internet.hopopt.HOPOPT._read_opt_smf_dpd"><code class="docutils literal notranslate"><span class="pre">HOPOPT._read_opt_smf_dpd()</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.internet.hopopt.HOPOPT._read_opt_pdm"><code class="docutils literal notranslate"><span class="pre">HOPOPT._read_opt_pdm()</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.internet.hopopt.HOPOPT._read_opt_qs"><code class="docutils literal notranslate"><span class="pre">HOPOPT._read_opt_qs()</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.internet.hopopt.HOPOPT._read_opt_rpl"><code class="docutils literal notranslate"><span class="pre">HOPOPT._read_opt_rpl()</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.internet.hopopt.HOPOPT._read_opt_mpl"><code class="docutils literal notranslate"><span class="pre">HOPOPT._read_opt_mpl()</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.internet.hopopt.HOPOPT._read_opt_ilnp"><code class="docutils literal notranslate"><span class="pre">HOPOPT._read_opt_ilnp()</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.internet.hopopt.HOPOPT._read_opt_lio"><code class="docutils literal notranslate"><span class="pre">HOPOPT._read_opt_lio()</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.internet.hopopt.HOPOPT._read_opt_jumbo"><code class="docutils literal notranslate"><span class="pre">HOPOPT._read_opt_jumbo()</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.internet.hopopt.HOPOPT._read_opt_home"><code class="docutils literal notranslate"><span class="pre">HOPOPT._read_opt_home()</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.internet.hopopt.HOPOPT._read_opt_ip_dff"><code class="docutils literal notranslate"><span class="pre">HOPOPT._read_opt_ip_dff()</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.internet.hopopt.HOPOPT._make_hopopt_options"><code class="docutils literal notranslate"><span class="pre">HOPOPT._make_hopopt_options()</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.internet.hopopt.HOPOPT._make_opt_none"><code class="docutils literal notranslate"><span class="pre">HOPOPT._make_opt_none()</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.internet.hopopt.HOPOPT._make_opt_pad"><code class="docutils literal notranslate"><span class="pre">HOPOPT._make_opt_pad()</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.internet.hopopt.HOPOPT._make_opt_tun"><code class="docutils literal notranslate"><span class="pre">HOPOPT._make_opt_tun()</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.internet.hopopt.HOPOPT._make_opt_ra"><code class="docutils literal notranslate"><span class="pre">HOPOPT._make_opt_ra()</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.internet.hopopt.HOPOPT._make_opt_calipso"><code class="docutils literal notranslate"><span class="pre">HOPOPT._make_opt_calipso()</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.internet.hopopt.HOPOPT._make_opt_smf_dpd"><code class="docutils literal notranslate"><span class="pre">HOPOPT._make_opt_smf_dpd()</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.internet.hopopt.HOPOPT._make_opt_pdm"><code class="docutils literal notranslate"><span class="pre">HOPOPT._make_opt_pdm()</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.internet.hopopt.HOPOPT._make_opt_qs"><code class="docutils literal notranslate"><span class="pre">HOPOPT._make_opt_qs()</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.internet.hopopt.HOPOPT._make_opt_rpl"><code class="docutils literal notranslate"><span class="pre">HOPOPT._make_opt_rpl()</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.internet.hopopt.HOPOPT._make_opt_mpl"><code class="docutils literal notranslate"><span class="pre">HOPOPT._make_opt_mpl()</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.internet.hopopt.HOPOPT._make_opt_ilnp"><code class="docutils literal notranslate"><span class="pre">HOPOPT._make_opt_ilnp()</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.internet.hopopt.HOPOPT._make_opt_lio"><code class="docutils literal notranslate"><span class="pre">HOPOPT._make_opt_lio()</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.internet.hopopt.HOPOPT._make_opt_jumbo"><code class="docutils literal notranslate"><span class="pre">HOPOPT._make_opt_jumbo()</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.internet.hopopt.HOPOPT._make_opt_home"><code class="docutils literal notranslate"><span class="pre">HOPOPT._make_opt_home()</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.internet.hopopt.HOPOPT._make_opt_ip_dff"><code class="docutils literal notranslate"><span class="pre">HOPOPT._make_opt_ip_dff()</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.internet.hopopt.HOPOPT.__option__"><code class="docutils literal notranslate"><span class="pre">HOPOPT.__option__</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.internet.hopopt.HOPOPT.__post_init__"><code class="docutils literal notranslate"><span class="pre">HOPOPT.__post_init__()</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.internet.hopopt.HOPOPT.__index__"><code class="docutils literal notranslate"><span class="pre">HOPOPT.__index__()</span></code></a></li>
-</ul>
-</li>
 <li><a class="reference internal" href="#module-pcapkit.protocols.schema.internet.hopopt">Header Schemas</a><ul>
-<li><a class="reference internal" href="#pcapkit.protocols.schema.internet.hopopt.HOPOPT"><code class="docutils literal notranslate"><span class="pre">HOPOPT</span></code></a><ul>
-<li><a class="reference internal" href="#pcapkit.protocols.schema.internet.hopopt.HOPOPT.next"><code class="docutils literal notranslate"><span class="pre">HOPOPT.next</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.schema.internet.hopopt.HOPOPT.len"><code class="docutils literal notranslate"><span class="pre">HOPOPT.len</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.schema.internet.hopopt.HOPOPT.options"><code class="docutils literal notranslate"><span class="pre">HOPOPT.options</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.schema.internet.hopopt.HOPOPT.payload"><code class="docutils literal notranslate"><span class="pre">HOPOPT.payload</span></code></a></li>
+<li><a class="reference internal" href="#type-stubs">Type Stubs</a></li>
+<li><a class="reference internal" href="#auxiliary-functions">Auxiliary Functions</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#pcapkit.protocols.schema.internet.hopopt.Option"><code class="docutils literal notranslate"><span class="pre">Option</span></code></a><ul>
-<li><a class="reference internal" href="#pcapkit.protocols.schema.internet.hopopt.Option.type"><code class="docutils literal notranslate"><span class="pre">Option.type</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.schema.internet.hopopt.Option.len"><code class="docutils literal notranslate"><span class="pre">Option.len</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.schema.internet.hopopt.Option.post_process"><code class="docutils literal notranslate"><span class="pre">Option.post_process()</span></code></a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#pcapkit.protocols.schema.internet.hopopt.UnassignedOption"><code class="docutils literal notranslate"><span class="pre">UnassignedOption</span></code></a><ul>
-<li><a class="reference internal" href="#pcapkit.protocols.schema.internet.hopopt.UnassignedOption.data"><code class="docutils literal notranslate"><span class="pre">UnassignedOption.data</span></code></a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#pcapkit.protocols.schema.internet.hopopt.PadOption"><code class="docutils literal notranslate"><span class="pre">PadOption</span></code></a><ul>
-<li><a class="reference internal" href="#pcapkit.protocols.schema.internet.hopopt.PadOption.pad"><code class="docutils literal notranslate"><span class="pre">PadOption.pad</span></code></a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#pcapkit.protocols.schema.internet.hopopt.TunnelEncapsulationLimitOption"><code class="docutils literal notranslate"><span class="pre">TunnelEncapsulationLimitOption</span></code></a><ul>
-<li><a class="reference internal" href="#pcapkit.protocols.schema.internet.hopopt.TunnelEncapsulationLimitOption.limit"><code class="docutils literal notranslate"><span class="pre">TunnelEncapsulationLimitOption.limit</span></code></a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#pcapkit.protocols.schema.internet.hopopt.RouterAlertOption"><code class="docutils literal notranslate"><span class="pre">RouterAlertOption</span></code></a><ul>
-<li><a class="reference internal" href="#pcapkit.protocols.schema.internet.hopopt.RouterAlertOption.alert"><code class="docutils literal notranslate"><span class="pre">RouterAlertOption.alert</span></code></a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#pcapkit.protocols.schema.internet.hopopt.CALIPSOOption"><code class="docutils literal notranslate"><span class="pre">CALIPSOOption</span></code></a><ul>
-<li><a class="reference internal" href="#pcapkit.protocols.schema.internet.hopopt.CALIPSOOption.domain"><code class="docutils literal notranslate"><span class="pre">CALIPSOOption.domain</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.schema.internet.hopopt.CALIPSOOption.cmpt_len"><code class="docutils literal notranslate"><span class="pre">CALIPSOOption.cmpt_len</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.schema.internet.hopopt.CALIPSOOption.level"><code class="docutils literal notranslate"><span class="pre">CALIPSOOption.level</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.schema.internet.hopopt.CALIPSOOption.checksum"><code class="docutils literal notranslate"><span class="pre">CALIPSOOption.checksum</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.schema.internet.hopopt.CALIPSOOption.bitmap"><code class="docutils literal notranslate"><span class="pre">CALIPSOOption.bitmap</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.schema.internet.hopopt.CALIPSOOption.pad"><code class="docutils literal notranslate"><span class="pre">CALIPSOOption.pad</span></code></a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#pcapkit.protocols.schema.internet.hopopt.SMFDPDOption"><code class="docutils literal notranslate"><span class="pre">SMFDPDOption</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.schema.internet.hopopt.SMFIdentificationBasedDPDOption"><code class="docutils literal notranslate"><span class="pre">SMFIdentificationBasedDPDOption</span></code></a><ul>
-<li><a class="reference internal" href="#pcapkit.protocols.schema.internet.hopopt.SMFIdentificationBasedDPDOption.info"><code class="docutils literal notranslate"><span class="pre">SMFIdentificationBasedDPDOption.info</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.schema.internet.hopopt.SMFIdentificationBasedDPDOption.tid"><code class="docutils literal notranslate"><span class="pre">SMFIdentificationBasedDPDOption.tid</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.schema.internet.hopopt.SMFIdentificationBasedDPDOption.id"><code class="docutils literal notranslate"><span class="pre">SMFIdentificationBasedDPDOption.id</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.schema.internet.hopopt.SMFIdentificationBasedDPDOption.post_process"><code class="docutils literal notranslate"><span class="pre">SMFIdentificationBasedDPDOption.post_process()</span></code></a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#pcapkit.protocols.schema.internet.hopopt.SMFHashBasedDPDOption"><code class="docutils literal notranslate"><span class="pre">SMFHashBasedDPDOption</span></code></a><ul>
-<li><a class="reference internal" href="#pcapkit.protocols.schema.internet.hopopt.SMFHashBasedDPDOption.hav"><code class="docutils literal notranslate"><span class="pre">SMFHashBasedDPDOption.hav</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.schema.internet.hopopt.SMFHashBasedDPDOption.post_process"><code class="docutils literal notranslate"><span class="pre">SMFHashBasedDPDOption.post_process()</span></code></a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#pcapkit.protocols.schema.internet.hopopt.PDMOption"><code class="docutils literal notranslate"><span class="pre">PDMOption</span></code></a><ul>
-<li><a class="reference internal" href="#pcapkit.protocols.schema.internet.hopopt.PDMOption.scaledtlr"><code class="docutils literal notranslate"><span class="pre">PDMOption.scaledtlr</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.schema.internet.hopopt.PDMOption.scaledtls"><code class="docutils literal notranslate"><span class="pre">PDMOption.scaledtls</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.schema.internet.hopopt.PDMOption.psntp"><code class="docutils literal notranslate"><span class="pre">PDMOption.psntp</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.schema.internet.hopopt.PDMOption.psnlr"><code class="docutils literal notranslate"><span class="pre">PDMOption.psnlr</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.schema.internet.hopopt.PDMOption.deltatlr"><code class="docutils literal notranslate"><span class="pre">PDMOption.deltatlr</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.schema.internet.hopopt.PDMOption.deltatls"><code class="docutils literal notranslate"><span class="pre">PDMOption.deltatls</span></code></a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#pcapkit.protocols.schema.internet.hopopt.QuickStartOption"><code class="docutils literal notranslate"><span class="pre">QuickStartOption</span></code></a><ul>
-<li><a class="reference internal" href="#pcapkit.protocols.schema.internet.hopopt.QuickStartOption.flags"><code class="docutils literal notranslate"><span class="pre">QuickStartOption.flags</span></code></a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#pcapkit.protocols.schema.internet.hopopt.RPLOption"><code class="docutils literal notranslate"><span class="pre">RPLOption</span></code></a><ul>
-<li><a class="reference internal" href="#pcapkit.protocols.schema.internet.hopopt.RPLOption.flags"><code class="docutils literal notranslate"><span class="pre">RPLOption.flags</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.schema.internet.hopopt.RPLOption.id"><code class="docutils literal notranslate"><span class="pre">RPLOption.id</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.schema.internet.hopopt.RPLOption.rank"><code class="docutils literal notranslate"><span class="pre">RPLOption.rank</span></code></a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#pcapkit.protocols.schema.internet.hopopt.RPLFlags"><code class="docutils literal notranslate"><span class="pre">RPLFlags</span></code></a><ul>
-<li><a class="reference internal" href="#pcapkit.protocols.schema.internet.hopopt.RPLFlags.down"><code class="docutils literal notranslate"><span class="pre">RPLFlags.down</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.schema.internet.hopopt.RPLFlags.rank_err"><code class="docutils literal notranslate"><span class="pre">RPLFlags.rank_err</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.schema.internet.hopopt.RPLFlags.fwd_err"><code class="docutils literal notranslate"><span class="pre">RPLFlags.fwd_err</span></code></a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#pcapkit.protocols.schema.internet.hopopt.MPLOption"><code class="docutils literal notranslate"><span class="pre">MPLOption</span></code></a><ul>
-<li><a class="reference internal" href="#pcapkit.protocols.schema.internet.hopopt.MPLOption.flags"><code class="docutils literal notranslate"><span class="pre">MPLOption.flags</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.schema.internet.hopopt.MPLOption.seq"><code class="docutils literal notranslate"><span class="pre">MPLOption.seq</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.schema.internet.hopopt.MPLOption.seed"><code class="docutils literal notranslate"><span class="pre">MPLOption.seed</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.schema.internet.hopopt.MPLOption.pad"><code class="docutils literal notranslate"><span class="pre">MPLOption.pad</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.schema.internet.hopopt.MPLOption.post_process"><code class="docutils literal notranslate"><span class="pre">MPLOption.post_process()</span></code></a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#pcapkit.protocols.schema.internet.hopopt.MPLFlags"><code class="docutils literal notranslate"><span class="pre">MPLFlags</span></code></a><ul>
-<li><a class="reference internal" href="#pcapkit.protocols.schema.internet.hopopt.MPLFlags.type"><code class="docutils literal notranslate"><span class="pre">MPLFlags.type</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.schema.internet.hopopt.MPLFlags.max"><code class="docutils literal notranslate"><span class="pre">MPLFlags.max</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.schema.internet.hopopt.MPLFlags.drop"><code class="docutils literal notranslate"><span class="pre">MPLFlags.drop</span></code></a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#pcapkit.protocols.schema.internet.hopopt.ILNPOption"><code class="docutils literal notranslate"><span class="pre">ILNPOption</span></code></a><ul>
-<li><a class="reference internal" href="#pcapkit.protocols.schema.internet.hopopt.ILNPOption.nonce"><code class="docutils literal notranslate"><span class="pre">ILNPOption.nonce</span></code></a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#pcapkit.protocols.schema.internet.hopopt.LineIdentificationOption"><code class="docutils literal notranslate"><span class="pre">LineIdentificationOption</span></code></a><ul>
-<li><a class="reference internal" href="#pcapkit.protocols.schema.internet.hopopt.LineIdentificationOption.id_len"><code class="docutils literal notranslate"><span class="pre">LineIdentificationOption.id_len</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.schema.internet.hopopt.LineIdentificationOption.id"><code class="docutils literal notranslate"><span class="pre">LineIdentificationOption.id</span></code></a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#pcapkit.protocols.schema.internet.hopopt.JumboPayloadOption"><code class="docutils literal notranslate"><span class="pre">JumboPayloadOption</span></code></a><ul>
-<li><a class="reference internal" href="#pcapkit.protocols.schema.internet.hopopt.JumboPayloadOption.jumbo_len"><code class="docutils literal notranslate"><span class="pre">JumboPayloadOption.jumbo_len</span></code></a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#pcapkit.protocols.schema.internet.hopopt.HomeAddressOption"><code class="docutils literal notranslate"><span class="pre">HomeAddressOption</span></code></a><ul>
-<li><a class="reference internal" href="#pcapkit.protocols.schema.internet.hopopt.HomeAddressOption.addr"><code class="docutils literal notranslate"><span class="pre">HomeAddressOption.addr</span></code></a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#pcapkit.protocols.schema.internet.hopopt.IPDFFOption"><code class="docutils literal notranslate"><span class="pre">IPDFFOption</span></code></a><ul>
-<li><a class="reference internal" href="#pcapkit.protocols.schema.internet.hopopt.IPDFFOption.flags"><code class="docutils literal notranslate"><span class="pre">IPDFFOption.flags</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.schema.internet.hopopt.IPDFFOption.seq"><code class="docutils literal notranslate"><span class="pre">IPDFFOption.seq</span></code></a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#pcapkit.protocols.schema.internet.hopopt.DFFFlags"><code class="docutils literal notranslate"><span class="pre">DFFFlags</span></code></a><ul>
-<li><a class="reference internal" href="#pcapkit.protocols.schema.internet.hopopt.DFFFlags.ver"><code class="docutils literal notranslate"><span class="pre">DFFFlags.ver</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.schema.internet.hopopt.DFFFlags.dup"><code class="docutils literal notranslate"><span class="pre">DFFFlags.dup</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.schema.internet.hopopt.DFFFlags.ret"><code class="docutils literal notranslate"><span class="pre">DFFFlags.ret</span></code></a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#type-stubs">Type Stubs</a><ul>
-<li><a class="reference internal" href="#pcapkit.protocols.schema.internet.hopopt.TaggerIDInfo"><code class="docutils literal notranslate"><span class="pre">TaggerIDInfo</span></code></a><ul>
-<li><a class="reference internal" href="#pcapkit.protocols.schema.internet.hopopt.TaggerIDInfo.mode"><code class="docutils literal notranslate"><span class="pre">TaggerIDInfo.mode</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.schema.internet.hopopt.TaggerIDInfo.type"><code class="docutils literal notranslate"><span class="pre">TaggerIDInfo.type</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.schema.internet.hopopt.TaggerIDInfo.len"><code class="docutils literal notranslate"><span class="pre">TaggerIDInfo.len</span></code></a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#pcapkit.protocols.schema.internet.hopopt.QuickStartFlags"><code class="docutils literal notranslate"><span class="pre">QuickStartFlags</span></code></a><ul>
-<li><a class="reference internal" href="#pcapkit.protocols.schema.internet.hopopt.QuickStartFlags.func"><code class="docutils literal notranslate"><span class="pre">QuickStartFlags.func</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.schema.internet.hopopt.QuickStartFlags.rate"><code class="docutils literal notranslate"><span class="pre">QuickStartFlags.rate</span></code></a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#id0"><code class="docutils literal notranslate"><span class="pre">RPLFlags</span></code></a><ul>
-<li><a class="reference internal" href="#id4"><code class="docutils literal notranslate"><span class="pre">RPLFlags.down</span></code></a></li>
-<li><a class="reference internal" href="#id5"><code class="docutils literal notranslate"><span class="pre">RPLFlags.rank_err</span></code></a></li>
-<li><a class="reference internal" href="#id6"><code class="docutils literal notranslate"><span class="pre">RPLFlags.fwd_err</span></code></a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#id7"><code class="docutils literal notranslate"><span class="pre">MPLFlags</span></code></a><ul>
-<li><a class="reference internal" href="#id8"><code class="docutils literal notranslate"><span class="pre">MPLFlags.type</span></code></a></li>
-<li><a class="reference internal" href="#id9"><code class="docutils literal notranslate"><span class="pre">MPLFlags.max</span></code></a></li>
-<li><a class="reference internal" href="#id10"><code class="docutils literal notranslate"><span class="pre">MPLFlags.drop</span></code></a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#id11"><code class="docutils literal notranslate"><span class="pre">DFFFlags</span></code></a><ul>
-<li><a class="reference internal" href="#id12"><code class="docutils literal notranslate"><span class="pre">DFFFlags.ver</span></code></a></li>
-<li><a class="reference internal" href="#id13"><code class="docutils literal notranslate"><span class="pre">DFFFlags.dup</span></code></a></li>
-<li><a class="reference internal" href="#id14"><code class="docutils literal notranslate"><span class="pre">DFFFlags.ret</span></code></a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#pcapkit.protocols.schema.internet.hopopt.SMFDPDTestFlag"><code class="docutils literal notranslate"><span class="pre">SMFDPDTestFlag</span></code></a><ul>
-<li><a class="reference internal" href="#pcapkit.protocols.schema.internet.hopopt.SMFDPDTestFlag.len"><code class="docutils literal notranslate"><span class="pre">SMFDPDTestFlag.len</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.schema.internet.hopopt.SMFDPDTestFlag.mode"><code class="docutils literal notranslate"><span class="pre">SMFDPDTestFlag.mode</span></code></a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#pcapkit.protocols.schema.internet.hopopt.QSTestFlags"><code class="docutils literal notranslate"><span class="pre">QSTestFlags</span></code></a><ul>
-<li><a class="reference internal" href="#pcapkit.protocols.schema.internet.hopopt.QSTestFlags.func"><code class="docutils literal notranslate"><span class="pre">QSTestFlags.func</span></code></a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#pcapkit.protocols.schema.internet.hopopt.QSNonce"><code class="docutils literal notranslate"><span class="pre">QSNonce</span></code></a><ul>
-<li><a class="reference internal" href="#pcapkit.protocols.schema.internet.hopopt.QSNonce.nonce"><code class="docutils literal notranslate"><span class="pre">QSNonce.nonce</span></code></a></li>
-</ul>
-</li>
-</ul>
-</li>
-<li><a class="reference internal" href="#auxiliary-functions">Auxiliary Functions</a><ul>
-<li><a class="reference internal" href="#pcapkit.protocols.schema.internet.hopopt.mpl_opt_seed_id_len"><code class="docutils literal notranslate"><span class="pre">mpl_opt_seed_id_len()</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.schema.internet.hopopt.smf_dpd_data_selector"><code class="docutils literal notranslate"><span class="pre">smf_dpd_data_selector()</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.schema.internet.hopopt.smf_i_dpd_tid_selector"><code class="docutils literal notranslate"><span class="pre">smf_i_dpd_tid_selector()</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.schema.internet.hopopt.quick_start_data_selector"><code class="docutils literal notranslate"><span class="pre">quick_start_data_selector()</span></code></a></li>
-</ul>
-</li>
-</ul>
-</li>
-<li><a class="reference internal" href="#module-pcapkit.protocols.data.internet.hopopt">Data Models</a><ul>
-<li><a class="reference internal" href="#pcapkit.protocols.data.internet.hopopt.HOPOPT"><code class="docutils literal notranslate"><span class="pre">HOPOPT</span></code></a><ul>
-<li><a class="reference internal" href="#pcapkit.protocols.data.internet.hopopt.HOPOPT.next"><code class="docutils literal notranslate"><span class="pre">HOPOPT.next</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.data.internet.hopopt.HOPOPT.length"><code class="docutils literal notranslate"><span class="pre">HOPOPT.length</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.data.internet.hopopt.HOPOPT.options"><code class="docutils literal notranslate"><span class="pre">HOPOPT.options</span></code></a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#pcapkit.protocols.data.internet.hopopt.Option"><code class="docutils literal notranslate"><span class="pre">Option</span></code></a><ul>
-<li><a class="reference internal" href="#pcapkit.protocols.data.internet.hopopt.Option.type"><code class="docutils literal notranslate"><span class="pre">Option.type</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.data.internet.hopopt.Option.action"><code class="docutils literal notranslate"><span class="pre">Option.action</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.data.internet.hopopt.Option.change"><code class="docutils literal notranslate"><span class="pre">Option.change</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.data.internet.hopopt.Option.length"><code class="docutils literal notranslate"><span class="pre">Option.length</span></code></a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#pcapkit.protocols.data.internet.hopopt.UnassignedOption"><code class="docutils literal notranslate"><span class="pre">UnassignedOption</span></code></a><ul>
-<li><a class="reference internal" href="#pcapkit.protocols.data.internet.hopopt.UnassignedOption.data"><code class="docutils literal notranslate"><span class="pre">UnassignedOption.data</span></code></a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#pcapkit.protocols.data.internet.hopopt.PadOption"><code class="docutils literal notranslate"><span class="pre">PadOption</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.data.internet.hopopt.TunnelEncapsulationLimitOption"><code class="docutils literal notranslate"><span class="pre">TunnelEncapsulationLimitOption</span></code></a><ul>
-<li><a class="reference internal" href="#pcapkit.protocols.data.internet.hopopt.TunnelEncapsulationLimitOption.limit"><code class="docutils literal notranslate"><span class="pre">TunnelEncapsulationLimitOption.limit</span></code></a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#pcapkit.protocols.data.internet.hopopt.RouterAlertOption"><code class="docutils literal notranslate"><span class="pre">RouterAlertOption</span></code></a><ul>
-<li><a class="reference internal" href="#pcapkit.protocols.data.internet.hopopt.RouterAlertOption.value"><code class="docutils literal notranslate"><span class="pre">RouterAlertOption.value</span></code></a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#pcapkit.protocols.data.internet.hopopt.CALIPSOOption"><code class="docutils literal notranslate"><span class="pre">CALIPSOOption</span></code></a><ul>
-<li><a class="reference internal" href="#pcapkit.protocols.data.internet.hopopt.CALIPSOOption.domain"><code class="docutils literal notranslate"><span class="pre">CALIPSOOption.domain</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.data.internet.hopopt.CALIPSOOption.cmpt_len"><code class="docutils literal notranslate"><span class="pre">CALIPSOOption.cmpt_len</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.data.internet.hopopt.CALIPSOOption.level"><code class="docutils literal notranslate"><span class="pre">CALIPSOOption.level</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.data.internet.hopopt.CALIPSOOption.checksum"><code class="docutils literal notranslate"><span class="pre">CALIPSOOption.checksum</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.data.internet.hopopt.CALIPSOOption.cmpt_bitmap"><code class="docutils literal notranslate"><span class="pre">CALIPSOOption.cmpt_bitmap</span></code></a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#pcapkit.protocols.data.internet.hopopt.SMFDPDOption"><code class="docutils literal notranslate"><span class="pre">SMFDPDOption</span></code></a><ul>
-<li><a class="reference internal" href="#pcapkit.protocols.data.internet.hopopt.SMFDPDOption.dpd_type"><code class="docutils literal notranslate"><span class="pre">SMFDPDOption.dpd_type</span></code></a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#pcapkit.protocols.data.internet.hopopt.SMFIdentificationBasedDPDOption"><code class="docutils literal notranslate"><span class="pre">SMFIdentificationBasedDPDOption</span></code></a><ul>
-<li><a class="reference internal" href="#pcapkit.protocols.data.internet.hopopt.SMFIdentificationBasedDPDOption.tid_type"><code class="docutils literal notranslate"><span class="pre">SMFIdentificationBasedDPDOption.tid_type</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.data.internet.hopopt.SMFIdentificationBasedDPDOption.tid_len"><code class="docutils literal notranslate"><span class="pre">SMFIdentificationBasedDPDOption.tid_len</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.data.internet.hopopt.SMFIdentificationBasedDPDOption.tid"><code class="docutils literal notranslate"><span class="pre">SMFIdentificationBasedDPDOption.tid</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.data.internet.hopopt.SMFIdentificationBasedDPDOption.id"><code class="docutils literal notranslate"><span class="pre">SMFIdentificationBasedDPDOption.id</span></code></a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#pcapkit.protocols.data.internet.hopopt.SMFHashBasedDPDOption"><code class="docutils literal notranslate"><span class="pre">SMFHashBasedDPDOption</span></code></a><ul>
-<li><a class="reference internal" href="#pcapkit.protocols.data.internet.hopopt.SMFHashBasedDPDOption.hav"><code class="docutils literal notranslate"><span class="pre">SMFHashBasedDPDOption.hav</span></code></a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#pcapkit.protocols.data.internet.hopopt.PDMOption"><code class="docutils literal notranslate"><span class="pre">PDMOption</span></code></a><ul>
-<li><a class="reference internal" href="#pcapkit.protocols.data.internet.hopopt.PDMOption.scaledtlr"><code class="docutils literal notranslate"><span class="pre">PDMOption.scaledtlr</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.data.internet.hopopt.PDMOption.scaledtls"><code class="docutils literal notranslate"><span class="pre">PDMOption.scaledtls</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.data.internet.hopopt.PDMOption.psntp"><code class="docutils literal notranslate"><span class="pre">PDMOption.psntp</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.data.internet.hopopt.PDMOption.psnlr"><code class="docutils literal notranslate"><span class="pre">PDMOption.psnlr</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.data.internet.hopopt.PDMOption.deltatlr"><code class="docutils literal notranslate"><span class="pre">PDMOption.deltatlr</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.data.internet.hopopt.PDMOption.deltatls"><code class="docutils literal notranslate"><span class="pre">PDMOption.deltatls</span></code></a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#pcapkit.protocols.data.internet.hopopt.QuickStartOption"><code class="docutils literal notranslate"><span class="pre">QuickStartOption</span></code></a><ul>
-<li><a class="reference internal" href="#pcapkit.protocols.data.internet.hopopt.QuickStartOption.func"><code class="docutils literal notranslate"><span class="pre">QuickStartOption.func</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.data.internet.hopopt.QuickStartOption.rate"><code class="docutils literal notranslate"><span class="pre">QuickStartOption.rate</span></code></a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#pcapkit.protocols.data.internet.hopopt.RPLOption"><code class="docutils literal notranslate"><span class="pre">RPLOption</span></code></a><ul>
-<li><a class="reference internal" href="#pcapkit.protocols.data.internet.hopopt.RPLOption.flags"><code class="docutils literal notranslate"><span class="pre">RPLOption.flags</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.data.internet.hopopt.RPLOption.id"><code class="docutils literal notranslate"><span class="pre">RPLOption.id</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.data.internet.hopopt.RPLOption.rank"><code class="docutils literal notranslate"><span class="pre">RPLOption.rank</span></code></a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#pcapkit.protocols.data.internet.hopopt.RPLFlags"><code class="docutils literal notranslate"><span class="pre">RPLFlags</span></code></a><ul>
-<li><a class="reference internal" href="#pcapkit.protocols.data.internet.hopopt.RPLFlags.down"><code class="docutils literal notranslate"><span class="pre">RPLFlags.down</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.data.internet.hopopt.RPLFlags.rank_err"><code class="docutils literal notranslate"><span class="pre">RPLFlags.rank_err</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.data.internet.hopopt.RPLFlags.fwd_err"><code class="docutils literal notranslate"><span class="pre">RPLFlags.fwd_err</span></code></a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#pcapkit.protocols.data.internet.hopopt.MPLOption"><code class="docutils literal notranslate"><span class="pre">MPLOption</span></code></a><ul>
-<li><a class="reference internal" href="#pcapkit.protocols.data.internet.hopopt.MPLOption.seed_type"><code class="docutils literal notranslate"><span class="pre">MPLOption.seed_type</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.data.internet.hopopt.MPLOption.flags"><code class="docutils literal notranslate"><span class="pre">MPLOption.flags</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.data.internet.hopopt.MPLOption.seq"><code class="docutils literal notranslate"><span class="pre">MPLOption.seq</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.data.internet.hopopt.MPLOption.seed_id"><code class="docutils literal notranslate"><span class="pre">MPLOption.seed_id</span></code></a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#pcapkit.protocols.data.internet.hopopt.MPLFlags"><code class="docutils literal notranslate"><span class="pre">MPLFlags</span></code></a><ul>
-<li><a class="reference internal" href="#pcapkit.protocols.data.internet.hopopt.MPLFlags.max"><code class="docutils literal notranslate"><span class="pre">MPLFlags.max</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.data.internet.hopopt.MPLFlags.drop"><code class="docutils literal notranslate"><span class="pre">MPLFlags.drop</span></code></a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#pcapkit.protocols.data.internet.hopopt.ILNPOption"><code class="docutils literal notranslate"><span class="pre">ILNPOption</span></code></a><ul>
-<li><a class="reference internal" href="#pcapkit.protocols.data.internet.hopopt.ILNPOption.nonce"><code class="docutils literal notranslate"><span class="pre">ILNPOption.nonce</span></code></a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#pcapkit.protocols.data.internet.hopopt.LineIdentificationOption"><code class="docutils literal notranslate"><span class="pre">LineIdentificationOption</span></code></a><ul>
-<li><a class="reference internal" href="#pcapkit.protocols.data.internet.hopopt.LineIdentificationOption.line_id_len"><code class="docutils literal notranslate"><span class="pre">LineIdentificationOption.line_id_len</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.data.internet.hopopt.LineIdentificationOption.line_id"><code class="docutils literal notranslate"><span class="pre">LineIdentificationOption.line_id</span></code></a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#pcapkit.protocols.data.internet.hopopt.JumboPayloadOption"><code class="docutils literal notranslate"><span class="pre">JumboPayloadOption</span></code></a><ul>
-<li><a class="reference internal" href="#pcapkit.protocols.data.internet.hopopt.JumboPayloadOption.jumbo_len"><code class="docutils literal notranslate"><span class="pre">JumboPayloadOption.jumbo_len</span></code></a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#pcapkit.protocols.data.internet.hopopt.HomeAddressOption"><code class="docutils literal notranslate"><span class="pre">HomeAddressOption</span></code></a><ul>
-<li><a class="reference internal" href="#pcapkit.protocols.data.internet.hopopt.HomeAddressOption.address"><code class="docutils literal notranslate"><span class="pre">HomeAddressOption.address</span></code></a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#pcapkit.protocols.data.internet.hopopt.IPDFFOption"><code class="docutils literal notranslate"><span class="pre">IPDFFOption</span></code></a><ul>
-<li><a class="reference internal" href="#pcapkit.protocols.data.internet.hopopt.IPDFFOption.version"><code class="docutils literal notranslate"><span class="pre">IPDFFOption.version</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.data.internet.hopopt.IPDFFOption.flags"><code class="docutils literal notranslate"><span class="pre">IPDFFOption.flags</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.data.internet.hopopt.IPDFFOption.seq"><code class="docutils literal notranslate"><span class="pre">IPDFFOption.seq</span></code></a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#pcapkit.protocols.data.internet.hopopt.DFFFlags"><code class="docutils literal notranslate"><span class="pre">DFFFlags</span></code></a><ul>
-<li><a class="reference internal" href="#pcapkit.protocols.data.internet.hopopt.DFFFlags.dup"><code class="docutils literal notranslate"><span class="pre">DFFFlags.dup</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.data.internet.hopopt.DFFFlags.ret"><code class="docutils literal notranslate"><span class="pre">DFFFlags.ret</span></code></a></li>
-</ul>
-</li>
-</ul>
-</li>
+<li><a class="reference internal" href="#module-pcapkit.protocols.data.internet.hopopt">Data Models</a></li>
 </ul>
 </li>
 </ul>

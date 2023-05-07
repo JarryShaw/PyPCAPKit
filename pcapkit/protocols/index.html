@@ -7,12 +7,12 @@
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://pypcapkit.jarryshaw.me/pcapkit/protocols/index.html" />
 <meta property="og:site_name" content="PyPCAPKit" />
-<meta property="og:description" content="pcapkit.protocols is collection of all protocol families, with detailed implementation and methods. Root Protocol- Protocol, Data Models., Auxiliary Protocols- PCAP File Headers, PCAP-NG File Forma..." />
+<meta property="og:description" content="pcapkit.protocols is collection of all protocol families, with detailed implementation and methods. Root Protocol- Data Models., Auxiliary Protocols- PCAP File Headers, PCAP-NG File Format, Raw Pac..." />
 <meta property="og:image:width" content="1146" />
 <meta property="og:image:height" content="600" />
-<meta property="og:image" content="https://pypcapkit.jarryshaw.me/_images/social_previews/summary_pcapkit_protocols_index_8cd972db.png" />
-<meta property="og:image:alt" content="pcapkit.protocols is collection of all protocol families, with detailed implementation and methods. Root Protocol- Protocol, Data Models., Auxiliary Protocol..." />
-<meta name="description" content="pcapkit.protocols is collection of all protocol families, with detailed implementation and methods. Root Protocol- Protocol, Data Models., Auxiliary Protocols- PCAP File Headers, PCAP-NG File Forma..." />
+<meta property="og:image" content="https://pypcapkit.jarryshaw.me/_images/social_previews/summary_pcapkit_protocols_index_bdeaa0f1.png" />
+<meta property="og:image:alt" content="pcapkit.protocols is collection of all protocol families, with detailed implementation and methods. Root Protocol- Data Models., Auxiliary Protocols- PCAP Fi..." />
+<meta name="description" content="pcapkit.protocols is collection of all protocol families, with detailed implementation and methods. Root Protocol- Data Models., Auxiliary Protocols- PCAP File Headers, PCAP-NG File Format, Raw Pac..." />
 <meta name="twitter:card" content="summary_large_image" />
 <link rel="index" title="Index" href="../../genindex.html" /><link rel="search" title="Search" href="../../search.html" /><link rel="next" title="Root Protocol" href="protocol.html" /><link rel="prev" title="3rd-Party Engines" href="../foundation/engines/3rdparty.html" />
 
@@ -368,7 +368,6 @@ with detailed implementation and methods.</p>
 <div class="toctree-wrapper compound">
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="protocol.html">Root Protocol</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="protocol.html#pcapkit.protocols.protocol.Protocol"><code class="docutils literal notranslate"><span class="pre">Protocol</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="protocol.html#data-models">Data Models</a></li>
 </ul>
 </li>
@@ -773,36 +772,9 @@ for more information with the inserted names to be excluded.</p>
           <div class="toc-tree">
             <ul>
 <li><a class="reference internal" href="#">Protocol Family</a><ul>
-<li><a class="reference internal" href="#protocol-registry">Protocol Registry</a><ul>
-<li><a class="reference internal" href="#pcapkit.protocols.__proto__"><code class="docutils literal notranslate"><span class="pre">__proto__</span></code></a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#module-pcapkit.protocols.schema.schema">Header Schema</a><ul>
-<li><a class="reference internal" href="#pcapkit.protocols.schema.schema.Schema"><code class="docutils literal notranslate"><span class="pre">Schema</span></code></a><ul>
-<li><a class="reference internal" href="#pcapkit.protocols.schema.schema.Schema.__payload__"><code class="docutils literal notranslate"><span class="pre">Schema.__payload__</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.schema.schema.Schema.__additional__"><code class="docutils literal notranslate"><span class="pre">Schema.__additional__</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.schema.schema.Schema.__excluded__"><code class="docutils literal notranslate"><span class="pre">Schema.__excluded__</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.schema.schema.Schema.__new__"><code class="docutils literal notranslate"><span class="pre">Schema.__new__()</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.schema.schema.Schema.from_dict"><code class="docutils literal notranslate"><span class="pre">Schema.from_dict()</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.schema.schema.Schema.to_dict"><code class="docutils literal notranslate"><span class="pre">Schema.to_dict()</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.schema.schema.Schema.to_bytes"><code class="docutils literal notranslate"><span class="pre">Schema.to_bytes()</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.schema.schema.Schema.get_payload"><code class="docutils literal notranslate"><span class="pre">Schema.get_payload()</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.schema.schema.Schema.pack"><code class="docutils literal notranslate"><span class="pre">Schema.pack()</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.schema.schema.Schema.pre_pack"><code class="docutils literal notranslate"><span class="pre">Schema.pre_pack()</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.schema.schema.Schema.unpack"><code class="docutils literal notranslate"><span class="pre">Schema.unpack()</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.schema.schema.Schema.pre_unpack"><code class="docutils literal notranslate"><span class="pre">Schema.pre_unpack()</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.schema.schema.Schema.post_process"><code class="docutils literal notranslate"><span class="pre">Schema.post_process()</span></code></a></li>
-</ul>
-</li>
-</ul>
-</li>
-<li><a class="reference internal" href="#module-pcapkit.protocols.data.data">Data Model</a><ul>
-<li><a class="reference internal" href="#pcapkit.protocols.data.data.Data"><code class="docutils literal notranslate"><span class="pre">Data</span></code></a><ul>
-<li><a class="reference internal" href="#pcapkit.protocols.data.data.Data.__excluded__"><code class="docutils literal notranslate"><span class="pre">Data.__excluded__</span></code></a></li>
-</ul>
-</li>
-</ul>
-</li>
+<li><a class="reference internal" href="#protocol-registry">Protocol Registry</a></li>
+<li><a class="reference internal" href="#module-pcapkit.protocols.schema.schema">Header Schema</a></li>
+<li><a class="reference internal" href="#module-pcapkit.protocols.data.data">Data Model</a></li>
 </ul>
 </li>
 </ul>

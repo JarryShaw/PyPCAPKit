@@ -369,7 +369,7 @@ descriptive of the structure of protocol headers.</p>
 <span id="base-field"></span><h2>Base Field<a class="headerlink" href="#module-pcapkit.corekit.fields.field" title="Permalink to this heading">#</a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.corekit.fields.field._Field">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.corekit.fields.field.</span></span><span class="sig-name descname"><span class="pre">_Field</span></span><a class="reference internal" href="../../_modules/pcapkit/corekit/fields/field.html#_Field"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.fields.field._Field" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.corekit.fields.field.</span></span><span class="sig-name descname"><span class="pre">_Field</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/corekit/fields/field.html#_Field"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.fields.field._Field" title="Permalink to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Generic" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Generic</span></code></a>[<code class="xref py py-obj docutils literal notranslate"><span class="pre">_T</span></code>]</p>
 <p>Internal base class for protocol fields.</p>
 <div class="admonition important">
@@ -379,6 +379,14 @@ is variable-length (i.e., length unspecified) and thus
 <a class="reference internal" href="#pcapkit.corekit.fields.field._Field.pack" title="pcapkit.corekit.fields.field._Field.pack"><code class="xref py py-meth docutils literal notranslate"><span class="pre">pack()</span></code></a> should be considerate of the template format
 and the actual value provided for packing.</p>
 </div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>args</strong> (<em>Any</em>) – </p></li>
+<li><p><strong>kwargs</strong> (<em>Any</em>) – </p></li>
+</ul>
+</dd>
+</dl>
 <dl class="py property">
 <dt class="sig sig-object py" id="pcapkit.corekit.fields.field._Field.name">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a></em><a class="headerlink" href="#pcapkit.corekit.fields.field._Field.name" title="Permalink to this definition">#</a></dt>
@@ -2118,9 +2126,17 @@ instead of updating the current instance.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.corekit.fields.misc.NoValueField">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.corekit.fields.misc.</span></span><span class="sig-name descname"><span class="pre">NoValueField</span></span><a class="reference internal" href="../../_modules/pcapkit/corekit/fields/misc.html#NoValueField"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.fields.misc.NoValueField" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.corekit.fields.misc.</span></span><span class="sig-name descname"><span class="pre">NoValueField</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/corekit/fields/misc.html#NoValueField"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.fields.misc.NoValueField" title="Permalink to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#pcapkit.corekit.fields.field._Field" title="pcapkit.corekit.fields.field._Field"><code class="xref py py-class docutils literal notranslate"><span class="pre">_Field</span></code></a>[<code class="xref py py-obj docutils literal notranslate"><span class="pre">_TN</span></code>]</p>
 <p>Schema field for no value type (or <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a>).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>args</strong> (<em>Any</em>) – </p></li>
+<li><p><strong>kwargs</strong> (<em>Any</em>) – </p></li>
+</ul>
+</dd>
+</dl>
 <dl class="py property">
 <dt class="sig sig-object py" id="pcapkit.corekit.fields.misc.NoValueField.template">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">template</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a></em><a class="headerlink" href="#pcapkit.corekit.fields.misc.NoValueField.template" title="Permalink to this definition">#</a></dt>
@@ -2235,196 +2251,18 @@ instead of updating the current instance.</p>
             <ul>
 <li><a class="reference internal" href="#">Protocol Fields</a><ul>
 <li><a class="reference internal" href="#module-pcapkit.corekit.fields.field">Base Field</a><ul>
-<li><a class="reference internal" href="#pcapkit.corekit.fields.field._Field"><code class="docutils literal notranslate"><span class="pre">_Field</span></code></a><ul>
-<li><a class="reference internal" href="#pcapkit.corekit.fields.field._Field.name"><code class="docutils literal notranslate"><span class="pre">_Field.name</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.corekit.fields.field._Field.default"><code class="docutils literal notranslate"><span class="pre">_Field.default</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.corekit.fields.field._Field.template"><code class="docutils literal notranslate"><span class="pre">_Field.template</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.corekit.fields.field._Field.length"><code class="docutils literal notranslate"><span class="pre">_Field.length</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.corekit.fields.field._Field.optional"><code class="docutils literal notranslate"><span class="pre">_Field.optional</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.corekit.fields.field._Field.__call__"><code class="docutils literal notranslate"><span class="pre">_Field.__call__()</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.corekit.fields.field._Field.pre_process"><code class="docutils literal notranslate"><span class="pre">_Field.pre_process()</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.corekit.fields.field._Field.pack"><code class="docutils literal notranslate"><span class="pre">_Field.pack()</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.corekit.fields.field._Field.post_process"><code class="docutils literal notranslate"><span class="pre">_Field.post_process()</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.corekit.fields.field._Field.unpack"><code class="docutils literal notranslate"><span class="pre">_Field.unpack()</span></code></a></li>
+<li><a class="reference internal" href="#auxiliary">Auxiliary</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#pcapkit.corekit.fields.field.Field"><code class="docutils literal notranslate"><span class="pre">Field</span></code></a><ul>
-<li><a class="reference internal" href="#pcapkit.corekit.fields.field.Field.template"><code class="docutils literal notranslate"><span class="pre">Field.template</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.corekit.fields.field.Field.__call__"><code class="docutils literal notranslate"><span class="pre">Field.__call__()</span></code></a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#auxiliary">Auxiliary</a><ul>
-<li><a class="reference internal" href="#pcapkit.corekit.fields.field.NoValueType"><code class="docutils literal notranslate"><span class="pre">NoValueType</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.corekit.fields.field.NoValue"><code class="docutils literal notranslate"><span class="pre">NoValue</span></code></a></li>
-</ul>
-</li>
-</ul>
-</li>
-<li><a class="reference internal" href="#module-pcapkit.corekit.fields.numbers">Numerical Fields</a><ul>
-<li><a class="reference internal" href="#pcapkit.corekit.fields.numbers.NumberField"><code class="docutils literal notranslate"><span class="pre">NumberField</span></code></a><ul>
-<li><a class="reference internal" href="#pcapkit.corekit.fields.numbers.NumberField.bit_length"><code class="docutils literal notranslate"><span class="pre">NumberField.bit_length</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.corekit.fields.numbers.NumberField.__call__"><code class="docutils literal notranslate"><span class="pre">NumberField.__call__()</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.corekit.fields.numbers.NumberField.build_template"><code class="docutils literal notranslate"><span class="pre">NumberField.build_template()</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.corekit.fields.numbers.NumberField.pre_process"><code class="docutils literal notranslate"><span class="pre">NumberField.pre_process()</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.corekit.fields.numbers.NumberField.post_process"><code class="docutils literal notranslate"><span class="pre">NumberField.post_process()</span></code></a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#pcapkit.corekit.fields.numbers.Int32Field"><code class="docutils literal notranslate"><span class="pre">Int32Field</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.corekit.fields.numbers.UInt32Field"><code class="docutils literal notranslate"><span class="pre">UInt32Field</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.corekit.fields.numbers.Int16Field"><code class="docutils literal notranslate"><span class="pre">Int16Field</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.corekit.fields.numbers.UInt16Field"><code class="docutils literal notranslate"><span class="pre">UInt16Field</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.corekit.fields.numbers.Int64Field"><code class="docutils literal notranslate"><span class="pre">Int64Field</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.corekit.fields.numbers.UInt64Field"><code class="docutils literal notranslate"><span class="pre">UInt64Field</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.corekit.fields.numbers.Int8Field"><code class="docutils literal notranslate"><span class="pre">Int8Field</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.corekit.fields.numbers.UInt8Field"><code class="docutils literal notranslate"><span class="pre">UInt8Field</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.corekit.fields.numbers.EnumField"><code class="docutils literal notranslate"><span class="pre">EnumField</span></code></a><ul>
-<li><a class="reference internal" href="#pcapkit.corekit.fields.numbers.EnumField.post_process"><code class="docutils literal notranslate"><span class="pre">EnumField.post_process()</span></code></a></li>
-</ul>
-</li>
-</ul>
-</li>
-<li><a class="reference internal" href="#module-pcapkit.corekit.fields.strings">Text Fields</a><ul>
-<li><a class="reference internal" href="#pcapkit.corekit.fields.strings._TextField"><code class="docutils literal notranslate"><span class="pre">_TextField</span></code></a><ul>
-<li><a class="reference internal" href="#pcapkit.corekit.fields.strings._TextField.__call__"><code class="docutils literal notranslate"><span class="pre">_TextField.__call__()</span></code></a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#pcapkit.corekit.fields.strings.BytesField"><code class="docutils literal notranslate"><span class="pre">BytesField</span></code></a><ul>
-<li><a class="reference internal" href="#pcapkit.corekit.fields.strings.BytesField.pre_process"><code class="docutils literal notranslate"><span class="pre">BytesField.pre_process()</span></code></a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#pcapkit.corekit.fields.strings.StringField"><code class="docutils literal notranslate"><span class="pre">StringField</span></code></a><ul>
-<li><a class="reference internal" href="#pcapkit.corekit.fields.strings.StringField.pre_process"><code class="docutils literal notranslate"><span class="pre">StringField.pre_process()</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.corekit.fields.strings.StringField.post_process"><code class="docutils literal notranslate"><span class="pre">StringField.post_process()</span></code></a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#pcapkit.corekit.fields.strings.BitField"><code class="docutils literal notranslate"><span class="pre">BitField</span></code></a><ul>
-<li><a class="reference internal" href="#pcapkit.corekit.fields.strings.BitField.pre_process"><code class="docutils literal notranslate"><span class="pre">BitField.pre_process()</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.corekit.fields.strings.BitField.post_process"><code class="docutils literal notranslate"><span class="pre">BitField.post_process()</span></code></a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#pcapkit.corekit.fields.strings.PaddingField"><code class="docutils literal notranslate"><span class="pre">PaddingField</span></code></a></li>
-</ul>
-</li>
+<li><a class="reference internal" href="#module-pcapkit.corekit.fields.numbers">Numerical Fields</a></li>
+<li><a class="reference internal" href="#module-pcapkit.corekit.fields.strings">Text Fields</a></li>
 <li><a class="reference internal" href="#module-pcapkit.corekit.fields.ipaddress">IP Address Fields</a><ul>
-<li><a class="reference internal" href="#pcapkit.corekit.fields.ipaddress._IPField"><code class="docutils literal notranslate"><span class="pre">_IPField</span></code></a><ul>
-<li><a class="reference internal" href="#pcapkit.corekit.fields.ipaddress._IPField.version"><code class="docutils literal notranslate"><span class="pre">_IPField.version</span></code></a></li>
+<li><a class="reference internal" href="#ip-addresses">IP Addresses</a></li>
+<li><a class="reference internal" href="#ip-interface">IP Interface</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#ip-addresses">IP Addresses</a><ul>
-<li><a class="reference internal" href="#pcapkit.corekit.fields.ipaddress._IPAddressField"><code class="docutils literal notranslate"><span class="pre">_IPAddressField</span></code></a><ul>
-<li><a class="reference internal" href="#pcapkit.corekit.fields.ipaddress._IPAddressField.pre_process"><code class="docutils literal notranslate"><span class="pre">_IPAddressField.pre_process()</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.corekit.fields.ipaddress._IPAddressField.post_process"><code class="docutils literal notranslate"><span class="pre">_IPAddressField.post_process()</span></code></a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#pcapkit.corekit.fields.ipaddress.IPv4AddressField"><code class="docutils literal notranslate"><span class="pre">IPv4AddressField</span></code></a><ul>
-<li><a class="reference internal" href="#pcapkit.corekit.fields.ipaddress.IPv4AddressField.version"><code class="docutils literal notranslate"><span class="pre">IPv4AddressField.version</span></code></a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#pcapkit.corekit.fields.ipaddress.IPv6AddressField"><code class="docutils literal notranslate"><span class="pre">IPv6AddressField</span></code></a><ul>
-<li><a class="reference internal" href="#pcapkit.corekit.fields.ipaddress.IPv6AddressField.version"><code class="docutils literal notranslate"><span class="pre">IPv6AddressField.version</span></code></a></li>
-</ul>
-</li>
-</ul>
-</li>
-<li><a class="reference internal" href="#ip-interface">IP Interface</a><ul>
-<li><a class="reference internal" href="#pcapkit.corekit.fields.ipaddress._IPInterfaceField"><code class="docutils literal notranslate"><span class="pre">_IPInterfaceField</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.corekit.fields.ipaddress.IPv4InterfaceField"><code class="docutils literal notranslate"><span class="pre">IPv4InterfaceField</span></code></a><ul>
-<li><a class="reference internal" href="#pcapkit.corekit.fields.ipaddress.IPv4InterfaceField.version"><code class="docutils literal notranslate"><span class="pre">IPv4InterfaceField.version</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.corekit.fields.ipaddress.IPv4InterfaceField.pre_process"><code class="docutils literal notranslate"><span class="pre">IPv4InterfaceField.pre_process()</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.corekit.fields.ipaddress.IPv4InterfaceField.post_process"><code class="docutils literal notranslate"><span class="pre">IPv4InterfaceField.post_process()</span></code></a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#pcapkit.corekit.fields.ipaddress.IPv6InterfaceField"><code class="docutils literal notranslate"><span class="pre">IPv6InterfaceField</span></code></a><ul>
-<li><a class="reference internal" href="#pcapkit.corekit.fields.ipaddress.IPv6InterfaceField.version"><code class="docutils literal notranslate"><span class="pre">IPv6InterfaceField.version</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.corekit.fields.ipaddress.IPv6InterfaceField.pre_process"><code class="docutils literal notranslate"><span class="pre">IPv6InterfaceField.pre_process()</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.corekit.fields.ipaddress.IPv6InterfaceField.post_process"><code class="docutils literal notranslate"><span class="pre">IPv6InterfaceField.post_process()</span></code></a></li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><a class="reference internal" href="#module-pcapkit.corekit.fields.collections">Container Fields</a><ul>
-<li><a class="reference internal" href="#pcapkit.corekit.fields.collections.ListField"><code class="docutils literal notranslate"><span class="pre">ListField</span></code></a><ul>
-<li><a class="reference internal" href="#pcapkit.corekit.fields.collections.ListField.length"><code class="docutils literal notranslate"><span class="pre">ListField.length</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.corekit.fields.collections.ListField.optional"><code class="docutils literal notranslate"><span class="pre">ListField.optional</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.corekit.fields.collections.ListField.__call__"><code class="docutils literal notranslate"><span class="pre">ListField.__call__()</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.corekit.fields.collections.ListField.pack"><code class="docutils literal notranslate"><span class="pre">ListField.pack()</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.corekit.fields.collections.ListField.unpack"><code class="docutils literal notranslate"><span class="pre">ListField.unpack()</span></code></a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#pcapkit.corekit.fields.collections.OptionField"><code class="docutils literal notranslate"><span class="pre">OptionField</span></code></a><ul>
-<li><a class="reference internal" href="#pcapkit.corekit.fields.collections.OptionField.base_schema"><code class="docutils literal notranslate"><span class="pre">OptionField.base_schema</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.corekit.fields.collections.OptionField.type_name"><code class="docutils literal notranslate"><span class="pre">OptionField.type_name</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.corekit.fields.collections.OptionField.registry"><code class="docutils literal notranslate"><span class="pre">OptionField.registry</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.corekit.fields.collections.OptionField.eool"><code class="docutils literal notranslate"><span class="pre">OptionField.eool</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.corekit.fields.collections.OptionField.option_padding"><code class="docutils literal notranslate"><span class="pre">OptionField.option_padding</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.corekit.fields.collections.OptionField.unpack"><code class="docutils literal notranslate"><span class="pre">OptionField.unpack()</span></code></a></li>
-</ul>
-</li>
-</ul>
-</li>
-<li><a class="reference internal" href="#module-pcapkit.corekit.fields.misc">Miscellaneous Fields</a><ul>
-<li><a class="reference internal" href="#pcapkit.corekit.fields.misc.ConditionalField"><code class="docutils literal notranslate"><span class="pre">ConditionalField</span></code></a><ul>
-<li><a class="reference internal" href="#pcapkit.corekit.fields.misc.ConditionalField.name"><code class="docutils literal notranslate"><span class="pre">ConditionalField.name</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.corekit.fields.misc.ConditionalField.default"><code class="docutils literal notranslate"><span class="pre">ConditionalField.default</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.corekit.fields.misc.ConditionalField.template"><code class="docutils literal notranslate"><span class="pre">ConditionalField.template</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.corekit.fields.misc.ConditionalField.length"><code class="docutils literal notranslate"><span class="pre">ConditionalField.length</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.corekit.fields.misc.ConditionalField.optional"><code class="docutils literal notranslate"><span class="pre">ConditionalField.optional</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.corekit.fields.misc.ConditionalField.field"><code class="docutils literal notranslate"><span class="pre">ConditionalField.field</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.corekit.fields.misc.ConditionalField.__call__"><code class="docutils literal notranslate"><span class="pre">ConditionalField.__call__()</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.corekit.fields.misc.ConditionalField.pre_process"><code class="docutils literal notranslate"><span class="pre">ConditionalField.pre_process()</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.corekit.fields.misc.ConditionalField.pack"><code class="docutils literal notranslate"><span class="pre">ConditionalField.pack()</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.corekit.fields.misc.ConditionalField.post_process"><code class="docutils literal notranslate"><span class="pre">ConditionalField.post_process()</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.corekit.fields.misc.ConditionalField.unpack"><code class="docutils literal notranslate"><span class="pre">ConditionalField.unpack()</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.corekit.fields.misc.ConditionalField.test"><code class="docutils literal notranslate"><span class="pre">ConditionalField.test()</span></code></a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#pcapkit.corekit.fields.misc.PayloadField"><code class="docutils literal notranslate"><span class="pre">PayloadField</span></code></a><ul>
-<li><a class="reference internal" href="#pcapkit.corekit.fields.misc.PayloadField.template"><code class="docutils literal notranslate"><span class="pre">PayloadField.template</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.corekit.fields.misc.PayloadField.length"><code class="docutils literal notranslate"><span class="pre">PayloadField.length</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.corekit.fields.misc.PayloadField.optional"><code class="docutils literal notranslate"><span class="pre">PayloadField.optional</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.corekit.fields.misc.PayloadField.protocol"><code class="docutils literal notranslate"><span class="pre">PayloadField.protocol</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.corekit.fields.misc.PayloadField.__call__"><code class="docutils literal notranslate"><span class="pre">PayloadField.__call__()</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.corekit.fields.misc.PayloadField.pack"><code class="docutils literal notranslate"><span class="pre">PayloadField.pack()</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.corekit.fields.misc.PayloadField.unpack"><code class="docutils literal notranslate"><span class="pre">PayloadField.unpack()</span></code></a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#pcapkit.corekit.fields.misc.SwitchField"><code class="docutils literal notranslate"><span class="pre">SwitchField</span></code></a><ul>
-<li><a class="reference internal" href="#pcapkit.corekit.fields.misc.SwitchField.name"><code class="docutils literal notranslate"><span class="pre">SwitchField.name</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.corekit.fields.misc.SwitchField.default"><code class="docutils literal notranslate"><span class="pre">SwitchField.default</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.corekit.fields.misc.SwitchField.template"><code class="docutils literal notranslate"><span class="pre">SwitchField.template</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.corekit.fields.misc.SwitchField.length"><code class="docutils literal notranslate"><span class="pre">SwitchField.length</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.corekit.fields.misc.SwitchField.optional"><code class="docutils literal notranslate"><span class="pre">SwitchField.optional</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.corekit.fields.misc.SwitchField.field"><code class="docutils literal notranslate"><span class="pre">SwitchField.field</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.corekit.fields.misc.SwitchField.__call__"><code class="docutils literal notranslate"><span class="pre">SwitchField.__call__()</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.corekit.fields.misc.SwitchField.pre_process"><code class="docutils literal notranslate"><span class="pre">SwitchField.pre_process()</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.corekit.fields.misc.SwitchField.pack"><code class="docutils literal notranslate"><span class="pre">SwitchField.pack()</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.corekit.fields.misc.SwitchField.post_process"><code class="docutils literal notranslate"><span class="pre">SwitchField.post_process()</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.corekit.fields.misc.SwitchField.unpack"><code class="docutils literal notranslate"><span class="pre">SwitchField.unpack()</span></code></a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#pcapkit.corekit.fields.misc.ForwardMatchField"><code class="docutils literal notranslate"><span class="pre">ForwardMatchField</span></code></a><ul>
-<li><a class="reference internal" href="#pcapkit.corekit.fields.misc.ForwardMatchField.name"><code class="docutils literal notranslate"><span class="pre">ForwardMatchField.name</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.corekit.fields.misc.ForwardMatchField.default"><code class="docutils literal notranslate"><span class="pre">ForwardMatchField.default</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.corekit.fields.misc.ForwardMatchField.template"><code class="docutils literal notranslate"><span class="pre">ForwardMatchField.template</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.corekit.fields.misc.ForwardMatchField.length"><code class="docutils literal notranslate"><span class="pre">ForwardMatchField.length</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.corekit.fields.misc.ForwardMatchField.optional"><code class="docutils literal notranslate"><span class="pre">ForwardMatchField.optional</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.corekit.fields.misc.ForwardMatchField.field"><code class="docutils literal notranslate"><span class="pre">ForwardMatchField.field</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.corekit.fields.misc.ForwardMatchField.__call__"><code class="docutils literal notranslate"><span class="pre">ForwardMatchField.__call__()</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.corekit.fields.misc.ForwardMatchField.pack"><code class="docutils literal notranslate"><span class="pre">ForwardMatchField.pack()</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.corekit.fields.misc.ForwardMatchField.unpack"><code class="docutils literal notranslate"><span class="pre">ForwardMatchField.unpack()</span></code></a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#pcapkit.corekit.fields.misc.NoValueField"><code class="docutils literal notranslate"><span class="pre">NoValueField</span></code></a><ul>
-<li><a class="reference internal" href="#pcapkit.corekit.fields.misc.NoValueField.template"><code class="docutils literal notranslate"><span class="pre">NoValueField.template</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.corekit.fields.misc.NoValueField.length"><code class="docutils literal notranslate"><span class="pre">NoValueField.length</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.corekit.fields.misc.NoValueField.pack"><code class="docutils literal notranslate"><span class="pre">NoValueField.pack()</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.corekit.fields.misc.NoValueField.unpack"><code class="docutils literal notranslate"><span class="pre">NoValueField.unpack()</span></code></a></li>
-</ul>
-</li>
-</ul>
-</li>
+<li><a class="reference internal" href="#module-pcapkit.corekit.fields.collections">Container Fields</a></li>
+<li><a class="reference internal" href="#module-pcapkit.corekit.fields.misc">Miscellaneous Fields</a></li>
 </ul>
 </li>
 </ul>

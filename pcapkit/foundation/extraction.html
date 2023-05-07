@@ -152,7 +152,7 @@
           <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
         </button>
       </div>
-      <label class="toc-overlay-icon toc-header-icon" for="__toc">
+      <label class="toc-overlay-icon toc-header-icon no-toc" for="__toc">
         <div class="visually-hidden">Toggle table of contents sidebar</div>
         <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
       </label>
@@ -355,7 +355,7 @@
               <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
             </button>
           </div>
-          <label class="toc-overlay-icon toc-content-icon" for="__toc">
+          <label class="toc-overlay-icon toc-content-icon no-toc" for="__toc">
             <div class="visually-hidden">Toggle table of contents sidebar</div>
             <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
           </label>
@@ -811,63 +811,8 @@ until the EOF reached; then it calls <code class="xref py py-meth docutils liter
         
       </footer>
     </div>
-    <aside class="toc-drawer">
+    <aside class="toc-drawer no-toc">
       
-      
-      <div class="toc-sticky toc-scroll">
-        <div class="toc-title-container">
-          <span class="toc-title">
-            On this page
-          </span>
-        </div>
-        <div class="toc-tree-container">
-          <div class="toc-tree">
-            <ul>
-<li><a class="reference internal" href="#">Extractor for PCAP Files</a><ul>
-<li><a class="reference internal" href="#pcapkit.foundation.extraction.Extractor"><code class="docutils literal notranslate"><span class="pre">Extractor</span></code></a><ul>
-<li><a class="reference internal" href="#pcapkit.foundation.extraction.Extractor.length"><code class="docutils literal notranslate"><span class="pre">Extractor.length</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.foundation.extraction.Extractor.format"><code class="docutils literal notranslate"><span class="pre">Extractor.format</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.foundation.extraction.Extractor.input"><code class="docutils literal notranslate"><span class="pre">Extractor.input</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.foundation.extraction.Extractor.output"><code class="docutils literal notranslate"><span class="pre">Extractor.output</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.foundation.extraction.Extractor.frame"><code class="docutils literal notranslate"><span class="pre">Extractor.frame</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.foundation.extraction.Extractor.reassembly"><code class="docutils literal notranslate"><span class="pre">Extractor.reassembly</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.foundation.extraction.Extractor.trace"><code class="docutils literal notranslate"><span class="pre">Extractor.trace</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.foundation.extraction.Extractor.engine"><code class="docutils literal notranslate"><span class="pre">Extractor.engine</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.foundation.extraction.Extractor.register_dumper"><code class="docutils literal notranslate"><span class="pre">Extractor.register_dumper()</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.foundation.extraction.Extractor.register_engine"><code class="docutils literal notranslate"><span class="pre">Extractor.register_engine()</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.foundation.extraction.Extractor.run"><code class="docutils literal notranslate"><span class="pre">Extractor.run()</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.foundation.extraction.Extractor.record_header"><code class="docutils literal notranslate"><span class="pre">Extractor.record_header()</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.foundation.extraction.Extractor.record_frames"><code class="docutils literal notranslate"><span class="pre">Extractor.record_frames()</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.foundation.extraction.Extractor._frnum"><code class="docutils literal notranslate"><span class="pre">Extractor._frnum</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.foundation.extraction.Extractor._reasm"><code class="docutils literal notranslate"><span class="pre">Extractor._reasm</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.foundation.extraction.Extractor._trace"><code class="docutils literal notranslate"><span class="pre">Extractor._trace</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.foundation.extraction.Extractor._ifile"><code class="docutils literal notranslate"><span class="pre">Extractor._ifile</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.foundation.extraction.Extractor._ofile"><code class="docutils literal notranslate"><span class="pre">Extractor._ofile</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.foundation.extraction.Extractor._exnam"><code class="docutils literal notranslate"><span class="pre">Extractor._exnam</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.foundation.extraction.Extractor._exeng"><code class="docutils literal notranslate"><span class="pre">Extractor._exeng</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.foundation.extraction.Extractor._flag_a"><code class="docutils literal notranslate"><span class="pre">Extractor._flag_a</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.foundation.extraction.Extractor._flag_d"><code class="docutils literal notranslate"><span class="pre">Extractor._flag_d</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.foundation.extraction.Extractor._flag_e"><code class="docutils literal notranslate"><span class="pre">Extractor._flag_e</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.foundation.extraction.Extractor._flag_q"><code class="docutils literal notranslate"><span class="pre">Extractor._flag_q</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.foundation.extraction.Extractor._flag_t"><code class="docutils literal notranslate"><span class="pre">Extractor._flag_t</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.foundation.extraction.Extractor._flag_v"><code class="docutils literal notranslate"><span class="pre">Extractor._flag_v</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.foundation.extraction.Extractor._ipv4"><code class="docutils literal notranslate"><span class="pre">Extractor._ipv4</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.foundation.extraction.Extractor._ipv6"><code class="docutils literal notranslate"><span class="pre">Extractor._ipv6</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.foundation.extraction.Extractor._tcp"><code class="docutils literal notranslate"><span class="pre">Extractor._tcp</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.foundation.extraction.Extractor.__output__"><code class="docutils literal notranslate"><span class="pre">Extractor.__output__</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.foundation.extraction.Extractor.__engine__"><code class="docutils literal notranslate"><span class="pre">Extractor.__engine__</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.foundation.extraction.Extractor.__iter__"><code class="docutils literal notranslate"><span class="pre">Extractor.__iter__()</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.foundation.extraction.Extractor.__next__"><code class="docutils literal notranslate"><span class="pre">Extractor.__next__()</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.foundation.extraction.Extractor.__call__"><code class="docutils literal notranslate"><span class="pre">Extractor.__call__()</span></code></a></li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-
-          </div>
-        </div>
-      </div>
       
       
     </aside>

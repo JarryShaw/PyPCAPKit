@@ -1024,67 +1024,9 @@ is as following:</p>
           <div class="toc-tree">
             <ul>
 <li><a class="reference internal" href="#">TCP Datagram Reassembly</a><ul>
-<li><a class="reference internal" href="#pcapkit.foundation.reassembly.tcp.TCP"><code class="docutils literal notranslate"><span class="pre">TCP</span></code></a><ul>
-<li><a class="reference internal" href="#pcapkit.foundation.reassembly.tcp.TCP.name"><code class="docutils literal notranslate"><span class="pre">TCP.name</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.foundation.reassembly.tcp.TCP.protocol"><code class="docutils literal notranslate"><span class="pre">TCP.protocol</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.foundation.reassembly.tcp.TCP.reassembly"><code class="docutils literal notranslate"><span class="pre">TCP.reassembly()</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.foundation.reassembly.tcp.TCP.submit"><code class="docutils literal notranslate"><span class="pre">TCP.submit()</span></code></a></li>
-</ul>
-</li>
 <li><a class="reference internal" href="#algorithm">Algorithm</a></li>
 <li><a class="reference internal" href="#terminology">Terminology</a></li>
-<li><a class="reference internal" href="#module-pcapkit.foundation.reassembly.data.tcp">Data Models</a><ul>
-<li><a class="reference internal" href="#pcapkit.foundation.reassembly.data.tcp.Packet"><code class="docutils literal notranslate"><span class="pre">Packet</span></code></a><ul>
-<li><a class="reference internal" href="#pcapkit.foundation.reassembly.data.tcp.Packet.bufid"><code class="docutils literal notranslate"><span class="pre">Packet.bufid</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.foundation.reassembly.data.tcp.Packet.dsn"><code class="docutils literal notranslate"><span class="pre">Packet.dsn</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.foundation.reassembly.data.tcp.Packet.ack"><code class="docutils literal notranslate"><span class="pre">Packet.ack</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.foundation.reassembly.data.tcp.Packet.num"><code class="docutils literal notranslate"><span class="pre">Packet.num</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.foundation.reassembly.data.tcp.Packet.syn"><code class="docutils literal notranslate"><span class="pre">Packet.syn</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.foundation.reassembly.data.tcp.Packet.fin"><code class="docutils literal notranslate"><span class="pre">Packet.fin</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.foundation.reassembly.data.tcp.Packet.rst"><code class="docutils literal notranslate"><span class="pre">Packet.rst</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.foundation.reassembly.data.tcp.Packet.len"><code class="docutils literal notranslate"><span class="pre">Packet.len</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.foundation.reassembly.data.tcp.Packet.first"><code class="docutils literal notranslate"><span class="pre">Packet.first</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.foundation.reassembly.data.tcp.Packet.last"><code class="docutils literal notranslate"><span class="pre">Packet.last</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.foundation.reassembly.data.tcp.Packet.header"><code class="docutils literal notranslate"><span class="pre">Packet.header</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.foundation.reassembly.data.tcp.Packet.payload"><code class="docutils literal notranslate"><span class="pre">Packet.payload</span></code></a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#pcapkit.foundation.reassembly.data.tcp.DatagramID"><code class="docutils literal notranslate"><span class="pre">DatagramID</span></code></a><ul>
-<li><a class="reference internal" href="#pcapkit.foundation.reassembly.data.tcp.DatagramID.src"><code class="docutils literal notranslate"><span class="pre">DatagramID.src</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.foundation.reassembly.data.tcp.DatagramID.dst"><code class="docutils literal notranslate"><span class="pre">DatagramID.dst</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.foundation.reassembly.data.tcp.DatagramID.ack"><code class="docutils literal notranslate"><span class="pre">DatagramID.ack</span></code></a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#pcapkit.foundation.reassembly.data.tcp.Datagram"><code class="docutils literal notranslate"><span class="pre">Datagram</span></code></a><ul>
-<li><a class="reference internal" href="#pcapkit.foundation.reassembly.data.tcp.Datagram.completed"><code class="docutils literal notranslate"><span class="pre">Datagram.completed</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.foundation.reassembly.data.tcp.Datagram.id"><code class="docutils literal notranslate"><span class="pre">Datagram.id</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.foundation.reassembly.data.tcp.Datagram.index"><code class="docutils literal notranslate"><span class="pre">Datagram.index</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.foundation.reassembly.data.tcp.Datagram.header"><code class="docutils literal notranslate"><span class="pre">Datagram.header</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.foundation.reassembly.data.tcp.Datagram.payload"><code class="docutils literal notranslate"><span class="pre">Datagram.payload</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.foundation.reassembly.data.tcp.Datagram.packet"><code class="docutils literal notranslate"><span class="pre">Datagram.packet</span></code></a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#pcapkit.foundation.reassembly.data.tcp.HoleDiscriptor"><code class="docutils literal notranslate"><span class="pre">HoleDiscriptor</span></code></a><ul>
-<li><a class="reference internal" href="#pcapkit.foundation.reassembly.data.tcp.HoleDiscriptor.first"><code class="docutils literal notranslate"><span class="pre">HoleDiscriptor.first</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.foundation.reassembly.data.tcp.HoleDiscriptor.last"><code class="docutils literal notranslate"><span class="pre">HoleDiscriptor.last</span></code></a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#pcapkit.foundation.reassembly.data.tcp.Fragment"><code class="docutils literal notranslate"><span class="pre">Fragment</span></code></a><ul>
-<li><a class="reference internal" href="#pcapkit.foundation.reassembly.data.tcp.Fragment.ind"><code class="docutils literal notranslate"><span class="pre">Fragment.ind</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.foundation.reassembly.data.tcp.Fragment.isn"><code class="docutils literal notranslate"><span class="pre">Fragment.isn</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.foundation.reassembly.data.tcp.Fragment.len"><code class="docutils literal notranslate"><span class="pre">Fragment.len</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.foundation.reassembly.data.tcp.Fragment.raw"><code class="docutils literal notranslate"><span class="pre">Fragment.raw</span></code></a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#pcapkit.foundation.reassembly.data.tcp.BufferID"><code class="docutils literal notranslate"><span class="pre">BufferID</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.foundation.reassembly.data.tcp.Buffer"><code class="docutils literal notranslate"><span class="pre">Buffer</span></code></a><ul>
-<li><a class="reference internal" href="#pcapkit.foundation.reassembly.data.tcp.Buffer.hdl"><code class="docutils literal notranslate"><span class="pre">Buffer.hdl</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.foundation.reassembly.data.tcp.Buffer.hdr"><code class="docutils literal notranslate"><span class="pre">Buffer.hdr</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.foundation.reassembly.data.tcp.Buffer.ack"><code class="docutils literal notranslate"><span class="pre">Buffer.ack</span></code></a></li>
-</ul>
-</li>
-</ul>
-</li>
+<li><a class="reference internal" href="#module-pcapkit.foundation.reassembly.data.tcp">Data Models</a></li>
 </ul>
 </li>
 </ul>

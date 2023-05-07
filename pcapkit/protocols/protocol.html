@@ -927,9 +927,9 @@ The values should be a tuple representing the module name and class name.</p>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>file</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Union" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.IO" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">IO</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a>], <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a>]) – Source packet stream.</p></li>
 <li><p><strong>length</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>]) – Length of packet data.</p></li>
-<li><p><strong>_layer</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a>) – Parse packet until <code class="docutils literal notranslate"><span class="pre">_layer</span></code>
+<li><p><strong>_layer</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>) – Parse packet until <code class="docutils literal notranslate"><span class="pre">_layer</span></code>
 (<code class="xref py py-attr docutils literal notranslate"><span class="pre">self._exlayer</span></code>).</p></li>
-<li><p><strong>_protocol</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em> | </em><a class="reference internal" href="#pcapkit.protocols.protocol.Protocol" title="pcapkit.protocols.protocol.Protocol"><em>Protocol</em></a><em> | </em><a class="reference internal" href="../const/l2tp.html#pcapkit.const.l2tp.type.Type" title="pcapkit.const.l2tp.type.Type"><em>Type</em></a><em>[</em><a class="reference internal" href="#pcapkit.protocols.protocol.Protocol" title="pcapkit.protocols.protocol.Protocol"><em>Protocol</em></a><em>]</em>) – Parse packet until <code class="docutils literal notranslate"><span class="pre">_protocol</span></code>
+<li><p><strong>_protocol</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span> <span class="pre">|</span> <span class="pre">Protocol</span> <span class="pre">|</span> <span class="pre">Type[Protocol]</span></code>) – Parse packet until <code class="docutils literal notranslate"><span class="pre">_protocol</span></code>
 (<code class="xref py py-attr docutils literal notranslate"><span class="pre">self._exproto</span></code>).</p></li>
 <li><p><strong>**kwargs</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>) – Arbitrary keyword arguments.</p></li>
 </ul>
@@ -1192,61 +1192,7 @@ to handle the <code class="docutils literal notranslate"><span class="pre">name<
           <div class="toc-tree">
             <ul>
 <li><a class="reference internal" href="#">Root Protocol</a><ul>
-<li><a class="reference internal" href="#pcapkit.protocols.protocol.Protocol"><code class="docutils literal notranslate"><span class="pre">Protocol</span></code></a><ul>
-<li><a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.name"><code class="docutils literal notranslate"><span class="pre">Protocol.name</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.alias"><code class="docutils literal notranslate"><span class="pre">Protocol.alias</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.info_name"><code class="docutils literal notranslate"><span class="pre">Protocol.info_name</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.info"><code class="docutils literal notranslate"><span class="pre">Protocol.info</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.data"><code class="docutils literal notranslate"><span class="pre">Protocol.data</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.length"><code class="docutils literal notranslate"><span class="pre">Protocol.length</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.payload"><code class="docutils literal notranslate"><span class="pre">Protocol.payload</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.protocol"><code class="docutils literal notranslate"><span class="pre">Protocol.protocol</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.protochain"><code class="docutils literal notranslate"><span class="pre">Protocol.protochain</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.packet"><code class="docutils literal notranslate"><span class="pre">Protocol.packet</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.schema"><code class="docutils literal notranslate"><span class="pre">Protocol.schema</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.id"><code class="docutils literal notranslate"><span class="pre">Protocol.id()</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.register"><code class="docutils literal notranslate"><span class="pre">Protocol.register()</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.analyze"><code class="docutils literal notranslate"><span class="pre">Protocol.analyze()</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.from_schema"><code class="docutils literal notranslate"><span class="pre">Protocol.from_schema()</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.from_data"><code class="docutils literal notranslate"><span class="pre">Protocol.from_data()</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.read"><code class="docutils literal notranslate"><span class="pre">Protocol.read()</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.make"><code class="docutils literal notranslate"><span class="pre">Protocol.make()</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.unpack"><code class="docutils literal notranslate"><span class="pre">Protocol.unpack()</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.pack"><code class="docutils literal notranslate"><span class="pre">Protocol.pack()</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.decode"><code class="docutils literal notranslate"><span class="pre">Protocol.decode()</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.unquote"><code class="docutils literal notranslate"><span class="pre">Protocol.unquote()</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.expand_comp"><code class="docutils literal notranslate"><span class="pre">Protocol.expand_comp()</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.protocol.Protocol._read_packet"><code class="docutils literal notranslate"><span class="pre">Protocol._read_packet()</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.protocol.Protocol._get_payload"><code class="docutils literal notranslate"><span class="pre">Protocol._get_payload()</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.protocol.Protocol._make_data"><code class="docutils literal notranslate"><span class="pre">Protocol._make_data()</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.protocol.Protocol._make_index"><code class="docutils literal notranslate"><span class="pre">Protocol._make_index()</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.protocol.Protocol._make_payload"><code class="docutils literal notranslate"><span class="pre">Protocol._make_payload()</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.protocol.Protocol._decode_next_layer"><code class="docutils literal notranslate"><span class="pre">Protocol._decode_next_layer()</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.protocol.Protocol._import_next_layer"><code class="docutils literal notranslate"><span class="pre">Protocol._import_next_layer()</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.__layer__"><code class="docutils literal notranslate"><span class="pre">Protocol.__layer__</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.__proto__"><code class="docutils literal notranslate"><span class="pre">Protocol.__proto__</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.__data__"><code class="docutils literal notranslate"><span class="pre">Protocol.__data__</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.protocol.Protocol._info"><code class="docutils literal notranslate"><span class="pre">Protocol._info</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.__schema__"><code class="docutils literal notranslate"><span class="pre">Protocol.__schema__</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.__header__"><code class="docutils literal notranslate"><span class="pre">Protocol.__header__</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.__init__"><code class="docutils literal notranslate"><span class="pre">Protocol.__init__()</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.__post_init__"><code class="docutils literal notranslate"><span class="pre">Protocol.__post_init__()</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.__init_subclass__"><code class="docutils literal notranslate"><span class="pre">Protocol.__init_subclass__()</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.__repr__"><code class="docutils literal notranslate"><span class="pre">Protocol.__repr__()</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.__str__"><code class="docutils literal notranslate"><span class="pre">Protocol.__str__()</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.__getitem__"><code class="docutils literal notranslate"><span class="pre">Protocol.__getitem__()</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.__contains__"><code class="docutils literal notranslate"><span class="pre">Protocol.__contains__()</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.__index__"><code class="docutils literal notranslate"><span class="pre">Protocol.__index__()</span></code></a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#data-models">Data Models</a><ul>
-<li><a class="reference internal" href="#pcapkit.protocols.data.protocol.Packet"><code class="docutils literal notranslate"><span class="pre">Packet</span></code></a><ul>
-<li><a class="reference internal" href="#pcapkit.protocols.data.protocol.Packet.header"><code class="docutils literal notranslate"><span class="pre">Packet.header</span></code></a></li>
-<li><a class="reference internal" href="#pcapkit.protocols.data.protocol.Packet.payload"><code class="docutils literal notranslate"><span class="pre">Packet.payload</span></code></a></li>
-</ul>
-</li>
-</ul>
-</li>
+<li><a class="reference internal" href="#data-models">Data Models</a></li>
 </ul>
 </li>
 </ul>
