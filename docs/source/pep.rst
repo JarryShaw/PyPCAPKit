@@ -62,3 +62,11 @@ Implementation for support of new engines would include adding corresponding
 handler methods and code blocks into :class:`pcapkit.foundation.extraction.Extractor`
 (see support for Scapy, DPKT, and/or PyShark), as well as, the unified auxiliary
 tools located in :mod:`pcapkit.toolkit`.
+
+Test Cases
+----------
+
+PyPCAPKit still does not have a systematic testing suite to be bundled with it.
+The only test cases I have worked out are those in the ``/tests`` folder - mostly
+functional tests. As PyPCAPKit is growing bigger and bigger, a comprehensive test
+suite is coming much more of demand for a more reliable development process.
