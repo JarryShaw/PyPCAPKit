@@ -10,7 +10,7 @@ from pcapkit.corekit.fields.ipaddress import IPv4AddressField
 from pcapkit.corekit.fields.misc import PayloadField, SchemaField, SwitchField
 from pcapkit.corekit.fields.numbers import EnumField, UInt8Field, UInt16Field, UInt32Field
 from pcapkit.corekit.fields.strings import BytesField, PaddingField
-from pcapkit.protocols.schema.schema import Schema
+from pcapkit.protocols.schema.schema import Schema, schema_final
 
 __all__ = ['OSPF', 'CrytographicAuthentication']
 
@@ -39,6 +39,7 @@ def ospf_auth_data_selector(pkt: 'dict[str, Any]') -> 'Field':
     return BytesField(length=8)
 
 
+@schema_final
 class CrytographicAuthentication(Schema):
     """Header schema for OSPF cryptographic authentication."""
 
@@ -55,6 +56,7 @@ class CrytographicAuthentication(Schema):
         def __init__(self, key_id: 'int', len: 'int', seq: 'int') -> 'None': ...
 
 
+@schema_final
 class OSPF(Schema):
     """Header schema for OSPF packet."""
 

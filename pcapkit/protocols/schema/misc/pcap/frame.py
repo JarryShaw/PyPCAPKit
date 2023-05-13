@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING
 
 from pcapkit.corekit.fields.misc import PayloadField
 from pcapkit.corekit.fields.numbers import UInt32Field
-from pcapkit.protocols.schema.schema import Schema
+from pcapkit.protocols.schema.schema import Schema, schema_final
 
 __all__ = ['Frame']
 
@@ -29,6 +29,7 @@ def byteorder_callback(field: 'Field', packet: 'dict[str, Any]') -> 'None':
     field._byteorder = packet.get('byteorder', sys.byteorder)
 
 
+@schema_final
 class Frame(Schema):
     """Frame header of PCAP file format."""
 

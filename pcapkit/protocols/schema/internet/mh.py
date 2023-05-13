@@ -9,7 +9,7 @@ from pcapkit.const.reg.transtype import TransType as Enum_TransType
 from pcapkit.corekit.fields.misc import PayloadField
 from pcapkit.corekit.fields.numbers import EnumField, UInt8Field
 from pcapkit.corekit.fields.strings import BytesField, PaddingField
-from pcapkit.protocols.schema.schema import Schema
+from pcapkit.protocols.schema.schema import Schema, schema_final
 
 __all__ = ['MH']
 
@@ -17,6 +17,7 @@ if TYPE_CHECKING:
     from pcapkit.protocols.protocol import Protocol
 
 
+@schema_final
 class MH(Schema):
     """Header schema for MH packets."""
 

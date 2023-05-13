@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING
 from pcapkit.const.reg.linktype import LinkType as Enum_LinkType
 from pcapkit.corekit.fields.numbers import EnumField, Int32Field, UInt16Field, UInt32Field
 from pcapkit.corekit.fields.strings import BytesField
-from pcapkit.protocols.schema.schema import Schema
+from pcapkit.protocols.schema.schema import Schema, schema_final
 from pcapkit.utilities.exceptions import ProtocolError
 
 __all__ = ['Header']
@@ -39,6 +39,7 @@ def magic_number_callback(field: 'NumberField', packet: 'dict[str, Any]') -> 'No
         raise ProtocolError('invalid magic number')
 
 
+@schema_final
 class Header(Schema):
     """Global header of PCAP file."""
 

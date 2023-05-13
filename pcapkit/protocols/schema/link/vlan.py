@@ -9,7 +9,7 @@ from pcapkit.const.vlan.priority_level import PriorityLevel as Enum_PriorityLeve
 from pcapkit.corekit.fields.misc import PayloadField
 from pcapkit.corekit.fields.numbers import EnumField, UInt8Field, UInt16Field
 from pcapkit.corekit.fields.strings import BitField
-from pcapkit.protocols.schema.schema import Schema
+from pcapkit.protocols.schema.schema import Schema, schema_final
 from pcapkit.utilities.logging import SPHINX_TYPE_CHECKING
 
 __all__ = ['VLAN', 'TCI']
@@ -31,20 +31,22 @@ if SPHINX_TYPE_CHECKING:
         vid: int
 
 
-class TCI(Schema[int]):
+@schema_final
+class TCI(Schema):
     """Header schema for 802.1Q Customer VLAN Tag Type tag control information."""
 
     #: Priority code point.
     pcp: 'Enum_PriorityLevel' = EnumField(length=1, bit_length=3, namespace=Enum_PriorityLevel)
     #: Drop eligible indicator.
-    dei: 'bool' = UInt8Field(bit_length=1)
+    dei: 'int' = UInt8Field(bit_length=1)
     #: VLAN identifier.
     vid: 'int' = UInt16Field(bit_length=12)
 
     if TYPE_CHECKING:
-        def __init__(self, pcp: 'Enum_PriorityLevel', dei: 'bool', vid: 'int') -> 'None': ...
+        def __init__(self, pcp: 'Enum_PriorityLevel', dei: 'int', vid: 'int') -> 'None': ...
 
 
+@schema_final
 class VLAN(Schema):
     """Header schema for 802.1Q Customer VLAN Tag Type packet."""
 

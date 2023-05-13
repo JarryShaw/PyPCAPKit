@@ -12,7 +12,7 @@ from pcapkit.corekit.fields.ipaddress import IPv6AddressField
 from pcapkit.corekit.fields.misc import PayloadField, SchemaField, SwitchField
 from pcapkit.corekit.fields.numbers import EnumField, UInt8Field
 from pcapkit.corekit.fields.strings import BitField, BytesField, PaddingField
-from pcapkit.protocols.schema.schema import Schema
+from pcapkit.protocols.schema.schema import Schema, schema_final
 from pcapkit.utilities.logging import SPHINX_TYPE_CHECKING
 
 __all__ = [
@@ -66,6 +66,7 @@ def ipv6_route_data_selector(pkt: 'dict[str, Any]') -> 'Field':
     return SchemaField(length=pkt['length'] * 8 - 4, schema=UnknownType)
 
 
+@schema_final
 class IPv6_Route(Schema):
     """Header schema for IPv6-Route packet."""
 
@@ -93,6 +94,7 @@ class RoutingType(Schema):
     """Header schema for IPv6-Route type-specific routing data."""
 
 
+@schema_final
 class UnknownType(RoutingType):
     """Header schema for IPv6-Route unknown type routing data."""
 
@@ -103,6 +105,7 @@ class UnknownType(RoutingType):
         def __init__(self, data: 'bytes') -> 'None': ...
 
 
+@schema_final
 class SourceRoute(RoutingType):
     """Header schema for IPv6-Route source route routing data."""
 
@@ -118,6 +121,7 @@ class SourceRoute(RoutingType):
         def __init__(self, ip: 'list[IPv6Address | str | int | bytes]') -> 'None': ...
 
 
+@schema_final
 class Type2(RoutingType):
     """Header schema for IPv6-Route type 2 routing data."""
 
@@ -130,6 +134,7 @@ class Type2(RoutingType):
         def __init__(self, ip: 'IPv6Address | str | int | bytes') -> 'None': ...
 
 
+@schema_final
 class RPL(RoutingType):
     """Header schema for IPv6-Route RPL routing data."""
 

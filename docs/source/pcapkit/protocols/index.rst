@@ -47,6 +47,8 @@ Header Schema
    .. autoattribute:: __excluded__
       :no-value:
 
+.. autodecorator:: pcapkit.protocols.schema.schema.schema_final
+
 Data Model
 ----------
 

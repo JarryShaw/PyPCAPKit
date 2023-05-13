@@ -8,7 +8,7 @@ from pcapkit.const.reg.transtype import TransType as Enum_TransType
 from pcapkit.corekit.fields.misc import PayloadField
 from pcapkit.corekit.fields.numbers import EnumField, UInt32Field
 from pcapkit.corekit.fields.strings import BitField, PaddingField
-from pcapkit.protocols.schema.schema import Schema
+from pcapkit.protocols.schema.schema import Schema, schema_final
 
 __all__ = ['IPv6_Frag']
 
@@ -26,6 +26,7 @@ if TYPE_CHECKING:
         mf: int
 
 
+@schema_final
 class IPv6_Frag(Schema):
     """Header schema for IPv6-Frag packet."""
 

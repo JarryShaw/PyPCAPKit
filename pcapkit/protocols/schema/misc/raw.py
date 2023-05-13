@@ -5,7 +5,7 @@
 from typing import TYPE_CHECKING
 
 from pcapkit.corekit.fields.misc import PayloadField
-from pcapkit.protocols.schema.schema import Schema
+from pcapkit.protocols.schema.schema import Schema, schema_final
 
 __all__ = ['Raw']
 
@@ -13,6 +13,7 @@ if TYPE_CHECKING:
     from pcapkit.protocols.protocol import Protocol
 
 
+@schema_final
 class Raw(Schema):
     """Schema for raw packet."""
 

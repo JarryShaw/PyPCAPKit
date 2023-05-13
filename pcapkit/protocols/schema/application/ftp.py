@@ -5,11 +5,12 @@
 from typing import TYPE_CHECKING
 
 from pcapkit.corekit.fields.strings import BytesField
-from pcapkit.protocols.schema.schema import Schema
+from pcapkit.protocols.schema.schema import Schema, schema_final
 
 __all__ = ['FTP']
 
 
+@schema_final
 class FTP(Schema):
     """Header schema for FTP packet."""
 

@@ -20,7 +20,7 @@ from pcapkit.corekit.fields.misc import (ConditionalField, ForwardMatchField, No
 from pcapkit.corekit.fields.numbers import (EnumField, NumberField, UInt8Field, UInt16Field,
                                             UInt32Field)
 from pcapkit.corekit.fields.strings import BitField, BytesField, PaddingField
-from pcapkit.protocols.schema.schema import Schema
+from pcapkit.protocols.schema.schema import Schema, schema_final
 from pcapkit.utilities.exceptions import FieldValueError
 from pcapkit.utilities.logging import SPHINX_TYPE_CHECKING
 
@@ -253,6 +253,7 @@ class Option(Schema):
         return self
 
 
+@schema_final
 class UnassignedOption(Option):
     """Header schema for IPv6-Opts unassigned options."""
 
@@ -263,6 +264,7 @@ class UnassignedOption(Option):
         def __init__(self, type: 'Enum_Option', len: 'int', data: 'bytes') -> 'None': ...
 
 
+@schema_final
 class PadOption(Option):
     """Header schema for IPv6-Opts padding options."""
 
@@ -273,6 +275,7 @@ class PadOption(Option):
         def __init__(self, type: 'Enum_Option', len: 'int') -> 'None': ...
 
 
+@schema_final
 class TunnelEncapsulationLimitOption(Option):
     """Header schema for IPv6-Opts tunnel encapsulation limit options."""
 
@@ -283,6 +286,7 @@ class TunnelEncapsulationLimitOption(Option):
         def __init__(self, type: 'Enum_Option', len: 'int', limit: 'int') -> 'None': ...
 
 
+@schema_final
 class RouterAlertOption(Option):
     """Header schema for IPv6-Opts router alert options."""
 
@@ -293,6 +297,7 @@ class RouterAlertOption(Option):
         def __init__(self, type: 'Enum_Option', len: 'int', alert: 'Enum_RouterAlert') -> 'None': ...
 
 
+@schema_final
 class CALIPSOOption(Option):
     """Header schema for IPv6-Opts common architecture label IPv6 security options."""
 
@@ -317,6 +322,7 @@ class CALIPSOOption(Option):
                      level: 'int', checksum: 'bytes', bitmap: 'Optional[bytes]') -> 'None': ...
 
 
+@schema_final
 class _SMFDPDOption(Schema):
     """Header schema for IPv6-Opts SMF DPD options with generic representation."""
 
@@ -352,6 +358,7 @@ class SMFDPDOption(Option):
         mode: 'Enum_SMFDPDMode'
 
 
+@schema_final
 class SMFIdentificationBasedDPDOption(SMFDPDOption):
     """Header schema for IPv6-Opts SMF identification-based DPD options."""
 
@@ -393,6 +400,7 @@ class SMFIdentificationBasedDPDOption(SMFDPDOption):
                      tid: 'Optional[bytes]', id: 'bytes') -> 'None': ...
 
 
+@schema_final
 class SMFHashBasedDPDOption(SMFDPDOption):
     """Header schema for IPv6-Opts SMF hash-based DPD options."""
 
@@ -417,6 +425,7 @@ class SMFHashBasedDPDOption(SMFDPDOption):
         def __init__(self, type: 'Enum_Option', len: 'int', hav: 'bytes') -> 'None': ...
 
 
+@schema_final
 class PDMOption(Option):
     """Header schema for IPv6-Opts performance and diagnostic metrics (PDM) options."""
 
@@ -438,6 +447,7 @@ class PDMOption(Option):
                      psntp: 'int', psnlr: 'int', deltatlr: 'int', deltatls: 'int') -> 'None': ...
 
 
+@schema_final
 class _QuickStartOption(Schema):
     """Header schema for IPv6-Opts quick start options in generic representation."""
 
@@ -478,6 +488,7 @@ class QuickStartOption(Option):
         func: 'Enum_QSFunction'
 
 
+@schema_final
 class QuickStartRequestOption(QuickStartOption):
     """Header schema for IPv6-Opts quick start request options."""
 
@@ -493,6 +504,7 @@ class QuickStartRequestOption(QuickStartOption):
                      ttl: 'int', nonce: 'QSNonce') -> 'None': ...
 
 
+@schema_final
 class QuickStartReportOption(QuickStartOption):
     """Header schema for IPv6-Opts quick start report of approved rate options."""
 
@@ -508,6 +520,7 @@ class QuickStartReportOption(QuickStartOption):
                      nonce: 'QSNonce') -> 'None': ...
 
 
+@schema_final
 class RPLOption(Option):
     """Header schema for IPv6-Opts routing protocol for low-power and lossy networks (RPL) options."""
 
@@ -527,6 +540,7 @@ class RPLOption(Option):
                      rank: 'int') -> 'None': ...
 
 
+@schema_final
 class MPLOption(Option):
     """Header schema for IPv6-Opts multicast protocol for low-power and lossy networks (MPL) options."""
 
@@ -567,6 +581,7 @@ class MPLOption(Option):
                      seed: 'Optional[int]') -> 'None': ...
 
 
+@schema_final
 class ILNPOption(Option):
     """Header schema for IPv6-Opts identifier-locator network protocol (ILNP) options."""
 
@@ -577,6 +592,7 @@ class ILNPOption(Option):
         def __init__(self, type: 'Enum_Option', len: 'int', nonce: 'int') -> 'None': ...
 
 
+@schema_final
 class LineIdentificationOption(Option):
     """Header schema for IPv6-Opts line-identification options."""
 
@@ -589,6 +605,7 @@ class LineIdentificationOption(Option):
         def __init__(self, type: 'Enum_Option', len: 'int', id_len: 'int', id: 'bytes') -> 'None': ...
 
 
+@schema_final
 class JumboPayloadOption(Option):
     """Header schema for IPv6-Opts jumbo payload options."""
 
@@ -599,6 +616,7 @@ class JumboPayloadOption(Option):
         def __init__(self, type: 'Enum_Option', len: 'int', jumbo_len: 'int') -> 'None': ...
 
 
+@schema_final
 class HomeAddressOption(Option):
     """Header schema for IPv6-Opts home address options."""
 
@@ -609,6 +627,7 @@ class HomeAddressOption(Option):
         def __init__(self, type: 'Enum_Option', len: 'int', addr: 'IPv6Address | int | str | bytes') -> 'None': ...
 
 
+@schema_final
 class IPDFFOption(Option):
     """Header schema for IPv6-Opts depth-first forwarding (``IP_DFF``) options."""
 
@@ -625,6 +644,7 @@ class IPDFFOption(Option):
         def __init__(self, type: 'Enum_Option', len: 'int', flags: 'DFFFlags', seq: 'int') -> 'None': ...
 
 
+@schema_final
 class IPv6_Opts(Schema):
     """Header schema for IPv6-Opts packet."""
 

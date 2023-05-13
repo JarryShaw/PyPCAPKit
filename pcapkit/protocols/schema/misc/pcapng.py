@@ -25,7 +25,7 @@ from pcapkit.corekit.fields.numbers import (EnumField, Int32Field, Int64Field, N
                                             UInt8Field, UInt16Field, UInt32Field, UInt64Field)
 from pcapkit.corekit.fields.strings import BitField, BytesField, PaddingField, StringField
 from pcapkit.corekit.multidict import MultiDict, OrderedMultiDict
-from pcapkit.protocols.schema.schema import Schema
+from pcapkit.protocols.schema.schema import Schema, schema_final
 from pcapkit.utilities.exceptions import FieldValueError, ProtocolError, stacklevel
 from pcapkit.utilities.logging import SPHINX_TYPE_CHECKING
 from pcapkit.utilities.warnings import ProtocolWarning, warn
@@ -308,6 +308,7 @@ class OptionEnumField(EnumField):
         return self._namespace.get(value, namespace=self._opt_ns)
 
 
+@schema_final
 class PCAPNG(Schema):
     """Header schema for PCAP-NG file blocks."""
 
@@ -351,6 +352,7 @@ class BlockType(Schema):
         length2: int
 
 
+@schema_final
 class UnknownBlock(BlockType):
     """Header schema for unknown PCAP-NG file blocks."""
 
@@ -384,6 +386,7 @@ class _OPT_Option(Option):
     length: 'int' = UInt16Field(callback=byteorder_callback)
 
 
+@schema_final
 class UnknownOption(_OPT_Option):
     """Header schema for unknown PCAP-NG file options."""
 
@@ -396,6 +399,7 @@ class UnknownOption(_OPT_Option):
         def __init__(self, type: 'Enum_OptionType', length: 'int', data: 'bytes') -> 'None': ...
 
 
+@schema_final
 class EndOfOption(_OPT_Option):
     """Header schema for PCAP-NG file ``opt_endofopt`` options."""
 
@@ -403,6 +407,7 @@ class EndOfOption(_OPT_Option):
         def __init__(self, type: 'Enum_OptionType', length: 'int') -> 'None': ...
 
 
+@schema_final
 class CommentOption(_OPT_Option):
     """Header schema for PCAP-NG file ``opt_comment`` options."""
 
@@ -415,6 +420,7 @@ class CommentOption(_OPT_Option):
         def __init__(self, type: 'Enum_OptionType', length: 'int', comment: 'str') -> 'None': ...
 
 
+@schema_final
 class CustomOption(_OPT_Option):
     """Header schema for PCAP-NG file ``opt_custom`` options."""
 
@@ -429,6 +435,7 @@ class CustomOption(_OPT_Option):
         def __init__(self, type: 'int', length: 'int', pen: 'int', data: 'bytes') -> 'None': ...
 
 
+@schema_final
 class SectionHeaderBlock(BlockType):
     """Header schema for PCAP-NG Section Header Block (SHB)."""
 
@@ -529,6 +536,7 @@ class _IF_Option(Option):
     length: 'int' = UInt16Field(callback=byteorder_callback)
 
 
+@schema_final
 class IF_NameOption(_IF_Option):
     """Header schema for PCAP-NG file ``if_name`` options."""
 
@@ -541,6 +549,7 @@ class IF_NameOption(_IF_Option):
         def __init__(self, type: 'Enum_OptionType', length: 'int', name: 'str') -> 'None': ...
 
 
+@schema_final
 class IF_DescriptionOption(_IF_Option):
     """Header schema for PCAP-NG file ``if_description`` options."""
 
@@ -553,6 +562,7 @@ class IF_DescriptionOption(_IF_Option):
         def __init__(self, type: 'Enum_OptionType', length: 'int', description: 'str') -> 'None': ...
 
 
+@schema_final
 class IF_IPv4AddrOption(_IF_Option):
     """Header schema for PCAP-NG file ``if_IPv4addr`` options."""
 
@@ -565,6 +575,7 @@ class IF_IPv4AddrOption(_IF_Option):
         def __init__(self, type: 'Enum_OptionType', length: 'int', interface: 'IPv4Interface | str') -> 'None': ...
 
 
+@schema_final
 class IF_IPv6AddrOption(_IF_Option):
     """Header schema for PCAP-NG file ``if_IPv6addr`` options."""
 
@@ -577,6 +588,7 @@ class IF_IPv6AddrOption(_IF_Option):
         def __init__(self, type: 'Enum_OptionType', length: 'int', interface: 'IPv6Interface | str') -> 'None': ...
 
 
+@schema_final
 class IF_MACAddrOption(_IF_Option):
     """Header schema for PCAP-NG file ``if_MACaddr`` options."""
 
@@ -589,6 +601,7 @@ class IF_MACAddrOption(_IF_Option):
         def __init__(self, type: 'Enum_OptionType', length: 'int', interface: 'bytes') -> 'None': ...
 
 
+@schema_final
 class IF_EUIAddrOption(_IF_Option):
     """Header schema for PCAP-NG file ``if_EUIaddr`` options."""
 
@@ -601,6 +614,7 @@ class IF_EUIAddrOption(_IF_Option):
         def __init__(self, type: 'Enum_OptionType', length: 'int', interface: 'bytes') -> 'None': ...
 
 
+@schema_final
 class IF_SpeedOption(_IF_Option):
     """Header schema for PCAP-NG file ``if_speed`` options."""
 
@@ -613,6 +627,7 @@ class IF_SpeedOption(_IF_Option):
         def __init__(self, type: 'Enum_OptionType', length: 'int', speed: 'int') -> 'None': ...
 
 
+@schema_final
 class IF_TSResolOption(_IF_Option):
     """Header schema for PCAP-NG file ``if_tsresol`` options."""
 
@@ -645,6 +660,7 @@ class IF_TSResolOption(_IF_Option):
         def __init__(self, type: 'Enum_OptionType', length: 'int', tsresol: 'ResolutionData') -> 'None': ...
 
 
+@schema_final
 class IF_TZoneOption(_IF_Option):
     """Header schema for PCAP-NG file ``if_tzone`` options."""
 
@@ -657,6 +673,7 @@ class IF_TZoneOption(_IF_Option):
         def __init__(self, type: 'Enum_OptionType', length: 'int', tzone: 'int') -> 'None': ...
 
 
+@schema_final
 class IF_FilterOption(_IF_Option):
     """Header schema for PCAP-NG file ``if_filter`` options."""
 
@@ -671,6 +688,7 @@ class IF_FilterOption(_IF_Option):
         def __init__(self, type: 'Enum_OptionType', length: 'int', code: 'Enum_FilterType', filter: 'bytes') -> 'None': ...
 
 
+@schema_final
 class IF_OSOption(_IF_Option):
     """Header schema for PCAP-NG file ``if_os`` options."""
 
@@ -683,6 +701,7 @@ class IF_OSOption(_IF_Option):
         def __init__(self, type: 'Enum_OptionType', length: 'int', os: 'str') -> 'None': ...
 
 
+@schema_final
 class IF_FCSLenOption(_IF_Option):
     """Header schema for PCAP-NG file ``if_fcslen`` options."""
 
@@ -695,6 +714,7 @@ class IF_FCSLenOption(_IF_Option):
         def __init__(self, type: 'Enum_OptionType', length: 'int', fcslen: 'int') -> 'None': ...
 
 
+@schema_final
 class IF_TSOffsetOption(_IF_Option):
     """Header schema for PCAP-NG file ``if_tsoffset`` options."""
 
@@ -707,6 +727,7 @@ class IF_TSOffsetOption(_IF_Option):
         def __init__(self, type: 'Enum_OptionType', length: 'int', tsoffset: 'int') -> 'None': ...
 
 
+@schema_final
 class IF_HardwareOption(_IF_Option):
     """Header schema for PCAP-NG file ``if_hardware`` options."""
 
@@ -719,6 +740,7 @@ class IF_HardwareOption(_IF_Option):
         def __init__(self, type: 'Enum_OptionType', length: 'int', hardware: 'str') -> 'None': ...
 
 
+@schema_final
 class IF_TxSpeedOption(_IF_Option):
     """Header schema for PCAP-NG file ``if_txspeed`` options."""
 
@@ -731,6 +753,7 @@ class IF_TxSpeedOption(_IF_Option):
         def __init__(self, type: 'Enum_OptionType', length: 'int', tx_speed: 'int') -> 'None': ...
 
 
+@schema_final
 class IF_RxSpeedOption(_IF_Option):
     """Header schema for PCAP-NG file ``if_rxspeed`` options."""
 
@@ -743,6 +766,7 @@ class IF_RxSpeedOption(_IF_Option):
         def __init__(self, type: 'Enum_OptionType', length: 'int', rx_speed: 'int') -> 'None': ...
 
 
+@schema_final
 class InterfaceDescriptionBlock(BlockType):
     """Header schema for PCAP-NG Interface Description Block (IDB)."""
 
@@ -804,6 +828,7 @@ class _EPB_Option(Option):
     length: 'int' = UInt16Field(callback=byteorder_callback)
 
 
+@schema_final
 class EPB_FlagsOption(_EPB_Option):
     """Header schema for PCAP-NG ``epb_flags`` options."""
 
@@ -828,6 +853,7 @@ class EPB_FlagsOption(_EPB_Option):
         def __init__(self, type: 'Enum_OptionType', length: 'int', flags: 'EPBFlags') -> 'None': ...
 
 
+@schema_final
 class EPB_HashOption(_EPB_Option):
     """Header schema for PCAP-NG ``epb_hash`` options."""
 
@@ -842,6 +868,7 @@ class EPB_HashOption(_EPB_Option):
         def __init__(self, type: 'Enum_OptionType', length: 'int', func: 'Enum_HashAlgorithm', data: 'bytes') -> 'None': ...
 
 
+@schema_final
 class EPB_DropCountOption(_EPB_Option):
     """Header schema for PCAP-NG ``epb_dropcount`` options."""
 
@@ -854,6 +881,7 @@ class EPB_DropCountOption(_EPB_Option):
         def __init__(self, type: 'Enum_OptionType', length: 'int', drop_count: 'int') -> 'None': ...
 
 
+@schema_final
 class EPB_PacketIDOption(_EPB_Option):
     """Header schema for PCAP-NG ``epb_packetid`` options."""
 
@@ -866,6 +894,7 @@ class EPB_PacketIDOption(_EPB_Option):
         def __init__(self, type: 'Enum_OptionType', length: 'int', packet_id: 'int') -> 'None': ...
 
 
+@schema_final
 class EPB_QueueOption(_EPB_Option):
     """Header schema for PCAP-NG ``epb_queue`` options."""
 
@@ -878,6 +907,7 @@ class EPB_QueueOption(_EPB_Option):
         def __init__(self, type: 'Enum_OptionType', length: 'int', queue_id: 'int') -> 'None': ...
 
 
+@schema_final
 class EPB_VerdictOption(_EPB_Option):
     """Header schema for PCAP-NG ``epb_verdict`` options."""
 
@@ -892,6 +922,7 @@ class EPB_VerdictOption(_EPB_Option):
         def __init__(self, type: 'Enum_OptionType', length: 'int', verdict: 'Enum_VerdictType', value: 'bytes') -> 'None': ...
 
 
+@schema_final
 class EnhancedPacketBlock(BlockType):
     """Header schema for PCAP-NG Enhanced Packet Block (EPB)."""
 
@@ -946,6 +977,7 @@ class EnhancedPacketBlock(BlockType):
                      options: 'list[Option | bytes] | bytes', length2: 'int') -> 'None': ...
 
 
+@schema_final
 class SimplePacketBlock(BlockType):
     """Header schema for PCAP-NG Simple Packet Block (SPB)."""
 
@@ -978,6 +1010,7 @@ class NameResolutionRecord(Schema):
     length: 'int' = UInt16Field(callback=byteorder_callback)
 
 
+@schema_final
 class UnknownRecord(NameResolutionRecord):
     """Header schema for PCAP-NG NRB unknown records."""
 
@@ -990,6 +1023,7 @@ class UnknownRecord(NameResolutionRecord):
         def __init__(self, type: 'Enum_RecordType', length: 'int', data: 'bytes') -> 'None': ...
 
 
+@schema_final
 class EndRecord(NameResolutionRecord):
     """Header schema for PCAP-NG ``nrb_record_end`` records."""
 
@@ -997,6 +1031,7 @@ class EndRecord(NameResolutionRecord):
         def __init__(self, type: 'Enum_RecordType', length: 'int') -> 'None': ...
 
 
+@schema_final
 class IPv4Record(NameResolutionRecord):
     """Header schema for PCAP-NG NRB ``nrb_record_ipv4`` records."""
 
@@ -1027,6 +1062,7 @@ class IPv4Record(NameResolutionRecord):
         def __init__(self, type: 'Enum_RecordType', length: 'int', ip: 'IPv4Address | str | bytes | int', resol: 'str') -> 'None': ...
 
 
+@schema_final
 class IPv6Record(NameResolutionRecord):
     """Header schema for PCAP-NG NRB ``nrb_record_ipv4`` records."""
 
@@ -1066,6 +1102,7 @@ class _NS_Option(Option):
     length: 'int' = UInt16Field(callback=byteorder_callback)
 
 
+@schema_final
 class NS_DNSNameOption(_NS_Option):
     """Header schema for PCAP-NG ``ns_dnsname`` option."""
 
@@ -1076,6 +1113,7 @@ class NS_DNSNameOption(_NS_Option):
         def __init__(self, type: 'Enum_OptionType', length: 'int', name: 'str') -> 'None': ...
 
 
+@schema_final
 class NS_DNSIP4AddrOption(_NS_Option):
     """Header schema for PCAP-NG ``ns_dnsIP4addr`` option."""
 
@@ -1086,6 +1124,7 @@ class NS_DNSIP4AddrOption(_NS_Option):
         def __init__(self, type: 'Enum_OptionType', length: 'int', ip: 'IPv4Address | str | bytes | int') -> 'None': ...
 
 
+@schema_final
 class NS_DNSIP6AddrOption(_NS_Option):
     """Header schema for PCAP-NG ``ns_dnsIP6addr`` option."""
 
@@ -1096,6 +1135,7 @@ class NS_DNSIP6AddrOption(_NS_Option):
         def __init__(self, type: 'Enum_OptionType', length: 'int', ip: 'IPv6Address | bytes | str | int') -> 'None': ...
 
 
+@schema_final
 class NameResolutionBlock(BlockType):
     """Header schema for PCAP-NG Name Resolution Block (NRB)."""
 
@@ -1181,6 +1221,7 @@ class _ISB_Option(Option):
     length: 'int' = UInt16Field(callback=byteorder_callback)
 
 
+@schema_final
 class ISB_StartTimeOption(_ISB_Option):
     """Header schema for PCAP-NG ``isb_starttime`` option."""
 
@@ -1193,6 +1234,7 @@ class ISB_StartTimeOption(_ISB_Option):
         def __init__(self, type: 'Enum_OptionType', length: 'int', timestamp_high: 'int', timestamp_low: 'int') -> 'None': ...
 
 
+@schema_final
 class ISB_EndTimeOption(_ISB_Option):
     """Header schema for PCAP-NG ``isb_endtime`` option."""
 
@@ -1205,6 +1247,7 @@ class ISB_EndTimeOption(_ISB_Option):
         def __init__(self, type: 'Enum_OptionType', length: 'int', timestamp_high: 'int', timestamp_low: 'int') -> 'None': ...
 
 
+@schema_final
 class ISB_IFRecvOption(_ISB_Option):
     """Header schema for PCAP-NG ``isb_ifrecv`` option."""
 
@@ -1215,6 +1258,7 @@ class ISB_IFRecvOption(_ISB_Option):
         def __init__(self, type: 'Enum_OptionType', length: 'int', packets: 'int') -> 'None': ...
 
 
+@schema_final
 class ISB_IFDropOption(_ISB_Option):
     """Header schema for PCAP-NG ``isb_ifdrop`` option."""
 
@@ -1225,6 +1269,7 @@ class ISB_IFDropOption(_ISB_Option):
         def __init__(self, type: 'Enum_OptionType', length: 'int', packets: 'int') -> 'None': ...
 
 
+@schema_final
 class ISB_FilterAcceptOption(_ISB_Option):
     """Header schema for PCAP-NG ``isb_filteraccept`` option."""
 
@@ -1235,6 +1280,7 @@ class ISB_FilterAcceptOption(_ISB_Option):
         def __init__(self, type: 'Enum_OptionType', length: 'int', packets: 'int') -> 'None': ...
 
 
+@schema_final
 class ISB_OSDropOption(_ISB_Option):
     """Header schema for PCAP-NG ``isb_osdrop`` option."""
 
@@ -1245,6 +1291,7 @@ class ISB_OSDropOption(_ISB_Option):
         def __init__(self, type: 'Enum_OptionType', length: 'int', packets: 'int') -> 'None': ...
 
 
+@schema_final
 class ISB_UsrDelivOption(_ISB_Option):
     """Header schema for PCAP-NG ``isb_usrdeliv`` option."""
 
@@ -1255,6 +1302,7 @@ class ISB_UsrDelivOption(_ISB_Option):
         def __init__(self, type: 'Enum_OptionType', length: 'int', packets: 'int') -> 'None': ...
 
 
+@schema_final
 class InterfaceStatisticsBlock(BlockType):
     """Header schema for PCAP-NG Interface Statistics Block (ISB)."""
 
@@ -1299,6 +1347,7 @@ class InterfaceStatisticsBlock(BlockType):
                      options: 'list[Option | bytes] | bytes', length2: 'int') -> 'None': ...
 
 
+@schema_final
 class SystemdJournalExportBlock(BlockType):
     """Header schema for PCAP-NG :manpage:`systemd(1)` Journal Export Block."""
 
@@ -1355,6 +1404,7 @@ class DSBSecrets(Schema):
     """Header schema for DSB secrets data."""
 
 
+@schema_final
 class UnknownSecrets(DSBSecrets):
     """Header schema for unknown DSB secrets data."""
 
@@ -1365,6 +1415,7 @@ class UnknownSecrets(DSBSecrets):
         def __init__(self, data: 'bytes') -> 'None': ...
 
 
+@schema_final
 class TLSKeyLog(DSBSecrets):
     """Header schema for TLS Key Log secrets data."""
 
@@ -1403,6 +1454,7 @@ class TLSKeyLog(DSBSecrets):
         def __init__(self, data: 'str') -> 'None': ...
 
 
+@schema_final
 class WireGuardKeyLog(DSBSecrets):
     """Header schema for WireGuard Key Log secrets data."""
 
@@ -1442,6 +1494,7 @@ class WireGuardKeyLog(DSBSecrets):
         def __init__(self, data: 'str') -> 'None': ...
 
 
+@schema_final
 class ZigBeeNWKKey(DSBSecrets):
     """Header schema for ZigBee NWK Key and ZigBee PANID secrets data."""
 
@@ -1456,6 +1509,7 @@ class ZigBeeNWKKey(DSBSecrets):
         def __init__(self, key: 'bytes', panid: 'int') -> 'None': ...
 
 
+@schema_final
 class ZigBeeAPSKey(DSBSecrets):
     """Header schema for ZigBee APS Key secrets data."""
 
@@ -1483,6 +1537,7 @@ class _DSB_Option(Option):
     length: 'int' = UInt16Field(callback=byteorder_callback)
 
 
+@schema_final
 class DecryptionSecretsBlock(BlockType):
     """Header schema for PCAP-NG Decryption Secrets Block (DSB)."""
 
@@ -1524,6 +1579,7 @@ class DecryptionSecretsBlock(BlockType):
                      options: 'list[Option | bytes] | bytes', length2: 'int') -> 'None': ...
 
 
+@schema_final
 class CustomBlock(BlockType):
     """Header schema for PCAP-NG Custom Block (CB)."""
 
@@ -1551,6 +1607,7 @@ class _PACK_Option(Option):
     length: 'int' = UInt16Field(callback=byteorder_callback)
 
 
+@schema_final
 class PACK_FlagsOption(_PACK_Option):
     """Header schema for PCAP-NG ``pack_flags`` options."""
 
@@ -1575,6 +1632,7 @@ class PACK_FlagsOption(_PACK_Option):
         def __init__(self, type: 'Enum_OptionType', length: 'int', flags: 'EPBFlags') -> 'None': ...
 
 
+@schema_final
 class PACK_HashOption(_PACK_Option):
     """Header schema for PCAP-NG ``pack_hash`` options."""
 
@@ -1589,6 +1647,7 @@ class PACK_HashOption(_PACK_Option):
         def __init__(self, type: 'Enum_OptionType', length: 'int', func: 'Enum_HashAlgorithm', data: 'bytes') -> 'None': ...
 
 
+@schema_final
 class PacketBlock(BlockType):
     """Header schema for PCAP-NG Packet Block (obsolete)."""
 

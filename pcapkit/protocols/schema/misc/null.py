@@ -2,11 +2,12 @@
 # mypy: disable-error-code=assignment
 """header schema for empty payload"""
 
-from pcapkit.protocols.schema.schema import Schema
+from pcapkit.protocols.schema.schema import Schema, schema_final
 
 __all__ = ['NoPayload']
 
 
+@schema_final
 class NoPayload(Schema):
     """Schema for empty payload."""
 

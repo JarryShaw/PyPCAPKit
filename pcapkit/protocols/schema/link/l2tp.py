@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING
 from pcapkit.corekit.fields.misc import ConditionalField, PayloadField
 from pcapkit.corekit.fields.numbers import UInt16Field
 from pcapkit.corekit.fields.strings import BitField, PaddingField
-from pcapkit.protocols.schema.schema import Schema
+from pcapkit.protocols.schema.schema import Schema, schema_final
 from pcapkit.utilities.logging import SPHINX_TYPE_CHECKING
 
 __all__ = ['L2TP']
@@ -37,6 +37,7 @@ if SPHINX_TYPE_CHECKING:
         version: Literal[2]
 
 
+@schema_final
 class L2TP(Schema):
     """Header schema for L2TP packet."""
 

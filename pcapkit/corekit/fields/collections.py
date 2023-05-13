@@ -240,9 +240,9 @@ class OptionField(ListField):
 
         Important:
             If the option list ended before the specified size limit,
-            set :attr:`self.option_padding <OptionField.option_padding>` as the remaining length to
-            the ``packet`` argument such that the next fields can be
-            aware of such informations.
+            set :attr:`self.option_padding <OptionField.option_padding>`
+            as the remaining length to the ``packet`` argument such that
+            the next fields can be aware of such informations.
 
         """
         length = self._length

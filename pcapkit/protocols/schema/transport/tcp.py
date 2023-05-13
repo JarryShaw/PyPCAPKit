@@ -15,7 +15,7 @@ from pcapkit.corekit.fields.misc import (ConditionalField, ForwardMatchField, Pa
 from pcapkit.corekit.fields.numbers import (EnumField, NumberField, UInt8Field, UInt16Field,
                                             UInt32Field, UInt64Field)
 from pcapkit.corekit.fields.strings import BitField, BytesField, PaddingField
-from pcapkit.protocols.schema.schema import Schema
+from pcapkit.protocols.schema.schema import Schema, schema_final
 from pcapkit.utilities.exceptions import FieldError
 from pcapkit.utilities.logging import SPHINX_TYPE_CHECKING
 
@@ -272,6 +272,7 @@ class Option(Schema):
         return self
 
 
+@schema_final
 class UnassignedOption(Option):
     """Header schema for TCP unassigned options."""
 
@@ -282,6 +283,7 @@ class UnassignedOption(Option):
         def __init__(self, kind: 'Enum_Option', length: 'int', data: 'bytes') -> 'None': ...
 
 
+@schema_final
 class EndOfOptionList(Option):
     """Header schema for TCP end of option list."""
 
@@ -289,6 +291,7 @@ class EndOfOptionList(Option):
         def __init__(self, kind: 'Enum_Option', length: 'int') -> 'None': ...
 
 
+@schema_final
 class NoOperation(Option):
     """Header schema for TCP no operation."""
 
@@ -296,6 +299,7 @@ class NoOperation(Option):
         def __init__(self, kind: 'Enum_Option', length: 'int') -> 'None': ...
 
 
+@schema_final
 class MaximumSegmentSize(Option):
     """Header schema for TCP max segment size option."""
 
@@ -306,6 +310,7 @@ class MaximumSegmentSize(Option):
         def __init__(self, kind: 'Enum_Option', length: 'int', mss: 'int') -> 'None': ...
 
 
+@schema_final
 class WindowScale(Option):
     """Header schema for TCP window scale option."""
 
@@ -316,6 +321,7 @@ class WindowScale(Option):
         def __init__(self, kind: 'Enum_Option', length: 'int', scale: 'int') -> 'None': ...
 
 
+@schema_final
 class SACKPermitted(Option):
     """Header schema for TCP SACK permitted option."""
 
@@ -323,6 +329,7 @@ class SACKPermitted(Option):
         def __init__(self, kind: 'Enum_Option', length: 'int') -> 'None': ...
 
 
+@schema_final
 class SACKBlock(Schema):
     """Header schema for TCP SACK option data."""
 
@@ -335,6 +342,7 @@ class SACKBlock(Schema):
         def __init__(self, left: 'int', right: 'int') -> 'None': ...
 
 
+@schema_final
 class SACK(Option):
     """Header schema for TCP SACK option."""
 
@@ -348,6 +356,7 @@ class SACK(Option):
         def __init__(self, kind: 'Enum_Option', length: 'int', sack: 'list[SACKBlock]') -> 'None': ...
 
 
+@schema_final
 class Echo(Option):
     """Header schema for TCP echo option."""
 
@@ -358,6 +367,7 @@ class Echo(Option):
         def __init__(self, kind: 'Enum_Option', length: 'int', data: 'bytes') -> 'None': ...
 
 
+@schema_final
 class EchoReply(Option):
     """Header schema for TCP echo reply option."""
 
@@ -368,6 +378,7 @@ class EchoReply(Option):
         def __init__(self, kind: 'Enum_Option', length: 'int', data: 'bytes') -> 'None': ...
 
 
+@schema_final
 class Timestamp(Option):
     """Header schema for TCP timestamps option."""
 
@@ -380,6 +391,7 @@ class Timestamp(Option):
         def __init__(self, kind: 'Enum_Option', length: 'int', value: 'int', reply: 'int') -> 'None': ...
 
 
+@schema_final
 class PartialOrderConnectionPermitted(Option):
     """Header schema for TCP partial order connection permitted option."""
 
@@ -387,6 +399,7 @@ class PartialOrderConnectionPermitted(Option):
         def __init__(self, kind: 'Enum_Option', length: 'int') -> 'None': ...
 
 
+@schema_final
 class PartialOrderConnectionProfile(Option):
     """Header schema for TCP partial order connection service profile option."""
 
@@ -400,6 +413,7 @@ class PartialOrderConnectionProfile(Option):
         def __init__(self, kind: 'Enum_Option', length: 'int', profile: 'POCProfile') -> 'None': ...
 
 
+@schema_final
 class CC(Option):
     """Header schema for TCP CC option."""
 
@@ -410,6 +424,7 @@ class CC(Option):
         def __init__(self, kind: 'Enum_Option', length: 'int', count: 'int') -> 'None': ...
 
 
+@schema_final
 class CCNew(Option):
     """Header schema for TCP connection count (new) option."""
 
@@ -420,6 +435,7 @@ class CCNew(Option):
         def __init__(self, kind: 'Enum_Option', length: 'int', count: 'int') -> 'None': ...
 
 
+@schema_final
 class CCEcho(Option):
     """Header schema for TCP connection count (echo) option."""
 
@@ -430,6 +446,7 @@ class CCEcho(Option):
         def __init__(self, kind: 'Enum_Option', length: 'int', count: 'int') -> 'None': ...
 
 
+@schema_final
 class AlternateChecksumRequest(Option):
     """Header schema for TCP alternate checksum request option."""
 
@@ -440,6 +457,7 @@ class AlternateChecksumRequest(Option):
         def __init__(self, kind: 'Enum_Option', length: 'int', algorithm: 'Enum_Checksum') -> 'None': ...
 
 
+@schema_final
 class AlternateChecksumData(Option):
     """Header schema for TCP alternate checksum data option."""
 
@@ -450,6 +468,7 @@ class AlternateChecksumData(Option):
         def __init__(self, kind: 'Enum_Option', length: 'int', data: 'bytes') -> 'None': ...
 
 
+@schema_final
 class MD5Signature(Option):
     """Header schema for TCP MD5 signature option."""
 
@@ -460,6 +479,7 @@ class MD5Signature(Option):
         def __init__(self, kind: 'Enum_Option', length: 'int', digest: 'bytes') -> 'None': ...
 
 
+@schema_final
 class QuickStartResponse(Option):
     """Header schema for TCP quick start response option."""
 
@@ -478,6 +498,7 @@ class QuickStartResponse(Option):
         def __init__(self, kind: 'Enum_Option', length: 'int', flags: 'QuickStartFlags', diff: 'int', nonce: 'QuickStartNonce') -> 'None': ...
 
 
+@schema_final
 class UserTimeout(Option):
     """Header schema for TCP user timeout option."""
 
@@ -491,6 +512,7 @@ class UserTimeout(Option):
         def __init__(self, kind: 'Enum_Option', length: 'int', info: 'TimeoutInfo') -> 'None': ...
 
 
+@schema_final
 class Authentication(Option):
     """Header schema for TCP authentication option."""
 
@@ -505,6 +527,7 @@ class Authentication(Option):
         def __init__(self, kind: 'Enum_Option', length: 'int', key_id: 'int', next_key_id: 'int', mac: 'bytes') -> 'None': ...
 
 
+@schema_final
 class _MPTCP(Schema):
     """Header schema for Multipath TCP options in a generic representation."""
 
@@ -541,6 +564,7 @@ class MPTCP(Option):
         subtype: 'Enum_MPTCPOption'
 
 
+@schema_final
 class MPTCPUnknown(MPTCP):
     """Header schema for unknown Multipath TCP option."""
 
@@ -556,6 +580,7 @@ class MPTCPUnknown(MPTCP):
         def __init__(self, kind: 'Enum_Option', length: 'int', test: 'MPTCPSubtypeUnknown', data: 'bytes') -> 'None': ...
 
 
+@schema_final
 class MPTCPCapable(MPTCP):
     """Header schema for Multipath TCP capable option."""
 
@@ -586,6 +611,7 @@ class MPTCPJoin(MPTCP):
     """Header schema for Multipath TCP join option."""
 
 
+@schema_final
 class MPTCPJoinSYN(MPTCPJoin):
     """Header schema for Multipath TCP join option for ``SYN`` connection."""
 
@@ -605,6 +631,7 @@ class MPTCPJoinSYN(MPTCPJoin):
         def __init__(self, kind: 'Enum_Option', length: 'int', test: 'MPTCPSubtypeJoin', addr_id: 'int', token: 'int', nonce: 'int') -> 'None': ...
 
 
+@schema_final
 class MPTCPJoinSYNACK(MPTCPJoin):
     """Header schema for Multipath TCP join option for ``SYN/ACK`` connection."""
 
@@ -624,6 +651,7 @@ class MPTCPJoinSYNACK(MPTCPJoin):
         def __init__(self, kind: 'Enum_Option', length: 'int', test: 'MPTCPSubtypeJoin', addr_id: 'int', hmac: 'bytes', nonce: 'int') -> 'None': ...
 
 
+@schema_final
 class MPTCPJoinACK(MPTCPJoin):
     """Header schema for Multipath TCP join option for ``ACK`` connection."""
 
@@ -640,6 +668,7 @@ class MPTCPJoinACK(MPTCPJoin):
         def __init__(self, kind: 'Enum_Option', length: 'int', test: 'MPTCPSubtype', hmac: 'bytes') -> 'None': ...
 
 
+@schema_final
 class MPTCPDSS(MPTCP):
     """Header schema for Multipath TCP DSS option."""
 
@@ -685,6 +714,7 @@ class MPTCPDSS(MPTCP):
         def __init__(self, kind: 'Enum_Option', length: 'int', test: 'MPTCPSubtype', flags: 'MPTCPDSSFlags', ack: 'Optional[int]', dsn: 'Optional[int]', ssn: 'Optional[int]', dl_len: 'Optional[int]', checksum: 'Optional[bytes]') -> 'None': ...
 
 
+@schema_final
 class MPTCPAddAddress(MPTCP):
     """Header schema for Multipath TCP add address option."""
 
@@ -709,6 +739,7 @@ class MPTCPAddAddress(MPTCP):
         def __init__(self, kind: 'Enum_Option', length: 'int', test: 'MPTCPSubtypeAddAddress', addr_id: 'int', address: 'IPv4Address | IPv6Address', port: 'Optional[int]') -> 'None': ...
 
 
+@schema_final
 class MPTCPRemoveAddress(MPTCP):
     """Header schema for Multipath TCP remove address option."""
 
@@ -726,6 +757,7 @@ class MPTCPRemoveAddress(MPTCP):
         def __init__(self, kind: 'Enum_Option', length: 'int', test: 'MPTCPSubtype', addr_id: 'list[int]') -> 'None': ...
 
 
+@schema_final
 class MPTCPPriority(MPTCP):
     """Header schema for Multipath TCP priority option."""
 
@@ -744,6 +776,7 @@ class MPTCPPriority(MPTCP):
         def __init__(self, kind: 'Enum_Option', length: 'int', test: 'MPTCPSubtypePriority', addr_id: 'Optional[int]') -> 'None': ...
 
 
+@schema_final
 class MPTCPFallback(MPTCP):
     """Header schema for Multipath TCP fallback option."""
 
@@ -758,6 +791,7 @@ class MPTCPFallback(MPTCP):
         def __init__(self, kind: 'Enum_Option', length: 'int', test: 'MPTCPSubtype', dsn: 'int') -> 'None': ...
 
 
+@schema_final
 class MPTCPFastclose(MPTCP):
     """Header schema for Multipath TCP fastclose option."""
 
@@ -772,6 +806,7 @@ class MPTCPFastclose(MPTCP):
         def __init__(self, kind: 'Enum_Option', length: 'int', test: 'MPTCPSubtype', key: 'int') -> 'None': ...
 
 
+@schema_final
 class FastOpenCookie(Option):
     """"Header schema for TCP Fast Open option."""
 
@@ -785,6 +820,7 @@ class FastOpenCookie(Option):
         def __init__(self, kind: 'Enum_Option', length: 'int', cookie: 'Optional[bytes]') -> 'None': ...
 
 
+@schema_final
 class TCP(Schema):
     """Header schema for TCP packet."""
 

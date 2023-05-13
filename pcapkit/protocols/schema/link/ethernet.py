@@ -9,7 +9,7 @@ from pcapkit.const.reg.ethertype import EtherType as Enum_EtherType
 from pcapkit.corekit.fields.misc import PayloadField
 from pcapkit.corekit.fields.numbers import EnumField
 from pcapkit.corekit.fields.strings import BytesField
-from pcapkit.protocols.schema.schema import Schema
+from pcapkit.protocols.schema.schema import Schema, schema_final
 
 __all__ = ['Ethernet']
 
@@ -29,6 +29,7 @@ def callback_payload(self: 'PayloadField', packet: 'dict[str, Any]') -> 'None':
     self.protocol = protocol
 
 
+@schema_final
 class Ethernet(Schema):
     """Header schema for ethernet packet."""
 

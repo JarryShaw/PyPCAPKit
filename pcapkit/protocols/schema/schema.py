@@ -5,7 +5,7 @@ import collections
 import collections.abc
 import io
 import itertools
-from typing import TYPE_CHECKING, Generic, TypeVar, cast
+from typing import TYPE_CHECKING, Generic, TypeVar, cast, final
 
 from pcapkit.corekit.fields.collections import ListField, OptionField
 from pcapkit.corekit.fields.field import NoValue, _Field
@@ -18,13 +18,123 @@ from pcapkit.utilities.warnings import SchemaWarning, UnknownFieldWarning, warn
 
 if TYPE_CHECKING:
     from collections import OrderedDict
-    from typing import IO, Any, Iterable, Iterator, Optional
+    from typing import IO, Any, Iterable, Iterator, Optional, Type
 
     from typing_extensions import Self
 
-__all__ = ['Schema']
+__all__ = ['Schema', 'schema_final']
 
 VT = TypeVar('VT')
+
+
+def schema_final(cls: 'Type[Schema[VT]]') -> 'Type[Schema[VT]]':
+    """Finalise schema class.
+
+    Args:
+        cls: Schema class.
+
+    Returns:
+        Finalised schema class.
+
+    Notes:
+        This decorator function is used to generate necessary
+        attributes and methods for the decorated :class:`Schema`
+        class. It can be useful to reduce runtime generation
+        time as well as caching already generated attributes.
+
+    :meta decorator:
+    """
+    if cls.__finalised__:
+        warn(f'{cls.__name__}: schema has been finalised; now skipping',
+             SchemaWarning, stacklevel=stacklevel())
+        return cls
+
+    temp = ['__map__', '__map_reverse__', '__builtin__',
+            '__fields__', '__buffer__', '__updated__',
+            '__payload__', '__finalised__']
+    temp.extend(cls.__additional__)
+    for obj in cls.mro():
+        temp.extend(dir(obj))
+    cls.__builtin__ = set(temp)
+    cls.__excluded__.extend(cls.__builtin__)
+
+    args_ = []  # type: list[str]
+    dict_ = []  # type: list[str]
+
+    cls_fields = []  # type: list[tuple[str, _Field]]
+    for cls_ in cls.mro():
+        # NOTE: We skip the ``Schema`` class itself, to avoid superclass
+        # type annotations being considered.
+        if cls_ is Schema:
+            break
+
+        # NOTE: We iterate in reversed order to ensure that the type
+        # annotations of the superclasses are considered first.
+        for key in reversed(cls_.__dict__):
+            # NOTE: We skip duplicated annotations to avoid duplicate
+            # argument in function definition.
+            if key in args_:
+                continue
+
+            # NOTE: We only consider the fields that are instances of
+            # the ``_Field`` class.
+            field = cls_.__dict__[key]
+            if not isinstance(field, _Field):
+                continue
+
+            # NOTE: We need to consider the case where the field itself
+            # is optional, i.e., the field is not required to be present
+            # in the protocol header.
+            args_.append(f'{key}=NoValue')
+            dict_.append(f'{key}={key}')
+
+            field.name = key
+            cls_fields.append((key, field))
+
+    # NOTE: We reverse the two lists such that the order of the
+    # arguments is the same as the order of the field definition,
+    # i.e., from the most base class to the most derived class.
+    args_.reverse()
+    dict_.reverse()
+
+    # NOTE: We also reverse the field list such that the order
+    # can be preserved in the :class:`~collections.OrderedDict`
+    # instance.
+    cls_fields.reverse()
+    cls.__fields__ = collections.OrderedDict(cls_fields)
+
+    # NOTE: We shall only attempt to generate ``__init__`` method
+    # if the class does not define such method.
+    if not hasattr(cls, '__init__'):
+        # NOTE: We only generate typed ``__init__`` method if only the class
+        # has field definition from any of itself and its base classes.
+        if args_:
+            # NOTE: The following code is to make the ``__init__`` method work.
+            # It is inspired from the :func:`dataclasses._create_fn` function.
+            init_ = (
+                f'def __create_fn__():\n'
+                f'    def __init__(self, {", ".join(args_)}, *, __packet__=None):\n'
+                f'        self.__update__({", ".join(dict_)})\n'
+                f'        self.__post_init__(__packet__)\n'
+                f'    return __init__\n'
+            )
+        else:
+            init_ = (
+                'def __create_fn__():\n'
+                '    def __init__(self, dict_=None, *, __packet__=None, **kwargs):\n'
+                '        self.__update__(dict_, **kwargs)\n'
+                '        self.__post_init__(__packet__)\n'
+                '    return __init__\n'
+            )
+
+        ns = {}  # type: dict[str, Any]
+        exec(init_, None, ns)  # pylint: disable=exec-used # nosec
+
+        cls.__init__ = ns['__create_fn__']()
+        cls.__init__.__qualname__ = f'{cls.__name__}.__init__'
+
+    cls.__finalised__ = True
+    return final(cls)
 
 
 class Schema(Mapping[str, VT], Generic[VT]):
@@ -46,6 +156,9 @@ class Schema(Mapping[str, VT], Generic[VT]):
         #: Flag for whether the schema is recently updated.
         __updated__: 'bool'
 
+    #: Flag for finalised class initialisation.
+    __finalised__ = False
+
     #: Field name of the payload.
     __payload__: 'str' = 'payload'
     #: List of additional built-in names.
@@ -65,83 +178,8 @@ class Schema(Mapping[str, VT], Generic[VT]):
             **kwargs: Arbitrary keyword arguments.
 
         """
-        cls_fields = []
-
-        temp = ['__map__', '__map_reverse__', '__builtin__',
-                '__fields__', '__buffer__', '__updated__',
-                '__payload__']
-        temp.extend(cls.__additional__)
-        for obj in cls.mro():
-            temp.extend(dir(obj))
-        cls.__builtin__ = set(temp)
-        cls.__excluded__.extend(cls.__builtin__)
-
-        args_ = []  # type: list[str]
-        dict_ = []  # type: list[str]
-
-        for cls_ in cls.mro():
-            # NOTE: We skip the ``Schema`` class itself, to avoid superclass
-            # type annotations being considered.
-            if cls_ is Schema:
-                break
-
-            # NOTE: We iterate in reversed order to ensure that the type
-            # annotations of the superclasses are considered first.
-            for key in reversed(cls_.__dict__):
-                # NOTE: We skip duplicated annotations to avoid duplicate
-                # argument in function definition.
-                if key in args_:
-                    continue
-
-                # NOTE: We only consider the fields that are instances of
-                # the ``_Field`` class.
-                field = cls_.__dict__[key]
-                if not isinstance(field, _Field):
-                    continue
-
-                # NOTE: We need to consider the case where the field itself
-                # is optional, i.e., the field is not required to be present
-                # in the protocol header.
-                args_.append(f'{key}=NoValue')
-                dict_.append(f'{key}={key}')
-
-                field.name = key
-                cls_fields.append((key, field))
-
-        # NOTE: We reverse the two lists such that the order of the
-        # arguments is the same as the order of the type annotations, i.e.,
-        # from the most base class to the most derived class.
-        args_.reverse()
-        dict_.reverse()
-        cls_fields.reverse()
-        cls.__fields__ = collections.OrderedDict(cls_fields)
-
-        # NOTE: We only generate typed ``__init__`` method if only the class
-        # has type annotations from any of itself and its base classes.
-        if args_:
-            # NOTE: The following code is to make the ``__init__`` method work.
-            # It is inspired from the :func:`dataclasses._create_fn` function.
-            init_ = (
-                f'def __create_fn__():\n'
-                f'    def __init__(self, {", ".join(args_)}, *, __packet__=None):\n'
-                f'        self.__update__({", ".join(dict_)})\n'
-                f'        self.__post_init__(__packet__)\n'
-                f'    return __init__\n'
-            )
-        else:
-            init_ = (
-                'def __create_fn__():\n'
-                '    def __init__(self, dict_=None, **kwargs, *, __packet__=None):\n'
-                '        self.__update__(dict_, **kwargs)\n'
-                '        self.__post_init__(__packet__)\n'
-                '    return __init__\n'
-            )
-
-        ns = {}  # type: dict[str, Any]
-        exec(init_, None, ns)  # pylint: disable=exec-used # nosec
-        cls.__init__ = ns['__create_fn__']()
-        cls.__init__.__qualname__ = f'{cls.__name__}.__init__'
-
+        if not cls.__finalised__:
+            cls = cast('Type[Self]', schema_final(cls))
         self = super().__new__(cls)
 
         # NOTE: We define the ``__map__`` and ``__map_reverse__`` attributes
@@ -152,8 +190,8 @@ class Schema(Mapping[str, VT], Generic[VT]):
 
         # NOTE: We only create the attributes for the instance itself,
         # to avoid creating shared attributes for the class.
-        self.__buffer__ = {name: b'' for name in self.__fields__.keys()}
-        self.__updated__ = True
+        super().__setattr__(self, '__buffer__', {name: b'' for name in self.__fields__.keys()})
+        super().__setattr__(self, '__updated__', True)
 
         return self
 
@@ -459,6 +497,12 @@ class Schema(Mapping[str, VT], Generic[VT]):
             We used a ``__length__`` key in ``packet`` to record the length
             of the remaining data, which is used to determine the length of
             the payload field.
+
+            And a ``__padding_length__`` key in the ``packet`` to record the
+            length of the padding field after an
+            :class:`~pcapkit.corekit.fields.collections.OptionField`, which
+            is used to potentially determine the length of the remaining
+            padding field data.
 
         """
         # force cast arg type since decorator changed their signatures

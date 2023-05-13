@@ -12,7 +12,7 @@ from pcapkit.corekit.fields.collections import ListField
 from pcapkit.corekit.fields.misc import ConditionalField, SchemaField, SwitchField
 from pcapkit.corekit.fields.numbers import EnumField, NumberField, UInt8Field, UInt32Field
 from pcapkit.corekit.fields.strings import BitField, BytesField, PaddingField
-from pcapkit.protocols.schema.schema import Schema
+from pcapkit.protocols.schema.schema import Schema, schema_final
 from pcapkit.utilities.logging import SPHINX_TYPE_CHECKING
 
 __all__ = [
@@ -101,6 +101,7 @@ def http_frame_selector(pkt: 'dict[str, Any]') -> 'Field':
     return SchemaField(length=pkt['__length__'], schema=UnassignedFrame)
 
 
+@schema_final
 class HTTP(Schema):
     """Header schema for HTTP/2 packet."""
 
@@ -163,6 +164,7 @@ class FrameType(Schema):
         return self
 
 
+@schema_final
 class UnassignedFrame(FrameType):
     """Header schema for unassigned HTTP/2 frame payload."""
 
@@ -173,6 +175,7 @@ class UnassignedFrame(FrameType):
         def __init__(self, data: 'bytes') -> 'None': ...
 
 
+@schema_final
 class DataFrame(FrameType):
     """Header schema for HTTP/2 ``DATA`` frames."""
 
@@ -199,6 +202,7 @@ class DataFrame(FrameType):
         def __init__(self, pad_len: 'Optional[int]', data: 'bytes') -> 'None': ...
 
 
+@schema_final
 class HeadersFrame(FrameType):
     """Header schema for HTTP/2 ``HEADERS`` frames."""
 
@@ -242,6 +246,7 @@ class HeadersFrame(FrameType):
         def __init__(self, pad_len: 'Optional[int]', stream_dep: 'Optional[StreamDependency]', weight: 'Optional[int]', fragment: 'bytes') -> 'None': ...
 
 
+@schema_final
 class PriorityFrame(FrameType):
     """Header schema for HTTP/2 ``PRIORITY`` frames."""
 
@@ -257,6 +262,7 @@ class PriorityFrame(FrameType):
         def __init__(self, stream: 'StreamDependency', weight: 'int') -> 'None': ...
 
 
+@schema_final
 class RSTStreamFrame(FrameType):
     """Header schema for HTTP/2 ``RST_STREAM`` frames."""
 
@@ -267,6 +273,7 @@ class RSTStreamFrame(FrameType):
         def __init__(self, error: 'Enum_ErrorCode') -> 'None': ...
 
 
+@schema_final
 class SettingPair(Schema):
     """Header schema for HTTP/2 ``SETTINGS`` frame setting pairs."""
 
@@ -279,6 +286,7 @@ class SettingPair(Schema):
         def __init__(self, id: 'Enum_Setting', value: 'int') -> 'None': ...
 
 
+@schema_final
 class SettingsFrame(FrameType):
     """Header schema for HTTP/2 ``SETTINGS`` frames."""
 
@@ -297,6 +305,7 @@ class SettingsFrame(FrameType):
         def __init__(self, settings: 'list[SettingPair] | bytes') -> 'None': ...
 
 
+@schema_final
 class PushPromiseFrame(FrameType):
     """Header schema for HTTP/2 ``PUSH_PROMISE`` frames."""
 
@@ -329,6 +338,7 @@ class PushPromiseFrame(FrameType):
         def __init__(self, pad_len: 'Optional[int]', stream: 'StreamID', fragment: 'bytes') -> 'None': ...
 
 
+@schema_final
 class PingFrame(FrameType):
     """Header schema for HTTP/2 ``PING`` frames."""
 
@@ -344,6 +354,7 @@ class PingFrame(FrameType):
         def __init__(self, data: 'bytes') -> 'None': ...
 
 
+@schema_final
 class GoawayFrame(FrameType):
     """Header schema for HTTP/2 ``GOAWAY`` frames."""
 
@@ -360,6 +371,7 @@ class GoawayFrame(FrameType):
         def __init__(self, stream: 'StreamID', error: 'Enum_ErrorCode', debug: 'bytes') -> 'None': ...
 
 
+@schema_final
 class WindowUpdateFrame(FrameType):
     """Header schema for HTTP/2 ``WINDOW_UPDATE`` frames."""
 
@@ -372,6 +384,7 @@ class WindowUpdateFrame(FrameType):
         def __init__(self, size: 'WindowSize') -> 'None': ...
 
 
+@schema_final
 class ContinuationFrame(FrameType):
     """Header schema for HTTP/2 ``CONTINUATION`` frames."""
 

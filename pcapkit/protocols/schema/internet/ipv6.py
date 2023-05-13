@@ -9,7 +9,7 @@ from pcapkit.corekit.fields.ipaddress import IPv6AddressField
 from pcapkit.corekit.fields.misc import PayloadField
 from pcapkit.corekit.fields.numbers import EnumField, UInt8Field, UInt16Field
 from pcapkit.corekit.fields.strings import BitField
-from pcapkit.protocols.schema.schema import Schema
+from pcapkit.protocols.schema.schema import Schema, schema_final
 from pcapkit.utilities.logging import SPHINX_TYPE_CHECKING
 
 __all__ = ['IPv6']
@@ -33,6 +33,7 @@ if SPHINX_TYPE_CHECKING:
     })
 
 
+@schema_final
 class IPv6(Schema):
     """Header schema for IPv6 packet."""
 

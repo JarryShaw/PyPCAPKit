@@ -29,7 +29,7 @@ from pcapkit.corekit.fields.misc import ConditionalField, PayloadField, SchemaFi
 from pcapkit.corekit.fields.numbers import (EnumField, NumberField, UInt8Field, UInt16Field,
                                             UInt32Field)
 from pcapkit.corekit.fields.strings import BitField, BytesField, PaddingField
-from pcapkit.protocols.schema.schema import Schema
+from pcapkit.protocols.schema.schema import Schema, schema_final
 from pcapkit.utilities.exceptions import FieldValueError
 from pcapkit.utilities.logging import SPHINX_TYPE_CHECKING
 from pcapkit.utilities.warnings import ProtocolWarning, warn
@@ -175,6 +175,7 @@ class Parameter(Schema):
     len: 'int' = UInt16Field()
 
 
+@schema_final
 class UnassignedParameter(Parameter):
     """Header schema for HIP unsigned parameters."""
 
@@ -187,6 +188,7 @@ class UnassignedParameter(Parameter):
         def __init__(self, type: 'Enum_Parameter', len: 'int', value: 'bytes') -> 'None': ...
 
 
+@schema_final
 class ESPInfoParameter(Parameter):
     """Header schema for HIP ``ESP_INFO`` parameters."""
 
@@ -206,6 +208,7 @@ class ESPInfoParameter(Parameter):
                      old_spi: 'int', new_spi: 'int') -> 'None': ...
 
 
+@schema_final
 class R1CounterParameter(Parameter):
     """Header schema for HIP ``R1_COUNTER`` parameters."""
 
@@ -220,6 +223,7 @@ class R1CounterParameter(Parameter):
         def __init__(self, type: 'Enum_Parameter', len: 'int', counter: 'int') -> 'None': ...
 
 
+@schema_final
 class Locator(Schema):
     """Header schema for HIP locators."""
 
@@ -247,6 +251,7 @@ class Locator(Schema):
                      lifetime: 'int', value: 'bytes | LocatorData') -> 'None': ...
 
 
+@schema_final
 class LocatorSetParameter(Parameter):
     """Header schema for HIP ``LOCATOR_SET`` parameters."""
 
@@ -262,6 +267,7 @@ class LocatorSetParameter(Parameter):
         def __init__(self, type: 'Enum_Parameter', len: 'int', locators: 'list[Locator]') -> 'None': ...
 
 
+@schema_final
 class LocatorData(Schema):
     """Header schema for HIP locator data."""
 
@@ -274,6 +280,7 @@ class LocatorData(Schema):
         def __init__(self, spi: 'int', ip: 'IPv6Address | int | bytes | str') -> 'None': ...
 
 
+@schema_final
 class PuzzleParameter(Parameter):
     """Header schema for HIP ``PUZZLE`` parameters."""
 
@@ -293,6 +300,7 @@ class PuzzleParameter(Parameter):
                      opaque: 'bytes', random: 'int') -> 'None': ...
 
 
+@schema_final
 class SolutionParameter(Parameter):
     """Header schema for HIP ``SOLUTION`` parameters."""
 
@@ -314,6 +322,7 @@ class SolutionParameter(Parameter):
                      opaque: 'bytes', random: 'int', solution: 'int') -> 'None': ...
 
 
+@schema_final
 class SEQParameter(Parameter):
     """Header schema for HIP ``SEQ`` parameters."""
 
@@ -326,6 +335,7 @@ class SEQParameter(Parameter):
         def __init__(self, type: 'Enum_Parameter', len: 'int', update_id: 'int') -> 'None': ...
 
 
+@schema_final
 class ACKParameter(Parameter):
     """Header schema for HIP ``ACK`` parameters."""
 
@@ -341,6 +351,7 @@ class ACKParameter(Parameter):
         def __init__(self, type: 'Enum_Parameter', len: 'int', update_id: 'bytes | list[int]') -> 'None': ...
 
 
+@schema_final
 class DHGroupListParameter(Parameter):
     """Header schema for HIP ``DH_GROUP_LIST`` parameters."""
 
@@ -356,6 +367,7 @@ class DHGroupListParameter(Parameter):
         def __init__(self, type: 'Enum_Parameter', len: 'int', groups: 'list[Enum_Group]') -> 'None': ...
 
 
+@schema_final
 class DiffieHellmanParameter(Parameter):
     """Header schema for HIP ``DIFFIE_HELLMAN`` parameters."""
 
@@ -373,6 +385,7 @@ class DiffieHellmanParameter(Parameter):
                      pub_val: 'int') -> 'None': ...
 
 
+@schema_final
 class HIPTransformParameter(Parameter):
     """Header schema for HIP ``TRANSFORM`` parameters."""
 
@@ -388,6 +401,7 @@ class HIPTransformParameter(Parameter):
         def __init__(self, type: 'Enum_Parameter', len: 'int', suites: 'list[Enum_Suite]') -> 'None': ...
 
 
+@schema_final
 class HIPCipherParameter(Parameter):
     """Header schema for HIP ``CIPHER`` parameters."""
 
@@ -403,6 +417,7 @@ class HIPCipherParameter(Parameter):
         def __init__(self, type: 'Enum_Parameter', len: 'int', ciphers: 'list[Enum_Cipher]') -> 'None': ...
 
 
+@schema_final
 class NATTraversalModeParameter(Parameter):
     """Header schema for HIP ``NAT_TRAVERSAL_MODE`` parameters."""
 
@@ -420,6 +435,7 @@ class NATTraversalModeParameter(Parameter):
         def __init__(self, type: 'Enum_Parameter', len: 'int', modes: 'list[Enum_NATTraversal]') -> 'None': ...
 
 
+@schema_final
 class TransactionPacingParameter(Parameter):
     """Header schema for HIP ``TRANSACTION_PACING`` parameters."""
 
@@ -432,6 +448,7 @@ class TransactionPacingParameter(Parameter):
         def __init__(self, type: 'Enum_Parameter', len: 'int', min_ta: 'int') -> 'None': ...
 
 
+@schema_final
 class EncryptedParameter(Parameter):
     """Header schema for HIP ``ENCRYPTED`` parameters."""
 
@@ -511,6 +528,7 @@ class EncryptedParameter(Parameter):
                      iv: 'Optional[bytes]', data: 'bytes') -> 'None': ...
 
 
+@schema_final
 class HostIDParameter(Parameter):
     """Header schema for HIP ``HOST_ID`` parameters."""
 
@@ -543,6 +561,7 @@ class HostIdentity(Schema):
     """Host identity schema."""
 
 
+@schema_final
 class ECDSACurveHostIdentity(HostIdentity):
     """Host identity schema with ECDSA curve."""
 
@@ -555,6 +574,7 @@ class ECDSACurveHostIdentity(HostIdentity):
         def __init__(self, curve: 'Enum_ECDSACurve', pub_key: 'bytes') -> 'None': ...
 
 
+@schema_final
 class ECDSALowCurveHostIdentity(HostIdentity):
     """Host identity schema with ECDSA_LOW curve."""
 
@@ -567,6 +587,7 @@ class ECDSALowCurveHostIdentity(HostIdentity):
         def __init__(self, curve: 'Enum_ECDSALowCurve', pub_key: 'bytes') -> 'None': ...
 
 
+@schema_final
 class EdDSACurveHostIdentity(HostIdentity):
     """Host identity schema with EdDSA curve."""
 
@@ -579,6 +600,7 @@ class EdDSACurveHostIdentity(HostIdentity):
         def __init__(self, curve: 'Enum_EdDSACurve', pub_key: 'bytes') -> 'None': ...
 
 
+@schema_final
 class HITSuiteListParameter(Parameter):
     """Header schema for HIP ``HIT_SUITE_LIST`` parameters."""
 
@@ -594,6 +616,7 @@ class HITSuiteListParameter(Parameter):
         def __init__(self, type: 'Enum_Parameter', len: 'int', suites: 'list[Enum_HITSuite]') -> 'None': ...
 
 
+@schema_final
 class CertParameter(Parameter):
     """Header schema for HIP ``CERT`` parameters."""
 
@@ -615,6 +638,7 @@ class CertParameter(Parameter):
                      cert_id: 'int', cert_type: 'Enum_Certificate', cert: 'bytes') -> 'None': ...
 
 
+@schema_final
 class NotificationParameter(Parameter):
     """Header schema for HIP ``NOTIFICATION`` parameters."""
 
@@ -631,6 +655,7 @@ class NotificationParameter(Parameter):
         def __init__(self, type: 'Enum_Parameter', len: 'int', msg_type: 'Enum_NotifyMessage', msg: 'bytes') -> 'None': ...
 
 
+@schema_final
 class EchoRequestSignedParameter(Parameter):
     """Header schema for HIP ``ECHO_REQUEST_SIGNED`` parameters."""
 
@@ -643,6 +668,7 @@ class EchoRequestSignedParameter(Parameter):
         def __init__(self, type: 'Enum_Parameter', len: 'int', opaque: 'bytes') -> 'None': ...
 
 
+@schema_final
 class RegInfoParameter(Parameter):
     """Header schema for HIP ``REG_INFO`` parameters."""
 
@@ -663,6 +689,7 @@ class RegInfoParameter(Parameter):
                      reg_info: 'list[Enum_Registration]') -> 'None': ...
 
 
+@schema_final
 class RegRequestParameter(Parameter):
     """Header schema for HIP ``REG_REQUEST`` parameters."""
 
@@ -680,6 +707,7 @@ class RegRequestParameter(Parameter):
         def __init__(self, type: 'Enum_Parameter', len: 'int', lifetime: 'int', reg_request: 'list[Enum_Registration]') -> 'None': ...
 
 
+@schema_final
 class RegResponseParameter(Parameter):
     """Header schema for HIP ``REG_RESPONSE`` parameters."""
 
@@ -697,6 +725,7 @@ class RegResponseParameter(Parameter):
         def __init__(self, type: 'Enum_Parameter', len: 'int', lifetime: 'int', reg_response: 'list[Enum_Registration]') -> 'None': ...
 
 
+@schema_final
 class RegFailedParameter(Parameter):
     """Header schema for HIP ``REG_FAILED`` parameters."""
 
@@ -714,6 +743,7 @@ class RegFailedParameter(Parameter):
         def __init__(self, type: 'Enum_Parameter', len: 'int', lifetime: 'int', reg_failed: 'list[Enum_RegistrationFailure]') -> 'None': ...
 
 
+@schema_final
 class RegFromParameter(Parameter):
     """Header schema for HIP ``REG_FROM`` parameters."""
 
@@ -730,6 +760,7 @@ class RegFromParameter(Parameter):
         def __init__(self, type: 'Enum_Parameter', len: 'int', port: 'int', protocol: 'Enum_TransType', address: 'IPv6Address | bytes | int | str') -> 'None': ...
 
 
+@schema_final
 class EchoResponseSignedParameter(Parameter):
     """Header schema for HIP ``ECHO_RESPONSE_SIGNED`` parameters."""
 
@@ -742,6 +773,7 @@ class EchoResponseSignedParameter(Parameter):
         def __init__(self, type: 'Enum_Parameter', len: 'int', opaque: 'bytes') -> 'None': ...
 
 
+@schema_final
 class TransportFormatListParameter(Parameter):
     """Header schema for HIP ``TRANSPORT_FORMAT_LIST`` parameters."""
 
@@ -757,6 +789,7 @@ class TransportFormatListParameter(Parameter):
         def __init__(self, type: 'Enum_Parameter', len: 'int', formats: 'list[Enum_Parameter]') -> 'None': ...
 
 
+@schema_final
 class ESPTransformParameter(Parameter):
     """Header schema for HIP ``ESP_TRANSFORM`` parameters."""
 
@@ -774,6 +807,7 @@ class ESPTransformParameter(Parameter):
         def __init__(self, type: 'Enum_Parameter', len: 'int', suites: 'list[Enum_ESPTransformSuite]') -> 'None': ...
 
 
+@schema_final
 class SeqDataParameter(Parameter):
     """Header schema for HIP ``SEQ_DATA`` parameters."""
 
@@ -786,6 +820,7 @@ class SeqDataParameter(Parameter):
         def __init__(self, type: 'Enum_Parameter', len: 'int', seq: 'int') -> 'None': ...
 
 
+@schema_final
 class AckDataParameter(Parameter):
     """Header schema for HIP ``ACK_DATA`` parameters."""
 
@@ -801,6 +836,7 @@ class AckDataParameter(Parameter):
         def __init__(self, type: 'Enum_Parameter', len: 'int', ack: 'list[int]') -> 'None': ...
 
 
+@schema_final
 class PayloadMICParameter(Parameter):
     """Header schema for HIP ``PAYLOAD_MIC`` parameters."""
 
@@ -819,6 +855,7 @@ class PayloadMICParameter(Parameter):
         def __init__(self, type: 'Enum_Parameter', len: 'int', next: 'Enum_TransType', payload: 'bytes', mic: 'bytes') -> 'None': ...
 
 
+@schema_final
 class TransactionIDParameter(Parameter):
     """Header schema for HIP ``TRANSACTION_ID`` parameters."""
 
@@ -831,6 +868,7 @@ class TransactionIDParameter(Parameter):
         def __init__(self, type: 'Enum_Parameter', len: 'int', id: 'int') -> 'None': ...
 
 
+@schema_final
 class OverlayIDParameter(Parameter):
     """Header schema for HIP ``OVERLAY_ID`` parameters."""
 
@@ -843,6 +881,7 @@ class OverlayIDParameter(Parameter):
         def __init__(self, type: 'Enum_Parameter', len: 'int', id: 'int') -> 'None': ...
 
 
+@schema_final
 class RouteDstParameter(Parameter):
     """Header schema for HIP ``ROUTE_DST`` parameters."""
 
@@ -865,6 +904,7 @@ class RouteDstParameter(Parameter):
         def __init__(self, type: 'Enum_Parameter', len: 'int', flags: 'RouteFlags', hit: 'list[str | int | bytes | IPv6Address]') -> 'None': ...
 
 
+@schema_final
 class HIPTransportModeParameter(Parameter):
     """Header schema for HIP ``HIP_TRANSPORT_MODE`` parameters."""
 
@@ -882,6 +922,7 @@ class HIPTransportModeParameter(Parameter):
         def __init__(self, type: 'Enum_Parameter', len: 'int', port: 'int', mode: 'list[Enum_Transport]') -> 'None': ...
 
 
+@schema_final
 class HIPMACParameter(Parameter):
     """Header schema for HIP ``HIP_MAC`` parameters."""
 
@@ -894,6 +935,7 @@ class HIPMACParameter(Parameter):
         def __init__(self, type: 'Enum_Parameter', len: 'int', hmac: 'bytes') -> 'None': ...
 
 
+@schema_final
 class HIPMAC2Parameter(Parameter):
     """Header schema for HIP ``HIP_MAC_2`` parameters."""
 
@@ -906,6 +948,7 @@ class HIPMAC2Parameter(Parameter):
         def __init__(self, type: 'Enum_Parameter', len: 'int', hmac: 'bytes') -> 'None': ...
 
 
+@schema_final
 class HIPSignature2Parameter(Parameter):
     """Header schema for HIP ``HIP_SIGNATURE_2`` parameters."""
 
@@ -920,6 +963,7 @@ class HIPSignature2Parameter(Parameter):
         def __init__(self, type: 'Enum_Parameter', len: 'int', algorithm: 'Enum_HIAlgorithm', signature: 'bytes') -> 'None': ...
 
 
+@schema_final
 class HIPSignatureParameter(Parameter):
     """Header schema for HIP ``HIP_SIGNATURE`` parameters."""
 
@@ -934,6 +978,7 @@ class HIPSignatureParameter(Parameter):
         def __init__(self, type: 'Enum_Parameter', len: 'int', algorithm: 'Enum_HIAlgorithm', signature: 'bytes') -> 'None': ...
 
 
+@schema_final
 class EchoRequestUnsignedParameter(Parameter):
     """Header schema for HIP ``ECHO_REQUEST_UNSIGNED`` parameters."""
 
@@ -946,6 +991,7 @@ class EchoRequestUnsignedParameter(Parameter):
         def __init__(self, type: 'Enum_Parameter', len: 'int', opaque: 'bytes') -> 'None': ...
 
 
+@schema_final
 class EchoResponseUnsignedParameter(Parameter):
     """Header schema for HIP ``ECHO_RESPONSE_UNSIGNED`` parameters."""
 
@@ -958,6 +1004,7 @@ class EchoResponseUnsignedParameter(Parameter):
         def __init__(self, type: 'Enum_Parameter', len: 'int', opaque: 'bytes') -> 'None': ...
 
 
+@schema_final
 class RelayFromParameter(Parameter):
     """Header schema for HIP ``RELAY_FROM`` parameters."""
 
@@ -974,6 +1021,7 @@ class RelayFromParameter(Parameter):
         def __init__(self, type: 'Enum_Parameter', len: 'int', port: 'int', protocol: 'Enum_TransType', address: 'str | bytes | int | IPv6Address') -> 'None': ...
 
 
+@schema_final
 class RelayToParameter(Parameter):
     """Header schema for HIP ``RELAY_TO`` parameters."""
 
@@ -990,6 +1038,7 @@ class RelayToParameter(Parameter):
         def __init__(self, type: 'Enum_Parameter', len: 'int', port: 'int', protocol: 'Enum_TransType', address: 'str | bytes | int | IPv6Address') -> 'None': ...
 
 
+@schema_final
 class OverlayTTLParameter(Parameter):
     """Header schema for HIP ``OVERLAY_TTL`` parameters."""
 
@@ -1004,6 +1053,7 @@ class OverlayTTLParameter(Parameter):
         def __init__(self, type: 'Enum_Parameter', len: 'int', ttl: 'int') -> 'None': ...
 
 
+@schema_final
 class RouteViaParameter(Parameter):
     """Header schema for HIP ``ROUTE_VIA`` parameters."""
 
@@ -1026,6 +1076,7 @@ class RouteViaParameter(Parameter):
         def __init__(self, type: 'Enum_Parameter', len: 'int', flags: 'RouteFlags', hit: 'list[str | bytes | int | IPv6Address]') -> 'None': ...
 
 
+@schema_final
 class FromParameter(Parameter):
     """Header schema for HIP ``FROM`` parameters."""
 
@@ -1038,6 +1089,7 @@ class FromParameter(Parameter):
         def __init__(self, type: 'Enum_Parameter', len: 'int', address: 'str | bytes | int | IPv6Address') -> 'None': ...
 
 
+@schema_final
 class RVSHMACParameter(Parameter):
     """Header schema for HIP ``RVS_HMAC`` parameters."""
 
@@ -1050,6 +1102,7 @@ class RVSHMACParameter(Parameter):
         def __init__(self, type: 'Enum_Parameter', len: 'int', hmac: 'bytes') -> 'None': ...
 
 
+@schema_final
 class ViaRVSParameter(Parameter):
     """Header schema for HIP ``VIA_RVS`` parameters."""
 
@@ -1065,6 +1118,7 @@ class ViaRVSParameter(Parameter):
         def __init__(self, type: 'Enum_Parameter', len: 'int', address: 'list[str | bytes | int | IPv6Address]') -> 'None': ...
 
 
+@schema_final
 class RelayHMACParameter(Parameter):
     """Header schema for HIP ``RELAY_HMAC`` parameters."""
 
@@ -1077,6 +1131,7 @@ class RelayHMACParameter(Parameter):
         def __init__(self, type: 'Enum_Parameter', len: 'int', hmac: 'bytes') -> 'None': ...
 
 
+@schema_final
 class HIP(Schema):
     """Header schema for HIP packet."""
 

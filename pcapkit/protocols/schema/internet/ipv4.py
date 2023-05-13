@@ -19,7 +19,7 @@ from pcapkit.corekit.fields.misc import (ConditionalField, ForwardMatchField, Pa
                                          SchemaField, SwitchField)
 from pcapkit.corekit.fields.numbers import EnumField, UInt8Field, UInt16Field, UInt32Field
 from pcapkit.corekit.fields.strings import BitField, BytesField, PaddingField
-from pcapkit.protocols.schema.schema import Schema
+from pcapkit.protocols.schema.schema import Schema, schema_final
 from pcapkit.utilities.exceptions import FieldValueError
 from pcapkit.utilities.logging import SPHINX_TYPE_CHECKING
 from pcapkit.utilities.warnings import ProtocolWarning, warn
@@ -156,6 +156,7 @@ class Option(Schema):
         return self
 
 
+@schema_final
 class UnassignedOption(Option):
     """Header schema for IPv4 unassigned options."""
 
@@ -166,6 +167,7 @@ class UnassignedOption(Option):
         def __init__(self, type: 'Enum_OptionNumber', length: 'int', data: 'bytes') -> 'None': ...
 
 
+@schema_final
 class EOOLOption(Option):
     """Header schema for IPv4 end of option list (``EOOL``) option."""
 
@@ -173,6 +175,7 @@ class EOOLOption(Option):
         def __init__(self, type: 'Enum_OptionNumber', length: 'int') -> 'None': ...
 
 
+@schema_final
 class NOPOption(Option):
     """Header schema for IPv4 no operation (``NOP``) option."""
 
@@ -180,6 +183,7 @@ class NOPOption(Option):
         def __init__(self, type: 'Enum_OptionNumber', length: 'int') -> 'None': ...
 
 
+@schema_final
 class SECOption(Option):
     """Header schema for IPv4 security (``SEC``) option."""
 
@@ -195,6 +199,7 @@ class SECOption(Option):
         def __init__(self, type: 'Enum_OptionNumber', length: 'int', level: 'int', data: 'Optional[bytes]') -> 'None': ...
 
 
+@schema_final
 class LSROption(Option):
     """Header schema for IPv4 loose source route (``LSR``) option."""
 
@@ -215,6 +220,7 @@ class LSROption(Option):
         def __init__(self, type: 'Enum_OptionNumber', length: 'int', pointer: 'int', route: 'list[IPv4Address | str | bytes | int]') -> 'None': ...
 
 
+@schema_final
 class TSOption(Option):
     """Header schema for IPv4 timestamp (``TS``) option."""
 
@@ -316,6 +322,7 @@ class TSOption(Option):
         def __init__(self, type: 'Enum_OptionNumber', length: 'int', pointer: 'int', flags: 'TSFlags', data: 'list[int]') -> 'None': ...
 
 
+@schema_final
 class ESECOption(Option):
     """Header schema for IPv4 extended security (``ESEC``) option."""
 
@@ -331,6 +338,7 @@ class ESECOption(Option):
         def __init__(self, type: 'Enum_OptionNumber', length: 'int', format: 'int', info: 'Optional[bytes]') -> 'None': ...
 
 
+@schema_final
 class RROption(Option):
     """Header schema for IPv4 record route (``RR``) option."""
 
@@ -351,6 +359,7 @@ class RROption(Option):
         def __init__(self, type: 'Enum_OptionNumber', length: 'int', pointer: 'int', route: 'list[IPv4Address | str | bytes | int]') -> 'None': ...
 
 
+@schema_final
 class SIDOption(Option):
     """Header schema for IPv4 stream identifier (``SID``) option."""
 
@@ -361,6 +370,7 @@ class SIDOption(Option):
         def __init__(self, type: 'Enum_OptionNumber', length: 'int', sid: 'int') -> 'None': ...
 
 
+@schema_final
 class SSROption(Option):
     """Header schema for IPv4 strict source route (``SSR``) option."""
 
@@ -381,6 +391,7 @@ class SSROption(Option):
         def __init__(self, type: 'Enum_OptionNumber', length: 'int', pointer: 'int', route: 'list[IPv4Address | str | bytes | int]') -> 'None': ...
 
 
+@schema_final
 class MTUPOption(Option):
     """Header schema for IPv4 MTU probe (``MTUP``) option."""
 
@@ -391,6 +402,7 @@ class MTUPOption(Option):
         def __init__(self, type: 'Enum_OptionNumber', length: 'int', mtu: 'int') -> 'None': ...
 
 
+@schema_final
 class MTUROption(Option):
     """Header schema for IPv4 MTU reply (``MTUR``) option."""
 
@@ -401,6 +413,7 @@ class MTUROption(Option):
         def __init__(self, type: 'Enum_OptionNumber', length: 'int', mtu: 'int') -> 'None': ...
 
 
+@schema_final
 class TROption(Option):
     """Header schema for IPv4 traceroute (``TR``) option."""
 
@@ -417,6 +430,7 @@ class TROption(Option):
         def __init__(self, type: 'Enum_OptionNumber', length: 'int', id: 'int', out: 'int', ret: 'int', origin: 'IPv4Address | str | bytes | int') -> 'None': ...
 
 
+@schema_final
 class RTRALTOption(Option):
     """Header schema for IPv4 router alert (``RTRALT``) option."""
 
@@ -427,6 +441,7 @@ class RTRALTOption(Option):
         def __init__(self, type: 'Enum_OptionNumber', length: 'int', alert: 'Enum_RouterAlert') -> 'None': ...
 
 
+@schema_final
 class _QSOption(Schema):
     """Header schema for IPv4 quick start (``QS``) options in generic representation."""
 
@@ -467,6 +482,7 @@ class QSOption(Option):
         func: 'Enum_QSFunction'
 
 
+@schema_final
 class QuickStartRequestOption(QSOption):
     """Header schema for IPV4 quick start request options."""
 
@@ -482,6 +498,7 @@ class QuickStartRequestOption(QSOption):
                      ttl: 'int', nonce: 'QSNonce') -> 'None': ...
 
 
+@schema_final
 class QuickStartReportOption(QSOption):
     """Header schema for IPV4 quick start report of approved rate options."""
 
@@ -495,6 +512,7 @@ class QuickStartReportOption(QSOption):
                      nonce: 'QSNonce') -> 'None': ...
 
 
+@schema_final
 class IPv4(Schema):
     """Header schema for IPv4 packet."""
 
