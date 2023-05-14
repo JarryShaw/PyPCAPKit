@@ -3,7 +3,7 @@
 
 from typing import TYPE_CHECKING, Generic, TypeVar
 
-from pcapkit.corekit.infoclass import Info
+from pcapkit.corekit.infoclass import Info, info_final
 from pcapkit.utilities.compat import Tuple
 
 __all__ = [
@@ -25,6 +25,7 @@ IPAddress = TypeVar('IPAddress', 'IPv4Address', 'IPv6Address')
 BufferID = Tuple[IPAddress, int, IPAddress, int]
 
 
+@info_final
 class Packet(Info):
     """Data model for :term:`reasm.tcp.packet`."""
 
@@ -57,6 +58,7 @@ class Packet(Info):
         def __init__(self, bufid: 'BufferID', dsn: 'int', ack: 'int', num: 'int', syn: 'bool', fin: 'bool', rst: 'bool', len: 'int', first: 'int', last: 'int', header: 'bytes', payload: 'bytearray') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
+@info_final
 class DatagramID(Info, Generic[IPAddress]):
     """Data model for :term:`reasm.tcp.datagram` original packet identifier."""
 
@@ -71,6 +73,7 @@ class DatagramID(Info, Generic[IPAddress]):
         def __init__(self, src: 'tuple[IPAddress, int]', dst: 'tuple[IPAddress, int]', ack: 'int') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
+@info_final
 class Datagram(Info, Generic[IPAddress]):
     """Data model for :term:`reasm.tcp.datagram`."""
 
@@ -97,6 +100,7 @@ class Datagram(Info, Generic[IPAddress]):
         def __init__(self, completed: 'bool', id: 'DatagramID[IPAddress]', index: 'tuple[int, ...]', header: 'bytes', payload: 'bytes | tuple[bytes, ...]', packet: 'Optional[Protocol]') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
+@info_final
 class HoleDiscriptor(Info):
     """Data model for :term:`reasm.tcp.buffer` hole descriptor."""
 
@@ -109,6 +113,7 @@ class HoleDiscriptor(Info):
         def __init__(self, first: 'int', last: 'int') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
+@info_final
 class Fragment(Info):
     """Data model for :term:`reasm.tcp.buffer` ACK list fragment item."""
 
@@ -125,6 +130,7 @@ class Fragment(Info):
         def __init__(self, ind: 'list[int]', isn: 'int', len: 'int', raw: 'bytearray') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
+@info_final
 class Buffer(Info):
     """Data model for :term:`reasm.tcp.buffer`."""
 

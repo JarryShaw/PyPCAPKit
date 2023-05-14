@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING
 
 from pcapkit.const.ipv4.option_class import OptionClass
 from pcapkit.const.ipv4.tos_del import ToSDelay
+from pcapkit.corekit.infoclass import info_final
 from pcapkit.protocols.data.data import Data
 
 if TYPE_CHECKING:
@@ -42,6 +43,7 @@ __all__ = [
 ]
 
 
+@info_final
 class ToSField(Data):
     """Data model for IPv4 ToS fields.
 
@@ -69,9 +71,10 @@ class ToSField(Data):
         # Thus, we directly inject the information into the annotations.
         self.__annotations__['del'] = ToSDelay  # pylint: disable=no-member
 
-        return self  # type: ignore[return-value]
+        return self
 
 
+@info_final
 class Flags(Data):
     """Data model for IPv4 Flags."""
 
@@ -84,6 +87,7 @@ class Flags(Data):
         def __init__(self, df: 'bool', mf: 'bool') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
+@info_final
 class IPv4(Data):
     """Data model for IPv4 packet."""
 
@@ -118,6 +122,7 @@ class IPv4(Data):
         def __init__(self, version: 'Literal[4]', hdr_len: 'int', tos: 'ToSField', len: 'int', id: 'int', flags: 'Flags', offset: 'int', ttl: 'timedelta', protocol: 'TransType', checksum: 'bytes', src: 'IPv4Address', dst: 'IPv4Address') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
+@info_final
 class OptionType(Data):
     """Data model for IPv4 option type data."""
 
@@ -135,7 +140,7 @@ class OptionType(Data):
         # Thus, we directly inject the information into the annotations.
         self.__annotations__['class'] = OptionClass  # pylint: disable=no-member
 
-        return self  # type: ignore[return-value]
+        return self
 
 
 class Option(Data):
@@ -149,6 +154,7 @@ class Option(Data):
     type: 'OptionType'
 
 
+@info_final
 class UnassignedOption(Option):
     """Data model for IPv4 unassigned option."""
 
@@ -159,6 +165,7 @@ class UnassignedOption(Option):
         def __init__(self, code: 'OptionNumber', length: 'int', type: 'OptionType', data: 'bytes') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
+@info_final
 class EOOLOption(Option):
     """Data model for IPv4 End of Option List (``EOOL``) option."""
 
@@ -166,6 +173,7 @@ class EOOLOption(Option):
         def __init__(self, code: 'OptionNumber', length: 'int', type: 'OptionType') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
+@info_final
 class NOPOption(Option):
     """Data model for IPv4 No Operation (``NOP``) option."""
 
@@ -173,6 +181,7 @@ class NOPOption(Option):
         def __init__(self, code: 'OptionNumber', length: 'int', type: 'OptionType') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
+@info_final
 class SECOption(Option):
     """Data model for IPv4 Security (``SEC``) option."""
 
@@ -185,6 +194,7 @@ class SECOption(Option):
         def __init__(self, code: 'OptionNumber', length: 'int', type: 'OptionType', level: 'ClassificationLevel', flags: 'tuple[ProtectionAuthority, ...]') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
+@info_final
 class LSROption(Option):
     """Data model for IPv4 Loose Source Route (``LSR``) option."""
 
@@ -197,6 +207,7 @@ class LSROption(Option):
         def __init__(self, code: 'OptionNumber', length: 'int', type: 'OptionType', pointer: 'int', route: 'tuple[IPv4Address, ...]') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
+@info_final
 class TSOption(Option):
     """Data model for IPv4 Time Stamp (``TS``) option."""
 
@@ -213,6 +224,7 @@ class TSOption(Option):
         def __init__(self, code: 'OptionNumber', length: 'int', type: 'OptionType', pointer: 'int', overflow: 'int', flag: 'TSFlag', timestamp: 'tuple[timedelta | int, ...] | OrderedMultiDict[IPv4Address, timedelta | int]') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
+@info_final
 class ESECOption(Option):
     """Data model for IPv4 Extended Security (``ESEC``) option."""
 
@@ -225,6 +237,7 @@ class ESECOption(Option):
         def __init__(self, code: 'OptionNumber', length: 'int', type: 'OptionType', format: 'int', info: 'bytes') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
+@info_final
 class RROption(Option):
     """Data model for IPv4 Record Route (``RR``) option."""
 
@@ -237,6 +250,7 @@ class RROption(Option):
         def __init__(self, code: 'OptionNumber', length: 'int', type: 'OptionType', pointer: 'int', route: 'Optional[tuple[IPv4Address, ...]]') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
+@info_final
 class SIDOption(Option):
     """Data model for IPv4 Stream ID (``SID``) option."""
 
@@ -247,6 +261,7 @@ class SIDOption(Option):
         def __init__(self, code: 'OptionNumber', length: 'int', type: 'OptionType', sid: 'int') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
+@info_final
 class SSROption(Option):
     """Data model for IPv4 Strict Source Route (``SSR``) option."""
 
@@ -259,6 +274,7 @@ class SSROption(Option):
         def __init__(self, code: 'OptionNumber', length: 'int', type: 'OptionType', pointer: 'int', route: 'Optional[tuple[IPv4Address, ...]]') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
+@info_final
 class MTUPOption(Option):
     """Data model for IPv4 MTU Probe (``MTUP``) option."""
 
@@ -269,6 +285,7 @@ class MTUPOption(Option):
         def __init__(self, code: 'OptionNumber', length: 'int', type: 'OptionType', mtu: 'int') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
+@info_final
 class MTUROption(Option):
     """Data model for IPv4 MTU Reply (``MTUR``) option."""
 
@@ -279,6 +296,7 @@ class MTUROption(Option):
         def __init__(self, code: 'OptionNumber', length: 'int', type: 'OptionType', mtu: 'int') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
+@info_final
 class TROption(Option):
     """Data model for IPv4 Traceroute (``TR``) option.
 
@@ -303,9 +321,10 @@ class TROption(Option):
         # Thus, we directly inject the information into the annotations.
         self.__annotations__['return'] = int  # pylint: disable=no-member
 
-        return self  # type: ignore[return-value]
+        return self
 
 
+@info_final
 class RTRALTOption(Option):
     """Data model for IPv4 Router Alert (``RTRALT``) option."""
 
@@ -325,6 +344,7 @@ class QSOption(Option):
     rate: 'int'
 
 
+@info_final
 class QuickStartRequestOption(QSOption):
     """Data model for IPv4 Quick Start request option."""
 
@@ -337,6 +357,7 @@ class QuickStartRequestOption(QSOption):
          def __init__(self, code: 'OptionNumber', length: 'int', type: 'OptionType', func: 'QSFunction', rate: 'int', ttl: 'timedelta', nonce: 'int') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
+@info_final
 class QuickStartReportOption(QSOption):
     """Data model for IPv4 Quick Start report of approved rate option."""
 

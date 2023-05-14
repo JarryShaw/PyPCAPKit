@@ -3,6 +3,7 @@
 
 from typing import TYPE_CHECKING
 
+from pcapkit.corekit.infoclass import info_final
 from pcapkit.protocols.data.data import Data
 
 if TYPE_CHECKING:
@@ -13,6 +14,7 @@ if TYPE_CHECKING:
 __all__ = ['L2TP']
 
 
+@info_final
 class Flags(Data):
     """Data model for L2TP flags and version info."""
 
@@ -30,6 +32,8 @@ class Flags(Data):
     if TYPE_CHECKING:
         def __init__(self, type: 'Type', len: 'bool', seq: 'bool', offset: 'bool', prio: 'bool') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,redefined-builtin,multiple-statements
 
+
+@info_final
 class L2TP(Data):
     """Data model for L2TP packet."""
 

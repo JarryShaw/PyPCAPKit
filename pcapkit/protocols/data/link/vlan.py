@@ -3,6 +3,7 @@
 
 from typing import TYPE_CHECKING
 
+from pcapkit.corekit.infoclass import info_final
 from pcapkit.protocols.data.data import Data
 
 if TYPE_CHECKING:
@@ -12,6 +13,7 @@ if TYPE_CHECKING:
 __all__ = ['VLAN', 'TCI']
 
 
+@info_final
 class TCI(Data):
     """Data model for tag control information."""
 
@@ -26,6 +28,7 @@ class TCI(Data):
         def __init__(self, pcp: 'PriorityLevel', dei: 'bool', vid: 'int') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements
 
 
+@info_final
 class VLAN(Data):
     """Data model for 802.1Q customer VLAN tag type."""
 

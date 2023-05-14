@@ -4,6 +4,7 @@
 
 from typing import TYPE_CHECKING
 
+from pcapkit.corekit.infoclass import info_final
 from pcapkit.protocols.data.data import Data
 
 if TYPE_CHECKING:
@@ -26,6 +27,7 @@ class FTP(Data):
     type: 'FTP_Type'
 
 
+@info_final
 class Request(FTP):
     """Data model for FTP request."""
 
@@ -40,6 +42,7 @@ class Request(FTP):
         def __init__(self, type: 'Literal[FTP_Type.REQUEST]', cmmd: 'Command', args: 'str') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
+@info_final
 class Response(FTP):
     """Data model for FTP response."""
 

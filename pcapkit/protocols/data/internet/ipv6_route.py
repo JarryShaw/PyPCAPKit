@@ -3,6 +3,7 @@
 
 from typing import TYPE_CHECKING
 
+from pcapkit.corekit.infoclass import info_final
 from pcapkit.protocols.data.data import Data
 
 if TYPE_CHECKING:
@@ -31,6 +32,7 @@ class IPv6_Route(Data):
     seg_left: 'int'
 
 
+@info_final
 class UnknownType(IPv6_Route):
     """Data model for IPv6-Route unknown type."""
 
@@ -42,6 +44,7 @@ class UnknownType(IPv6_Route):
                      data: 'bytes') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,super-init-not-called,redefined-builtin,line-too-long
 
 
+@info_final
 class SourceRoute(IPv6_Route):
     """Data model for IPv6-Route Source Route data type."""
 
@@ -53,6 +56,7 @@ class SourceRoute(IPv6_Route):
                      ip: 'tuple[IPv6Address, ...]') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,super-init-not-called,redefined-builtin,line-too-long
 
 
+@info_final
 class Type2(IPv6_Route):
     """Data model for IPv6-Route Type 2 data type."""
 
@@ -64,6 +68,7 @@ class Type2(IPv6_Route):
                      ip: 'IPv6Address') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,super-init-not-called,redefined-builtin,line-too-long
 
 
+@info_final
 class RPL(IPv6_Route):
     """Data model for RPL Source data type."""
 

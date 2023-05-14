@@ -3,7 +3,7 @@
 
 from typing import TYPE_CHECKING, Generic, TypeVar
 
-from pcapkit.corekit.infoclass import Info
+from pcapkit.corekit.infoclass import Info, info_final
 from pcapkit.utilities.compat import Tuple
 
 __all__ = [
@@ -25,6 +25,7 @@ AT = TypeVar('AT', 'IPv4Address', 'IPv6Address')
 BufferID = Tuple[AT, AT, int, 'TransType']
 
 
+@info_final
 class Packet(Info, Generic[AT]):
     """Data model for :term:`reasm.ipv4.packet` / :term:`reasm.ipv6.packet`."""
 
@@ -49,6 +50,7 @@ class Packet(Info, Generic[AT]):
         def __init__(self, bufid: 'tuple[AT, AT, int, TransType]', num: 'int', fo: 'int', ihl: 'int', mf: 'bool', tl: 'int', header: 'bytes', payload: 'bytearray') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
+@info_final
 class DatagramID(Info, Generic[AT]):
     """Data model for :term:`reasm.ipv4.datagram` / :term:`reasm.ipv6.datagram` original packet identifier."""
 
@@ -65,6 +67,7 @@ class DatagramID(Info, Generic[AT]):
         def __init__(self, src: 'AT', dst: 'AT', id: 'int', proto: 'TransType') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
+@info_final
 class Datagram(Info, Generic[AT]):
     """Data model for :term:`reasm.ipv4.datagram` / :term:`reasm.ipv6.datagram`."""
 
@@ -91,6 +94,7 @@ class Datagram(Info, Generic[AT]):
         def __init__(self, completed: 'bool', id: 'DatagramID[AT]', index: 'tuple[int, ...]', header: 'bytes', payload: 'bytes | tuple[bytes, ...]', packet: 'Optional[Protocol]') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
+@info_final
 class Buffer(Info, Generic[AT]):
     """Data model for :term:`reasm.ipv4.buffer` / :term:`reasm.ipv6.buffer`."""
 

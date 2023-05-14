@@ -3,6 +3,7 @@
 
 from typing import TYPE_CHECKING
 
+from pcapkit.corekit.infoclass import info_final
 from pcapkit.protocols.data.data import Data
 
 if TYPE_CHECKING:
@@ -48,6 +49,7 @@ class Option(Data):
     length: 'int'
 
 
+@info_final
 class IPv6_Opts(Data):
     """Data model for IPv6-Opts protocol."""
 
@@ -63,6 +65,7 @@ class IPv6_Opts(Data):
                      options: 'OrderedMultiDict[Enum_Option, Option]') -> 'None': ...  # pylint: disable=super-init-not-called,unused-argument,redefined-builtin,multiple-statements,line-too-long
 
 
+@info_final
 class UnassignedOption(Option):
     """Data model for IPv6-Opts unassigned option."""
 
@@ -74,6 +77,7 @@ class UnassignedOption(Option):
                      data: 'bytes') -> 'None': ...  # pylint: disable=super-init-not-called,unused-argument,redefined-builtin,multiple-statements,line-too-long
 
 
+@info_final
 class PadOption(Option):
     """Data model for IPv6-Opts padding options."""
 
@@ -82,6 +86,7 @@ class PadOption(Option):
                      length: 'int') -> 'None': ...  # pylint: disable=super-init-not-called,unused-argument,redefined-builtin,multiple-statements,line-too-long
 
 
+@info_final
 class TunnelEncapsulationLimitOption(Option):
     """Data model for IPv6-Opts tunnel encapsulation limit option."""
 
@@ -93,6 +98,7 @@ class TunnelEncapsulationLimitOption(Option):
                      limit: 'int') -> 'None': ...  # pylint: disable=super-init-not-called,unused-argument,redefined-builtin,multiple-statements,line-too-long
 
 
+@info_final
 class RouterAlertOption(Option):
     """Data model for IPv6-Opts router alter option."""
 
@@ -104,6 +110,7 @@ class RouterAlertOption(Option):
                      value: 'RouterAlert') -> 'None': ...  # pylint: disable=super-init-not-called,unused-argument,redefined-builtin,multiple-statements,line-too-long
 
 
+@info_final
 class CALIPSOOption(Option):
     """Data model for IPv6-Opts Common Architecture Label IPv6 Security Option (CALIPSO) option."""
 
@@ -131,6 +138,7 @@ class SMFDPDOption(Option):
     dpd_type: 'SMFDPDMode'
 
 
+@info_final
 class SMFIdentificationBasedDPDOption(SMFDPDOption):
     """Data model for IPv6-Opts **I-DPD** (Identification-Based DPD) option."""
 
@@ -148,6 +156,7 @@ class SMFIdentificationBasedDPDOption(SMFDPDOption):
                      tid: 'Optional[bytes | IPv4Address | IPv6Address]', id: 'bytes') -> 'None': ...  # pylint: disable=super-init-not-called,unused-argument,redefined-builtin,multiple-statements,line-too-long
 
 
+@info_final
 class SMFHashBasedDPDOption(SMFDPDOption):
     """Data model for IPv6-Opts **H-DPD** (Hash-Based DPD) option."""
 
@@ -159,6 +168,7 @@ class SMFHashBasedDPDOption(SMFDPDOption):
                      hav: 'bytes') -> 'None': ...  # pylint: disable=super-init-not-called,unused-argument,redefined-builtin,multiple-statements,line-too-long
 
 
+@info_final
 class PDMOption(Option):
     """Data model for IPv6-Opts Performance Diagnostic Metrics (PDM) option."""
 
@@ -189,6 +199,7 @@ class QuickStartOption(Option):
     rate: 'int'
 
 
+@info_final
 class QuickStartRequestOption(QuickStartOption):
     """Data model for IPv6-Opts Quick Start request option."""
 
@@ -202,6 +213,7 @@ class QuickStartRequestOption(QuickStartOption):
                      nonce: 'int') -> 'None': ...  # pylint: disable=super-init-not-called,unused-argument,redefined-builtin,multiple-statements,line-too-long
 
 
+@info_final
 class QuickStartReportOption(QuickStartOption):
     """Data model for IPv6-Opts Quick Start report of approved rate option."""
 
@@ -213,6 +225,7 @@ class QuickStartReportOption(QuickStartOption):
             ...
 
 
+@info_final
 class RPLFlags(Data):
     """Data model for IPv6-Opts RPL option flags fields."""
 
@@ -228,6 +241,7 @@ class RPLFlags(Data):
                      fwd_err: 'bool') -> 'None': ...  # pylint: disable=super-init-not-called,unused-argument,redefined-builtin,multiple-statements,line-too-long
 
 
+@info_final
 class RPLOption(Option):
     """Data model for IPv6-Opts Routing Protocol for Low-Power and Lossy Networks (RPL) option."""
 
@@ -243,6 +257,7 @@ class RPLOption(Option):
                      rank: 'int') -> 'None': ...  # pylint: disable=super-init-not-called,unused-argument,redefined-builtin,multiple-statements,line-too-long
 
 
+@info_final
 class MPLFlags(Data):
     """Data model for IPv6-Opts MPL option flags fields."""
 
@@ -255,6 +270,7 @@ class MPLFlags(Data):
         def __init__(self, max: 'bool', drop: 'bool') -> 'None': ...  # pylint: disable=super-init-not-called,unused-argument,redefined-builtin,multiple-statements,line-too-long
 
 
+@info_final
 class MPLOption(Option):
     """Data model for IPv6-Opts Multicast Protocol for Low-Power and Lossy Networks (MPL) option."""
 
@@ -272,6 +288,7 @@ class MPLOption(Option):
                      seed_id: 'Optional[int]') -> 'None': ...  # pylint: disable=super-init-not-called,unused-argument,redefined-builtin,multiple-statements,line-too-long
 
 
+@info_final
 class ILNPOption(Option):
     """Data model for IPv6-Opts Identifier-Locator Network Protocol (ILNP) Nonce option."""
 
@@ -283,6 +300,7 @@ class ILNPOption(Option):
                      nonce: 'int') -> 'None': ...  # pylint: disable=super-init-not-called,unused-argument,redefined-builtin,multiple-statements,line-too-long
 
 
+@info_final
 class LineIdentificationOption(Option):
     """Data model for IPv6-Opts Line-Identification option."""
 
@@ -296,6 +314,7 @@ class LineIdentificationOption(Option):
                      line_id: 'bytes') -> 'None': ...  # pylint: disable=super-init-not-called,unused-argument,redefined-builtin,multiple-statements,line-too-long
 
 
+@info_final
 class JumboPayloadOption(Option):
     """Data model for Jumbo Payload option."""
 
@@ -307,6 +326,7 @@ class JumboPayloadOption(Option):
                      jumbo_len: 'int') -> 'None': ...  # pylint: disable=super-init-not-called,unused-argument,redefined-builtin,multiple-statements,line-too-long
 
 
+@info_final
 class HomeAddressOption(Option):
     """Data model for IPv6-Opts Home Address option."""
 
@@ -318,6 +338,7 @@ class HomeAddressOption(Option):
                      address: 'IPv6Address') -> 'None': ...  # pylint: disable=super-init-not-called,unused-argument,redefined-builtin,multiple-statements,line-too-long
 
 
+@info_final
 class DFFFlags(Data):
     """Data model for IPv6-Opts ``IP_DFF`` option flags."""
 
@@ -330,6 +351,7 @@ class DFFFlags(Data):
         def __init__(self, dup: 'bool', ret: 'bool') -> 'None': ...  # pylint: disable=super-init-not-called,unused-argument,redefined-builtin,multiple-statements,line-too-long
 
 
+@info_final
 class IPDFFOption(Option):
     """Data model for IPv6-Opts Depth-First Forwarding (``IP_DFF``) option."""
 

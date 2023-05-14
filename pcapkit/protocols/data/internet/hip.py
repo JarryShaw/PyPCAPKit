@@ -3,6 +3,7 @@
 
 from typing import TYPE_CHECKING
 
+from pcapkit.corekit.infoclass import info_final
 from pcapkit.protocols.data.data import Data
 
 if TYPE_CHECKING:
@@ -58,6 +59,7 @@ __all__ = [
 ]
 
 
+@info_final
 class Control(Data):
     """Data model for HIP controls."""
 
@@ -79,6 +81,7 @@ class Parameter(Data):
     length: 'int'
 
 
+@info_final
 class HIP(Data):
     """Data model for HIP header."""
 
@@ -106,6 +109,7 @@ class HIP(Data):
         def __init__(self, next: 'TransType', length: 'int', type: 'Packet', version: 'int', chksum: 'bytes', control: 'Control', shit: 'int', rhit: 'int') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
 
 
+@info_final
 class UnassignedParameter(Parameter):
     """Data model for unassigned parameter."""
 
@@ -116,6 +120,7 @@ class UnassignedParameter(Parameter):
         def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', contents: 'bytes') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
 
 
+@info_final
 class ESPInfoParameter(Parameter):
     """Data model for HIP ``ESP_INFO`` parameter."""
 
@@ -130,6 +135,7 @@ class ESPInfoParameter(Parameter):
         def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', index: 'int', old_spi: 'int', new_spi: 'int') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
 
 
+@info_final
 class R1CounterParameter(Parameter):
     """Data model for HIP ``R1_COUNTER`` parameter."""
 
@@ -140,6 +146,7 @@ class R1CounterParameter(Parameter):
         def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', counter: 'int') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
 
 
+@info_final
 class LocatorData(Data):
     """Data model for HIP locator data."""
 
@@ -152,6 +159,7 @@ class LocatorData(Data):
         def __init__(self, spi: 'int', ip: 'IPv6Address') -> 'None': ...  # pylint: disable=super-init-not-called,unused-argument,multiple-statements
 
 
+@info_final
 class Locator(Data):
     """Data model for HIP locator."""
 
@@ -172,6 +180,7 @@ class Locator(Data):
         def __init__(self, traffic: 'int', type: 'int', length: 'int', preferred: 'bool', lifetime: 'timedelta', locator: 'LocatorData | IPv6Address') -> 'None': ...  # pylint: disable=super-init-not-called,unused-argument,multiple-statements,redefined-builtin,line-too-long
 
 
+@info_final
 class LocatorSetParameter(Parameter):
     """Data model for HIP ``LOCATOR_SET`` parameter."""
 
@@ -182,6 +191,7 @@ class LocatorSetParameter(Parameter):
         def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', locator_set: 'tuple[Locator, ...]') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
 
 
+@info_final
 class PuzzleParameter(Parameter):
     """Data model for HIP ``PUZZLE`` parameter."""
 
@@ -198,6 +208,7 @@ class PuzzleParameter(Parameter):
         def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', index: 'int', lifetime: 'timedelta', opaque: 'bytes', random: 'int') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
 
 
+@info_final
 class SolutionParameter(Parameter):
     """Data model for HIP ``SOLUTION`` parameter."""
 
@@ -216,6 +227,7 @@ class SolutionParameter(Parameter):
         def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', index: 'int', lifetime: 'timedelta', opaque: 'bytes', random: 'int', solution: 'int') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
 
 
+@info_final
 class SEQParameter(Parameter):
     """Data model for HIP ``SEQ`` parameter."""
 
@@ -226,6 +238,7 @@ class SEQParameter(Parameter):
         def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', id: 'int') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
 
 
+@info_final
 class ACKParameter(Parameter):
     """Data model for HIP ``ACK`` parameter."""
 
@@ -236,6 +249,7 @@ class ACKParameter(Parameter):
         def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', update_id: 'tuple[int, ...]') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
 
 
+@info_final
 class DHGroupListParameter(Parameter):
     """Data model for HIP ``DH_GROUP_LIST`` parameter."""
 
@@ -246,6 +260,7 @@ class DHGroupListParameter(Parameter):
         def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', group_id: 'tuple[Group, ...]') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
 
 
+@info_final
 class DiffieHellmanParameter(Parameter):
     """Data model for HIP ``DIFFIE_HELLMAN`` parameter."""
 
@@ -260,6 +275,7 @@ class DiffieHellmanParameter(Parameter):
         def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', group_id: 'Group', pub_len: 'int', pub_val: 'int') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
 
 
+@info_final
 class HIPTransformParameter(Parameter):
     """Data model for HIP ``HIP_TRANSFORM`` parameter."""
 
@@ -270,6 +286,7 @@ class HIPTransformParameter(Parameter):
         def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', suite_id: 'tuple[Suite, ...]') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
 
 
+@info_final
 class HIPCipherParameter(Parameter):
     """Data model for HIP ``HIP_CIPHER`` parameter."""
 
@@ -280,6 +297,7 @@ class HIPCipherParameter(Parameter):
         def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', cipher_id: 'tuple[Cipher, ...]') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
 
 
+@info_final
 class NATTraversalModeParameter(Parameter):
     """Data model for HIP ``NAT_TRAVERSAL_MODE`` parameter."""
 
@@ -290,6 +308,7 @@ class NATTraversalModeParameter(Parameter):
         def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', mode_id: 'tuple[NATTraversal, ...]') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
 
 
+@info_final
 class TransactionPacingParameter(Parameter):
     """Data model for HIP ``TRANSACTION_PACING`` parameter."""
 
@@ -300,6 +319,7 @@ class TransactionPacingParameter(Parameter):
         def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', min_ta: 'int') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
 
 
+@info_final
 class EncryptedParameter(Parameter):
     """Data model for HIP ``ENCRYPTED`` parameter."""
 
@@ -315,6 +335,7 @@ class EncryptedParameter(Parameter):
                      cipher: 'Cipher', iv: 'Optional[bytes]', data: 'bytes') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
 
 
+@info_final
 class HostIdentity(Data):
     """Data model for host identity."""
 
@@ -328,6 +349,7 @@ class HostIdentity(Data):
                      pubkey: 'bytes') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
 
 
+@info_final
 class HostIDParameter(Parameter):
     """Data model for HIP ``HOST_ID`` parameter."""
 
@@ -348,6 +370,7 @@ class HostIDParameter(Parameter):
         def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', hi_len: 'int', di_type: 'DITypes', di_len: 'int', algorithm: 'HIAlgorithm', hi: 'HostIdentity | bytes', di: 'bytes') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
 
 
+@info_final
 class HITSuiteListParameter(Parameter):
     """Data model for HIP ``HIST_SUITE_LIST`` parameter."""
 
@@ -358,6 +381,7 @@ class HITSuiteListParameter(Parameter):
         def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', suite_id: 'tuple[HITSuite, ...]') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
 
 
+@info_final
 class CertParameter(Parameter):
     """Data model for HIP ``CERT`` parameter."""
 
@@ -376,6 +400,7 @@ class CertParameter(Parameter):
         def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', cert_group: 'Group', cert_count: 'int', cert_id: 'int', cert_type: 'Certificate', cert: 'bytes') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
 
 
+@info_final
 class NotificationParameter(Parameter):
     """Data model for HIP ``NOTIFICATION`` parameter."""
 
@@ -388,6 +413,7 @@ class NotificationParameter(Parameter):
         def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', msg_type: 'NotifyMessage', msg: 'bytes') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
 
 
+@info_final
 class EchoRequestSignedParameter(Parameter):
     """Data model for HIP ``ECHO_REQUEST_SIGNED`` parameter."""
 
@@ -398,6 +424,7 @@ class EchoRequestSignedParameter(Parameter):
         def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', opaque: 'bytes') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
 
 
+@info_final
 class Lifetime(Data):
     """Data model for registration lifetime."""
 
@@ -410,6 +437,7 @@ class Lifetime(Data):
         def __init__(self, min: 'timedelta', max: 'timedelta') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
 
 
+@info_final
 class RegInfoParameter(Parameter):
     """Data model for HIP ``REG_INFO`` parameter."""
 
@@ -422,6 +450,7 @@ class RegInfoParameter(Parameter):
         def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', lifetime: 'Lifetime', reg_type: 'tuple[Registration, ...]') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
 
 
+@info_final
 class RegRequestParameter(Parameter):
     """Data model for HIP ``REG_REQUEST`` parameter."""
 
@@ -434,6 +463,7 @@ class RegRequestParameter(Parameter):
         def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', lifetime: 'timedelta', reg_type: 'tuple[Registration, ...]') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
 
 
+@info_final
 class RegResponseParameter(Parameter):
     """Data model for HIP ``REG_RESPONSE`` parameter."""
 
@@ -446,6 +476,7 @@ class RegResponseParameter(Parameter):
         def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', lifetime: 'timedelta', reg_type: 'tuple[Registration, ...]') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
 
 
+@info_final
 class RegFailedParameter(Parameter):
     """Data model for HIP ``REG_FAILED`` parameter."""
 
@@ -458,6 +489,7 @@ class RegFailedParameter(Parameter):
         def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', lifetime: 'timedelta', reg_type: 'tuple[RegistrationFailure, ...]') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
 
 
+@info_final
 class RegFromParameter(Parameter):
     """Data model for HIP ``REG_FROM`` parameter."""
 
@@ -472,6 +504,7 @@ class RegFromParameter(Parameter):
         def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', port: 'int', protocol: 'TransType', address: 'IPv6Address') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
 
 
+@info_final
 class EchoResponseSignedParameter(Parameter):
     """Data model for HIP ``ECHO_RESPONSE_SIGNED`` parameter."""
 
@@ -482,6 +515,7 @@ class EchoResponseSignedParameter(Parameter):
         def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', opaque: 'bytes') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
 
 
+@info_final
 class TransportFormatListParameter(Parameter):
     """Data model for HIP ``TRANSPORT_FORMAT_LIST`` parameter."""
 
@@ -492,6 +526,7 @@ class TransportFormatListParameter(Parameter):
         def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', tf_type: 'tuple[Enum_Parameter, ...]') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
 
 
+@info_final
 class ESPTransformParameter(Parameter):
     """Data model for HIP ``ESP_TRANSFORM`` parameter."""
 
@@ -502,6 +537,7 @@ class ESPTransformParameter(Parameter):
         def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', suite_id: 'tuple[ESPTransformSuite, ...]') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
 
 
+@info_final
 class SeqDataParameter(Parameter):
     """Data model for HIP ``SEQ_DATA`` parameter."""
 
@@ -512,6 +548,7 @@ class SeqDataParameter(Parameter):
         def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', seq: 'int') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
 
 
+@info_final
 class AckDataParameter(Parameter):
     """Data model for HIP ``ACK_DATA`` parameter."""
 
@@ -522,6 +559,7 @@ class AckDataParameter(Parameter):
         def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', ack: 'tuple[int, ...]') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
 
 
+@info_final
 class PayloadMICParameter(Parameter):
     """Data model for HIP ``PAYLOAD_MIC`` parameter."""
 
@@ -536,6 +574,7 @@ class PayloadMICParameter(Parameter):
         def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', next: 'TransType', payload: 'bytes', mic: 'bytes') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
 
 
+@info_final
 class TransactionIDParameter(Parameter):
     """Data model for HIP ``TRANSACTION_ID`` parameter."""
 
@@ -546,6 +585,7 @@ class TransactionIDParameter(Parameter):
         def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', id: 'int') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
 
 
+@info_final
 class OverlayIDParameter(Parameter):
     """Data mode HIP ``OVERLAY_ID`` parameter."""
 
@@ -556,6 +596,7 @@ class OverlayIDParameter(Parameter):
         def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', id: 'int') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
 
 
+@info_final
 class Flags(Data):
     """Data model for flags in HIP ``HIP_PARAMETER_FLAGS`` parameter."""
 
@@ -568,6 +609,7 @@ class Flags(Data):
         def __init__(self, symmetric: 'bool', must_follow: 'bool') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
 
 
+@info_final
 class RouteDstParameter(Parameter):
     """Data model for HIP ``ROUTE_DST`` parameter."""
 
@@ -580,6 +622,7 @@ class RouteDstParameter(Parameter):
         def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', flags: 'Flags', hit: 'tuple[IPv6Address, ...]') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
 
 
+@info_final
 class HIPTransportModeParameter(Parameter):
     """Data model for HIP ``HIP_TRANSPORT_MODE`` parameter."""
 
@@ -592,6 +635,7 @@ class HIPTransportModeParameter(Parameter):
         def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', port: 'int', mode_id: 'tuple[Transport, ...]') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
 
 
+@info_final
 class HIPMACParameter(Parameter):
     """Data model for HIP ``HIP_MAC`` parameter."""
 
@@ -602,6 +646,7 @@ class HIPMACParameter(Parameter):
         def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', hmac: 'bytes') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
 
 
+@info_final
 class HIPMAC2Parameter(Parameter):
     """Data model for HIP ``HIP_MAC_2`` parameter."""
 
@@ -612,6 +657,7 @@ class HIPMAC2Parameter(Parameter):
         def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', hmac: 'bytes') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
 
 
+@info_final
 class HIPSignature2Parameter(Parameter):
     """Data model for HIP ``HIP_SIGNATURE_2`` parameter."""
 
@@ -624,6 +670,7 @@ class HIPSignature2Parameter(Parameter):
         def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', algorithm: 'HIAlgorithm', signature: 'bytes') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
 
 
+@info_final
 class HIPSignatureParameter(Parameter):
     """Data model for HIP ``HIP_SIGNATURE`` parameter."""
 
@@ -636,6 +683,7 @@ class HIPSignatureParameter(Parameter):
         def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', algorithm: 'HIAlgorithm', signature: 'bytes') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
 
 
+@info_final
 class EchoRequestUnsignedParameter(Parameter):
     """Data model for HIP ``ECHO_REQUEST_UNSIGNED`` parameter."""
 
@@ -646,6 +694,7 @@ class EchoRequestUnsignedParameter(Parameter):
         def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', opaque: 'bytes') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
 
 
+@info_final
 class EchoResponseUnsignedParameter(Parameter):
     """Data model for HIP ``ECHO_RESPONSE_UNSIGNED`` parameter."""
 
@@ -656,6 +705,7 @@ class EchoResponseUnsignedParameter(Parameter):
         def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', opaque: 'bytes') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
 
 
+@info_final
 class RelayFromParameter(Parameter):
     """Data model for HIP ``RELAY_FROM`` parameter."""
 
@@ -670,6 +720,7 @@ class RelayFromParameter(Parameter):
         def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', port: 'int', protocol: 'TransType', address: 'IPv6Address') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
 
 
+@info_final
 class RelayToParameter(Parameter):
     """Data model for HIP ``RELAY_TO`` parameter."""
 
@@ -684,6 +735,7 @@ class RelayToParameter(Parameter):
         def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', port: 'int', protocol: 'TransType', address: 'IPv6Address') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
 
 
+@info_final
 class OverlayTTLParameter(Parameter):
     """Data model for HIP ``OVERLAY_TTL`` parameter."""
 
@@ -694,6 +746,7 @@ class OverlayTTLParameter(Parameter):
         def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', ttl: 'timedelta') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
 
 
+@info_final
 class RouteViaParameter(Parameter):
     """Data model for HIP ``ROUTE_VIA`` parameter."""
 
@@ -706,6 +759,7 @@ class RouteViaParameter(Parameter):
         def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', flags: 'Flags', hit: 'tuple[IPv6Address, ...]') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
 
 
+@info_final
 class FromParameter(Parameter):
     """Data model for HIP ``FROM`` parameter."""
 
@@ -716,6 +770,7 @@ class FromParameter(Parameter):
         def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', address: 'IPv6Address') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
 
 
+@info_final
 class RVSHMACParameter(Parameter):
     """Data model for HIP ``RVS_HMAC`` parameter."""
 
@@ -726,6 +781,7 @@ class RVSHMACParameter(Parameter):
         def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', hmac: 'bytes') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
 
 
+@info_final
 class ViaRVSParameter(Parameter):
     """Data model for HIP ``VIA_RVS`` parameter."""
 
@@ -736,6 +792,7 @@ class ViaRVSParameter(Parameter):
         def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', address: 'tuple[IPv6Address, ...]') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
 
 
+@info_final
 class RelayHMACParameter(Parameter):
     """Data model for HIP ``RELAY_HMAC`` parameter."""
 

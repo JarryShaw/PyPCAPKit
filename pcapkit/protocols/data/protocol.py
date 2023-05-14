@@ -3,6 +3,7 @@
 
 from typing import TYPE_CHECKING
 
+from pcapkit.corekit.infoclass import info_final
 from pcapkit.protocols.data.data import Data
 
 __all__ = [
@@ -10,6 +11,7 @@ __all__ = [
 ]
 
 
+@info_final
 class Packet(Data):
     """Header and payload data."""
 

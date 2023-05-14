@@ -3,6 +3,7 @@
 
 from typing import TYPE_CHECKING
 
+from pcapkit.corekit.infoclass import info_final
 from pcapkit.protocols.data.data import Data
 
 if TYPE_CHECKING:
@@ -41,6 +42,7 @@ __all__ = [
 ]
 
 
+@info_final
 class Flags(Data):
     """Data model for TCP flags."""
 
@@ -67,6 +69,7 @@ class Flags(Data):
         def __init__(self, ns: 'bool', cwr: 'bool', ece: 'bool', urg: 'bool', ack: 'bool', psh: 'bool', rst: 'bool', syn: 'bool', fin: 'bool') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
+@info_final
 class TCP(Data):
     """Data model for TCP packet."""
 
@@ -107,6 +110,7 @@ class Option(Data):
     length: 'int'
 
 
+@info_final
 class UnassignedOption(Option):
     """Data model for unassigned TCP option."""
 
@@ -117,6 +121,7 @@ class UnassignedOption(Option):
         def __init__(self, kind: 'OptionNumber', length: 'int', data: 'bytes') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
+@info_final
 class EndOfOptionList(Option):
     """Data model for TCP end of option list option."""
 
@@ -124,6 +129,7 @@ class EndOfOptionList(Option):
         def __init__(self, kind: 'OptionNumber', length: 'int') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
+@info_final
 class NoOperation(Option):
     """Data model for TCP no operation option."""
 
@@ -131,6 +137,7 @@ class NoOperation(Option):
         def __init__(self, kind: 'OptionNumber', length: 'int') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
+@info_final
 class MaximumSegmentSize(Option):
     """Data model for TCP maximum segment size option."""
 
@@ -141,6 +148,7 @@ class MaximumSegmentSize(Option):
         def __init__(self, kind: 'OptionNumber', length: 'int', mss: 'int') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
+@info_final
 class WindowScale(Option):
     """Data model for TCP window scale option."""
 
@@ -151,6 +159,7 @@ class WindowScale(Option):
         def __init__(self, kind: 'OptionNumber', length: 'int', shift: 'int') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
+@info_final
 class SACKPermitted(Option):
     """Data model for TCP SACK permitted option."""
 
@@ -158,6 +167,7 @@ class SACKPermitted(Option):
         def __init__(self, kind: 'OptionNumber', length: 'int') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
+@info_final
 class SACKBlock(Data):
     """Data model for TCP SACK block."""
 
@@ -170,6 +180,7 @@ class SACKBlock(Data):
         def __init__(self, left: 'int', right: 'int') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
+@info_final
 class SACK(Option):
     """Data model for TCP SACK option."""
 
@@ -180,6 +191,7 @@ class SACK(Option):
         def __init__(self, kind: 'OptionNumber', length: 'int', sack: 'tuple[SACKBlock, ...]') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
+@info_final
 class Echo(Option):
     """Data model for TCP echo option."""
 
@@ -190,6 +202,7 @@ class Echo(Option):
         def __init__(self, kind: 'OptionNumber', length: 'int', data: 'bytes') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
+@info_final
 class EchoReply(Option):
     """Data model for TCP echo reply option."""
 
@@ -200,6 +213,7 @@ class EchoReply(Option):
         def __init__(self, kind: 'OptionNumber', length: 'int', data: 'bytes') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
+@info_final
 class Timestamp(Option):
     """Data model for TCP timestamp option."""
 
@@ -212,6 +226,7 @@ class Timestamp(Option):
         def __init__(self, kind: 'OptionNumber', length: 'int', timestamp: 'int', echo: 'int') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
+@info_final
 class PartialOrderConnectionPermitted(Option):
     """Data model for TCP partial order connection permitted option."""
 
@@ -219,6 +234,7 @@ class PartialOrderConnectionPermitted(Option):
         def __init__(self, kind: 'OptionNumber', length: 'int') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
+@info_final
 class PartialOrderConnectionProfile(Option):
     """Data model for TCP partial order connection profile option."""
 
@@ -231,6 +247,7 @@ class PartialOrderConnectionProfile(Option):
         def __init__(self, kind: 'OptionNumber', length: 'int', start: 'bool', end: 'bool') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
+@info_final
 class CC(Option):
     """Data model for TCP CC option."""
 
@@ -241,6 +258,7 @@ class CC(Option):
         def __init__(self, kind: 'OptionNumber', length: 'int', cc: 'int') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
+@info_final
 class CCNew(Option):
     """Data model for TCP CC.NEW option."""
 
@@ -251,6 +269,7 @@ class CCNew(Option):
         def __init__(self, kind: 'OptionNumber', length: 'int', cc: 'int') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
+@info_final
 class CCEcho(Option):
     """Data model for TCP CC.ECHO option."""
 
@@ -261,6 +280,7 @@ class CCEcho(Option):
         def __init__(self, kind: 'OptionNumber', length: 'int', cc: 'int') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
+@info_final
 class AlternateChecksumRequest(Option):
     """Data model for TCP alternate checksum request option."""
 
@@ -271,6 +291,7 @@ class AlternateChecksumRequest(Option):
         def __init__(self, kind: 'OptionNumber', length: 'int', chksum: 'Checksum') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
+@info_final
 class AlternateChecksumData(Option):
     """Data model for TCP alternate checksum data option."""
 
@@ -281,6 +302,7 @@ class AlternateChecksumData(Option):
         def __init__(self, kind: 'OptionNumber', length: 'int', data: 'bytes') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
+@info_final
 class MD5Signature(Option):
     """Data model for TCP MD5 signature option."""
 
@@ -291,6 +313,7 @@ class MD5Signature(Option):
         def __init__(self, kind: 'OptionNumber', length: 'int', digest: 'bytes') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
+@info_final
 class QuickStartResponse(Option):
     """Data model for TCP quick start response option."""
 
@@ -305,6 +328,7 @@ class QuickStartResponse(Option):
         def __init__(self, kind: 'OptionNumber', length: 'int', req_rate: 'int', ttl_diff: 'int', nonce: 'int') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
+@info_final
 class UserTimeout(Option):
     """Data model for TCP user timeout option."""
 
@@ -315,6 +339,7 @@ class UserTimeout(Option):
         def __init__(self, kind: 'OptionNumber', length: 'int', timeout: 'timedelta') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
+@info_final
 class Authentication(Option):
     """Data model for TCP authentication option."""
 
@@ -329,6 +354,7 @@ class Authentication(Option):
         def __init__(self, kind: 'OptionNumber', length: 'int', key_id: 'int', next_key_id: 'int', mac: 'bytes') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
+@info_final
 class FastOpenCookie(Option):
     """Data model for TCP fast open cookie option."""
 
@@ -346,6 +372,7 @@ class MPTCP(Option):
     subtype: 'MPTCPOption'
 
 
+@info_final
 class MPTCPUnknown(MPTCP):
     """Data model for TCP unknown MPTCP option."""
 
@@ -356,6 +383,7 @@ class MPTCPUnknown(MPTCP):
         def __init__(self, kind: 'OptionNumber', length: 'int', subtype: 'MPTCPOption', data: 'bytes') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
+@info_final
 class MPTCPCapableFlag(Data):
     """Data model for TCP MPTCP capable option flags."""
 
@@ -370,6 +398,7 @@ class MPTCPCapableFlag(Data):
         def __init__(self, req: 'bool', ext: 'bool', hsa: 'bool') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
+@info_final
 class MPTCPCapable(MPTCP):
     """Data model for TCP ``MP_CAPABLE`` option."""
 
@@ -393,6 +422,7 @@ class MPTCPJoin(MPTCP):
     connection: 'TCP_Flags'
 
 
+@info_final
 class MPTCPJoinSYN(MPTCPJoin):
     """Data model for TCP ``MP_JOIN-SYN`` option."""
 
@@ -409,6 +439,7 @@ class MPTCPJoinSYN(MPTCPJoin):
         def __init__(self, kind: 'OptionNumber', length: 'int', subtype: 'MPTCPOption', connection: 'TCP_Flags', backup: 'bool', addr_id: 'int', token: 'int', nonce: 'int') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
+@info_final
 class MPTCPJoinSYNACK(MPTCPJoin):
     """Data model for TCP ``MP_JOIN-SYNACK`` option."""
 
@@ -425,6 +456,7 @@ class MPTCPJoinSYNACK(MPTCPJoin):
         def __init__(self, kind: 'OptionNumber', length: 'int', subtype: 'MPTCPOption', connection: 'TCP_Flags', backup: 'bool', addr_id: 'int', hmac: 'bytes', nonce: 'int') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
+@info_final
 class MPTCPJoinACK(MPTCPJoin):
     """Data model for TCP ``MP_JOIN-ACK`` option."""
 
@@ -435,6 +467,7 @@ class MPTCPJoinACK(MPTCPJoin):
         def __init__(self, kind: 'OptionNumber', length: 'int', subtype: 'MPTCPOption', connection: 'TCP_Flags', hmac: 'bytes') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
+@info_final
 class MPTCPDSS(MPTCP):
     """Data model for TCP ``DSS`` option."""
 
@@ -455,6 +488,7 @@ class MPTCPDSS(MPTCP):
         def __init__(self, kind: 'OptionNumber', length: 'int', subtype: 'MPTCPOption', data_fin: 'bool', ack: 'Optional[int]', dsn: 'Optional[int]', ssn: 'Optional[int]', dl_len: 'Optional[int]', checksum: 'Optional[bytes]') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
+@info_final
 class MPTCPAddAddress(MPTCP):
     """Data model for TCP ``ADD_ADDR`` option."""
 
@@ -471,6 +505,7 @@ class MPTCPAddAddress(MPTCP):
         def __init__(self, kind: 'OptionNumber', length: 'int', subtype: 'MPTCPOption', version: 'int', addr_id: 'int', addr: 'IPAddress', port: 'Optional[int]') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
+@info_final
 class MPTCPRemoveAddress(MPTCP):
     """Data model for TCP ``REMOVE_ADDR`` option."""
 
@@ -481,6 +516,7 @@ class MPTCPRemoveAddress(MPTCP):
         def __init__(self, kind: 'OptionNumber', length: 'int', subtype: 'MPTCPOption', addr_id: 'tuple[int, ...]') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
+@info_final
 class MPTCPPriority(MPTCP):
     """Data model for TCP ``MP_PRIO`` option."""
 
@@ -493,6 +529,7 @@ class MPTCPPriority(MPTCP):
         def __init__(self, kind: 'OptionNumber', length: 'int', subtype: 'MPTCPOption', backup: 'bool', addr_id: 'Optional[int]') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
+@info_final
 class MPTCPFallback(MPTCP):
     """Data model for TCP ``MP_FAIL`` option."""
 
@@ -503,6 +540,7 @@ class MPTCPFallback(MPTCP):
         def __init__(self, kind: 'OptionNumber', length: 'int', subtype: 'MPTCPOption', dsn: 'int') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
+@info_final
 class MPTCPFastclose(MPTCP):
     """Data model for TCP ``MP_FASTCLOSE`` option."""
 

@@ -3,6 +3,7 @@
 
 from typing import TYPE_CHECKING
 
+from pcapkit.corekit.infoclass import info_final
 from pcapkit.protocols.data.data import Data
 
 if TYPE_CHECKING:
@@ -48,6 +49,7 @@ class Option(Data):
     length: 'int'
 
 
+@info_final
 class HOPOPT(Data):
     """Data model for HOPOPT protocol."""
 
@@ -62,6 +64,7 @@ class HOPOPT(Data):
         def __init__(self, next: 'TransType', length: 'int', options: 'OrderedMultiDict[Enum_Option, Option]') -> 'None': ...  # pylint: disable=super-init-not-called,unused-argument,redefined-builtin,multiple-statements,line-too-long
 
 
+@info_final
 class UnassignedOption(Option):
     """Data model for HOPOPT unassigned option."""
 
@@ -72,6 +75,7 @@ class UnassignedOption(Option):
         def __init__(self, type: 'Enum_Option', action: 'int', change: 'bool', length: 'int', data: 'bytes') -> 'None': ...  # pylint: disable=super-init-not-called,unused-argument,redefined-builtin,multiple-statements,line-too-long
 
 
+@info_final
 class PadOption(Option):
     """Data model for HOPOPT padding options."""
 
@@ -79,6 +83,7 @@ class PadOption(Option):
         def __init__(self, type: 'Enum_Option', action: 'int', change: 'bool', length: 'int') -> 'None': ...  # pylint: disable=super-init-not-called,unused-argument,redefined-builtin,multiple-statements,line-too-long
 
 
+@info_final
 class TunnelEncapsulationLimitOption(Option):
     """Data model for HOPOPT tunnel encapsulation limit option."""
 
@@ -89,6 +94,7 @@ class TunnelEncapsulationLimitOption(Option):
         def __init__(self, type: 'Enum_Option', action: 'int', change: 'bool', length: 'int', limit: 'int') -> 'None': ...  # pylint: disable=super-init-not-called,unused-argument,redefined-builtin,multiple-statements,line-too-long
 
 
+@info_final
 class RouterAlertOption(Option):
     """Data model for HOPOPT router alter option."""
 
@@ -99,6 +105,7 @@ class RouterAlertOption(Option):
         def __init__(self, type: 'Enum_Option', action: 'int', change: 'bool', length: 'int', value: 'RouterAlert') -> 'None': ...  # pylint: disable=super-init-not-called,unused-argument,redefined-builtin,multiple-statements,line-too-long
 
 
+@info_final
 class CALIPSOOption(Option):
     """Data model for HOPOPT Common Architecture Label IPv6 Security Option (CALIPSO) option."""
 
@@ -125,7 +132,7 @@ class SMFDPDOption(Option):
     dpd_type: 'SMFDPDMode'
 
 
-
+@info_final
 class SMFIdentificationBasedDPDOption(SMFDPDOption):
     """Data model for HOPOPT **I-DPD** (Identification-Based DPD) option."""
 
@@ -142,6 +149,7 @@ class SMFIdentificationBasedDPDOption(SMFDPDOption):
         def __init__(self, type: 'Enum_Option', action: 'int', change: 'bool', length: 'int', dpd_type: 'SMFDPDMode', tid_type: 'TaggerID', tid_len: 'int', tid: 'Optional[bytes | IPv4Address | IPv6Address]', id: 'bytes') -> 'None': ...  # pylint: disable=super-init-not-called,unused-argument,redefined-builtin,multiple-statements,line-too-long
 
 
+@info_final
 class SMFHashBasedDPDOption(SMFDPDOption):
     """Data model for HOPOPT **H-DPD** (Hash-Based DPD) option."""
 
@@ -152,6 +160,7 @@ class SMFHashBasedDPDOption(SMFDPDOption):
         def __init__(self, type: 'Enum_Option', action: 'int', change: 'bool', length: 'int', dpd_type: 'SMFDPDMode', hav: 'bytes') -> 'None': ...  # pylint: disable=super-init-not-called,unused-argument,redefined-builtin,multiple-statements,line-too-long
 
 
+@info_final
 class PDMOption(Option):
     """Data model for HOPOPT Performance Diagnostic Metrics (PDM) option."""
 
@@ -181,6 +190,7 @@ class QuickStartOption(Option):
     rate: 'int'
 
 
+@info_final
 class QuickStartRequestOption(QuickStartOption):
     """Data model for HOPOPT Quick Start request option."""
 
@@ -194,6 +204,7 @@ class QuickStartRequestOption(QuickStartOption):
                      nonce: 'int') -> 'None': ...  # pylint: disable=super-init-not-called,unused-argument,redefined-builtin,multiple-statements,line-too-long
 
 
+@info_final
 class QuickStartReportOption(QuickStartOption):
     """Data model for HOPOPT Quick Start report of approved rate option."""
 
@@ -204,6 +215,7 @@ class QuickStartReportOption(QuickStartOption):
         def __init__(self, type: 'Enum_Option', action: 'int', change: 'bool', length: 'int', func: 'QSFunction', rate: 'int', nonce: 'int') -> 'None': ...
 
 
+@info_final
 class RPLFlags(Data):
     """Data model for HOPOPT RPL option flags fields."""
 
@@ -218,6 +230,7 @@ class RPLFlags(Data):
         def __init__(self, down: 'bool', rank_err: 'bool', fwd_err: 'bool') -> 'None': ...  # pylint: disable=super-init-not-called,unused-argument,redefined-builtin,multiple-statements,line-too-long
 
 
+@info_final
 class RPLOption(Option):
     """Data model for HOPOPT Routing Protocol for Low-Power and Lossy Networks (RPL) option."""
 
@@ -232,6 +245,7 @@ class RPLOption(Option):
         def __init__(self, type: 'Enum_Option', action: 'int', change: 'bool', length: 'int', flags: 'RPLFlags', id: 'int', rank: 'int') -> 'None': ...  # pylint: disable=super-init-not-called,unused-argument,redefined-builtin,multiple-statements,line-too-long
 
 
+@info_final
 class MPLFlags(Data):
     """Data model for HOPOPT MPL option flags fields."""
 
@@ -244,6 +258,7 @@ class MPLFlags(Data):
         def __init__(self, max: 'bool', drop: 'bool') -> 'None': ...  # pylint: disable=super-init-not-called,unused-argument,redefined-builtin,multiple-statements,line-too-long
 
 
+@info_final
 class MPLOption(Option):
     """Data model for HOPOPT Multicast Protocol for Low-Power and Lossy Networks (MPL) option."""
 
@@ -260,6 +275,7 @@ class MPLOption(Option):
         def __init__(self, type: 'Enum_Option', action: 'int', change: 'bool', length: 'int', seed_type: 'int', flags: 'MPLFlags', seq: 'int', seed_id: 'Optional[int]') -> 'None': ...  # pylint: disable=super-init-not-called,unused-argument,redefined-builtin,multiple-statements,line-too-long
 
 
+@info_final
 class ILNPOption(Option):
     """Data model for HOPOPT Identifier-Locator Network Protocol (ILNP) Nonce option."""
 
@@ -270,6 +286,7 @@ class ILNPOption(Option):
         def __init__(self, type: 'Enum_Option', action: 'int', change: 'bool', length: 'int', nonce: 'int') -> 'None': ...  # pylint: disable=super-init-not-called,unused-argument,redefined-builtin,multiple-statements,line-too-long
 
 
+@info_final
 class LineIdentificationOption(Option):
     """Data model for HOPOPT Line-Identification option."""
 
@@ -282,6 +299,7 @@ class LineIdentificationOption(Option):
         def __init__(self, type: 'Enum_Option', action: 'int', change: 'bool', length: 'int', line_id_len: 'int', line_id: 'bytes') -> 'None': ...  # pylint: disable=super-init-not-called,unused-argument,redefined-builtin,multiple-statements,line-too-long
 
 
+@info_final
 class JumboPayloadOption(Option):
     """Data model for Jumbo Payload option."""
 
@@ -293,6 +311,7 @@ class JumboPayloadOption(Option):
                      jumbo_len: 'int') -> 'None': ...  # pylint: disable=super-init-not-called,unused-argument,redefined-builtin,multiple-statements,line-too-long
 
 
+@info_final
 class HomeAddressOption(Option):
     """Data model for HOPOPT Home Address option."""
 
@@ -303,6 +322,7 @@ class HomeAddressOption(Option):
         def __init__(self, type: 'Enum_Option', action: 'int', change: 'bool', length: 'int', address: 'IPv6Address') -> 'None': ...  # pylint: disable=super-init-not-called,unused-argument,redefined-builtin,multiple-statements,line-too-long
 
 
+@info_final
 class DFFFlags(Data):
     """Data model for HOPOPT ``IP_DFF`` option flags."""
 
@@ -315,6 +335,7 @@ class DFFFlags(Data):
         def __init__(self, dup: 'bool', ret: 'bool') -> 'None': ...  # pylint: disable=super-init-not-called,unused-argument,redefined-builtin,multiple-statements,line-too-long
 
 
+@info_final
 class IPDFFOption(Option):
     """Data model for HOPOPT Depth-First Forwarding (``IP_DFF``) option."""
 

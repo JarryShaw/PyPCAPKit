@@ -16,13 +16,13 @@ and :class:`~pcapkit.corekit.multidict.MultiDict` family inspired from
 
 """
 from pcapkit.corekit.fields import *
-from pcapkit.corekit.infoclass import Info
+from pcapkit.corekit.infoclass import Info, info_final
 from pcapkit.corekit.multidict import MultiDict, OrderedMultiDict
 from pcapkit.corekit.protochain import ProtoChain
 from pcapkit.corekit.version import VersionInfo
 
 __all__ = [
-    'Info',
+    'Info', 'info_final',
 
     'ProtoChain',
 

@@ -12,7 +12,7 @@ from logging import warn
 from typing import TYPE_CHECKING, cast
 
 from pcapkit.const.pcapng.block_type import BlockType as Enum_BlockType
-from pcapkit.corekit.infoclass import Info
+from pcapkit.corekit.infoclass import Info, info_final
 from pcapkit.foundation.engines.engine import Engine
 from pcapkit.protocols.misc.pcapng import PCAPNG as P_PCAPNG
 from pcapkit.utilities.exceptions import FormatError, stacklevel
@@ -39,6 +39,7 @@ if TYPE_CHECKING:
     from pcapkit.protocols.data.misc.pcapng import UnknownBlock as Data_UnknownBlock
 
 
+@info_final
 class Context(Info):
     """Context manager for PCAP-NG file format."""
 

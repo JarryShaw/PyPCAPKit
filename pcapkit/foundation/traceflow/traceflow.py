@@ -16,7 +16,6 @@ import os
 import sys
 from typing import TYPE_CHECKING, Generic, TypeVar, overload
 
-from pcapkit.corekit.infoclass import Info
 from pcapkit.dumpkit.common import make_dumper
 from pcapkit.utilities.exceptions import FileExists, stacklevel
 from pcapkit.utilities.warnings import FileWarning, FormatWarning, warn
@@ -29,6 +28,7 @@ if TYPE_CHECKING:
     from dictdumper.dumper import Dumper
     from typing_extensions import Literal, Self
 
+    from pcapkit.corekit.infoclass import Info
     from pcapkit.protocols.protocol import Protocol
 
 BufferID = TypeVar('BufferID')

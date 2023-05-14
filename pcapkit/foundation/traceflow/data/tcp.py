@@ -3,7 +3,7 @@
 
 from typing import TYPE_CHECKING, Generic, TypeVar
 
-from pcapkit.corekit.infoclass import Info
+from pcapkit.corekit.infoclass import Info, info_final
 from pcapkit.utilities.compat import Tuple
 
 __all__ = ['BufferID', 'Packet', 'Buffer', 'Index']
@@ -23,6 +23,7 @@ IPAddress = TypeVar('IPAddress', 'IPv4Address', 'IPv6Address')
 BufferID = Tuple[IPAddress, int, IPAddress, int]
 
 
+@info_final
 class Packet(Info, Generic[IPAddress]):
     """Data structure for **TCP flow tracing**.
 
@@ -58,6 +59,7 @@ class Packet(Info, Generic[IPAddress]):
                      srcport: 'int', dstport: 'int', timestamp: 'float') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long
 
 
+@info_final
 class Buffer(Info):
     """Data structure for **TCP flow tracing**.
 
@@ -79,6 +81,7 @@ class Buffer(Info):
                      index: 'list[int]', label: 'str') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements
 
 
+@info_final
 class Index(Info):
     """Data structure for **TCP flow tracing**.
 

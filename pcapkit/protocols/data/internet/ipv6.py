@@ -3,6 +3,7 @@
 
 from typing import TYPE_CHECKING
 
+from pcapkit.corekit.infoclass import info_final
 from pcapkit.protocols.data.data import Data
 
 if TYPE_CHECKING:
@@ -16,10 +17,10 @@ if TYPE_CHECKING:
 
 __all__ = [
     'IPv6',
-
 ]
 
 
+@info_final
 class IPv6(Data):
     """Data model for Internet Protocol version 6.
 
@@ -63,4 +64,4 @@ class IPv6(Data):
         # Thus, we directly inject the information into the annotations.
         self.__annotations__['class'] = int  # pylint: disable=no-member
 
-        return self  # type: ignore[return-value]
+        return self

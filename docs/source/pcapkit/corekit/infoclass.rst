@@ -21,3 +21,5 @@ in :pep:`557`.
       :no-value:
    .. autoattribute:: __excluded__
       :no-value:
+
+.. autodecorator:: pcapkit.corekit.infoclass.info_final

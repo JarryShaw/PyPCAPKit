@@ -12,19 +12,110 @@ in :pep:`557`.
 """
 import collections.abc
 import itertools
-from typing import TYPE_CHECKING, Generic, TypeVar
+from typing import TYPE_CHECKING, Generic, TypeVar, cast, final
 
 from pcapkit.utilities.compat import Mapping
-from pcapkit.utilities.exceptions import UnsupportedCall
+from pcapkit.utilities.exceptions import UnsupportedCall, stacklevel
+from pcapkit.utilities.warnings import InfoWarning, warn
 
 if TYPE_CHECKING:
-    from typing import Any, Iterable, Iterator, NoReturn, Optional
+    from typing import Any, Iterable, Iterator, NoReturn, Optional, Type
 
     from typing_extensions import Self
 
-__all__ = ['Info']
+__all__ = ['Info', 'info_final']
 
 VT = TypeVar('VT')
+
+
+def info_final(cls: 'Type[Info[VT]]') -> 'Type[Info[VT]]':
+    """Finalise info class.
+
+    Args:
+        cls: Info class.
+
+    Returns:
+        Finalised info class.
+
+    Notes:
+        This decorator function is used to generate necessary
+        attributes and methods for the decorated :class:`Info`
+        class. It can be useful to reduce runtime generation
+        time as well as caching already generated attributes.
+
+    :meta decorator:
+    """
+    if cls.__finalised__:
+        warn(f'{cls.__name__}: info class has been finalised; now skipping',
+             InfoWarning, stacklevel=stacklevel())
+        return cls
+
+    temp = ['__map__', '__map_reverse__', '__builtin__', '__finalised__']
+    temp.extend(cls.__additional__)
+    for obj in cls.mro():
+        temp.extend(dir(obj))
+    cls.__builtin__ = set(temp)
+    cls.__excluded__.extend(cls.__builtin__)
+
+    # NOTE: We only generate ``__init__`` method for subclasses of the
+    # ``Info`` class, rather than itself, plus that such class does not
+    # override the ``__init__`` method of the meta class.
+    if '__init__' not in cls.__dict__ and cls is not Info:
+        args_ = []  # type: list[str]
+        dict_ = []  # type: list[str]
+
+        for cls_ in cls.mro():
+            # NOTE: We skip the ``Info`` class itself, to avoid superclass
+            # type annotations being considered.
+            if cls_ is Info:
+                break
+
+            # NOTE: We iterate in reversed order to ensure that the type
+            # annotations of the superclasses are considered first.
+            for key in reversed(cls_.__annotations__):
+                # NOTE: We skip duplicated annotations to avoid duplicate
+                # argument in function definition.
+                if key in args_:
+                    continue
+
+                args_.append(key)
+                dict_.append(f'{key}={key}')
+
+        # NOTE: We reverse the two lists such that the order of the
+        # arguments is the same as the order of the type annotations, i.e.,
+        # from the most base class to the most derived class.
+        args_.reverse()
+        dict_.reverse()
+
+        # NOTE: We only generate typed ``__init__`` method if only the class
+        # has type annotations from any of itself and its base classes.
+        if args_:
+            # NOTE: The following code is to make the ``__init__`` method work.
+            # It is inspired from the :func:`dataclasses._create_fn` function.
+            init_ = (
+                f'def __create_fn__():\n'
+                f'    def __init__(self, {", ".join(args_)}):\n'
+                f'        self.__update__({", ".join(dict_)})\n'
+                f'        self.__post_init__()\n'
+                f'    return __init__\n'
+            )
+        else:
+            init_ = (
+                'def __create_fn__():\n'
+                '    def __init__(self, dict_=None, **kwargs):\n'
+                '        self.__update__(dict_, **kwargs)\n'
+                '        self.__post_init__()\n'
+                '    return __init__\n'
+            )
+
+        ns = {}  # type: dict[str, Any]
+        exec(init_, None, ns)  # pylint: disable=exec-used # nosec
+
+        cls.__init__ = ns['__create_fn__']()
+        cls.__init__.__qualname__ = f'{cls.__name__}.__init__'
+
+    cls.__finalised__ = True
+    return final(cls)
 
 
 class Info(Mapping[str, VT], Generic[VT]):
@@ -55,6 +146,9 @@ class Info(Mapping[str, VT], Generic[VT]):
         #: List of builtin methods.
         __builtin__: 'set[str]'
 
+    #: Flag for finalised class initialisation.
+    __finalised__ = False
+
     #: List of additional built-in names.
     __additional__: 'list[str]' = []
     #: List of names to be excluded from :obj:`dict` conversion.
@@ -72,69 +166,8 @@ class Info(Mapping[str, VT], Generic[VT]):
             **kwargs: Arbitrary keyword arguments.
 
         """
-        temp = ['__map__', '__map_reverse__', '__builtin__']
-        temp.extend(cls.__additional__)
-        for obj in cls.mro():
-            temp.extend(dir(obj))
-        cls.__builtin__ = set(temp)
-        cls.__excluded__.extend(cls.__builtin__)
-
-        # NOTE: We only generate ``__init__`` method for subclasses of the
-        # ``Info`` class, rather than itself, plus that such class does not
-        # override the ``__init__`` method of the meta class.
-        if '__init__' not in cls.__dict__ and cls is not Info:
-            args_ = []  # type: list[str]
-            dict_ = []  # type: list[str]
-
-            for cls_ in cls.mro():
-                # NOTE: We skip the ``Info`` class itself, to avoid superclass
-                # type annotations being considered.
-                if cls_ is Info:
-                    break
-
-                # NOTE: We iterate in reversed order to ensure that the type
-                # annotations of the superclasses are considered first.
-                for key in reversed(cls_.__annotations__):
-                    # NOTE: We skip duplicated annotations to avoid duplicate
-                    # argument in function definition.
-                    if key in args_:
-                        continue
-
-                    args_.append(key)
-                    dict_.append(f'{key}={key}')
-
-            # NOTE: We reverse the two lists such that the order of the
-            # arguments is the same as the order of the type annotations, i.e.,
-            # from the most base class to the most derived class.
-            args_.reverse()
-            dict_.reverse()
-
-            # NOTE: We only generate typed ``__init__`` method if only the class
-            # has type annotations from any of itself and its base classes.
-            if args_:
-                # NOTE: The following code is to make the ``__init__`` method work.
-                # It is inspired from the :func:`dataclasses._create_fn` function.
-                init_ = (
-                    f'def __create_fn__():\n'
-                    f'    def __init__(self, {", ".join(args_)}):\n'
-                    f'        self.__update__({", ".join(dict_)})\n'
-                    f'        self.__post_init__()\n'
-                    f'    return __init__\n'
-                )
-            else:
-                init_ = (
-                    'def __create_fn__():\n'
-                    '    def __init__(self, dict_=None, **kwargs):\n'
-                    '        self.__update__(dict_, **kwargs)\n'
-                    '        self.__post_init__()\n'
-                    '    return __init__\n'
-                )
-
-            ns = {}  # type: dict[str, Any]
-            exec(init_, None, ns)  # pylint: disable=exec-used # nosec
-            cls.__init__ = ns['__create_fn__']()
-            cls.__init__.__qualname__ = f'{cls.__name__}.__init__'
-
+        if not cls.__finalised__:
+            cls = cast('Type[Self]', info_final(cls))
         self = super().__new__(cls)
 
         # NOTE: We define the ``__map__`` and ``__map_reverse__`` attributes

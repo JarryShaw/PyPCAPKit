@@ -3,12 +3,11 @@
 
 from typing import TYPE_CHECKING
 
+from pcapkit.corekit.infoclass import info_final
 from pcapkit.protocols.data.data import Data
 
 if TYPE_CHECKING:
     from typing import Any
-
-    from typing_extensions import Literal
 
     from pcapkit.const.http.method import Method as Enum_Method
     from pcapkit.const.http.status_code import StatusCode as Enum_StatusCode
@@ -23,6 +22,7 @@ __all__ = [
 ]
 
 
+@info_final
 class HTTP(Data):
     """Data model for HTTP/1.* protocol."""
 
@@ -44,11 +44,12 @@ class Header(Data):
     type: 'HTTP_Type'
 
 
+@info_final
 class RequestHeader(Header):
     """Data model for HTTP/1.* request header line."""
 
     #: HTTP request header line.
-    type: 'Literal[HTTP_Type.REQUEST]'
+    type: 'HTTP_Type'
     #: HTTP method.
     method: 'Enum_Method'
     #: HTTP request URI.
@@ -57,14 +58,15 @@ class RequestHeader(Header):
     version: 'str'
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'Literal[HTTP_Type.REQUEST]', method: 'Enum_Method', uri: 'str', version: 'str') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
+        def __init__(self, type: 'HTTP_Type', method: 'Enum_Method', uri: 'str', version: 'str') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
+@info_final
 class ResponseHeader(Header):
     """Data model for HTTP/1.* response header line."""
 
     #: HTTP response header line.
-    type: 'Literal[HTTP_Type.RESPONSE]'
+    type: 'HTTP_Type'
     #: HTTP response version.
     version: 'str'
     #: HTTP response status.
@@ -73,4 +75,4 @@ class ResponseHeader(Header):
     message: 'str'
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'Literal[HTTP_Type.RESPONSE]', version: 'str', status: 'Enum_StatusCode', message: 'str') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
+        def __init__(self, type: 'HTTP_Type', version: 'str', status: 'Enum_StatusCode', message: 'str') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin

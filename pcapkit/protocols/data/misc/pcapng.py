@@ -5,6 +5,7 @@ import datetime
 import decimal
 from typing import TYPE_CHECKING
 
+from pcapkit.corekit.infoclass import info_final
 from pcapkit.corekit.multidict import MultiDict
 from pcapkit.protocols.data.data import Data
 
@@ -66,6 +67,7 @@ class PCAPNG(Data):
     length: 'int'
 
 
+@info_final
 class UnknownBlock(PCAPNG):
     """Data model for unknown PCAP-NG file blocks."""
 
@@ -85,6 +87,7 @@ class Option(Data):
     length: 'int'
 
 
+@info_final
 class UnknownOption(Option):
     """Data model for unknown PCAP-NG file options."""
 
@@ -95,6 +98,7 @@ class UnknownOption(Option):
         def __init__(self, type: 'Enum_OptionType', length: 'int', data: 'bytes') -> None: ...
 
 
+@info_final
 class EndOfOption(Option):
     """Data model for PCAP-NG file ``opt_endofopt`` options."""
 
@@ -102,6 +106,7 @@ class EndOfOption(Option):
         def __init__(self, type: 'Enum_OptionType', length: 'int') -> None: ...
 
 
+@info_final
 class CommentOption(Option):
     """Data model for PCAP-NG file ``opt_comment`` options."""
 
@@ -112,6 +117,7 @@ class CommentOption(Option):
         def __init__(self, type: 'Enum_OptionType', length: 'int', comment: 'str') -> None: ...
 
 
+@info_final
 class CustomOption(Option):
     """Data model for PCAP-NG file ``opt_custom`` options."""
 
@@ -124,6 +130,7 @@ class CustomOption(Option):
         def __init__(self, type: 'Enum_OptionType', length: 'int', pen: 'int', data: 'bytes') -> None: ...
 
 
+@info_final
 class SectionHeaderBlock(PCAPNG):
     """Data model for PCAP-NG Section Header Block (SHB)."""
 
@@ -141,6 +148,7 @@ class SectionHeaderBlock(PCAPNG):
                      section_length: 'int', options: 'OrderedMultiDict[Enum_OptionType, Option]') -> None: ...
 
 
+@info_final
 class IF_NameOption(Option):
     """Data model for PCAP-NG file ``if_name`` options."""
 
@@ -151,6 +159,7 @@ class IF_NameOption(Option):
         def __init__(self, type: 'Enum_OptionType', length: 'int', name: 'str') -> None: ...
 
 
+@info_final
 class IF_DescriptionOption(Option):
     """Data model for PCAP-NG file ``if_description`` options."""
 
@@ -158,6 +167,7 @@ class IF_DescriptionOption(Option):
     description: 'str'
 
 
+@info_final
 class IF_IPv4AddrOption(Option):
     """Data model for PCAP-NG file ``if_IPv4addr`` options."""
 
@@ -168,6 +178,7 @@ class IF_IPv4AddrOption(Option):
         def __init__(self, type: 'Enum_OptionType', length: 'int', interface: 'IPv4Interface') -> None: ...
 
 
+@info_final
 class IF_IPv6AddrOption(Option):
     """Data model for PCAP-NG file ``if_IPv6addr`` options."""
 
@@ -178,6 +189,7 @@ class IF_IPv6AddrOption(Option):
         def __init__(self, type: 'Enum_OptionType', length: 'int', interface: 'IPv6Interface') -> None: ...
 
 
+@info_final
 class IF_MACAddrOption(Option):
     """Data model for PCAP-NG file ``if_MACaddr`` options."""
 
@@ -188,6 +200,7 @@ class IF_MACAddrOption(Option):
         def __init__(self, type: 'Enum_OptionType', length: 'int', interface: 'str') -> None: ...
 
 
+@info_final
 class IF_EUIAddrOption(Option):
     """Data model for PCAP-NG file ``if_EUIaddr`` options."""
 
@@ -198,6 +211,7 @@ class IF_EUIAddrOption(Option):
         def __init__(self, type: 'Enum_OptionType', length: 'int', interface: 'str') -> None: ...
 
 
+@info_final
 class IF_SpeedOption(Option):
     """Data model for PCAP-NG file ``if_speed`` options."""
 
@@ -208,6 +222,7 @@ class IF_SpeedOption(Option):
         def __init__(self, type: 'Enum_OptionType', length: 'int', speed: 'int') -> None: ...
 
 
+@info_final
 class IF_TSResolOption(Option):
     """Data model for PCAP-NG file ``if_tsresol`` options."""
 
@@ -218,6 +233,7 @@ class IF_TSResolOption(Option):
         def __init__(self, type: 'Enum_OptionType', length: 'int', resolution: 'int') -> None: ...
 
 
+@info_final
 class IF_TZoneOption(Option):
     """Data model for PCAP-NG file ``if_tzone`` options."""
 
@@ -228,6 +244,7 @@ class IF_TZoneOption(Option):
         def __init__(self, type: 'Enum_OptionType', length: 'int', timezone: 'dt_timezone') -> None: ...
 
 
+@info_final
 class IF_FilterOption(Option):
     """Data model for PCAP-NG file ``if_filter`` options."""
 
@@ -240,6 +257,7 @@ class IF_FilterOption(Option):
         def __init__(self, type: 'Enum_OptionType', length: 'int', code: 'Enum_FilterType', expression: 'bytes') -> None: ...
 
 
+@info_final
 class IF_OSOption(Option):
     """Data model for PCAP-NG file ``if_os`` options."""
 
@@ -250,6 +268,7 @@ class IF_OSOption(Option):
         def __init__(self, type: 'Enum_OptionType', length: 'int', os: 'str') -> None: ...
 
 
+@info_final
 class IF_FCSLenOption(Option):
     """Data model for PCAP-NG file ``if_fcslen`` options."""
 
@@ -260,6 +279,7 @@ class IF_FCSLenOption(Option):
         def __init__(self, type: 'Enum_OptionType', length: 'int', fcs_length: 'int') -> None: ...
 
 
+@info_final
 class IF_TSOffsetOption(Option):
     """Data model for PCAP-NG file ``if_tsoffset`` options."""
 
@@ -270,6 +290,7 @@ class IF_TSOffsetOption(Option):
         def __init__(self, type: 'Enum_OptionType', length: 'int', offset: 'int') -> None: ...
 
 
+@info_final
 class IF_HardwareOption(Option):
     """Data model for PCAP-NG file ``if_hardware`` options."""
 
@@ -280,6 +301,7 @@ class IF_HardwareOption(Option):
         def __init__(self, type: 'Enum_OptionType', length: 'int', hardware: 'str') -> None: ...
 
 
+@info_final
 class IF_TxSpeedOption(Option):
     """Data model for PCAP-NG file ``if_txspeed`` options."""
 
@@ -290,6 +312,7 @@ class IF_TxSpeedOption(Option):
         def __init__(self, type: 'Enum_OptionType', length: 'int', speed: 'int') -> None: ...
 
 
+@info_final
 class IF_RxSpeedOption(Option):
     """Data model for PCAP-NG file ``if_rxspeed`` options."""
 
@@ -300,6 +323,7 @@ class IF_RxSpeedOption(Option):
         def __init__(self, type: 'Enum_OptionType', length: 'int', speed: 'int') -> None: ...
 
 
+@info_final
 class InterfaceDescriptionBlock(PCAPNG):
     """Data model for PCAP-NG Interface Description Block (IDB)."""
 
@@ -315,6 +339,7 @@ class InterfaceDescriptionBlock(PCAPNG):
                      snaplen: 'int', options: 'OrderedMultiDict[Enum_OptionType, Option]') -> None: ...
 
 
+@info_final
 class EPB_FlagsOption(Option):
     """Data model for PCAP-NG file ``epb_flags`` options."""
 
@@ -348,6 +373,7 @@ class EPB_FlagsOption(Option):
                      delimiter_error: 'bool', preamble_error: 'bool', symbol_error: 'bool') -> 'None': ...
 
 
+@info_final
 class EPB_HashOption(Option):
     """Data model for PCAP-NG ``epb_hash`` options."""
 
@@ -360,6 +386,7 @@ class EPB_HashOption(Option):
         def __init__(self, type: 'Enum_OptionType', length: 'int', algorithm: 'Enum_HashAlgorithm', hash: 'bytes') -> 'None': ...
 
 
+@info_final
 class EPB_DropCountOption(Option):
     """Data model for PCAP-NG ``epb_dropcount`` options."""
 
@@ -370,6 +397,7 @@ class EPB_DropCountOption(Option):
         def __init__(self, type: 'Enum_OptionType', length: 'int', drop_count: 'int') -> 'None': ...
 
 
+@info_final
 class EPB_PacketIDOption(Option):
     """Data model for PCAP-NG ``epb_packetid`` options."""
 
@@ -380,6 +408,7 @@ class EPB_PacketIDOption(Option):
         def __init__(self, type: 'Enum_OptionType', length: 'int', packet_id: 'int') -> 'None': ...
 
 
+@info_final
 class EPB_QueueOption(Option):
     """Data model for PCAP-NG ``epb_queue`` options."""
 
@@ -390,6 +419,7 @@ class EPB_QueueOption(Option):
         def __init__(self, type: 'Enum_OptionType', length: 'int', queue_id: 'int') -> 'None': ...
 
 
+@info_final
 class EPB_VerdictOption(Option):
     """Data model for PCAP-NG ``epb_verdict`` options."""
 
@@ -402,6 +432,7 @@ class EPB_VerdictOption(Option):
         def __init__(self, type: 'Enum_OptionType', length: 'int', verdict: 'Enum_VerdictType', value: 'bytes') -> 'None': ...
 
 
+@info_final
 class EnhancedPacketBlock(PCAPNG):
     """Data model for PCAP-NG Enhanced Packet Block (EPB)."""
 
@@ -433,6 +464,7 @@ class EnhancedPacketBlock(PCAPNG):
                      options: 'OrderedMultiDict[Enum_OptionType, Option]') -> 'None': ...
 
 
+@info_final
 class SimplePacketBlock(PCAPNG):
     """Data model for PCAP-NG Simple Packet Block (SPB)."""
 
@@ -479,6 +511,7 @@ class NameResolutionRecord(Data):
     length: 'int'
 
 
+@info_final
 class UnknownRecord(NameResolutionRecord):
     """Data model for PCAP-NG NRB unknown records."""
 
@@ -489,6 +522,7 @@ class UnknownRecord(NameResolutionRecord):
         def __init__(self, type: 'Enum_RecordType', length: 'int', data: 'bytes') -> 'None': ...
 
 
+@info_final
 class EndRecord(NameResolutionRecord):
     """Data model for PCAP-NG ``nrb_record_end`` records."""
 
@@ -496,6 +530,7 @@ class EndRecord(NameResolutionRecord):
         def __init__(self, type: 'Enum_RecordType', length: 'int') -> 'None': ...
 
 
+@info_final
 class IPv4Record(NameResolutionRecord):
     """Data model for PCAP-NG ``nrb_record_ipv4`` records."""
 
@@ -509,6 +544,7 @@ class IPv4Record(NameResolutionRecord):
                      records: 'tuple[str, ...]') -> 'None': ...
 
 
+@info_final
 class IPv6Record(NameResolutionRecord):
     """Data model for PCAP-NG ``nrb_record_ipv6`` records."""
 
@@ -522,6 +558,7 @@ class IPv6Record(NameResolutionRecord):
                      records: 'tuple[str, ...]') -> 'None': ...
 
 
+@info_final
 class NS_DNSNameOption(Option):
     """Data model for PCAP-NG ``ns_dnsname`` option."""
 
@@ -532,6 +569,7 @@ class NS_DNSNameOption(Option):
         def __init__(self, type: 'Enum_OptionType', length: 'int', name: 'str') -> 'None': ...
 
 
+@info_final
 class NS_DNSIP4AddrOption(Option):
     """Data model for PCAP-NG ``ns_dnsip4addr`` option."""
 
@@ -542,6 +580,7 @@ class NS_DNSIP4AddrOption(Option):
         def __init__(self, type: 'Enum_OptionType', length: 'int', ip: 'IPv4Address') -> 'None': ...
 
 
+@info_final
 class NS_DNSIP6AddrOption(Option):
     """Data model for PCAP-NG ``ns_dnsip6addr`` option."""
 
@@ -552,6 +591,7 @@ class NS_DNSIP6AddrOption(Option):
         def __init__(self, type: 'Enum_OptionType', length: 'int', ip: 'IPv6Address') -> 'None': ...
 
 
+@info_final
 class NameResolutionBlock(PCAPNG):
     """Data model for PCAP-NG Name Resolution Block (NRB)."""
 
@@ -586,6 +626,7 @@ class NameResolutionBlock(PCAPNG):
                      options: 'OrderedMultiDict[Enum_OptionType, Option]') -> 'None': ...
 
 
+@info_final
 class ISB_StartTimeOption(Option):
     """Data model for PCAP-NG ``isb_starttime`` option."""
 
@@ -599,6 +640,7 @@ class ISB_StartTimeOption(Option):
                      timestamp_epoch: 'Decimal') -> 'None': ...
 
 
+@info_final
 class ISB_EndTimeOption(Option):
     """Data model for PCAP-NG ``isb_endtime`` option."""
 
@@ -612,6 +654,7 @@ class ISB_EndTimeOption(Option):
                      timestamp_epoch: 'Decimal') -> 'None': ...
 
 
+@info_final
 class ISB_IFRecvOption(Option):
     """Data model for PCAP-NG ``isb_ifrecv`` option."""
 
@@ -622,6 +665,7 @@ class ISB_IFRecvOption(Option):
         def __init__(self, type: 'Enum_OptionType', length: 'int', packets: 'int') -> 'None': ...
 
 
+@info_final
 class ISB_IFDropOption(Option):
     """Data model for PCAP-NG ``isb_ifdrop`` option."""
 
@@ -632,6 +676,7 @@ class ISB_IFDropOption(Option):
         def __init__(self, type: 'Enum_OptionType', length: 'int', packets: 'int') -> 'None': ...
 
 
+@info_final
 class ISB_FilterAcceptOption(Option):
     """Data model for PCAP-NG ``isb_filteraccept`` option."""
 
@@ -642,6 +687,7 @@ class ISB_FilterAcceptOption(Option):
         def __init__(self, type: 'Enum_OptionType', length: 'int', packets: 'int') -> 'None': ...
 
 
+@info_final
 class ISB_OSDropOption(Option):
     """Data model for PCAP-NG ``isb_osdrop`` option."""
 
@@ -652,6 +698,7 @@ class ISB_OSDropOption(Option):
         def __init__(self, type: 'Enum_OptionType', length: 'int', packets: 'int') -> 'None': ...
 
 
+@info_final
 class ISB_UsrDelivOption(Option):
     """Data model for PCAP-NG ``isb_usrdeliv`` option."""
 
@@ -662,6 +709,7 @@ class ISB_UsrDelivOption(Option):
         def __init__(self, type: 'Enum_OptionType', length: 'int', packets: 'int') -> 'None': ...
 
 
+@info_final
 class InterfaceStatisticsBlock(PCAPNG):
     """Data model for PCAP-NG Interface Statistics Block (ISB)."""
 
@@ -679,6 +727,7 @@ class InterfaceStatisticsBlock(PCAPNG):
                      timestamp_epoch: 'Decimal', options: 'OrderedMultiDict[Enum_OptionType, Option]') -> 'None': ...
 
 
+@info_final
 class SystemdJournalExportBlock(PCAPNG):
     """Data model for PCAP-NG :manpage:`systemd(1)` Journal Export Block."""
 
@@ -693,6 +742,7 @@ class DSBSecrets(Data):
     """Data model for DSB secrets data."""
 
 
+@info_final
 class UnknownSecrets(DSBSecrets):
     """Data model for unknown DSB secrets."""
 
@@ -703,6 +753,7 @@ class UnknownSecrets(DSBSecrets):
         def __init__(self, data: 'bytes') -> 'None': ...
 
 
+@info_final
 class TLSKeyLog(DSBSecrets):
     """Data model for TLS key log DSB secrets."""
 
@@ -713,6 +764,7 @@ class TLSKeyLog(DSBSecrets):
         def __init__(self, entries: 'dict[TLSKeyLabel, OrderedMultiDict[bytes, bytes]]') -> 'None': ...
 
 
+@info_final
 class WireGuardKeyLog(DSBSecrets):
     """Data model for WireGuard key DSB secrets."""
 
@@ -723,6 +775,7 @@ class WireGuardKeyLog(DSBSecrets):
         def __init__(self, entries: 'OrderedMultiDict[WireGuardKeyLabel, bytes]') -> 'None': ...
 
 
+@info_final
 class ZigBeeNWKKey(DSBSecrets):
     """Data model for ZigBEE NWK Key and ZigBee PANID secrets data."""
 
@@ -735,6 +788,7 @@ class ZigBeeNWKKey(DSBSecrets):
         def __init__(self, nwk_key: 'bytes', pan_id: 'int') -> 'None': ...
 
 
+@info_final
 class ZigBeeAPSKey(DSBSecrets):
     """Data model for ZigBEE APS Key secrets data."""
 
@@ -749,6 +803,7 @@ class ZigBeeAPSKey(DSBSecrets):
         def __init__(self, aps_key: 'bytes', pan_id: 'int', short_address: 'int') -> 'None': ...
 
 
+@info_final
 class DecryptionSecretsBlock(PCAPNG):
     """Data model for PCAP-NG Decryption Secrets Block (DSB)."""
 
@@ -767,6 +822,7 @@ class DecryptionSecretsBlock(PCAPNG):
                      options: 'OrderedMultiDict[Enum_OptionType, Option]') -> 'None': ...
 
 
+@info_final
 class CustomBlock(PCAPNG):
     """Data model for PCAP-NG Custom Block (CB)."""
 
@@ -779,6 +835,7 @@ class CustomBlock(PCAPNG):
         def __init__(self, type: 'Enum_BlockType', length: 'int', pen: 'int', data: 'bytes') -> 'None': ...
 
 
+@info_final
 class PACK_FlagsOption(Option):
     """Data model for PCAP-NG file ``pack_flags`` options."""
 
@@ -812,6 +869,7 @@ class PACK_FlagsOption(Option):
                      delimiter_error: 'bool', preamble_error: 'bool', symbol_error: 'bool') -> 'None': ...
 
 
+@info_final
 class PACK_HashOption(Option):
     """Data model for PCAP-NG ``pack_hash`` options."""
 
@@ -824,6 +882,7 @@ class PACK_HashOption(Option):
         def __init__(self, type: 'Enum_OptionType', length: 'int', algorithm: 'Enum_HashAlgorithm', hash: 'bytes') -> 'None': ...
 
 
+@info_final
 class PacketBlock(PCAPNG):
     """Data model for PCAP-NG Packet Block (obsolete)."""
 

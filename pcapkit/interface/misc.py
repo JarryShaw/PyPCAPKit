@@ -12,7 +12,7 @@ generally provided per user's requests.
 import sys
 from typing import TYPE_CHECKING
 
-from pcapkit.corekit.infoclass import Info
+from pcapkit.corekit.infoclass import Info, info_final
 from pcapkit.foundation.extraction import Extractor
 from pcapkit.foundation.reassembly.tcp import TCP as TCP_Reassembly
 from pcapkit.utilities.exceptions import stacklevel
@@ -36,6 +36,7 @@ __all__ = ['follow_tcp_stream']
 ###############################################################################
 
 
+@info_final
 class Stream(Info):
     """Data model for TCP streams."""
 

@@ -3,6 +3,7 @@
 
 from typing import TYPE_CHECKING
 
+from pcapkit.corekit.infoclass import info_final
 from pcapkit.protocols.data.data import Data
 
 if TYPE_CHECKING:
@@ -50,6 +51,7 @@ class HTTP(Data):
     sid: 'int'
 
 
+@info_final
 class UnassignedFrame(HTTP):
     """Data model for HTTP/2 unassigned frame."""
 
@@ -62,6 +64,7 @@ class UnassignedFrame(HTTP):
         def __init__(self, length: 'int', type: 'Frame', flags: 'Literal[None]', sid: 'int', data: 'bytes') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
+@info_final
 class DataFrameFlags(Flags):
     """Data model for HTTP/2 ``DATA`` frame flags."""
 
@@ -74,6 +77,7 @@ class DataFrameFlags(Flags):
         def __init__(self, END_STREAM: 'bool', PADDED: 'bool') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
+@info_final
 class DataFrame(HTTP):
     """Data model for HTTP/2 ``DATA`` frame."""
 
@@ -88,6 +92,7 @@ class DataFrame(HTTP):
         def __init__(self, length: 'int', type: 'Frame', flags: 'DataFrameFlags', pad_len: 'int', sid: 'int', data: 'bytes') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
+@info_final
 class HeadersFrameFlags(Flags):
     """Data model for HTTP/2 ``HEADERS`` frame flags."""
 
@@ -104,6 +109,7 @@ class HeadersFrameFlags(Flags):
         def __init__(self, END_STREAM: 'bool', END_HEADERS: 'bool', PADDED: 'bool', PRIORITY: 'bool') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
+@info_final
 class HeadersFrame(HTTP):
     """Data model for HTTP/2 ``HEADERS`` frame."""
 
@@ -124,6 +130,7 @@ class HeadersFrame(HTTP):
         def __init__(self, length: 'int', type: 'Frame', flags: 'HeadersFrameFlags', pad_len: 'int', sid: 'int', excl_dependency: 'bool', stream_dependency: 'int', weight: 'int', fragment: 'bytes') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
+@info_final
 class PriorityFrame(HTTP):
     """Data model for HTTP/2 ``PRIORITY`` frame."""
 
@@ -140,6 +147,7 @@ class PriorityFrame(HTTP):
         def __init__(self, length: 'int', type: 'Frame', flags: 'Literal[None]', sid: 'int', excl_dependency: 'bool', stream_dependency: 'int', weight: 'int') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
+@info_final
 class RSTStreamFrame(HTTP):
     """Data model for HTTP/2 ``RST_STREAM`` frame."""
 
@@ -152,6 +160,7 @@ class RSTStreamFrame(HTTP):
         def __init__(self, length: 'int', type: 'Frame', flags: 'Literal[None]', sid: 'int', error: 'int') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
+@info_final
 class SettingsFrameFlags(Flags):
     """Data model for HTTP/2 ``SETTINGS`` frame flags."""
 
@@ -162,6 +171,7 @@ class SettingsFrameFlags(Flags):
         def __init__(self, ACK: 'bool') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
+@info_final
 class SettingsFrame(HTTP):
     """Data model for HTTP/2 ``SETTINGS`` frame."""
 
@@ -174,6 +184,7 @@ class SettingsFrame(HTTP):
         def __init__(self, length: 'int', type: 'Frame', flags: 'Optional[Flags]', sid: 'int', settings: 'OrderedMultiDict[Setting, int]') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
+@info_final
 class PushPromiseFrameFlags(Flags):
     """Data model for HTTP/2 ``PUSH_PROMISE`` frame flags."""
 
@@ -186,6 +197,7 @@ class PushPromiseFrameFlags(Flags):
         def __init__(self, END_HEADERS: 'bool', PADDED: 'bool') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
+@info_final
 class PushPromiseFrame(HTTP):
     """Data model for HTTP/2 ``PUSH_PROMISE`` frame."""
 
@@ -202,6 +214,7 @@ class PushPromiseFrame(HTTP):
         def __init__(self, length: 'int', type: 'Frame', flags: 'Optional[Flags]', pad_len: 'int', sid: 'int', promised_sid: 'int', fragment: 'bytes') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
+@info_final
 class PingFrameFlags(Flags):
     """Data model for HTTP/2 ``PING`` frame flags."""
 
@@ -212,6 +225,7 @@ class PingFrameFlags(Flags):
         def __init__(self, ACK: 'bool') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
+@info_final
 class PingFrame(HTTP):
     """Data model for HTTP/2 ``PING`` frame."""
 
@@ -224,6 +238,7 @@ class PingFrame(HTTP):
         def __init__(self, length: 'int', type: 'Frame', flags: 'Optional[Flags]', sid: 'int', data: 'bytes') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
+@info_final
 class GoawayFrame(HTTP):
     """Data model for HTTP/2 ``GOAWAY`` frame."""
 
@@ -240,6 +255,7 @@ class GoawayFrame(HTTP):
         def __init__(self, length: 'int', type: 'Frame', flags: 'Optional[Flags]', sid: 'int', last_sid: 'int', error: 'int', debug_data: 'bytes') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
+@info_final
 class WindowUpdateFrame(HTTP):
     """Data moddel for HTTP/2 ``WINDOW_UPDATE`` frame."""
 
@@ -252,6 +268,7 @@ class WindowUpdateFrame(HTTP):
         def __init__(self, length: 'int', type: 'Frame', flags: 'Optional[Flags]', sid: 'int', increment: 'int') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
+@info_final
 class ContinuationFrameFlags(Flags):
     """Data model for HTTP/2 ``CONTINUATION`` frame flags."""
 
@@ -262,6 +279,7 @@ class ContinuationFrameFlags(Flags):
         def __init__(self, END_HEADERS: 'bool') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
+@info_final
 class ContinuationFrame(HTTP):
     """Data model for HTTP/2 ``CONTINUATION`` frame."""
 

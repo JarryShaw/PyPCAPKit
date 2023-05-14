@@ -13,12 +13,13 @@ __all__ = [
 
 from typing import TYPE_CHECKING
 
-from pcapkit.corekit.infoclass import Info
+from pcapkit.corekit.infoclass import Info, info_final
 
 if TYPE_CHECKING:
     from typing import Optional
 
 
+@info_final
 class TraceFlowData(Info):
     """Data storage for flow tracing."""
 
