@@ -86,7 +86,7 @@ Engine Comparison
 -----------------
 
 Due to the general overhead of ``pcapkit``, its extraction procedure takes
-around *0.96* milliseconds per packet, which is already impressive but not enough
+around *0.2* milliseconds per packet, which is already impressive but not enough
 comparing to other popular extration engines availbale on the market, given the
 fact that ``pcapkit`` is a **comprehensive** packet processing module.
 
