@@ -350,7 +350,7 @@
 <span class="kn">from</span> <span class="nn">pcapkit.const.reg.linktype</span> <span class="kn">import</span> <span class="n">LinkType</span> <span class="k">as</span> <span class="n">Enum_LinkType</span>
 <span class="kn">from</span> <span class="nn">pcapkit.corekit.fields.numbers</span> <span class="kn">import</span> <span class="n">EnumField</span><span class="p">,</span> <span class="n">Int32Field</span><span class="p">,</span> <span class="n">UInt16Field</span><span class="p">,</span> <span class="n">UInt32Field</span>
 <span class="kn">from</span> <span class="nn">pcapkit.corekit.fields.strings</span> <span class="kn">import</span> <span class="n">BytesField</span>
-<span class="kn">from</span> <span class="nn">pcapkit.protocols.schema.schema</span> <span class="kn">import</span> <span class="n">Schema</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.schema.schema</span> <span class="kn">import</span> <span class="n">Schema</span><span class="p">,</span> <span class="n">schema_final</span>
 <span class="kn">from</span> <span class="nn">pcapkit.utilities.exceptions</span> <span class="kn">import</span> <span class="n">ProtocolError</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Header&#39;</span><span class="p">]</span>
@@ -382,7 +382,8 @@
         <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="s1">&#39;invalid magic number&#39;</span><span class="p">)</span>
 
 
-<div class="viewcode-block" id="Header"><a class="viewcode-back" href="../../../../../../pcapkit/protocols/misc/pcap.html#pcapkit.protocols.schema.misc.pcap.header.Header">[docs]</a><span class="k">class</span> <span class="nc">Header</span><span class="p">(</span><span class="n">Schema</span><span class="p">):</span>
+<div class="viewcode-block" id="Header"><a class="viewcode-back" href="../../../../../../pcapkit/protocols/misc/pcap.html#pcapkit.protocols.schema.misc.pcap.header.Header">[docs]</a><span class="nd">@schema_final</span>
+<span class="k">class</span> <span class="nc">Header</span><span class="p">(</span><span class="n">Schema</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Global header of PCAP file.&quot;&quot;&quot;</span>
 
     <span class="c1">#: Magic number.</span>

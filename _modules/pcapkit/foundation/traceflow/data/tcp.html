@@ -346,7 +346,7 @@
 
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">Generic</span><span class="p">,</span> <span class="n">TypeVar</span>
 
-<span class="kn">from</span> <span class="nn">pcapkit.corekit.infoclass</span> <span class="kn">import</span> <span class="n">Info</span>
+<span class="kn">from</span> <span class="nn">pcapkit.corekit.infoclass</span> <span class="kn">import</span> <span class="n">Info</span><span class="p">,</span> <span class="n">info_final</span>
 <span class="kn">from</span> <span class="nn">pcapkit.utilities.compat</span> <span class="kn">import</span> <span class="n">Tuple</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;BufferID&#39;</span><span class="p">,</span> <span class="s1">&#39;Packet&#39;</span><span class="p">,</span> <span class="s1">&#39;Buffer&#39;</span><span class="p">,</span> <span class="s1">&#39;Index&#39;</span><span class="p">]</span>
@@ -366,7 +366,8 @@
 <span class="n">BufferID</span> <span class="o">=</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">IPAddress</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="n">IPAddress</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span>
 
 
-<div class="viewcode-block" id="Packet"><a class="viewcode-back" href="../../../../../pcapkit/foundation/traceflow/tcp.html#pcapkit.foundation.traceflow.data.tcp.Packet">[docs]</a><span class="k">class</span> <span class="nc">Packet</span><span class="p">(</span><span class="n">Info</span><span class="p">,</span> <span class="n">Generic</span><span class="p">[</span><span class="n">IPAddress</span><span class="p">]):</span>
+<div class="viewcode-block" id="Packet"><a class="viewcode-back" href="../../../../../pcapkit/foundation/traceflow/tcp.html#pcapkit.foundation.traceflow.data.tcp.Packet">[docs]</a><span class="nd">@info_final</span>
+<span class="k">class</span> <span class="nc">Packet</span><span class="p">(</span><span class="n">Info</span><span class="p">,</span> <span class="n">Generic</span><span class="p">[</span><span class="n">IPAddress</span><span class="p">]):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Data structure for **TCP flow tracing**.</span>
 
 <span class="sd">    See Also:</span>
@@ -401,7 +402,8 @@
                      <span class="n">srcport</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">dstport</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">timestamp</span><span class="p">:</span> <span class="s1">&#39;float&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long</span></div>
 
 
-<div class="viewcode-block" id="Buffer"><a class="viewcode-back" href="../../../../../pcapkit/foundation/traceflow/tcp.html#pcapkit.foundation.traceflow.data.tcp.Buffer">[docs]</a><span class="k">class</span> <span class="nc">Buffer</span><span class="p">(</span><span class="n">Info</span><span class="p">):</span>
+<div class="viewcode-block" id="Buffer"><a class="viewcode-back" href="../../../../../pcapkit/foundation/traceflow/tcp.html#pcapkit.foundation.traceflow.data.tcp.Buffer">[docs]</a><span class="nd">@info_final</span>
+<span class="k">class</span> <span class="nc">Buffer</span><span class="p">(</span><span class="n">Info</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Data structure for **TCP flow tracing**.</span>
 
 <span class="sd">    See Also:</span>
@@ -422,7 +424,8 @@
                      <span class="n">index</span><span class="p">:</span> <span class="s1">&#39;list[int]&#39;</span><span class="p">,</span> <span class="n">label</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements</span></div>
 
 
-<div class="viewcode-block" id="Index"><a class="viewcode-back" href="../../../../../pcapkit/foundation/traceflow/tcp.html#pcapkit.foundation.traceflow.data.tcp.Index">[docs]</a><span class="k">class</span> <span class="nc">Index</span><span class="p">(</span><span class="n">Info</span><span class="p">):</span>
+<div class="viewcode-block" id="Index"><a class="viewcode-back" href="../../../../../pcapkit/foundation/traceflow/tcp.html#pcapkit.foundation.traceflow.data.tcp.Index">[docs]</a><span class="nd">@info_final</span>
+<span class="k">class</span> <span class="nc">Index</span><span class="p">(</span><span class="n">Info</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Data structure for **TCP flow tracing**.</span>
 
 <span class="sd">    See Also:</span>

@@ -355,19 +355,110 @@
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="kn">import</span> <span class="nn">collections.abc</span>
 <span class="kn">import</span> <span class="nn">itertools</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">Generic</span><span class="p">,</span> <span class="n">TypeVar</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">Generic</span><span class="p">,</span> <span class="n">TypeVar</span><span class="p">,</span> <span class="n">cast</span><span class="p">,</span> <span class="n">final</span>
 
 <span class="kn">from</span> <span class="nn">pcapkit.utilities.compat</span> <span class="kn">import</span> <span class="n">Mapping</span>
-<span class="kn">from</span> <span class="nn">pcapkit.utilities.exceptions</span> <span class="kn">import</span> <span class="n">UnsupportedCall</span>
+<span class="kn">from</span> <span class="nn">pcapkit.utilities.exceptions</span> <span class="kn">import</span> <span class="n">UnsupportedCall</span><span class="p">,</span> <span class="n">stacklevel</span>
+<span class="kn">from</span> <span class="nn">pcapkit.utilities.warnings</span> <span class="kn">import</span> <span class="n">InfoWarning</span><span class="p">,</span> <span class="n">warn</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-    <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">Iterator</span><span class="p">,</span> <span class="n">NoReturn</span><span class="p">,</span> <span class="n">Optional</span>
+    <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">Iterator</span><span class="p">,</span> <span class="n">NoReturn</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Type</span>
 
     <span class="kn">from</span> <span class="nn">typing_extensions</span> <span class="kn">import</span> <span class="n">Self</span>
 
-<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Info&#39;</span><span class="p">]</span>
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Info&#39;</span><span class="p">,</span> <span class="s1">&#39;info_final&#39;</span><span class="p">]</span>
 
 <span class="n">VT</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s1">&#39;VT&#39;</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="info_final"><a class="viewcode-back" href="../../../pcapkit/corekit/infoclass.html#pcapkit.corekit.infoclass.info_final">[docs]</a><span class="k">def</span> <span class="nf">info_final</span><span class="p">(</span><span class="bp">cls</span><span class="p">:</span> <span class="s1">&#39;Type[Info[VT]]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Type[Info[VT]]&#39;</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Finalise info class.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        cls: Info class.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Finalised info class.</span>
+
+<span class="sd">    Notes:</span>
+<span class="sd">        This decorator function is used to generate necessary</span>
+<span class="sd">        attributes and methods for the decorated :class:`Info`</span>
+<span class="sd">        class. It can be useful to reduce runtime generation</span>
+<span class="sd">        time as well as caching already generated attributes.</span>
+
+<span class="sd">    :meta decorator:</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="bp">cls</span><span class="o">.</span><span class="n">__finalised__</span><span class="p">:</span>
+        <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1">: info class has been finalised; now skipping&#39;</span><span class="p">,</span>
+             <span class="n">InfoWarning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="n">stacklevel</span><span class="p">())</span>
+        <span class="k">return</span> <span class="bp">cls</span>
+
+    <span class="n">temp</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;__map__&#39;</span><span class="p">,</span> <span class="s1">&#39;__map_reverse__&#39;</span><span class="p">,</span> <span class="s1">&#39;__builtin__&#39;</span><span class="p">,</span> <span class="s1">&#39;__finalised__&#39;</span><span class="p">]</span>
+    <span class="n">temp</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">__additional__</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">obj</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="n">mro</span><span class="p">():</span>
+        <span class="n">temp</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="nb">dir</span><span class="p">(</span><span class="n">obj</span><span class="p">))</span>
+    <span class="bp">cls</span><span class="o">.</span><span class="n">__builtin__</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">temp</span><span class="p">)</span>
+    <span class="bp">cls</span><span class="o">.</span><span class="n">__excluded__</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">__builtin__</span><span class="p">)</span>
+
+    <span class="c1"># NOTE: We only generate ``__init__`` method for subclasses of the</span>
+    <span class="c1"># ``Info`` class, rather than itself, plus that such class does not</span>
+    <span class="c1"># override the ``__init__`` method of the meta class.</span>
+    <span class="k">if</span> <span class="s1">&#39;__init__&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="vm">__dict__</span> <span class="ow">and</span> <span class="bp">cls</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">Info</span><span class="p">:</span>
+        <span class="n">args_</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: list[str]</span>
+        <span class="n">dict_</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: list[str]</span>
+
+        <span class="k">for</span> <span class="n">cls_</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="n">mro</span><span class="p">():</span>
+            <span class="c1"># NOTE: We skip the ``Info`` class itself, to avoid superclass</span>
+            <span class="c1"># type annotations being considered.</span>
+            <span class="k">if</span> <span class="n">cls_</span> <span class="ow">is</span> <span class="n">Info</span><span class="p">:</span>
+                <span class="k">break</span>
+
+            <span class="c1"># NOTE: We iterate in reversed order to ensure that the type</span>
+            <span class="c1"># annotations of the superclasses are considered first.</span>
+            <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="nb">reversed</span><span class="p">(</span><span class="n">cls_</span><span class="o">.</span><span class="vm">__annotations__</span><span class="p">):</span>
+                <span class="c1"># NOTE: We skip duplicated annotations to avoid duplicate</span>
+                <span class="c1"># argument in function definition.</span>
+                <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">args_</span><span class="p">:</span>
+                    <span class="k">continue</span>
+
+                <span class="n">args_</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+                <span class="n">dict_</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s1">=</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+
+        <span class="c1"># NOTE: We reverse the two lists such that the order of the</span>
+        <span class="c1"># arguments is the same as the order of the type annotations, i.e.,</span>
+        <span class="c1"># from the most base class to the most derived class.</span>
+        <span class="n">args_</span><span class="o">.</span><span class="n">reverse</span><span class="p">()</span>
+        <span class="n">dict_</span><span class="o">.</span><span class="n">reverse</span><span class="p">()</span>
+
+        <span class="c1"># NOTE: We only generate typed ``__init__`` method if only the class</span>
+        <span class="c1"># has type annotations from any of itself and its base classes.</span>
+        <span class="k">if</span> <span class="n">args_</span><span class="p">:</span>
+            <span class="c1"># NOTE: The following code is to make the ``__init__`` method work.</span>
+            <span class="c1"># It is inspired from the :func:`dataclasses._create_fn` function.</span>
+            <span class="n">init_</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="sa">f</span><span class="s1">&#39;def __create_fn__():</span><span class="se">\n</span><span class="s1">&#39;</span>
+                <span class="sa">f</span><span class="s1">&#39;    def __init__(self, </span><span class="si">{</span><span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">args_</span><span class="p">)</span><span class="si">}</span><span class="s1">):</span><span class="se">\n</span><span class="s1">&#39;</span>
+                <span class="sa">f</span><span class="s1">&#39;        self.__update__(</span><span class="si">{</span><span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dict_</span><span class="p">)</span><span class="si">}</span><span class="s1">)</span><span class="se">\n</span><span class="s1">&#39;</span>
+                <span class="sa">f</span><span class="s1">&#39;        self.__post_init__()</span><span class="se">\n</span><span class="s1">&#39;</span>
+                <span class="sa">f</span><span class="s1">&#39;    return __init__</span><span class="se">\n</span><span class="s1">&#39;</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">init_</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="s1">&#39;def __create_fn__():</span><span class="se">\n</span><span class="s1">&#39;</span>
+                <span class="s1">&#39;    def __init__(self, dict_=None, **kwargs):</span><span class="se">\n</span><span class="s1">&#39;</span>
+                <span class="s1">&#39;        self.__update__(dict_, **kwargs)</span><span class="se">\n</span><span class="s1">&#39;</span>
+                <span class="s1">&#39;        self.__post_init__()</span><span class="se">\n</span><span class="s1">&#39;</span>
+                <span class="s1">&#39;    return __init__</span><span class="se">\n</span><span class="s1">&#39;</span>
+            <span class="p">)</span>
+
+        <span class="n">ns</span> <span class="o">=</span> <span class="p">{}</span>  <span class="c1"># type: dict[str, Any]</span>
+        <span class="n">exec</span><span class="p">(</span><span class="n">init_</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">ns</span><span class="p">)</span>  <span class="c1"># pylint: disable=exec-used # nosec</span>
+
+        <span class="bp">cls</span><span class="o">.</span><span class="fm">__init__</span> <span class="o">=</span> <span class="n">ns</span><span class="p">[</span><span class="s1">&#39;__create_fn__&#39;</span><span class="p">]()</span>
+        <span class="bp">cls</span><span class="o">.</span><span class="fm">__init__</span><span class="o">.</span><span class="vm">__qualname__</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1">.__init__&#39;</span>
+
+    <span class="bp">cls</span><span class="o">.</span><span class="n">__finalised__</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="k">return</span> <span class="n">final</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="Info"><a class="viewcode-back" href="../../../pcapkit/corekit/infoclass.html#pcapkit.corekit.infoclass.Info">[docs]</a><span class="k">class</span> <span class="nc">Info</span><span class="p">(</span><span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">VT</span><span class="p">],</span> <span class="n">Generic</span><span class="p">[</span><span class="n">VT</span><span class="p">]):</span>
@@ -398,6 +489,9 @@
         <span class="c1">#: List of builtin methods.</span>
         <span class="n">__builtin__</span><span class="p">:</span> <span class="s1">&#39;set[str]&#39;</span>
 
+    <span class="c1">#: Flag for finalised class initialisation.</span>
+    <span class="n">__finalised__</span> <span class="o">=</span> <span class="kc">False</span>
+
     <span class="c1">#: List of additional built-in names.</span>
     <span class="n">__additional__</span><span class="p">:</span> <span class="s1">&#39;list[str]&#39;</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="c1">#: List of names to be excluded from :obj:`dict` conversion.</span>
@@ -415,69 +509,8 @@
 <span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">temp</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;__map__&#39;</span><span class="p">,</span> <span class="s1">&#39;__map_reverse__&#39;</span><span class="p">,</span> <span class="s1">&#39;__builtin__&#39;</span><span class="p">]</span>
-        <span class="n">temp</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">__additional__</span><span class="p">)</span>
-        <span class="k">for</span> <span class="n">obj</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="n">mro</span><span class="p">():</span>
-            <span class="n">temp</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="nb">dir</span><span class="p">(</span><span class="n">obj</span><span class="p">))</span>
-        <span class="bp">cls</span><span class="o">.</span><span class="n">__builtin__</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">temp</span><span class="p">)</span>
-        <span class="bp">cls</span><span class="o">.</span><span class="n">__excluded__</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">__builtin__</span><span class="p">)</span>
-
-        <span class="c1"># NOTE: We only generate ``__init__`` method for subclasses of the</span>
-        <span class="c1"># ``Info`` class, rather than itself, plus that such class does not</span>
-        <span class="c1"># override the ``__init__`` method of the meta class.</span>
-        <span class="k">if</span> <span class="s1">&#39;__init__&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="vm">__dict__</span> <span class="ow">and</span> <span class="bp">cls</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">Info</span><span class="p">:</span>
-            <span class="n">args_</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: list[str]</span>
-            <span class="n">dict_</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: list[str]</span>
-
-            <span class="k">for</span> <span class="n">cls_</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="n">mro</span><span class="p">():</span>
-                <span class="c1"># NOTE: We skip the ``Info`` class itself, to avoid superclass</span>
-                <span class="c1"># type annotations being considered.</span>
-                <span class="k">if</span> <span class="n">cls_</span> <span class="ow">is</span> <span class="n">Info</span><span class="p">:</span>
-                    <span class="k">break</span>
-
-                <span class="c1"># NOTE: We iterate in reversed order to ensure that the type</span>
-                <span class="c1"># annotations of the superclasses are considered first.</span>
-                <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="nb">reversed</span><span class="p">(</span><span class="n">cls_</span><span class="o">.</span><span class="vm">__annotations__</span><span class="p">):</span>
-                    <span class="c1"># NOTE: We skip duplicated annotations to avoid duplicate</span>
-                    <span class="c1"># argument in function definition.</span>
-                    <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">args_</span><span class="p">:</span>
-                        <span class="k">continue</span>
-
-                    <span class="n">args_</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
-                    <span class="n">dict_</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s1">=</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
-
-            <span class="c1"># NOTE: We reverse the two lists such that the order of the</span>
-            <span class="c1"># arguments is the same as the order of the type annotations, i.e.,</span>
-            <span class="c1"># from the most base class to the most derived class.</span>
-            <span class="n">args_</span><span class="o">.</span><span class="n">reverse</span><span class="p">()</span>
-            <span class="n">dict_</span><span class="o">.</span><span class="n">reverse</span><span class="p">()</span>
-
-            <span class="c1"># NOTE: We only generate typed ``__init__`` method if only the class</span>
-            <span class="c1"># has type annotations from any of itself and its base classes.</span>
-            <span class="k">if</span> <span class="n">args_</span><span class="p">:</span>
-                <span class="c1"># NOTE: The following code is to make the ``__init__`` method work.</span>
-                <span class="c1"># It is inspired from the :func:`dataclasses._create_fn` function.</span>
-                <span class="n">init_</span> <span class="o">=</span> <span class="p">(</span>
-                    <span class="sa">f</span><span class="s1">&#39;def __create_fn__():</span><span class="se">\n</span><span class="s1">&#39;</span>
-                    <span class="sa">f</span><span class="s1">&#39;    def __init__(self, </span><span class="si">{</span><span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">args_</span><span class="p">)</span><span class="si">}</span><span class="s1">):</span><span class="se">\n</span><span class="s1">&#39;</span>
-                    <span class="sa">f</span><span class="s1">&#39;        self.__update__(</span><span class="si">{</span><span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dict_</span><span class="p">)</span><span class="si">}</span><span class="s1">)</span><span class="se">\n</span><span class="s1">&#39;</span>
-                    <span class="sa">f</span><span class="s1">&#39;        self.__post_init__()</span><span class="se">\n</span><span class="s1">&#39;</span>
-                    <span class="sa">f</span><span class="s1">&#39;    return __init__</span><span class="se">\n</span><span class="s1">&#39;</span>
-                <span class="p">)</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">init_</span> <span class="o">=</span> <span class="p">(</span>
-                    <span class="s1">&#39;def __create_fn__():</span><span class="se">\n</span><span class="s1">&#39;</span>
-                    <span class="s1">&#39;    def __init__(self, dict_=None, **kwargs):</span><span class="se">\n</span><span class="s1">&#39;</span>
-                    <span class="s1">&#39;        self.__update__(dict_, **kwargs)</span><span class="se">\n</span><span class="s1">&#39;</span>
-                    <span class="s1">&#39;        self.__post_init__()</span><span class="se">\n</span><span class="s1">&#39;</span>
-                    <span class="s1">&#39;    return __init__</span><span class="se">\n</span><span class="s1">&#39;</span>
-                <span class="p">)</span>
-
-            <span class="n">ns</span> <span class="o">=</span> <span class="p">{}</span>  <span class="c1"># type: dict[str, Any]</span>
-            <span class="n">exec</span><span class="p">(</span><span class="n">init_</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">ns</span><span class="p">)</span>  <span class="c1"># pylint: disable=exec-used # nosec</span>
-            <span class="bp">cls</span><span class="o">.</span><span class="fm">__init__</span> <span class="o">=</span> <span class="n">ns</span><span class="p">[</span><span class="s1">&#39;__create_fn__&#39;</span><span class="p">]()</span>
-            <span class="bp">cls</span><span class="o">.</span><span class="fm">__init__</span><span class="o">.</span><span class="vm">__qualname__</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1">.__init__&#39;</span>
-
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">cls</span><span class="o">.</span><span class="n">__finalised__</span><span class="p">:</span>
+            <span class="bp">cls</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">&#39;Type[Self]&#39;</span><span class="p">,</span> <span class="n">info_final</span><span class="p">(</span><span class="bp">cls</span><span class="p">))</span>
         <span class="bp">self</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span>
 
         <span class="c1"># NOTE: We define the ``__map__`` and ``__map_reverse__`` attributes</span>

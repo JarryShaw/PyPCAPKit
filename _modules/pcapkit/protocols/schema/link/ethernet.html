@@ -352,7 +352,7 @@
 <span class="kn">from</span> <span class="nn">pcapkit.corekit.fields.misc</span> <span class="kn">import</span> <span class="n">PayloadField</span>
 <span class="kn">from</span> <span class="nn">pcapkit.corekit.fields.numbers</span> <span class="kn">import</span> <span class="n">EnumField</span>
 <span class="kn">from</span> <span class="nn">pcapkit.corekit.fields.strings</span> <span class="kn">import</span> <span class="n">BytesField</span>
-<span class="kn">from</span> <span class="nn">pcapkit.protocols.schema.schema</span> <span class="kn">import</span> <span class="n">Schema</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.schema.schema</span> <span class="kn">import</span> <span class="n">Schema</span><span class="p">,</span> <span class="n">schema_final</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Ethernet&#39;</span><span class="p">]</span>
 
@@ -372,7 +372,8 @@
     <span class="bp">self</span><span class="o">.</span><span class="n">protocol</span> <span class="o">=</span> <span class="n">protocol</span></div>
 
 
-<div class="viewcode-block" id="Ethernet"><a class="viewcode-back" href="../../../../../pcapkit/protocols/link/ethernet.html#pcapkit.protocols.schema.link.ethernet.Ethernet">[docs]</a><span class="k">class</span> <span class="nc">Ethernet</span><span class="p">(</span><span class="n">Schema</span><span class="p">):</span>
+<div class="viewcode-block" id="Ethernet"><a class="viewcode-back" href="../../../../../pcapkit/protocols/link/ethernet.html#pcapkit.protocols.schema.link.ethernet.Ethernet">[docs]</a><span class="nd">@schema_final</span>
+<span class="k">class</span> <span class="nc">Ethernet</span><span class="p">(</span><span class="n">Schema</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for ethernet packet.&quot;&quot;&quot;</span>
 
     <span class="c1">#: Destination MAC address.</span>

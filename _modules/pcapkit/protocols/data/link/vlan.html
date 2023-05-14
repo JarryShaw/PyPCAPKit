@@ -346,6 +346,7 @@
 
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
 
+<span class="kn">from</span> <span class="nn">pcapkit.corekit.infoclass</span> <span class="kn">import</span> <span class="n">info_final</span>
 <span class="kn">from</span> <span class="nn">pcapkit.protocols.data.data</span> <span class="kn">import</span> <span class="n">Data</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
@@ -355,7 +356,8 @@
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;VLAN&#39;</span><span class="p">,</span> <span class="s1">&#39;TCI&#39;</span><span class="p">]</span>
 
 
-<div class="viewcode-block" id="TCI"><a class="viewcode-back" href="../../../../../pcapkit/protocols/link/vlan.html#pcapkit.protocols.data.link.vlan.TCI">[docs]</a><span class="k">class</span> <span class="nc">TCI</span><span class="p">(</span><span class="n">Data</span><span class="p">):</span>
+<div class="viewcode-block" id="TCI"><a class="viewcode-back" href="../../../../../pcapkit/protocols/link/vlan.html#pcapkit.protocols.data.link.vlan.TCI">[docs]</a><span class="nd">@info_final</span>
+<span class="k">class</span> <span class="nc">TCI</span><span class="p">(</span><span class="n">Data</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for tag control information.&quot;&quot;&quot;</span>
 
     <span class="c1">#: Priority code point.</span>
@@ -369,7 +371,8 @@
         <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pcp</span><span class="p">:</span> <span class="s1">&#39;PriorityLevel&#39;</span><span class="p">,</span> <span class="n">dei</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span><span class="p">,</span> <span class="n">vid</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements</span></div>
 
 
-<div class="viewcode-block" id="VLAN"><a class="viewcode-back" href="../../../../../pcapkit/protocols/link/vlan.html#pcapkit.protocols.data.link.vlan.VLAN">[docs]</a><span class="k">class</span> <span class="nc">VLAN</span><span class="p">(</span><span class="n">Data</span><span class="p">):</span>
+<div class="viewcode-block" id="VLAN"><a class="viewcode-back" href="../../../../../pcapkit/protocols/link/vlan.html#pcapkit.protocols.data.link.vlan.VLAN">[docs]</a><span class="nd">@info_final</span>
+<span class="k">class</span> <span class="nc">VLAN</span><span class="p">(</span><span class="n">Data</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for 802.1Q customer VLAN tag type.&quot;&quot;&quot;</span>
 
     <span class="c1">#: Tag control information.</span>

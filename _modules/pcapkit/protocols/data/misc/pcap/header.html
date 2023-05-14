@@ -346,6 +346,7 @@
 
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
 
+<span class="kn">from</span> <span class="nn">pcapkit.corekit.infoclass</span> <span class="kn">import</span> <span class="n">info_final</span>
 <span class="kn">from</span> <span class="nn">pcapkit.protocols.data.data</span> <span class="kn">import</span> <span class="n">Data</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
@@ -357,7 +358,8 @@
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Header&#39;</span><span class="p">,</span> <span class="s1">&#39;MagicNumber&#39;</span><span class="p">]</span>
 
 
-<div class="viewcode-block" id="MagicNumber"><a class="viewcode-back" href="../../../../../../pcapkit/protocols/misc/pcap.html#pcapkit.protocols.data.misc.pcap.header.MagicNumber">[docs]</a><span class="k">class</span> <span class="nc">MagicNumber</span><span class="p">(</span><span class="n">Data</span><span class="p">):</span>
+<div class="viewcode-block" id="MagicNumber"><a class="viewcode-back" href="../../../../../../pcapkit/protocols/misc/pcap.html#pcapkit.protocols.data.misc.pcap.header.MagicNumber">[docs]</a><span class="nd">@info_final</span>
+<span class="k">class</span> <span class="nc">MagicNumber</span><span class="p">(</span><span class="n">Data</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Magic number of PCAP file.&quot;&quot;&quot;</span>
 
     <span class="c1">#: Magic number sequence.</span>
@@ -371,7 +373,8 @@
         <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">,</span> <span class="n">byteorder</span><span class="p">:</span> <span class="s1">&#39;Literal[&quot;big&quot;, &quot;little&quot;]&#39;</span><span class="p">,</span> <span class="n">nanosecond</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements</span></div>
 
 
-<div class="viewcode-block" id="Header"><a class="viewcode-back" href="../../../../../../pcapkit/protocols/misc/pcap.html#pcapkit.protocols.data.misc.pcap.header.Header">[docs]</a><span class="k">class</span> <span class="nc">Header</span><span class="p">(</span><span class="n">Data</span><span class="p">):</span>
+<div class="viewcode-block" id="Header"><a class="viewcode-back" href="../../../../../../pcapkit/protocols/misc/pcap.html#pcapkit.protocols.data.misc.pcap.header.Header">[docs]</a><span class="nd">@info_final</span>
+<span class="k">class</span> <span class="nc">Header</span><span class="p">(</span><span class="n">Data</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Global header of PCAP file.&quot;&quot;&quot;</span>
 
     <span class="c1">#: Magic number.</span>

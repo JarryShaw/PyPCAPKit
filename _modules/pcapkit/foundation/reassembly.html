@@ -371,13 +371,14 @@
 
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
 
-<span class="kn">from</span> <span class="nn">pcapkit.corekit.infoclass</span> <span class="kn">import</span> <span class="n">Info</span>
+<span class="kn">from</span> <span class="nn">pcapkit.corekit.infoclass</span> <span class="kn">import</span> <span class="n">Info</span><span class="p">,</span> <span class="n">info_final</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
     <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Optional</span>
 
 
-<div class="viewcode-block" id="ReassemblyManager"><a class="viewcode-back" href="../../../pcapkit/foundation/reassembly/index.html#pcapkit.foundation.reassembly.ReassemblyManager">[docs]</a><span class="k">class</span> <span class="nc">ReassemblyManager</span><span class="p">(</span><span class="n">Info</span><span class="p">):</span>
+<div class="viewcode-block" id="ReassemblyManager"><a class="viewcode-back" href="../../../pcapkit/foundation/reassembly/index.html#pcapkit.foundation.reassembly.ReassemblyManager">[docs]</a><span class="nd">@info_final</span>
+<span class="k">class</span> <span class="nc">ReassemblyManager</span><span class="p">(</span><span class="n">Info</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Reassembly Manager.&quot;&quot;&quot;</span>
 
     <span class="c1">#: IPv4 reassembly.</span>

@@ -363,7 +363,7 @@
 <span class="kn">from</span> <span class="nn">pcapkit.corekit.fields.numbers</span> <span class="kn">import</span> <span class="p">(</span><span class="n">EnumField</span><span class="p">,</span> <span class="n">NumberField</span><span class="p">,</span> <span class="n">UInt8Field</span><span class="p">,</span> <span class="n">UInt16Field</span><span class="p">,</span>
                                             <span class="n">UInt32Field</span><span class="p">)</span>
 <span class="kn">from</span> <span class="nn">pcapkit.corekit.fields.strings</span> <span class="kn">import</span> <span class="n">BitField</span><span class="p">,</span> <span class="n">BytesField</span><span class="p">,</span> <span class="n">PaddingField</span>
-<span class="kn">from</span> <span class="nn">pcapkit.protocols.schema.schema</span> <span class="kn">import</span> <span class="n">Schema</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.schema.schema</span> <span class="kn">import</span> <span class="n">Schema</span><span class="p">,</span> <span class="n">schema_final</span>
 <span class="kn">from</span> <span class="nn">pcapkit.utilities.exceptions</span> <span class="kn">import</span> <span class="n">FieldValueError</span>
 <span class="kn">from</span> <span class="nn">pcapkit.utilities.logging</span> <span class="kn">import</span> <span class="n">SPHINX_TYPE_CHECKING</span>
 
@@ -596,7 +596,8 @@
         <span class="k">return</span> <span class="bp">self</span></div></div>
 
 
-<div class="viewcode-block" id="UnassignedOption"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hopopt.html#pcapkit.protocols.schema.internet.hopopt.UnassignedOption">[docs]</a><span class="k">class</span> <span class="nc">UnassignedOption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+<div class="viewcode-block" id="UnassignedOption"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hopopt.html#pcapkit.protocols.schema.internet.hopopt.UnassignedOption">[docs]</a><span class="nd">@schema_final</span>
+<span class="k">class</span> <span class="nc">UnassignedOption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for HOPOPT unassigned options.&quot;&quot;&quot;</span>
 
     <span class="c1">#: Option data.</span>
@@ -606,7 +607,8 @@
         <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span><span class="p">,</span> <span class="nb">len</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
 
 
-<div class="viewcode-block" id="PadOption"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hopopt.html#pcapkit.protocols.schema.internet.hopopt.PadOption">[docs]</a><span class="k">class</span> <span class="nc">PadOption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+<div class="viewcode-block" id="PadOption"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hopopt.html#pcapkit.protocols.schema.internet.hopopt.PadOption">[docs]</a><span class="nd">@schema_final</span>
+<span class="k">class</span> <span class="nc">PadOption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for HOPOPT padding options.&quot;&quot;&quot;</span>
 
     <span class="c1">#: Padding.</span>
@@ -616,7 +618,8 @@
         <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span><span class="p">,</span> <span class="nb">len</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
 
 
-<div class="viewcode-block" id="TunnelEncapsulationLimitOption"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hopopt.html#pcapkit.protocols.schema.internet.hopopt.TunnelEncapsulationLimitOption">[docs]</a><span class="k">class</span> <span class="nc">TunnelEncapsulationLimitOption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+<div class="viewcode-block" id="TunnelEncapsulationLimitOption"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hopopt.html#pcapkit.protocols.schema.internet.hopopt.TunnelEncapsulationLimitOption">[docs]</a><span class="nd">@schema_final</span>
+<span class="k">class</span> <span class="nc">TunnelEncapsulationLimitOption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for HOPOPT tunnel encapsulation limit options.&quot;&quot;&quot;</span>
 
     <span class="c1">#: Tunnel encapsulation limit.</span>
@@ -626,7 +629,8 @@
         <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span><span class="p">,</span> <span class="nb">len</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">limit</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
 
 
-<div class="viewcode-block" id="RouterAlertOption"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hopopt.html#pcapkit.protocols.schema.internet.hopopt.RouterAlertOption">[docs]</a><span class="k">class</span> <span class="nc">RouterAlertOption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+<div class="viewcode-block" id="RouterAlertOption"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hopopt.html#pcapkit.protocols.schema.internet.hopopt.RouterAlertOption">[docs]</a><span class="nd">@schema_final</span>
+<span class="k">class</span> <span class="nc">RouterAlertOption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for HOPOPT router alert options.&quot;&quot;&quot;</span>
 
     <span class="c1">#: Router alert.</span>
@@ -636,7 +640,8 @@
         <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span><span class="p">,</span> <span class="nb">len</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">alert</span><span class="p">:</span> <span class="s1">&#39;Enum_RouterAlert&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
 
 
-<div class="viewcode-block" id="CALIPSOOption"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hopopt.html#pcapkit.protocols.schema.internet.hopopt.CALIPSOOption">[docs]</a><span class="k">class</span> <span class="nc">CALIPSOOption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+<div class="viewcode-block" id="CALIPSOOption"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hopopt.html#pcapkit.protocols.schema.internet.hopopt.CALIPSOOption">[docs]</a><span class="nd">@schema_final</span>
+<span class="k">class</span> <span class="nc">CALIPSOOption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for HOPOPT common architecture label IPv6 security options.&quot;&quot;&quot;</span>
 
     <span class="c1">#: CALIPSO domain of interpretation.</span>
@@ -660,6 +665,7 @@
                      <span class="n">level</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">checksum</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">,</span> <span class="n">bitmap</span><span class="p">:</span> <span class="s1">&#39;Optional[bytes]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
 
 
+<span class="nd">@schema_final</span>
 <span class="k">class</span> <span class="nc">_SMFDPDOption</span><span class="p">(</span><span class="n">Schema</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for HOPOPT SMF DPD options with generic representation.&quot;&quot;&quot;</span>
 
@@ -695,7 +701,8 @@
         <span class="n">mode</span><span class="p">:</span> <span class="s1">&#39;Enum_SMFDPDMode&#39;</span></div>
 
 
-<div class="viewcode-block" id="SMFIdentificationBasedDPDOption"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hopopt.html#pcapkit.protocols.schema.internet.hopopt.SMFIdentificationBasedDPDOption">[docs]</a><span class="k">class</span> <span class="nc">SMFIdentificationBasedDPDOption</span><span class="p">(</span><span class="n">SMFDPDOption</span><span class="p">):</span>
+<div class="viewcode-block" id="SMFIdentificationBasedDPDOption"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hopopt.html#pcapkit.protocols.schema.internet.hopopt.SMFIdentificationBasedDPDOption">[docs]</a><span class="nd">@schema_final</span>
+<span class="k">class</span> <span class="nc">SMFIdentificationBasedDPDOption</span><span class="p">(</span><span class="n">SMFDPDOption</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for HOPOPT SMF identification-based DPD options.&quot;&quot;&quot;</span>
 
     <span class="c1">#: TaggerID information.</span>
@@ -733,7 +740,8 @@
                      <span class="n">tid</span><span class="p">:</span> <span class="s1">&#39;Optional[bytes]&#39;</span><span class="p">,</span> <span class="nb">id</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
 
 
-<div class="viewcode-block" id="SMFHashBasedDPDOption"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hopopt.html#pcapkit.protocols.schema.internet.hopopt.SMFHashBasedDPDOption">[docs]</a><span class="k">class</span> <span class="nc">SMFHashBasedDPDOption</span><span class="p">(</span><span class="n">SMFDPDOption</span><span class="p">):</span>
+<div class="viewcode-block" id="SMFHashBasedDPDOption"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hopopt.html#pcapkit.protocols.schema.internet.hopopt.SMFHashBasedDPDOption">[docs]</a><span class="nd">@schema_final</span>
+<span class="k">class</span> <span class="nc">SMFHashBasedDPDOption</span><span class="p">(</span><span class="n">SMFDPDOption</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for HOPOPT SMF hash-based DPD options.&quot;&quot;&quot;</span>
 
     <span class="c1">#: Hash assist value (HAV).</span>
@@ -757,7 +765,8 @@
         <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span><span class="p">,</span> <span class="nb">len</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">hav</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
 
 
-<div class="viewcode-block" id="PDMOption"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hopopt.html#pcapkit.protocols.schema.internet.hopopt.PDMOption">[docs]</a><span class="k">class</span> <span class="nc">PDMOption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+<div class="viewcode-block" id="PDMOption"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hopopt.html#pcapkit.protocols.schema.internet.hopopt.PDMOption">[docs]</a><span class="nd">@schema_final</span>
+<span class="k">class</span> <span class="nc">PDMOption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for HOPOPT performance and diagnostic metrics (PDM) options.&quot;&quot;&quot;</span>
 
     <span class="c1">#: Scale delta time last received (DTLR).</span>
@@ -778,6 +787,7 @@
                      <span class="n">psntp</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">psnlr</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">deltatlr</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">deltatls</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
 
 
+<span class="nd">@schema_final</span>
 <span class="k">class</span> <span class="nc">_QuickStartOption</span><span class="p">(</span><span class="n">Schema</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for HOPOPT quick start options in generic representation.&quot;&quot;&quot;</span>
 
@@ -818,6 +828,7 @@
         <span class="n">func</span><span class="p">:</span> <span class="s1">&#39;Enum_QSFunction&#39;</span></div>
 
 
+<span class="nd">@schema_final</span>
 <span class="k">class</span> <span class="nc">QuickStartRequestOption</span><span class="p">(</span><span class="n">QuickStartOption</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for HOPOPT quick start request options.&quot;&quot;&quot;</span>
 
@@ -833,6 +844,7 @@
                      <span class="n">ttl</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">nonce</span><span class="p">:</span> <span class="s1">&#39;QSNonce&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>
 
 
+<span class="nd">@schema_final</span>
 <span class="k">class</span> <span class="nc">QuickStartReportOption</span><span class="p">(</span><span class="n">QuickStartOption</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for HOPOPT quick start report of approved rate options.&quot;&quot;&quot;</span>
 
@@ -848,7 +860,8 @@
                      <span class="n">nonce</span><span class="p">:</span> <span class="s1">&#39;QSNonce&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>
 
 
-<div class="viewcode-block" id="RPLOption"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hopopt.html#pcapkit.protocols.schema.internet.hopopt.RPLOption">[docs]</a><span class="k">class</span> <span class="nc">RPLOption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+<div class="viewcode-block" id="RPLOption"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hopopt.html#pcapkit.protocols.schema.internet.hopopt.RPLOption">[docs]</a><span class="nd">@schema_final</span>
+<span class="k">class</span> <span class="nc">RPLOption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for HOPOPT routing protocol for low-power and lossy networks (RPL) options.&quot;&quot;&quot;</span>
 
     <span class="c1">#: Flags.</span>
@@ -867,7 +880,8 @@
                      <span class="n">rank</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
 
 
-<div class="viewcode-block" id="MPLOption"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hopopt.html#pcapkit.protocols.schema.internet.hopopt.MPLOption">[docs]</a><span class="k">class</span> <span class="nc">MPLOption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+<div class="viewcode-block" id="MPLOption"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hopopt.html#pcapkit.protocols.schema.internet.hopopt.MPLOption">[docs]</a><span class="nd">@schema_final</span>
+<span class="k">class</span> <span class="nc">MPLOption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for HOPOPT multicast protocol for low-power and lossy networks (MPL) options.&quot;&quot;&quot;</span>
 
     <span class="c1">#: Flags.</span>
@@ -907,7 +921,8 @@
                      <span class="n">seed</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
 
 
-<div class="viewcode-block" id="ILNPOption"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hopopt.html#pcapkit.protocols.schema.internet.hopopt.ILNPOption">[docs]</a><span class="k">class</span> <span class="nc">ILNPOption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+<div class="viewcode-block" id="ILNPOption"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hopopt.html#pcapkit.protocols.schema.internet.hopopt.ILNPOption">[docs]</a><span class="nd">@schema_final</span>
+<span class="k">class</span> <span class="nc">ILNPOption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for HOPOPT identifier-locator network protocol (ILNP) options.&quot;&quot;&quot;</span>
 
     <span class="c1">#: Nonce value.</span>
@@ -917,7 +932,8 @@
         <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span><span class="p">,</span> <span class="nb">len</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">nonce</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
 
 
-<div class="viewcode-block" id="LineIdentificationOption"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hopopt.html#pcapkit.protocols.schema.internet.hopopt.LineIdentificationOption">[docs]</a><span class="k">class</span> <span class="nc">LineIdentificationOption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+<div class="viewcode-block" id="LineIdentificationOption"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hopopt.html#pcapkit.protocols.schema.internet.hopopt.LineIdentificationOption">[docs]</a><span class="nd">@schema_final</span>
+<span class="k">class</span> <span class="nc">LineIdentificationOption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for HOPOPT line-identification options.&quot;&quot;&quot;</span>
 
     <span class="c1">#: Line ID length.</span>
@@ -929,7 +945,8 @@
         <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span><span class="p">,</span> <span class="nb">len</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">id_len</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="nb">id</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
 
 
-<div class="viewcode-block" id="JumboPayloadOption"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hopopt.html#pcapkit.protocols.schema.internet.hopopt.JumboPayloadOption">[docs]</a><span class="k">class</span> <span class="nc">JumboPayloadOption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+<div class="viewcode-block" id="JumboPayloadOption"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hopopt.html#pcapkit.protocols.schema.internet.hopopt.JumboPayloadOption">[docs]</a><span class="nd">@schema_final</span>
+<span class="k">class</span> <span class="nc">JumboPayloadOption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for HOPOPT jumbo payload options.&quot;&quot;&quot;</span>
 
     <span class="c1">#: Jumbo payload length.</span>
@@ -939,7 +956,8 @@
         <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span><span class="p">,</span> <span class="nb">len</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">jumbo_len</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
 
 
-<div class="viewcode-block" id="HomeAddressOption"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hopopt.html#pcapkit.protocols.schema.internet.hopopt.HomeAddressOption">[docs]</a><span class="k">class</span> <span class="nc">HomeAddressOption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+<div class="viewcode-block" id="HomeAddressOption"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hopopt.html#pcapkit.protocols.schema.internet.hopopt.HomeAddressOption">[docs]</a><span class="nd">@schema_final</span>
+<span class="k">class</span> <span class="nc">HomeAddressOption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for HOPOPT home address options.&quot;&quot;&quot;</span>
 
     <span class="c1">#: Home address.</span>
@@ -949,7 +967,8 @@
         <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span><span class="p">,</span> <span class="nb">len</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">addr</span><span class="p">:</span> <span class="s1">&#39;IPv6Address | int | str | bytes&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
 
 
-<div class="viewcode-block" id="IPDFFOption"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hopopt.html#pcapkit.protocols.schema.internet.hopopt.IPDFFOption">[docs]</a><span class="k">class</span> <span class="nc">IPDFFOption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+<div class="viewcode-block" id="IPDFFOption"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hopopt.html#pcapkit.protocols.schema.internet.hopopt.IPDFFOption">[docs]</a><span class="nd">@schema_final</span>
+<span class="k">class</span> <span class="nc">IPDFFOption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for HOPOPT depth-first forwarding (``IP_DFF``) options.&quot;&quot;&quot;</span>
 
     <span class="c1">#: Flags.</span>
@@ -965,7 +984,8 @@
         <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span><span class="p">,</span> <span class="nb">len</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">flags</span><span class="p">:</span> <span class="s1">&#39;DFFFlags&#39;</span><span class="p">,</span> <span class="n">seq</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
 
 
-<div class="viewcode-block" id="HOPOPT"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hopopt.html#pcapkit.protocols.schema.internet.hopopt.HOPOPT">[docs]</a><span class="k">class</span> <span class="nc">HOPOPT</span><span class="p">(</span><span class="n">Schema</span><span class="p">):</span>
+<div class="viewcode-block" id="HOPOPT"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/hopopt.html#pcapkit.protocols.schema.internet.hopopt.HOPOPT">[docs]</a><span class="nd">@schema_final</span>
+<span class="k">class</span> <span class="nc">HOPOPT</span><span class="p">(</span><span class="n">Schema</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for HOPOPT packet.&quot;&quot;&quot;</span>
 
     <span class="c1">#: Next header.</span>

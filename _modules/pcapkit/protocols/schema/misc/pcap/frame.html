@@ -350,7 +350,7 @@
 
 <span class="kn">from</span> <span class="nn">pcapkit.corekit.fields.misc</span> <span class="kn">import</span> <span class="n">PayloadField</span>
 <span class="kn">from</span> <span class="nn">pcapkit.corekit.fields.numbers</span> <span class="kn">import</span> <span class="n">UInt32Field</span>
-<span class="kn">from</span> <span class="nn">pcapkit.protocols.schema.schema</span> <span class="kn">import</span> <span class="n">Schema</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.schema.schema</span> <span class="kn">import</span> <span class="n">Schema</span><span class="p">,</span> <span class="n">schema_final</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Frame&#39;</span><span class="p">]</span>
 
@@ -372,7 +372,8 @@
     <span class="n">field</span><span class="o">.</span><span class="n">_byteorder</span> <span class="o">=</span> <span class="n">packet</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;byteorder&#39;</span><span class="p">,</span> <span class="n">sys</span><span class="o">.</span><span class="n">byteorder</span><span class="p">)</span>
 
 
-<div class="viewcode-block" id="Frame"><a class="viewcode-back" href="../../../../../../pcapkit/protocols/misc/pcap.html#pcapkit.protocols.schema.misc.pcap.frame.Frame">[docs]</a><span class="k">class</span> <span class="nc">Frame</span><span class="p">(</span><span class="n">Schema</span><span class="p">):</span>
+<div class="viewcode-block" id="Frame"><a class="viewcode-back" href="../../../../../../pcapkit/protocols/misc/pcap.html#pcapkit.protocols.schema.misc.pcap.frame.Frame">[docs]</a><span class="nd">@schema_final</span>
+<span class="k">class</span> <span class="nc">Frame</span><span class="p">(</span><span class="n">Schema</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Frame header of PCAP file format.&quot;&quot;&quot;</span>
 
     <span class="n">__payload__</span> <span class="o">=</span> <span class="s1">&#39;packet&#39;</span>

@@ -346,6 +346,7 @@
 
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
 
+<span class="kn">from</span> <span class="nn">pcapkit.corekit.infoclass</span> <span class="kn">import</span> <span class="n">info_final</span>
 <span class="kn">from</span> <span class="nn">pcapkit.protocols.data.data</span> <span class="kn">import</span> <span class="n">Data</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
@@ -357,7 +358,8 @@
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;OSPF&#39;</span><span class="p">,</span> <span class="s1">&#39;CrytographicAuthentication&#39;</span><span class="p">]</span>
 
 
-<div class="viewcode-block" id="CrytographicAuthentication"><a class="viewcode-back" href="../../../../../pcapkit/protocols/link/ospf.html#pcapkit.protocols.data.link.ospf.CrytographicAuthentication">[docs]</a><span class="k">class</span> <span class="nc">CrytographicAuthentication</span><span class="p">(</span><span class="n">Data</span><span class="p">):</span>
+<div class="viewcode-block" id="CrytographicAuthentication"><a class="viewcode-back" href="../../../../../pcapkit/protocols/link/ospf.html#pcapkit.protocols.data.link.ospf.CrytographicAuthentication">[docs]</a><span class="nd">@info_final</span>
+<span class="k">class</span> <span class="nc">CrytographicAuthentication</span><span class="p">(</span><span class="n">Data</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for OSPF crytographic authentication.&quot;&quot;&quot;</span>
 
     <span class="c1">#: Key ID.</span>
@@ -371,7 +373,8 @@
         <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key_id</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="nb">len</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">seq</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,redefined-builtin</span></div>
 
 
-<div class="viewcode-block" id="OSPF"><a class="viewcode-back" href="../../../../../pcapkit/protocols/link/ospf.html#pcapkit.protocols.data.link.ospf.OSPF">[docs]</a><span class="k">class</span> <span class="nc">OSPF</span><span class="p">(</span><span class="n">Data</span><span class="p">):</span>
+<div class="viewcode-block" id="OSPF"><a class="viewcode-back" href="../../../../../pcapkit/protocols/link/ospf.html#pcapkit.protocols.data.link.ospf.OSPF">[docs]</a><span class="nd">@info_final</span>
+<span class="k">class</span> <span class="nc">OSPF</span><span class="p">(</span><span class="n">Data</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for OSPF packet.&quot;&quot;&quot;</span>
 
     <span class="c1">#: Version number.</span>

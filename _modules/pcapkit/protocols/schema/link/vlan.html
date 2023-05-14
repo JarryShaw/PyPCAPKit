@@ -352,7 +352,7 @@
 <span class="kn">from</span> <span class="nn">pcapkit.corekit.fields.misc</span> <span class="kn">import</span> <span class="n">PayloadField</span>
 <span class="kn">from</span> <span class="nn">pcapkit.corekit.fields.numbers</span> <span class="kn">import</span> <span class="n">EnumField</span><span class="p">,</span> <span class="n">UInt8Field</span><span class="p">,</span> <span class="n">UInt16Field</span>
 <span class="kn">from</span> <span class="nn">pcapkit.corekit.fields.strings</span> <span class="kn">import</span> <span class="n">BitField</span>
-<span class="kn">from</span> <span class="nn">pcapkit.protocols.schema.schema</span> <span class="kn">import</span> <span class="n">Schema</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.schema.schema</span> <span class="kn">import</span> <span class="n">Schema</span><span class="p">,</span> <span class="n">schema_final</span>
 <span class="kn">from</span> <span class="nn">pcapkit.utilities.logging</span> <span class="kn">import</span> <span class="n">SPHINX_TYPE_CHECKING</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;VLAN&#39;</span><span class="p">,</span> <span class="s1">&#39;TCI&#39;</span><span class="p">]</span>
@@ -374,21 +374,23 @@
         <span class="n">vid</span><span class="p">:</span> <span class="nb">int</span></div>
 
 
-<div class="viewcode-block" id="TCI"><a class="viewcode-back" href="../../../../../pcapkit/protocols/link/vlan.html#pcapkit.protocols.schema.link.vlan.TCI">[docs]</a><span class="k">class</span> <span class="nc">TCI</span><span class="p">(</span><span class="n">Schema</span><span class="p">[</span><span class="nb">int</span><span class="p">]):</span>
+<div class="viewcode-block" id="TCI"><a class="viewcode-back" href="../../../../../pcapkit/protocols/link/vlan.html#pcapkit.protocols.schema.link.vlan.TCI">[docs]</a><span class="nd">@schema_final</span>
+<span class="k">class</span> <span class="nc">TCI</span><span class="p">(</span><span class="n">Schema</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for 802.1Q Customer VLAN Tag Type tag control information.&quot;&quot;&quot;</span>
 
     <span class="c1">#: Priority code point.</span>
     <span class="n">pcp</span><span class="p">:</span> <span class="s1">&#39;Enum_PriorityLevel&#39;</span> <span class="o">=</span> <span class="n">EnumField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">bit_length</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="n">Enum_PriorityLevel</span><span class="p">)</span>
     <span class="c1">#: Drop eligible indicator.</span>
-    <span class="n">dei</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="n">UInt8Field</span><span class="p">(</span><span class="n">bit_length</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">dei</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span> <span class="o">=</span> <span class="n">UInt8Field</span><span class="p">(</span><span class="n">bit_length</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
     <span class="c1">#: VLAN identifier.</span>
     <span class="n">vid</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span> <span class="o">=</span> <span class="n">UInt16Field</span><span class="p">(</span><span class="n">bit_length</span><span class="o">=</span><span class="mi">12</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pcp</span><span class="p">:</span> <span class="s1">&#39;Enum_PriorityLevel&#39;</span><span class="p">,</span> <span class="n">dei</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span><span class="p">,</span> <span class="n">vid</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
+        <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pcp</span><span class="p">:</span> <span class="s1">&#39;Enum_PriorityLevel&#39;</span><span class="p">,</span> <span class="n">dei</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">vid</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
 
 
-<div class="viewcode-block" id="VLAN"><a class="viewcode-back" href="../../../../../pcapkit/protocols/link/vlan.html#pcapkit.protocols.schema.link.vlan.VLAN">[docs]</a><span class="k">class</span> <span class="nc">VLAN</span><span class="p">(</span><span class="n">Schema</span><span class="p">):</span>
+<div class="viewcode-block" id="VLAN"><a class="viewcode-back" href="../../../../../pcapkit/protocols/link/vlan.html#pcapkit.protocols.schema.link.vlan.VLAN">[docs]</a><span class="nd">@schema_final</span>
+<span class="k">class</span> <span class="nc">VLAN</span><span class="p">(</span><span class="n">Schema</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for 802.1Q Customer VLAN Tag Type packet.&quot;&quot;&quot;</span>
 
     <span class="c1">#: Tag control information.</span>

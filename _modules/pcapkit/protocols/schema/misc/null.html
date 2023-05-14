@@ -345,12 +345,13 @@
 <span class="c1"># mypy: disable-error-code=assignment</span>
 <span class="sd">&quot;&quot;&quot;header schema for empty payload&quot;&quot;&quot;</span>
 
-<span class="kn">from</span> <span class="nn">pcapkit.protocols.schema.schema</span> <span class="kn">import</span> <span class="n">Schema</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.schema.schema</span> <span class="kn">import</span> <span class="n">Schema</span><span class="p">,</span> <span class="n">schema_final</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;NoPayload&#39;</span><span class="p">]</span>
 
 
-<div class="viewcode-block" id="NoPayload"><a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/null.html#pcapkit.protocols.schema.misc.null.NoPayload">[docs]</a><span class="k">class</span> <span class="nc">NoPayload</span><span class="p">(</span><span class="n">Schema</span><span class="p">):</span>
+<div class="viewcode-block" id="NoPayload"><a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/null.html#pcapkit.protocols.schema.misc.null.NoPayload">[docs]</a><span class="nd">@schema_final</span>
+<span class="k">class</span> <span class="nc">NoPayload</span><span class="p">(</span><span class="n">Schema</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Schema for empty payload.&quot;&quot;&quot;</span>
 
     <span class="c1"># NOTE: We add this method for both type annotation and to mark that this</span>

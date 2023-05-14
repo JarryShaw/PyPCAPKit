@@ -353,7 +353,7 @@
 <span class="kn">from</span> <span class="nn">pcapkit.corekit.fields.misc</span> <span class="kn">import</span> <span class="n">PayloadField</span><span class="p">,</span> <span class="n">SchemaField</span><span class="p">,</span> <span class="n">SwitchField</span>
 <span class="kn">from</span> <span class="nn">pcapkit.corekit.fields.numbers</span> <span class="kn">import</span> <span class="n">EnumField</span><span class="p">,</span> <span class="n">UInt8Field</span><span class="p">,</span> <span class="n">UInt16Field</span><span class="p">,</span> <span class="n">UInt32Field</span>
 <span class="kn">from</span> <span class="nn">pcapkit.corekit.fields.strings</span> <span class="kn">import</span> <span class="n">BytesField</span><span class="p">,</span> <span class="n">PaddingField</span>
-<span class="kn">from</span> <span class="nn">pcapkit.protocols.schema.schema</span> <span class="kn">import</span> <span class="n">Schema</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.schema.schema</span> <span class="kn">import</span> <span class="n">Schema</span><span class="p">,</span> <span class="n">schema_final</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;OSPF&#39;</span><span class="p">,</span> <span class="s1">&#39;CrytographicAuthentication&#39;</span><span class="p">]</span>
 
@@ -382,7 +382,8 @@
     <span class="k">return</span> <span class="n">BytesField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">8</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="CrytographicAuthentication"><a class="viewcode-back" href="../../../../../pcapkit/protocols/link/ospf.html#pcapkit.protocols.schema.link.ospf.CrytographicAuthentication">[docs]</a><span class="k">class</span> <span class="nc">CrytographicAuthentication</span><span class="p">(</span><span class="n">Schema</span><span class="p">):</span>
+<div class="viewcode-block" id="CrytographicAuthentication"><a class="viewcode-back" href="../../../../../pcapkit/protocols/link/ospf.html#pcapkit.protocols.schema.link.ospf.CrytographicAuthentication">[docs]</a><span class="nd">@schema_final</span>
+<span class="k">class</span> <span class="nc">CrytographicAuthentication</span><span class="p">(</span><span class="n">Schema</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for OSPF cryptographic authentication.&quot;&quot;&quot;</span>
 
     <span class="c1">#: Reserved bytes.</span>
@@ -398,7 +399,8 @@
         <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key_id</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="nb">len</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">seq</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
 
 
-<div class="viewcode-block" id="OSPF"><a class="viewcode-back" href="../../../../../pcapkit/protocols/link/ospf.html#pcapkit.protocols.schema.link.ospf.OSPF">[docs]</a><span class="k">class</span> <span class="nc">OSPF</span><span class="p">(</span><span class="n">Schema</span><span class="p">):</span>
+<div class="viewcode-block" id="OSPF"><a class="viewcode-back" href="../../../../../pcapkit/protocols/link/ospf.html#pcapkit.protocols.schema.link.ospf.OSPF">[docs]</a><span class="nd">@schema_final</span>
+<span class="k">class</span> <span class="nc">OSPF</span><span class="p">(</span><span class="n">Schema</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for OSPF packet.&quot;&quot;&quot;</span>
 
     <span class="c1">#: Version.</span>

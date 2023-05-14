@@ -346,6 +346,7 @@
 
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
 
+<span class="kn">from</span> <span class="nn">pcapkit.corekit.infoclass</span> <span class="kn">import</span> <span class="n">info_final</span>
 <span class="kn">from</span> <span class="nn">pcapkit.protocols.data.data</span> <span class="kn">import</span> <span class="n">Data</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
@@ -384,7 +385,8 @@
 <span class="p">]</span>
 
 
-<div class="viewcode-block" id="Flags"><a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.data.transport.tcp.Flags">[docs]</a><span class="k">class</span> <span class="nc">Flags</span><span class="p">(</span><span class="n">Data</span><span class="p">):</span>
+<div class="viewcode-block" id="Flags"><a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.data.transport.tcp.Flags">[docs]</a><span class="nd">@info_final</span>
+<span class="k">class</span> <span class="nc">Flags</span><span class="p">(</span><span class="n">Data</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for TCP flags.&quot;&quot;&quot;</span>
 
     <span class="c1">#: ECN-nonce concealment protection.</span>
@@ -410,7 +412,8 @@
         <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ns</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span><span class="p">,</span> <span class="n">cwr</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span><span class="p">,</span> <span class="n">ece</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span><span class="p">,</span> <span class="n">urg</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span><span class="p">,</span> <span class="n">ack</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span><span class="p">,</span> <span class="n">psh</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span><span class="p">,</span> <span class="n">rst</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span><span class="p">,</span> <span class="n">syn</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span><span class="p">,</span> <span class="n">fin</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
 
 
-<div class="viewcode-block" id="TCP"><a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.data.transport.tcp.TCP">[docs]</a><span class="k">class</span> <span class="nc">TCP</span><span class="p">(</span><span class="n">Data</span><span class="p">):</span>
+<div class="viewcode-block" id="TCP"><a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.data.transport.tcp.TCP">[docs]</a><span class="nd">@info_final</span>
+<span class="k">class</span> <span class="nc">TCP</span><span class="p">(</span><span class="n">Data</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for TCP packet.&quot;&quot;&quot;</span>
 
     <span class="c1">#: Source port.</span>
@@ -450,7 +453,8 @@
     <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span></div>
 
 
-<div class="viewcode-block" id="UnassignedOption"><a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.data.transport.tcp.UnassignedOption">[docs]</a><span class="k">class</span> <span class="nc">UnassignedOption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+<div class="viewcode-block" id="UnassignedOption"><a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.data.transport.tcp.UnassignedOption">[docs]</a><span class="nd">@info_final</span>
+<span class="k">class</span> <span class="nc">UnassignedOption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for unassigned TCP option.&quot;&quot;&quot;</span>
 
     <span class="c1">#: Option data.</span>
@@ -460,21 +464,24 @@
         <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;OptionNumber&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
 
 
-<div class="viewcode-block" id="EndOfOptionList"><a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.data.transport.tcp.EndOfOptionList">[docs]</a><span class="k">class</span> <span class="nc">EndOfOptionList</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+<div class="viewcode-block" id="EndOfOptionList"><a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.data.transport.tcp.EndOfOptionList">[docs]</a><span class="nd">@info_final</span>
+<span class="k">class</span> <span class="nc">EndOfOptionList</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for TCP end of option list option.&quot;&quot;&quot;</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
         <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;OptionNumber&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
 
 
-<div class="viewcode-block" id="NoOperation"><a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.data.transport.tcp.NoOperation">[docs]</a><span class="k">class</span> <span class="nc">NoOperation</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+<div class="viewcode-block" id="NoOperation"><a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.data.transport.tcp.NoOperation">[docs]</a><span class="nd">@info_final</span>
+<span class="k">class</span> <span class="nc">NoOperation</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for TCP no operation option.&quot;&quot;&quot;</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
         <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;OptionNumber&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
 
 
-<div class="viewcode-block" id="MaximumSegmentSize"><a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.data.transport.tcp.MaximumSegmentSize">[docs]</a><span class="k">class</span> <span class="nc">MaximumSegmentSize</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+<div class="viewcode-block" id="MaximumSegmentSize"><a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.data.transport.tcp.MaximumSegmentSize">[docs]</a><span class="nd">@info_final</span>
+<span class="k">class</span> <span class="nc">MaximumSegmentSize</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for TCP maximum segment size option.&quot;&quot;&quot;</span>
 
     <span class="c1">#: Maximum segment size.</span>
@@ -484,7 +491,8 @@
         <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;OptionNumber&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">mss</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
 
 
-<div class="viewcode-block" id="WindowScale"><a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.data.transport.tcp.WindowScale">[docs]</a><span class="k">class</span> <span class="nc">WindowScale</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+<div class="viewcode-block" id="WindowScale"><a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.data.transport.tcp.WindowScale">[docs]</a><span class="nd">@info_final</span>
+<span class="k">class</span> <span class="nc">WindowScale</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for TCP window scale option.&quot;&quot;&quot;</span>
 
     <span class="c1">#: Window scale.</span>
@@ -494,13 +502,15 @@
         <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;OptionNumber&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">shift</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
 
 
-<div class="viewcode-block" id="SACKPermitted"><a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.data.transport.tcp.SACKPermitted">[docs]</a><span class="k">class</span> <span class="nc">SACKPermitted</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+<div class="viewcode-block" id="SACKPermitted"><a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.data.transport.tcp.SACKPermitted">[docs]</a><span class="nd">@info_final</span>
+<span class="k">class</span> <span class="nc">SACKPermitted</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for TCP SACK permitted option.&quot;&quot;&quot;</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
         <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;OptionNumber&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
 
 
+<span class="nd">@info_final</span>
 <span class="k">class</span> <span class="nc">SACKBlock</span><span class="p">(</span><span class="n">Data</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for TCP SACK block.&quot;&quot;&quot;</span>
 
@@ -513,7 +523,8 @@
         <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">left</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">right</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span>
 
 
-<div class="viewcode-block" id="SACK"><a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.data.transport.tcp.SACK">[docs]</a><span class="k">class</span> <span class="nc">SACK</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+<div class="viewcode-block" id="SACK"><a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.data.transport.tcp.SACK">[docs]</a><span class="nd">@info_final</span>
+<span class="k">class</span> <span class="nc">SACK</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for TCP SACK option.&quot;&quot;&quot;</span>
 
     <span class="c1">#: SACK blocks.</span>
@@ -523,7 +534,8 @@
         <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;OptionNumber&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">sack</span><span class="p">:</span> <span class="s1">&#39;tuple[SACKBlock, ...]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
 
 
-<div class="viewcode-block" id="Echo"><a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.data.transport.tcp.Echo">[docs]</a><span class="k">class</span> <span class="nc">Echo</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+<div class="viewcode-block" id="Echo"><a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.data.transport.tcp.Echo">[docs]</a><span class="nd">@info_final</span>
+<span class="k">class</span> <span class="nc">Echo</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for TCP echo option.&quot;&quot;&quot;</span>
 
     <span class="c1">#: Echo data.</span>
@@ -533,7 +545,8 @@
         <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;OptionNumber&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
 
 
-<div class="viewcode-block" id="EchoReply"><a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.data.transport.tcp.EchoReply">[docs]</a><span class="k">class</span> <span class="nc">EchoReply</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+<div class="viewcode-block" id="EchoReply"><a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.data.transport.tcp.EchoReply">[docs]</a><span class="nd">@info_final</span>
+<span class="k">class</span> <span class="nc">EchoReply</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for TCP echo reply option.&quot;&quot;&quot;</span>
 
     <span class="c1">#: Echo data.</span>
@@ -543,7 +556,8 @@
         <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;OptionNumber&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
 
 
-<div class="viewcode-block" id="Timestamp"><a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.data.transport.tcp.Timestamp">[docs]</a><span class="k">class</span> <span class="nc">Timestamp</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+<div class="viewcode-block" id="Timestamp"><a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.data.transport.tcp.Timestamp">[docs]</a><span class="nd">@info_final</span>
+<span class="k">class</span> <span class="nc">Timestamp</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for TCP timestamp option.&quot;&quot;&quot;</span>
 
     <span class="c1">#: Timestamp .</span>
@@ -555,14 +569,16 @@
         <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;OptionNumber&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">timestamp</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">echo</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
 
 
-<div class="viewcode-block" id="PartialOrderConnectionPermitted"><a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.data.transport.tcp.PartialOrderConnectionPermitted">[docs]</a><span class="k">class</span> <span class="nc">PartialOrderConnectionPermitted</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+<div class="viewcode-block" id="PartialOrderConnectionPermitted"><a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.data.transport.tcp.PartialOrderConnectionPermitted">[docs]</a><span class="nd">@info_final</span>
+<span class="k">class</span> <span class="nc">PartialOrderConnectionPermitted</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for TCP partial order connection permitted option.&quot;&quot;&quot;</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
         <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;OptionNumber&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
 
 
-<div class="viewcode-block" id="PartialOrderConnectionProfile"><a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.data.transport.tcp.PartialOrderConnectionProfile">[docs]</a><span class="k">class</span> <span class="nc">PartialOrderConnectionProfile</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+<div class="viewcode-block" id="PartialOrderConnectionProfile"><a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.data.transport.tcp.PartialOrderConnectionProfile">[docs]</a><span class="nd">@info_final</span>
+<span class="k">class</span> <span class="nc">PartialOrderConnectionProfile</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for TCP partial order connection profile option.&quot;&quot;&quot;</span>
 
     <span class="c1">#: Start flag.</span>
@@ -574,7 +590,8 @@
         <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;OptionNumber&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">start</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span><span class="p">,</span> <span class="n">end</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
 
 
-<div class="viewcode-block" id="CC"><a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.data.transport.tcp.CC">[docs]</a><span class="k">class</span> <span class="nc">CC</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+<div class="viewcode-block" id="CC"><a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.data.transport.tcp.CC">[docs]</a><span class="nd">@info_final</span>
+<span class="k">class</span> <span class="nc">CC</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for TCP CC option.&quot;&quot;&quot;</span>
 
     <span class="c1">#: Connection count.</span>
@@ -584,7 +601,8 @@
         <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;OptionNumber&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">cc</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
 
 
-<div class="viewcode-block" id="CCNew"><a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.data.transport.tcp.CCNew">[docs]</a><span class="k">class</span> <span class="nc">CCNew</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+<div class="viewcode-block" id="CCNew"><a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.data.transport.tcp.CCNew">[docs]</a><span class="nd">@info_final</span>
+<span class="k">class</span> <span class="nc">CCNew</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for TCP CC.NEW option.&quot;&quot;&quot;</span>
 
     <span class="c1">#: Connection count.</span>
@@ -594,7 +612,8 @@
         <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;OptionNumber&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">cc</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
 
 
-<div class="viewcode-block" id="CCEcho"><a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.data.transport.tcp.CCEcho">[docs]</a><span class="k">class</span> <span class="nc">CCEcho</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+<div class="viewcode-block" id="CCEcho"><a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.data.transport.tcp.CCEcho">[docs]</a><span class="nd">@info_final</span>
+<span class="k">class</span> <span class="nc">CCEcho</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for TCP CC.ECHO option.&quot;&quot;&quot;</span>
 
     <span class="c1">#: Connection count.</span>
@@ -604,7 +623,8 @@
         <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;OptionNumber&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">cc</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
 
 
-<div class="viewcode-block" id="AlternateChecksumRequest"><a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.data.transport.tcp.AlternateChecksumRequest">[docs]</a><span class="k">class</span> <span class="nc">AlternateChecksumRequest</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+<div class="viewcode-block" id="AlternateChecksumRequest"><a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.data.transport.tcp.AlternateChecksumRequest">[docs]</a><span class="nd">@info_final</span>
+<span class="k">class</span> <span class="nc">AlternateChecksumRequest</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for TCP alternate checksum request option.&quot;&quot;&quot;</span>
 
     <span class="c1">#: Checksum algorithm.</span>
@@ -614,7 +634,8 @@
         <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;OptionNumber&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">chksum</span><span class="p">:</span> <span class="s1">&#39;Checksum&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
 
 
-<div class="viewcode-block" id="AlternateChecksumData"><a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.data.transport.tcp.AlternateChecksumData">[docs]</a><span class="k">class</span> <span class="nc">AlternateChecksumData</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+<div class="viewcode-block" id="AlternateChecksumData"><a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.data.transport.tcp.AlternateChecksumData">[docs]</a><span class="nd">@info_final</span>
+<span class="k">class</span> <span class="nc">AlternateChecksumData</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for TCP alternate checksum data option.&quot;&quot;&quot;</span>
 
     <span class="c1">#: Checksum data.</span>
@@ -624,7 +645,8 @@
         <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;OptionNumber&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
 
 
-<div class="viewcode-block" id="MD5Signature"><a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.data.transport.tcp.MD5Signature">[docs]</a><span class="k">class</span> <span class="nc">MD5Signature</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+<div class="viewcode-block" id="MD5Signature"><a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.data.transport.tcp.MD5Signature">[docs]</a><span class="nd">@info_final</span>
+<span class="k">class</span> <span class="nc">MD5Signature</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for TCP MD5 signature option.&quot;&quot;&quot;</span>
 
     <span class="c1">#: MD5 signature.</span>
@@ -634,7 +656,8 @@
         <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;OptionNumber&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">digest</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
 
 
-<div class="viewcode-block" id="QuickStartResponse"><a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.data.transport.tcp.QuickStartResponse">[docs]</a><span class="k">class</span> <span class="nc">QuickStartResponse</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+<div class="viewcode-block" id="QuickStartResponse"><a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.data.transport.tcp.QuickStartResponse">[docs]</a><span class="nd">@info_final</span>
+<span class="k">class</span> <span class="nc">QuickStartResponse</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for TCP quick start response option.&quot;&quot;&quot;</span>
 
     <span class="c1">#: Rate request.</span>
@@ -648,7 +671,8 @@
         <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;OptionNumber&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">req_rate</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">ttl_diff</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">nonce</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
 
 
-<div class="viewcode-block" id="UserTimeout"><a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.data.transport.tcp.UserTimeout">[docs]</a><span class="k">class</span> <span class="nc">UserTimeout</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+<div class="viewcode-block" id="UserTimeout"><a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.data.transport.tcp.UserTimeout">[docs]</a><span class="nd">@info_final</span>
+<span class="k">class</span> <span class="nc">UserTimeout</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for TCP user timeout option.&quot;&quot;&quot;</span>
 
     <span class="c1">#: User timeout.</span>
@@ -658,7 +682,8 @@
         <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;OptionNumber&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">timeout</span><span class="p">:</span> <span class="s1">&#39;timedelta&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
 
 
-<div class="viewcode-block" id="Authentication"><a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.data.transport.tcp.Authentication">[docs]</a><span class="k">class</span> <span class="nc">Authentication</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+<div class="viewcode-block" id="Authentication"><a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.data.transport.tcp.Authentication">[docs]</a><span class="nd">@info_final</span>
+<span class="k">class</span> <span class="nc">Authentication</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for TCP authentication option.&quot;&quot;&quot;</span>
 
     <span class="c1">#: Key ID.</span>
@@ -672,7 +697,8 @@
         <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;OptionNumber&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">key_id</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">next_key_id</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">mac</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
 
 
-<div class="viewcode-block" id="FastOpenCookie"><a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.data.transport.tcp.FastOpenCookie">[docs]</a><span class="k">class</span> <span class="nc">FastOpenCookie</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+<div class="viewcode-block" id="FastOpenCookie"><a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.data.transport.tcp.FastOpenCookie">[docs]</a><span class="nd">@info_final</span>
+<span class="k">class</span> <span class="nc">FastOpenCookie</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for TCP fast open cookie option.&quot;&quot;&quot;</span>
 
     <span class="c1">#: Cookie.</span>
@@ -689,7 +715,8 @@
     <span class="n">subtype</span><span class="p">:</span> <span class="s1">&#39;MPTCPOption&#39;</span></div>
 
 
-<div class="viewcode-block" id="MPTCPUnknown"><a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.data.transport.tcp.MPTCPUnknown">[docs]</a><span class="k">class</span> <span class="nc">MPTCPUnknown</span><span class="p">(</span><span class="n">MPTCP</span><span class="p">):</span>
+<div class="viewcode-block" id="MPTCPUnknown"><a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.data.transport.tcp.MPTCPUnknown">[docs]</a><span class="nd">@info_final</span>
+<span class="k">class</span> <span class="nc">MPTCPUnknown</span><span class="p">(</span><span class="n">MPTCP</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for TCP unknown MPTCP option.&quot;&quot;&quot;</span>
 
     <span class="c1">#: Data.</span>
@@ -699,6 +726,7 @@
         <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;OptionNumber&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">subtype</span><span class="p">:</span> <span class="s1">&#39;MPTCPOption&#39;</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
 
 
+<span class="nd">@info_final</span>
 <span class="k">class</span> <span class="nc">MPTCPCapableFlag</span><span class="p">(</span><span class="n">Data</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for TCP MPTCP capable option flags.&quot;&quot;&quot;</span>
 
@@ -713,7 +741,8 @@
         <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">req</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span><span class="p">,</span> <span class="n">ext</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span><span class="p">,</span> <span class="n">hsa</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span>
 
 
-<div class="viewcode-block" id="MPTCPCapable"><a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.data.transport.tcp.MPTCPCapable">[docs]</a><span class="k">class</span> <span class="nc">MPTCPCapable</span><span class="p">(</span><span class="n">MPTCP</span><span class="p">):</span>
+<div class="viewcode-block" id="MPTCPCapable"><a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.data.transport.tcp.MPTCPCapable">[docs]</a><span class="nd">@info_final</span>
+<span class="k">class</span> <span class="nc">MPTCPCapable</span><span class="p">(</span><span class="n">MPTCP</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for TCP ``MP_CAPABLE`` option.&quot;&quot;&quot;</span>
 
     <span class="c1">#: Version.</span>
@@ -736,7 +765,8 @@
     <span class="n">connection</span><span class="p">:</span> <span class="s1">&#39;TCP_Flags&#39;</span></div>
 
 
-<div class="viewcode-block" id="MPTCPJoinSYN"><a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.data.transport.tcp.MPTCPJoinSYN">[docs]</a><span class="k">class</span> <span class="nc">MPTCPJoinSYN</span><span class="p">(</span><span class="n">MPTCPJoin</span><span class="p">):</span>
+<div class="viewcode-block" id="MPTCPJoinSYN"><a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.data.transport.tcp.MPTCPJoinSYN">[docs]</a><span class="nd">@info_final</span>
+<span class="k">class</span> <span class="nc">MPTCPJoinSYN</span><span class="p">(</span><span class="n">MPTCPJoin</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for TCP ``MP_JOIN-SYN`` option.&quot;&quot;&quot;</span>
 
     <span class="c1">#: Backup path flag.</span>
@@ -752,7 +782,8 @@
         <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;OptionNumber&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">subtype</span><span class="p">:</span> <span class="s1">&#39;MPTCPOption&#39;</span><span class="p">,</span> <span class="n">connection</span><span class="p">:</span> <span class="s1">&#39;TCP_Flags&#39;</span><span class="p">,</span> <span class="n">backup</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span><span class="p">,</span> <span class="n">addr_id</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">token</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">nonce</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
 
 
-<div class="viewcode-block" id="MPTCPJoinSYNACK"><a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.data.transport.tcp.MPTCPJoinSYNACK">[docs]</a><span class="k">class</span> <span class="nc">MPTCPJoinSYNACK</span><span class="p">(</span><span class="n">MPTCPJoin</span><span class="p">):</span>
+<div class="viewcode-block" id="MPTCPJoinSYNACK"><a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.data.transport.tcp.MPTCPJoinSYNACK">[docs]</a><span class="nd">@info_final</span>
+<span class="k">class</span> <span class="nc">MPTCPJoinSYNACK</span><span class="p">(</span><span class="n">MPTCPJoin</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for TCP ``MP_JOIN-SYNACK`` option.&quot;&quot;&quot;</span>
 
     <span class="c1">#: Backup path flag.</span>
@@ -768,7 +799,8 @@
         <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;OptionNumber&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">subtype</span><span class="p">:</span> <span class="s1">&#39;MPTCPOption&#39;</span><span class="p">,</span> <span class="n">connection</span><span class="p">:</span> <span class="s1">&#39;TCP_Flags&#39;</span><span class="p">,</span> <span class="n">backup</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span><span class="p">,</span> <span class="n">addr_id</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">hmac</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">,</span> <span class="n">nonce</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
 
 
-<div class="viewcode-block" id="MPTCPJoinACK"><a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.data.transport.tcp.MPTCPJoinACK">[docs]</a><span class="k">class</span> <span class="nc">MPTCPJoinACK</span><span class="p">(</span><span class="n">MPTCPJoin</span><span class="p">):</span>
+<div class="viewcode-block" id="MPTCPJoinACK"><a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.data.transport.tcp.MPTCPJoinACK">[docs]</a><span class="nd">@info_final</span>
+<span class="k">class</span> <span class="nc">MPTCPJoinACK</span><span class="p">(</span><span class="n">MPTCPJoin</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for TCP ``MP_JOIN-ACK`` option.&quot;&quot;&quot;</span>
 
     <span class="c1">#: HMAC value.</span>
@@ -778,7 +810,8 @@
         <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;OptionNumber&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">subtype</span><span class="p">:</span> <span class="s1">&#39;MPTCPOption&#39;</span><span class="p">,</span> <span class="n">connection</span><span class="p">:</span> <span class="s1">&#39;TCP_Flags&#39;</span><span class="p">,</span> <span class="n">hmac</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
 
 
-<div class="viewcode-block" id="MPTCPDSS"><a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.data.transport.tcp.MPTCPDSS">[docs]</a><span class="k">class</span> <span class="nc">MPTCPDSS</span><span class="p">(</span><span class="n">MPTCP</span><span class="p">):</span>
+<div class="viewcode-block" id="MPTCPDSS"><a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.data.transport.tcp.MPTCPDSS">[docs]</a><span class="nd">@info_final</span>
+<span class="k">class</span> <span class="nc">MPTCPDSS</span><span class="p">(</span><span class="n">MPTCP</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for TCP ``DSS`` option.&quot;&quot;&quot;</span>
 
     <span class="c1">#: ``DATA_FIN`` flag.</span>
@@ -798,7 +831,8 @@
         <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;OptionNumber&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">subtype</span><span class="p">:</span> <span class="s1">&#39;MPTCPOption&#39;</span><span class="p">,</span> <span class="n">data_fin</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span><span class="p">,</span> <span class="n">ack</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span><span class="p">,</span> <span class="n">dsn</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span><span class="p">,</span> <span class="n">ssn</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span><span class="p">,</span> <span class="n">dl_len</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span><span class="p">,</span> <span class="n">checksum</span><span class="p">:</span> <span class="s1">&#39;Optional[bytes]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
 
 
-<div class="viewcode-block" id="MPTCPAddAddress"><a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.data.transport.tcp.MPTCPAddAddress">[docs]</a><span class="k">class</span> <span class="nc">MPTCPAddAddress</span><span class="p">(</span><span class="n">MPTCP</span><span class="p">):</span>
+<div class="viewcode-block" id="MPTCPAddAddress"><a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.data.transport.tcp.MPTCPAddAddress">[docs]</a><span class="nd">@info_final</span>
+<span class="k">class</span> <span class="nc">MPTCPAddAddress</span><span class="p">(</span><span class="n">MPTCP</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for TCP ``ADD_ADDR`` option.&quot;&quot;&quot;</span>
 
     <span class="c1">#: IP version.</span>
@@ -814,7 +848,8 @@
         <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;OptionNumber&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">subtype</span><span class="p">:</span> <span class="s1">&#39;MPTCPOption&#39;</span><span class="p">,</span> <span class="n">version</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">addr_id</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">addr</span><span class="p">:</span> <span class="s1">&#39;IPAddress&#39;</span><span class="p">,</span> <span class="n">port</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
 
 
-<div class="viewcode-block" id="MPTCPRemoveAddress"><a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.data.transport.tcp.MPTCPRemoveAddress">[docs]</a><span class="k">class</span> <span class="nc">MPTCPRemoveAddress</span><span class="p">(</span><span class="n">MPTCP</span><span class="p">):</span>
+<div class="viewcode-block" id="MPTCPRemoveAddress"><a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.data.transport.tcp.MPTCPRemoveAddress">[docs]</a><span class="nd">@info_final</span>
+<span class="k">class</span> <span class="nc">MPTCPRemoveAddress</span><span class="p">(</span><span class="n">MPTCP</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for TCP ``REMOVE_ADDR`` option.&quot;&quot;&quot;</span>
 
     <span class="c1">#: Address ID.</span>
@@ -824,7 +859,8 @@
         <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;OptionNumber&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">subtype</span><span class="p">:</span> <span class="s1">&#39;MPTCPOption&#39;</span><span class="p">,</span> <span class="n">addr_id</span><span class="p">:</span> <span class="s1">&#39;tuple[int, ...]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
 
 
-<div class="viewcode-block" id="MPTCPPriority"><a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.data.transport.tcp.MPTCPPriority">[docs]</a><span class="k">class</span> <span class="nc">MPTCPPriority</span><span class="p">(</span><span class="n">MPTCP</span><span class="p">):</span>
+<div class="viewcode-block" id="MPTCPPriority"><a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.data.transport.tcp.MPTCPPriority">[docs]</a><span class="nd">@info_final</span>
+<span class="k">class</span> <span class="nc">MPTCPPriority</span><span class="p">(</span><span class="n">MPTCP</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for TCP ``MP_PRIO`` option.&quot;&quot;&quot;</span>
 
     <span class="c1">#: Backup path flag.</span>
@@ -836,7 +872,8 @@
         <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;OptionNumber&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">subtype</span><span class="p">:</span> <span class="s1">&#39;MPTCPOption&#39;</span><span class="p">,</span> <span class="n">backup</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span><span class="p">,</span> <span class="n">addr_id</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
 
 
-<div class="viewcode-block" id="MPTCPFallback"><a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.data.transport.tcp.MPTCPFallback">[docs]</a><span class="k">class</span> <span class="nc">MPTCPFallback</span><span class="p">(</span><span class="n">MPTCP</span><span class="p">):</span>
+<div class="viewcode-block" id="MPTCPFallback"><a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.data.transport.tcp.MPTCPFallback">[docs]</a><span class="nd">@info_final</span>
+<span class="k">class</span> <span class="nc">MPTCPFallback</span><span class="p">(</span><span class="n">MPTCP</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for TCP ``MP_FAIL`` option.&quot;&quot;&quot;</span>
 
     <span class="c1">#: Data sequence number.</span>
@@ -846,7 +883,8 @@
         <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;OptionNumber&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">subtype</span><span class="p">:</span> <span class="s1">&#39;MPTCPOption&#39;</span><span class="p">,</span> <span class="n">dsn</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
 
 
-<div class="viewcode-block" id="MPTCPFastclose"><a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.data.transport.tcp.MPTCPFastclose">[docs]</a><span class="k">class</span> <span class="nc">MPTCPFastclose</span><span class="p">(</span><span class="n">MPTCP</span><span class="p">):</span>
+<div class="viewcode-block" id="MPTCPFastclose"><a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.data.transport.tcp.MPTCPFastclose">[docs]</a><span class="nd">@info_final</span>
+<span class="k">class</span> <span class="nc">MPTCPFastclose</span><span class="p">(</span><span class="n">MPTCP</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for TCP ``MP_FASTCLOSE`` option.&quot;&quot;&quot;</span>
 
     <span class="c1">#: Option receiver&#39;s key.</span>

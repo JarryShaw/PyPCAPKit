@@ -362,7 +362,7 @@
                                          <span class="n">SchemaField</span><span class="p">,</span> <span class="n">SwitchField</span><span class="p">)</span>
 <span class="kn">from</span> <span class="nn">pcapkit.corekit.fields.numbers</span> <span class="kn">import</span> <span class="n">EnumField</span><span class="p">,</span> <span class="n">UInt8Field</span><span class="p">,</span> <span class="n">UInt16Field</span><span class="p">,</span> <span class="n">UInt32Field</span>
 <span class="kn">from</span> <span class="nn">pcapkit.corekit.fields.strings</span> <span class="kn">import</span> <span class="n">BitField</span><span class="p">,</span> <span class="n">BytesField</span><span class="p">,</span> <span class="n">PaddingField</span>
-<span class="kn">from</span> <span class="nn">pcapkit.protocols.schema.schema</span> <span class="kn">import</span> <span class="n">Schema</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.schema.schema</span> <span class="kn">import</span> <span class="n">Schema</span><span class="p">,</span> <span class="n">schema_final</span>
 <span class="kn">from</span> <span class="nn">pcapkit.utilities.exceptions</span> <span class="kn">import</span> <span class="n">FieldValueError</span>
 <span class="kn">from</span> <span class="nn">pcapkit.utilities.logging</span> <span class="kn">import</span> <span class="n">SPHINX_TYPE_CHECKING</span>
 <span class="kn">from</span> <span class="nn">pcapkit.utilities.warnings</span> <span class="kn">import</span> <span class="n">ProtocolWarning</span><span class="p">,</span> <span class="n">warn</span>
@@ -499,7 +499,8 @@
         <span class="k">return</span> <span class="bp">self</span></div></div>
 
 
-<div class="viewcode-block" id="UnassignedOption"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/ipv4.html#pcapkit.protocols.schema.internet.ipv4.UnassignedOption">[docs]</a><span class="k">class</span> <span class="nc">UnassignedOption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+<div class="viewcode-block" id="UnassignedOption"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/ipv4.html#pcapkit.protocols.schema.internet.ipv4.UnassignedOption">[docs]</a><span class="nd">@schema_final</span>
+<span class="k">class</span> <span class="nc">UnassignedOption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for IPv4 unassigned options.&quot;&quot;&quot;</span>
 
     <span class="c1">#: Option data.</span>
@@ -509,21 +510,24 @@
         <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_OptionNumber&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
 
 
-<div class="viewcode-block" id="EOOLOption"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/ipv4.html#pcapkit.protocols.schema.internet.ipv4.EOOLOption">[docs]</a><span class="k">class</span> <span class="nc">EOOLOption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+<div class="viewcode-block" id="EOOLOption"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/ipv4.html#pcapkit.protocols.schema.internet.ipv4.EOOLOption">[docs]</a><span class="nd">@schema_final</span>
+<span class="k">class</span> <span class="nc">EOOLOption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for IPv4 end of option list (``EOOL``) option.&quot;&quot;&quot;</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
         <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_OptionNumber&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
 
 
-<div class="viewcode-block" id="NOPOption"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/ipv4.html#pcapkit.protocols.schema.internet.ipv4.NOPOption">[docs]</a><span class="k">class</span> <span class="nc">NOPOption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+<div class="viewcode-block" id="NOPOption"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/ipv4.html#pcapkit.protocols.schema.internet.ipv4.NOPOption">[docs]</a><span class="nd">@schema_final</span>
+<span class="k">class</span> <span class="nc">NOPOption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for IPv4 no operation (``NOP``) option.&quot;&quot;&quot;</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
         <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_OptionNumber&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
 
 
-<div class="viewcode-block" id="SECOption"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/ipv4.html#pcapkit.protocols.schema.internet.ipv4.SECOption">[docs]</a><span class="k">class</span> <span class="nc">SECOption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+<div class="viewcode-block" id="SECOption"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/ipv4.html#pcapkit.protocols.schema.internet.ipv4.SECOption">[docs]</a><span class="nd">@schema_final</span>
+<span class="k">class</span> <span class="nc">SECOption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for IPv4 security (``SEC``) option.&quot;&quot;&quot;</span>
 
     <span class="c1">#: Classification level.</span>
@@ -538,7 +542,8 @@
         <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_OptionNumber&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">level</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">&#39;Optional[bytes]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
 
 
-<div class="viewcode-block" id="LSROption"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/ipv4.html#pcapkit.protocols.schema.internet.ipv4.LSROption">[docs]</a><span class="k">class</span> <span class="nc">LSROption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+<div class="viewcode-block" id="LSROption"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/ipv4.html#pcapkit.protocols.schema.internet.ipv4.LSROption">[docs]</a><span class="nd">@schema_final</span>
+<span class="k">class</span> <span class="nc">LSROption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for IPv4 loose source route (``LSR``) option.&quot;&quot;&quot;</span>
 
     <span class="c1">#: Pointer.</span>
@@ -558,7 +563,8 @@
         <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_OptionNumber&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">pointer</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">route</span><span class="p">:</span> <span class="s1">&#39;list[IPv4Address | str | bytes | int]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
 
 
-<div class="viewcode-block" id="TSOption"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/ipv4.html#pcapkit.protocols.schema.internet.ipv4.TSOption">[docs]</a><span class="k">class</span> <span class="nc">TSOption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+<div class="viewcode-block" id="TSOption"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/ipv4.html#pcapkit.protocols.schema.internet.ipv4.TSOption">[docs]</a><span class="nd">@schema_final</span>
+<span class="k">class</span> <span class="nc">TSOption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for IPv4 timestamp (``TS``) option.&quot;&quot;&quot;</span>
 
     <span class="c1">#: Pointer.</span>
@@ -659,7 +665,8 @@
         <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_OptionNumber&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">pointer</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">flags</span><span class="p">:</span> <span class="s1">&#39;TSFlags&#39;</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">&#39;list[int]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
 
 
-<div class="viewcode-block" id="ESECOption"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/ipv4.html#pcapkit.protocols.schema.internet.ipv4.ESECOption">[docs]</a><span class="k">class</span> <span class="nc">ESECOption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+<div class="viewcode-block" id="ESECOption"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/ipv4.html#pcapkit.protocols.schema.internet.ipv4.ESECOption">[docs]</a><span class="nd">@schema_final</span>
+<span class="k">class</span> <span class="nc">ESECOption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for IPv4 extended security (``ESEC``) option.&quot;&quot;&quot;</span>
 
     <span class="c1">#: Additional security information format code.</span>
@@ -674,7 +681,8 @@
         <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_OptionNumber&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="nb">format</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">info</span><span class="p">:</span> <span class="s1">&#39;Optional[bytes]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
 
 
-<div class="viewcode-block" id="RROption"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/ipv4.html#pcapkit.protocols.schema.internet.ipv4.RROption">[docs]</a><span class="k">class</span> <span class="nc">RROption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+<div class="viewcode-block" id="RROption"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/ipv4.html#pcapkit.protocols.schema.internet.ipv4.RROption">[docs]</a><span class="nd">@schema_final</span>
+<span class="k">class</span> <span class="nc">RROption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for IPv4 record route (``RR``) option.&quot;&quot;&quot;</span>
 
     <span class="c1">#: Pointer.</span>
@@ -694,7 +702,8 @@
         <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_OptionNumber&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">pointer</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">route</span><span class="p">:</span> <span class="s1">&#39;list[IPv4Address | str | bytes | int]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
 
 
-<div class="viewcode-block" id="SIDOption"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/ipv4.html#pcapkit.protocols.schema.internet.ipv4.SIDOption">[docs]</a><span class="k">class</span> <span class="nc">SIDOption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+<div class="viewcode-block" id="SIDOption"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/ipv4.html#pcapkit.protocols.schema.internet.ipv4.SIDOption">[docs]</a><span class="nd">@schema_final</span>
+<span class="k">class</span> <span class="nc">SIDOption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for IPv4 stream identifier (``SID``) option.&quot;&quot;&quot;</span>
 
     <span class="c1">#: Stream identifier.</span>
@@ -704,7 +713,8 @@
         <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_OptionNumber&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">sid</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
 
 
-<div class="viewcode-block" id="SSROption"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/ipv4.html#pcapkit.protocols.schema.internet.ipv4.SSROption">[docs]</a><span class="k">class</span> <span class="nc">SSROption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+<div class="viewcode-block" id="SSROption"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/ipv4.html#pcapkit.protocols.schema.internet.ipv4.SSROption">[docs]</a><span class="nd">@schema_final</span>
+<span class="k">class</span> <span class="nc">SSROption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for IPv4 strict source route (``SSR``) option.&quot;&quot;&quot;</span>
 
     <span class="c1">#: Pointer.</span>
@@ -724,7 +734,8 @@
         <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_OptionNumber&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">pointer</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">route</span><span class="p">:</span> <span class="s1">&#39;list[IPv4Address | str | bytes | int]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
 
 
-<div class="viewcode-block" id="MTUPOption"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/ipv4.html#pcapkit.protocols.schema.internet.ipv4.MTUPOption">[docs]</a><span class="k">class</span> <span class="nc">MTUPOption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+<div class="viewcode-block" id="MTUPOption"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/ipv4.html#pcapkit.protocols.schema.internet.ipv4.MTUPOption">[docs]</a><span class="nd">@schema_final</span>
+<span class="k">class</span> <span class="nc">MTUPOption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for IPv4 MTU probe (``MTUP``) option.&quot;&quot;&quot;</span>
 
     <span class="c1">#: MTU.</span>
@@ -734,7 +745,8 @@
         <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_OptionNumber&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">mtu</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
 
 
-<div class="viewcode-block" id="MTUROption"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/ipv4.html#pcapkit.protocols.schema.internet.ipv4.MTUROption">[docs]</a><span class="k">class</span> <span class="nc">MTUROption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+<div class="viewcode-block" id="MTUROption"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/ipv4.html#pcapkit.protocols.schema.internet.ipv4.MTUROption">[docs]</a><span class="nd">@schema_final</span>
+<span class="k">class</span> <span class="nc">MTUROption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for IPv4 MTU reply (``MTUR``) option.&quot;&quot;&quot;</span>
 
     <span class="c1">#: MTU.</span>
@@ -744,7 +756,8 @@
         <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_OptionNumber&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">mtu</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
 
 
-<div class="viewcode-block" id="TROption"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/ipv4.html#pcapkit.protocols.schema.internet.ipv4.TROption">[docs]</a><span class="k">class</span> <span class="nc">TROption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+<div class="viewcode-block" id="TROption"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/ipv4.html#pcapkit.protocols.schema.internet.ipv4.TROption">[docs]</a><span class="nd">@schema_final</span>
+<span class="k">class</span> <span class="nc">TROption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for IPv4 traceroute (``TR``) option.&quot;&quot;&quot;</span>
 
     <span class="c1">#: ID number.</span>
@@ -760,7 +773,8 @@
         <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_OptionNumber&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="nb">id</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">out</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">ret</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">origin</span><span class="p">:</span> <span class="s1">&#39;IPv4Address | str | bytes | int&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
 
 
-<div class="viewcode-block" id="RTRALTOption"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/ipv4.html#pcapkit.protocols.schema.internet.ipv4.RTRALTOption">[docs]</a><span class="k">class</span> <span class="nc">RTRALTOption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+<div class="viewcode-block" id="RTRALTOption"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/ipv4.html#pcapkit.protocols.schema.internet.ipv4.RTRALTOption">[docs]</a><span class="nd">@schema_final</span>
+<span class="k">class</span> <span class="nc">RTRALTOption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for IPv4 router alert (``RTRALT``) option.&quot;&quot;&quot;</span>
 
     <span class="c1">#: Router alert value.</span>
@@ -770,6 +784,7 @@
         <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_OptionNumber&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">alert</span><span class="p">:</span> <span class="s1">&#39;Enum_RouterAlert&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
 
 
+<span class="nd">@schema_final</span>
 <span class="k">class</span> <span class="nc">_QSOption</span><span class="p">(</span><span class="n">Schema</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for IPv4 quick start (``QS``) options in generic representation.&quot;&quot;&quot;</span>
 
@@ -810,6 +825,7 @@
         <span class="n">func</span><span class="p">:</span> <span class="s1">&#39;Enum_QSFunction&#39;</span></div>
 
 
+<span class="nd">@schema_final</span>
 <span class="k">class</span> <span class="nc">QuickStartRequestOption</span><span class="p">(</span><span class="n">QSOption</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for IPV4 quick start request options.&quot;&quot;&quot;</span>
 
@@ -825,6 +841,7 @@
                      <span class="n">ttl</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">nonce</span><span class="p">:</span> <span class="s1">&#39;QSNonce&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>
 
 
+<span class="nd">@schema_final</span>
 <span class="k">class</span> <span class="nc">QuickStartReportOption</span><span class="p">(</span><span class="n">QSOption</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for IPV4 quick start report of approved rate options.&quot;&quot;&quot;</span>
 
@@ -838,7 +855,8 @@
                      <span class="n">nonce</span><span class="p">:</span> <span class="s1">&#39;QSNonce&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>
 
 
-<div class="viewcode-block" id="IPv4"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/ipv4.html#pcapkit.protocols.schema.internet.ipv4.IPv4">[docs]</a><span class="k">class</span> <span class="nc">IPv4</span><span class="p">(</span><span class="n">Schema</span><span class="p">):</span>
+<div class="viewcode-block" id="IPv4"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/ipv4.html#pcapkit.protocols.schema.internet.ipv4.IPv4">[docs]</a><span class="nd">@schema_final</span>
+<span class="k">class</span> <span class="nc">IPv4</span><span class="p">(</span><span class="n">Schema</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for IPv4 packet.&quot;&quot;&quot;</span>
 
     <span class="c1">#: Version and header length.</span>

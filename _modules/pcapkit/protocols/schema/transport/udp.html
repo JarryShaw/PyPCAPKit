@@ -350,7 +350,7 @@
 <span class="kn">from</span> <span class="nn">pcapkit.corekit.fields.misc</span> <span class="kn">import</span> <span class="n">PayloadField</span>
 <span class="kn">from</span> <span class="nn">pcapkit.corekit.fields.numbers</span> <span class="kn">import</span> <span class="n">UInt16Field</span>
 <span class="kn">from</span> <span class="nn">pcapkit.corekit.fields.strings</span> <span class="kn">import</span> <span class="n">BytesField</span>
-<span class="kn">from</span> <span class="nn">pcapkit.protocols.schema.schema</span> <span class="kn">import</span> <span class="n">Schema</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.schema.schema</span> <span class="kn">import</span> <span class="n">Schema</span><span class="p">,</span> <span class="n">schema_final</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;UDP&#39;</span><span class="p">]</span>
 
@@ -358,7 +358,8 @@
     <span class="kn">from</span> <span class="nn">pcapkit.protocols.protocol</span> <span class="kn">import</span> <span class="n">Protocol</span>
 
 
-<div class="viewcode-block" id="UDP"><a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/udp.html#pcapkit.protocols.schema.transport.udp.UDP">[docs]</a><span class="k">class</span> <span class="nc">UDP</span><span class="p">(</span><span class="n">Schema</span><span class="p">):</span>
+<div class="viewcode-block" id="UDP"><a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/udp.html#pcapkit.protocols.schema.transport.udp.UDP">[docs]</a><span class="nd">@schema_final</span>
+<span class="k">class</span> <span class="nc">UDP</span><span class="p">(</span><span class="n">Schema</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for UDP packet.&quot;&quot;&quot;</span>
 
     <span class="c1">#: Source port.</span>
