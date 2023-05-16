@@ -26,9 +26,10 @@ if TYPE_CHECKING:
 __all__ = ['Info', 'info_final']
 
 VT = TypeVar('VT')
+ST = TypeVar('ST', bound='Type[Info]')
 
 
-def info_final(cls: 'Type[Info[VT]]') -> 'Type[Info[VT]]':
+def info_final(cls: 'ST') -> 'ST':
     """Finalise info class.
 
     Args:
@@ -111,8 +112,8 @@ def info_final(cls: 'Type[Info[VT]]') -> 'Type[Info[VT]]':
         ns = {}  # type: dict[str, Any]
         exec(init_, None, ns)  # pylint: disable=exec-used # nosec
 
-        cls.__init__ = ns['__create_fn__']()
-        cls.__init__.__qualname__ = f'{cls.__name__}.__init__'
+        cls.__init__ = ns['__create_fn__']()  # type: ignore[misc]
+        cls.__init__.__qualname__ = f'{cls.__name__}.__init__'  # type: ignore[misc]
 
     cls.__finalised__ = True
     return final(cls)
@@ -167,7 +168,7 @@ class Info(Mapping[str, VT], Generic[VT]):
 
         """
         if not cls.__finalised__:
-            cls = cast('Type[Self]', info_final(cls))
+            cls = info_final(cls)
         self = super().__new__(cls)
 
         # NOTE: We define the ``__map__`` and ``__map_reverse__`` attributes

@@ -25,9 +25,10 @@ if TYPE_CHECKING:
 __all__ = ['Schema', 'schema_final']
 
 VT = TypeVar('VT')
+ST = TypeVar('ST', bound='Type[Schema]')
 
 
-def schema_final(cls: 'Type[Schema[VT]]') -> 'Type[Schema[VT]]':
+def schema_final(cls: 'ST') -> 'ST':
     """Finalise schema class.
 
     Args:
@@ -130,8 +131,8 @@ def schema_final(cls: 'Type[Schema[VT]]') -> 'Type[Schema[VT]]':
         ns = {}  # type: dict[str, Any]
         exec(init_, None, ns)  # pylint: disable=exec-used # nosec
 
-        cls.__init__ = ns['__create_fn__']()
-        cls.__init__.__qualname__ = f'{cls.__name__}.__init__'
+        cls.__init__ = ns['__create_fn__']()  # type: ignore[misc]
+        cls.__init__.__qualname__ = f'{cls.__name__}.__init__'  # type: ignore[misc]
 
     cls.__finalised__ = True
     return final(cls)
@@ -179,7 +180,7 @@ class Schema(Mapping[str, VT], Generic[VT]):
 
         """
         if not cls.__finalised__:
-            cls = cast('Type[Self]', schema_final(cls))
+            cls = schema_final(cls)
         self = super().__new__(cls)
 
         # NOTE: We define the ``__map__`` and ``__map_reverse__`` attributes
