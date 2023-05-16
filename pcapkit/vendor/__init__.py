@@ -90,7 +90,7 @@ __all__ = [
     'MH_UpdateNotificationReason', 'MH_UpdateNotificationACKStatus',
     'MH_FlowBindingType', 'MH_FlowBindingIndicationTrigger',
     'MH_FlowBindingACKStatus', 'MH_FlowBindingAction', 'MH_QoSAttribute',
-    'MH_LMAControlledMAGSuboption',
+    'MH_LMAControlledMAGSuboption', 'MH_LLACode',
     # OSPF
     'OSPF_Authentication', 'OSPF_Packet',
     # TCP

@@ -84,6 +84,8 @@ enumerations include:
      - Quality-of-Service Attribute Registry [*]_
    * - :class:`MH_LMAControlledMAGSuboption <pcapkit.const.mh.lma_mag_suboption.LMAControlledMAGSuboption>`
      - LMA-Controlled MAG Parameters Sub-Option Type Values [*]_
+   * - :class:`MH_LLACode <pcapkit.const.mh.lla_code.LLACode>`
+     - Link-Layer Address (LLA) Option Code [*]_
 
 Access Technology Type Option Type Values
 =========================================
@@ -566,10 +568,22 @@ which is automatically generated from :class:`pcapkit.vendor.mh.upn_reason.Updat
    :undoc-members:
    :show-inheritance:
 
+Link-Layer Address (LLA) Option Code
+====================================
+
+.. module:: pcapkit.const.mh.lla_code
+
+This module contains the constant enumeration for **Link-Layer Address (LLA) Option Code**,
+which is automatically generated from :class:`pcapkit.vendor.mh.lla_code.LLACode`.
+
+.. autoclass:: pcapkit.const.mh.lla_code.LLACode
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 .. raw:: html
 
    <hr />
-
 
 .. [*] https://www.iana.org/assignments/mobility-parameters/mobility-parameters.xhtml#mobility-parameters-1
 .. [*] https://www.iana.org/assignments/mobility-parameters/mobility-parameters.xhtml#mobility-parameters-2
@@ -608,3 +622,4 @@ which is automatically generated from :class:`pcapkit.vendor.mh.upn_reason.Updat
 .. [*] https://www.iana.org/assignments/mobility-parameters/mobility-parameters.xhtml#flow-binding-action
 .. [*] https://www.iana.org/assignments/mobility-parameters/mobility-parameters.xhtml#qos-attribute
 .. [*] https://www.iana.org/assignments/mobility-parameters/mobility-parameters.xhtml#lma-controlled-mag-parameters-sub-option-type
+.. [*] :rfc:`5568#section-6.4.3`

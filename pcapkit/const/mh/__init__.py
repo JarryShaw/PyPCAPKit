@@ -85,6 +85,8 @@ enumerations include:
      - Quality-of-Service Attribute Registry [*]_
    * - :class:`MH_LMAControlledMAGSuboption <pcapkit.const.mh.lma_mag_suboption.LMAControlledMAGSuboption>`
      - LMA-Controlled MAG Parameters Sub-Option Type Values [*]_
+   * - :class:`MH_LLACode <pcapkit.const.mh.lla_code.LLACode>`
+     - Link-Layer Address (LLA) Option Code [*]_
 
 .. [*] https://www.iana.org/assignments/mobility-parameters/mobility-parameters.xhtml#mobility-parameters-1
 .. [*] https://www.iana.org/assignments/mobility-parameters/mobility-parameters.xhtml#mobility-parameters-2
@@ -123,6 +125,7 @@ enumerations include:
 .. [*] https://www.iana.org/assignments/mobility-parameters/mobility-parameters.xhtml#flow-binding-action
 .. [*] https://www.iana.org/assignments/mobility-parameters/mobility-parameters.xhtml#qos-attribute
 .. [*] https://www.iana.org/assignments/mobility-parameters/mobility-parameters.xhtml#lma-controlled-mag-parameters-sub-option-type
+.. [*] :rfc:`5568#section-6.4.3`
 
 """
 
@@ -165,6 +168,7 @@ from pcapkit.const.mh.traffic_selector import TrafficSelector as MH_TrafficSelec
 from pcapkit.const.mh.upa_status import \
     UpdateNotificationACKStatus as MH_UpdateNotificationACKStatus
 from pcapkit.const.mh.upn_reason import UpdateNotificationReason as MH_UpdateNotificationReason
+from pcapkit.const.mh.lla_code import LLACode as MH_LLACode
 
 __all__ = [
     'MH_Packet', 'MH_Option', 'MH_DNSStatusCode', 'MH_ACKStatusCode',
@@ -179,5 +183,5 @@ __all__ = [
     'MH_UpdateNotificationReason', 'MH_UpdateNotificationACKStatus',
     'MH_FlowBindingType', 'MH_FlowBindingIndicationTrigger',
     'MH_FlowBindingACKStatus', 'MH_FlowBindingAction', 'MH_QoSAttribute',
-    'MH_LMAControlledMAGSuboption',
+    'MH_LMAControlledMAGSuboption', 'MH_LLACode',
 ]

@@ -84,6 +84,8 @@ vendor crawlers include:
      - Quality-of-Service Attribute Registry [*]_
    * - :class:`MH_LMAControlledMAGSuboption <pcapkit.vendor.mh.lma_mag_suboption.LMAControlledMAGSuboption>`
      - LMA-Controlled MAG Parameters Sub-Option Type Values [*]_
+   * - :class:`MH_LLACode <pcapkit.vendor.mh.lla_code.LLACode>`
+     - Link-Layer Address (LLA) Option Code [*]_
 
 Access Technology Type Option Type Values
 =========================================
@@ -529,10 +531,21 @@ which is automatically generating :class:`pcapkit.const.mh.upn_reason.UpdateNoti
    :members: FLAG, LINK
    :show-inheritance:
 
+Link-Layer Address (LLA) Option Code
+====================================
+
+.. module:: pcapkit.vendor.mh.lla_code
+
+This module contains the vendor crawler for **Link-Layer Address (LLA) Option Code**,
+which is automatically generating :class:`pcapkit.const.mh.lla_code.LLACode`.
+
+.. autoclass:: pcapkit.vendor.mh.lla_code.LLACode
+   :members: FLAG, LINK
+   :show-inheritance:
+
 .. raw:: html
 
    <hr />
-
 
 .. [*] https://www.iana.org/assignments/mobility-parameters/mobility-parameters.xhtml#mobility-parameters-1
 .. [*] https://www.iana.org/assignments/mobility-parameters/mobility-parameters.xhtml#mobility-parameters-2
@@ -571,3 +584,4 @@ which is automatically generating :class:`pcapkit.const.mh.upn_reason.UpdateNoti
 .. [*] https://www.iana.org/assignments/mobility-parameters/mobility-parameters.xhtml#flow-binding-action
 .. [*] https://www.iana.org/assignments/mobility-parameters/mobility-parameters.xhtml#qos-attribute
 .. [*] https://www.iana.org/assignments/mobility-parameters/mobility-parameters.xhtml#lma-controlled-mag-parameters-sub-option-type
+.. [*] :rfc:`5568#section-6.4.3`
