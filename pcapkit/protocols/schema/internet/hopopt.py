@@ -269,7 +269,7 @@ class PadOption(Option):
     """Header schema for HOPOPT padding options."""
 
     #: Padding.
-    pad: 'bytes' = PaddingField(length=lambda pkt: pkt['len'])
+    pad: 'bytes' = PaddingField(length=lambda pkt: pkt.get('len', 0))
 
     if TYPE_CHECKING:
         def __init__(self, type: 'Enum_Option', len: 'int') -> 'None': ...

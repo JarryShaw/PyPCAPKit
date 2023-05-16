@@ -154,7 +154,6 @@ from pcapkit.protocols.schema.misc.pcapng import NameResolutionRecord as Schema_
 from pcapkit.protocols.schema.misc.pcapng import NS_DNSIP4AddrOption as Schema_NS_DNSIP4AddrOption
 from pcapkit.protocols.schema.misc.pcapng import NS_DNSIP6AddrOption as Schema_NS_DNSIP6AddrOption
 from pcapkit.protocols.schema.misc.pcapng import NS_DNSNameOption as Schema_NS_DNSNameOption
-from pcapkit.protocols.schema.misc.pcapng import Option as Schema_Option
 from pcapkit.protocols.schema.misc.pcapng import PACK_FlagsOption as Schema_PACK_FlagsOption
 from pcapkit.protocols.schema.misc.pcapng import PACK_HashOption as Schema_PACK_HashOption
 from pcapkit.protocols.schema.misc.pcapng import PacketBlock as Schema_PacketBlock
@@ -190,6 +189,7 @@ if TYPE_CHECKING:
     from typing_extensions import Literal
 
     from pcapkit.foundation.engines.pcapng import Context
+    from pcapkit.protocols.schema.misc.pcapng import Option as Schema_Option
     from pcapkit.protocols.schema.schema import Schema
 
     Packet = Union[Data_EnhancedPacketBlock, Data_SimplePacketBlock, Data_PacketBlock]
