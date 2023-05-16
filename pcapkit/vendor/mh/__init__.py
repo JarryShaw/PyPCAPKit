@@ -153,6 +153,7 @@ from pcapkit.vendor.mh.handover_ack_flag import HandoverACKFlag as MH_HandoverAC
 from pcapkit.vendor.mh.handover_ack_status import HandoverACKStatus as MH_HandoverACKStatus
 from pcapkit.vendor.mh.handover_initiate_flag import HandoverInitiateFlag as MH_HandoverInitiateFlag
 from pcapkit.vendor.mh.home_address_reply import HomeAddressReply as MH_HomeAddressReply
+from pcapkit.vendor.mh.lla_code import LLACode as MH_LLACode
 from pcapkit.vendor.mh.lma_mag_suboption import \
     LMAControlledMAGSuboption as MH_LMAControlledMAGSuboption
 from pcapkit.vendor.mh.mn_group_id import MNGroupID as MH_MNGroupID
@@ -168,7 +169,6 @@ from pcapkit.vendor.mh.traffic_selector import TrafficSelector as MH_TrafficSele
 from pcapkit.vendor.mh.upa_status import \
     UpdateNotificationACKStatus as MH_UpdateNotificationACKStatus
 from pcapkit.vendor.mh.upn_reason import UpdateNotificationReason as MH_UpdateNotificationReason
-from pcapkit.vendor.mh.lla_code import LLACode as MH_LLACode
 
 __all__ = [
     'MH_Packet', 'MH_Option', 'MH_DNSStatusCode', 'MH_ACKStatusCode',
