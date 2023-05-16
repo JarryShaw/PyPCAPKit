@@ -65,7 +65,8 @@ class AuthSubtype(Vendor):
             desc = self.wrap_comment(f'{name}{cmmt}{tmp1}')
 
             code, _ = item[0], int(item[0])
-            renm = self.rename(name, code, original=long)
+            renm = self.rename(name.replace(' authentication mobility option', ''),
+                               code, original=long)
 
             pres = f"{renm} = {code}"
             sufs = f'#: {desc}'

@@ -19,10 +19,10 @@ class AuthSubtype(IntEnum):
     """[AuthSubtype] Subtype Field of the MN-HA and MN-AAA Authentication Mobility Options"""
 
     #: MN-HA authentication mobility option [:rfc:`4285`]
-    MN_HA_authentication_mobility_option = 1
+    MN_HA = 1
 
     #: MN-AAA authentication mobility option [:rfc:`4285`]
-    MN_AAA_authentication_mobility_option = 2
+    MN_AAA = 2
 
     @staticmethod
     def get(key: 'int | str', default: 'int' = -1) -> 'AuthSubtype':
