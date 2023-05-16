@@ -5,7 +5,7 @@
     <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../../../genindex.html" /><link rel="search" title="Search" href="../../../../search.html" />
 
     <!-- Generated with Sphinx 6.2.1 and Furo 2023.03.27 -->
-        <title>pcapkit.vendor.mh.auth_subtype - PyPCAPKit</title>
+        <title>pcapkit.const.mh.lla_code - PyPCAPKit</title>
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../../../../_static/styles/furo.css?digest=fad236701ea90a88636c2a8c73b44ae642ed2a53" />
     <link rel="stylesheet" type="text/css" href="../../../../_static/copybutton.css" />
@@ -340,90 +340,70 @@
           </label>
         </div>
         <article role="main">
-          <h1>Source code for pcapkit.vendor.mh.auth_subtype</h1><div class="highlight"><pre>
+          <h1>Source code for pcapkit.const.mh.lla_code</h1><div class="highlight"><pre>
 <span></span><span class="c1"># -*- coding: utf-8 -*-</span>
-<span class="sd">&quot;&quot;&quot;Subtype Field of the MN-HA and MN-AAA Authentication Mobility Options</span>
-<span class="sd">==========================================================================</span>
+<span class="c1"># pylint: disable=line-too-long,consider-using-f-string</span>
+<span class="sd">&quot;&quot;&quot;Link-Layer Address (LLA) Option Code</span>
+<span class="sd">==========================================</span>
 
-<span class="sd">.. module:: pcapkit.vendor.mh.auth_subtype</span>
+<span class="sd">.. module:: pcapkit.const.mh.lla_code</span>
 
-<span class="sd">This module contains the vendor crawler for **Subtype Field of the MN-HA and MN-AAA Authentication Mobility Options**,</span>
-<span class="sd">which is automatically generating :class:`pcapkit.const.mh.auth_subtype.AuthSubtype`.</span>
+<span class="sd">This module contains the constant enumeration for **Link-Layer Address (LLA) Option Code**,</span>
+<span class="sd">which is automatically generated from :class:`pcapkit.vendor.mh.lla_code.LLACode`.</span>
 
 <span class="sd">&quot;&quot;&quot;</span>
 
-<span class="kn">import</span> <span class="nn">csv</span>
-<span class="kn">import</span> <span class="nn">re</span>
-<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">from</span> <span class="nn">aenum</span> <span class="kn">import</span> <span class="n">IntEnum</span><span class="p">,</span> <span class="n">extend_enum</span>
 
-<span class="kn">from</span> <span class="nn">pcapkit.vendor.default</span> <span class="kn">import</span> <span class="n">Vendor</span>
-
-<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;AuthSubtype&#39;</span><span class="p">]</span>
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;LLACode&#39;</span><span class="p">]</span>
 
 
-<div class="viewcode-block" id="AuthSubtype"><a class="viewcode-back" href="../../../../pcapkit/vendor/mh.html#pcapkit.vendor.mh.auth_subtype.AuthSubtype">[docs]</a><span class="k">class</span> <span class="nc">AuthSubtype</span><span class="p">(</span><span class="n">Vendor</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Subtype Field of the MN-HA and MN-AAA Authentication Mobility Options&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="LLACode"><a class="viewcode-back" href="../../../../pcapkit/const/mh.html#pcapkit.const.mh.lla_code.LLACode">[docs]</a><span class="k">class</span> <span class="nc">LLACode</span><span class="p">(</span><span class="n">IntEnum</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;[LLACode] Link-Layer Address (LLA) Option Code&quot;&quot;&quot;</span>
 
-    <span class="c1">#: Value limit checker.</span>
-    <span class="n">FLAG</span> <span class="o">=</span> <span class="s1">&#39;isinstance(value, int) and 0 &lt;= value &lt;= 255&#39;</span>
-    <span class="c1">#: Link to registry.</span>
-    <span class="n">LINK</span> <span class="o">=</span> <span class="s1">&#39;https://www.iana.org/assignments/mobility-parameters/mobility-parameters-8.csv&#39;</span>
+    <span class="n">Wilcard</span> <span class="o">=</span> <span class="mi">0</span>
 
-    <span class="k">def</span> <span class="nf">process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">&#39;list[str]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;tuple[list[str], list[str]]&#39;</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Process CSV data.</span>
+    <span class="n">New_Access_Point</span> <span class="o">=</span> <span class="mi">1</span>
+
+    <span class="n">MH</span> <span class="o">=</span> <span class="mi">2</span>
+
+    <span class="n">NAR</span> <span class="o">=</span> <span class="mi">3</span>
+
+    <span class="n">RtSolPr_or_PrRtAdv</span> <span class="o">=</span> <span class="mi">4</span>
+
+    <span class="n">access_point</span> <span class="o">=</span> <span class="mi">5</span>
+
+    <span class="n">no_prefix_information</span> <span class="o">=</span> <span class="mi">6</span>
+
+    <span class="n">no_fast_handover_support</span> <span class="o">=</span> <span class="mi">7</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="n">key</span><span class="p">:</span> <span class="s1">&#39;int | str&#39;</span><span class="p">,</span> <span class="n">default</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;LLACode&#39;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Backport support for original codes.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            data: CSV data.</span>
+<span class="sd">            key: Key to get enum item.</span>
+<span class="sd">            default: Default value if not found.</span>
 
-<span class="sd">        Returns:</span>
-<span class="sd">            Enumeration fields and missing fields.</span>
+<span class="sd">        :meta private:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">LLACode</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">LLACode</span><span class="o">.</span><span class="n">_member_map_</span><span class="p">:</span>  <span class="c1"># pylint: disable=no-member</span>
+            <span class="k">return</span> <span class="n">extend_enum</span><span class="p">(</span><span class="n">LLACode</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">default</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">LLACode</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>  <span class="c1"># type: ignore[misc]</span>
+
+<div class="viewcode-block" id="LLACode._missing_"><a class="viewcode-back" href="../../../../pcapkit/const/mh.html#pcapkit.const.mh.lla_code.LLACode._missing_">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">_missing_</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;LLACode&#39;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Lookup function used when value is not found.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            value: Value to get enum item.</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">reader</span> <span class="o">=</span> <span class="n">csv</span><span class="o">.</span><span class="n">reader</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
-        <span class="nb">next</span><span class="p">(</span><span class="n">reader</span><span class="p">)</span>  <span class="c1"># header</span>
-
-        <span class="n">enum</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: list[str]</span>
-        <span class="n">miss</span> <span class="o">=</span> <span class="p">[</span>
-            <span class="s2">&quot;return extend_enum(cls, &#39;Unassigned_</span><span class="si">%d</span><span class="s2">&#39; % value, value)&quot;</span><span class="p">,</span>
-        <span class="p">]</span>
-        <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">reader</span><span class="p">:</span>
-            <span class="n">long</span> <span class="o">=</span> <span class="n">item</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
-            <span class="n">rfcs</span> <span class="o">=</span> <span class="n">item</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
-
-            <span class="n">temp</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: list[str]</span>
-            <span class="k">for</span> <span class="n">rfc</span> <span class="ow">in</span> <span class="nb">filter</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;\[|\]&#39;</span><span class="p">,</span> <span class="n">rfcs</span><span class="p">)):</span>
-                <span class="k">if</span> <span class="s1">&#39;RFC&#39;</span> <span class="ow">in</span> <span class="n">rfc</span> <span class="ow">and</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;\d+&#39;</span><span class="p">,</span> <span class="n">rfc</span><span class="p">[</span><span class="mi">3</span><span class="p">:]):</span>
-                    <span class="c1"># temp.append(f&#39;[{rfc[:3]} {rfc[3:]}]&#39;)</span>
-                    <span class="n">temp</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;[:rfc:`</span><span class="si">{</span><span class="n">rfc</span><span class="p">[</span><span class="mi">3</span><span class="p">:]</span><span class="si">}</span><span class="s1">`]&#39;</span><span class="p">)</span>
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="n">temp</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;[</span><span class="si">{</span><span class="n">rfc</span><span class="si">}</span><span class="s1">]&#39;</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">,</span> <span class="s1">&#39; &#39;</span><span class="p">))</span>
-            <span class="n">tmp1</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot; </span><span class="si">{</span><span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">temp</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">if</span> <span class="n">rfcs</span> <span class="k">else</span> <span class="s1">&#39;&#39;</span>
-
-            <span class="n">split</span> <span class="o">=</span> <span class="n">long</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39; (&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
-            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">split</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
-                <span class="n">name</span> <span class="o">=</span> <span class="n">split</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-                <span class="n">cmmt</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot; (</span><span class="si">{</span><span class="n">split</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">name</span><span class="p">,</span> <span class="n">cmmt</span> <span class="o">=</span> <span class="n">long</span><span class="p">,</span> <span class="s1">&#39;&#39;</span>
-            <span class="n">desc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">wrap_comment</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">name</span><span class="si">}{</span><span class="n">cmmt</span><span class="si">}{</span><span class="n">tmp1</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
-
-            <span class="n">code</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">item</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="nb">int</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-            <span class="n">renm</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39; authentication mobility option&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">),</span>
-                               <span class="n">code</span><span class="p">,</span> <span class="n">original</span><span class="o">=</span><span class="n">long</span><span class="p">)</span>
-
-            <span class="n">pres</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">renm</span><span class="si">}</span><span class="s2"> = </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s2">&quot;</span>
-            <span class="n">sufs</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;#: </span><span class="si">{</span><span class="n">desc</span><span class="si">}</span><span class="s1">&#39;</span>
-
-            <span class="c1"># if len(pres) &gt; 74:</span>
-            <span class="c1">#     sufs = f&quot;\n{&#39; &#39;*80}{sufs}&quot;</span>
-
-            <span class="c1"># enum.append(f&#39;{pres.ljust(76)}{sufs}&#39;)</span>
-            <span class="n">enum</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">sufs</span><span class="si">}</span><span class="se">\n</span><span class="s1">    </span><span class="si">{</span><span class="n">pres</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">enum</span><span class="p">,</span> <span class="n">miss</span></div>
-
-
-<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
-    <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="n">AuthSubtype</span><span class="p">())</span>  <span class="c1"># type: ignore[arg-type]</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="ow">and</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mi">255</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%r</span><span class="s1"> is not a valid </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">extend_enum</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s1">&#39;Unassigned_</span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">value</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span></div></div>
 </pre></div>
         </article>
       </div>

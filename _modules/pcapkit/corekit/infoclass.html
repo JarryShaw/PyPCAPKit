@@ -369,9 +369,10 @@
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Info&#39;</span><span class="p">,</span> <span class="s1">&#39;info_final&#39;</span><span class="p">]</span>
 
 <span class="n">VT</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s1">&#39;VT&#39;</span><span class="p">)</span>
+<span class="n">ST</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s1">&#39;ST&#39;</span><span class="p">,</span> <span class="n">bound</span><span class="o">=</span><span class="s1">&#39;Type[Info]&#39;</span><span class="p">)</span>
 
 
-<div class="viewcode-block" id="info_final"><a class="viewcode-back" href="../../../pcapkit/corekit/infoclass.html#pcapkit.corekit.infoclass.info_final">[docs]</a><span class="k">def</span> <span class="nf">info_final</span><span class="p">(</span><span class="bp">cls</span><span class="p">:</span> <span class="s1">&#39;Type[Info[VT]]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Type[Info[VT]]&#39;</span><span class="p">:</span>
+<div class="viewcode-block" id="info_final"><a class="viewcode-back" href="../../../pcapkit/corekit/infoclass.html#pcapkit.corekit.infoclass.info_final">[docs]</a><span class="k">def</span> <span class="nf">info_final</span><span class="p">(</span><span class="bp">cls</span><span class="p">:</span> <span class="s1">&#39;ST&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;ST&#39;</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Finalise info class.</span>
 
 <span class="sd">    Args:</span>
@@ -454,8 +455,8 @@
         <span class="n">ns</span> <span class="o">=</span> <span class="p">{}</span>  <span class="c1"># type: dict[str, Any]</span>
         <span class="n">exec</span><span class="p">(</span><span class="n">init_</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">ns</span><span class="p">)</span>  <span class="c1"># pylint: disable=exec-used # nosec</span>
 
-        <span class="bp">cls</span><span class="o">.</span><span class="fm">__init__</span> <span class="o">=</span> <span class="n">ns</span><span class="p">[</span><span class="s1">&#39;__create_fn__&#39;</span><span class="p">]()</span>
-        <span class="bp">cls</span><span class="o">.</span><span class="fm">__init__</span><span class="o">.</span><span class="vm">__qualname__</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1">.__init__&#39;</span>
+        <span class="bp">cls</span><span class="o">.</span><span class="fm">__init__</span> <span class="o">=</span> <span class="n">ns</span><span class="p">[</span><span class="s1">&#39;__create_fn__&#39;</span><span class="p">]()</span>  <span class="c1"># type: ignore[misc]</span>
+        <span class="bp">cls</span><span class="o">.</span><span class="fm">__init__</span><span class="o">.</span><span class="vm">__qualname__</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1">.__init__&#39;</span>  <span class="c1"># type: ignore[misc]</span>
 
     <span class="bp">cls</span><span class="o">.</span><span class="n">__finalised__</span> <span class="o">=</span> <span class="kc">True</span>
     <span class="k">return</span> <span class="n">final</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span></div>
@@ -510,7 +511,7 @@
 
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">cls</span><span class="o">.</span><span class="n">__finalised__</span><span class="p">:</span>
-            <span class="bp">cls</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">&#39;Type[Self]&#39;</span><span class="p">,</span> <span class="n">info_final</span><span class="p">(</span><span class="bp">cls</span><span class="p">))</span>
+            <span class="bp">cls</span> <span class="o">=</span> <span class="n">info_final</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span>
         <span class="bp">self</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span>
 
         <span class="c1"># NOTE: We define the ``__map__`` and ``__map_reverse__`` attributes</span>

@@ -497,7 +497,6 @@
 <span class="kn">from</span> <span class="nn">pcapkit.protocols.schema.misc.pcapng</span> <span class="kn">import</span> <span class="n">NS_DNSIP4AddrOption</span> <span class="k">as</span> <span class="n">Schema_NS_DNSIP4AddrOption</span>
 <span class="kn">from</span> <span class="nn">pcapkit.protocols.schema.misc.pcapng</span> <span class="kn">import</span> <span class="n">NS_DNSIP6AddrOption</span> <span class="k">as</span> <span class="n">Schema_NS_DNSIP6AddrOption</span>
 <span class="kn">from</span> <span class="nn">pcapkit.protocols.schema.misc.pcapng</span> <span class="kn">import</span> <span class="n">NS_DNSNameOption</span> <span class="k">as</span> <span class="n">Schema_NS_DNSNameOption</span>
-<span class="kn">from</span> <span class="nn">pcapkit.protocols.schema.misc.pcapng</span> <span class="kn">import</span> <span class="n">Option</span> <span class="k">as</span> <span class="n">Schema_Option</span>
 <span class="kn">from</span> <span class="nn">pcapkit.protocols.schema.misc.pcapng</span> <span class="kn">import</span> <span class="n">PACK_FlagsOption</span> <span class="k">as</span> <span class="n">Schema_PACK_FlagsOption</span>
 <span class="kn">from</span> <span class="nn">pcapkit.protocols.schema.misc.pcapng</span> <span class="kn">import</span> <span class="n">PACK_HashOption</span> <span class="k">as</span> <span class="n">Schema_PACK_HashOption</span>
 <span class="kn">from</span> <span class="nn">pcapkit.protocols.schema.misc.pcapng</span> <span class="kn">import</span> <span class="n">PacketBlock</span> <span class="k">as</span> <span class="n">Schema_PacketBlock</span>
@@ -533,6 +532,7 @@
     <span class="kn">from</span> <span class="nn">typing_extensions</span> <span class="kn">import</span> <span class="n">Literal</span>
 
     <span class="kn">from</span> <span class="nn">pcapkit.foundation.engines.pcapng</span> <span class="kn">import</span> <span class="n">Context</span>
+    <span class="kn">from</span> <span class="nn">pcapkit.protocols.schema.misc.pcapng</span> <span class="kn">import</span> <span class="n">Option</span> <span class="k">as</span> <span class="n">Schema_Option</span>
     <span class="kn">from</span> <span class="nn">pcapkit.protocols.schema.schema</span> <span class="kn">import</span> <span class="n">Schema</span>
 
     <span class="n">Packet</span> <span class="o">=</span> <span class="n">Union</span><span class="p">[</span><span class="n">Data_EnhancedPacketBlock</span><span class="p">,</span> <span class="n">Data_SimplePacketBlock</span><span class="p">,</span> <span class="n">Data_PacketBlock</span><span class="p">]</span>
