@@ -32,7 +32,6 @@ jobs:
           export PCAPKIT_CI_MODE=1
 
           pcapkit-vendor
-          isort -l100 -ppcapkit pcapkit/const/*/*.py
 
       - name: Verify Changed files
         uses: tj-actions/verify-changed-files@v14
@@ -45,6 +44,7 @@ jobs:
 
           python util/bump_version.py
           isort -l100 -ppcapkit --skip-glob '**/__init__.py' pcapkit
+          isort -l100 -ppcapkit pcapkit/const/*/*.py
           isort -l100 -ppcapkit pcapkit/vendor/*/*.py
 
       - name: Commit changes
