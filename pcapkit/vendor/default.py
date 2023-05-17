@@ -87,7 +87,7 @@ class {NAME}(IntEnum):
         if not ({FLAG}):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))
         {MISS}
-        {'' if ''.join(MISS.splitlines()[-1:]).startswith('return') else 'return super()._missing_(value)'}
+        {'' if ''.join(MISS.splitlines()[-1:]).strip().startswith('return') else 'return super()._missing_(value)'}
 '''.strip()  # type: Callable[[str, str, str, str, str, str], str]
 
 
