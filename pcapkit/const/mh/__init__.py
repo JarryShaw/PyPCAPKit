@@ -145,6 +145,9 @@ from pcapkit.const.mh.auth_subtype import AuthSubtype as MH_AuthSubtype
 from pcapkit.const.mh.binding_ack_flag import BindingACKFlag as MH_BindingACKFlag
 from pcapkit.const.mh.binding_revocation import BindingRevocation as MH_BindingRevocation
 from pcapkit.const.mh.binding_update_flag import BindingUpdateFlag as MH_BindingUpdateFlag
+from pcapkit.const.mh.cga_extension import CGAExtension as MH_CGAExtension
+from pcapkit.const.mh.cga_sec import CGASec as MH_CGASec
+from pcapkit.const.mh.cga_type import CGAType as MH_CGAType
 from pcapkit.const.mh.dhcp_support_mode import DHCPSupportMode as MH_DHCPSupportMode
 from pcapkit.const.mh.dns_status_code import DNSStatusCode as MH_DNSStatusCode
 from pcapkit.const.mh.dsmip6_tls_packet import DSMIP6TLSPacket as MH_DSMIP6TLSPacket
@@ -178,9 +181,6 @@ from pcapkit.const.mh.traffic_selector import TrafficSelector as MH_TrafficSelec
 from pcapkit.const.mh.upa_status import \
     UpdateNotificationACKStatus as MH_UpdateNotificationACKStatus
 from pcapkit.const.mh.upn_reason import UpdateNotificationReason as MH_UpdateNotificationReason
-from pcapkit.const.mh.cga_extension import CGAExtension as MH_CGAExtension
-from pcapkit.const.mh.cga_type import CGAType as MH_CGAType
-from pcapkit.const.mh.cga_sec import CGASec as MH_CGASec
 
 __all__ = [
     'MH_Packet', 'MH_Option', 'MH_DNSStatusCode', 'MH_ACKStatusCode',
