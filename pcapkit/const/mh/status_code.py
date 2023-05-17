@@ -64,4 +64,3 @@ class StatusCode(IntEnum):
             return extend_enum(cls, 'Unassigned_%d' % value, value)
         #: Unspecified in the IANA registry
         return extend_enum(cls, 'Unassigned_%d' % value, value)
-        return super()._missing_(value)

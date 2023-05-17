@@ -62,4 +62,3 @@ class ClassificationLevel(IntEnum):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))
         temp = bin(value)[2:].upper().zfill(8)
         return extend_enum(cls, 'Unassigned_0b%s' % (temp[:4]+'_'+temp[4:]), value)
-        return super()._missing_(value)

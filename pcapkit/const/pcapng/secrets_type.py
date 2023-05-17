@@ -54,4 +54,3 @@ class SecretsType(IntEnum):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))
         extend_enum(cls, 'Unassigned_0x%08x' % value, value)
         return cls(value)
-        return super()._missing_(value)
