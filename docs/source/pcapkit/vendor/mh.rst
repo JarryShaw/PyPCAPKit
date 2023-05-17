@@ -86,6 +86,12 @@ vendor crawlers include:
      - LMA-Controlled MAG Parameters Sub-Option Type Values [*]_
    * - :class:`MH_LLACode <pcapkit.vendor.mh.lla_code.LLACode>`
      - Link-Layer Address (LLA) Option Code [*]_
+   * - :class:`MH_CGAType <pcapkit.vendor.mh.cga_type.CGAType>`
+     - CGA Extension Type Tags [*]_
+   * - :class:`MH_CGAExtension <pcapkit.vendor.mh.cga_type.CGAExtension>`
+     - CGA Extension Type Values [*]_
+   * - :class:`MH_CGASec <pcapkit.vendor.mh.cga_sec.CGASec>`
+     - CGA SEC [*]_
 
 Access Technology Type Option Type Values
 =========================================
@@ -543,6 +549,42 @@ which is automatically generating :class:`pcapkit.const.mh.lla_code.LLACode`.
    :members: FLAG, LINK
    :show-inheritance:
 
+CGA Extension Type Tags
+=======================
+
+.. module:: pcapkit.vendor.mh.cga_type
+
+This module contains the vendor crawler for **CGA Extension Type Tags**,
+which is automatically generating :class:`pcapkit.const.mh.cga_type.CGAType`.
+
+.. autoclass:: pcapkit.vendor.mh.cga_type.CGAType
+   :members: FLAG, LINK
+   :show-inheritance:
+
+CGA Extension Type Values
+=========================
+
+.. module:: pcapkit.vendor.mh.cga_extension
+
+This module contains the vendor crawler for **CGA Extension Type Values**,
+which is automatically generating :class:`pcapkit.const.mh.cga_extension.CGAExtension`.
+
+.. autoclass:: pcapkit.vendor.mh.cga_extension.CGAExtension
+   :members: FLAG, LINK
+   :show-inheritance:
+
+CGA SEC
+=======
+
+.. module:: pcapkit.vendor.mh.cga_sec
+
+This module contains the vendor crawler for **CGA SEC**,
+which is automatically generating :class:`pcapkit.const.mh.cga_sec.CGASec`.
+
+.. autoclass:: pcapkit.vendor.mh.cga_sec.CGASec
+   :members: FLAG, LINK
+   :show-inheritance:
+
 .. raw:: html
 
    <hr />
@@ -585,3 +627,6 @@ which is automatically generating :class:`pcapkit.const.mh.lla_code.LLACode`.
 .. [*] https://www.iana.org/assignments/mobility-parameters/mobility-parameters.xhtml#qos-attribute
 .. [*] https://www.iana.org/assignments/mobility-parameters/mobility-parameters.xhtml#lma-controlled-mag-parameters-sub-option-type
 .. [*] :rfc:`5568#section-6.4.3`
+.. [*] https://www.iana.org/assignments/cga-message-types/cga-message-types.xhtml#cga-message-types-1
+.. [*] https://www.iana.org/assignments/cga-message-types/cga-message-types.xhtml#cga-message-types-2
+.. [*] https://www.iana.org/assignments/cga-message-types/cga-message-types.xhtml#cga-message-types-3

@@ -87,6 +87,12 @@ enumerations include:
      - LMA-Controlled MAG Parameters Sub-Option Type Values [*]_
    * - :class:`MH_LLACode <pcapkit.const.mh.lla_code.LLACode>`
      - Link-Layer Address (LLA) Option Code [*]_
+   * - :class:`MH_CGAType <pcapkit.const.mh.cga_type.CGAType>`
+     - CGA Extension Type Tags [*]_
+   * - :class:`MH_CGAExtension <pcapkit.const.mh.cga_type.CGAExtension>`
+     - CGA Extension Type Values [*]_
+   * - :class:`MH_CGASec <pcapkit.const.mh.cga_sec.CGASec>`
+     - CGA SEC [*]_
 
 .. [*] https://www.iana.org/assignments/mobility-parameters/mobility-parameters.xhtml#mobility-parameters-1
 .. [*] https://www.iana.org/assignments/mobility-parameters/mobility-parameters.xhtml#mobility-parameters-2
@@ -126,6 +132,9 @@ enumerations include:
 .. [*] https://www.iana.org/assignments/mobility-parameters/mobility-parameters.xhtml#qos-attribute
 .. [*] https://www.iana.org/assignments/mobility-parameters/mobility-parameters.xhtml#lma-controlled-mag-parameters-sub-option-type
 .. [*] :rfc:`5568#section-6.4.3`
+.. [*] https://www.iana.org/assignments/cga-message-types/cga-message-types.xhtml#cga-message-types-1
+.. [*] https://www.iana.org/assignments/cga-message-types/cga-message-types.xhtml#cga-message-types-2
+.. [*] https://www.iana.org/assignments/cga-message-types/cga-message-types.xhtml#cga-message-types-3
 
 """
 
@@ -169,6 +178,9 @@ from pcapkit.const.mh.traffic_selector import TrafficSelector as MH_TrafficSelec
 from pcapkit.const.mh.upa_status import \
     UpdateNotificationACKStatus as MH_UpdateNotificationACKStatus
 from pcapkit.const.mh.upn_reason import UpdateNotificationReason as MH_UpdateNotificationReason
+from pcapkit.const.mh.cga_extension import CGAExtension as MH_CGAExtension
+from pcapkit.const.mh.cga_type import CGAType as MH_CGAType
+from pcapkit.const.mh.cga_sec import CGASec as MH_CGASec
 
 __all__ = [
     'MH_Packet', 'MH_Option', 'MH_DNSStatusCode', 'MH_ACKStatusCode',
@@ -183,5 +195,6 @@ __all__ = [
     'MH_UpdateNotificationReason', 'MH_UpdateNotificationACKStatus',
     'MH_FlowBindingType', 'MH_FlowBindingIndicationTrigger',
     'MH_FlowBindingACKStatus', 'MH_FlowBindingAction', 'MH_QoSAttribute',
-    'MH_LMAControlledMAGSuboption', 'MH_LLACode',
+    'MH_LMAControlledMAGSuboption', 'MH_LLACode', 'MH_CGAType',
+    'MH_CGAExtension', 'MH_CGASec',
 ]
