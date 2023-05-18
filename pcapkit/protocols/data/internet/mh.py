@@ -64,6 +64,7 @@ if TYPE_CHECKING:
 
 __all__ = [
     'MH',
+    'UnknownMessage',
 
     'Option',
     'UnassignedOption', 'PadOption', 'BindRefreshAdviceOption', 'AlternateCareofAddressOption',
@@ -79,7 +80,6 @@ __all__ = [
 ]
 
 
-@info_final
 class MH(Data):
     """Data model for MH protocol."""
 
@@ -91,6 +91,12 @@ class MH(Data):
     type: 'Packet'
     #: Checksum.
     chksum: 'bytes'
+
+
+@info_final
+class UnknownMessage(MH):
+    """Data model for MH unknown message type."""
+
     #: Message data.
     data: 'bytes'
 

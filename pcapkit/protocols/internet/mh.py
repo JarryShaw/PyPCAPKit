@@ -133,6 +133,10 @@ from pcapkit.protocols.data.internet.mh import CareofTestInitOption as Data_Care
 from pcapkit.protocols.schema.internet.mh import CareofTestOption as Schema_CareofTestOption
 from pcapkit.protocols.data.internet.mh import CareofTestOption as Data_CareofTestOption
 
+from pcapkit.protocols.schema.internet.mh import UnknownMessage as Schema_UnknownMessage
+from pcapkit.protocols.data.internet.mh import UnknownMessage as Data_UnknownMessage
+
+
 if TYPE_CHECKING:
     from datetime import datetime as dt_type
     from enum import IntEnum as StdlibEnum
@@ -155,7 +159,7 @@ if TYPE_CHECKING:
     Extension = OrderedMultiDict[Enum_CGAExtension, Data_CGAExtension]
 
     PacketParser = Callable[[Schema_Packet, NamedArg(Schema_MH, 'header')], Data_MH]
-    PacketConstructor = Callable[[Enum_Packet, DefaultArg(Optional[Data_MH]),
+    PacketConstructor = Callable[[DefaultArg(Optional[Data_MH]),
                                  KwArg(Any)], Schema_Packet]
 
     OptionParser = Callable[[Schema_Option, NamedArg(Option, 'options')], Data_Option]
@@ -182,10 +186,10 @@ class MH(Internet[Data_MH, Schema_MH],
 
     #: DefaultDict[Enum_Packet, str | tuple[PacketParser, PacketConstructor]]:
     #: Message type to method mapping. Method names are expected to be referred
-    #: to the class by ``_read_packet_${name}`` and/or ``_make_packet_${name}``,
+    #: to the class by ``_read_msg_${name}`` and/or ``_make_msg_${name}``,
     #: and if such name not found, the value should then be a method that can
-    #: parse the packet by itself.
-    __packet__ = collections.defaultdict(
+    #: parse the message type by itself.
+    __message__ = collections.defaultdict(
         lambda: 'unknown',
         {
 
@@ -320,13 +324,14 @@ class MH(Internet[Data_MH, Schema_MH],
             length = len(self)
         schema = self.__header__
 
-        mh = Data_MH(
-            next=schema.next,
-            length=(schema.length + 1) * 8,
-            type=schema.type,
-            chksum=schema.chksum,
-            data=schema.data,
-        )
+        name = self.__message__[schema.type]
+        if isinstance(name, str):
+            meth_name = f'_read_msg_{name}'
+            meth = cast('PacketParser',
+                        getattr(self, meth_name, self._read_msg_unknown))
+        else:
+            meth = name[0]
+        mh = meth(schema.data, header=schema)
 
         if extension:
             return mh
@@ -342,12 +347,23 @@ class MH(Internet[Data_MH, Schema_MH],
              type_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
              type_reversed: 'bool' = False,
              chksum: 'bytes' = b'',
-             data: 'bytes' = b'\x00\x00',  # minimum length
+             data: 'bytes | Data_MH | Schema_Packet | dict[str, Any]' = b'\x00\x00',  # minimum length
              payload: 'Protocol | Schema | bytes' = b'',
              **kwargs: 'Any') -> 'Schema_MH':
         """Make (construct) packet data.
 
         Args:
+            next: Next header type.
+            next_default: Default value for next header type field.
+            next_namespace: Namespace of next header type field.
+            next_reversed: Whether the bits of next header type field is reversed.
+            type: Mobility Header type.
+            type_default: Default value for Mobility Header type field.
+            type_namespace: Namespace of Mobility Header type field.
+            type_reversed: Whether the bits of Mobility Header type field is reversed.
+            chksum: Checksum.
+            data: Message data.
+            payload: Payload of next layer protocol.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
@@ -359,12 +375,32 @@ class MH(Internet[Data_MH, Schema_MH],
         type_val = self._make_index(type, type_default, namespace=type_namespace,  # type: ignore[call-overload]
                                     reversed=type_reversed, pack=False)
 
+        if isinstance(data, bytes):
+            data_val = data  # type: bytes | Schema_Packet
+        elif isinstance(data, (dict, Data_MH)):
+            name = self.__message__[type_val]
+            if isinstance(name, str):
+                meth_name = f'_make_msg_{name}'
+                meth = cast('PacketConstructor',
+                            getattr(self, meth_name, self._make_msg_unknown))
+            else:
+                meth = name[1]
+
+            if isinstance(data, dict):
+                data_val = meth(**data)
+            else:
+                data_val = meth(data)
+        elif isinstance(data, Schema_Packet):
+            data_val = data
+        else:
+            raise ProtocolError(f'MH: [Type {type_val}] invalid format')
+
         return Schema_MH(
             next=next_val,
-            length=math.ceil((len(data) + 6) / 8) - 1,
+            length=math.ceil((len(data_val) + 6) / 8) - 1,
             type=type_val,
             chksum=chksum,
-            data=data,
+            data=data_val,
             payload=payload,
         )
 
@@ -434,9 +470,33 @@ class MH(Internet[Data_MH, Schema_MH],
             'next': data.next,
             'type': data.type,
             'chksum': data.chksum,
-            'data': data.data,
+            'data': data,
             'payload': cls._make_payload(data),
         }
+
+    def _read_msg_unknown(self, schema: 'Schema_UnknownMessage', *,
+                          header: 'Schema_MH') -> 'Data_UnknownMessage':
+        """Read unknown MH message type.
+
+        Args:
+            schema: Parsed message type schema.
+            header: Parsed MH header schema.
+
+        Returns:
+            Parsed message type data.
+
+        """
+        data = Data_UnknownMessage(
+            next=header.next,
+            length=(header.length + 1) * 8,
+            type=header.type,
+            chksum=header.chksum,
+            data=schema.data,
+        )
+        return data
+
+
+
 
     def _read_mh_options(self, options_schema: 'list[Schema_Option]') -> 'Option':
         """Read MH options.
@@ -1207,6 +1267,30 @@ class MH(Internet[Data_MH, Schema_MH],
             prefixes=tuple(schema.prefixes),
         )
         return data
+
+
+
+
+    def _make_msg_unknown(self, message: 'Optional[Data_UnknownMessage]', *,
+                          data: 'bytes' = b'',
+                          **kwargs: 'Any') -> 'Schema_UnknownMessage':
+        """Make MH unknown message type.
+
+        Args:
+            message: Message data model.
+            data: Raw message data.
+            **kwargs: Arbitrary keyword arguments.
+
+        Returns:
+            Constructed message type.
+
+        """
+        if message is not None:
+            data = message.data
+
+        return Schema_UnknownMessage(
+            data=data,
+        )
 
 
 

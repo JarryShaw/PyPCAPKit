@@ -193,6 +193,7 @@ from pcapkit.protocols.schema.internet.mh import SignatureOption as MH_Signature
 from pcapkit.protocols.schema.internet.mh import PermanentHomeKeygenTokenOption as MH_PermanentHomeKeygenTokenOption
 from pcapkit.protocols.schema.internet.mh import CareofTestInitOption as MH_CareofTestInitOption
 from pcapkit.protocols.schema.internet.mh import CareofTestOption as MH_CareofTestOption
+from pcapkit.protocols.schema.internet.mh import UnknownMessage as MH_UnknownMessage
 
 __all__ = [
     # Authentication Header

@@ -66,6 +66,7 @@ __all__ = [
     'MH',
 
     'Packet',
+    'UnknownMessage',
 
     'Option',
     'UnassignedOption', 'PadOption', 'BindRefreshAdviceOption', 'AlternateCareofAddressOption',
@@ -104,6 +105,24 @@ if SPHINX_TYPE_CHECKING:
         P: int
 
 
+def mh_data_selector(pkt: 'dict[str, Any]') -> 'Field':
+    """Selector function for :attr:`MH.data` field.
+
+    Args:
+        pkt: Packet data.
+
+    Returns:
+        Returns a :class:`~pcapkit.corekit.fields.misc.SchemaField`
+        wrapped :class:`~pcapkit.protocols.schema.misc.mh.Packet`
+        subclass instance.
+
+    """
+    type = pkt['type']  # type: Enum_Packet
+    length = pkt['length'] * 8 + 2
+
+    return SchemaField(length=length, schema=UnknownMessage)
+
+
 def mn_id_selector(pkt: 'dict[str, Any]') -> 'Field':
     """Selector function for :attr:`MNIDOption.identifier` field.
 
@@ -121,34 +140,6 @@ def mn_id_selector(pkt: 'dict[str, Any]') -> 'Field':
     if subtype == Enum_MNIDSubtype.IPv6_Address:
         return IPv6AddressField()
     return BytesField(length=pkt['length'] - 1)
-
-
-@schema_final
-class MH(Schema):
-    """Header schema for MH packets."""
-
-    #: Next header.
-    next: 'Enum_TransType' = EnumField(length=1, namespace=Enum_TransType)
-    #: Header length.
-    length: 'int' = UInt8Field()
-    #: MH type.
-    type: 'Enum_Packet' = EnumField(length=1, namespace=Enum_Packet)
-    #: Reserved.
-    reserved: 'bytes' = PaddingField(length=1)
-    #: Checksum.
-    chksum: 'bytes' = BytesField(length=2)
-    #: Message data.
-    data: 'bytes' = BytesField(length=lambda pkt: pkt['length'] * 8 + 2)
-    #: Payload.
-    payload: 'bytes' = PayloadField()
-
-    if TYPE_CHECKING:
-        def __init__(self, next: 'Enum_TransType', length: 'int', type: 'Enum_Packet',
-                     chksum: 'bytes', data: 'bytes', payload: 'bytes | Protocol | Schema') -> 'None': ...
-
-
-class Packet(Schema):
-    """Header schema for MH packet data."""
 
 
 class Option(Schema):
@@ -471,3 +462,42 @@ class CareofTestOption(Option):
 
     if TYPE_CHECKING:
         def __init__(self, type: 'Enum_Option', length: 'int', token: 'bytes') -> 'None': ...
+
+
+class Packet(Schema):
+    """Header schema for MH packet data."""
+
+
+@schema_final
+class UnknownMessage(Packet):
+    """Header schema for MH unknown message type."""
+
+    #: Message data.
+    data: 'bytes' = BytesField(length=lambda pkt: pkt['__length__'])
+
+    if TYPE_CHECKING:
+        def __init__(self, data: 'bytes') -> 'None': ...
+
+
+@schema_final
+class MH(Schema):
+    """Header schema for MH packets."""
+
+    #: Next header.
+    next: 'Enum_TransType' = EnumField(length=1, namespace=Enum_TransType)
+    #: Header length.
+    length: 'int' = UInt8Field()
+    #: MH type.
+    type: 'Enum_Packet' = EnumField(length=1, namespace=Enum_Packet)
+    #: Reserved.
+    reserved: 'bytes' = PaddingField(length=1)
+    #: Checksum.
+    chksum: 'bytes' = BytesField(length=2)
+    #: Message data.
+    data: 'Packet' = SwitchField(selector=mh_data_selector)
+    #: Payload.
+    payload: 'bytes' = PayloadField()
+
+    if TYPE_CHECKING:
+        def __init__(self, next: 'Enum_TransType', length: 'int', type: 'Enum_Packet',
+                     chksum: 'bytes', data: 'Packet | bytes', payload: 'bytes | Protocol | Schema') -> 'None': ...
