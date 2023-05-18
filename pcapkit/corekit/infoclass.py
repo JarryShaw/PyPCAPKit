@@ -11,6 +11,7 @@ in :pep:`557`.
 
 """
 import collections.abc
+import enum
 import itertools
 from typing import TYPE_CHECKING, Generic, TypeVar, cast, final
 
@@ -29,24 +30,40 @@ VT = TypeVar('VT')
 ST = TypeVar('ST', bound='Type[Info]')
 
 
-def info_final(cls: 'ST') -> 'ST':
+class FinalisedState(enum.IntEnum):
+    """Finalised state."""
+
+    #: Not finalised.
+    NONE = enum.auto()
+    #: Base class.
+    BASE = enum.auto()
+    #: Finalised.
+    FINAL = enum.auto()
+
+
+def info_final(cls: 'ST', *, _finalised: 'bool' = True) -> 'ST':
     """Finalise info class.
+
+    This decorator function is used to generate necessary
+    attributes and methods for the decorated :class:`Info`
+    class. It can be useful to reduce runtime generation
+    time as well as caching already generated attributes.
 
     Args:
         cls: Info class.
+        _finalised: Whether to make the info class as finalised.
 
     Returns:
         Finalised info class.
 
     Notes:
-        This decorator function is used to generate necessary
-        attributes and methods for the decorated :class:`Info`
-        class. It can be useful to reduce runtime generation
-        time as well as caching already generated attributes.
+        The decorator should only be used on the *final*
+        class, otherwise, any subclasses derived from a
+        finalised info class will not be re-finalised.
 
     :meta decorator:
     """
-    if cls.__finalised__:
+    if cls.__finalised__ == FinalisedState.FINAL:
         warn(f'{cls.__name__}: info class has been finalised; now skipping',
              InfoWarning, stacklevel=stacklevel())
         return cls
@@ -115,7 +132,11 @@ def info_final(cls: 'ST') -> 'ST':
         cls.__init__ = ns['__create_fn__']()  # type: ignore[misc]
         cls.__init__.__qualname__ = f'{cls.__name__}.__init__'  # type: ignore[misc]
 
-    cls.__finalised__ = True
+    if not _finalised:
+        cls.__finalised__ = FinalisedState.BASE
+        return cls
+
+    cls.__finalised__ = FinalisedState.FINAL
     return final(cls)
 
 
@@ -148,7 +169,7 @@ class Info(Mapping[str, VT], Generic[VT]):
         __builtin__: 'set[str]'
 
     #: Flag for finalised class initialisation.
-    __finalised__ = False
+    __finalised__: 'FinalisedState' = FinalisedState.NONE
 
     #: List of additional built-in names.
     __additional__: 'list[str]' = []
@@ -167,8 +188,8 @@ class Info(Mapping[str, VT], Generic[VT]):
             **kwargs: Arbitrary keyword arguments.
 
         """
-        if not cls.__finalised__:
-            cls = info_final(cls)
+        if cls.__finalised__ == FinalisedState.NONE:
+            cls = info_final(cls, _finalised=False)
         self = super().__new__(cls)
 
         # NOTE: We define the ``__map__`` and ``__map_reverse__`` attributes

@@ -7,6 +7,7 @@ import io
 import itertools
 from typing import TYPE_CHECKING, Generic, TypeVar, cast, final
 
+from pcapkit.corekit.infoclass import FinalisedState
 from pcapkit.corekit.fields.collections import ListField, OptionField
 from pcapkit.corekit.fields.field import NoValue, _Field
 from pcapkit.corekit.fields.misc import ConditionalField, ForwardMatchField, PayloadField
@@ -28,24 +29,29 @@ VT = TypeVar('VT')
 ST = TypeVar('ST', bound='Type[Schema]')
 
 
-def schema_final(cls: 'ST') -> 'ST':
+def schema_final(cls: 'ST', *, _finalised: 'bool' = True) -> 'ST':
     """Finalise schema class.
+
+    This decorator function is used to generate necessary
+    attributes and methods for the decorated :class:`Schema`
+    class. It can be useful to reduce runtime generation
+    time as well as caching already generated attributes.
 
     Args:
         cls: Schema class.
+        _finalised: Whether to make the schema class finalised.
 
     Returns:
         Finalised schema class.
 
     Notes:
-        This decorator function is used to generate necessary
-        attributes and methods for the decorated :class:`Schema`
-        class. It can be useful to reduce runtime generation
-        time as well as caching already generated attributes.
+        The decorator should only be used on the *final*
+        class, otherwise, any subclasses derived from a
+        finalised schema class will not be re-finalised.
 
     :meta decorator:
     """
-    if cls.__finalised__:
+    if cls.__finalised__ == FinalisedState.FINAL:
         warn(f'{cls.__name__}: schema has been finalised; now skipping',
              SchemaWarning, stacklevel=stacklevel())
         return cls
@@ -134,7 +140,11 @@ def schema_final(cls: 'ST') -> 'ST':
         cls.__init__ = ns['__create_fn__']()  # type: ignore[misc]
         cls.__init__.__qualname__ = f'{cls.__name__}.__init__'  # type: ignore[misc]
 
-    cls.__finalised__ = True
+    if not _finalised:
+        cls.__finalised__ = FinalisedState.BASE
+        return cls
+
+    cls.__finalised__ = FinalisedState.FINAL
     return final(cls)
 
 
@@ -158,7 +168,7 @@ class Schema(Mapping[str, VT], Generic[VT]):
         __updated__: 'bool'
 
     #: Flag for finalised class initialisation.
-    __finalised__ = False
+    __finalised__: 'FinalisedState' = FinalisedState.NONE
 
     #: Field name of the payload.
     __payload__: 'str' = 'payload'
@@ -179,8 +189,8 @@ class Schema(Mapping[str, VT], Generic[VT]):
             **kwargs: Arbitrary keyword arguments.
 
         """
-        if not cls.__finalised__:
-            cls = schema_final(cls)
+        if cls.__finalised__ == FinalisedState.NONE:
+            cls = schema_final(cls, _finalised=False)
         self = super().__new__(cls)
 
         # NOTE: We define the ``__map__`` and ``__map_reverse__`` attributes
