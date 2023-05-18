@@ -69,7 +69,7 @@ __all__ = [
     'UnassignedOption', 'PadOption', 'BindRefreshAdviceOption', 'AlternateCareofAddressOption',
     'NonceIndicesOption', 'BindingAuthorizationDataOption', 'MobileNetworkPrefixOption',
     'LinkLayerAddressOption', 'MNIDOption', 'AuthOption', 'MesgIDOption', 'CGAParametersRequestOption',
-    'CGAParametersOption',
+    'CGAParametersOption', 'SignatureOption', 'PermanentHomeKeygenTokenOption', 'CareofTestInitOption',
 
     'CGAParameter',
 
@@ -308,3 +308,44 @@ class CGAParametersOption(Option):
 
     if TYPE_CHECKING:
         def __init__(self, type: 'Enum_Option', length: 'int', parameters: 'tuple[CGAParameter, ...]') -> 'None': ...
+
+
+@info_final
+class SignatureOption(Option):
+    """Data model for MH Signature option."""
+
+    #: Signature.
+    signature: 'bytes'
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_Option', length: 'int', signature: 'bytes') -> 'None': ...
+
+
+@info_final
+class PermanentHomeKeygenTokenOption(Option):
+    """Data model for Permanent Home Keygen Token option."""
+
+    #: Permanent home keygen token.
+    token: 'bytes'
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_Option', length: 'int', token: 'bytes') -> 'None': ...
+
+
+@info_final
+class CareofTestInitOption(Option):
+    """Header schema for MH Care-of Test Init options."""
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_Option', length: 'int') -> 'None': ...
+
+
+@info_final
+class CareofTestOption(Option):
+    """Header schema for MH Care-of Test options."""
+
+    #: Care-of keygen token.
+    token: 'bytes'
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_Option', length: 'int', token: 'bytes') -> 'None': ...

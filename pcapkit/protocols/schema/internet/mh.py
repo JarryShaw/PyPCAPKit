@@ -5,8 +5,6 @@
 import collections
 import datetime
 import math
-from email.mime import base
-from lib2to3.fixes.fix_idioms import TYPE
 from typing import TYPE_CHECKING
 
 from pcapkit.const.mh.access_type import AccessType as Enum_AccessType
@@ -73,7 +71,8 @@ __all__ = [
     'UnassignedOption', 'PadOption', 'BindRefreshAdviceOption', 'AlternateCareofAddressOption',
     'NonceIndicesOption', 'BindingAuthorizationDataOption', 'MobileNetworkPrefixOption',
     'LinkLayerAddressOption', 'MNIDOption', 'AuthOption', 'MesgIDOption', 'CGAParametersRequestOption',
-    'CGAParametersOption',
+    'CGAParametersOption', 'SignatureOption', 'PermanentHomeKeygenTokenOption', 'CareofTestInitOption',
+    'CareofTestOption',
 
     'CGAParameter',
 
@@ -431,3 +430,44 @@ class CGAParametersOption(Option):
 
     if TYPE_CHECKING:
         def __init__(self, type: 'Enum_Option', length: 'int', parameters: 'list[CGAParameter | bytes]') -> 'None': ...
+
+
+@schema_final
+class SignatureOption(Option):
+    """Header schema for MH Signature options."""
+
+    #: Signature.
+    signature: 'bytes' = BytesField(length=lambda pkt: pkt['length'])
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_Option', length: 'int', signature: 'bytes') -> 'None': ...
+
+
+@schema_final
+class PermanentHomeKeygenTokenOption(Option):
+    """Header schema for Permanent Home Keygen Token options."""
+
+    #: Permanent home keygen token.
+    token: 'bytes' = BytesField(length=lambda pkt: pkt['length'])
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_Option', length: 'int', token: 'bytes') -> 'None': ...
+
+
+@schema_final
+class CareofTestInitOption(Option):
+    """Header schema for MH Care-of Test Init options."""
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_Option', length: 'int') -> 'None': ...
+
+
+@schema_final
+class CareofTestOption(Option):
+    """Header schema for MH Care-of Test options."""
+
+    #: Care-of keygen token.
+    token: 'bytes' = BytesField(length=8)
+
+    if TYPE_CHECKING:
+        def __init__(self, type: 'Enum_Option', length: 'int', token: 'bytes') -> 'None': ...

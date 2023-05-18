@@ -124,6 +124,15 @@ from pcapkit.protocols.schema.internet.mh import UnknownExtension as Schema_Unkn
 from pcapkit.utilities.exceptions import ProtocolError, UnsupportedCall
 from pcapkit.utilities.warnings import ProtocolWarning, warn
 
+from pcapkit.protocols.schema.internet.mh import SignatureOption as Schema_SignatureOption
+from pcapkit.protocols.data.internet.mh import SignatureOption as Data_SignatureOption
+from pcapkit.protocols.schema.internet.mh import PermanentHomeKeygenTokenOption as Schema_PermanentHomeKeygenTokenOption
+from pcapkit.protocols.data.internet.mh import PermanentHomeKeygenTokenOption as Data_PermanentHomeKeygenTokenOption
+from pcapkit.protocols.schema.internet.mh import CareofTestInitOption as Schema_CareofTestInitOption
+from pcapkit.protocols.data.internet.mh import CareofTestInitOption as Data_CareofTestInitOption
+from pcapkit.protocols.schema.internet.mh import CareofTestOption as Schema_CareofTestOption
+from pcapkit.protocols.data.internet.mh import CareofTestOption as Data_CareofTestOption
+
 if TYPE_CHECKING:
     from datetime import datetime as dt_type
     from enum import IntEnum as StdlibEnum
@@ -204,6 +213,10 @@ class MH(Internet[Data_MH, Schema_MH],
             Enum_Option.MESG_ID_OPTION_TYPE: 'mesg_id',
             Enum_Option.CGA_Parameters_Request: 'cga_pr',
             Enum_Option.CGA_Parameters: 'cga_param',
+            Enum_Option.Signature: 'signature',
+            Enum_Option.Permanent_Home_Keygen_Token: 'phkt',
+            Enum_Option.Care_of_Test_Init: 'ct_init',
+            Enum_Option.Care_of_Test: 'ct',
         },
     )  # type: DefaultDict[Enum_Option | int, str | tuple[OptionParser, OptionConstructor]]
 
@@ -945,6 +958,143 @@ class MH(Internet[Data_MH, Schema_MH],
         )
         return data
 
+    def _read_opt_signature(self, schema: 'Schema_SignatureOption', *,
+                            options: 'Option') -> 'Data_SignatureOption':
+        """Read MH signature option.
+
+        Structure of MH Signature option [:rfc:`4866`]:
+
+        .. code-block:: text
+
+            0                   1                   2                   3
+            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+                                           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+                                           |  Option Type  | Option Length |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |                                                               |
+           :                                                               :
+           :                            Signature                          :
+           :                                                               :
+           |                                                               |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+        Args:
+            schema: Parsed option schema.
+            options: Parsed MH options.
+
+        Returns:
+            Constructed option data.
+
+        """
+        data = Data_SignatureOption(
+            type=schema.type,
+            length=schema.length + 2,
+            signature=schema.signature,
+        )
+        return data
+
+    def _read_opt_phkt(self, schema: 'Schema_PermanentHomeKeygenTokenOption', *,
+                       options: 'Option') -> 'Data_PermanentHomeKeygenTokenOption':
+        """Read MH permanent home keygen token option.
+
+        Structure of MH Permanent Home Keygen Token option [:rfc:`4866`]:
+
+        .. code-block:: text
+
+            0                   1                   2                   3
+            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+                                           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+                                           |  Option Type  | Option Length |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |                                                               |
+           :                                                               :
+           :                  Permanent Home Keygen Token                  :
+           :                                                               :
+           |                                                               |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+        Args:
+            schema: Parsed option schema.
+            options: Parsed MH options.
+
+        Returns:
+            Constructed option data.
+
+        """
+        data = Data_PermanentHomeKeygenTokenOption(
+            type=schema.type,
+            length=schema.length + 2,
+            token=schema.token,
+        )
+        return data
+
+    def _read_opt_ct_init(self, schema: 'Schema_CareofTestInitOption', *,
+                          options: 'Option') -> 'Data_CareofTestInitOption':
+        """Read MH Care-of Test Init option.
+
+        Structure of MH Care-of Test Init option [:rfc:`4866`]:
+
+        .. code-block:: text
+
+            0                   1                   2                   3
+            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+                                           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+                                           |  Option Type  | Option Length |
+                                           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+        Args:
+            schema: Parsed option schema.
+            options: Parsed MH options.
+
+        Returns:
+            Constructed option data.
+
+        """
+        if schema.length != 0:
+            raise ProtocolError(f'{self.alias}: [Opt {schema.type}] invalid format')
+
+        data = Data_CareofTestInitOption(
+            type=schema.type,
+            length=schema.length + 2,
+        )
+        return data
+
+    def _read_opt_ct(self, schema: 'Schema_CareofTestOption', *,
+                     options: 'Option') -> 'Data_CareofTestOption':
+        """Read MH Care-of Test option.
+
+        Structure of MH Care-of Test option [:rfc:`4866`]:
+
+        .. code-block:: text
+
+            0                   1                   2                   3
+            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+                                           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+                                           |  Option Type  | Option Length |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |                                                               |
+           +                     Care-of Keygen Token                      +
+           |                                                               |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+        Args:
+            schema: Parsed option schema.
+            options: Parsed MH options.
+
+        Returns:
+            Constructed option data.
+
+        """
+        if schema.length != 8:
+            raise ProtocolError(f'{self.alias}: [Opt {schema.type}] invalid format')
+
+        data = Data_CareofTestOption(
+            type=schema.type,
+            length=schema.length + 2,
+            token=schema.token,
+        )
+        return data
+
 
 
 
@@ -1524,6 +1674,97 @@ class MH(Internet[Data_MH, Schema_MH],
             length=length,
             parameters=param,
         )
+
+    def _make_opt_signature(self, type: 'Enum_Option', option: 'Optional[Data_SignatureOption]' = None, *,
+                            signature: 'bytes' = b'',
+                            **kwargs: 'Any') -> 'Schema_SignatureOption':
+        """Make MH signature option.
+
+        Args:
+            type: Option type.
+            option: Option data model.
+            signature: Signature data.
+            **kwargs: Arbitrary keyword arguments.
+
+        Returns:
+            Constructed option schema.
+
+        """
+        if option is not None:
+            signature = option.signature
+
+        return Schema_SignatureOption(
+            type=type,
+            length=len(signature),
+            signature=signature,
+        )
+
+    def _make_opt_phkt(self, type: 'Enum_Option', option: 'Optional[Data_PermanentHomeKeygenTokenOption]' = None, *,
+                       token: 'bytes' = b'',
+                       **kwargs: 'Any') -> 'Schema_PermanentHomeKeygenTokenOption':
+        """Make MH permanent home keygen token option.
+
+        Args:
+            type: Option type.
+            option: Option data model.
+            token: Token data.
+            **kwargs: Arbitrary keyword arguments.
+
+        Returns:
+            Constructed option schema.
+
+        """
+        if option is not None:
+            token = option.token
+
+        return Schema_PermanentHomeKeygenTokenOption(
+            type=type,
+            length=len(token),
+            token=token,
+        )
+
+    def _make_opt_ct_init(self, type: 'Enum_Option', option: 'Optional[Data_CareofTestInitOption]' = None,
+                          **kwargs: 'Any') -> 'Schema_CareofTestInitOption':
+        """Make MH Care-of Test Init option.
+
+        Args:
+            type: Option type.
+            option: Option data model.
+            **kwargs: Arbitrary keyword arguments.
+
+        Returns:
+            Constructed option schema.
+
+        """
+        return Schema_CareofTestInitOption(
+            type=type,
+            length=0,
+        )
+
+    def _make_opt_ct(self, type: 'Enum_Option', option: 'Optional[Data_CareofTestOption]' = None,
+                     token: 'bytes' = b'\x00\x00\x00\x00\x00\x00\x00\x00',
+                     **kwargs: 'Any') -> 'Schema_CareofTestOption':
+        """Make MH Care-of Test option.
+
+        Args:
+            type: Option type.
+            option: Option data model.
+            token: Care-of keygen token.
+            **kwargs: Arbitrary keyword arguments.
+
+        Returns:
+            Constructed option schema.
+
+        """
+        if option is not None:
+            token = option.token
+
+        return Schema_CareofTestOption(
+            type=type,
+            length=8,
+            token=token,
+        )
+
 
 
 

@@ -189,6 +189,10 @@ from pcapkit.protocols.schema.internet.mh import CGAParametersOption as MH_CGAPa
 from pcapkit.protocols.schema.internet.mh import UnknownExtension as MH_UnknownExtension
 from pcapkit.protocols.schema.internet.mh import MultiPrefixExtension as MH_MultiPrefixExtension
 from pcapkit.protocols.schema.internet.mh import Packet as MH_Packet
+from pcapkit.protocols.schema.internet.mh import SignatureOption as MH_SignatureOption
+from pcapkit.protocols.schema.internet.mh import PermanentHomeKeygenTokenOption as MH_PermanentHomeKeygenTokenOption
+from pcapkit.protocols.schema.internet.mh import CareofTestInitOption as MH_CareofTestInitOption
+from pcapkit.protocols.schema.internet.mh import CareofTestOption as MH_CareofTestOption
 
 __all__ = [
     # Authentication Header
