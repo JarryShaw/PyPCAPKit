@@ -397,8 +397,7 @@
         <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="ow">and</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mh">0xFFFF</span><span class="p">):</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%r</span><span class="s1"> is not a valid </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span><span class="p">))</span>
         <span class="n">extend_enum</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s1">&#39;Unassigned_0x</span><span class="si">%04x</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">value</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
-        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
-        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_missing_</span><span class="p">(</span><span class="n">value</span><span class="p">)</span></div></div>
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">value</span><span class="p">)</span></div></div>
 </pre></div>
         </article>
       </div>

@@ -345,19 +345,126 @@
 <span class="c1"># mypy: disable-error-code=assignment</span>
 <span class="sd">&quot;&quot;&quot;header schema for mobility header&quot;&quot;&quot;</span>
 
+<span class="kn">import</span> <span class="nn">collections</span>
+<span class="kn">import</span> <span class="nn">datetime</span>
+<span class="kn">import</span> <span class="nn">math</span>
+<span class="kn">from</span> <span class="nn">email.mime</span> <span class="kn">import</span> <span class="n">base</span>
+<span class="kn">from</span> <span class="nn">lib2to3.fixes.fix_idioms</span> <span class="kn">import</span> <span class="n">TYPE</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
 
+<span class="kn">from</span> <span class="nn">pcapkit.const.mh.access_type</span> <span class="kn">import</span> <span class="n">AccessType</span> <span class="k">as</span> <span class="n">Enum_AccessType</span>
+<span class="kn">from</span> <span class="nn">pcapkit.const.mh.ack_status_code</span> <span class="kn">import</span> <span class="n">ACKStatusCode</span> <span class="k">as</span> <span class="n">Enum_ACKStatusCode</span>
+<span class="kn">from</span> <span class="nn">pcapkit.const.mh.ani_suboption</span> <span class="kn">import</span> <span class="n">ANISuboption</span> <span class="k">as</span> <span class="n">Enum_ANISuboption</span>
+<span class="kn">from</span> <span class="nn">pcapkit.const.mh.auth_subtype</span> <span class="kn">import</span> <span class="n">AuthSubtype</span> <span class="k">as</span> <span class="n">Enum_AuthSubtype</span>
+<span class="kn">from</span> <span class="nn">pcapkit.const.mh.binding_ack_flag</span> <span class="kn">import</span> <span class="n">BindingACKFlag</span> <span class="k">as</span> <span class="n">Enum_BindingACKFlag</span>
+<span class="kn">from</span> <span class="nn">pcapkit.const.mh.binding_revocation</span> <span class="kn">import</span> <span class="n">BindingRevocation</span> <span class="k">as</span> <span class="n">Enum_BindingRevocation</span>
+<span class="kn">from</span> <span class="nn">pcapkit.const.mh.binding_update_flag</span> <span class="kn">import</span> <span class="n">BindingUpdateFlag</span> <span class="k">as</span> <span class="n">Enum_BindingUpdateFlag</span>
+<span class="kn">from</span> <span class="nn">pcapkit.const.mh.cga_extension</span> <span class="kn">import</span> <span class="n">CGAExtension</span> <span class="k">as</span> <span class="n">Enum_CGAExtension</span>
+<span class="kn">from</span> <span class="nn">pcapkit.const.mh.cga_type</span> <span class="kn">import</span> <span class="n">CGAType</span> <span class="k">as</span> <span class="n">Enum_CGAType</span>
+<span class="kn">from</span> <span class="nn">pcapkit.const.mh.dhcp_support_mode</span> <span class="kn">import</span> <span class="n">DHCPSupportMode</span> <span class="k">as</span> <span class="n">Enum_DHCPSupportMode</span>
+<span class="kn">from</span> <span class="nn">pcapkit.const.mh.dns_status_code</span> <span class="kn">import</span> <span class="n">DNSStatusCode</span> <span class="k">as</span> <span class="n">Enum_DNSStatusCode</span>
+<span class="kn">from</span> <span class="nn">pcapkit.const.mh.dsmip6_tls_packet</span> <span class="kn">import</span> <span class="n">DSMIP6TLSPacket</span> <span class="k">as</span> <span class="n">Enum_DSMIP6TLSPacket</span>
+<span class="kn">from</span> <span class="nn">pcapkit.const.mh.dsmipv6_home_address</span> <span class="kn">import</span> <span class="n">DSMIPv6HomeAddress</span> <span class="k">as</span> <span class="n">Enum_DSMIPv6HomeAddress</span>
+<span class="kn">from</span> <span class="nn">pcapkit.const.mh.enumerating_algorithm</span> <span class="kn">import</span> <span class="n">EnumeratingAlgorithm</span> <span class="k">as</span> <span class="n">Enum_EnumeratingAlgorithm</span>
+<span class="kn">from</span> <span class="nn">pcapkit.const.mh.fb_ack_status</span> <span class="kn">import</span> <span class="n">FlowBindingACKStatus</span> <span class="k">as</span> <span class="n">Enum_FlowBindingACKStatus</span>
+<span class="kn">from</span> <span class="nn">pcapkit.const.mh.fb_action</span> <span class="kn">import</span> <span class="n">FlowBindingAction</span> <span class="k">as</span> <span class="n">Enum_FlowBindingAction</span>
+<span class="kn">from</span> <span class="nn">pcapkit.const.mh.fb_indication_trigger</span> <span class="kn">import</span> \
+    <span class="n">FlowBindingIndicationTrigger</span> <span class="k">as</span> <span class="n">Enum_FlowBindingIndicationTrigger</span>
+<span class="kn">from</span> <span class="nn">pcapkit.const.mh.fb_type</span> <span class="kn">import</span> <span class="n">FlowBindingType</span> <span class="k">as</span> <span class="n">Enum_FlowBindingType</span>
+<span class="kn">from</span> <span class="nn">pcapkit.const.mh.flow_id_status</span> <span class="kn">import</span> <span class="n">FlowIDStatus</span> <span class="k">as</span> <span class="n">Enum_FlowIDStatus</span>
+<span class="kn">from</span> <span class="nn">pcapkit.const.mh.flow_id_suboption</span> <span class="kn">import</span> <span class="n">FlowIDSuboption</span> <span class="k">as</span> <span class="n">Enum_FlowIDSuboption</span>
+<span class="kn">from</span> <span class="nn">pcapkit.const.mh.handoff_type</span> <span class="kn">import</span> <span class="n">HandoffType</span> <span class="k">as</span> <span class="n">Enum_HandoffType</span>
+<span class="kn">from</span> <span class="nn">pcapkit.const.mh.handover_ack_flag</span> <span class="kn">import</span> <span class="n">HandoverACKFlag</span> <span class="k">as</span> <span class="n">Enum_HandoverACKFlag</span>
+<span class="kn">from</span> <span class="nn">pcapkit.const.mh.handover_ack_status</span> <span class="kn">import</span> <span class="n">HandoverACKStatus</span> <span class="k">as</span> <span class="n">Enum_HandoverACKStatus</span>
+<span class="kn">from</span> <span class="nn">pcapkit.const.mh.handover_initiate_flag</span> <span class="kn">import</span> \
+    <span class="n">HandoverInitiateFlag</span> <span class="k">as</span> <span class="n">Enum_HandoverInitiateFlag</span>
+<span class="kn">from</span> <span class="nn">pcapkit.const.mh.home_address_reply</span> <span class="kn">import</span> <span class="n">HomeAddressReply</span> <span class="k">as</span> <span class="n">Enum_HomeAddressReply</span>
+<span class="kn">from</span> <span class="nn">pcapkit.const.mh.lla_code</span> <span class="kn">import</span> <span class="n">LLACode</span> <span class="k">as</span> <span class="n">Enum_LLACode</span>
+<span class="kn">from</span> <span class="nn">pcapkit.const.mh.lma_mag_suboption</span> <span class="kn">import</span> \
+    <span class="n">LMAControlledMAGSuboption</span> <span class="k">as</span> <span class="n">Enum_LMAControlledMAGSuboption</span>
+<span class="kn">from</span> <span class="nn">pcapkit.const.mh.mn_group_id</span> <span class="kn">import</span> <span class="n">MNGroupID</span> <span class="k">as</span> <span class="n">Enum_MNGroupID</span>
+<span class="kn">from</span> <span class="nn">pcapkit.const.mh.mn_id_subtype</span> <span class="kn">import</span> <span class="n">MNIDSubtype</span> <span class="k">as</span> <span class="n">Enum_MNIDSubtype</span>
+<span class="kn">from</span> <span class="nn">pcapkit.const.mh.operator_id</span> <span class="kn">import</span> <span class="n">OperatorID</span> <span class="k">as</span> <span class="n">Enum_OperatorID</span>
+<span class="kn">from</span> <span class="nn">pcapkit.const.mh.option</span> <span class="kn">import</span> <span class="n">Option</span> <span class="k">as</span> <span class="n">Enum_Option</span>
 <span class="kn">from</span> <span class="nn">pcapkit.const.mh.packet</span> <span class="kn">import</span> <span class="n">Packet</span> <span class="k">as</span> <span class="n">Enum_Packet</span>
+<span class="kn">from</span> <span class="nn">pcapkit.const.mh.qos_attribute</span> <span class="kn">import</span> <span class="n">QoSAttribute</span> <span class="k">as</span> <span class="n">Enum_QoSAttribute</span>
+<span class="kn">from</span> <span class="nn">pcapkit.const.mh.revocation_status_code</span> <span class="kn">import</span> \
+    <span class="n">RevocationStatusCode</span> <span class="k">as</span> <span class="n">Enum_RevocationStatusCode</span>
+<span class="kn">from</span> <span class="nn">pcapkit.const.mh.revocation_trigger</span> <span class="kn">import</span> <span class="n">RevocationTrigger</span> <span class="k">as</span> <span class="n">Enum_RevocationTrigger</span>
+<span class="kn">from</span> <span class="nn">pcapkit.const.mh.status_code</span> <span class="kn">import</span> <span class="n">StatusCode</span> <span class="k">as</span> <span class="n">Enum_StatusCode</span>
+<span class="kn">from</span> <span class="nn">pcapkit.const.mh.traffic_selector</span> <span class="kn">import</span> <span class="n">TrafficSelector</span> <span class="k">as</span> <span class="n">Enum_TrafficSelector</span>
+<span class="kn">from</span> <span class="nn">pcapkit.const.mh.upa_status</span> <span class="kn">import</span> \
+    <span class="n">UpdateNotificationACKStatus</span> <span class="k">as</span> <span class="n">Enum_UpdateNotificationACKStatus</span>
+<span class="kn">from</span> <span class="nn">pcapkit.const.mh.upn_reason</span> <span class="kn">import</span> <span class="n">UpdateNotificationReason</span> <span class="k">as</span> <span class="n">Enum_UpdateNotificationReason</span>
 <span class="kn">from</span> <span class="nn">pcapkit.const.reg.transtype</span> <span class="kn">import</span> <span class="n">TransType</span> <span class="k">as</span> <span class="n">Enum_TransType</span>
-<span class="kn">from</span> <span class="nn">pcapkit.corekit.fields.misc</span> <span class="kn">import</span> <span class="n">PayloadField</span>
-<span class="kn">from</span> <span class="nn">pcapkit.corekit.fields.numbers</span> <span class="kn">import</span> <span class="n">EnumField</span><span class="p">,</span> <span class="n">UInt8Field</span>
-<span class="kn">from</span> <span class="nn">pcapkit.corekit.fields.strings</span> <span class="kn">import</span> <span class="n">BytesField</span><span class="p">,</span> <span class="n">PaddingField</span>
+<span class="kn">from</span> <span class="nn">pcapkit.corekit.fields.collections</span> <span class="kn">import</span> <span class="n">ListField</span><span class="p">,</span> <span class="n">OptionField</span>
+<span class="kn">from</span> <span class="nn">pcapkit.corekit.fields.ipaddress</span> <span class="kn">import</span> <span class="n">IPv6AddressField</span>
+<span class="kn">from</span> <span class="nn">pcapkit.corekit.fields.misc</span> <span class="kn">import</span> <span class="p">(</span><span class="n">ConditionalField</span><span class="p">,</span> <span class="n">ForwardMatchField</span><span class="p">,</span> <span class="n">PayloadField</span><span class="p">,</span>
+                                         <span class="n">SchemaField</span><span class="p">,</span> <span class="n">SwitchField</span><span class="p">)</span>
+<span class="kn">from</span> <span class="nn">pcapkit.corekit.fields.numbers</span> <span class="kn">import</span> <span class="p">(</span><span class="n">EnumField</span><span class="p">,</span> <span class="n">UInt8Field</span><span class="p">,</span> <span class="n">UInt16Field</span><span class="p">,</span> <span class="n">UInt32Field</span><span class="p">,</span>
+                                            <span class="n">UInt64Field</span><span class="p">)</span>
+<span class="kn">from</span> <span class="nn">pcapkit.corekit.fields.strings</span> <span class="kn">import</span> <span class="n">BitField</span><span class="p">,</span> <span class="n">BytesField</span><span class="p">,</span> <span class="n">PaddingField</span><span class="p">,</span> <span class="n">StringField</span>
 <span class="kn">from</span> <span class="nn">pcapkit.protocols.schema.schema</span> <span class="kn">import</span> <span class="n">Schema</span><span class="p">,</span> <span class="n">schema_final</span>
+<span class="kn">from</span> <span class="nn">pcapkit.utilities.logging</span> <span class="kn">import</span> <span class="n">SPHINX_TYPE_CHECKING</span>
 
-<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;MH&#39;</span><span class="p">]</span>
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s1">&#39;MH&#39;</span><span class="p">,</span>
+
+    <span class="s1">&#39;Packet&#39;</span><span class="p">,</span>
+
+    <span class="s1">&#39;Option&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;UnassignedOption&#39;</span><span class="p">,</span> <span class="s1">&#39;PadOption&#39;</span><span class="p">,</span> <span class="s1">&#39;BindRefreshAdviceOption&#39;</span><span class="p">,</span> <span class="s1">&#39;AlternateCareofAddressOption&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;NonceIndicesOption&#39;</span><span class="p">,</span> <span class="s1">&#39;BindingAuthorizationDataOption&#39;</span><span class="p">,</span> <span class="s1">&#39;MobileNetworkPrefixOption&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;LinkLayerAddressOption&#39;</span><span class="p">,</span> <span class="s1">&#39;MNIDOption&#39;</span><span class="p">,</span> <span class="s1">&#39;AuthOption&#39;</span><span class="p">,</span> <span class="s1">&#39;MesgIDOption&#39;</span><span class="p">,</span> <span class="s1">&#39;CGAParametersRequestOption&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;CGAParametersOption&#39;</span><span class="p">,</span>
+
+    <span class="s1">&#39;CGAParameter&#39;</span><span class="p">,</span>
+
+    <span class="s1">&#39;CGAExtension&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;UnknownExtension&#39;</span><span class="p">,</span> <span class="s1">&#39;MultiPrefixExtension&#39;</span><span class="p">,</span>
+
+<span class="p">]</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span> <span class="k">as</span> <span class="n">dt_type</span>
+    <span class="kn">from</span> <span class="nn">ipaddress</span> <span class="kn">import</span> <span class="n">IPv6Address</span>
+    <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span>
+
+    <span class="kn">from</span> <span class="nn">pcapkit.corekit.fields.field</span> <span class="kn">import</span> <span class="n">_Field</span> <span class="k">as</span> <span class="n">Field</span>
     <span class="kn">from</span> <span class="nn">pcapkit.protocols.protocol</span> <span class="kn">import</span> <span class="n">Protocol</span>
+
+<span class="k">if</span> <span class="n">SPHINX_TYPE_CHECKING</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">typing_extensions</span> <span class="kn">import</span> <span class="n">TypedDict</span>
+
+    <span class="k">class</span> <span class="nc">ANSIKeyLengthTest</span><span class="p">(</span><span class="n">TypedDict</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Length test for ANSI.1 encoded data, c.f.,</span>
+<span class="sd">        :attr:`CGAParameter.public_key_test`.&quot;&quot;&quot;</span>
+
+        <span class="nb">len</span><span class="p">:</span> <span class="nb">int</span>
+
+    <span class="k">class</span> <span class="nc">MultiPrefixExtensionFlags</span><span class="p">(</span><span class="n">TypedDict</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Flags for :attr:`MultiPrefixExtension.flags`.&quot;&quot;&quot;</span>
+
+        <span class="n">P</span><span class="p">:</span> <span class="nb">int</span>
+
+
+<span class="k">def</span> <span class="nf">mn_id_selector</span><span class="p">(</span><span class="n">pkt</span><span class="p">:</span> <span class="s1">&#39;dict[str, Any]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Field&#39;</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Selector function for :attr:`MNIDOption.identifier` field.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        pkt: Packet data.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Returns a :class:`~pcapkit.corekit.fields.field.Field` instance</span>
+<span class="sd">        corresponding to the subtype.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">subtype</span> <span class="o">=</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">&#39;subtype&#39;</span><span class="p">]</span>  <span class="c1"># type: Enum_MNIDSubtype</span>
+    <span class="k">if</span> <span class="n">subtype</span> <span class="o">==</span> <span class="n">Enum_MNIDSubtype</span><span class="o">.</span><span class="n">NAI</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">StringField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="n">pkt</span><span class="p">[</span><span class="s1">&#39;length&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">subtype</span> <span class="o">==</span> <span class="n">Enum_MNIDSubtype</span><span class="o">.</span><span class="n">IPv6_Address</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">IPv6AddressField</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">BytesField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="n">pkt</span><span class="p">[</span><span class="s1">&#39;length&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="MH"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.schema.internet.mh.MH">[docs]</a><span class="nd">@schema_final</span>
@@ -382,6 +489,291 @@
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
         <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">next</span><span class="p">:</span> <span class="s1">&#39;Enum_TransType&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_Packet&#39;</span><span class="p">,</span>
                      <span class="n">chksum</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">,</span> <span class="n">payload</span><span class="p">:</span> <span class="s1">&#39;bytes | Protocol | Schema&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
+
+
+<span class="k">class</span> <span class="nc">Packet</span><span class="p">(</span><span class="n">Schema</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for MH packet data.&quot;&quot;&quot;</span>
+
+
+<span class="k">class</span> <span class="nc">Option</span><span class="p">(</span><span class="n">Schema</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for MH options.&quot;&quot;&quot;</span>
+
+    <span class="c1">#: Option type.</span>
+    <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span> <span class="o">=</span> <span class="n">EnumField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="n">Enum_Option</span><span class="p">)</span>
+    <span class="c1">#: Option length (excl. type and length fields), conditional in case of</span>
+    <span class="c1">#: ``Pad1`` option.</span>
+    <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span> <span class="o">=</span> <span class="n">ConditionalField</span><span class="p">(</span>
+        <span class="n">UInt8Field</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mi">0</span><span class="p">),</span>
+        <span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="o">!=</span> <span class="n">Enum_Option</span><span class="o">.</span><span class="n">Pad1</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">post_process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">&#39;dict[str, Any]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Option&#39;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Revise ``schema`` data after unpacking process.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            packet: Unpacked data.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Revised schema.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># for Pad1 option, length is always 1</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="n">Enum_Option</span><span class="o">.</span><span class="n">pad1</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">length</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">return</span> <span class="bp">self</span>
+
+
+<span class="nd">@schema_final</span>
+<span class="k">class</span> <span class="nc">UnassignedOption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for unassigned MH options.&quot;&quot;&quot;</span>
+
+    <span class="c1">#: Option data.</span>
+    <span class="n">data</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span> <span class="o">=</span> <span class="n">BytesField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">&#39;length&#39;</span><span class="p">])</span>
+
+    <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+        <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>
+
+
+<span class="nd">@schema_final</span>
+<span class="k">class</span> <span class="nc">PadOption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for MH padding options.&quot;&quot;&quot;</span>
+
+    <span class="c1">#: Option data.</span>
+    <span class="n">data</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span> <span class="o">=</span> <span class="n">PaddingField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;length&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+
+    <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+        <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>
+
+
+<span class="nd">@schema_final</span>
+<span class="k">class</span> <span class="nc">BindRefreshAdviceOption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for MH binding refresh advice options.&quot;&quot;&quot;</span>
+
+    <span class="c1">#: Refresh interval.</span>
+    <span class="n">interval</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span> <span class="o">=</span> <span class="n">UInt16Field</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+        <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">interval</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>
+
+
+<span class="nd">@schema_final</span>
+<span class="k">class</span> <span class="nc">AlternateCareofAddressOption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for MH alternate care-of address options.&quot;&quot;&quot;</span>
+
+    <span class="c1">#: Alternate care-of address.</span>
+    <span class="n">address</span><span class="p">:</span> <span class="s1">&#39;IPv6Address&#39;</span> <span class="o">=</span> <span class="n">IPv6AddressField</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+        <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">address</span><span class="p">:</span> <span class="s1">&#39;IPv6Address | str | bytes | int&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>
+
+
+<span class="nd">@schema_final</span>
+<span class="k">class</span> <span class="nc">NonceIndicesOption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for MH nonce indices options.&quot;&quot;&quot;</span>
+
+    <span class="c1">#: Home nonce index.</span>
+    <span class="n">home</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span> <span class="o">=</span> <span class="n">UInt16Field</span><span class="p">()</span>
+    <span class="c1">#: Care-of nonce index.</span>
+    <span class="n">careof</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span> <span class="o">=</span> <span class="n">UInt16Field</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+        <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">home</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">careof</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>
+
+
+<span class="nd">@schema_final</span>
+<span class="k">class</span> <span class="nc">BindingAuthorizationDataOption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for MH binding authorization data options.&quot;&quot;&quot;</span>
+
+    <span class="c1">#: Authenticator.</span>
+    <span class="n">data</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span> <span class="o">=</span> <span class="n">BytesField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">&#39;length&#39;</span><span class="p">])</span>
+
+    <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+        <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>
+
+
+<span class="nd">@schema_final</span>
+<span class="k">class</span> <span class="nc">MobileNetworkPrefixOption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for MH mobile network prefix options.&quot;&quot;&quot;</span>
+
+    <span class="c1">#: Reserved.</span>
+    <span class="n">reserved</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span> <span class="o">=</span> <span class="n">PaddingField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="c1">#: Prefix length.</span>
+    <span class="n">prefix_length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span> <span class="o">=</span> <span class="n">UInt8Field</span><span class="p">()</span>
+    <span class="c1">#: Mobile network prefix.</span>
+    <span class="n">prefix</span><span class="p">:</span> <span class="s1">&#39;IPv6Address&#39;</span> <span class="o">=</span> <span class="n">IPv6AddressField</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+        <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">prefix_length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">prefix</span><span class="p">:</span> <span class="s1">&#39;IPv6Address | int | bytes | str&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>
+
+
+<span class="nd">@schema_final</span>
+<span class="k">class</span> <span class="nc">LinkLayerAddressOption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for MH link-layer address (MH-LLA) options.&quot;&quot;&quot;</span>
+
+    <span class="c1">#: Option code.</span>
+    <span class="n">code</span><span class="p">:</span> <span class="s1">&#39;Enum_LLACode&#39;</span> <span class="o">=</span> <span class="n">EnumField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="n">Enum_LLACode</span><span class="p">)</span>
+    <span class="c1">#: Link-layer address (LAA).</span>
+    <span class="n">lla</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span> <span class="o">=</span> <span class="n">BytesField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">&#39;length&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+        <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">&#39;Enum_LLACode&#39;</span><span class="p">,</span> <span class="n">lla</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>
+
+
+<span class="nd">@schema_final</span>
+<span class="k">class</span> <span class="nc">MNIDOption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for MH mobile node identifier (MNID) options.&quot;&quot;&quot;</span>
+
+    <span class="c1">#: Subtype.</span>
+    <span class="n">subtype</span><span class="p">:</span> <span class="s1">&#39;Enum_MNIDSubtype&#39;</span> <span class="o">=</span> <span class="n">EnumField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="n">Enum_MNIDSubtype</span><span class="p">)</span>
+    <span class="c1">#: Identifier.</span>
+    <span class="n">identifier</span><span class="p">:</span> <span class="s1">&#39;bytes | str | IPv6Address&#39;</span> <span class="o">=</span> <span class="n">SwitchField</span><span class="p">(</span><span class="n">selector</span><span class="o">=</span><span class="n">mn_id_selector</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+        <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">subtype</span><span class="p">:</span> <span class="s1">&#39;Enum_MNIDSubtype&#39;</span><span class="p">,</span> <span class="n">identifier</span><span class="p">:</span> <span class="s1">&#39;bytes | str | IPv6Address | int&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>
+
+
+<span class="nd">@schema_final</span>
+<span class="k">class</span> <span class="nc">AuthOption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for Mobility Message Authentication options.&quot;&quot;&quot;</span>
+
+    <span class="c1">#: Subtype.</span>
+    <span class="n">subtype</span><span class="p">:</span> <span class="s1">&#39;Enum_AuthSubtype&#39;</span> <span class="o">=</span> <span class="n">EnumField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="n">Enum_AuthSubtype</span><span class="p">)</span>
+    <span class="c1">#: Mobility SPI.</span>
+    <span class="n">spi</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span> <span class="o">=</span> <span class="n">UInt32Field</span><span class="p">()</span>
+    <span class="c1">#: Authentication data.</span>
+    <span class="n">data</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span> <span class="o">=</span> <span class="n">BytesField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">&#39;length&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="mi">5</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+        <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">subtype</span><span class="p">:</span> <span class="s1">&#39;Enum_AuthSubtype&#39;</span><span class="p">,</span> <span class="n">spi</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>
+
+
+<span class="nd">@schema_final</span>
+<span class="k">class</span> <span class="nc">MesgIDOption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for Mobility Message Replay Protection options.&quot;&quot;&quot;</span>
+
+    <span class="c1">#: Timestamp (seconds since January 1st, 1970, c.f., :rfc:`1305`).</span>
+    <span class="n">seconds</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span> <span class="o">=</span> <span class="n">UInt32Field</span><span class="p">()</span>
+    <span class="c1">#: Timestamp fractions (1/2**32 seconds per unit, c.f., :rfc:`1305`).</span>
+    <span class="n">fraction</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span> <span class="o">=</span> <span class="n">UInt32Field</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">post_process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">&#39;dict[str, Any]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;MesgIDOption&#39;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Revise ``schema`` data after unpacking process.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            packet: Unpacked data.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Revised schema.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">post_process</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span>
+
+        <span class="c1"># convert timestamp to datetime</span>
+        <span class="c1"># c.f., http://tickelton.gitlab.io/articles/ntp-timestamps/</span>
+        <span class="n">ts_sec</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">seconds</span> <span class="o">-</span> <span class="mi">2_208_988_800</span>  <span class="c1"># 70 years</span>
+        <span class="n">ts_usec</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fraction</span> <span class="o">/</span> <span class="mi">2</span><span class="o">**</span><span class="mi">32</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">timestamp</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">fromtimestamp</span><span class="p">(</span><span class="n">ts_sec</span> <span class="o">+</span> <span class="n">ts_usec</span><span class="p">,</span> <span class="n">tz</span><span class="o">=</span><span class="n">datetime</span><span class="o">.</span><span class="n">timezone</span><span class="o">.</span><span class="n">utc</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">self</span>
+
+    <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+        <span class="c1">#: Timestamp interval (since UNIX-epoch).</span>
+        <span class="n">timestamp</span><span class="p">:</span> <span class="s1">&#39;dt_type&#39;</span>
+
+        <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">seconds</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">fraction</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>
+
+
+<span class="nd">@schema_final</span>
+<span class="k">class</span> <span class="nc">CGAParametersRequestOption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for CGA Parameters Request options.&quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+        <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>
+
+
+<span class="k">class</span> <span class="nc">CGAExtension</span><span class="p">(</span><span class="n">Schema</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for CGA extensions.&quot;&quot;&quot;</span>
+
+    <span class="c1">#: Extension type.</span>
+    <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_CGAExtension&#39;</span> <span class="o">=</span> <span class="n">EnumField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="n">Enum_CGAExtension</span><span class="p">)</span>
+    <span class="c1">#: Extension data length.</span>
+    <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span> <span class="o">=</span> <span class="n">UInt16Field</span><span class="p">()</span>
+
+
+<span class="nd">@schema_final</span>
+<span class="k">class</span> <span class="nc">UnknownExtension</span><span class="p">(</span><span class="n">CGAExtension</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for unknown CGA extensions.&quot;&quot;&quot;</span>
+
+    <span class="c1">#: Extension data.</span>
+    <span class="n">data</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span> <span class="o">=</span> <span class="n">BytesField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">&#39;length&#39;</span><span class="p">])</span>
+
+    <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+        <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_CGAExtension&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>
+
+
+<span class="nd">@schema_final</span>
+<span class="k">class</span> <span class="nc">MultiPrefixExtension</span><span class="p">(</span><span class="n">CGAExtension</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for Multi-Prefix CGA extensions.&quot;&quot;&quot;</span>
+
+    <span class="c1">#: Flags.</span>
+    <span class="n">flags</span><span class="p">:</span> <span class="s1">&#39;MultiPrefixExtensionFlags&#39;</span> <span class="o">=</span> <span class="n">BitField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="p">{</span>
+        <span class="s1">&#39;P&#39;</span><span class="p">:</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+    <span class="p">})</span>
+    <span class="c1">#: Prefixes.</span>
+    <span class="n">prefixes</span><span class="p">:</span> <span class="s1">&#39;list[int]&#39;</span> <span class="o">=</span> <span class="n">ListField</span><span class="p">(</span>
+        <span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">&#39;length&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="mi">4</span><span class="p">,</span>
+        <span class="n">item_type</span><span class="o">=</span><span class="n">UInt64Field</span><span class="p">(),</span>
+    <span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+        <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_CGAExtension&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">flags</span><span class="p">:</span> <span class="s1">&#39;MultiPrefixExtensionFlags&#39;</span><span class="p">,</span> <span class="n">prefixes</span><span class="p">:</span> <span class="s1">&#39;list[int]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>
+
+
+<span class="nd">@schema_final</span>
+<span class="k">class</span> <span class="nc">CGAParameter</span><span class="p">(</span><span class="n">Schema</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for CGA Parameters.&quot;&quot;&quot;</span>
+
+    <span class="c1">#: Modifier.</span>
+    <span class="n">modifier</span><span class="p">:</span> <span class="s1">&#39;Enum_CGAType&#39;</span> <span class="o">=</span> <span class="n">EnumField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">16</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="n">Enum_CGAType</span><span class="p">)</span>
+    <span class="c1">#: Subnet prefix.</span>
+    <span class="n">prefix</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span> <span class="o">=</span> <span class="n">UInt64Field</span><span class="p">()</span>
+    <span class="c1">#: Collision count.</span>
+    <span class="n">collision_count</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span> <span class="o">=</span> <span class="n">UInt8Field</span><span class="p">()</span>
+    <span class="c1">#: Public key length test.</span>
+    <span class="n">public_key_test</span><span class="p">:</span> <span class="s1">&#39;ANSIKeyLengthTest&#39;</span> <span class="o">=</span> <span class="n">ForwardMatchField</span><span class="p">(</span><span class="n">BitField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="p">{</span>
+        <span class="s1">&#39;len&#39;</span><span class="p">:</span> <span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="mi">8</span><span class="p">),</span>
+    <span class="p">}))</span>
+    <span class="c1">#: Public key (ASN.1 encoded).</span>
+    <span class="n">public_key</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span> <span class="o">=</span> <span class="n">BytesField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">&#39;public_key_test&#39;</span><span class="p">][</span><span class="s1">&#39;len&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="mi">2</span><span class="p">)</span>  <span class="c1"># 2 bytes for type &amp; length</span>
+    <span class="c1">#: Extension fields.</span>
+    <span class="n">extensions</span><span class="p">:</span> <span class="s1">&#39;list[CGAExtension]&#39;</span> <span class="o">=</span> <span class="n">OptionField</span><span class="p">(</span>
+        <span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">&#39;length&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="mi">25</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">pkt</span><span class="p">[</span><span class="s1">&#39;public_key&#39;</span><span class="p">]),</span>
+        <span class="n">base_schema</span><span class="o">=</span><span class="n">CGAExtension</span><span class="p">,</span>
+        <span class="n">type_name</span><span class="o">=</span><span class="s1">&#39;type&#39;</span><span class="p">,</span>
+        <span class="n">registry</span><span class="o">=</span><span class="n">collections</span><span class="o">.</span><span class="n">defaultdict</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="n">UnknownExtension</span><span class="p">,</span> <span class="p">{</span>
+            <span class="n">Enum_CGAExtension</span><span class="o">.</span><span class="n">Multi_Prefix</span><span class="p">:</span> <span class="n">MultiPrefixExtension</span><span class="p">,</span>
+        <span class="p">}),</span>
+        <span class="n">eool</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+        <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">modifier</span><span class="p">:</span> <span class="s1">&#39;Enum_CGAType&#39;</span><span class="p">,</span> <span class="n">prefix</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">collision_count</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">public_key</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">,</span>
+                     <span class="n">extensions</span><span class="p">:</span> <span class="s1">&#39;list[CGAExtension | bytes]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>
+
+
+<span class="nd">@schema_final</span>
+<span class="k">class</span> <span class="nc">CGAParametersOption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for CGA Parameters options.&quot;&quot;&quot;</span>
+
+    <span class="c1">#: CGA parameters, c.f., :rfc:`3972`.</span>
+    <span class="n">parameters</span><span class="p">:</span> <span class="s1">&#39;list[CGAParameter]&#39;</span> <span class="o">=</span> <span class="n">ListField</span><span class="p">(</span>
+        <span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">&#39;length&#39;</span><span class="p">],</span>
+        <span class="n">item_type</span><span class="o">=</span><span class="n">SchemaField</span><span class="p">(</span><span class="n">schema</span><span class="o">=</span><span class="n">CGAParameter</span><span class="p">),</span>
+    <span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+        <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">parameters</span><span class="p">:</span> <span class="s1">&#39;list[CGAParameter | bytes]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>
 </pre></div>
         </article>
       </div>

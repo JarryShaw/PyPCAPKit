@@ -364,35 +364,203 @@
 <span class="sd">.. [*] https://en.wikipedia.org/wiki/Mobile_IP#Changes_in_IPv6_for_Mobile_IPv6</span>
 
 <span class="sd">&quot;&quot;&quot;</span>
-<span class="c1"># TODO: Implements extractor for message data of all MH types.</span>
-
+<span class="kn">import</span> <span class="nn">collections</span>
+<span class="kn">import</span> <span class="nn">datetime</span>
+<span class="kn">import</span> <span class="nn">ipaddress</span>
 <span class="kn">import</span> <span class="nn">math</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">overload</span>
+<span class="kn">from</span> <span class="nn">tokenize</span> <span class="kn">import</span> <span class="n">Name</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">cast</span><span class="p">,</span> <span class="n">overload</span>
 
+<span class="kn">from</span> <span class="nn">pcapkit.const.mh.access_type</span> <span class="kn">import</span> <span class="n">AccessType</span> <span class="k">as</span> <span class="n">Enum_AccessType</span>
+<span class="kn">from</span> <span class="nn">pcapkit.const.mh.ack_status_code</span> <span class="kn">import</span> <span class="n">ACKStatusCode</span> <span class="k">as</span> <span class="n">Enum_ACKStatusCode</span>
+<span class="kn">from</span> <span class="nn">pcapkit.const.mh.ani_suboption</span> <span class="kn">import</span> <span class="n">ANISuboption</span> <span class="k">as</span> <span class="n">Enum_ANISuboption</span>
+<span class="kn">from</span> <span class="nn">pcapkit.const.mh.auth_subtype</span> <span class="kn">import</span> <span class="n">AuthSubtype</span> <span class="k">as</span> <span class="n">Enum_AuthSubtype</span>
+<span class="kn">from</span> <span class="nn">pcapkit.const.mh.binding_ack_flag</span> <span class="kn">import</span> <span class="n">BindingACKFlag</span> <span class="k">as</span> <span class="n">Enum_BindingACKFlag</span>
+<span class="kn">from</span> <span class="nn">pcapkit.const.mh.binding_revocation</span> <span class="kn">import</span> <span class="n">BindingRevocation</span> <span class="k">as</span> <span class="n">Enum_BindingRevocation</span>
+<span class="kn">from</span> <span class="nn">pcapkit.const.mh.binding_update_flag</span> <span class="kn">import</span> <span class="n">BindingUpdateFlag</span> <span class="k">as</span> <span class="n">Enum_BindingUpdateFlag</span>
+<span class="kn">from</span> <span class="nn">pcapkit.const.mh.cga_extension</span> <span class="kn">import</span> <span class="n">CGAExtension</span> <span class="k">as</span> <span class="n">Enum_CGAExtension</span>
+<span class="kn">from</span> <span class="nn">pcapkit.const.mh.cga_type</span> <span class="kn">import</span> <span class="n">CGAType</span> <span class="k">as</span> <span class="n">Enum_CGAType</span>
+<span class="kn">from</span> <span class="nn">pcapkit.const.mh.dhcp_support_mode</span> <span class="kn">import</span> <span class="n">DHCPSupportMode</span> <span class="k">as</span> <span class="n">Enum_DHCPSupportMode</span>
+<span class="kn">from</span> <span class="nn">pcapkit.const.mh.dns_status_code</span> <span class="kn">import</span> <span class="n">DNSStatusCode</span> <span class="k">as</span> <span class="n">Enum_DNSStatusCode</span>
+<span class="kn">from</span> <span class="nn">pcapkit.const.mh.dsmip6_tls_packet</span> <span class="kn">import</span> <span class="n">DSMIP6TLSPacket</span> <span class="k">as</span> <span class="n">Enum_DSMIP6TLSPacket</span>
+<span class="kn">from</span> <span class="nn">pcapkit.const.mh.dsmipv6_home_address</span> <span class="kn">import</span> <span class="n">DSMIPv6HomeAddress</span> <span class="k">as</span> <span class="n">Enum_DSMIPv6HomeAddress</span>
+<span class="kn">from</span> <span class="nn">pcapkit.const.mh.enumerating_algorithm</span> <span class="kn">import</span> <span class="n">EnumeratingAlgorithm</span> <span class="k">as</span> <span class="n">Enum_EnumeratingAlgorithm</span>
+<span class="kn">from</span> <span class="nn">pcapkit.const.mh.fb_ack_status</span> <span class="kn">import</span> <span class="n">FlowBindingACKStatus</span> <span class="k">as</span> <span class="n">Enum_FlowBindingACKStatus</span>
+<span class="kn">from</span> <span class="nn">pcapkit.const.mh.fb_action</span> <span class="kn">import</span> <span class="n">FlowBindingAction</span> <span class="k">as</span> <span class="n">Enum_FlowBindingAction</span>
+<span class="kn">from</span> <span class="nn">pcapkit.const.mh.fb_indication_trigger</span> <span class="kn">import</span> \
+    <span class="n">FlowBindingIndicationTrigger</span> <span class="k">as</span> <span class="n">Enum_FlowBindingIndicationTrigger</span>
+<span class="kn">from</span> <span class="nn">pcapkit.const.mh.fb_type</span> <span class="kn">import</span> <span class="n">FlowBindingType</span> <span class="k">as</span> <span class="n">Enum_FlowBindingType</span>
+<span class="kn">from</span> <span class="nn">pcapkit.const.mh.flow_id_status</span> <span class="kn">import</span> <span class="n">FlowIDStatus</span> <span class="k">as</span> <span class="n">Enum_FlowIDStatus</span>
+<span class="kn">from</span> <span class="nn">pcapkit.const.mh.flow_id_suboption</span> <span class="kn">import</span> <span class="n">FlowIDSuboption</span> <span class="k">as</span> <span class="n">Enum_FlowIDSuboption</span>
+<span class="kn">from</span> <span class="nn">pcapkit.const.mh.handoff_type</span> <span class="kn">import</span> <span class="n">HandoffType</span> <span class="k">as</span> <span class="n">Enum_HandoffType</span>
+<span class="kn">from</span> <span class="nn">pcapkit.const.mh.handover_ack_flag</span> <span class="kn">import</span> <span class="n">HandoverACKFlag</span> <span class="k">as</span> <span class="n">Enum_HandoverACKFlag</span>
+<span class="kn">from</span> <span class="nn">pcapkit.const.mh.handover_ack_status</span> <span class="kn">import</span> <span class="n">HandoverACKStatus</span> <span class="k">as</span> <span class="n">Enum_HandoverACKStatus</span>
+<span class="kn">from</span> <span class="nn">pcapkit.const.mh.handover_initiate_flag</span> <span class="kn">import</span> \
+    <span class="n">HandoverInitiateFlag</span> <span class="k">as</span> <span class="n">Enum_HandoverInitiateFlag</span>
+<span class="kn">from</span> <span class="nn">pcapkit.const.mh.home_address_reply</span> <span class="kn">import</span> <span class="n">HomeAddressReply</span> <span class="k">as</span> <span class="n">Enum_HomeAddressReply</span>
+<span class="kn">from</span> <span class="nn">pcapkit.const.mh.lla_code</span> <span class="kn">import</span> <span class="n">LLACode</span> <span class="k">as</span> <span class="n">Enum_LLACode</span>
+<span class="kn">from</span> <span class="nn">pcapkit.const.mh.lma_mag_suboption</span> <span class="kn">import</span> \
+    <span class="n">LMAControlledMAGSuboption</span> <span class="k">as</span> <span class="n">Enum_LMAControlledMAGSuboption</span>
+<span class="kn">from</span> <span class="nn">pcapkit.const.mh.mn_group_id</span> <span class="kn">import</span> <span class="n">MNGroupID</span> <span class="k">as</span> <span class="n">Enum_MNGroupID</span>
+<span class="kn">from</span> <span class="nn">pcapkit.const.mh.mn_id_subtype</span> <span class="kn">import</span> <span class="n">MNIDSubtype</span> <span class="k">as</span> <span class="n">Enum_MNIDSubtype</span>
+<span class="kn">from</span> <span class="nn">pcapkit.const.mh.operator_id</span> <span class="kn">import</span> <span class="n">OperatorID</span> <span class="k">as</span> <span class="n">Enum_OperatorID</span>
+<span class="kn">from</span> <span class="nn">pcapkit.const.mh.option</span> <span class="kn">import</span> <span class="n">Option</span> <span class="k">as</span> <span class="n">Enum_Option</span>
 <span class="kn">from</span> <span class="nn">pcapkit.const.mh.packet</span> <span class="kn">import</span> <span class="n">Packet</span> <span class="k">as</span> <span class="n">Enum_Packet</span>
+<span class="kn">from</span> <span class="nn">pcapkit.const.mh.qos_attribute</span> <span class="kn">import</span> <span class="n">QoSAttribute</span> <span class="k">as</span> <span class="n">Enum_QoSAttribute</span>
+<span class="kn">from</span> <span class="nn">pcapkit.const.mh.revocation_status_code</span> <span class="kn">import</span> \
+    <span class="n">RevocationStatusCode</span> <span class="k">as</span> <span class="n">Enum_RevocationStatusCode</span>
+<span class="kn">from</span> <span class="nn">pcapkit.const.mh.revocation_trigger</span> <span class="kn">import</span> <span class="n">RevocationTrigger</span> <span class="k">as</span> <span class="n">Enum_RevocationTrigger</span>
+<span class="kn">from</span> <span class="nn">pcapkit.const.mh.status_code</span> <span class="kn">import</span> <span class="n">StatusCode</span> <span class="k">as</span> <span class="n">Enum_StatusCode</span>
+<span class="kn">from</span> <span class="nn">pcapkit.const.mh.traffic_selector</span> <span class="kn">import</span> <span class="n">TrafficSelector</span> <span class="k">as</span> <span class="n">Enum_TrafficSelector</span>
+<span class="kn">from</span> <span class="nn">pcapkit.const.mh.upa_status</span> <span class="kn">import</span> \
+    <span class="n">UpdateNotificationACKStatus</span> <span class="k">as</span> <span class="n">Enum_UpdateNotificationACKStatus</span>
+<span class="kn">from</span> <span class="nn">pcapkit.const.mh.upn_reason</span> <span class="kn">import</span> <span class="n">UpdateNotificationReason</span> <span class="k">as</span> <span class="n">Enum_UpdateNotificationReason</span>
 <span class="kn">from</span> <span class="nn">pcapkit.const.reg.transtype</span> <span class="kn">import</span> <span class="n">TransType</span> <span class="k">as</span> <span class="n">Enum_TransType</span>
 <span class="kn">from</span> <span class="nn">pcapkit.protocols.data.internet.mh</span> <span class="kn">import</span> <span class="n">MH</span> <span class="k">as</span> <span class="n">Data_MH</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.internet.mh</span> <span class="kn">import</span> \
+    <span class="n">AlternateCareofAddressOption</span> <span class="k">as</span> <span class="n">Data_AlternateCareofAddressOption</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.internet.mh</span> <span class="kn">import</span> <span class="n">AuthOption</span> <span class="k">as</span> <span class="n">Data_AuthOption</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.internet.mh</span> <span class="kn">import</span> \
+    <span class="n">BindingAuthorizationDataOption</span> <span class="k">as</span> <span class="n">Data_BindingAuthorizationDataOption</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.internet.mh</span> <span class="kn">import</span> \
+    <span class="n">BindRefreshAdviceOption</span> <span class="k">as</span> <span class="n">Data_BindRefreshAdviceOption</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.internet.mh</span> <span class="kn">import</span> <span class="n">CGAExtension</span> <span class="k">as</span> <span class="n">Data_CGAExtension</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.internet.mh</span> <span class="kn">import</span> <span class="n">CGAParameter</span> <span class="k">as</span> <span class="n">Data_CGAParameter</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.internet.mh</span> <span class="kn">import</span> <span class="n">CGAParametersOption</span> <span class="k">as</span> <span class="n">Data_CGAParametersOption</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.internet.mh</span> <span class="kn">import</span> \
+    <span class="n">CGAParametersRequestOption</span> <span class="k">as</span> <span class="n">Data_CGAParametersRequestOption</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.internet.mh</span> <span class="kn">import</span> <span class="n">LinkLayerAddressOption</span> <span class="k">as</span> <span class="n">Data_LinkLayerAddressOption</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.internet.mh</span> <span class="kn">import</span> <span class="n">MesgIDOption</span> <span class="k">as</span> <span class="n">Data_MesgIDOption</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.internet.mh</span> <span class="kn">import</span> <span class="n">MNIDOption</span> <span class="k">as</span> <span class="n">Data_MNIDOption</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.internet.mh</span> <span class="kn">import</span> \
+    <span class="n">MobileNetworkPrefixOption</span> <span class="k">as</span> <span class="n">Data_MobileNetworkPrefixOption</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.internet.mh</span> <span class="kn">import</span> <span class="n">MultiPrefixExtension</span> <span class="k">as</span> <span class="n">Data_MultiPrefixExtension</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.internet.mh</span> <span class="kn">import</span> <span class="n">NonceIndicesOption</span> <span class="k">as</span> <span class="n">Data_NonceIndicesOption</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.internet.mh</span> <span class="kn">import</span> <span class="n">PadOption</span> <span class="k">as</span> <span class="n">Data_PadOption</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.internet.mh</span> <span class="kn">import</span> <span class="n">UnassignedOption</span> <span class="k">as</span> <span class="n">Data_UnassignedOption</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.internet.mh</span> <span class="kn">import</span> <span class="n">UnknownExtension</span> <span class="k">as</span> <span class="n">Data_UnknownExtension</span>
 <span class="kn">from</span> <span class="nn">pcapkit.protocols.internet.internet</span> <span class="kn">import</span> <span class="n">Internet</span>
 <span class="kn">from</span> <span class="nn">pcapkit.protocols.schema.internet.mh</span> <span class="kn">import</span> <span class="n">MH</span> <span class="k">as</span> <span class="n">Schema_MH</span>
-<span class="kn">from</span> <span class="nn">pcapkit.utilities.exceptions</span> <span class="kn">import</span> <span class="n">UnsupportedCall</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.schema.internet.mh</span> <span class="kn">import</span> \
+    <span class="n">AlternateCareofAddressOption</span> <span class="k">as</span> <span class="n">Schema_AlternateCareofAddressOption</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.schema.internet.mh</span> <span class="kn">import</span> <span class="n">AuthOption</span> <span class="k">as</span> <span class="n">Schema_AuthOption</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.schema.internet.mh</span> <span class="kn">import</span> \
+    <span class="n">BindingAuthorizationDataOption</span> <span class="k">as</span> <span class="n">Schema_BindingAuthorizationDataOption</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.schema.internet.mh</span> <span class="kn">import</span> \
+    <span class="n">BindRefreshAdviceOption</span> <span class="k">as</span> <span class="n">Schema_BindRefreshAdviceOption</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.schema.internet.mh</span> <span class="kn">import</span> <span class="n">CGAExtension</span> <span class="k">as</span> <span class="n">Schema_CGAExtension</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.schema.internet.mh</span> <span class="kn">import</span> <span class="n">CGAParameter</span> <span class="k">as</span> <span class="n">Schema_CGAParameter</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.schema.internet.mh</span> <span class="kn">import</span> <span class="n">CGAParametersOption</span> <span class="k">as</span> <span class="n">Schema_CGAParametersOption</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.schema.internet.mh</span> <span class="kn">import</span> \
+    <span class="n">CGAParametersRequestOption</span> <span class="k">as</span> <span class="n">Schema_CGAParametersRequestOption</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.schema.internet.mh</span> <span class="kn">import</span> \
+    <span class="n">LinkLayerAddressOption</span> <span class="k">as</span> <span class="n">Schema_LinkLayerAddressOption</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.schema.internet.mh</span> <span class="kn">import</span> <span class="n">MesgIDOption</span> <span class="k">as</span> <span class="n">Schema_MesgIDOption</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.schema.internet.mh</span> <span class="kn">import</span> <span class="n">MNIDOption</span> <span class="k">as</span> <span class="n">Schema_MNIDOption</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.schema.internet.mh</span> <span class="kn">import</span> \
+    <span class="n">MobileNetworkPrefixOption</span> <span class="k">as</span> <span class="n">Schema_MobileNetworkPrefixOption</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.schema.internet.mh</span> <span class="kn">import</span> <span class="n">MultiPrefixExtension</span> <span class="k">as</span> <span class="n">Schema_MultiPrefixExtension</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.schema.internet.mh</span> <span class="kn">import</span> <span class="n">NonceIndicesOption</span> <span class="k">as</span> <span class="n">Schema_NonceIndicesOption</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.schema.internet.mh</span> <span class="kn">import</span> <span class="n">PadOption</span> <span class="k">as</span> <span class="n">Schema_PadOption</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.schema.internet.mh</span> <span class="kn">import</span> <span class="n">UnassignedOption</span> <span class="k">as</span> <span class="n">Schema_UnassignedOption</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.schema.internet.mh</span> <span class="kn">import</span> <span class="n">UnknownExtension</span> <span class="k">as</span> <span class="n">Schema_UnknownExtension</span>
+<span class="kn">from</span> <span class="nn">pcapkit.utilities.exceptions</span> <span class="kn">import</span> <span class="n">ProtocolError</span><span class="p">,</span> <span class="n">UnsupportedCall</span>
+<span class="kn">from</span> <span class="nn">pcapkit.utilities.warnings</span> <span class="kn">import</span> <span class="n">ProtocolWarning</span><span class="p">,</span> <span class="n">warn</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span> <span class="k">as</span> <span class="n">dt_type</span>
     <span class="kn">from</span> <span class="nn">enum</span> <span class="kn">import</span> <span class="n">IntEnum</span> <span class="k">as</span> <span class="n">StdlibEnum</span>
-    <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">IO</span><span class="p">,</span> <span class="n">Any</span><span class="p">,</span> <span class="n">NoReturn</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Type</span>
+    <span class="kn">from</span> <span class="nn">ipaddress</span> <span class="kn">import</span> <span class="n">IPv6Address</span><span class="p">,</span> <span class="n">IPv6Network</span>
+    <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">IO</span><span class="p">,</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">DefaultDict</span><span class="p">,</span> <span class="n">NoReturn</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Type</span>
 
     <span class="kn">from</span> <span class="nn">aenum</span> <span class="kn">import</span> <span class="n">IntEnum</span> <span class="k">as</span> <span class="n">AenumEnum</span>
+    <span class="kn">from</span> <span class="nn">mypy_extensions</span> <span class="kn">import</span> <span class="n">DefaultArg</span><span class="p">,</span> <span class="n">KwArg</span><span class="p">,</span> <span class="n">NamedArg</span>
     <span class="kn">from</span> <span class="nn">typing_extensions</span> <span class="kn">import</span> <span class="n">Literal</span>
 
+    <span class="kn">from</span> <span class="nn">pcapkit.corekit.multidict</span> <span class="kn">import</span> <span class="n">OrderedMultiDict</span>
     <span class="kn">from</span> <span class="nn">pcapkit.corekit.protochain</span> <span class="kn">import</span> <span class="n">ProtoChain</span>
+    <span class="kn">from</span> <span class="nn">pcapkit.protocols.data.internet.mh</span> <span class="kn">import</span> <span class="n">Option</span> <span class="k">as</span> <span class="n">Data_Option</span>
     <span class="kn">from</span> <span class="nn">pcapkit.protocols.protocol</span> <span class="kn">import</span> <span class="n">Protocol</span>
+    <span class="kn">from</span> <span class="nn">pcapkit.protocols.schema.internet.mh</span> <span class="kn">import</span> <span class="n">Option</span> <span class="k">as</span> <span class="n">Schema_Option</span>
+    <span class="kn">from</span> <span class="nn">pcapkit.protocols.schema.internet.mh</span> <span class="kn">import</span> <span class="n">Packet</span> <span class="k">as</span> <span class="n">Schema_Packet</span>
     <span class="kn">from</span> <span class="nn">pcapkit.protocols.schema.schema</span> <span class="kn">import</span> <span class="n">Schema</span>
 
+    <span class="n">Option</span> <span class="o">=</span> <span class="n">OrderedMultiDict</span><span class="p">[</span><span class="n">Enum_Option</span><span class="p">,</span> <span class="n">Data_Option</span><span class="p">]</span>
+    <span class="n">Extension</span> <span class="o">=</span> <span class="n">OrderedMultiDict</span><span class="p">[</span><span class="n">Enum_CGAExtension</span><span class="p">,</span> <span class="n">Data_CGAExtension</span><span class="p">]</span>
+
+    <span class="n">PacketParser</span> <span class="o">=</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">Schema_Packet</span><span class="p">,</span> <span class="n">NamedArg</span><span class="p">(</span><span class="n">Schema_MH</span><span class="p">,</span> <span class="s1">&#39;header&#39;</span><span class="p">)],</span> <span class="n">Data_MH</span><span class="p">]</span>
+    <span class="n">PacketConstructor</span> <span class="o">=</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">Enum_Packet</span><span class="p">,</span> <span class="n">DefaultArg</span><span class="p">(</span><span class="n">Optional</span><span class="p">[</span><span class="n">Data_MH</span><span class="p">]),</span>
+                                 <span class="n">KwArg</span><span class="p">(</span><span class="n">Any</span><span class="p">)],</span> <span class="n">Schema_Packet</span><span class="p">]</span>
+
+    <span class="n">OptionParser</span> <span class="o">=</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">Schema_Option</span><span class="p">,</span> <span class="n">NamedArg</span><span class="p">(</span><span class="n">Option</span><span class="p">,</span> <span class="s1">&#39;options&#39;</span><span class="p">)],</span> <span class="n">Data_Option</span><span class="p">]</span>
+    <span class="n">OptionConstructor</span> <span class="o">=</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">Enum_Option</span><span class="p">,</span> <span class="n">DefaultArg</span><span class="p">(</span><span class="n">Optional</span><span class="p">[</span><span class="n">Data_Option</span><span class="p">]),</span>
+                                  <span class="n">KwArg</span><span class="p">(</span><span class="n">Any</span><span class="p">)],</span> <span class="n">Schema_Option</span><span class="p">]</span>
+
+    <span class="n">ExtensionParser</span> <span class="o">=</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">Schema_CGAExtension</span><span class="p">,</span> <span class="n">NamedArg</span><span class="p">(</span><span class="n">Extension</span><span class="p">,</span> <span class="s1">&#39;extensions&#39;</span><span class="p">)],</span> <span class="n">Data_CGAExtension</span><span class="p">]</span>
+    <span class="n">ExtensionConstructor</span> <span class="o">=</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">Enum_CGAExtension</span><span class="p">,</span> <span class="n">DefaultArg</span><span class="p">(</span><span class="n">Optional</span><span class="p">[</span><span class="n">Data_CGAExtension</span><span class="p">]),</span>
+                                     <span class="n">KwArg</span><span class="p">(</span><span class="n">Any</span><span class="p">)],</span> <span class="n">Schema_CGAExtension</span><span class="p">]</span>
+
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;MH&#39;</span><span class="p">]</span>
+
+<span class="n">NTPTimestamp</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">namedtuple</span><span class="p">(</span><span class="s1">&#39;NTPTimestamp&#39;</span><span class="p">,</span> <span class="s1">&#39;seconds fraction&#39;</span><span class="p">)</span>
+<span class="n">NTPTimestamp</span><span class="o">.</span><span class="vm">__doc__</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;NTP timestamp format, c.f., :rfc:`1305`.&quot;&quot;&quot;</span>
 
 
 <div class="viewcode-block" id="MH"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.internet.mh.MH">[docs]</a><span class="k">class</span> <span class="nc">MH</span><span class="p">(</span><span class="n">Internet</span><span class="p">[</span><span class="n">Data_MH</span><span class="p">,</span> <span class="n">Schema_MH</span><span class="p">],</span>
          <span class="n">schema</span><span class="o">=</span><span class="n">Schema_MH</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">Data_MH</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;This class implements Mobility Header.&quot;&quot;&quot;</span>
+
+    <span class="c1">##########################################################################</span>
+    <span class="c1"># Defaults.</span>
+    <span class="c1">##########################################################################</span>
+
+    <span class="c1">#: DefaultDict[Enum_Packet, str | tuple[PacketParser, PacketConstructor]]:</span>
+    <span class="c1">#: Message type to method mapping. Method names are expected to be referred</span>
+    <span class="c1">#: to the class by ``_read_packet_${name}`` and/or ``_make_packet_${name}``,</span>
+    <span class="c1">#: and if such name not found, the value should then be a method that can</span>
+    <span class="c1">#: parse the packet by itself.</span>
+    <span class="n">__packet__</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">defaultdict</span><span class="p">(</span>
+        <span class="k">lambda</span><span class="p">:</span> <span class="s1">&#39;unknown&#39;</span><span class="p">,</span>
+        <span class="p">{</span>
+
+        <span class="p">},</span>
+    <span class="p">)</span>  <span class="c1"># type: DefaultDict[Enum_Packet | int, str | tuple[PacketParser, PacketConstructor]]</span>
+
+    <span class="c1">#: DefaultDict[Enum_Option, str | tuple[OptionParser, OptionConstructor]]:</span>
+    <span class="c1">#: Option type to method mapping. Method names are expected to be referred</span>
+    <span class="c1">#: to the class by ``_read_option_${name}`` and/or ``_make_opt_${name}``,</span>
+    <span class="c1">#: and if such name not found, the value should then be a method that can</span>
+    <span class="c1">#: parse the option by itself.</span>
+    <span class="n">__option__</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">defaultdict</span><span class="p">(</span>
+        <span class="k">lambda</span><span class="p">:</span> <span class="s1">&#39;none&#39;</span><span class="p">,</span>
+        <span class="p">{</span>
+            <span class="n">Enum_Option</span><span class="o">.</span><span class="n">Pad1</span><span class="p">:</span> <span class="s1">&#39;pad&#39;</span><span class="p">,</span>
+            <span class="n">Enum_Option</span><span class="o">.</span><span class="n">PadN</span><span class="p">:</span> <span class="s1">&#39;pad&#39;</span><span class="p">,</span>
+            <span class="n">Enum_Option</span><span class="o">.</span><span class="n">Binding_Refresh_Advice</span><span class="p">:</span> <span class="s1">&#39;bra&#39;</span><span class="p">,</span>
+            <span class="n">Enum_Option</span><span class="o">.</span><span class="n">Alternate_Care_of_Address</span><span class="p">:</span> <span class="s1">&#39;aca&#39;</span><span class="p">,</span>
+            <span class="n">Enum_Option</span><span class="o">.</span><span class="n">Nonce_Indices</span><span class="p">:</span> <span class="s1">&#39;ni&#39;</span><span class="p">,</span>
+            <span class="n">Enum_Option</span><span class="o">.</span><span class="n">Authorization_Data</span><span class="p">:</span> <span class="s1">&#39;bad&#39;</span><span class="p">,</span>
+            <span class="n">Enum_Option</span><span class="o">.</span><span class="n">Mobile_Network_Prefix_Option</span><span class="p">:</span> <span class="s1">&#39;mnp&#39;</span><span class="p">,</span>
+            <span class="n">Enum_Option</span><span class="o">.</span><span class="n">Mobility_Header_Link_Layer_Address_option</span><span class="p">:</span> <span class="s1">&#39;lla&#39;</span><span class="p">,</span>
+            <span class="n">Enum_Option</span><span class="o">.</span><span class="n">MN_ID_OPTION_TYPE</span><span class="p">:</span> <span class="s1">&#39;mn_id&#39;</span><span class="p">,</span>
+            <span class="n">Enum_Option</span><span class="o">.</span><span class="n">AUTH_OPTION_TYPE</span><span class="p">:</span> <span class="s1">&#39;auth&#39;</span><span class="p">,</span>
+            <span class="n">Enum_Option</span><span class="o">.</span><span class="n">MESG_ID_OPTION_TYPE</span><span class="p">:</span> <span class="s1">&#39;mesg_id&#39;</span><span class="p">,</span>
+            <span class="n">Enum_Option</span><span class="o">.</span><span class="n">CGA_Parameters_Request</span><span class="p">:</span> <span class="s1">&#39;cga_pr&#39;</span><span class="p">,</span>
+            <span class="n">Enum_Option</span><span class="o">.</span><span class="n">CGA_Parameters</span><span class="p">:</span> <span class="s1">&#39;cga_param&#39;</span><span class="p">,</span>
+        <span class="p">},</span>
+    <span class="p">)</span>  <span class="c1"># type: DefaultDict[Enum_Option | int, str | tuple[OptionParser, OptionConstructor]]</span>
+
+    <span class="c1">#: DefaultDict[Enum_CGAExtension, str | tuple[ExtensionParser, ExtensionConstructor]]:</span>
+    <span class="c1">#: CGA extension type to method mapping. Method names are expected to be referred</span>
+    <span class="c1">#: to the class by ``_read_extension_${name}`` and/or ``_make_ext_${name}``,</span>
+    <span class="c1">#: and if such name not found, the value should then be a method that can</span>
+    <span class="c1">#: parse the CGA extension by itself.</span>
+    <span class="n">__extension__</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">defaultdict</span><span class="p">(</span>
+        <span class="k">lambda</span><span class="p">:</span> <span class="s1">&#39;none&#39;</span><span class="p">,</span>
+        <span class="p">{</span>
+            <span class="n">Enum_CGAExtension</span><span class="o">.</span><span class="n">Multi_Prefix</span><span class="p">:</span> <span class="s1">&#39;multiprefix&#39;</span><span class="p">,</span>
+        <span class="p">},</span>
+    <span class="p">)</span>  <span class="c1"># type: DefaultDict[Enum_CGAExtension | int, str | tuple[ExtensionParser, ExtensionConstructor]]</span>
 
     <span class="c1">##########################################################################</span>
     <span class="c1"># Properties.</span>
@@ -598,7 +766,1222 @@
             <span class="s1">&#39;chksum&#39;</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">chksum</span><span class="p">,</span>
             <span class="s1">&#39;data&#39;</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">data</span><span class="p">,</span>
             <span class="s1">&#39;payload&#39;</span><span class="p">:</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_make_payload</span><span class="p">(</span><span class="n">data</span><span class="p">),</span>
-        <span class="p">}</span></div></div>
+        <span class="p">}</span></div>
+
+    <span class="k">def</span> <span class="nf">_read_mh_options</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">options_schema</span><span class="p">:</span> <span class="s1">&#39;list[Schema_Option]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Option&#39;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read MH options.</span>
+
+<span class="sd">        Structure of MH option [:rfc:`6275`]:</span>
+
+<span class="sd">        .. code-block:: text</span>
+
+<span class="sd">            0                   1                   2                   3</span>
+<span class="sd">            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1</span>
+<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+<span class="sd">           |  Option Type  | Option Length |   Option Data...</span>
+<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            options_schema: Parsed MH options.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Parsed MH options data.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">options</span> <span class="o">=</span> <span class="n">OrderedMultiDict</span><span class="p">()</span>  <span class="c1"># type: Option</span>
+
+        <span class="k">for</span> <span class="n">schema</span> <span class="ow">in</span> <span class="n">options_schema</span><span class="p">:</span>
+            <span class="nb">type</span> <span class="o">=</span> <span class="n">schema</span><span class="o">.</span><span class="n">type</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__option__</span><span class="p">[</span><span class="nb">type</span><span class="p">]</span>
+
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+                <span class="n">meth_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;_read_opt_</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1">&#39;</span>
+                <span class="n">meth</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">&#39;OptionParser&#39;</span><span class="p">,</span>
+                            <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">meth_name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_opt_none</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">meth</span> <span class="o">=</span> <span class="n">name</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">meth</span><span class="p">(</span><span class="n">schema</span><span class="p">,</span> <span class="n">options</span><span class="o">=</span><span class="n">options</span><span class="p">)</span>
+
+            <span class="c1"># record option data</span>
+            <span class="n">options</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="nb">type</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">options</span>
+
+    <span class="k">def</span> <span class="nf">_read_opt_none</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">&#39;Schema_UnassignedOption&#39;</span><span class="p">,</span> <span class="o">*</span>
+                             <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Data_UnassignedOption&#39;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read MH unassigned option.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            schema: Parsed option schema.</span>
+<span class="sd">            options: Parsed MH options.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Constructed option data.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">Data_UnassignedOption</span><span class="p">(</span>
+            <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span>
+            <span class="n">data</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">data</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">data</span>
+
+    <span class="k">def</span> <span class="nf">_read_opt_pad</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">&#39;Schema_PadOption&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                      <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Data_PadOption&#39;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read MH padding option.</span>
+
+<span class="sd">        Structure of MH padding option [:rfc:`6275`]:</span>
+
+<span class="sd">        * ``Pad1`` option:</span>
+
+<span class="sd">          .. code-block:: text</span>
+
+<span class="sd">              0</span>
+<span class="sd">              0 1 2 3 4 5 6 7</span>
+<span class="sd">             +-+-+-+-+-+-+-+-+</span>
+<span class="sd">             |   Type = 0    |</span>
+<span class="sd">             +-+-+-+-+-+-+-+-+</span>
+
+<span class="sd">        * ``PadN`` option:</span>
+
+<span class="sd">          .. code-block:: text</span>
+
+<span class="sd">              0                   1</span>
+<span class="sd">              0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5</span>
+<span class="sd">             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+- - - - - - - - -</span>
+<span class="sd">             |   Type = 1    | Option Length | Option Data</span>
+<span class="sd">             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+- - - - - - - - -</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            schema: Parsed option schema.</span>
+<span class="sd">            options: Parsed MH options.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Constructed option data.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">code</span><span class="p">,</span> <span class="n">clen</span> <span class="o">=</span> <span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="n">schema</span><span class="o">.</span><span class="n">length</span>
+
+        <span class="k">if</span> <span class="n">code</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="n">Enum_Option</span><span class="o">.</span><span class="n">Pad1</span><span class="p">,</span> <span class="n">Enum_Option</span><span class="o">.</span><span class="n">PadN</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1">] invalid format&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">code</span> <span class="o">==</span> <span class="n">Enum_Option</span><span class="o">.</span><span class="n">Pad1</span> <span class="ow">and</span> <span class="n">clen</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1">] invalid format&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">code</span> <span class="o">==</span> <span class="n">Enum_Option</span><span class="o">.</span><span class="n">PadN</span> <span class="ow">and</span> <span class="n">clen</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1">] invalid format&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">code</span> <span class="o">==</span> <span class="n">Enum_Option</span><span class="o">.</span><span class="n">Pad1</span><span class="p">:</span>
+            <span class="n">size</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">size</span> <span class="o">=</span> <span class="n">clen</span> <span class="o">+</span> <span class="mi">2</span>
+
+        <span class="n">data</span> <span class="o">=</span> <span class="n">Data_PadOption</span><span class="p">(</span>
+            <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="n">size</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">data</span>
+
+    <span class="k">def</span> <span class="nf">_read_opt_bra</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">&#39;Schema_BindRefreshAdviceOption&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                      <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Data_BindRefreshAdviceOption&#39;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read MH binding refresh advice option.</span>
+
+<span class="sd">        Structure of MH Binding Refresh Advice option [:rfc:`6275`]:</span>
+
+<span class="sd">        .. code-block:: text</span>
+
+<span class="sd">            0                   1                   2                   3</span>
+<span class="sd">            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1</span>
+<span class="sd">                                           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+<span class="sd">                                           |   Type = 2    |   Length = 2  |</span>
+<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+<span class="sd">           |       Refresh Interval        |</span>
+<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            schema: Parsed option schema.</span>
+<span class="sd">            options: Parsed MH options.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Constructed option data.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [Opt </span><span class="si">{</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s1">] invalid format&#39;</span><span class="p">)</span>
+
+        <span class="n">data</span> <span class="o">=</span> <span class="n">Data_BindRefreshAdviceOption</span><span class="p">(</span>
+            <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span>
+            <span class="n">interval</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">interval</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">data</span>
+
+    <span class="k">def</span> <span class="nf">_read_opt_aca</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">&#39;Schema_AlternateCareofAddressOption&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                      <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Data_AlternateCareofAddressOption&#39;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read MH alternate care-of address option.</span>
+
+<span class="sd">        Structure of MH Alternate Care-of Address option [:rfc:`6275`]:</span>
+
+<span class="sd">        .. code-block:: text</span>
+
+<span class="sd">            0                   1                   2                   3</span>
+<span class="sd">            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1</span>
+<span class="sd">                                           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+<span class="sd">                                           |   Type = 3    |  Length = 16  |</span>
+<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+<span class="sd">           |                                                               |</span>
+<span class="sd">           +                                                               +</span>
+<span class="sd">           |                                                               |</span>
+<span class="sd">           +                   Alternate Care-of Address                   +</span>
+<span class="sd">           |                                                               |</span>
+<span class="sd">           +                                                               +</span>
+<span class="sd">           |                                                               |</span>
+<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            schema: Parsed option schema.</span>
+<span class="sd">            options: Parsed MH options.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Constructed option data.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">!=</span> <span class="mi">16</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [Opt </span><span class="si">{</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s1">] invalid format&#39;</span><span class="p">)</span>
+
+        <span class="n">data</span> <span class="o">=</span> <span class="n">Data_AlternateCareofAddressOption</span><span class="p">(</span>
+            <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span>
+            <span class="n">address</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">address</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">data</span>
+
+    <span class="k">def</span> <span class="nf">_read_opt_ni</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">&#39;Schema_NonceIndicesOption&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                     <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Data_NonceIndicesOption&#39;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read MH nonce indices option.</span>
+
+<span class="sd">        Structure of MH Nonce Indices option [:rfc:`6275`]:</span>
+
+<span class="sd">        .. code-block:: text</span>
+
+<span class="sd">            0                   1                   2                   3</span>
+<span class="sd">            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1</span>
+<span class="sd">                                           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+<span class="sd">                                           |   Type = 4    |   Length = 4  |</span>
+<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+<span class="sd">           |         Home Nonce Index      |     Care-of Nonce Index       |</span>
+<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            schema: Parsed option schema.</span>
+<span class="sd">            options: Parsed MH options.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Constructed option data.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">!=</span> <span class="mi">4</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [Opt </span><span class="si">{</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s1">] invalid format&#39;</span><span class="p">)</span>
+
+        <span class="n">data</span> <span class="o">=</span> <span class="n">Data_NonceIndicesOption</span><span class="p">(</span>
+            <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span>
+            <span class="n">home</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">home</span><span class="p">,</span>
+            <span class="n">careof</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">careof</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">data</span>
+
+    <span class="k">def</span> <span class="nf">_read_opt_bad</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">&#39;Schema_BindingAuthorizationDataOption&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                      <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Data_BindingAuthorizationDataOption&#39;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read MH binding authorization data option.</span>
+
+<span class="sd">        Structure of MH Binding Authorization Data option [:rfc:`6275`]:</span>
+
+<span class="sd">        .. code-block:: text</span>
+
+<span class="sd">            0                   1                   2                   3</span>
+<span class="sd">            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1</span>
+<span class="sd">                                           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+<span class="sd">                                           |   Type = 5    | Option Length |</span>
+<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+<span class="sd">           |                                                               |</span>
+<span class="sd">           +                                                               +</span>
+<span class="sd">           |                         Authenticator                         |</span>
+<span class="sd">           +                                                               +</span>
+<span class="sd">           |                                                               |</span>
+<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            schema: Parsed option schema.</span>
+<span class="sd">            options: Parsed MH options.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Constructed option data.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">%</span> <span class="mi">8</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [Opt </span><span class="si">{</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s1">] invalid format&#39;</span><span class="p">)</span>
+
+        <span class="n">data</span> <span class="o">=</span> <span class="n">Data_BindingAuthorizationDataOption</span><span class="p">(</span>
+            <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span>
+            <span class="n">data</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">data</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">data</span>
+
+    <span class="k">def</span> <span class="nf">_read_opt_mnp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">&#39;Schema_MobileNetworkPrefixOption&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                      <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Data_MobileNetworkPrefixOption&#39;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read MH mobile network prefix option.</span>
+
+<span class="sd">        Structure of MH Mobile Network Prefix option [:rfc:`3963`]:</span>
+
+<span class="sd">        .. code-block:: text</span>
+
+<span class="sd">            0                   1                   2                   3</span>
+<span class="sd">            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1</span>
+<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+<span class="sd">           |      Type     |   Length      |   Reserved    | Prefix Length |</span>
+<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+<span class="sd">           |                                                               |</span>
+<span class="sd">           +                                                               +</span>
+<span class="sd">           |                                                               |</span>
+<span class="sd">           +                   Mobile Network Prefix                       +</span>
+<span class="sd">           |                                                               |</span>
+<span class="sd">           +                                                               +</span>
+<span class="sd">           |                                                               |</span>
+<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            schema: Parsed option schema.</span>
+<span class="sd">            options: Parsed MH options.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Constructed option data.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">!=</span> <span class="mi">18</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [Opt </span><span class="si">{</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s1">] invalid format&#39;</span><span class="p">)</span>
+
+        <span class="n">prefix</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">&#39;IPv6Network&#39;</span><span class="p">,</span>
+                      <span class="n">ipaddress</span><span class="o">.</span><span class="n">ip_network</span><span class="p">((</span><span class="n">schema</span><span class="o">.</span><span class="n">prefix</span><span class="p">,</span> <span class="n">schema</span><span class="o">.</span><span class="n">prefix_length</span><span class="p">)))</span>
+
+        <span class="n">data</span> <span class="o">=</span> <span class="n">Data_MobileNetworkPrefixOption</span><span class="p">(</span>
+            <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span>
+            <span class="n">prefix</span><span class="o">=</span><span class="n">prefix</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">data</span>
+
+    <span class="k">def</span> <span class="nf">_read_opt_lla</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">&#39;Schema_LinkLayerAddressOption&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                      <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Data_LinkLayerAddressOption&#39;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read MH link-layer address (MH-LLA) option.</span>
+
+<span class="sd">        Structure of MH Link-Layer Address option [:rfc:`5568`]:</span>
+
+<span class="sd">        .. code-block:: text</span>
+
+<span class="sd">            0                   1                   2                   3</span>
+<span class="sd">            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1</span>
+<span class="sd">                                         +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+<span class="sd">                                         |     Type      |     Length    |</span>
+<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+<span class="sd">           | Option-Code   |                  LLA                     ....</span>
+<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            schema: Parsed option schema.</span>
+<span class="sd">            options: Parsed MH options.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Constructed option data.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">schema</span><span class="o">.</span><span class="n">code</span> <span class="o">!=</span> <span class="n">Enum_LLACode</span><span class="o">.</span><span class="n">MH</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [Opt </span><span class="si">{</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s1">] invalid format&#39;</span><span class="p">)</span>
+
+        <span class="n">data</span> <span class="o">=</span> <span class="n">Data_LinkLayerAddressOption</span><span class="p">(</span>
+            <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span>
+            <span class="n">code</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">code</span><span class="p">,</span>
+            <span class="n">lla</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">lla</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">data</span>
+
+    <span class="k">def</span> <span class="nf">_read_opt_mn_id</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">&#39;Schema_MNIDOption&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                       <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Data_MNIDOption&#39;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read MH mobile node identifier option.</span>
+
+<span class="sd">        Structure of MH Mobile Node Identifier option [:rfc:`4283`]:</span>
+
+<span class="sd">        .. code-block:: text</span>
+
+<span class="sd">           0                   1                   2                   3</span>
+<span class="sd">           0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1</span>
+<span class="sd">                                           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+<span class="sd">                                           |  Option Type  | Option Length |</span>
+<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+<span class="sd">           |  Subtype      |          Identifier ...</span>
+<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            schema: Parsed option schema.</span>
+<span class="sd">            options: Parsed MH options.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Constructed option data.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">Data_MNIDOption</span><span class="p">(</span>
+            <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span>
+            <span class="n">subtype</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">subtype</span><span class="p">,</span>
+            <span class="n">identifier</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">identifier</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">data</span>
+
+    <span class="k">def</span> <span class="nf">_read_opt_auth</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">&#39;Schema_AuthOption&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                       <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Data_AuthOption&#39;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read MH mobility message authentication option.</span>
+
+<span class="sd">        Structure of MH Mobility Message Authentication option [:rfc:`4285`]:</span>
+
+<span class="sd">        .. code-block:: text</span>
+
+<span class="sd">           0                   1                   2                   3</span>
+<span class="sd">           0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1</span>
+<span class="sd">                           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+<span class="sd">                           |  Option Type  | Option Length |  Subtype      |</span>
+<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+<span class="sd">           |                  Mobility SPI                                 |</span>
+<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+<span class="sd">           |                  Authentication Data ....</span>
+<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            schema: Parsed option schema.</span>
+<span class="sd">            options: Parsed MH options.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Constructed option data.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">%</span> <span class="mi">4</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [Opt </span><span class="si">{</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s1">] invalid format&#39;</span><span class="p">)</span>
+
+        <span class="n">data</span> <span class="o">=</span> <span class="n">Data_AuthOption</span><span class="p">(</span>
+            <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span>
+            <span class="n">subtype</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">subtype</span><span class="p">,</span>
+            <span class="n">spi</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">spi</span><span class="p">,</span>
+            <span class="n">data</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">data</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">data</span>
+
+    <span class="k">def</span> <span class="nf">_read_opt_mesg_id</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">&#39;Schema_MesgIDOption&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                          <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Data_MesgIDOption&#39;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read MH mobility message replay protection option.</span>
+
+<span class="sd">        Structure of MH Mobility Message Replay Protection option [:rfc:`4285`]:</span>
+
+<span class="sd">        .. code-block:: text</span>
+
+<span class="sd">           0                   1                   2                   3</span>
+<span class="sd">           0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1</span>
+<span class="sd">                                       +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+<span class="sd">                                       |      Option Type  | Option Length |</span>
+<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+<span class="sd">           |                  Timestamp ...                                |</span>
+<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+<span class="sd">           |                  Timestamp                                    |</span>
+<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            schema: Parsed option schema.</span>
+<span class="sd">            options: Parsed MH options.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Constructed option data.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">)</span> <span class="o">%</span> <span class="mi">8</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [Opt </span><span class="si">{</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s1">] invalid format&#39;</span><span class="p">)</span>
+
+        <span class="n">data</span> <span class="o">=</span> <span class="n">Data_MesgIDOption</span><span class="p">(</span>
+            <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span>
+            <span class="n">timestamp</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">timestamp</span><span class="p">,</span>
+            <span class="n">ntp_timestamp</span><span class="o">=</span><span class="n">NTPTimestamp</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">seconds</span><span class="p">,</span> <span class="n">schema</span><span class="o">.</span><span class="n">fraction</span><span class="p">),</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">data</span>
+
+    <span class="k">def</span> <span class="nf">_read_opt_cga_pr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">&#39;Schema_CGAParametersRequestOption&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                         <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Data_CGAParametersRequestOption&#39;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read MH CGA parameters request option.</span>
+
+<span class="sd">        Structure of MH CGA Parameters Request option [:rfc:`4866`]:</span>
+
+<span class="sd">        .. code-block:: text</span>
+
+<span class="sd">            0                   1                   2                   3</span>
+<span class="sd">            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1</span>
+<span class="sd">                                           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+<span class="sd">                                           |  Option Type  | Option Length |</span>
+<span class="sd">                                           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            schema: Parsed option schema.</span>
+<span class="sd">            options: Parsed MH options.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Constructed option data.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [Opt </span><span class="si">{</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s1">] invalid format&#39;</span><span class="p">)</span>
+
+        <span class="n">data</span> <span class="o">=</span> <span class="n">Data_CGAParametersRequestOption</span><span class="p">(</span>
+            <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">data</span>
+
+    <span class="k">def</span> <span class="nf">_read_opt_cga_param</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">&#39;Schema_CGAParametersOption&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                            <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Data_CGAParametersOption&#39;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read MH CGA parameters option.</span>
+
+<span class="sd">        Structure of MH CGA Parameters option [:rfc:`4866`]:</span>
+
+<span class="sd">        .. code-block:: text</span>
+
+<span class="sd">            0                   1                   2                   3</span>
+<span class="sd">            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1</span>
+<span class="sd">                                           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+<span class="sd">                                           |  Option Type  | Option Length |</span>
+<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+<span class="sd">           |                                                               |</span>
+<span class="sd">           :                                                               :</span>
+<span class="sd">           :                          CGA Parameters                       :</span>
+<span class="sd">           :                                                               :</span>
+<span class="sd">           |                                                               |</span>
+<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            schema: Parsed option schema.</span>
+<span class="sd">            options: Parsed MH options.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Constructed option data.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">param</span> <span class="ow">in</span> <span class="n">schema</span><span class="o">.</span><span class="n">parameters</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">param</span><span class="o">.</span><span class="n">collision_count</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [Opt </span><span class="si">{</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s1">] invalid format&#39;</span><span class="p">)</span>
+
+        <span class="n">data</span> <span class="o">=</span> <span class="n">Data_CGAParametersOption</span><span class="p">(</span>
+            <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span>
+            <span class="n">parameters</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">Data_CGAParameter</span><span class="p">(</span>
+                <span class="n">modifier</span><span class="o">=</span><span class="n">param</span><span class="o">.</span><span class="n">modifier</span><span class="p">,</span>
+                <span class="n">prefix</span><span class="o">=</span><span class="n">param</span><span class="o">.</span><span class="n">prefix</span><span class="p">,</span>
+                <span class="n">collision_count</span><span class="o">=</span><span class="n">param</span><span class="o">.</span><span class="n">collision_count</span><span class="p">,</span>
+                <span class="n">public_key</span><span class="o">=</span><span class="n">param</span><span class="o">.</span><span class="n">public_key</span><span class="p">,</span>
+                <span class="n">extensions</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_read_cga_extensions</span><span class="p">(</span><span class="n">param</span><span class="o">.</span><span class="n">extensions</span><span class="p">),</span>
+            <span class="p">)</span> <span class="k">for</span> <span class="n">param</span> <span class="ow">in</span> <span class="n">schema</span><span class="o">.</span><span class="n">parameters</span><span class="p">),</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">data</span>
+
+
+
+
+    <span class="k">def</span> <span class="nf">_read_cga_extensions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">extensions_schema</span><span class="p">:</span> <span class="s1">&#39;list[Schema_CGAExtension]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Extension&#39;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read CGA extensions.</span>
+
+<span class="sd">        Structure of CGA extensions [:rfc:`4581`]:</span>
+
+<span class="sd">        .. code-block:: text</span>
+
+<span class="sd">            0                   1                   2                   3</span>
+<span class="sd">            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1</span>
+<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+<span class="sd">           |         Extension Type        |   Extension Data Length       |</span>
+<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+<span class="sd">           |                                                               |</span>
+<span class="sd">           ~                       Extension Data                          ~</span>
+<span class="sd">           |                                                               |</span>
+<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            extensions_schema: Parsed CGA extensions.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Parsed CGA extensions data.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">extensions</span> <span class="o">=</span> <span class="n">OrderedMultiDict</span><span class="p">()</span>  <span class="c1"># type: Extension</span>
+
+        <span class="k">for</span> <span class="n">schema</span> <span class="ow">in</span> <span class="n">extensions_schema</span><span class="p">:</span>
+            <span class="nb">type</span> <span class="o">=</span> <span class="n">schema</span><span class="o">.</span><span class="n">type</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__extension__</span><span class="p">[</span><span class="nb">type</span><span class="p">]</span>
+
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+                <span class="n">meth_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;_read_ext_</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1">&#39;</span>
+                <span class="n">meth</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">&#39;ExtensionParser&#39;</span><span class="p">,</span>
+                            <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">meth_name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_ext_none</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">meth</span> <span class="o">=</span> <span class="n">name</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">meth</span><span class="p">(</span><span class="n">schema</span><span class="p">,</span> <span class="n">extensions</span><span class="o">=</span><span class="n">extensions</span><span class="p">)</span>
+
+            <span class="c1"># record extension data</span>
+            <span class="n">extensions</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="nb">type</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">extensions</span>
+
+    <span class="k">def</span> <span class="nf">_read_ext_none</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">&#39;Schema_UnknownExtension&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                       <span class="n">extensions</span><span class="p">:</span> <span class="s1">&#39;Extension&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Data_UnknownExtension&#39;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read unknown CGA extension.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            schema: Parsed extension schema.</span>
+<span class="sd">            extensions: Parsed MH CGA extensions.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Constructed extension data.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">Data_UnknownExtension</span><span class="p">(</span>
+            <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span>
+            <span class="n">data</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">data</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">data</span>
+
+    <span class="k">def</span> <span class="nf">_read_ext_multiprefix</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">&#39;Schema_MultiPrefixExtension&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                                <span class="n">extensions</span><span class="p">:</span> <span class="s1">&#39;Extension&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Data_MultiPrefixExtension&#39;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read multi-prefix CGA extension.</span>
+
+<span class="sd">        Structure of Multi-Prefix CGA extension [:rfc:`5535`]::</span>
+
+<span class="sd">        .. code-block:: text</span>
+
+<span class="sd">            0                   1                   2                   3</span>
+<span class="sd">            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1</span>
+<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+<span class="sd">           |         Extension Type        |   Extension Data Length       |</span>
+<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+<span class="sd">           |P|                         Reserved                            |</span>
+<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+<span class="sd">           |                                                               |</span>
+<span class="sd">           +                           Prefix[1]                           +</span>
+<span class="sd">           |                                                               |</span>
+<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+<span class="sd">           |                                                               |</span>
+<span class="sd">           +                           Prefix[2]                           +</span>
+<span class="sd">           |                                                               |</span>
+<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+<span class="sd">           .                               .                               .</span>
+<span class="sd">           .                               .                               .</span>
+<span class="sd">           .                               .                               .</span>
+<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+<span class="sd">           |                                                               |</span>
+<span class="sd">           +                           Prefix[n]                           +</span>
+<span class="sd">           |                                                               |</span>
+<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            schema: Parsed extension schema.</span>
+<span class="sd">            extensions: Parsed MH CGA extensions.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Constructed extension data.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">Data_MultiPrefixExtension</span><span class="p">(</span>
+            <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span>
+            <span class="n">flag</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">flags</span><span class="p">[</span><span class="s1">&#39;P&#39;</span><span class="p">]),</span>
+            <span class="n">prefixes</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">prefixes</span><span class="p">),</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">data</span>
+
+
+
+    <span class="k">def</span> <span class="nf">_make_mh_options</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option | list[Schema_Option | tuple[Enum_Option, dict[str, Any]] | bytes]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;tuple[list[Schema_Option | bytes], int]&#39;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Make options for MH.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            options: MH options.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Tuple of options and total length of options.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">total_length</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">options</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+            <span class="n">options_list</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: list[Schema_Option | bytes]</span>
+            <span class="k">for</span> <span class="n">schema</span> <span class="ow">in</span> <span class="n">options</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">schema</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">):</span>
+                    <span class="n">code</span> <span class="o">=</span> <span class="n">Enum_Option</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">int</span><span class="o">.</span><span class="n">from_bytes</span><span class="p">(</span><span class="n">schema</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">1</span><span class="p">],</span> <span class="s1">&#39;big&#39;</span><span class="p">,</span> <span class="n">signed</span><span class="o">=</span><span class="kc">False</span><span class="p">))</span>
+
+                    <span class="n">data</span> <span class="o">=</span> <span class="n">schema</span>  <span class="c1"># type: Schema_Option | bytes</span>
+                    <span class="n">data_len</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+                <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">schema</span><span class="p">,</span> <span class="n">Schema</span><span class="p">):</span>
+                    <span class="n">data</span> <span class="o">=</span> <span class="n">schema</span>
+                    <span class="n">data_len</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">pack</span><span class="p">())</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">code</span><span class="p">,</span> <span class="n">args</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">&#39;tuple[Enum_Option, dict[str, Any]]&#39;</span><span class="p">,</span> <span class="n">schema</span><span class="p">)</span>
+                    <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__option__</span><span class="p">[</span><span class="n">code</span><span class="p">]</span>
+                    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+                        <span class="n">meth_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;_make_opt_</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1">&#39;</span>
+                        <span class="n">meth</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">&#39;OptionConstructor&#39;</span><span class="p">,</span>
+                                    <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">meth_name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_opt_none</span><span class="p">))</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">meth</span> <span class="o">=</span> <span class="n">name</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+                    <span class="n">data</span> <span class="o">=</span> <span class="n">meth</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="o">**</span><span class="n">args</span><span class="p">)</span>
+                    <span class="n">data_len</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">pack</span><span class="p">())</span>
+
+                <span class="n">options_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+                <span class="n">total_length</span> <span class="o">+=</span> <span class="n">data_len</span>
+            <span class="k">return</span> <span class="n">options_list</span><span class="p">,</span> <span class="n">total_length</span>
+
+        <span class="n">options_list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">code</span><span class="p">,</span> <span class="n">option</span> <span class="ow">in</span> <span class="n">options</span><span class="o">.</span><span class="n">items</span><span class="p">(</span><span class="n">multi</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__option__</span><span class="p">[</span><span class="n">code</span><span class="p">]</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+                <span class="n">meth_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;_make_opt_</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1">&#39;</span>
+                <span class="n">meth</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">&#39;OptionConstructor&#39;</span><span class="p">,</span>
+                            <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">meth_name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_opt_none</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">meth</span> <span class="o">=</span> <span class="n">name</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+            <span class="n">data</span> <span class="o">=</span> <span class="n">meth</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">option</span><span class="p">)</span>
+            <span class="n">data_len</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">pack</span><span class="p">())</span>
+
+            <span class="n">options_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+            <span class="n">total_length</span> <span class="o">+=</span> <span class="n">data_len</span>
+        <span class="k">return</span> <span class="n">options_list</span><span class="p">,</span> <span class="n">total_length</span>
+
+    <span class="k">def</span> <span class="nf">_make_opt_none</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span><span class="p">,</span> <span class="n">option</span><span class="p">:</span> <span class="s1">&#39;Optional[Data_UnassignedOption]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                             <span class="n">data</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">&#39;&#39;</span><span class="p">,</span>
+                             <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Schema_UnassignedOption&#39;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Make MH unassigned option.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            type: Option type.</span>
+<span class="sd">            option: Option data model.</span>
+<span class="sd">            data: Option data.</span>
+<span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Constructed option schema.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">option</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">option</span><span class="o">.</span><span class="n">data</span>
+
+        <span class="k">return</span> <span class="n">Schema_UnassignedOption</span><span class="p">(</span>
+            <span class="nb">type</span><span class="o">=</span><span class="nb">type</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">),</span>
+            <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_make_opt_pad</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span><span class="p">,</span> <span class="n">option</span><span class="p">:</span> <span class="s1">&#39;Optional[Data_PadOption]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                      <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+                      <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Schema_PadOption&#39;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Make MH pad option.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            type: Option type.</span>
+<span class="sd">            option: Option data model.</span>
+<span class="sd">            length: Padding length.</span>
+<span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Constructed option schema.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span>  <span class="n">option</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">length</span> <span class="o">=</span> <span class="n">option</span><span class="o">.</span><span class="n">length</span>
+
+        <span class="k">if</span> <span class="nb">type</span> <span class="o">==</span> <span class="n">Enum_Option</span><span class="o">.</span><span class="n">Pad1</span> <span class="ow">and</span> <span class="n">length</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="c1"># raise ProtocolError(f&#39;{self.alias}: [OptNo {type}] invalid format&#39;)</span>
+            <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="nb">type</span><span class="si">}</span><span class="s1">] invalid format&#39;</span><span class="p">,</span> <span class="n">ProtocolWarning</span><span class="p">)</span>
+            <span class="nb">type</span> <span class="o">=</span> <span class="n">Enum_Option</span><span class="o">.</span><span class="n">PadN</span>  <span class="c1"># type: ignore[assignment]</span>
+        <span class="k">if</span> <span class="nb">type</span> <span class="o">==</span> <span class="n">Enum_Option</span><span class="o">.</span><span class="n">PadN</span> <span class="ow">and</span> <span class="n">length</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="c1"># raise ProtocolError(f&#39;{self.alias}: [OptNo {type}] invalid format&#39;)</span>
+            <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="nb">type</span><span class="si">}</span><span class="s1">] invalid format&#39;</span><span class="p">,</span> <span class="n">ProtocolWarning</span><span class="p">)</span>
+            <span class="nb">type</span> <span class="o">=</span> <span class="n">Enum_Option</span><span class="o">.</span><span class="n">Pad1</span>  <span class="c1"># type: ignore[assignment]</span>
+
+        <span class="k">return</span> <span class="n">Schema_PadOption</span><span class="p">(</span>
+            <span class="nb">type</span><span class="o">=</span><span class="nb">type</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="n">length</span><span class="p">,</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_make_opt_bra</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span><span class="p">,</span> <span class="n">option</span><span class="p">:</span> <span class="s1">&#39;Optional[Data_BindRefreshAdviceOption]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                      <span class="n">interval</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+                      <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Schema_BindRefreshAdviceOption&#39;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Make MH binding refresh advice option.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            type: Option type.</span>
+<span class="sd">            option: Option data model.</span>
+<span class="sd">            interval: Refresh interval.</span>
+<span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Constructed option schema.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">option</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">interval</span> <span class="o">=</span> <span class="n">option</span><span class="o">.</span><span class="n">interval</span>
+
+        <span class="k">return</span> <span class="n">Schema_BindRefreshAdviceOption</span><span class="p">(</span>
+            <span class="nb">type</span><span class="o">=</span><span class="nb">type</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+            <span class="n">interval</span><span class="o">=</span><span class="n">interval</span><span class="p">,</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_make_opt_aca</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span><span class="p">,</span> <span class="n">option</span><span class="p">:</span> <span class="s1">&#39;Optional[Data_AlternateCareofAddressOption]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                      <span class="n">address</span><span class="p">:</span> <span class="s1">&#39;bytes | str | int | IPv6Address&#39;</span> <span class="o">=</span> <span class="s1">&#39;::&#39;</span><span class="p">,</span>
+                      <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Schema_AlternateCareofAddressOption&#39;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Make MH alternate care-of address option.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            type: Option type.</span>
+<span class="sd">            option: Option data model.</span>
+<span class="sd">            address: Alternate care-of address.</span>
+<span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Constructed option schema.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">option</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">address</span> <span class="o">=</span> <span class="n">option</span><span class="o">.</span><span class="n">address</span>
+
+        <span class="k">return</span> <span class="n">Schema_AlternateCareofAddressOption</span><span class="p">(</span>
+            <span class="nb">type</span><span class="o">=</span><span class="nb">type</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="mi">16</span><span class="p">,</span>
+            <span class="n">address</span><span class="o">=</span><span class="n">address</span><span class="p">,</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_make_opt_ni</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span><span class="p">,</span> <span class="n">option</span><span class="p">:</span> <span class="s1">&#39;Optional[Data_NonceIndicesOption]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                     <span class="n">home</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+                     <span class="n">careof</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+                     <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Schema_NonceIndicesOption&#39;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Make MH nonce indices option.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            type: Option type.</span>
+<span class="sd">            option: Option data model.</span>
+<span class="sd">            home: Home nonce index.</span>
+<span class="sd">            careof: Care-of nonce index.</span>
+<span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Constructed option schema.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">option</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">home</span> <span class="o">=</span> <span class="n">option</span><span class="o">.</span><span class="n">home</span>
+            <span class="n">careof</span> <span class="o">=</span> <span class="n">option</span><span class="o">.</span><span class="n">careof</span>
+
+        <span class="k">return</span> <span class="n">Schema_NonceIndicesOption</span><span class="p">(</span>
+            <span class="nb">type</span><span class="o">=</span><span class="nb">type</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
+            <span class="n">home</span><span class="o">=</span><span class="n">home</span><span class="p">,</span>
+            <span class="n">careof</span><span class="o">=</span><span class="n">careof</span><span class="p">,</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_make_opt_bad</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span><span class="p">,</span> <span class="n">option</span><span class="p">:</span> <span class="s1">&#39;Optional[Data_BindingAuthorizationDataOption]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                      <span class="n">data</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">&#39;&#39;</span><span class="p">,</span>
+                      <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Schema_BindingAuthorizationDataOption&#39;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Make MH binding authorization data option.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            type: Option type.</span>
+<span class="sd">            option: Option data model.</span>
+<span class="sd">            data: Authenticator.</span>
+<span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Constructed option schema.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">option</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">option</span><span class="o">.</span><span class="n">data</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">%</span> <span class="mi">8</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="nb">type</span><span class="si">}</span><span class="s1">] invalid format&#39;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">Schema_BindingAuthorizationDataOption</span><span class="p">(</span>
+            <span class="nb">type</span><span class="o">=</span><span class="nb">type</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">),</span>
+            <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_make_opt_mnp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span><span class="p">,</span> <span class="n">option</span><span class="p">:</span> <span class="s1">&#39;Optional[Data_MobileNetworkPrefixOption]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                      <span class="n">prefix</span><span class="p">:</span> <span class="s1">&#39;bytes | str | IPv6Network&#39;</span> <span class="o">=</span> <span class="s1">&#39;::/0&#39;</span><span class="p">,</span>
+                      <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Schema_MobileNetworkPrefixOption&#39;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Make MH mobile network prefix option.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            type: Option type.</span>
+<span class="sd">            option: Option data model.</span>
+<span class="sd">            prefix: Mobile network prefix.</span>
+<span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Constructed option schema.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">option</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">prefix</span> <span class="o">=</span> <span class="n">option</span><span class="o">.</span><span class="n">prefix</span>
+
+        <span class="n">prefix_val</span> <span class="o">=</span> <span class="n">ipaddress</span><span class="o">.</span><span class="n">ip_network</span><span class="p">(</span><span class="n">prefix</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">prefix_val</span><span class="o">.</span><span class="n">version</span> <span class="o">!=</span> <span class="mi">6</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="nb">type</span><span class="si">}</span><span class="s1">] invalid movile network prefix: </span><span class="si">{</span><span class="n">prefix</span><span class="si">!r}</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">prefix_length</span> <span class="o">=</span> <span class="n">prefix_val</span><span class="o">.</span><span class="n">prefixlen</span>
+        <span class="n">prefix_addr</span> <span class="o">=</span> <span class="n">prefix_val</span><span class="o">.</span><span class="n">network_address</span>
+
+        <span class="k">return</span> <span class="n">Schema_MobileNetworkPrefixOption</span><span class="p">(</span>
+            <span class="nb">type</span><span class="o">=</span><span class="nb">type</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="mi">18</span><span class="p">,</span>
+            <span class="n">prefix_length</span><span class="o">=</span><span class="n">prefix_length</span><span class="p">,</span>
+            <span class="n">prefix</span><span class="o">=</span><span class="n">prefix_addr</span><span class="p">,</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_make_opt_lla</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span><span class="p">,</span> <span class="n">option</span><span class="p">:</span> <span class="s1">&#39;Optional[Data_LinkLayerAddressOption]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                      <span class="n">address</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">&#39;&#39;</span><span class="p">,</span>
+                      <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Schema_LinkLayerAddressOption&#39;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Make MH link-layer address option.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            type: Option type.</span>
+<span class="sd">            option: Option data model.</span>
+<span class="sd">            address: Link-layer address.</span>
+<span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Constructed option schema.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">option</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">address</span> <span class="o">=</span> <span class="n">option</span><span class="o">.</span><span class="n">lla</span>
+
+        <span class="k">return</span> <span class="n">Schema_LinkLayerAddressOption</span><span class="p">(</span>
+            <span class="nb">type</span><span class="o">=</span><span class="nb">type</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">address</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span>
+            <span class="n">code</span><span class="o">=</span><span class="n">Enum_LLACode</span><span class="o">.</span><span class="n">MH</span><span class="p">,</span>  <span class="c1"># type: ignore[arg-type]</span>
+            <span class="n">lla</span><span class="o">=</span><span class="n">address</span><span class="p">,</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_make_opt_mn_id</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span><span class="p">,</span> <span class="n">option</span><span class="p">:</span> <span class="s1">&#39;Optional[Data_MNIDOption]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                       <span class="n">subtype</span><span class="p">:</span> <span class="s1">&#39;Enum_MNIDSubtype | StdlibEnum | AenumEnum | str | int&#39;</span> <span class="o">=</span> <span class="n">Enum_MNIDSubtype</span><span class="o">.</span><span class="n">IPv6_Address</span><span class="p">,</span>
+                       <span class="n">subtype_default</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                       <span class="n">subtype_namespace</span><span class="p">:</span> <span class="s1">&#39;Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># pylint: disable=line-too-long</span>
+                       <span class="n">subtype_reversed</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+                       <span class="n">identifier</span><span class="p">:</span> <span class="s1">&#39;bytes | str | IPv6Address | int&#39;</span> <span class="o">=</span> <span class="s1">&#39;::&#39;</span><span class="p">,</span>
+                       <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Schema_MNIDOption&#39;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Make MH mobile node identifier option.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            type: Option type.</span>
+<span class="sd">            option: Option data model.</span>
+<span class="sd">            subtype: MN-ID subtype.</span>
+<span class="sd">            subtype_default: MN-ID subtype default value.</span>
+<span class="sd">            subtype_namespace: MN-ID subtype namespace.</span>
+<span class="sd">            subtype_reversed: MN-ID subtype reversed flag.</span>
+<span class="sd">            identifier: Identifier.</span>
+<span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Constructed option schema.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">option</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">subtype_val</span> <span class="o">=</span> <span class="n">option</span><span class="o">.</span><span class="n">subtype</span>
+            <span class="n">identifier</span> <span class="o">=</span> <span class="n">option</span><span class="o">.</span><span class="n">identifier</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">subtype_val</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_index</span><span class="p">(</span><span class="n">subtype</span><span class="p">,</span> <span class="n">subtype_default</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="n">subtype_namespace</span><span class="p">,</span>  <span class="c1"># type: ignore[call-overload]</span>
+                                           <span class="nb">reversed</span><span class="o">=</span><span class="n">subtype_reversed</span><span class="p">,</span> <span class="n">pack</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">identifier</span><span class="p">,</span> <span class="n">ipaddress</span><span class="o">.</span><span class="n">IPv6Address</span><span class="p">):</span>
+            <span class="n">id_len</span> <span class="o">=</span> <span class="mi">16</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">identifier</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+            <span class="n">id_len</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">identifier</span><span class="o">.</span><span class="n">bit_length</span><span class="p">()</span> <span class="o">/</span> <span class="mi">8</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">id_len</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">identifier</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">Schema_MNIDOption</span><span class="p">(</span>
+            <span class="nb">type</span><span class="o">=</span><span class="nb">type</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="mi">1</span> <span class="o">+</span> <span class="n">id_len</span><span class="p">,</span>
+            <span class="n">subtype</span><span class="o">=</span><span class="n">subtype_val</span><span class="p">,</span>
+            <span class="n">identifier</span><span class="o">=</span><span class="n">identifier</span><span class="p">,</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_make_opt_auth</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span><span class="p">,</span> <span class="n">option</span><span class="p">:</span> <span class="s1">&#39;Optional[Data_AuthOption]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                       <span class="n">subtype</span><span class="p">:</span> <span class="s1">&#39;Enum_AuthSubtype | StdlibEnum | AenumEnum | str | int&#39;</span> <span class="o">=</span> <span class="n">Enum_AuthSubtype</span><span class="o">.</span><span class="n">MN_HA</span><span class="p">,</span>
+                       <span class="n">subtype_default</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                       <span class="n">subtype_namespace</span><span class="p">:</span> <span class="s1">&#39;Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># pylint: disable=line-too-long</span>
+                       <span class="n">subtype_reversed</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+                       <span class="n">spi</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+                       <span class="n">data</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">&#39;&#39;</span><span class="p">,</span>
+                       <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Schema_AuthOption&#39;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Make MH authentication option.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            type: Option type.</span>
+<span class="sd">            option: Option data model.</span>
+<span class="sd">            subtype: Authentication subtype.</span>
+<span class="sd">            subtype_default: Authentication subtype default value.</span>
+<span class="sd">            subtype_namespace: Authentication subtype namespace.</span>
+<span class="sd">            subtype_reversed: Authentication subtype reversed flag.</span>
+<span class="sd">            spi: Security parameter index.</span>
+<span class="sd">            data: Authentication data.</span>
+<span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Constructed option schema.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">option</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">subtype_val</span> <span class="o">=</span> <span class="n">option</span><span class="o">.</span><span class="n">subtype</span>
+            <span class="n">spi</span> <span class="o">=</span> <span class="n">option</span><span class="o">.</span><span class="n">spi</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">option</span><span class="o">.</span><span class="n">data</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">subtype_val</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_index</span><span class="p">(</span><span class="n">subtype</span><span class="p">,</span> <span class="n">subtype_default</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="n">subtype_namespace</span><span class="p">,</span>  <span class="c1"># type: ignore[call-overload]</span>
+                                           <span class="nb">reversed</span><span class="o">=</span><span class="n">subtype_reversed</span><span class="p">,</span> <span class="n">pack</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">+</span> <span class="mi">6</span><span class="p">)</span> <span class="o">%</span> <span class="mi">4</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="nb">type</span><span class="si">}</span><span class="s1">] invalid format&#39;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">Schema_AuthOption</span><span class="p">(</span>
+            <span class="nb">type</span><span class="o">=</span><span class="nb">type</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="mi">5</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">),</span>
+            <span class="n">subtype</span><span class="o">=</span><span class="n">subtype_val</span><span class="p">,</span>
+            <span class="n">spi</span><span class="o">=</span><span class="n">spi</span><span class="p">,</span>
+            <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_make_opt_mesg_id</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span><span class="p">,</span> <span class="n">option</span><span class="p">:</span> <span class="s1">&#39;Optional[Data_MesgIDOption]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                          <span class="n">timestamp</span><span class="p">:</span> <span class="s1">&#39;Optional[NTPTimestamp]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                          <span class="n">interval</span><span class="p">:</span> <span class="s1">&#39;Optional[dt_type]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                          <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Schema_MesgIDOption&#39;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Make MH mobility message replay protection option.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            type: Option type.</span>
+<span class="sd">            option: Option data model.</span>
+<span class="sd">            timestamp: NTP timestamp, c.f., :rfc:`1305`.</span>
+<span class="sd">            interval: Timestamp interval (since UNIX-epoch).</span>
+<span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Constructed option schema.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">option</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">timestamp</span> <span class="o">=</span> <span class="n">option</span><span class="o">.</span><span class="n">ntp_timestamp</span>
+
+        <span class="k">if</span> <span class="n">timestamp</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">interval</span> <span class="o">=</span> <span class="n">interval</span> <span class="ow">or</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">timezone</span><span class="o">.</span><span class="n">utc</span><span class="p">)</span>
+
+            <span class="n">int_ts</span> <span class="o">=</span> <span class="n">interval</span><span class="o">.</span><span class="n">timestamp</span><span class="p">()</span>
+            <span class="n">ts_sec</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">int_ts</span><span class="p">)</span>
+            <span class="n">ts_frc</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">ceil</span><span class="p">(((</span><span class="n">int_ts</span> <span class="o">-</span> <span class="n">ts_sec</span><span class="p">)</span> <span class="o">*</span> <span class="mi">1_000_000</span><span class="p">))</span> <span class="o">*</span> <span class="mi">2</span><span class="o">**</span><span class="mi">32</span>
+
+            <span class="n">timestamp</span> <span class="o">=</span> <span class="n">NTPTimestamp</span><span class="p">(</span><span class="n">seconds</span><span class="o">=</span><span class="n">ts_sec</span> <span class="o">+</span> <span class="mi">2_208_988_800</span><span class="p">,</span>  <span class="c1"># 70 years</span>
+                                     <span class="n">fraction</span><span class="o">=</span><span class="n">ts_frc</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">Schema_MesgIDOption</span><span class="p">(</span>
+            <span class="nb">type</span><span class="o">=</span><span class="nb">type</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span>
+            <span class="n">seconds</span><span class="o">=</span><span class="n">timestamp</span><span class="o">.</span><span class="n">seconds</span><span class="p">,</span>
+            <span class="n">fraction</span><span class="o">=</span><span class="n">timestamp</span><span class="o">.</span><span class="n">fraction</span><span class="p">,</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_make_opt_cga_pr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span><span class="p">,</span> <span class="n">option</span><span class="p">:</span> <span class="s1">&#39;Optional[Data_CGAParametersRequestOption]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                         <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Schema_CGAParametersRequestOption&#39;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Make MH CGA parameters request option.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            type: Option type.</span>
+<span class="sd">            option: Option data model.</span>
+<span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Constructed option schema.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">Schema_CGAParametersRequestOption</span><span class="p">(</span>
+            <span class="nb">type</span><span class="o">=</span><span class="nb">type</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_make_opt_cga_param</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span><span class="p">,</span> <span class="n">option</span><span class="p">:</span> <span class="s1">&#39;Optional[Data_CGAParametersOption]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                            <span class="n">parameters</span><span class="p">:</span> <span class="s1">&#39;Optional[list[Schema_CGAParameter | Data_CGAParameter | dict[str, Any] | bytes]]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                            <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Schema_CGAParametersOption&#39;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Make MH CGA paramters option.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            type: Option type.</span>
+<span class="sd">            option: Option data model.</span>
+<span class="sd">            parameters: CGA parameters.</span>
+<span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Constructed option schema.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">option</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">parameters</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">&#39;list[Data_CGAParameter]&#39;</span><span class="p">,</span> <span class="n">option</span><span class="o">.</span><span class="n">parameters</span><span class="p">)</span>  <span class="c1"># type: ignore[assignment]</span>
+
+        <span class="k">if</span> <span class="n">parameters</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">parameters</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="n">param</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: list[Schema_CGAParameter | bytes]</span>
+        <span class="n">length</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">parameters</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">):</span>
+                <span class="n">length</span> <span class="o">+=</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+                <span class="n">param</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">Schema_CGAParameter</span><span class="p">):</span>
+                <span class="n">length</span> <span class="o">+=</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+                <span class="n">param</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">Data_CGAParameter</span><span class="p">):</span>
+                <span class="n">ext</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_cga_extensions</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">extensions</span><span class="p">)</span>
+                <span class="n">schema</span> <span class="o">=</span> <span class="n">Schema_CGAParameter</span><span class="p">(</span>
+                    <span class="n">modifier</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">modifier</span><span class="p">,</span>
+                    <span class="n">prefix</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">prefix</span><span class="p">,</span>
+                    <span class="n">collision_count</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">collision_count</span><span class="p">,</span>
+                    <span class="n">public_key</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">public_key</span><span class="p">,</span>
+                    <span class="n">extensions</span><span class="o">=</span><span class="n">ext</span><span class="p">,</span>
+                <span class="p">)</span>
+
+                <span class="n">length</span> <span class="o">+=</span> <span class="nb">len</span><span class="p">(</span><span class="n">schema</span><span class="p">)</span>
+                <span class="n">param</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">schema</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="nb">type</span><span class="si">}</span><span class="s1">] unknown CGA parameter format: </span><span class="si">{</span><span class="n">data</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">Schema_CGAParametersOption</span><span class="p">(</span>
+            <span class="nb">type</span><span class="o">=</span><span class="nb">type</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="n">length</span><span class="p">,</span>
+            <span class="n">parameters</span><span class="o">=</span><span class="n">param</span><span class="p">,</span>
+        <span class="p">)</span>
+
+
+
+
+    <span class="k">def</span> <span class="nf">_make_cga_extensions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">extensions</span><span class="p">:</span> <span class="s1">&#39;Extension | list[Schema_CGAExtension | tuple[Enum_CGAExtension, dict[str, Any]] | bytes]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;tuple[list[Schema_CGAExtension | bytes], int]&#39;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Make CGA extensions for MH.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            extensions: CGA extensions.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Tuple of extensions and total length of extensions.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">total_length</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">extensions</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+            <span class="n">extensions_list</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: list[Schema_CGAExtension | bytes]</span>
+            <span class="k">for</span> <span class="n">schema</span> <span class="ow">in</span> <span class="n">extensions</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">schema</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">):</span>
+                    <span class="n">code</span> <span class="o">=</span> <span class="n">Enum_CGAExtension</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">int</span><span class="o">.</span><span class="n">from_bytes</span><span class="p">(</span><span class="n">schema</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">],</span> <span class="s1">&#39;big&#39;</span><span class="p">,</span> <span class="n">signed</span><span class="o">=</span><span class="kc">False</span><span class="p">))</span>
+
+                    <span class="n">data</span> <span class="o">=</span> <span class="n">schema</span>  <span class="c1"># type: Schema_CGAExtension | bytes</span>
+                    <span class="n">data_len</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+                <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">schema</span><span class="p">,</span> <span class="n">Schema</span><span class="p">):</span>
+                    <span class="n">data</span> <span class="o">=</span> <span class="n">schema</span>
+                    <span class="n">data_len</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">pack</span><span class="p">())</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">code</span><span class="p">,</span> <span class="n">args</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">&#39;tuple[Enum_CGAExtension, dict[str, Any]]&#39;</span><span class="p">,</span> <span class="n">schema</span><span class="p">)</span>
+                    <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__extension__</span><span class="p">[</span><span class="n">code</span><span class="p">]</span>
+                    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+                        <span class="n">meth_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;_make_ext_</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1">&#39;</span>
+                        <span class="n">meth</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">&#39;ExtensionConstructor&#39;</span><span class="p">,</span>
+                                    <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">meth_name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_ext_none</span><span class="p">))</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">meth</span> <span class="o">=</span> <span class="n">name</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+                    <span class="n">data</span> <span class="o">=</span> <span class="n">meth</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="o">**</span><span class="n">args</span><span class="p">)</span>
+                    <span class="n">data_len</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">pack</span><span class="p">())</span>
+
+                <span class="n">extensions_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+                <span class="n">total_length</span> <span class="o">+=</span> <span class="n">data_len</span>
+            <span class="k">return</span> <span class="n">extensions_list</span><span class="p">,</span> <span class="n">total_length</span>
+
+        <span class="n">extensions_list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">code</span><span class="p">,</span> <span class="n">extension</span> <span class="ow">in</span> <span class="n">extensions</span><span class="o">.</span><span class="n">items</span><span class="p">(</span><span class="n">multi</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__extension__</span><span class="p">[</span><span class="n">code</span><span class="p">]</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+                <span class="n">meth_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;_make_ext_</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1">&#39;</span>
+                <span class="n">meth</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">&#39;ExtensionConstructor&#39;</span><span class="p">,</span>
+                            <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">meth_name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_ext_none</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">meth</span> <span class="o">=</span> <span class="n">name</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+            <span class="n">data</span> <span class="o">=</span> <span class="n">meth</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">extension</span><span class="p">)</span>
+            <span class="n">data_len</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">pack</span><span class="p">())</span>
+
+            <span class="n">extensions_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+            <span class="n">total_length</span> <span class="o">+=</span> <span class="n">data_len</span>
+        <span class="k">return</span> <span class="n">extensions_list</span><span class="p">,</span> <span class="n">total_length</span>
+
+    <span class="k">def</span> <span class="nf">_make_ext_none</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_CGAExtension&#39;</span><span class="p">,</span> <span class="n">option</span><span class="p">:</span> <span class="s1">&#39;Optional[Data_UnknownExtension]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                       <span class="n">data</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">&#39;&#39;</span><span class="p">,</span>
+                       <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Schema_UnknownExtension&#39;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Make CGA extension.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            type: Extension type.</span>
+<span class="sd">            option: Extension data model.</span>
+<span class="sd">            data: Extension data.</span>
+<span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Constructed extension schema.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">option</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">option</span><span class="o">.</span><span class="n">data</span>
+
+        <span class="k">return</span> <span class="n">Schema_UnknownExtension</span><span class="p">(</span>
+            <span class="nb">type</span><span class="o">=</span><span class="nb">type</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">),</span>
+            <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_make_ext_multiprefix</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_CGAExtension&#39;</span><span class="p">,</span> <span class="n">option</span><span class="p">:</span> <span class="s1">&#39;Optional[Data_MultiPrefixExtension]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                              <span class="n">flag</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+                              <span class="n">prefixes</span><span class="p">:</span> <span class="s1">&#39;Optional[list[int]]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                              <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Schema_MultiPrefixExtension&#39;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Make CGA multi-prefix extension.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            type: Extension type.</span>
+<span class="sd">            option: Extension data model.</span>
+<span class="sd">            flag: Public key flag.</span>
+<span class="sd">            prefixes: Prefixes.</span>
+<span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Constructed extension schema.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">option</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">flag</span> <span class="o">=</span> <span class="n">option</span><span class="o">.</span><span class="n">flag</span>
+            <span class="n">prefixes</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">&#39;list[int]&#39;</span><span class="p">,</span> <span class="n">option</span><span class="o">.</span><span class="n">prefixes</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">prefixes</span> <span class="o">=</span> <span class="n">prefixes</span> <span class="ow">or</span> <span class="p">[]</span>
+
+        <span class="k">return</span> <span class="n">Schema_MultiPrefixExtension</span><span class="p">(</span>
+            <span class="nb">type</span><span class="o">=</span><span class="nb">type</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="mi">1</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">prefixes</span><span class="p">)</span> <span class="o">*</span> <span class="mi">16</span><span class="p">,</span>
+            <span class="n">flags</span><span class="o">=</span><span class="p">{</span>
+                <span class="s1">&#39;P&#39;</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">flag</span><span class="p">),</span>
+            <span class="p">},</span>
+            <span class="n">prefixes</span><span class="o">=</span><span class="n">prefixes</span><span class="p">,</span>
+        <span class="p">)</span></div>
 </pre></div>
         </article>
       </div>
