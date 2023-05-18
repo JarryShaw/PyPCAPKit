@@ -173,6 +173,24 @@ from pcapkit.protocols.data.internet.ipx import Address as IPX_Address
 
 # Mobility Header
 from pcapkit.protocols.data.internet.mh import MH
+from pcapkit.protocols.data.internet.mh import Option as MH_Option
+from pcapkit.protocols.data.internet.mh import UnassignedOption as MH_UnassignedOption
+from pcapkit.protocols.data.internet.mh import PadOption as MH_PadOption
+from pcapkit.protocols.data.internet.mh import BindRefreshAdviceOption as MH_BindRefreshAdviceOption
+from pcapkit.protocols.data.internet.mh import AlternateCareofAddressOption as MH_AlternateCareofAddressOption
+from pcapkit.protocols.data.internet.mh import NonceIndicesOption as MH_NonceIndicesOption
+from pcapkit.protocols.data.internet.mh import BindingAuthorizationDataOption as MH_BindingAuthorizationDataOption
+from pcapkit.protocols.data.internet.mh import MobileNetworkPrefixOption as MH_MobileNetworkPrefixOption
+from pcapkit.protocols.data.internet.mh import LinkLayerAddressOption as MH_LinkLayerAddressOption
+from pcapkit.protocols.data.internet.mh import MNIDOption as MH_MNIDOption
+from pcapkit.protocols.data.internet.mh import AuthOption as MH_AuthOption
+from pcapkit.protocols.data.internet.mh import MesgIDOption as MH_MesgIDOption
+from pcapkit.protocols.data.internet.mh import CGAParametersRequestOption as MH_CGAParametersRequestOption
+from pcapkit.protocols.data.internet.mh import CGAExtension as MH_CGAExtension
+from pcapkit.protocols.data.internet.mh import CGAParameter as MH_CGAParameter
+from pcapkit.protocols.data.internet.mh import CGAParametersOption as MH_CGAParametersOption
+from pcapkit.protocols.data.internet.mh import UnknownExtension as MH_UnknownExtension
+from pcapkit.protocols.data.internet.mh import MultiPrefixExtension as MH_MultiPrefixExtension
 
 __all__ = [
     # Authentication Header
