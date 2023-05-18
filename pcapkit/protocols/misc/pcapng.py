@@ -197,7 +197,7 @@ if TYPE_CHECKING:
     Record = OrderedMultiDict[Enum_RecordType, Data_NameResolutionRecord]
 
     BlockParser = Callable[[Schema_BlockType, NamedArg(Schema_PCAPNG, 'header')], Data_PCAPNG]
-    BlockConstructor = Callable[[Enum_BlockType, DefaultArg(Optional[Data_PCAPNG]),
+    BlockConstructor = Callable[[DefaultArg(Optional[Data_PCAPNG]),
                                  KwArg(Any)], Schema_BlockType]
 
     OptionParser = Callable[[Schema_Option, NamedArg(Option, 'options')], Data_Option]
@@ -966,9 +966,9 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
                 meth = name[1]
 
             if isinstance(block, dict):
-                block_val = meth(type_val, **block)
+                block_val = meth(**block)
             else:
-                block_val = meth(type_val, block)
+                block_val = meth(block)
         elif isinstance(block, Schema):
             block_val = block
         else:
