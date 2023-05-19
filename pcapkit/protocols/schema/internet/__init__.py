@@ -2,6 +2,7 @@
 """header schema for internet layer protocols"""
 
 # Authentication Header
+import pcapkit
 from pcapkit.protocols.schema.internet.ah import AH
 
 # Host Identity Protocol
@@ -196,6 +197,9 @@ from pcapkit.protocols.schema.internet.mh import CareofTestOption as MH_CareofTe
 from pcapkit.protocols.schema.internet.mh import UnknownMessage as MH_UnknownMessage
 from pcapkit.protocols.schema.internet.mh import BindingRefreshRequestMessage as MH_BindingRefreshRequestMessage
 from pcapkit.protocols.schema.internet.mh import HomeTestInitMessage as MH_HomeTestInitMessage
+from pcapkit.protocols.schema.internet.mh import CareofTestInitMessage as MH_CareofTestInitMessage
+from pcapkit.protocols.schema.internet.mh import HomeTestMessage as MH_HomeTestMessage
+from pcapkit.protocols.schema.internet.mh import CareofTestMessage as MH_CareofTestMessage
 
 __all__ = [
     # Authentication Header

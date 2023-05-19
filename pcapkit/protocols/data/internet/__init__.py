@@ -198,6 +198,9 @@ from pcapkit.protocols.data.internet.mh import CareofTestOption as MH_CareofTest
 from pcapkit.protocols.data.internet.mh import UnknownMessage as MH_UnknownMessage
 from pcapkit.protocols.data.internet.mh import BindingRefreshRequestMessage as MH_BindingRefreshRequestMessage
 from pcapkit.protocols.data.internet.mh import HomeTestInitMessage as MH_HomeTestInitMessage
+from pcapkit.protocols.data.internet.mh import CareofTestInitMessage as MH_CareofTestInitMessage
+from pcapkit.protocols.data.internet.mh import HomeTestMessage as MH_HomeTestMessage
+from pcapkit.protocols.data.internet.mh import CareofTestMessage as MH_CareofTestMessage
 
 __all__ = [
     # Authentication Header

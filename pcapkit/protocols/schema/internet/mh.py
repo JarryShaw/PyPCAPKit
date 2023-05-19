@@ -66,7 +66,8 @@ __all__ = [
     'MH',
 
     'Packet',
-    'UnknownMessage', 'BindingRefreshRequestMessage', 'HomeTestInitMessage',
+    'UnknownMessage', 'BindingRefreshRequestMessage', 'HomeTestInitMessage', 'CareofTestInitMessage',
+    'HomeTestMessage', 'CareofTestMessage',
 
     'Option',
     'UnassignedOption', 'PadOption', 'BindRefreshAdviceOption', 'AlternateCareofAddressOption',
@@ -147,6 +148,12 @@ def mh_data_selector(pkt: 'dict[str, Any]') -> 'Field':
         return SchemaField(length=length, schema=BindingRefreshRequestMessage)
     if type == Enum_Packet.Home_Test_Init:
         return SchemaField(length=length, schema=HomeTestInitMessage)
+    if type == Enum_Packet.Care_of_Test_Init:
+        return SchemaField(length=length, schema=CareofTestInitMessage)
+    if type == Enum_Packet.Home_Test:
+        return SchemaField(length=length, schema=HomeTestMessage)
+    if type == Enum_Packet.Care_of_Test:
+        return SchemaField(length=length, schema=CareofTestMessage)
     return SchemaField(length=length, schema=UnknownMessage)
 
 
@@ -568,3 +575,72 @@ class HomeTestInitMessage(Packet):
 
     if TYPE_CHECKING:
         def __init__(self, cookie: 'bytes', options: 'list[Option | bytes]') -> 'None': ...
+
+
+@schema_final
+class CareofTestInitMessage(Packet):
+    """Header schema for MH Care-of Test Init (CoTI) messages."""
+
+    #: Reserved.
+    reserved: 'bytes' = PaddingField(length=2)
+    #: Care-of init cookie.
+    cookie: 'bytes' = BytesField(length=8)
+    #: Mobility options.
+    options: 'list[Option]' = OptionField(
+        length=lambda pkt: pkt['__length__'],
+        base_schema=Option,
+        type_name='type',
+        registry=mh_opt_registry(),  # type: ignore[arg-type]
+        eool=None,
+    )
+
+    if TYPE_CHECKING:
+        def __init__(self, cookie: 'bytes', options: 'list[Option | bytes]') -> 'None': ...
+
+
+@schema_final
+class HomeTestMessage(Packet):
+    """Header schema for MH Home Test (HoT) message."""
+
+    #: Home nonce index.
+    nonce_index: 'int' = UInt16Field()
+    #: Home init cookie.
+    cookie: 'bytes' = BytesField(length=8)
+    #: Home keygen token.
+    token: 'bytes' = BytesField(length=8)
+    #: Mobility options.
+    options: 'list[Option]' = OptionField(
+        length=lambda pkt: pkt['__length__'],
+        base_schema=Option,
+        type_name='type',
+        registry=mh_opt_registry(),  # type: ignore[arg-type]
+        eool=None,
+    )
+
+    if TYPE_CHECKING:
+        def __init__(self, nonce_index: 'int', cookie: 'bytes', token: 'bytes',
+                     options: 'list[Option | bytes]') -> 'None': ...
+
+
+@schema_final
+class CareofTestMessage(Packet):
+    """Header schema for MH Care-of Test (CoT) message."""
+
+    #: Care-of nonce index.
+    nonce_index: 'int' = UInt16Field()
+    #: Care-of init cookie.
+    cookie: 'bytes' = BytesField(length=8)
+    #: Care-of keygen token.
+    token: 'bytes' = BytesField(length=8)
+    #: Mobility options.
+    options: 'list[Option]' = OptionField(
+        length=lambda pkt: pkt['__length__'],
+        base_schema=Option,
+        type_name='type',
+        registry=mh_opt_registry(),  # type: ignore[arg-type]
+        eool=None,
+    )
+
+    if TYPE_CHECKING:
+        def __init__(self, nonce_index: 'int', cookie: 'bytes', token: 'bytes',
+                     options: 'list[Option | bytes]') -> 'None': ...

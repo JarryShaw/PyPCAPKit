@@ -63,7 +63,8 @@ if TYPE_CHECKING:
 
 __all__ = [
     'MH',
-    'UnknownMessage', 'BindingRefreshRequestMessage',
+    'UnknownMessage', 'BindingRefreshRequestMessage', 'HomeTestInitMessage', 'CareofTestInitMessage',
+    'HomeTestMessage', 'CareofTestMessage',
 
     'Option',
     'UnassignedOption', 'PadOption', 'BindRefreshAdviceOption', 'AlternateCareofAddressOption',
@@ -127,6 +128,58 @@ class HomeTestInitMessage(MH):
     if TYPE_CHECKING:
         def __init__(self, next: 'TransType', length: 'int', type: 'Packet', chksum: 'bytes',
                      cookie: 'bytes', options: 'OrderedMultiDict[Enum_Option, Option]') -> 'None': ...
+
+
+@info_final
+class CareofTestInitMessage(MH):
+    """Data model for MH Care-of Test Init (CoTI) message type."""
+
+    #: Care-of init cookie.
+    cookie: 'bytes'
+    #: Mobility options.
+    options: 'OrderedMultiDict[Enum_Option, Option]'
+
+    if TYPE_CHECKING:
+        def __init__(self, next: 'TransType', length: 'int', type: 'Packet', chksum: 'bytes',
+                     cookie: 'bytes', options: 'OrderedMultiDict[Enum_Option, Option]') -> 'None': ...
+
+
+@info_final
+class HomeTestMessage(MH):
+    """Data model for MH Home Test (HoT) message type."""
+
+    #: Home nonce index.
+    nonce_index: 'int'
+    #: Home init cookie.
+    cookie: 'bytes'
+    #: Home keygen token.
+    token: 'bytes'
+    #: Mobility options.
+    options: 'OrderedMultiDict[Enum_Option, Option]'
+
+    if TYPE_CHECKING:
+        def __init__(self, next: 'TransType', length: 'int', type: 'Packet', chksum: 'bytes',
+                     nonce_index: 'int', cookie: 'bytes', token: 'bytes',
+                     options: 'OrderedMultiDict[Enum_Option, Option]') -> 'None': ...
+
+
+@info_final
+class CareofTestMessage(MH):
+    """Data model for MH Care-of Test (CoT) message type."""
+
+    #: Care-of nonce index.
+    nonce_index: 'int'
+    #: Care-of init cookie.
+    cookie: 'bytes'
+    #: Care-of keygen token.
+    token: 'bytes'
+    #: Mobility options.
+    options: 'OrderedMultiDict[Enum_Option, Option]'
+
+    if TYPE_CHECKING:
+        def __init__(self, next: 'TransType', length: 'int', type: 'Packet', chksum: 'bytes',
+                     nonce_index: 'int', cookie: 'bytes', token: 'bytes',
+                     options: 'OrderedMultiDict[Enum_Option, Option]') -> 'None': ...
 
 
 

@@ -140,6 +140,12 @@ from pcapkit.protocols.schema.internet.mh import BindingRefreshRequestMessage as
 from pcapkit.protocols.data.internet.mh import BindingRefreshRequestMessage as Data_BindingRefreshRequestMessage
 from pcapkit.protocols.schema.internet.mh import HomeTestInitMessage as Schema_HomeTestInitMessage
 from pcapkit.protocols.data.internet.mh import HomeTestInitMessage as Data_HomeTestInitMessage
+from pcapkit.protocols.schema.internet.mh import CareofTestInitMessage as Schema_CareofTestInitMessage
+from pcapkit.protocols.data.internet.mh import CareofTestInitMessage as Data_CareofTestInitMessage
+from pcapkit.protocols.schema.internet.mh import HomeTestMessage as Schema_HomeTestMessage
+from pcapkit.protocols.data.internet.mh import HomeTestMessage as Data_HomeTestMessage
+from pcapkit.protocols.schema.internet.mh import CareofTestMessage as Schema_CareofTestMessage
+from pcapkit.protocols.data.internet.mh import CareofTestMessage as Data_CareofTestMessage
 
 if TYPE_CHECKING:
     from datetime import datetime as dt_type
@@ -198,6 +204,9 @@ class MH(Internet[Data_MH, Schema_MH],
         {
             Enum_Packet.Binding_Refresh_Request: 'brr',
             Enum_Packet.Home_Test_Init: 'hoti',
+            Enum_Packet.Care_of_Test_Init: 'coti',
+            Enum_Packet.Home_Test: 'hot',
+            Enum_Packet.Care_of_Test: 'cot',
         },
     )  # type: DefaultDict[Enum_Packet | int, str | tuple[PacketParser, PacketConstructor]]
 
@@ -572,6 +581,138 @@ class MH(Internet[Data_MH, Schema_MH],
             chksum=header.chksum,
             cookie=schema.cookie,
             options=self._read_mh_options(schema.options)
+        )
+        return data
+
+    def _read_msg_coti(self, schema: 'Schema_CareofTestInitMessage', *,
+                       header: 'Schema_MH') -> 'Data_CareofTestInitMessage':
+        """Read MH care-of test initiation (CoTI) message type.
+
+        Structure of MH Care-of Test Initiation Message [:rfc:`6275`]:
+
+        .. code-block:: text
+
+                                           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+                                           |           Reserved            |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |                                                               |
+           +                      Care-of Init Cookie                      +
+           |                                                               |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |                                                               |
+           .                                                               .
+           .                        Mobility Options                       .
+           .                                                               .
+           |                                                               |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+        Args:
+            schema: Parsed message type schema.
+            header: Parsed MH header schema.
+
+        Returns:
+            Parsed message type data.
+
+        """
+        data = Data_CareofTestInitMessage(
+            next=header.next,
+            length=(header.length + 1) * 8,
+            type=header.type,
+            chksum=header.chksum,
+            cookie=schema.cookie,
+            options=self._read_mh_options(schema.options)
+        )
+        return data
+
+    def _read_msg_hot(self, schema: 'Schema_HomeTestMessage', *,
+                      header: 'Schema_MH') -> 'Data_HomeTestMessage':
+        """Read MH home test (HoT) message type.
+
+        Structure of MH Home Test Message [:rfc:`6275`]:
+
+        .. code-block:: text
+
+                                           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+                                           |       Home Nonce Index        |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |                                                               |
+           +                        Home Init Cookie                       +
+           |                                                               |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |                                                               |
+           +                       Home Keygen Token                       +
+           |                                                               |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |                                                               |
+           .                                                               .
+           .                        Mobility Options                       .
+           .                                                               .
+           |                                                               |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+        Args:
+            schema: Parsed message type schema.
+            header: Parsed MH header schema.
+
+        Returns:
+            Parsed message type data.
+
+        """
+        data = Data_HomeTestMessage(
+            next=header.next,
+            length=(header.length + 1) * 8,
+            type=header.type,
+            chksum=header.chksum,
+            nonce_index=schema.nonce_index,
+            cookie=schema.cookie,
+            token=schema.token,
+            options=self._read_mh_options(schema.options),
+        )
+        return data
+
+    def _read_msg_cot(self, schema: 'Schema_CareofTestMessage', *,
+                      header: 'Schema_MH') -> 'Data_CareofTestMessage':
+        """Read MH care-of test (CoT) message type.
+
+        Structure of MH Care-of Test Message [:rfc:`6275`]:
+
+        .. code-block:: text
+
+                                           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+                                           |      Care-of Nonce Index      |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |                                                               |
+           +                      Care-of Init Cookie                      +
+           |                                                               |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |                                                               |
+           +                     Care-of Keygen Token                      +
+           |                                                               |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |                                                               |
+           .                                                               .
+           .                        Mobility Options                       .
+           .                                                               .
+           |                                                               |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+        Args:
+            schema: Parsed message type schema.
+            header: Parsed MH header schema.
+
+        Returns:
+            Parsed message type data.
+
+        """
+        data = Data_CareofTestMessage(
+            next=header.next,
+            length=(header.length + 1) * 8,
+            type=header.type,
+            chksum=header.chksum,
+            nonce_index=schema.nonce_index,
+            cookie=schema.cookie,
+            token=schema.token,
+            options=self._read_mh_options(schema.options),
         )
         return data
 
@@ -1424,6 +1565,104 @@ class MH(Internet[Data_MH, Schema_MH],
             cookie=cookie,
             options=self._make_mh_options(options),
         )
+
+    def _make_msg_coti(self, message: 'Optional[Data_CareofTestInitMessage]', *,
+                       cookie: 'bytes' = b'\x00\x00\x00\x00\x00\x00\x00\x00',
+                       options: 'Optional[Option | list[Schema_Option | tuple[Enum_Option, dict[str, Any]] | bytes]]' = None,
+                       **kwargs: 'Any') -> 'Schema_CareofTestInitMessage':
+        """Make MH care-of test init (CoTI) message type.
+
+        Args:
+            message: Message data model.
+            cookie: Care-of test cookie.
+            options: Mobility options.
+            **kwargs: Arbitrary keyword arguments.
+
+        Returns:
+            Constructed message type.
+
+        """
+        if message is not None:
+            cookie = message.cookie
+            options = message.options
+        else:
+            options = options or []
+
+        return Schema_CareofTestInitMessage(
+            cookie=cookie,
+            options=self._make_mh_options(options),
+        )
+
+    def _make_msg_hot(self, message: 'Optional[Data_HomeTestMessage]', *,
+                      nonce_index: 'int' = 0,
+                      cookie: 'bytes' = b'\x00\x00\x00\x00\x00\x00\x00\x00',
+                      token: 'bytes' = b'\x00\x00\x00\x00\x00\x00\x00\x00',
+                      options: 'Optional[Option | list[Schema_Option | tuple[Enum_Option, dict[str, Any]] | bytes]]' = None,
+                      **kwargs: 'Any') -> 'Schema_HomeTestMessage':
+        """Make MH home test (HoT) message type.
+
+        Args:
+            message: Message data model.
+            nonce_index: Home nonce index.
+            cookie: Home test cookie.
+            token: Home test token.
+            options: Mobility options.
+            **kwargs: Arbitrary keyword arguments.
+
+        Returns:
+            Constructed message type.
+
+        """
+        if message is not None:
+            nonce_index = message.nonce_index
+            cookie = message.cookie
+            token = message.token
+            options = message.options
+        else:
+            options = options or []
+
+        return Schema_HomeTestMessage(
+            nonce_index=nonce_index,
+            cookie=cookie,
+            token=token,
+            options=self._make_mh_options(options),
+        )
+
+    def _make_msg_cot(self, message: 'Optional[Data_CareofTestMessage]', *,
+                      nonce_index: 'int' = 0,
+                      cookie: 'bytes' = b'\x00\x00\x00\x00\x00\x00\x00\x00',
+                      token: 'bytes' = b'\x00\x00\x00\x00\x00\x00\x00\x00',
+                      options: 'Optional[Option | list[Schema_Option | tuple[Enum_Option, dict[str, Any]] | bytes]]' = None,
+                      **kwargs: 'Any') -> 'Schema_CareofTestMessage':
+        """Make MH care-of test (CoT) message type.
+
+        Args:
+            message: Message data model.
+            nonce_index: Care-of nonce index.
+            cookie: Care-of test cookie.
+            token: Care-of test token.
+            options: Mobility options.
+            **kwargs: Arbitrary keyword arguments.
+
+        Returns:
+            Constructed message type.
+
+        """
+        if message is not None:
+            nonce_index = message.nonce_index
+            cookie = message.cookie
+            token = message.token
+            options = message.options
+        else:
+            options = options or []
+
+        return Schema_CareofTestMessage(
+            nonce_index=nonce_index,
+            cookie=cookie,
+            token=token,
+            options=self._make_mh_options(options),
+        )
+
 
 
 
