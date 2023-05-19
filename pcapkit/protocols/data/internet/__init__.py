@@ -196,6 +196,8 @@ from pcapkit.protocols.data.internet.mh import PermanentHomeKeygenTokenOption as
 from pcapkit.protocols.data.internet.mh import CareofTestInitOption as MH_CareofTestInitOption
 from pcapkit.protocols.data.internet.mh import CareofTestOption as MH_CareofTestOption
 from pcapkit.protocols.data.internet.mh import UnknownMessage as MH_UnknownMessage
+from pcapkit.protocols.data.internet.mh import BindingRefreshRequestMessage as MH_BindingRefreshRequestMessage
+from pcapkit.protocols.data.internet.mh import HomeTestInitMessage as MH_HomeTestInitMessage
 
 __all__ = [
     # Authentication Header

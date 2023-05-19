@@ -136,6 +136,11 @@ from pcapkit.protocols.schema.internet.mh import UnknownMessage as Schema_Unknow
 from pcapkit.utilities.exceptions import ProtocolError, UnsupportedCall
 from pcapkit.utilities.warnings import ProtocolWarning, warn
 
+from pcapkit.protocols.schema.internet.mh import BindingRefreshRequestMessage as Schema_BindingRefreshRequestMessage
+from pcapkit.protocols.data.internet.mh import BindingRefreshRequestMessage as Data_BindingRefreshRequestMessage
+from pcapkit.protocols.schema.internet.mh import HomeTestInitMessage as Schema_HomeTestInitMessage
+from pcapkit.protocols.data.internet.mh import HomeTestInitMessage as Data_HomeTestInitMessage
+
 if TYPE_CHECKING:
     from datetime import datetime as dt_type
     from enum import IntEnum as StdlibEnum
@@ -191,7 +196,8 @@ class MH(Internet[Data_MH, Schema_MH],
     __message__ = collections.defaultdict(
         lambda: 'unknown',
         {
-
+            Enum_Packet.Binding_Refresh_Request: 'brr',
+            Enum_Packet.Home_Test_Init: 'hoti',
         },
     )  # type: DefaultDict[Enum_Packet | int, str | tuple[PacketParser, PacketConstructor]]
 
@@ -493,6 +499,82 @@ class MH(Internet[Data_MH, Schema_MH],
             data=schema.data,
         )
         return data
+
+    def _read_msg_brr(self, schema: 'Schema_BindingRefreshRequestMessage', *,
+                      header: 'Schema_MH') -> 'Data_BindingRefreshRequestMessage':
+        """Read MH binding refresh request (BRR) message type.
+
+        Structure of MH Binding Refresh Request Message [:rfc:`6275`]:
+
+        .. code-block:: text
+
+                                           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+                                           |          Reserved             |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |                                                               |
+           .                                                               .
+           .                        Mobility Options                       .
+           .                                                               .
+           |                                                               |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+        Args:
+            schema: Parsed message type schema.
+            header: Parsed MH header schema.
+
+        Returns:
+            Parsed message type data.
+
+        """
+        data = Data_BindingRefreshRequestMessage(
+            next=header.next,
+            length=(header.length + 1) * 8,
+            type=header.type,
+            chksum=header.chksum,
+            options=self._read_mh_options(schema.options)
+        )
+        return data
+
+    def _read_msg_hoti(self, schema: 'Schema_HomeTestInitMessage', *,
+                       header: 'Schema_MH') -> 'Data_HomeTestInitMessage':
+        """Read MH home test initiation (HoTI) message type.
+
+        Structure of MH Home Test Initiation Message [:rfc:`6275`]:
+
+        .. code-block:: text
+
+                                           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+                                           |           Reserved            |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |                                                               |
+           +                       Home Init Cookie                        +
+           |                                                               |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |                                                               |
+           .                                                               .
+           .                       Mobility Options                        .
+           .                                                               .
+           |                                                               |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+        Args:
+            schema: Parsed message type schema.
+            header: Parsed MH header schema.
+
+        Returns:
+            Parsed message type data.
+
+        """
+        data = Data_HomeTestInitMessage(
+            next=header.next,
+            length=(header.length + 1) * 8,
+            type=header.type,
+            chksum=header.chksum,
+            cookie=schema.cookie,
+            options=self._read_mh_options(schema.options)
+        )
+        return data
+
 
 
 
@@ -1158,6 +1240,8 @@ class MH(Internet[Data_MH, Schema_MH],
 
 
 
+
+
     def _read_cga_extensions(self, extensions_schema: 'list[Schema_CGAExtension]') -> 'Extension':
         """Read CGA extensions.
 
@@ -1270,7 +1354,6 @@ class MH(Internet[Data_MH, Schema_MH],
 
 
 
-
     def _make_msg_unknown(self, message: 'Optional[Data_UnknownMessage]', *,
                           data: 'bytes' = b'',
                           **kwargs: 'Any') -> 'Schema_UnknownMessage':
@@ -1292,19 +1375,71 @@ class MH(Internet[Data_MH, Schema_MH],
             data=data,
         )
 
+    def _make_msg_brr(self, message: 'Optional[Data_BindingRefreshRequestMessage]', *,
+                      options: 'Optional[Option | list[Schema_Option | tuple[Enum_Option, dict[str, Any]] | bytes]]' = None,
+                      **kwargs: 'Any') -> 'Schema_BindingRefreshRequestMessage':
+        """Make MH binding refresh request (BRR) message type.
+
+        Args:
+            message: Message data model.
+            options: Mobility options.
+            **kwargs: Arbitrary keyword arguments.
+
+        Returns:
+            Constructed message type.
+
+        """
+        if message is not None:
+            options = message.options
+        else:
+            options = options or []
+
+        return Schema_BindingRefreshRequestMessage(
+            options=self._make_mh_options(options),
+        )
+
+    def _make_msg_hoti(self, message: 'Optional[Data_HomeTestInitMessage]', *,
+                       cookie: 'bytes' = b'\x00\x00\x00\x00\x00\x00\x00\x00',
+                       options: 'Optional[Option | list[Schema_Option | tuple[Enum_Option, dict[str, Any]] | bytes]]' = None,
+                       **kwargs: 'Any') -> 'Schema_HomeTestInitMessage':
+        """Make MH home test init (HoTI) message type.
+
+        Args:
+            message: Message data model.
+            cookie: Home test cookie.
+            options: Mobility options.
+            **kwargs: Arbitrary keyword arguments.
+
+        Returns:
+            Constructed message type.
+
+        """
+        if message is not None:
+            cookie = message.cookie
+            options = message.options
+        else:
+            options = options or []
+
+        return Schema_HomeTestInitMessage(
+            cookie=cookie,
+            options=self._make_mh_options(options),
+        )
 
 
-    def _make_mh_options(self, options: 'Option | list[Schema_Option | tuple[Enum_Option, dict[str, Any]] | bytes]') -> 'tuple[list[Schema_Option | bytes], int]':
+
+
+
+
+    def _make_mh_options(self, options: 'Option | list[Schema_Option | tuple[Enum_Option, dict[str, Any]] | bytes]') -> 'list[Schema_Option | bytes]':
         """Make options for MH.
 
         Args:
             options: MH options.
 
         Returns:
-            Tuple of options and total length of options.
+            Mobility options list.
 
         """
-        total_length = 0
         if isinstance(options, list):
             options_list = []  # type: list[Schema_Option | bytes]
             for schema in options:
@@ -1312,10 +1447,8 @@ class MH(Internet[Data_MH, Schema_MH],
                     code = Enum_Option.get(int.from_bytes(schema[0:1], 'big', signed=False))
 
                     data = schema  # type: Schema_Option | bytes
-                    data_len = len(data)
                 elif isinstance(schema, Schema):
                     data = schema
-                    data_len = len(schema.pack())
                 else:
                     code, args = cast('tuple[Enum_Option, dict[str, Any]]', schema)
                     name = self.__option__[code]
@@ -1325,13 +1458,10 @@ class MH(Internet[Data_MH, Schema_MH],
                                     getattr(self, meth_name, self._make_opt_none))
                     else:
                         meth = name[1]
-
                     data = meth(code, **args)
-                    data_len = len(data.pack())
 
                 options_list.append(data)
-                total_length += data_len
-            return options_list, total_length
+            return options_list
 
         options_list = []
         for code, option in options.items(multi=True):
@@ -1344,11 +1474,8 @@ class MH(Internet[Data_MH, Schema_MH],
                 meth = name[1]
 
             data = meth(code, option)
-            data_len = len(data.pack())
-
             options_list.append(data)
-            total_length += data_len
-        return options_list, total_length
+        return options_list
 
     def _make_opt_none(self, type: 'Enum_Option', option: 'Optional[Data_UnassignedOption]' = None, *,
                              data: 'bytes' = b'',
@@ -1848,6 +1975,7 @@ class MH(Internet[Data_MH, Schema_MH],
             length=8,
             token=token,
         )
+
 
 
 

@@ -63,7 +63,7 @@ if TYPE_CHECKING:
 
 __all__ = [
     'MH',
-    'UnknownMessage',
+    'UnknownMessage', 'BindingRefreshRequestMessage',
 
     'Option',
     'UnassignedOption', 'PadOption', 'BindRefreshAdviceOption', 'AlternateCareofAddressOption',
@@ -101,6 +101,36 @@ class UnknownMessage(MH):
 
     if TYPE_CHECKING:
         def __init__(self, next: 'TransType', length: 'int', type: 'Packet', chksum: 'bytes', data: 'bytes') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,redefined-builtin,line-too-long
+
+
+@info_final
+class BindingRefreshRequestMessage(MH):
+    """Data model for MH Binding Refresh Request (BRR) message type."""
+
+    #: Mobility options.
+    options: 'OrderedMultiDict[Enum_Option, Option]'
+
+    if TYPE_CHECKING:
+        def __init__(self, next: 'TransType', length: 'int', type: 'Packet', chksum: 'bytes',
+                     options: 'OrderedMultiDict[Enum_Option, Option]') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,redefined-builtin,line-too-long
+
+
+@info_final
+class HomeTestInitMessage(MH):
+    """Data modelf for MH Home Test Init (HoTI) message type."""
+
+    #: Home init cookie.
+    cookie: 'bytes'
+    #: Mobility options.
+    options: 'OrderedMultiDict[Enum_Option, Option]'
+
+    if TYPE_CHECKING:
+        def __init__(self, next: 'TransType', length: 'int', type: 'Packet', chksum: 'bytes',
+                     cookie: 'bytes', options: 'OrderedMultiDict[Enum_Option, Option]') -> 'None': ...
+
+
+
+
 
 
 class Option(Data):

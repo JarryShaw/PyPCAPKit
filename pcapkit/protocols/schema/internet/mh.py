@@ -66,7 +66,7 @@ __all__ = [
     'MH',
 
     'Packet',
-    'UnknownMessage',
+    'UnknownMessage', 'BindingRefreshRequestMessage', 'HomeTestInitMessage',
 
     'Option',
     'UnassignedOption', 'PadOption', 'BindRefreshAdviceOption', 'AlternateCareofAddressOption',
@@ -85,7 +85,7 @@ __all__ = [
 if TYPE_CHECKING:
     from datetime import datetime as dt_type
     from ipaddress import IPv6Address
-    from typing import Any
+    from typing import Any, DefaultDict, Type
 
     from pcapkit.corekit.fields.field import _Field as Field
     from pcapkit.protocols.protocol import Protocol
@@ -105,6 +105,29 @@ if SPHINX_TYPE_CHECKING:
         P: int
 
 
+def mh_opt_registry() -> 'DefaultDict[Enum_Option | int, Type[Option]]':
+    """Registry for MH type-specific message :attr:`~Packet.options`."""
+    return collections.defaultdict(lambda: UnassignedOption, {
+        Enum_Option.Pad1: PadOption,
+        Enum_Option.PadN: PadOption,
+        Enum_Option.Binding_Refresh_Advice: BindingAuthorizationDataOption,
+        Enum_Option.Alternate_Care_of_Address: AlternateCareofAddressOption,
+        Enum_Option.Nonce_Indices: NonceIndicesOption,
+        Enum_Option.Authorization_Data: BindingAuthorizationDataOption,
+        Enum_Option.Mobile_Network_Prefix_Option: MobileNetworkPrefixOption,
+        Enum_Option.Mobility_Header_Link_Layer_Address_option: LinkLayerAddressOption,
+        Enum_Option.MN_ID_OPTION_TYPE: MNIDOption,
+        Enum_Option.AUTH_OPTION_TYPE: AuthOption,
+        Enum_Option.MESG_ID_OPTION_TYPE: MesgIDOption,
+        Enum_Option.CGA_Parameters_Request: CGAParametersRequestOption,
+        Enum_Option.CGA_Parameters: CGAParametersOption,
+        Enum_Option.Signature: SignatureOption,
+        Enum_Option.Permanent_Home_Keygen_Token: PermanentHomeKeygenTokenOption,
+        Enum_Option.Care_of_Test_Init: CareofTestInitOption,
+        Enum_Option.Care_of_Test: CareofTestOption,
+    })
+
+
 def mh_data_selector(pkt: 'dict[str, Any]') -> 'Field':
     """Selector function for :attr:`MH.data` field.
 
@@ -120,6 +143,10 @@ def mh_data_selector(pkt: 'dict[str, Any]') -> 'Field':
     type = pkt['type']  # type: Enum_Packet
     length = pkt['length'] * 8 + 2
 
+    if type == Enum_Packet.Binding_Refresh_Request:
+        return SchemaField(length=length, schema=BindingRefreshRequestMessage)
+    if type == Enum_Packet.Home_Test_Init:
+        return SchemaField(length=length, schema=HomeTestInitMessage)
     return SchemaField(length=length, schema=UnknownMessage)
 
 
@@ -140,6 +167,30 @@ def mn_id_selector(pkt: 'dict[str, Any]') -> 'Field':
     if subtype == Enum_MNIDSubtype.IPv6_Address:
         return IPv6AddressField()
     return BytesField(length=pkt['length'] - 1)
+
+
+@schema_final
+class MH(Schema):
+    """Header schema for MH packets."""
+
+    #: Next header.
+    next: 'Enum_TransType' = EnumField(length=1, namespace=Enum_TransType)
+    #: Header length.
+    length: 'int' = UInt8Field()
+    #: MH type.
+    type: 'Enum_Packet' = EnumField(length=1, namespace=Enum_Packet)
+    #: Reserved.
+    reserved: 'bytes' = PaddingField(length=1)
+    #: Checksum.
+    chksum: 'bytes' = BytesField(length=2)
+    #: Message data.
+    data: 'Packet' = SwitchField(selector=mh_data_selector)
+    #: Payload.
+    payload: 'bytes' = PayloadField()
+
+    if TYPE_CHECKING:
+        def __init__(self, next: 'Enum_TransType', length: 'int', type: 'Enum_Packet',
+                     chksum: 'bytes', data: 'Packet | bytes', payload: 'bytes | Protocol | Schema') -> 'None': ...
 
 
 class Option(Schema):
@@ -480,24 +531,40 @@ class UnknownMessage(Packet):
 
 
 @schema_final
-class MH(Schema):
-    """Header schema for MH packets."""
+class BindingRefreshRequestMessage(Packet):
+    """Header schema for MH Binding Refresh Request (BRR) message."""
 
-    #: Next header.
-    next: 'Enum_TransType' = EnumField(length=1, namespace=Enum_TransType)
-    #: Header length.
-    length: 'int' = UInt8Field()
-    #: MH type.
-    type: 'Enum_Packet' = EnumField(length=1, namespace=Enum_Packet)
     #: Reserved.
-    reserved: 'bytes' = PaddingField(length=1)
-    #: Checksum.
-    chksum: 'bytes' = BytesField(length=2)
-    #: Message data.
-    data: 'Packet' = SwitchField(selector=mh_data_selector)
-    #: Payload.
-    payload: 'bytes' = PayloadField()
+    reserved: 'bytes' = PaddingField(length=2)
+    #: Mobility options.
+    options: 'list[Option]' = OptionField(
+        length=lambda pkt: pkt['__length__'],
+        base_schema=Option,
+        type_name='type',
+        registry=mh_opt_registry(),  # type: ignore[arg-type]
+        eool=None,
+    )
 
     if TYPE_CHECKING:
-        def __init__(self, next: 'Enum_TransType', length: 'int', type: 'Enum_Packet',
-                     chksum: 'bytes', data: 'Packet | bytes', payload: 'bytes | Protocol | Schema') -> 'None': ...
+        def __init__(self, options: 'list[Option | bytes]') -> 'None': ...
+
+
+@schema_final
+class HomeTestInitMessage(Packet):
+    """Header schema for MH Home Test Init (HoTI) message."""
+
+    #: Reserved.
+    reserved: 'bytes' = PaddingField(length=2)
+    #: Home init cookie.
+    cookie: 'bytes' = BytesField(length=8)
+    #: Mobility options.
+    options: 'list[Option]' = OptionField(
+        length=lambda pkt: pkt['__length__'],
+        base_schema=Option,
+        type_name='type',
+        registry=mh_opt_registry(),  # type: ignore[arg-type]
+        eool=None,
+    )
+
+    if TYPE_CHECKING:
+        def __init__(self, cookie: 'bytes', options: 'list[Option | bytes]') -> 'None': ...
