@@ -404,15 +404,16 @@
     <span class="kn">from</span> <span class="nn">pcapkit.corekit.multidict</span> <span class="kn">import</span> <span class="n">OrderedMultiDict</span>
     <span class="kn">from</span> <span class="nn">pcapkit.protocols.internet.mh</span> <span class="kn">import</span> <span class="n">NTPTimestamp</span>
 
-
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
     <span class="s1">&#39;MH&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;UnknownMessage&#39;</span><span class="p">,</span> <span class="s1">&#39;BindingRefreshRequestMessage&#39;</span><span class="p">,</span> <span class="s1">&#39;HomeTestInitMessage&#39;</span><span class="p">,</span> <span class="s1">&#39;CareofTestInitMessage&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;HomeTestMessage&#39;</span><span class="p">,</span> <span class="s1">&#39;CareofTestMessage&#39;</span><span class="p">,</span>
 
     <span class="s1">&#39;Option&#39;</span><span class="p">,</span>
     <span class="s1">&#39;UnassignedOption&#39;</span><span class="p">,</span> <span class="s1">&#39;PadOption&#39;</span><span class="p">,</span> <span class="s1">&#39;BindRefreshAdviceOption&#39;</span><span class="p">,</span> <span class="s1">&#39;AlternateCareofAddressOption&#39;</span><span class="p">,</span>
     <span class="s1">&#39;NonceIndicesOption&#39;</span><span class="p">,</span> <span class="s1">&#39;BindingAuthorizationDataOption&#39;</span><span class="p">,</span> <span class="s1">&#39;MobileNetworkPrefixOption&#39;</span><span class="p">,</span>
     <span class="s1">&#39;LinkLayerAddressOption&#39;</span><span class="p">,</span> <span class="s1">&#39;MNIDOption&#39;</span><span class="p">,</span> <span class="s1">&#39;AuthOption&#39;</span><span class="p">,</span> <span class="s1">&#39;MesgIDOption&#39;</span><span class="p">,</span> <span class="s1">&#39;CGAParametersRequestOption&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;CGAParametersOption&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;CGAParametersOption&#39;</span><span class="p">,</span> <span class="s1">&#39;SignatureOption&#39;</span><span class="p">,</span> <span class="s1">&#39;PermanentHomeKeygenTokenOption&#39;</span><span class="p">,</span> <span class="s1">&#39;CareofTestInitOption&#39;</span><span class="p">,</span>
 
     <span class="s1">&#39;CGAParameter&#39;</span><span class="p">,</span>
 
@@ -422,8 +423,7 @@
 <span class="p">]</span>
 
 
-<div class="viewcode-block" id="MH"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.data.internet.mh.MH">[docs]</a><span class="nd">@info_final</span>
-<span class="k">class</span> <span class="nc">MH</span><span class="p">(</span><span class="n">Data</span><span class="p">):</span>
+<div class="viewcode-block" id="MH"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.data.internet.mh.MH">[docs]</a><span class="k">class</span> <span class="nc">MH</span><span class="p">(</span><span class="n">Data</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for MH protocol.&quot;&quot;&quot;</span>
 
     <span class="c1">#: Next header.</span>
@@ -433,12 +433,100 @@
     <span class="c1">#: Mobility header type.</span>
     <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Packet&#39;</span>
     <span class="c1">#: Checksum.</span>
-    <span class="n">chksum</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span>
+    <span class="n">chksum</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span></div>
+
+
+<span class="nd">@info_final</span>
+<span class="k">class</span> <span class="nc">UnknownMessage</span><span class="p">(</span><span class="n">MH</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for MH unknown message type.&quot;&quot;&quot;</span>
+
     <span class="c1">#: Message data.</span>
     <span class="n">data</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">next</span><span class="p">:</span> <span class="s1">&#39;TransType&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Packet&#39;</span><span class="p">,</span> <span class="n">chksum</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,redefined-builtin,line-too-long</span></div>
+        <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">next</span><span class="p">:</span> <span class="s1">&#39;TransType&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Packet&#39;</span><span class="p">,</span> <span class="n">chksum</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,redefined-builtin,line-too-long</span>
+
+
+<span class="nd">@info_final</span>
+<span class="k">class</span> <span class="nc">BindingRefreshRequestMessage</span><span class="p">(</span><span class="n">MH</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for MH Binding Refresh Request (BRR) message type.&quot;&quot;&quot;</span>
+
+    <span class="c1">#: Mobility options.</span>
+    <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;OrderedMultiDict[Enum_Option, Option]&#39;</span>
+
+    <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+        <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">next</span><span class="p">:</span> <span class="s1">&#39;TransType&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Packet&#39;</span><span class="p">,</span> <span class="n">chksum</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">,</span>
+                     <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;OrderedMultiDict[Enum_Option, Option]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,redefined-builtin,line-too-long</span>
+
+
+<span class="nd">@info_final</span>
+<span class="k">class</span> <span class="nc">HomeTestInitMessage</span><span class="p">(</span><span class="n">MH</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Data modelf for MH Home Test Init (HoTI) message type.&quot;&quot;&quot;</span>
+
+    <span class="c1">#: Home init cookie.</span>
+    <span class="n">cookie</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span>
+    <span class="c1">#: Mobility options.</span>
+    <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;OrderedMultiDict[Enum_Option, Option]&#39;</span>
+
+    <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+        <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">next</span><span class="p">:</span> <span class="s1">&#39;TransType&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Packet&#39;</span><span class="p">,</span> <span class="n">chksum</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">,</span>
+                     <span class="n">cookie</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;OrderedMultiDict[Enum_Option, Option]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>
+
+
+<span class="nd">@info_final</span>
+<span class="k">class</span> <span class="nc">CareofTestInitMessage</span><span class="p">(</span><span class="n">MH</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for MH Care-of Test Init (CoTI) message type.&quot;&quot;&quot;</span>
+
+    <span class="c1">#: Care-of init cookie.</span>
+    <span class="n">cookie</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span>
+    <span class="c1">#: Mobility options.</span>
+    <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;OrderedMultiDict[Enum_Option, Option]&#39;</span>
+
+    <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+        <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">next</span><span class="p">:</span> <span class="s1">&#39;TransType&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Packet&#39;</span><span class="p">,</span> <span class="n">chksum</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">,</span>
+                     <span class="n">cookie</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;OrderedMultiDict[Enum_Option, Option]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>
+
+
+<span class="nd">@info_final</span>
+<span class="k">class</span> <span class="nc">HomeTestMessage</span><span class="p">(</span><span class="n">MH</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for MH Home Test (HoT) message type.&quot;&quot;&quot;</span>
+
+    <span class="c1">#: Home nonce index.</span>
+    <span class="n">nonce_index</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span>
+    <span class="c1">#: Home init cookie.</span>
+    <span class="n">cookie</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span>
+    <span class="c1">#: Home keygen token.</span>
+    <span class="n">token</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span>
+    <span class="c1">#: Mobility options.</span>
+    <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;OrderedMultiDict[Enum_Option, Option]&#39;</span>
+
+    <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+        <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">next</span><span class="p">:</span> <span class="s1">&#39;TransType&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Packet&#39;</span><span class="p">,</span> <span class="n">chksum</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">,</span>
+                     <span class="n">nonce_index</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">cookie</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">,</span> <span class="n">token</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">,</span>
+                     <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;OrderedMultiDict[Enum_Option, Option]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>
+
+
+<span class="nd">@info_final</span>
+<span class="k">class</span> <span class="nc">CareofTestMessage</span><span class="p">(</span><span class="n">MH</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for MH Care-of Test (CoT) message type.&quot;&quot;&quot;</span>
+
+    <span class="c1">#: Care-of nonce index.</span>
+    <span class="n">nonce_index</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span>
+    <span class="c1">#: Care-of init cookie.</span>
+    <span class="n">cookie</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span>
+    <span class="c1">#: Care-of keygen token.</span>
+    <span class="n">token</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span>
+    <span class="c1">#: Mobility options.</span>
+    <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;OrderedMultiDict[Enum_Option, Option]&#39;</span>
+
+    <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+        <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">next</span><span class="p">:</span> <span class="s1">&#39;TransType&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Packet&#39;</span><span class="p">,</span> <span class="n">chksum</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">,</span>
+                     <span class="n">nonce_index</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">cookie</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">,</span> <span class="n">token</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">,</span>
+                     <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;OrderedMultiDict[Enum_Option, Option]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>
+
+
+
+
 
 
 <span class="k">class</span> <span class="nc">Option</span><span class="p">(</span><span class="n">Data</span><span class="p">):</span>
@@ -651,6 +739,47 @@
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
         <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">parameters</span><span class="p">:</span> <span class="s1">&#39;tuple[CGAParameter, ...]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>
+
+
+<span class="nd">@info_final</span>
+<span class="k">class</span> <span class="nc">SignatureOption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for MH Signature option.&quot;&quot;&quot;</span>
+
+    <span class="c1">#: Signature.</span>
+    <span class="n">signature</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span>
+
+    <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+        <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">signature</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>
+
+
+<span class="nd">@info_final</span>
+<span class="k">class</span> <span class="nc">PermanentHomeKeygenTokenOption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for Permanent Home Keygen Token option.&quot;&quot;&quot;</span>
+
+    <span class="c1">#: Permanent home keygen token.</span>
+    <span class="n">token</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span>
+
+    <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+        <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">token</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>
+
+
+<span class="nd">@info_final</span>
+<span class="k">class</span> <span class="nc">CareofTestInitOption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for MH Care-of Test Init options.&quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+        <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>
+
+
+<span class="nd">@info_final</span>
+<span class="k">class</span> <span class="nc">CareofTestOption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for MH Care-of Test options.&quot;&quot;&quot;</span>
+
+    <span class="c1">#: Care-of keygen token.</span>
+    <span class="n">token</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span>
+
+    <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+        <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">token</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>
 </pre></div>
         </article>
       </div>

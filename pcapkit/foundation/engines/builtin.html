@@ -516,7 +516,7 @@ context storage.</p>
 </dl>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.foundation.engines.pcapng.Context.section">
-<span class="sig-name descname"><span class="pre">section</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="../../protocols/misc/pcapng.html#pcapkit.protocols.data.misc.pcapng.SectionHeaderBlock" title="pcapkit.protocols.data.misc.pcapng.SectionHeaderBlock"><code class="xref py py-class docutils literal notranslate"><span class="pre">SectionHeaderBlock</span></code></a></em><a class="headerlink" href="#pcapkit.foundation.engines.pcapng.Context.section" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">section</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Data_SectionHeaderBlock</span></em><a class="headerlink" href="#pcapkit.foundation.engines.pcapng.Context.section" title="Permalink to this definition">#</a></dt>
 <dd><p>Section header.</p>
 </dd></dl>
 
@@ -533,43 +533,43 @@ context storage.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.foundation.engines.pcapng.Context.interfaces">
-<span class="sig-name descname"><span class="pre">interfaces</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code></a><span class="pre">[</span><a class="reference internal" href="../../protocols/misc/pcapng.html#pcapkit.protocols.data.misc.pcapng.InterfaceDescriptionBlock" title="pcapkit.protocols.data.misc.pcapng.InterfaceDescriptionBlock"><code class="xref py py-class docutils literal notranslate"><span class="pre">InterfaceDescriptionBlock</span></code></a><span class="pre">]</span></em><a class="headerlink" href="#pcapkit.foundation.engines.pcapng.Context.interfaces" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">interfaces</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">list[Data_InterfaceDescriptionBlock]</span></em><a class="headerlink" href="#pcapkit.foundation.engines.pcapng.Context.interfaces" title="Permalink to this definition">#</a></dt>
 <dd><p>Interface descriptions.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.foundation.engines.pcapng.Context.names">
-<span class="sig-name descname"><span class="pre">names</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code></a><span class="pre">[</span><a class="reference internal" href="../../protocols/misc/pcapng.html#pcapkit.protocols.data.misc.pcapng.NameResolutionBlock" title="pcapkit.protocols.data.misc.pcapng.NameResolutionBlock"><code class="xref py py-class docutils literal notranslate"><span class="pre">NameResolutionBlock</span></code></a><span class="pre">]</span></em><a class="headerlink" href="#pcapkit.foundation.engines.pcapng.Context.names" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">names</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">list[Data_NameResolutionBlock]</span></em><a class="headerlink" href="#pcapkit.foundation.engines.pcapng.Context.names" title="Permalink to this definition">#</a></dt>
 <dd><p>Name resolution records.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.foundation.engines.pcapng.Context.journals">
-<span class="sig-name descname"><span class="pre">journals</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code></a><span class="pre">[</span><a class="reference internal" href="../../protocols/misc/pcapng.html#pcapkit.protocols.data.misc.pcapng.SystemdJournalExportBlock" title="pcapkit.protocols.data.misc.pcapng.SystemdJournalExportBlock"><code class="xref py py-class docutils literal notranslate"><span class="pre">SystemdJournalExportBlock</span></code></a><span class="pre">]</span></em><a class="headerlink" href="#pcapkit.foundation.engines.pcapng.Context.journals" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">journals</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">list[Data_SystemdJournalExportBlock]</span></em><a class="headerlink" href="#pcapkit.foundation.engines.pcapng.Context.journals" title="Permalink to this definition">#</a></dt>
 <dd><p><em class="manpage"><a class="manpage reference external" href="https://linux.die.net/man/1/systemd">systemd(1)</a></em> journal export records.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.foundation.engines.pcapng.Context.secrets">
-<span class="sig-name descname"><span class="pre">secrets</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code></a><span class="pre">[</span><a class="reference internal" href="../../protocols/misc/pcapng.html#pcapkit.protocols.data.misc.pcapng.DecryptionSecretsBlock" title="pcapkit.protocols.data.misc.pcapng.DecryptionSecretsBlock"><code class="xref py py-class docutils literal notranslate"><span class="pre">DecryptionSecretsBlock</span></code></a><span class="pre">]</span></em><a class="headerlink" href="#pcapkit.foundation.engines.pcapng.Context.secrets" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">secrets</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">list[Data_DecryptionSecretsBlock]</span></em><a class="headerlink" href="#pcapkit.foundation.engines.pcapng.Context.secrets" title="Permalink to this definition">#</a></dt>
 <dd><p>Decryption secrets.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.foundation.engines.pcapng.Context.custom">
-<span class="sig-name descname"><span class="pre">custom</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code></a><span class="pre">[</span><a class="reference internal" href="../../protocols/misc/pcapng.html#pcapkit.protocols.data.misc.pcapng.CustomBlock" title="pcapkit.protocols.data.misc.pcapng.CustomBlock"><code class="xref py py-class docutils literal notranslate"><span class="pre">CustomBlock</span></code></a><span class="pre">]</span></em><a class="headerlink" href="#pcapkit.foundation.engines.pcapng.Context.custom" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">custom</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">list[Data_CustomBlock]</span></em><a class="headerlink" href="#pcapkit.foundation.engines.pcapng.Context.custom" title="Permalink to this definition">#</a></dt>
 <dd><p>Custom blocks.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.foundation.engines.pcapng.Context.statistics">
-<span class="sig-name descname"><span class="pre">statistics</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code></a><span class="pre">[</span><a class="reference internal" href="../../protocols/misc/pcapng.html#pcapkit.protocols.data.misc.pcapng.InterfaceStatisticsBlock" title="pcapkit.protocols.data.misc.pcapng.InterfaceStatisticsBlock"><code class="xref py py-class docutils literal notranslate"><span class="pre">InterfaceStatisticsBlock</span></code></a><span class="pre">]</span></em><a class="headerlink" href="#pcapkit.foundation.engines.pcapng.Context.statistics" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">statistics</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">list[Data_InterfaceStatisticsBlock]</span></em><a class="headerlink" href="#pcapkit.foundation.engines.pcapng.Context.statistics" title="Permalink to this definition">#</a></dt>
 <dd><p>Interface statistics.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.foundation.engines.pcapng.Context.unknown">
-<span class="sig-name descname"><span class="pre">unknown</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code></a><span class="pre">[</span><a class="reference internal" href="../../protocols/misc/pcapng.html#pcapkit.protocols.data.misc.pcapng.UnknownBlock" title="pcapkit.protocols.data.misc.pcapng.UnknownBlock"><code class="xref py py-class docutils literal notranslate"><span class="pre">UnknownBlock</span></code></a><span class="pre">]</span></em><a class="headerlink" href="#pcapkit.foundation.engines.pcapng.Context.unknown" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">unknown</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">list[Data_UnknownBlock]</span></em><a class="headerlink" href="#pcapkit.foundation.engines.pcapng.Context.unknown" title="Permalink to this definition">#</a></dt>
 <dd><p>Unknown blocks.</p>
 </dd></dl>
 

@@ -424,6 +424,8 @@
     <span class="n">BindingAuthorizationDataOption</span> <span class="k">as</span> <span class="n">Data_BindingAuthorizationDataOption</span>
 <span class="kn">from</span> <span class="nn">pcapkit.protocols.data.internet.mh</span> <span class="kn">import</span> \
     <span class="n">BindRefreshAdviceOption</span> <span class="k">as</span> <span class="n">Data_BindRefreshAdviceOption</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.internet.mh</span> <span class="kn">import</span> <span class="n">CareofTestInitOption</span> <span class="k">as</span> <span class="n">Data_CareofTestInitOption</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.internet.mh</span> <span class="kn">import</span> <span class="n">CareofTestOption</span> <span class="k">as</span> <span class="n">Data_CareofTestOption</span>
 <span class="kn">from</span> <span class="nn">pcapkit.protocols.data.internet.mh</span> <span class="kn">import</span> <span class="n">CGAExtension</span> <span class="k">as</span> <span class="n">Data_CGAExtension</span>
 <span class="kn">from</span> <span class="nn">pcapkit.protocols.data.internet.mh</span> <span class="kn">import</span> <span class="n">CGAParameter</span> <span class="k">as</span> <span class="n">Data_CGAParameter</span>
 <span class="kn">from</span> <span class="nn">pcapkit.protocols.data.internet.mh</span> <span class="kn">import</span> <span class="n">CGAParametersOption</span> <span class="k">as</span> <span class="n">Data_CGAParametersOption</span>
@@ -437,8 +439,12 @@
 <span class="kn">from</span> <span class="nn">pcapkit.protocols.data.internet.mh</span> <span class="kn">import</span> <span class="n">MultiPrefixExtension</span> <span class="k">as</span> <span class="n">Data_MultiPrefixExtension</span>
 <span class="kn">from</span> <span class="nn">pcapkit.protocols.data.internet.mh</span> <span class="kn">import</span> <span class="n">NonceIndicesOption</span> <span class="k">as</span> <span class="n">Data_NonceIndicesOption</span>
 <span class="kn">from</span> <span class="nn">pcapkit.protocols.data.internet.mh</span> <span class="kn">import</span> <span class="n">PadOption</span> <span class="k">as</span> <span class="n">Data_PadOption</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.internet.mh</span> <span class="kn">import</span> \
+    <span class="n">PermanentHomeKeygenTokenOption</span> <span class="k">as</span> <span class="n">Data_PermanentHomeKeygenTokenOption</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.internet.mh</span> <span class="kn">import</span> <span class="n">SignatureOption</span> <span class="k">as</span> <span class="n">Data_SignatureOption</span>
 <span class="kn">from</span> <span class="nn">pcapkit.protocols.data.internet.mh</span> <span class="kn">import</span> <span class="n">UnassignedOption</span> <span class="k">as</span> <span class="n">Data_UnassignedOption</span>
 <span class="kn">from</span> <span class="nn">pcapkit.protocols.data.internet.mh</span> <span class="kn">import</span> <span class="n">UnknownExtension</span> <span class="k">as</span> <span class="n">Data_UnknownExtension</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.internet.mh</span> <span class="kn">import</span> <span class="n">UnknownMessage</span> <span class="k">as</span> <span class="n">Data_UnknownMessage</span>
 <span class="kn">from</span> <span class="nn">pcapkit.protocols.internet.internet</span> <span class="kn">import</span> <span class="n">Internet</span>
 <span class="kn">from</span> <span class="nn">pcapkit.protocols.schema.internet.mh</span> <span class="kn">import</span> <span class="n">MH</span> <span class="k">as</span> <span class="n">Schema_MH</span>
 <span class="kn">from</span> <span class="nn">pcapkit.protocols.schema.internet.mh</span> <span class="kn">import</span> \
@@ -448,6 +454,8 @@
     <span class="n">BindingAuthorizationDataOption</span> <span class="k">as</span> <span class="n">Schema_BindingAuthorizationDataOption</span>
 <span class="kn">from</span> <span class="nn">pcapkit.protocols.schema.internet.mh</span> <span class="kn">import</span> \
     <span class="n">BindRefreshAdviceOption</span> <span class="k">as</span> <span class="n">Schema_BindRefreshAdviceOption</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.schema.internet.mh</span> <span class="kn">import</span> <span class="n">CareofTestInitOption</span> <span class="k">as</span> <span class="n">Schema_CareofTestInitOption</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.schema.internet.mh</span> <span class="kn">import</span> <span class="n">CareofTestOption</span> <span class="k">as</span> <span class="n">Schema_CareofTestOption</span>
 <span class="kn">from</span> <span class="nn">pcapkit.protocols.schema.internet.mh</span> <span class="kn">import</span> <span class="n">CGAExtension</span> <span class="k">as</span> <span class="n">Schema_CGAExtension</span>
 <span class="kn">from</span> <span class="nn">pcapkit.protocols.schema.internet.mh</span> <span class="kn">import</span> <span class="n">CGAParameter</span> <span class="k">as</span> <span class="n">Schema_CGAParameter</span>
 <span class="kn">from</span> <span class="nn">pcapkit.protocols.schema.internet.mh</span> <span class="kn">import</span> <span class="n">CGAParametersOption</span> <span class="k">as</span> <span class="n">Schema_CGAParametersOption</span>
@@ -462,10 +470,25 @@
 <span class="kn">from</span> <span class="nn">pcapkit.protocols.schema.internet.mh</span> <span class="kn">import</span> <span class="n">MultiPrefixExtension</span> <span class="k">as</span> <span class="n">Schema_MultiPrefixExtension</span>
 <span class="kn">from</span> <span class="nn">pcapkit.protocols.schema.internet.mh</span> <span class="kn">import</span> <span class="n">NonceIndicesOption</span> <span class="k">as</span> <span class="n">Schema_NonceIndicesOption</span>
 <span class="kn">from</span> <span class="nn">pcapkit.protocols.schema.internet.mh</span> <span class="kn">import</span> <span class="n">PadOption</span> <span class="k">as</span> <span class="n">Schema_PadOption</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.schema.internet.mh</span> <span class="kn">import</span> \
+    <span class="n">PermanentHomeKeygenTokenOption</span> <span class="k">as</span> <span class="n">Schema_PermanentHomeKeygenTokenOption</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.schema.internet.mh</span> <span class="kn">import</span> <span class="n">SignatureOption</span> <span class="k">as</span> <span class="n">Schema_SignatureOption</span>
 <span class="kn">from</span> <span class="nn">pcapkit.protocols.schema.internet.mh</span> <span class="kn">import</span> <span class="n">UnassignedOption</span> <span class="k">as</span> <span class="n">Schema_UnassignedOption</span>
 <span class="kn">from</span> <span class="nn">pcapkit.protocols.schema.internet.mh</span> <span class="kn">import</span> <span class="n">UnknownExtension</span> <span class="k">as</span> <span class="n">Schema_UnknownExtension</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.schema.internet.mh</span> <span class="kn">import</span> <span class="n">UnknownMessage</span> <span class="k">as</span> <span class="n">Schema_UnknownMessage</span>
 <span class="kn">from</span> <span class="nn">pcapkit.utilities.exceptions</span> <span class="kn">import</span> <span class="n">ProtocolError</span><span class="p">,</span> <span class="n">UnsupportedCall</span>
 <span class="kn">from</span> <span class="nn">pcapkit.utilities.warnings</span> <span class="kn">import</span> <span class="n">ProtocolWarning</span><span class="p">,</span> <span class="n">warn</span>
+
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.schema.internet.mh</span> <span class="kn">import</span> <span class="n">BindingRefreshRequestMessage</span> <span class="k">as</span> <span class="n">Schema_BindingRefreshRequestMessage</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.internet.mh</span> <span class="kn">import</span> <span class="n">BindingRefreshRequestMessage</span> <span class="k">as</span> <span class="n">Data_BindingRefreshRequestMessage</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.schema.internet.mh</span> <span class="kn">import</span> <span class="n">HomeTestInitMessage</span> <span class="k">as</span> <span class="n">Schema_HomeTestInitMessage</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.internet.mh</span> <span class="kn">import</span> <span class="n">HomeTestInitMessage</span> <span class="k">as</span> <span class="n">Data_HomeTestInitMessage</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.schema.internet.mh</span> <span class="kn">import</span> <span class="n">CareofTestInitMessage</span> <span class="k">as</span> <span class="n">Schema_CareofTestInitMessage</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.internet.mh</span> <span class="kn">import</span> <span class="n">CareofTestInitMessage</span> <span class="k">as</span> <span class="n">Data_CareofTestInitMessage</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.schema.internet.mh</span> <span class="kn">import</span> <span class="n">HomeTestMessage</span> <span class="k">as</span> <span class="n">Schema_HomeTestMessage</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.internet.mh</span> <span class="kn">import</span> <span class="n">HomeTestMessage</span> <span class="k">as</span> <span class="n">Data_HomeTestMessage</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.schema.internet.mh</span> <span class="kn">import</span> <span class="n">CareofTestMessage</span> <span class="k">as</span> <span class="n">Schema_CareofTestMessage</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.internet.mh</span> <span class="kn">import</span> <span class="n">CareofTestMessage</span> <span class="k">as</span> <span class="n">Data_CareofTestMessage</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
     <span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span> <span class="k">as</span> <span class="n">dt_type</span>
@@ -489,7 +512,7 @@
     <span class="n">Extension</span> <span class="o">=</span> <span class="n">OrderedMultiDict</span><span class="p">[</span><span class="n">Enum_CGAExtension</span><span class="p">,</span> <span class="n">Data_CGAExtension</span><span class="p">]</span>
 
     <span class="n">PacketParser</span> <span class="o">=</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">Schema_Packet</span><span class="p">,</span> <span class="n">NamedArg</span><span class="p">(</span><span class="n">Schema_MH</span><span class="p">,</span> <span class="s1">&#39;header&#39;</span><span class="p">)],</span> <span class="n">Data_MH</span><span class="p">]</span>
-    <span class="n">PacketConstructor</span> <span class="o">=</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">Enum_Packet</span><span class="p">,</span> <span class="n">DefaultArg</span><span class="p">(</span><span class="n">Optional</span><span class="p">[</span><span class="n">Data_MH</span><span class="p">]),</span>
+    <span class="n">PacketConstructor</span> <span class="o">=</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">DefaultArg</span><span class="p">(</span><span class="n">Optional</span><span class="p">[</span><span class="n">Data_MH</span><span class="p">]),</span>
                                  <span class="n">KwArg</span><span class="p">(</span><span class="n">Any</span><span class="p">)],</span> <span class="n">Schema_Packet</span><span class="p">]</span>
 
     <span class="n">OptionParser</span> <span class="o">=</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">Schema_Option</span><span class="p">,</span> <span class="n">NamedArg</span><span class="p">(</span><span class="n">Option</span><span class="p">,</span> <span class="s1">&#39;options&#39;</span><span class="p">)],</span> <span class="n">Data_Option</span><span class="p">]</span>
@@ -516,13 +539,17 @@
 
     <span class="c1">#: DefaultDict[Enum_Packet, str | tuple[PacketParser, PacketConstructor]]:</span>
     <span class="c1">#: Message type to method mapping. Method names are expected to be referred</span>
-    <span class="c1">#: to the class by ``_read_packet_${name}`` and/or ``_make_packet_${name}``,</span>
+    <span class="c1">#: to the class by ``_read_msg_${name}`` and/or ``_make_msg_${name}``,</span>
     <span class="c1">#: and if such name not found, the value should then be a method that can</span>
-    <span class="c1">#: parse the packet by itself.</span>
-    <span class="n">__packet__</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">defaultdict</span><span class="p">(</span>
+    <span class="c1">#: parse the message type by itself.</span>
+    <span class="n">__message__</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">defaultdict</span><span class="p">(</span>
         <span class="k">lambda</span><span class="p">:</span> <span class="s1">&#39;unknown&#39;</span><span class="p">,</span>
         <span class="p">{</span>
-
+            <span class="n">Enum_Packet</span><span class="o">.</span><span class="n">Binding_Refresh_Request</span><span class="p">:</span> <span class="s1">&#39;brr&#39;</span><span class="p">,</span>
+            <span class="n">Enum_Packet</span><span class="o">.</span><span class="n">Home_Test_Init</span><span class="p">:</span> <span class="s1">&#39;hoti&#39;</span><span class="p">,</span>
+            <span class="n">Enum_Packet</span><span class="o">.</span><span class="n">Care_of_Test_Init</span><span class="p">:</span> <span class="s1">&#39;coti&#39;</span><span class="p">,</span>
+            <span class="n">Enum_Packet</span><span class="o">.</span><span class="n">Home_Test</span><span class="p">:</span> <span class="s1">&#39;hot&#39;</span><span class="p">,</span>
+            <span class="n">Enum_Packet</span><span class="o">.</span><span class="n">Care_of_Test</span><span class="p">:</span> <span class="s1">&#39;cot&#39;</span><span class="p">,</span>
         <span class="p">},</span>
     <span class="p">)</span>  <span class="c1"># type: DefaultDict[Enum_Packet | int, str | tuple[PacketParser, PacketConstructor]]</span>
 
@@ -547,6 +574,10 @@
             <span class="n">Enum_Option</span><span class="o">.</span><span class="n">MESG_ID_OPTION_TYPE</span><span class="p">:</span> <span class="s1">&#39;mesg_id&#39;</span><span class="p">,</span>
             <span class="n">Enum_Option</span><span class="o">.</span><span class="n">CGA_Parameters_Request</span><span class="p">:</span> <span class="s1">&#39;cga_pr&#39;</span><span class="p">,</span>
             <span class="n">Enum_Option</span><span class="o">.</span><span class="n">CGA_Parameters</span><span class="p">:</span> <span class="s1">&#39;cga_param&#39;</span><span class="p">,</span>
+            <span class="n">Enum_Option</span><span class="o">.</span><span class="n">Signature</span><span class="p">:</span> <span class="s1">&#39;signature&#39;</span><span class="p">,</span>
+            <span class="n">Enum_Option</span><span class="o">.</span><span class="n">Permanent_Home_Keygen_Token</span><span class="p">:</span> <span class="s1">&#39;phkt&#39;</span><span class="p">,</span>
+            <span class="n">Enum_Option</span><span class="o">.</span><span class="n">Care_of_Test_Init</span><span class="p">:</span> <span class="s1">&#39;ct_init&#39;</span><span class="p">,</span>
+            <span class="n">Enum_Option</span><span class="o">.</span><span class="n">Care_of_Test</span><span class="p">:</span> <span class="s1">&#39;ct&#39;</span><span class="p">,</span>
         <span class="p">},</span>
     <span class="p">)</span>  <span class="c1"># type: DefaultDict[Enum_Option | int, str | tuple[OptionParser, OptionConstructor]]</span>
 
@@ -650,13 +681,14 @@
             <span class="n">length</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
         <span class="n">schema</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__header__</span>
 
-        <span class="n">mh</span> <span class="o">=</span> <span class="n">Data_MH</span><span class="p">(</span>
-            <span class="nb">next</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">next</span><span class="p">,</span>
-            <span class="n">length</span><span class="o">=</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="mi">8</span><span class="p">,</span>
-            <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
-            <span class="n">chksum</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">chksum</span><span class="p">,</span>
-            <span class="n">data</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">data</span><span class="p">,</span>
-        <span class="p">)</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__message__</span><span class="p">[</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">]</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="n">meth_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;_read_msg_</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1">&#39;</span>
+            <span class="n">meth</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">&#39;PacketParser&#39;</span><span class="p">,</span>
+                        <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">meth_name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_msg_unknown</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">meth</span> <span class="o">=</span> <span class="n">name</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">mh</span> <span class="o">=</span> <span class="n">meth</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">header</span><span class="o">=</span><span class="n">schema</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">extension</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">mh</span>
@@ -672,12 +704,23 @@
              <span class="n">type_namespace</span><span class="p">:</span> <span class="s1">&#39;Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># pylint: disable=line-too-long</span>
              <span class="n">type_reversed</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
              <span class="n">chksum</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">&#39;&#39;</span><span class="p">,</span>
-             <span class="n">data</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">&#39;</span><span class="se">\x00\x00</span><span class="s1">&#39;</span><span class="p">,</span>  <span class="c1"># minimum length</span>
+             <span class="n">data</span><span class="p">:</span> <span class="s1">&#39;bytes | Data_MH | Schema_Packet | dict[str, Any]&#39;</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">&#39;</span><span class="se">\x00\x00</span><span class="s1">&#39;</span><span class="p">,</span>  <span class="c1"># minimum length</span>
              <span class="n">payload</span><span class="p">:</span> <span class="s1">&#39;Protocol | Schema | bytes&#39;</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">&#39;&#39;</span><span class="p">,</span>
              <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Schema_MH&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Make (construct) packet data.</span>
 
 <span class="sd">        Args:</span>
+<span class="sd">            next: Next header type.</span>
+<span class="sd">            next_default: Default value for next header type field.</span>
+<span class="sd">            next_namespace: Namespace of next header type field.</span>
+<span class="sd">            next_reversed: Whether the bits of next header type field is reversed.</span>
+<span class="sd">            type: Mobility Header type.</span>
+<span class="sd">            type_default: Default value for Mobility Header type field.</span>
+<span class="sd">            type_namespace: Namespace of Mobility Header type field.</span>
+<span class="sd">            type_reversed: Whether the bits of Mobility Header type field is reversed.</span>
+<span class="sd">            chksum: Checksum.</span>
+<span class="sd">            data: Message data.</span>
+<span class="sd">            payload: Payload of next layer protocol.</span>
 <span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
 
 <span class="sd">        Returns:</span>
@@ -689,12 +732,32 @@
         <span class="n">type_val</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_index</span><span class="p">(</span><span class="nb">type</span><span class="p">,</span> <span class="n">type_default</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="n">type_namespace</span><span class="p">,</span>  <span class="c1"># type: ignore[call-overload]</span>
                                     <span class="nb">reversed</span><span class="o">=</span><span class="n">type_reversed</span><span class="p">,</span> <span class="n">pack</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">):</span>
+            <span class="n">data_val</span> <span class="o">=</span> <span class="n">data</span>  <span class="c1"># type: bytes | Schema_Packet</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="p">(</span><span class="nb">dict</span><span class="p">,</span> <span class="n">Data_MH</span><span class="p">)):</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__message__</span><span class="p">[</span><span class="n">type_val</span><span class="p">]</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+                <span class="n">meth_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;_make_msg_</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1">&#39;</span>
+                <span class="n">meth</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">&#39;PacketConstructor&#39;</span><span class="p">,</span>
+                            <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">meth_name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_msg_unknown</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">meth</span> <span class="o">=</span> <span class="n">name</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+                <span class="n">data_val</span> <span class="o">=</span> <span class="n">meth</span><span class="p">(</span><span class="o">**</span><span class="n">data</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">data_val</span> <span class="o">=</span> <span class="n">meth</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">Schema_Packet</span><span class="p">):</span>
+            <span class="n">data_val</span> <span class="o">=</span> <span class="n">data</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;MH: [Type </span><span class="si">{</span><span class="n">type_val</span><span class="si">}</span><span class="s1">] invalid format&#39;</span><span class="p">)</span>
+
         <span class="k">return</span> <span class="n">Schema_MH</span><span class="p">(</span>
             <span class="nb">next</span><span class="o">=</span><span class="n">next_val</span><span class="p">,</span>
-            <span class="n">length</span><span class="o">=</span><span class="n">math</span><span class="o">.</span><span class="n">ceil</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">+</span> <span class="mi">6</span><span class="p">)</span> <span class="o">/</span> <span class="mi">8</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="n">math</span><span class="o">.</span><span class="n">ceil</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">data_val</span><span class="p">)</span> <span class="o">+</span> <span class="mi">6</span><span class="p">)</span> <span class="o">/</span> <span class="mi">8</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">type_val</span><span class="p">,</span>
             <span class="n">chksum</span><span class="o">=</span><span class="n">chksum</span><span class="p">,</span>
-            <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span>
+            <span class="n">data</span><span class="o">=</span><span class="n">data_val</span><span class="p">,</span>
             <span class="n">payload</span><span class="o">=</span><span class="n">payload</span><span class="p">,</span>
         <span class="p">)</span></div>
 
@@ -764,9 +827,242 @@
             <span class="s1">&#39;next&#39;</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">next</span><span class="p">,</span>
             <span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="s1">&#39;chksum&#39;</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">chksum</span><span class="p">,</span>
-            <span class="s1">&#39;data&#39;</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">data</span><span class="p">,</span>
+            <span class="s1">&#39;data&#39;</span><span class="p">:</span> <span class="n">data</span><span class="p">,</span>
             <span class="s1">&#39;payload&#39;</span><span class="p">:</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_make_payload</span><span class="p">(</span><span class="n">data</span><span class="p">),</span>
         <span class="p">}</span></div>
+
+    <span class="k">def</span> <span class="nf">_read_msg_unknown</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">&#39;Schema_UnknownMessage&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                          <span class="n">header</span><span class="p">:</span> <span class="s1">&#39;Schema_MH&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Data_UnknownMessage&#39;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read unknown MH message type.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            schema: Parsed message type schema.</span>
+<span class="sd">            header: Parsed MH header schema.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Parsed message type data.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">Data_UnknownMessage</span><span class="p">(</span>
+            <span class="nb">next</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">next</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">length</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="mi">8</span><span class="p">,</span>
+            <span class="nb">type</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
+            <span class="n">chksum</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">chksum</span><span class="p">,</span>
+            <span class="n">data</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">data</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">data</span>
+
+    <span class="k">def</span> <span class="nf">_read_msg_brr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">&#39;Schema_BindingRefreshRequestMessage&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                      <span class="n">header</span><span class="p">:</span> <span class="s1">&#39;Schema_MH&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Data_BindingRefreshRequestMessage&#39;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read MH binding refresh request (BRR) message type.</span>
+
+<span class="sd">        Structure of MH Binding Refresh Request Message [:rfc:`6275`]:</span>
+
+<span class="sd">        .. code-block:: text</span>
+
+<span class="sd">                                           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+<span class="sd">                                           |          Reserved             |</span>
+<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+<span class="sd">           |                                                               |</span>
+<span class="sd">           .                                                               .</span>
+<span class="sd">           .                        Mobility Options                       .</span>
+<span class="sd">           .                                                               .</span>
+<span class="sd">           |                                                               |</span>
+<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            schema: Parsed message type schema.</span>
+<span class="sd">            header: Parsed MH header schema.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Parsed message type data.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">Data_BindingRefreshRequestMessage</span><span class="p">(</span>
+            <span class="nb">next</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">next</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">length</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="mi">8</span><span class="p">,</span>
+            <span class="nb">type</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
+            <span class="n">chksum</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">chksum</span><span class="p">,</span>
+            <span class="n">options</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_read_mh_options</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">options</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">data</span>
+
+    <span class="k">def</span> <span class="nf">_read_msg_hoti</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">&#39;Schema_HomeTestInitMessage&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                       <span class="n">header</span><span class="p">:</span> <span class="s1">&#39;Schema_MH&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Data_HomeTestInitMessage&#39;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read MH home test initiation (HoTI) message type.</span>
+
+<span class="sd">        Structure of MH Home Test Initiation Message [:rfc:`6275`]:</span>
+
+<span class="sd">        .. code-block:: text</span>
+
+<span class="sd">                                           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+<span class="sd">                                           |           Reserved            |</span>
+<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+<span class="sd">           |                                                               |</span>
+<span class="sd">           +                       Home Init Cookie                        +</span>
+<span class="sd">           |                                                               |</span>
+<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+<span class="sd">           |                                                               |</span>
+<span class="sd">           .                                                               .</span>
+<span class="sd">           .                       Mobility Options                        .</span>
+<span class="sd">           .                                                               .</span>
+<span class="sd">           |                                                               |</span>
+<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            schema: Parsed message type schema.</span>
+<span class="sd">            header: Parsed MH header schema.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Parsed message type data.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">Data_HomeTestInitMessage</span><span class="p">(</span>
+            <span class="nb">next</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">next</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">length</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="mi">8</span><span class="p">,</span>
+            <span class="nb">type</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
+            <span class="n">chksum</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">chksum</span><span class="p">,</span>
+            <span class="n">cookie</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">cookie</span><span class="p">,</span>
+            <span class="n">options</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_read_mh_options</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">options</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">data</span>
+
+    <span class="k">def</span> <span class="nf">_read_msg_coti</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">&#39;Schema_CareofTestInitMessage&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                       <span class="n">header</span><span class="p">:</span> <span class="s1">&#39;Schema_MH&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Data_CareofTestInitMessage&#39;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read MH care-of test initiation (CoTI) message type.</span>
+
+<span class="sd">        Structure of MH Care-of Test Initiation Message [:rfc:`6275`]:</span>
+
+<span class="sd">        .. code-block:: text</span>
+
+<span class="sd">                                           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+<span class="sd">                                           |           Reserved            |</span>
+<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+<span class="sd">           |                                                               |</span>
+<span class="sd">           +                      Care-of Init Cookie                      +</span>
+<span class="sd">           |                                                               |</span>
+<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+<span class="sd">           |                                                               |</span>
+<span class="sd">           .                                                               .</span>
+<span class="sd">           .                        Mobility Options                       .</span>
+<span class="sd">           .                                                               .</span>
+<span class="sd">           |                                                               |</span>
+<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            schema: Parsed message type schema.</span>
+<span class="sd">            header: Parsed MH header schema.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Parsed message type data.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">Data_CareofTestInitMessage</span><span class="p">(</span>
+            <span class="nb">next</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">next</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">length</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="mi">8</span><span class="p">,</span>
+            <span class="nb">type</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
+            <span class="n">chksum</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">chksum</span><span class="p">,</span>
+            <span class="n">cookie</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">cookie</span><span class="p">,</span>
+            <span class="n">options</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_read_mh_options</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">options</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">data</span>
+
+    <span class="k">def</span> <span class="nf">_read_msg_hot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">&#39;Schema_HomeTestMessage&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                      <span class="n">header</span><span class="p">:</span> <span class="s1">&#39;Schema_MH&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Data_HomeTestMessage&#39;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read MH home test (HoT) message type.</span>
+
+<span class="sd">        Structure of MH Home Test Message [:rfc:`6275`]:</span>
+
+<span class="sd">        .. code-block:: text</span>
+
+<span class="sd">                                           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+<span class="sd">                                           |       Home Nonce Index        |</span>
+<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+<span class="sd">           |                                                               |</span>
+<span class="sd">           +                        Home Init Cookie                       +</span>
+<span class="sd">           |                                                               |</span>
+<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+<span class="sd">           |                                                               |</span>
+<span class="sd">           +                       Home Keygen Token                       +</span>
+<span class="sd">           |                                                               |</span>
+<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+<span class="sd">           |                                                               |</span>
+<span class="sd">           .                                                               .</span>
+<span class="sd">           .                        Mobility Options                       .</span>
+<span class="sd">           .                                                               .</span>
+<span class="sd">           |                                                               |</span>
+<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            schema: Parsed message type schema.</span>
+<span class="sd">            header: Parsed MH header schema.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Parsed message type data.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">Data_HomeTestMessage</span><span class="p">(</span>
+            <span class="nb">next</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">next</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">length</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="mi">8</span><span class="p">,</span>
+            <span class="nb">type</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
+            <span class="n">chksum</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">chksum</span><span class="p">,</span>
+            <span class="n">nonce_index</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">nonce_index</span><span class="p">,</span>
+            <span class="n">cookie</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">cookie</span><span class="p">,</span>
+            <span class="n">token</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">token</span><span class="p">,</span>
+            <span class="n">options</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_read_mh_options</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">options</span><span class="p">),</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">data</span>
+
+    <span class="k">def</span> <span class="nf">_read_msg_cot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">&#39;Schema_CareofTestMessage&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                      <span class="n">header</span><span class="p">:</span> <span class="s1">&#39;Schema_MH&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Data_CareofTestMessage&#39;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read MH care-of test (CoT) message type.</span>
+
+<span class="sd">        Structure of MH Care-of Test Message [:rfc:`6275`]:</span>
+
+<span class="sd">        .. code-block:: text</span>
+
+<span class="sd">                                           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+<span class="sd">                                           |      Care-of Nonce Index      |</span>
+<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+<span class="sd">           |                                                               |</span>
+<span class="sd">           +                      Care-of Init Cookie                      +</span>
+<span class="sd">           |                                                               |</span>
+<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+<span class="sd">           |                                                               |</span>
+<span class="sd">           +                     Care-of Keygen Token                      +</span>
+<span class="sd">           |                                                               |</span>
+<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+<span class="sd">           |                                                               |</span>
+<span class="sd">           .                                                               .</span>
+<span class="sd">           .                        Mobility Options                       .</span>
+<span class="sd">           .                                                               .</span>
+<span class="sd">           |                                                               |</span>
+<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            schema: Parsed message type schema.</span>
+<span class="sd">            header: Parsed MH header schema.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Parsed message type data.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">Data_CareofTestMessage</span><span class="p">(</span>
+            <span class="nb">next</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">next</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">length</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="mi">8</span><span class="p">,</span>
+            <span class="nb">type</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
+            <span class="n">chksum</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">chksum</span><span class="p">,</span>
+            <span class="n">nonce_index</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">nonce_index</span><span class="p">,</span>
+            <span class="n">cookie</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">cookie</span><span class="p">,</span>
+            <span class="n">token</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">token</span><span class="p">,</span>
+            <span class="n">options</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_read_mh_options</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">options</span><span class="p">),</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">data</span>
+
+
+
+
+
 
     <span class="k">def</span> <span class="nf">_read_mh_options</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">options_schema</span><span class="p">:</span> <span class="s1">&#39;list[Schema_Option]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Option&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Read MH options.</span>
@@ -1288,6 +1584,145 @@
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">data</span>
 
+    <span class="k">def</span> <span class="nf">_read_opt_signature</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">&#39;Schema_SignatureOption&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                            <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Data_SignatureOption&#39;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read MH signature option.</span>
+
+<span class="sd">        Structure of MH Signature option [:rfc:`4866`]:</span>
+
+<span class="sd">        .. code-block:: text</span>
+
+<span class="sd">            0                   1                   2                   3</span>
+<span class="sd">            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1</span>
+<span class="sd">                                           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+<span class="sd">                                           |  Option Type  | Option Length |</span>
+<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+<span class="sd">           |                                                               |</span>
+<span class="sd">           :                                                               :</span>
+<span class="sd">           :                            Signature                          :</span>
+<span class="sd">           :                                                               :</span>
+<span class="sd">           |                                                               |</span>
+<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            schema: Parsed option schema.</span>
+<span class="sd">            options: Parsed MH options.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Constructed option data.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">Data_SignatureOption</span><span class="p">(</span>
+            <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span>
+            <span class="n">signature</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">signature</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">data</span>
+
+    <span class="k">def</span> <span class="nf">_read_opt_phkt</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">&#39;Schema_PermanentHomeKeygenTokenOption&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                       <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Data_PermanentHomeKeygenTokenOption&#39;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read MH permanent home keygen token option.</span>
+
+<span class="sd">        Structure of MH Permanent Home Keygen Token option [:rfc:`4866`]:</span>
+
+<span class="sd">        .. code-block:: text</span>
+
+<span class="sd">            0                   1                   2                   3</span>
+<span class="sd">            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1</span>
+<span class="sd">                                           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+<span class="sd">                                           |  Option Type  | Option Length |</span>
+<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+<span class="sd">           |                                                               |</span>
+<span class="sd">           :                                                               :</span>
+<span class="sd">           :                  Permanent Home Keygen Token                  :</span>
+<span class="sd">           :                                                               :</span>
+<span class="sd">           |                                                               |</span>
+<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            schema: Parsed option schema.</span>
+<span class="sd">            options: Parsed MH options.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Constructed option data.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">Data_PermanentHomeKeygenTokenOption</span><span class="p">(</span>
+            <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span>
+            <span class="n">token</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">token</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">data</span>
+
+    <span class="k">def</span> <span class="nf">_read_opt_ct_init</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">&#39;Schema_CareofTestInitOption&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                          <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Data_CareofTestInitOption&#39;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read MH Care-of Test Init option.</span>
+
+<span class="sd">        Structure of MH Care-of Test Init option [:rfc:`4866`]:</span>
+
+<span class="sd">        .. code-block:: text</span>
+
+<span class="sd">            0                   1                   2                   3</span>
+<span class="sd">            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1</span>
+<span class="sd">                                           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+<span class="sd">                                           |  Option Type  | Option Length |</span>
+<span class="sd">                                           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            schema: Parsed option schema.</span>
+<span class="sd">            options: Parsed MH options.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Constructed option data.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [Opt </span><span class="si">{</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s1">] invalid format&#39;</span><span class="p">)</span>
+
+        <span class="n">data</span> <span class="o">=</span> <span class="n">Data_CareofTestInitOption</span><span class="p">(</span>
+            <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">data</span>
+
+    <span class="k">def</span> <span class="nf">_read_opt_ct</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">&#39;Schema_CareofTestOption&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                     <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Data_CareofTestOption&#39;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read MH Care-of Test option.</span>
+
+<span class="sd">        Structure of MH Care-of Test option [:rfc:`4866`]:</span>
+
+<span class="sd">        .. code-block:: text</span>
+
+<span class="sd">            0                   1                   2                   3</span>
+<span class="sd">            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1</span>
+<span class="sd">                                           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+<span class="sd">                                           |  Option Type  | Option Length |</span>
+<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+<span class="sd">           |                                                               |</span>
+<span class="sd">           +                     Care-of Keygen Token                      +</span>
+<span class="sd">           |                                                               |</span>
+<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            schema: Parsed option schema.</span>
+<span class="sd">            options: Parsed MH options.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Constructed option data.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">!=</span> <span class="mi">8</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [Opt </span><span class="si">{</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s1">] invalid format&#39;</span><span class="p">)</span>
+
+        <span class="n">data</span> <span class="o">=</span> <span class="n">Data_CareofTestOption</span><span class="p">(</span>
+            <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span>
+            <span class="n">token</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">token</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">data</span>
+
+
+
 
 
 
@@ -1403,17 +1838,190 @@
 
 
 
-    <span class="k">def</span> <span class="nf">_make_mh_options</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option | list[Schema_Option | tuple[Enum_Option, dict[str, Any]] | bytes]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;tuple[list[Schema_Option | bytes], int]&#39;</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">_make_msg_unknown</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="p">:</span> <span class="s1">&#39;Optional[Data_UnknownMessage]&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                          <span class="n">data</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">&#39;&#39;</span><span class="p">,</span>
+                          <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Schema_UnknownMessage&#39;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Make MH unknown message type.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            message: Message data model.</span>
+<span class="sd">            data: Raw message data.</span>
+<span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Constructed message type.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">message</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">message</span><span class="o">.</span><span class="n">data</span>
+
+        <span class="k">return</span> <span class="n">Schema_UnknownMessage</span><span class="p">(</span>
+            <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_make_msg_brr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="p">:</span> <span class="s1">&#39;Optional[Data_BindingRefreshRequestMessage]&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                      <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Optional[Option | list[Schema_Option | tuple[Enum_Option, dict[str, Any]] | bytes]]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                      <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Schema_BindingRefreshRequestMessage&#39;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Make MH binding refresh request (BRR) message type.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            message: Message data model.</span>
+<span class="sd">            options: Mobility options.</span>
+<span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Constructed message type.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">message</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">options</span> <span class="o">=</span> <span class="n">message</span><span class="o">.</span><span class="n">options</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">options</span> <span class="o">=</span> <span class="n">options</span> <span class="ow">or</span> <span class="p">[]</span>
+
+        <span class="k">return</span> <span class="n">Schema_BindingRefreshRequestMessage</span><span class="p">(</span>
+            <span class="n">options</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_make_mh_options</span><span class="p">(</span><span class="n">options</span><span class="p">),</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_make_msg_hoti</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="p">:</span> <span class="s1">&#39;Optional[Data_HomeTestInitMessage]&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                       <span class="n">cookie</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">&#39;</span><span class="se">\x00\x00\x00\x00\x00\x00\x00\x00</span><span class="s1">&#39;</span><span class="p">,</span>
+                       <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Optional[Option | list[Schema_Option | tuple[Enum_Option, dict[str, Any]] | bytes]]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                       <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Schema_HomeTestInitMessage&#39;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Make MH home test init (HoTI) message type.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            message: Message data model.</span>
+<span class="sd">            cookie: Home test cookie.</span>
+<span class="sd">            options: Mobility options.</span>
+<span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Constructed message type.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">message</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">cookie</span> <span class="o">=</span> <span class="n">message</span><span class="o">.</span><span class="n">cookie</span>
+            <span class="n">options</span> <span class="o">=</span> <span class="n">message</span><span class="o">.</span><span class="n">options</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">options</span> <span class="o">=</span> <span class="n">options</span> <span class="ow">or</span> <span class="p">[]</span>
+
+        <span class="k">return</span> <span class="n">Schema_HomeTestInitMessage</span><span class="p">(</span>
+            <span class="n">cookie</span><span class="o">=</span><span class="n">cookie</span><span class="p">,</span>
+            <span class="n">options</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_make_mh_options</span><span class="p">(</span><span class="n">options</span><span class="p">),</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_make_msg_coti</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="p">:</span> <span class="s1">&#39;Optional[Data_CareofTestInitMessage]&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                       <span class="n">cookie</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">&#39;</span><span class="se">\x00\x00\x00\x00\x00\x00\x00\x00</span><span class="s1">&#39;</span><span class="p">,</span>
+                       <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Optional[Option | list[Schema_Option | tuple[Enum_Option, dict[str, Any]] | bytes]]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                       <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Schema_CareofTestInitMessage&#39;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Make MH care-of test init (CoTI) message type.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            message: Message data model.</span>
+<span class="sd">            cookie: Care-of test cookie.</span>
+<span class="sd">            options: Mobility options.</span>
+<span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Constructed message type.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">message</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">cookie</span> <span class="o">=</span> <span class="n">message</span><span class="o">.</span><span class="n">cookie</span>
+            <span class="n">options</span> <span class="o">=</span> <span class="n">message</span><span class="o">.</span><span class="n">options</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">options</span> <span class="o">=</span> <span class="n">options</span> <span class="ow">or</span> <span class="p">[]</span>
+
+        <span class="k">return</span> <span class="n">Schema_CareofTestInitMessage</span><span class="p">(</span>
+            <span class="n">cookie</span><span class="o">=</span><span class="n">cookie</span><span class="p">,</span>
+            <span class="n">options</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_make_mh_options</span><span class="p">(</span><span class="n">options</span><span class="p">),</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_make_msg_hot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="p">:</span> <span class="s1">&#39;Optional[Data_HomeTestMessage]&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                      <span class="n">nonce_index</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+                      <span class="n">cookie</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">&#39;</span><span class="se">\x00\x00\x00\x00\x00\x00\x00\x00</span><span class="s1">&#39;</span><span class="p">,</span>
+                      <span class="n">token</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">&#39;</span><span class="se">\x00\x00\x00\x00\x00\x00\x00\x00</span><span class="s1">&#39;</span><span class="p">,</span>
+                      <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Optional[Option | list[Schema_Option | tuple[Enum_Option, dict[str, Any]] | bytes]]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                      <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Schema_HomeTestMessage&#39;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Make MH home test (HoT) message type.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            message: Message data model.</span>
+<span class="sd">            nonce_index: Home nonce index.</span>
+<span class="sd">            cookie: Home test cookie.</span>
+<span class="sd">            token: Home test token.</span>
+<span class="sd">            options: Mobility options.</span>
+<span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Constructed message type.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">message</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">nonce_index</span> <span class="o">=</span> <span class="n">message</span><span class="o">.</span><span class="n">nonce_index</span>
+            <span class="n">cookie</span> <span class="o">=</span> <span class="n">message</span><span class="o">.</span><span class="n">cookie</span>
+            <span class="n">token</span> <span class="o">=</span> <span class="n">message</span><span class="o">.</span><span class="n">token</span>
+            <span class="n">options</span> <span class="o">=</span> <span class="n">message</span><span class="o">.</span><span class="n">options</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">options</span> <span class="o">=</span> <span class="n">options</span> <span class="ow">or</span> <span class="p">[]</span>
+
+        <span class="k">return</span> <span class="n">Schema_HomeTestMessage</span><span class="p">(</span>
+            <span class="n">nonce_index</span><span class="o">=</span><span class="n">nonce_index</span><span class="p">,</span>
+            <span class="n">cookie</span><span class="o">=</span><span class="n">cookie</span><span class="p">,</span>
+            <span class="n">token</span><span class="o">=</span><span class="n">token</span><span class="p">,</span>
+            <span class="n">options</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_make_mh_options</span><span class="p">(</span><span class="n">options</span><span class="p">),</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_make_msg_cot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="p">:</span> <span class="s1">&#39;Optional[Data_CareofTestMessage]&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                      <span class="n">nonce_index</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+                      <span class="n">cookie</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">&#39;</span><span class="se">\x00\x00\x00\x00\x00\x00\x00\x00</span><span class="s1">&#39;</span><span class="p">,</span>
+                      <span class="n">token</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">&#39;</span><span class="se">\x00\x00\x00\x00\x00\x00\x00\x00</span><span class="s1">&#39;</span><span class="p">,</span>
+                      <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Optional[Option | list[Schema_Option | tuple[Enum_Option, dict[str, Any]] | bytes]]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                      <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Schema_CareofTestMessage&#39;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Make MH care-of test (CoT) message type.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            message: Message data model.</span>
+<span class="sd">            nonce_index: Care-of nonce index.</span>
+<span class="sd">            cookie: Care-of test cookie.</span>
+<span class="sd">            token: Care-of test token.</span>
+<span class="sd">            options: Mobility options.</span>
+<span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Constructed message type.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">message</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">nonce_index</span> <span class="o">=</span> <span class="n">message</span><span class="o">.</span><span class="n">nonce_index</span>
+            <span class="n">cookie</span> <span class="o">=</span> <span class="n">message</span><span class="o">.</span><span class="n">cookie</span>
+            <span class="n">token</span> <span class="o">=</span> <span class="n">message</span><span class="o">.</span><span class="n">token</span>
+            <span class="n">options</span> <span class="o">=</span> <span class="n">message</span><span class="o">.</span><span class="n">options</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">options</span> <span class="o">=</span> <span class="n">options</span> <span class="ow">or</span> <span class="p">[]</span>
+
+        <span class="k">return</span> <span class="n">Schema_CareofTestMessage</span><span class="p">(</span>
+            <span class="n">nonce_index</span><span class="o">=</span><span class="n">nonce_index</span><span class="p">,</span>
+            <span class="n">cookie</span><span class="o">=</span><span class="n">cookie</span><span class="p">,</span>
+            <span class="n">token</span><span class="o">=</span><span class="n">token</span><span class="p">,</span>
+            <span class="n">options</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_make_mh_options</span><span class="p">(</span><span class="n">options</span><span class="p">),</span>
+        <span class="p">)</span>
+
+
+
+
+
+
+
+    <span class="k">def</span> <span class="nf">_make_mh_options</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option | list[Schema_Option | tuple[Enum_Option, dict[str, Any]] | bytes]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;list[Schema_Option | bytes]&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Make options for MH.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            options: MH options.</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            Tuple of options and total length of options.</span>
+<span class="sd">            Mobility options list.</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">total_length</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">options</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
             <span class="n">options_list</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: list[Schema_Option | bytes]</span>
             <span class="k">for</span> <span class="n">schema</span> <span class="ow">in</span> <span class="n">options</span><span class="p">:</span>
@@ -1421,10 +2029,8 @@
                     <span class="n">code</span> <span class="o">=</span> <span class="n">Enum_Option</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">int</span><span class="o">.</span><span class="n">from_bytes</span><span class="p">(</span><span class="n">schema</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">1</span><span class="p">],</span> <span class="s1">&#39;big&#39;</span><span class="p">,</span> <span class="n">signed</span><span class="o">=</span><span class="kc">False</span><span class="p">))</span>
 
                     <span class="n">data</span> <span class="o">=</span> <span class="n">schema</span>  <span class="c1"># type: Schema_Option | bytes</span>
-                    <span class="n">data_len</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
                 <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">schema</span><span class="p">,</span> <span class="n">Schema</span><span class="p">):</span>
                     <span class="n">data</span> <span class="o">=</span> <span class="n">schema</span>
-                    <span class="n">data_len</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">pack</span><span class="p">())</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="n">code</span><span class="p">,</span> <span class="n">args</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">&#39;tuple[Enum_Option, dict[str, Any]]&#39;</span><span class="p">,</span> <span class="n">schema</span><span class="p">)</span>
                     <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__option__</span><span class="p">[</span><span class="n">code</span><span class="p">]</span>
@@ -1434,13 +2040,10 @@
                                     <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">meth_name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_opt_none</span><span class="p">))</span>
                     <span class="k">else</span><span class="p">:</span>
                         <span class="n">meth</span> <span class="o">=</span> <span class="n">name</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
-
                     <span class="n">data</span> <span class="o">=</span> <span class="n">meth</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="o">**</span><span class="n">args</span><span class="p">)</span>
-                    <span class="n">data_len</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">pack</span><span class="p">())</span>
 
                 <span class="n">options_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
-                <span class="n">total_length</span> <span class="o">+=</span> <span class="n">data_len</span>
-            <span class="k">return</span> <span class="n">options_list</span><span class="p">,</span> <span class="n">total_length</span>
+            <span class="k">return</span> <span class="n">options_list</span>
 
         <span class="n">options_list</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">code</span><span class="p">,</span> <span class="n">option</span> <span class="ow">in</span> <span class="n">options</span><span class="o">.</span><span class="n">items</span><span class="p">(</span><span class="n">multi</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
@@ -1453,11 +2056,8 @@
                 <span class="n">meth</span> <span class="o">=</span> <span class="n">name</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
 
             <span class="n">data</span> <span class="o">=</span> <span class="n">meth</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">option</span><span class="p">)</span>
-            <span class="n">data_len</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">pack</span><span class="p">())</span>
-
             <span class="n">options_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
-            <span class="n">total_length</span> <span class="o">+=</span> <span class="n">data_len</span>
-        <span class="k">return</span> <span class="n">options_list</span><span class="p">,</span> <span class="n">total_length</span>
+        <span class="k">return</span> <span class="n">options_list</span>
 
     <span class="k">def</span> <span class="nf">_make_opt_none</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span><span class="p">,</span> <span class="n">option</span><span class="p">:</span> <span class="s1">&#39;Optional[Data_UnassignedOption]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
                              <span class="n">data</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">&#39;&#39;</span><span class="p">,</span>
@@ -1867,6 +2467,98 @@
             <span class="n">length</span><span class="o">=</span><span class="n">length</span><span class="p">,</span>
             <span class="n">parameters</span><span class="o">=</span><span class="n">param</span><span class="p">,</span>
         <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_make_opt_signature</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span><span class="p">,</span> <span class="n">option</span><span class="p">:</span> <span class="s1">&#39;Optional[Data_SignatureOption]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                            <span class="n">signature</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">&#39;&#39;</span><span class="p">,</span>
+                            <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Schema_SignatureOption&#39;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Make MH signature option.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            type: Option type.</span>
+<span class="sd">            option: Option data model.</span>
+<span class="sd">            signature: Signature data.</span>
+<span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Constructed option schema.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">option</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">signature</span> <span class="o">=</span> <span class="n">option</span><span class="o">.</span><span class="n">signature</span>
+
+        <span class="k">return</span> <span class="n">Schema_SignatureOption</span><span class="p">(</span>
+            <span class="nb">type</span><span class="o">=</span><span class="nb">type</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">signature</span><span class="p">),</span>
+            <span class="n">signature</span><span class="o">=</span><span class="n">signature</span><span class="p">,</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_make_opt_phkt</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span><span class="p">,</span> <span class="n">option</span><span class="p">:</span> <span class="s1">&#39;Optional[Data_PermanentHomeKeygenTokenOption]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                       <span class="n">token</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">&#39;&#39;</span><span class="p">,</span>
+                       <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Schema_PermanentHomeKeygenTokenOption&#39;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Make MH permanent home keygen token option.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            type: Option type.</span>
+<span class="sd">            option: Option data model.</span>
+<span class="sd">            token: Token data.</span>
+<span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Constructed option schema.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">option</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">token</span> <span class="o">=</span> <span class="n">option</span><span class="o">.</span><span class="n">token</span>
+
+        <span class="k">return</span> <span class="n">Schema_PermanentHomeKeygenTokenOption</span><span class="p">(</span>
+            <span class="nb">type</span><span class="o">=</span><span class="nb">type</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">token</span><span class="p">),</span>
+            <span class="n">token</span><span class="o">=</span><span class="n">token</span><span class="p">,</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_make_opt_ct_init</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span><span class="p">,</span> <span class="n">option</span><span class="p">:</span> <span class="s1">&#39;Optional[Data_CareofTestInitOption]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                          <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Schema_CareofTestInitOption&#39;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Make MH Care-of Test Init option.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            type: Option type.</span>
+<span class="sd">            option: Option data model.</span>
+<span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Constructed option schema.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">Schema_CareofTestInitOption</span><span class="p">(</span>
+            <span class="nb">type</span><span class="o">=</span><span class="nb">type</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_make_opt_ct</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span><span class="p">,</span> <span class="n">option</span><span class="p">:</span> <span class="s1">&#39;Optional[Data_CareofTestOption]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                     <span class="n">token</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">&#39;</span><span class="se">\x00\x00\x00\x00\x00\x00\x00\x00</span><span class="s1">&#39;</span><span class="p">,</span>
+                     <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Schema_CareofTestOption&#39;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Make MH Care-of Test option.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            type: Option type.</span>
+<span class="sd">            option: Option data model.</span>
+<span class="sd">            token: Care-of keygen token.</span>
+<span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Constructed option schema.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">option</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">token</span> <span class="o">=</span> <span class="n">option</span><span class="o">.</span><span class="n">token</span>
+
+        <span class="k">return</span> <span class="n">Schema_CareofTestOption</span><span class="p">(</span>
+            <span class="nb">type</span><span class="o">=</span><span class="nb">type</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span>
+            <span class="n">token</span><span class="o">=</span><span class="n">token</span><span class="p">,</span>
+        <span class="p">)</span>
+
+
 
 
 

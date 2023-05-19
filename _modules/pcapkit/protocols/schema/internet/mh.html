@@ -348,8 +348,6 @@
 <span class="kn">import</span> <span class="nn">collections</span>
 <span class="kn">import</span> <span class="nn">datetime</span>
 <span class="kn">import</span> <span class="nn">math</span>
-<span class="kn">from</span> <span class="nn">email.mime</span> <span class="kn">import</span> <span class="n">base</span>
-<span class="kn">from</span> <span class="nn">lib2to3.fixes.fix_idioms</span> <span class="kn">import</span> <span class="n">TYPE</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
 
 <span class="kn">from</span> <span class="nn">pcapkit.const.mh.access_type</span> <span class="kn">import</span> <span class="n">AccessType</span> <span class="k">as</span> <span class="n">Enum_AccessType</span>
@@ -411,12 +409,15 @@
     <span class="s1">&#39;MH&#39;</span><span class="p">,</span>
 
     <span class="s1">&#39;Packet&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;UnknownMessage&#39;</span><span class="p">,</span> <span class="s1">&#39;BindingRefreshRequestMessage&#39;</span><span class="p">,</span> <span class="s1">&#39;HomeTestInitMessage&#39;</span><span class="p">,</span> <span class="s1">&#39;CareofTestInitMessage&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;HomeTestMessage&#39;</span><span class="p">,</span> <span class="s1">&#39;CareofTestMessage&#39;</span><span class="p">,</span>
 
     <span class="s1">&#39;Option&#39;</span><span class="p">,</span>
     <span class="s1">&#39;UnassignedOption&#39;</span><span class="p">,</span> <span class="s1">&#39;PadOption&#39;</span><span class="p">,</span> <span class="s1">&#39;BindRefreshAdviceOption&#39;</span><span class="p">,</span> <span class="s1">&#39;AlternateCareofAddressOption&#39;</span><span class="p">,</span>
     <span class="s1">&#39;NonceIndicesOption&#39;</span><span class="p">,</span> <span class="s1">&#39;BindingAuthorizationDataOption&#39;</span><span class="p">,</span> <span class="s1">&#39;MobileNetworkPrefixOption&#39;</span><span class="p">,</span>
     <span class="s1">&#39;LinkLayerAddressOption&#39;</span><span class="p">,</span> <span class="s1">&#39;MNIDOption&#39;</span><span class="p">,</span> <span class="s1">&#39;AuthOption&#39;</span><span class="p">,</span> <span class="s1">&#39;MesgIDOption&#39;</span><span class="p">,</span> <span class="s1">&#39;CGAParametersRequestOption&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;CGAParametersOption&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;CGAParametersOption&#39;</span><span class="p">,</span> <span class="s1">&#39;SignatureOption&#39;</span><span class="p">,</span> <span class="s1">&#39;PermanentHomeKeygenTokenOption&#39;</span><span class="p">,</span> <span class="s1">&#39;CareofTestInitOption&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;CareofTestOption&#39;</span><span class="p">,</span>
 
     <span class="s1">&#39;CGAParameter&#39;</span><span class="p">,</span>
 
@@ -428,7 +429,7 @@
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
     <span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span> <span class="k">as</span> <span class="n">dt_type</span>
     <span class="kn">from</span> <span class="nn">ipaddress</span> <span class="kn">import</span> <span class="n">IPv6Address</span>
-    <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span>
+    <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">DefaultDict</span><span class="p">,</span> <span class="n">Type</span>
 
     <span class="kn">from</span> <span class="nn">pcapkit.corekit.fields.field</span> <span class="kn">import</span> <span class="n">_Field</span> <span class="k">as</span> <span class="n">Field</span>
     <span class="kn">from</span> <span class="nn">pcapkit.protocols.protocol</span> <span class="kn">import</span> <span class="n">Protocol</span>
@@ -446,6 +447,57 @@
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Flags for :attr:`MultiPrefixExtension.flags`.&quot;&quot;&quot;</span>
 
         <span class="n">P</span><span class="p">:</span> <span class="nb">int</span>
+
+
+<span class="k">def</span> <span class="nf">mh_opt_registry</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="s1">&#39;DefaultDict[Enum_Option | int, Type[Option]]&#39;</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Registry for MH type-specific message :attr:`~Packet.options`.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">collections</span><span class="o">.</span><span class="n">defaultdict</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="n">UnassignedOption</span><span class="p">,</span> <span class="p">{</span>
+        <span class="n">Enum_Option</span><span class="o">.</span><span class="n">Pad1</span><span class="p">:</span> <span class="n">PadOption</span><span class="p">,</span>
+        <span class="n">Enum_Option</span><span class="o">.</span><span class="n">PadN</span><span class="p">:</span> <span class="n">PadOption</span><span class="p">,</span>
+        <span class="n">Enum_Option</span><span class="o">.</span><span class="n">Binding_Refresh_Advice</span><span class="p">:</span> <span class="n">BindingAuthorizationDataOption</span><span class="p">,</span>
+        <span class="n">Enum_Option</span><span class="o">.</span><span class="n">Alternate_Care_of_Address</span><span class="p">:</span> <span class="n">AlternateCareofAddressOption</span><span class="p">,</span>
+        <span class="n">Enum_Option</span><span class="o">.</span><span class="n">Nonce_Indices</span><span class="p">:</span> <span class="n">NonceIndicesOption</span><span class="p">,</span>
+        <span class="n">Enum_Option</span><span class="o">.</span><span class="n">Authorization_Data</span><span class="p">:</span> <span class="n">BindingAuthorizationDataOption</span><span class="p">,</span>
+        <span class="n">Enum_Option</span><span class="o">.</span><span class="n">Mobile_Network_Prefix_Option</span><span class="p">:</span> <span class="n">MobileNetworkPrefixOption</span><span class="p">,</span>
+        <span class="n">Enum_Option</span><span class="o">.</span><span class="n">Mobility_Header_Link_Layer_Address_option</span><span class="p">:</span> <span class="n">LinkLayerAddressOption</span><span class="p">,</span>
+        <span class="n">Enum_Option</span><span class="o">.</span><span class="n">MN_ID_OPTION_TYPE</span><span class="p">:</span> <span class="n">MNIDOption</span><span class="p">,</span>
+        <span class="n">Enum_Option</span><span class="o">.</span><span class="n">AUTH_OPTION_TYPE</span><span class="p">:</span> <span class="n">AuthOption</span><span class="p">,</span>
+        <span class="n">Enum_Option</span><span class="o">.</span><span class="n">MESG_ID_OPTION_TYPE</span><span class="p">:</span> <span class="n">MesgIDOption</span><span class="p">,</span>
+        <span class="n">Enum_Option</span><span class="o">.</span><span class="n">CGA_Parameters_Request</span><span class="p">:</span> <span class="n">CGAParametersRequestOption</span><span class="p">,</span>
+        <span class="n">Enum_Option</span><span class="o">.</span><span class="n">CGA_Parameters</span><span class="p">:</span> <span class="n">CGAParametersOption</span><span class="p">,</span>
+        <span class="n">Enum_Option</span><span class="o">.</span><span class="n">Signature</span><span class="p">:</span> <span class="n">SignatureOption</span><span class="p">,</span>
+        <span class="n">Enum_Option</span><span class="o">.</span><span class="n">Permanent_Home_Keygen_Token</span><span class="p">:</span> <span class="n">PermanentHomeKeygenTokenOption</span><span class="p">,</span>
+        <span class="n">Enum_Option</span><span class="o">.</span><span class="n">Care_of_Test_Init</span><span class="p">:</span> <span class="n">CareofTestInitOption</span><span class="p">,</span>
+        <span class="n">Enum_Option</span><span class="o">.</span><span class="n">Care_of_Test</span><span class="p">:</span> <span class="n">CareofTestOption</span><span class="p">,</span>
+    <span class="p">})</span>
+
+
+<span class="k">def</span> <span class="nf">mh_data_selector</span><span class="p">(</span><span class="n">pkt</span><span class="p">:</span> <span class="s1">&#39;dict[str, Any]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Field&#39;</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Selector function for :attr:`MH.data` field.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        pkt: Packet data.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Returns a :class:`~pcapkit.corekit.fields.misc.SchemaField`</span>
+<span class="sd">        wrapped :class:`~pcapkit.protocols.schema.misc.mh.Packet`</span>
+<span class="sd">        subclass instance.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="nb">type</span> <span class="o">=</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span>  <span class="c1"># type: Enum_Packet</span>
+    <span class="n">length</span> <span class="o">=</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">&#39;length&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="mi">8</span> <span class="o">+</span> <span class="mi">2</span>
+
+    <span class="k">if</span> <span class="nb">type</span> <span class="o">==</span> <span class="n">Enum_Packet</span><span class="o">.</span><span class="n">Binding_Refresh_Request</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">SchemaField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="n">length</span><span class="p">,</span> <span class="n">schema</span><span class="o">=</span><span class="n">BindingRefreshRequestMessage</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">type</span> <span class="o">==</span> <span class="n">Enum_Packet</span><span class="o">.</span><span class="n">Home_Test_Init</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">SchemaField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="n">length</span><span class="p">,</span> <span class="n">schema</span><span class="o">=</span><span class="n">HomeTestInitMessage</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">type</span> <span class="o">==</span> <span class="n">Enum_Packet</span><span class="o">.</span><span class="n">Care_of_Test_Init</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">SchemaField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="n">length</span><span class="p">,</span> <span class="n">schema</span><span class="o">=</span><span class="n">CareofTestInitMessage</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">type</span> <span class="o">==</span> <span class="n">Enum_Packet</span><span class="o">.</span><span class="n">Home_Test</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">SchemaField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="n">length</span><span class="p">,</span> <span class="n">schema</span><span class="o">=</span><span class="n">HomeTestMessage</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">type</span> <span class="o">==</span> <span class="n">Enum_Packet</span><span class="o">.</span><span class="n">Care_of_Test</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">SchemaField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="n">length</span><span class="p">,</span> <span class="n">schema</span><span class="o">=</span><span class="n">CareofTestMessage</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">SchemaField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="n">length</span><span class="p">,</span> <span class="n">schema</span><span class="o">=</span><span class="n">UnknownMessage</span><span class="p">)</span>
 
 
 <span class="k">def</span> <span class="nf">mn_id_selector</span><span class="p">(</span><span class="n">pkt</span><span class="p">:</span> <span class="s1">&#39;dict[str, Any]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Field&#39;</span><span class="p">:</span>
@@ -482,17 +534,13 @@
     <span class="c1">#: Checksum.</span>
     <span class="n">chksum</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span> <span class="o">=</span> <span class="n">BytesField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
     <span class="c1">#: Message data.</span>
-    <span class="n">data</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span> <span class="o">=</span> <span class="n">BytesField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">&#39;length&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="mi">8</span> <span class="o">+</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="n">data</span><span class="p">:</span> <span class="s1">&#39;Packet&#39;</span> <span class="o">=</span> <span class="n">SwitchField</span><span class="p">(</span><span class="n">selector</span><span class="o">=</span><span class="n">mh_data_selector</span><span class="p">)</span>
     <span class="c1">#: Payload.</span>
     <span class="n">payload</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span> <span class="o">=</span> <span class="n">PayloadField</span><span class="p">()</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
         <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">next</span><span class="p">:</span> <span class="s1">&#39;Enum_TransType&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_Packet&#39;</span><span class="p">,</span>
-                     <span class="n">chksum</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">,</span> <span class="n">payload</span><span class="p">:</span> <span class="s1">&#39;bytes | Protocol | Schema&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
-
-
-<span class="k">class</span> <span class="nc">Packet</span><span class="p">(</span><span class="n">Schema</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for MH packet data.&quot;&quot;&quot;</span>
+                     <span class="n">chksum</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">&#39;Packet | bytes&#39;</span><span class="p">,</span> <span class="n">payload</span><span class="p">:</span> <span class="s1">&#39;bytes | Protocol | Schema&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
 
 
 <span class="k">class</span> <span class="nc">Option</span><span class="p">(</span><span class="n">Schema</span><span class="p">):</span>
@@ -774,6 +822,171 @@
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
         <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">parameters</span><span class="p">:</span> <span class="s1">&#39;list[CGAParameter | bytes]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>
+
+
+<span class="nd">@schema_final</span>
+<span class="k">class</span> <span class="nc">SignatureOption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for MH Signature options.&quot;&quot;&quot;</span>
+
+    <span class="c1">#: Signature.</span>
+    <span class="n">signature</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span> <span class="o">=</span> <span class="n">BytesField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">&#39;length&#39;</span><span class="p">])</span>
+
+    <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+        <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">signature</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>
+
+
+<span class="nd">@schema_final</span>
+<span class="k">class</span> <span class="nc">PermanentHomeKeygenTokenOption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for Permanent Home Keygen Token options.&quot;&quot;&quot;</span>
+
+    <span class="c1">#: Permanent home keygen token.</span>
+    <span class="n">token</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span> <span class="o">=</span> <span class="n">BytesField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">&#39;length&#39;</span><span class="p">])</span>
+
+    <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+        <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">token</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>
+
+
+<span class="nd">@schema_final</span>
+<span class="k">class</span> <span class="nc">CareofTestInitOption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for MH Care-of Test Init options.&quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+        <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>
+
+
+<span class="nd">@schema_final</span>
+<span class="k">class</span> <span class="nc">CareofTestOption</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for MH Care-of Test options.&quot;&quot;&quot;</span>
+
+    <span class="c1">#: Care-of keygen token.</span>
+    <span class="n">token</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span> <span class="o">=</span> <span class="n">BytesField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">8</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+        <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">token</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>
+
+
+<span class="k">class</span> <span class="nc">Packet</span><span class="p">(</span><span class="n">Schema</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for MH packet data.&quot;&quot;&quot;</span>
+
+
+<span class="nd">@schema_final</span>
+<span class="k">class</span> <span class="nc">UnknownMessage</span><span class="p">(</span><span class="n">Packet</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for MH unknown message type.&quot;&quot;&quot;</span>
+
+    <span class="c1">#: Message data.</span>
+    <span class="n">data</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span> <span class="o">=</span> <span class="n">BytesField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">&#39;__length__&#39;</span><span class="p">])</span>
+
+    <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+        <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>
+
+
+<span class="nd">@schema_final</span>
+<span class="k">class</span> <span class="nc">BindingRefreshRequestMessage</span><span class="p">(</span><span class="n">Packet</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for MH Binding Refresh Request (BRR) message.&quot;&quot;&quot;</span>
+
+    <span class="c1">#: Reserved.</span>
+    <span class="n">reserved</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span> <span class="o">=</span> <span class="n">PaddingField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+    <span class="c1">#: Mobility options.</span>
+    <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;list[Option]&#39;</span> <span class="o">=</span> <span class="n">OptionField</span><span class="p">(</span>
+        <span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">&#39;__length__&#39;</span><span class="p">],</span>
+        <span class="n">base_schema</span><span class="o">=</span><span class="n">Option</span><span class="p">,</span>
+        <span class="n">type_name</span><span class="o">=</span><span class="s1">&#39;type&#39;</span><span class="p">,</span>
+        <span class="n">registry</span><span class="o">=</span><span class="n">mh_opt_registry</span><span class="p">(),</span>  <span class="c1"># type: ignore[arg-type]</span>
+        <span class="n">eool</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+        <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;list[Option | bytes]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>
+
+
+<span class="nd">@schema_final</span>
+<span class="k">class</span> <span class="nc">HomeTestInitMessage</span><span class="p">(</span><span class="n">Packet</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for MH Home Test Init (HoTI) message.&quot;&quot;&quot;</span>
+
+    <span class="c1">#: Reserved.</span>
+    <span class="n">reserved</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span> <span class="o">=</span> <span class="n">PaddingField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+    <span class="c1">#: Home init cookie.</span>
+    <span class="n">cookie</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span> <span class="o">=</span> <span class="n">BytesField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">8</span><span class="p">)</span>
+    <span class="c1">#: Mobility options.</span>
+    <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;list[Option]&#39;</span> <span class="o">=</span> <span class="n">OptionField</span><span class="p">(</span>
+        <span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">&#39;__length__&#39;</span><span class="p">],</span>
+        <span class="n">base_schema</span><span class="o">=</span><span class="n">Option</span><span class="p">,</span>
+        <span class="n">type_name</span><span class="o">=</span><span class="s1">&#39;type&#39;</span><span class="p">,</span>
+        <span class="n">registry</span><span class="o">=</span><span class="n">mh_opt_registry</span><span class="p">(),</span>  <span class="c1"># type: ignore[arg-type]</span>
+        <span class="n">eool</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+        <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cookie</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;list[Option | bytes]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>
+
+
+<span class="nd">@schema_final</span>
+<span class="k">class</span> <span class="nc">CareofTestInitMessage</span><span class="p">(</span><span class="n">Packet</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for MH Care-of Test Init (CoTI) messages.&quot;&quot;&quot;</span>
+
+    <span class="c1">#: Reserved.</span>
+    <span class="n">reserved</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span> <span class="o">=</span> <span class="n">PaddingField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+    <span class="c1">#: Care-of init cookie.</span>
+    <span class="n">cookie</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span> <span class="o">=</span> <span class="n">BytesField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">8</span><span class="p">)</span>
+    <span class="c1">#: Mobility options.</span>
+    <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;list[Option]&#39;</span> <span class="o">=</span> <span class="n">OptionField</span><span class="p">(</span>
+        <span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">&#39;__length__&#39;</span><span class="p">],</span>
+        <span class="n">base_schema</span><span class="o">=</span><span class="n">Option</span><span class="p">,</span>
+        <span class="n">type_name</span><span class="o">=</span><span class="s1">&#39;type&#39;</span><span class="p">,</span>
+        <span class="n">registry</span><span class="o">=</span><span class="n">mh_opt_registry</span><span class="p">(),</span>  <span class="c1"># type: ignore[arg-type]</span>
+        <span class="n">eool</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+        <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cookie</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;list[Option | bytes]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>
+
+
+<span class="nd">@schema_final</span>
+<span class="k">class</span> <span class="nc">HomeTestMessage</span><span class="p">(</span><span class="n">Packet</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for MH Home Test (HoT) message.&quot;&quot;&quot;</span>
+
+    <span class="c1">#: Home nonce index.</span>
+    <span class="n">nonce_index</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span> <span class="o">=</span> <span class="n">UInt16Field</span><span class="p">()</span>
+    <span class="c1">#: Home init cookie.</span>
+    <span class="n">cookie</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span> <span class="o">=</span> <span class="n">BytesField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">8</span><span class="p">)</span>
+    <span class="c1">#: Home keygen token.</span>
+    <span class="n">token</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span> <span class="o">=</span> <span class="n">BytesField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">8</span><span class="p">)</span>
+    <span class="c1">#: Mobility options.</span>
+    <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;list[Option]&#39;</span> <span class="o">=</span> <span class="n">OptionField</span><span class="p">(</span>
+        <span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">&#39;__length__&#39;</span><span class="p">],</span>
+        <span class="n">base_schema</span><span class="o">=</span><span class="n">Option</span><span class="p">,</span>
+        <span class="n">type_name</span><span class="o">=</span><span class="s1">&#39;type&#39;</span><span class="p">,</span>
+        <span class="n">registry</span><span class="o">=</span><span class="n">mh_opt_registry</span><span class="p">(),</span>  <span class="c1"># type: ignore[arg-type]</span>
+        <span class="n">eool</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+        <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nonce_index</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">cookie</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">,</span> <span class="n">token</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">,</span>
+                     <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;list[Option | bytes]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>
+
+
+<span class="nd">@schema_final</span>
+<span class="k">class</span> <span class="nc">CareofTestMessage</span><span class="p">(</span><span class="n">Packet</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for MH Care-of Test (CoT) message.&quot;&quot;&quot;</span>
+
+    <span class="c1">#: Care-of nonce index.</span>
+    <span class="n">nonce_index</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span> <span class="o">=</span> <span class="n">UInt16Field</span><span class="p">()</span>
+    <span class="c1">#: Care-of init cookie.</span>
+    <span class="n">cookie</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span> <span class="o">=</span> <span class="n">BytesField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">8</span><span class="p">)</span>
+    <span class="c1">#: Care-of keygen token.</span>
+    <span class="n">token</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span> <span class="o">=</span> <span class="n">BytesField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">8</span><span class="p">)</span>
+    <span class="c1">#: Mobility options.</span>
+    <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;list[Option]&#39;</span> <span class="o">=</span> <span class="n">OptionField</span><span class="p">(</span>
+        <span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">&#39;__length__&#39;</span><span class="p">],</span>
+        <span class="n">base_schema</span><span class="o">=</span><span class="n">Option</span><span class="p">,</span>
+        <span class="n">type_name</span><span class="o">=</span><span class="s1">&#39;type&#39;</span><span class="p">,</span>
+        <span class="n">registry</span><span class="o">=</span><span class="n">mh_opt_registry</span><span class="p">(),</span>  <span class="c1"># type: ignore[arg-type]</span>
+        <span class="n">eool</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+        <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nonce_index</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">cookie</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">,</span> <span class="n">token</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">,</span>
+                     <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;list[Option | bytes]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>
 </pre></div>
         </article>
       </div>

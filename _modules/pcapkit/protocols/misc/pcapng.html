@@ -540,7 +540,7 @@
     <span class="n">Record</span> <span class="o">=</span> <span class="n">OrderedMultiDict</span><span class="p">[</span><span class="n">Enum_RecordType</span><span class="p">,</span> <span class="n">Data_NameResolutionRecord</span><span class="p">]</span>
 
     <span class="n">BlockParser</span> <span class="o">=</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">Schema_BlockType</span><span class="p">,</span> <span class="n">NamedArg</span><span class="p">(</span><span class="n">Schema_PCAPNG</span><span class="p">,</span> <span class="s1">&#39;header&#39;</span><span class="p">)],</span> <span class="n">Data_PCAPNG</span><span class="p">]</span>
-    <span class="n">BlockConstructor</span> <span class="o">=</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">Enum_BlockType</span><span class="p">,</span> <span class="n">DefaultArg</span><span class="p">(</span><span class="n">Optional</span><span class="p">[</span><span class="n">Data_PCAPNG</span><span class="p">]),</span>
+    <span class="n">BlockConstructor</span> <span class="o">=</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">DefaultArg</span><span class="p">(</span><span class="n">Optional</span><span class="p">[</span><span class="n">Data_PCAPNG</span><span class="p">]),</span>
                                  <span class="n">KwArg</span><span class="p">(</span><span class="n">Any</span><span class="p">)],</span> <span class="n">Schema_BlockType</span><span class="p">]</span>
 
     <span class="n">OptionParser</span> <span class="o">=</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">Schema_Option</span><span class="p">,</span> <span class="n">NamedArg</span><span class="p">(</span><span class="n">Option</span><span class="p">,</span> <span class="s1">&#39;options&#39;</span><span class="p">)],</span> <span class="n">Data_Option</span><span class="p">]</span>
@@ -1309,9 +1309,9 @@
                 <span class="n">meth</span> <span class="o">=</span> <span class="n">name</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
 
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">block</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
-                <span class="n">block_val</span> <span class="o">=</span> <span class="n">meth</span><span class="p">(</span><span class="n">type_val</span><span class="p">,</span> <span class="o">**</span><span class="n">block</span><span class="p">)</span>
+                <span class="n">block_val</span> <span class="o">=</span> <span class="n">meth</span><span class="p">(</span><span class="o">**</span><span class="n">block</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">block_val</span> <span class="o">=</span> <span class="n">meth</span><span class="p">(</span><span class="n">type_val</span><span class="p">,</span> <span class="n">block</span><span class="p">)</span>
+                <span class="n">block_val</span> <span class="o">=</span> <span class="n">meth</span><span class="p">(</span><span class="n">block</span><span class="p">)</span>
         <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">block</span><span class="p">,</span> <span class="n">Schema</span><span class="p">):</span>
             <span class="n">block_val</span> <span class="o">=</span> <span class="n">block</span>
         <span class="k">else</span><span class="p">:</span>
