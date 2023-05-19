@@ -7,11 +7,11 @@ import io
 import itertools
 from typing import TYPE_CHECKING, Generic, TypeVar, cast, final
 
-from pcapkit.corekit.infoclass import FinalisedState
 from pcapkit.corekit.fields.collections import ListField, OptionField
 from pcapkit.corekit.fields.field import NoValue, _Field
 from pcapkit.corekit.fields.misc import ConditionalField, ForwardMatchField, PayloadField
 from pcapkit.corekit.fields.strings import PaddingField
+from pcapkit.corekit.infoclass import FinalisedState
 from pcapkit.utilities.compat import Mapping
 from pcapkit.utilities.decorators import prepare
 from pcapkit.utilities.exceptions import NoDefaultValue, ProtocolUnbound, stacklevel

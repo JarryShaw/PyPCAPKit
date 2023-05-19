@@ -61,7 +61,6 @@ if TYPE_CHECKING:
     from pcapkit.corekit.multidict import OrderedMultiDict
     from pcapkit.protocols.internet.mh import NTPTimestamp
 
-
 __all__ = [
     'MH',
     'UnknownMessage',
