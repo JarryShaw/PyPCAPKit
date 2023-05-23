@@ -146,6 +146,7 @@ from pcapkit.vendor.mh.ack_status_code import ACKStatusCode as MH_ACKStatusCode
 from pcapkit.vendor.mh.ani_suboption import ANISuboption as MH_ANISuboption
 from pcapkit.vendor.mh.auth_subtype import AuthSubtype as MH_AuthSubtype
 from pcapkit.vendor.mh.binding_ack_flag import BindingACKFlag as MH_BindingACKFlag
+from pcapkit.vendor.mh.binding_error import BindingError as MH_BindingError
 from pcapkit.vendor.mh.binding_revocation import BindingRevocation as MH_BindingRevocation
 from pcapkit.vendor.mh.binding_update_flag import BindingUpdateFlag as MH_BindingUpdateFlag
 from pcapkit.vendor.mh.cga_extension import CGAExtension as MH_CGAExtension
@@ -184,7 +185,6 @@ from pcapkit.vendor.mh.traffic_selector import TrafficSelector as MH_TrafficSele
 from pcapkit.vendor.mh.upa_status import \
     UpdateNotificationACKStatus as MH_UpdateNotificationACKStatus
 from pcapkit.vendor.mh.upn_reason import UpdateNotificationReason as MH_UpdateNotificationReason
-from pcapkit.vendor.mh.binding_error import BindingError as MH_BindingError
 
 __all__ = [
     'MH_Packet', 'MH_Option', 'MH_DNSStatusCode', 'MH_ACKStatusCode',

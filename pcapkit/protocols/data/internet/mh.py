@@ -2,13 +2,14 @@
 """data model for MH protocol"""
 
 from typing import TYPE_CHECKING
-from pcapkit.const.mh import status_code
 
+from pcapkit.const.mh import status_code
 from pcapkit.corekit.infoclass import info_final
 from pcapkit.protocols.data.data import Data
 
 if TYPE_CHECKING:
-    from datetime import datetime as dt_type, timedelta
+    from datetime import datetime as dt_type
+    from datetime import timedelta
     from ipaddress import IPv6Address, IPv6Network
 
     from pcapkit.const.mh.access_type import AccessType as Enum_AccessType
@@ -16,6 +17,7 @@ if TYPE_CHECKING:
     from pcapkit.const.mh.ani_suboption import ANISuboption as Enum_ANISuboption
     from pcapkit.const.mh.auth_subtype import AuthSubtype as Enum_AuthSubtype
     from pcapkit.const.mh.binding_ack_flag import BindingACKFlag as Enum_BindingACKFlag
+    from pcapkit.const.mh.binding_error import BindingError as Enum_BindingError
     from pcapkit.const.mh.binding_revocation import BindingRevocation as Enum_BindingRevocation
     from pcapkit.const.mh.binding_update_flag import BindingUpdateFlag as Enum_BindingUpdateFlag
     from pcapkit.const.mh.cga_extension import CGAExtension as Enum_CGAExtension
@@ -61,7 +63,6 @@ if TYPE_CHECKING:
     from pcapkit.const.reg.transtype import TransType
     from pcapkit.corekit.multidict import OrderedMultiDict
     from pcapkit.protocols.internet.mh import NTPTimestamp
-    from pcapkit.const.mh.binding_error import BindingError as Enum_BindingError
 
 __all__ = [
     'MH',

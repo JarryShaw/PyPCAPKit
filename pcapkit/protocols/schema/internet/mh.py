@@ -12,6 +12,7 @@ from pcapkit.const.mh.ack_status_code import ACKStatusCode as Enum_ACKStatusCode
 from pcapkit.const.mh.ani_suboption import ANISuboption as Enum_ANISuboption
 from pcapkit.const.mh.auth_subtype import AuthSubtype as Enum_AuthSubtype
 from pcapkit.const.mh.binding_ack_flag import BindingACKFlag as Enum_BindingACKFlag
+from pcapkit.const.mh.binding_error import BindingError as Enum_BindingError
 from pcapkit.const.mh.binding_revocation import BindingRevocation as Enum_BindingRevocation
 from pcapkit.const.mh.binding_update_flag import BindingUpdateFlag as Enum_BindingUpdateFlag
 from pcapkit.const.mh.cga_extension import CGAExtension as Enum_CGAExtension
@@ -61,7 +62,6 @@ from pcapkit.corekit.fields.numbers import (EnumField, UInt8Field, UInt16Field, 
 from pcapkit.corekit.fields.strings import BitField, BytesField, PaddingField, StringField
 from pcapkit.protocols.schema.schema import Schema, schema_final
 from pcapkit.utilities.logging import SPHINX_TYPE_CHECKING
-from pcapkit.const.mh.binding_error import BindingError as Enum_BindingError
 
 __all__ = [
     'MH',
