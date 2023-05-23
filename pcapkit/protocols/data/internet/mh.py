@@ -2,12 +2,13 @@
 """data model for MH protocol"""
 
 from typing import TYPE_CHECKING
+from pcapkit.const.mh import status_code
 
 from pcapkit.corekit.infoclass import info_final
 from pcapkit.protocols.data.data import Data
 
 if TYPE_CHECKING:
-    from datetime import datetime as dt_type
+    from datetime import datetime as dt_type, timedelta
     from ipaddress import IPv6Address, IPv6Network
 
     from pcapkit.const.mh.access_type import AccessType as Enum_AccessType
@@ -60,11 +61,12 @@ if TYPE_CHECKING:
     from pcapkit.const.reg.transtype import TransType
     from pcapkit.corekit.multidict import OrderedMultiDict
     from pcapkit.protocols.internet.mh import NTPTimestamp
+    from pcapkit.const.mh.binding_error import BindingError as Enum_BindingError
 
 __all__ = [
     'MH',
     'UnknownMessage', 'BindingRefreshRequestMessage', 'HomeTestInitMessage', 'CareofTestInitMessage',
-    'HomeTestMessage', 'CareofTestMessage',
+    'HomeTestMessage', 'CareofTestMessage', 'BindingUpdateMessage', 'BindingAcknowledgementMessage',
 
     'Option',
     'UnassignedOption', 'PadOption', 'BindRefreshAdviceOption', 'AlternateCareofAddressOption',
@@ -182,6 +184,50 @@ class CareofTestMessage(MH):
                      options: 'OrderedMultiDict[Enum_Option, Option]') -> 'None': ...
 
 
+@info_final
+class BindingUpdateMessage(MH):
+    """Data model for MH Binding Update message type."""
+
+    #: Sequence number.
+    seq: 'int'
+    #: Acknowledge flag.
+    ack: 'bool'
+    #: home registration flag.
+    home: 'bool'
+    #: Link-local address compability flag.
+    lla_compat: 'bool'
+    #: Key management mobility capability flag.
+    key_mngt: 'bool'
+    #: Lifetime.
+    lifetime: 'timedelta'
+    #: Mobility options.
+    options: 'OrderedMultiDict[Enum_Option, Option]'
+
+    if TYPE_CHECKING:
+        def __init__(self, next: 'TransType', length: 'int', type: 'Packet', chksum: 'bytes',
+                     seq: 'int', ack: 'bool', home: 'bool', lla_compat: 'bool', key_mngt: 'bool',
+                     lifetime: 'timedelta', options: 'OrderedMultiDict[Enum_Option, Option]') -> 'None': ...
+
+
+@info_final
+class BindingAcknowledgementMessage(MH):
+    """Data model for MH Binding Acknowledge (BA) message type."""
+
+    #: Status.
+    status: 'Enum_StatusCode'
+    #: Key management mobility capability flag.
+    key_mngt: 'bool'
+    #: Sequence number.
+    seq: 'int'
+    #: Lifetime.
+    lifetime: 'timedelta'
+    #: Mobility options.
+    options: 'OrderedMultiDict[Enum_Option, Option]'
+
+    if TYPE_CHECKING:
+        def __init__(self, next: 'TransType', length: 'int', type: 'Packet', chksum: 'bytes',
+                     status: 'Enum_StatusCode', key_mngt: 'bool', seq: 'int', lifetime: 'timedelta',
+                     options: 'OrderedMultiDict[Enum_Option, Option]') -> 'None': ...
 
 
 

@@ -28,6 +28,7 @@ import math
 from tokenize import Name
 from typing import TYPE_CHECKING, cast, overload
 
+from pcapkit.const.mh.binding_error import BindingError as Enum_BindingError
 from pcapkit.const.mh.access_type import AccessType as Enum_AccessType
 from pcapkit.const.mh.ack_status_code import ACKStatusCode as Enum_ACKStatusCode
 from pcapkit.const.mh.ani_suboption import ANISuboption as Enum_ANISuboption
@@ -146,9 +147,13 @@ from pcapkit.protocols.schema.internet.mh import HomeTestMessage as Schema_HomeT
 from pcapkit.protocols.data.internet.mh import HomeTestMessage as Data_HomeTestMessage
 from pcapkit.protocols.schema.internet.mh import CareofTestMessage as Schema_CareofTestMessage
 from pcapkit.protocols.data.internet.mh import CareofTestMessage as Data_CareofTestMessage
+from pcapkit.protocols.schema.internet.mh import BindingUpdateMessage as Schema_BindingUpdateMessage
+from pcapkit.protocols.data.internet.mh import BindingUpdateMessage as Data_BindingUpdateMessage
+from pcapkit.protocols.schema.internet.mh import BindingAcknowledgementMessage as Schema_BindingAcknowledgementMessage
+from pcapkit.protocols.data.internet.mh import BindingAcknowledgementMessage as Data_BindingAcknowledgementMessage
 
 if TYPE_CHECKING:
-    from datetime import datetime as dt_type
+    from datetime import timedelta, datetime as dt_type
     from enum import IntEnum as StdlibEnum
     from ipaddress import IPv6Address, IPv6Network
     from typing import IO, Any, Callable, DefaultDict, NoReturn, Optional, Type
@@ -207,6 +212,8 @@ class MH(Internet[Data_MH, Schema_MH],
             Enum_Packet.Care_of_Test_Init: 'coti',
             Enum_Packet.Home_Test: 'hot',
             Enum_Packet.Care_of_Test: 'cot',
+            Enum_Packet.Binding_Update: 'bu',
+            Enum_Packet.Binding_Acknowledgement: 'ba',
         },
     )  # type: DefaultDict[Enum_Packet | int, str | tuple[PacketParser, PacketConstructor]]
 
@@ -384,9 +391,9 @@ class MH(Internet[Data_MH, Schema_MH],
             Constructed packet data.
 
         """
-        next_val = self._make_index(next, next_default, namespace=next_namespace,  # type: ignore[call-overload]
+        next_val = self._make_index(next, next_default, namespace=next_namespace,
                                     reversed=next_reversed, pack=False)
-        type_val = self._make_index(type, type_default, namespace=type_namespace,  # type: ignore[call-overload]
+        type_val = self._make_index(type, type_default, namespace=type_namespace,
                                     reversed=type_reversed, pack=False)
 
         if isinstance(data, bytes):
@@ -712,6 +719,90 @@ class MH(Internet[Data_MH, Schema_MH],
             nonce_index=schema.nonce_index,
             cookie=schema.cookie,
             token=schema.token,
+            options=self._read_mh_options(schema.options),
+        )
+        return data
+
+    def _read_msg_bu(self, schema: 'Schema_BindingUpdateMessage', *,
+                     header: 'Schema_MH') -> 'Data_BindingUpdateMessage':
+        """Read MH binding update (BU) message type.
+
+        Structure of MH Binding Update Message [:rfc:`6275`]:
+
+        .. code-block:: text
+
+                                           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+                                           |          Sequence #           |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |A|H|L|K|        Reserved       |           Lifetime            |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |                                                               |
+           .                                                               .
+           .                        Mobility Options                       .
+           .                                                               .
+           |                                                               |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+        Args:
+            schema: Parsed message type schema.
+            header: Parsed MH header schema.
+
+        Returns:
+            Parsed message type data.
+
+        """
+        data = Data_BindingUpdateMessage(
+            next=header.next,
+            length=(header.length + 1) * 8,
+            type=header.type,
+            chksum=header.chksum,
+            seq=schema.seq,
+            ack=bool(schema.flags['A']),
+            home=bool(schema.flags['H']),
+            lla_compat=bool(schema.flags['L']),
+            key_mngt=bool(schema.flags['K']),
+            lifetime=datetime.timedelta(seconds=schema.lifetime * 4),
+            options=self._read_mh_options(schema.options),
+        )
+        return data
+
+    def _read_msg_ba(self, schema: 'Schema_BindingAcknowledgementMessage', *,
+                     header: 'Schema_MH') -> 'Data_BindingAcknowledgementMessage':
+        """Read MH binding acknowledgement (BA) message type.
+
+        Structure of MH Binding Acknowledgement Message [:rfc:`6275`]:
+
+        .. code-block:: text
+
+                                           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+                                           |    Status     |K|  Reserved   |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |           Sequence #          |           Lifetime            |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |                                                               |
+           .                                                               .
+           .                        Mobility Options                       .
+           .                                                               .
+           |                                                               |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+        Args:
+            schema: Parsed message type schema.
+            header: Parsed MH header schema.
+
+        Returns:
+            Parsed message type data.
+
+        """
+        data = Data_BindingAcknowledgementMessage(
+            next=header.next,
+            length=(header.length + 1) * 8,
+            type=header.type,
+            chksum=header.chksum,
+            status=schema.status,
+            key_mngt=bool(schema.flags['K']),
+            seq=schema.seq,
+            lifetime=datetime.timedelta(seconds=schema.lifetime * 4),
             options=self._read_mh_options(schema.options),
         )
         return data
@@ -1663,6 +1754,106 @@ class MH(Internet[Data_MH, Schema_MH],
             options=self._make_mh_options(options),
         )
 
+    def _make_msg_bu(self, message: 'Optional[Data_BindingUpdateMessage]', *,
+                     seq: 'int' = 0,
+                     ack: 'bool' = False,
+                     home: 'bool' = False,
+                     lla_compat: 'bool' = False,
+                     key_mngt: 'bool' = False,
+                     lifetime: 'int | timedelta' = 4,  # reasonable default value
+                     options: 'Optional[Option | list[Schema_Option | tuple[Enum_Option, dict[str, Any]] | bytes]]' = None,
+                     **kwargs: 'Any') -> 'Schema_BindingUpdateMessage':
+        """Make MH care-of test (CoT) message type.
+
+        Args:
+            message: Message data model.
+            seq: Sequence number.
+            ack: Acknowledgement flag.
+            home: Home registration flag.
+            lla_compat: LLA compatibility flag.
+            key_mngt: Key management mobility option flag.
+            lifetime: Lifetime in seconds or timedelta.
+            options: Mobility options.
+            **kwargs: Arbitrary keyword arguments.
+
+        Returns:
+            Constructed message type.
+
+        """
+        if message is not None:
+            seq = message.seq
+            ack = message.ack
+            home = message.home
+            lla_compat = message.lla_compat
+            key_mngt = message.key_mngt
+            lifetime_val = math.ceil(message.lifetime.total_seconds())
+            options = message.options
+        else:
+            lifetime_val = lifetime if isinstance(lifetime, int) else math.ceil(lifetime.total_seconds())
+            options = options or []
+
+        return Schema_BindingUpdateMessage(
+            seq=seq,
+            flags={
+                'A': ack,
+                'H': home,
+                'L': lla_compat,
+                'K': key_mngt,
+            },
+            lifetime=math.ceil(lifetime_val / 4),
+            options=self._make_mh_options(options),
+        )
+
+    def _make_msg_ba(self, message: 'Optional[Data_BindingAcknowledgementMessage]', *,
+                     status: 'Enum_StatusCode | StdlibEnum | AenumEnum | str | int' = Enum_StatusCode.Binding_Update_accepted_Proxy_Binding_Update_accepted,
+                     status_default: 'Optional[int]' = None,
+                     status_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
+                     status_reversed: 'bool' = False,
+                     key_mngt: 'bool' = False,
+                     seq: 'int' = 0,
+                     lifetime: 'int | timedelta' = 4,  # reasonable default value
+                     options: 'Optional[Option | list[Schema_Option | tuple[Enum_Option, dict[str, Any]] | bytes]]' = None,
+                     **kwargs: 'Any') -> 'Schema_BindingAcknowledgementMessage':
+        """Make MH care-of test (CoT) message type.
+
+        Args:
+            message: Message data model.
+            status: Status code.
+            status_default: Default status code.
+            status_namespace: Status code namespace.
+            status_reversed: Reverse status code namespace.
+            key_mngt: Key management mobility option flag.
+            seq: Sequence number.
+            lifetime: Lifetime in seconds or timedelta.
+            options: Mobility options.
+            **kwargs: Arbitrary keyword arguments.
+
+        Returns:
+            Constructed message type.
+
+        """
+        if message is not None:
+            status_val = message.status
+            key_mngt = message.key_mngt
+            seq = message.seq
+            lifetime_val = math.ceil(message.lifetime.total_seconds())
+            options = message.options
+        else:
+            status_val = self._make_index(status, status_default, namespace=status_namespace,  # type: ignore[assignment]
+                                          reversed=status_reversed, pack=False)
+            lifetime_val = lifetime if isinstance(lifetime, int) else math.ceil(lifetime.total_seconds())
+            options = options or []
+
+        return Schema_BindingAcknowledgementMessage(
+            status=status_val,
+            flags={
+                'K': key_mngt,
+            },
+            seq=seq,
+            lifetime=math.ceil(lifetime_val / 4),
+            options=self._make_mh_options(options),
+        )
+
 
 
 
@@ -1958,7 +2149,7 @@ class MH(Internet[Data_MH, Schema_MH],
             subtype_val = option.subtype
             identifier = option.identifier
         else:
-            subtype_val = self._make_index(subtype, subtype_default, namespace=subtype_namespace,  # type: ignore[call-overload]
+            subtype_val = self._make_index(subtype, subtype_default, namespace=subtype_namespace,  # type: ignore[assignment]
                                            reversed=subtype_reversed, pack=False)
 
         if isinstance(identifier, ipaddress.IPv6Address):
@@ -2005,7 +2196,7 @@ class MH(Internet[Data_MH, Schema_MH],
             spi = option.spi
             data = option.data
         else:
-            subtype_val = self._make_index(subtype, subtype_default, namespace=subtype_namespace,  # type: ignore[call-overload]
+            subtype_val = self._make_index(subtype, subtype_default, namespace=subtype_namespace,  # type: ignore[assignment]
                                            reversed=subtype_reversed, pack=False)
 
         if (len(data) + 6) % 4 != 0:

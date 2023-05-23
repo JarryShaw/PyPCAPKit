@@ -61,13 +61,14 @@ from pcapkit.corekit.fields.numbers import (EnumField, UInt8Field, UInt16Field, 
 from pcapkit.corekit.fields.strings import BitField, BytesField, PaddingField, StringField
 from pcapkit.protocols.schema.schema import Schema, schema_final
 from pcapkit.utilities.logging import SPHINX_TYPE_CHECKING
+from pcapkit.const.mh.binding_error import BindingError as Enum_BindingError
 
 __all__ = [
     'MH',
 
     'Packet',
     'UnknownMessage', 'BindingRefreshRequestMessage', 'HomeTestInitMessage', 'CareofTestInitMessage',
-    'HomeTestMessage', 'CareofTestMessage',
+    'HomeTestMessage', 'CareofTestMessage', 'BindingUpdateMessage', 'BindingAcknowledgementMessage',
 
     'Option',
     'UnassignedOption', 'PadOption', 'BindRefreshAdviceOption', 'AlternateCareofAddressOption',
@@ -104,6 +105,19 @@ if SPHINX_TYPE_CHECKING:
         """Flags for :attr:`MultiPrefixExtension.flags`."""
 
         P: int
+
+    class BindingUpdateMessageFlags(TypedDict):
+        """Flags for :attr:`BindingUpdateMessage.flags`."""
+
+        A: 'int'
+        H: 'int'
+        L: 'int'
+        K: 'int'
+
+    class BindingAcknowledgementMessageFlags(TypedDict):
+        """Flags for :attr:`BindingAcknowledgementMessage.flags`."""
+
+        K: 'int'
 
 
 def mh_opt_registry() -> 'DefaultDict[Enum_Option | int, Type[Option]]':
@@ -154,6 +168,10 @@ def mh_data_selector(pkt: 'dict[str, Any]') -> 'Field':
         return SchemaField(length=length, schema=HomeTestMessage)
     if type == Enum_Packet.Care_of_Test:
         return SchemaField(length=length, schema=CareofTestMessage)
+    if type == Enum_Packet.Binding_Update:
+        return SchemaField(length=length, schema=BindingUpdateMessage)
+    if type == Enum_Packet.Binding_Acknowledgement:
+        return SchemaField(length=length, schema=BindingAcknowledgementMessage)
     return SchemaField(length=length, schema=UnknownMessage)
 
 
@@ -196,7 +214,7 @@ class MH(Schema):
     payload: 'bytes' = PayloadField()
 
     if TYPE_CHECKING:
-        def __init__(self, next: 'Enum_TransType', length: 'int', type: 'Enum_Packet',
+        def __init__(self, next: 'Enum_TransType | int', length: 'int', type: 'Enum_Packet | int',
                      chksum: 'bytes', data: 'Packet | bytes', payload: 'bytes | Protocol | Schema') -> 'None': ...
 
 
@@ -644,3 +662,68 @@ class CareofTestMessage(Packet):
     if TYPE_CHECKING:
         def __init__(self, nonce_index: 'int', cookie: 'bytes', token: 'bytes',
                      options: 'list[Option | bytes]') -> 'None': ...
+
+
+@schema_final
+class BindingUpdateMessage(Packet):
+    """Header schema for MH Binding Update (BU) messages."""
+
+    #: Sequence number.
+    seq: 'int' = UInt16Field()
+    #: Flags.
+    flags: 'BindingUpdateMessageFlags' = BitField(length=2, namespace={
+        'A': (0, 1),
+        'H': (1, 1),
+        'L': (2, 1),
+        'K': (3, 1),
+    })
+    #: Lifetime. One time unit is 4 seconds.
+    lifetime: 'int' = UInt16Field()
+    #: Mobility options.
+    options: 'list[Option]' = OptionField(
+        length=lambda pkt: pkt['__length__'],
+        base_schema=Option,
+        type_name='type',
+        registry=mh_opt_registry(),  # type: ignore[arg-type]
+        eool=None,
+    )
+
+    if TYPE_CHECKING:
+        def __init__(self, seq: 'int', flags: 'BindingUpdateMessageFlags',
+                     lifetime: 'int', options: 'list[Option | bytes]') -> 'None': ...
+
+
+@schema_final
+class BindingAcknowledgementMessage(Packet):
+    """Header schema for MH Binding Acknowledgement (BA) messages."""
+
+    #: Status.
+    status: 'Enum_StatusCode' = EnumField(length=1, namespace=Enum_StatusCode)
+    #: Flags.
+    flags: 'BindingAcknowledgementMessageFlags' = BitField(length=1, namespace={
+        'K': (0, 1),
+    })
+    #: Sequence number.
+    seq: 'int' = UInt16Field()
+    #: Lifetime. One time unit is 4 seconds.
+    lifetime: 'int' = UInt16Field()
+    #: Mobility options.
+    options: 'list[Option]' = OptionField(
+        length=lambda pkt: pkt['__length__'],
+        base_schema=Option,
+        type_name='type',
+        registry=mh_opt_registry(),  # type: ignore[arg-type]
+        eool=None,
+    )
+
+    if TYPE_CHECKING:
+        def __init__(self, status: 'Enum_StatusCode', flags: 'BindingAcknowledgementMessageFlags',
+                     seq: 'int', lifetime: 'int', options: 'list[Option | bytes]') -> 'None': ...
+
+
+@schema_final
+class BindingErrorMessage(Packet):
+    """Header schema for MH Binding Error (BE) messages."""
+
+    #: Status.
+    status: 'Enum_BindingError' = EnumField(length=1, namespace=Enum_BindingError)

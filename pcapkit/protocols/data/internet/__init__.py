@@ -201,6 +201,8 @@ from pcapkit.protocols.data.internet.mh import HomeTestInitMessage as MH_HomeTes
 from pcapkit.protocols.data.internet.mh import CareofTestInitMessage as MH_CareofTestInitMessage
 from pcapkit.protocols.data.internet.mh import HomeTestMessage as MH_HomeTestMessage
 from pcapkit.protocols.data.internet.mh import CareofTestMessage as MH_CareofTestMessage
+from pcapkit.protocols.data.internet.mh import BindingUpdateMessage as MH_BindingUpdateMessage
+from pcapkit.protocols.data.internet.mh import BindingAcknowledgementMessage as MH_BindingAcknowledgementMessage
 
 __all__ = [
     # Authentication Header
