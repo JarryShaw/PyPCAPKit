@@ -92,6 +92,8 @@ vendor crawlers include:
      - CGA Extension Type Values [*]_
    * - :class:`MH_CGASec <pcapkit.vendor.mh.cga_sec.CGASec>`
      - CGA SEC [*]_
+   * - :class:`MH_BindingError <pcapkit.vendor.mh.binding_error.BindingError>`
+     - Bingding Error Status Code [*]_
 
 Access Technology Type Option Type Values
 =========================================
@@ -585,6 +587,18 @@ which is automatically generating :class:`pcapkit.const.mh.cga_sec.CGASec`.
    :members: FLAG, LINK
    :show-inheritance:
 
+Binding Error Status Code
+=========================
+
+.. module:: pcapkit.vendor.mh.binding_error
+
+This module contains the vendor crawler for **Binding Error Status Code**,
+which is automatically generating :class:`pcapkit.const.mh.binding_error.BindingError`.
+
+.. autoclass:: pcapkit.vendor.mh.binding_error.BindingError
+   :members: FLAG, LINK
+   :show-inheritance:
+
 .. raw:: html
 
    <hr />
@@ -630,3 +644,4 @@ which is automatically generating :class:`pcapkit.const.mh.cga_sec.CGASec`.
 .. [*] https://www.iana.org/assignments/cga-message-types/cga-message-types.xhtml#cga-message-types-1
 .. [*] https://www.iana.org/assignments/cga-message-types/cga-message-types.xhtml#cga-message-types-2
 .. [*] https://www.iana.org/assignments/cga-message-types/cga-message-types.xhtml#cga-message-types-3
+.. [*] :rfc:`6275#section-6.1.9`

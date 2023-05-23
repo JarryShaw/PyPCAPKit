@@ -92,6 +92,8 @@ enumerations include:
      - CGA Extension Type Values [*]_
    * - :class:`MH_CGASec <pcapkit.const.mh.cga_sec.CGASec>`
      - CGA SEC [*]_
+   * - :class:`MH_BindingError <pcapkit.const.mh.binding_error.BindingError>`
+     - Bingding Error Status Code [*]_
 
 Access Technology Type Option Type Values
 =========================================
@@ -626,6 +628,19 @@ which is automatically generated from :class:`pcapkit.vendor.mh.cga_sec.CGASec`.
    :undoc-members:
    :show-inheritance:
 
+Binding Error Status Code
+=========================
+
+.. module:: pcapkit.const.mh.binding_error
+
+This module contains the constant enumeration for **Binding Error Status Code**,
+which is automatically generated from :class:`pcapkit.vendor.mh.binding_error.BindingError`.
+
+.. autoclass:: pcapkit.const.mh.binding_error.BindingError
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 .. raw:: html
 
    <hr />
@@ -671,3 +686,4 @@ which is automatically generated from :class:`pcapkit.vendor.mh.cga_sec.CGASec`.
 .. [*] https://www.iana.org/assignments/cga-message-types/cga-message-types.xhtml#cga-message-types-1
 .. [*] https://www.iana.org/assignments/cga-message-types/cga-message-types.xhtml#cga-message-types-2
 .. [*] https://www.iana.org/assignments/cga-message-types/cga-message-types.xhtml#cga-message-types-3
+.. [*] :rfc:`6275#section-6.1.9`

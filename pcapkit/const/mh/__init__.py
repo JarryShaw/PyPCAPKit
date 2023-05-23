@@ -93,6 +93,8 @@ enumerations include:
      - CGA Extension Type Values [*]_
    * - :class:`MH_CGASec <pcapkit.const.mh.cga_sec.CGASec>`
      - CGA SEC [*]_
+   * - :class:`MH_BindingError <pcapkit.const.mh.binding_error.BindingError>`
+     - Bingding Error Status Code [*]_
 
 .. [*] https://www.iana.org/assignments/mobility-parameters/mobility-parameters.xhtml#mobility-parameters-1
 .. [*] https://www.iana.org/assignments/mobility-parameters/mobility-parameters.xhtml#mobility-parameters-2
@@ -135,6 +137,7 @@ enumerations include:
 .. [*] https://www.iana.org/assignments/cga-message-types/cga-message-types.xhtml#cga-message-types-1
 .. [*] https://www.iana.org/assignments/cga-message-types/cga-message-types.xhtml#cga-message-types-2
 .. [*] https://www.iana.org/assignments/cga-message-types/cga-message-types.xhtml#cga-message-types-3
+.. [*] :rfc:`6275#section-6.1.9`
 
 """
 
@@ -181,6 +184,7 @@ from pcapkit.const.mh.traffic_selector import TrafficSelector as MH_TrafficSelec
 from pcapkit.const.mh.upa_status import \
     UpdateNotificationACKStatus as MH_UpdateNotificationACKStatus
 from pcapkit.const.mh.upn_reason import UpdateNotificationReason as MH_UpdateNotificationReason
+from pcapkit.const.mh.binding_error import BindingError as MH_BindingError
 
 __all__ = [
     'MH_Packet', 'MH_Option', 'MH_DNSStatusCode', 'MH_ACKStatusCode',
@@ -196,5 +200,5 @@ __all__ = [
     'MH_FlowBindingType', 'MH_FlowBindingIndicationTrigger',
     'MH_FlowBindingACKStatus', 'MH_FlowBindingAction', 'MH_QoSAttribute',
     'MH_LMAControlledMAGSuboption', 'MH_LLACode', 'MH_CGAType',
-    'MH_CGAExtension', 'MH_CGASec',
+    'MH_CGAExtension', 'MH_CGASec', 'MH_BindingError',
 ]
