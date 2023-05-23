@@ -134,7 +134,7 @@ class Hardware(IntEnum):
     #: HFI [Tseng-Hui Lin]
     HFI = 37
 
-    #: Unified Bus (UB) [Luoqing Zhou]
+    #: Unified Bus (UB) [Wei Pan]
     Unified_Bus = 38
 
     #: HW_EXP2 [:rfc:`5494`]

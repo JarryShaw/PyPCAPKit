@@ -81,14 +81,20 @@ from pcapkit.protocols.data.internet.mh import AuthOption as Data_AuthOption
 from pcapkit.protocols.data.internet.mh import \
     BindingAuthorizationDataOption as Data_BindingAuthorizationDataOption
 from pcapkit.protocols.data.internet.mh import \
+    BindingRefreshRequestMessage as Data_BindingRefreshRequestMessage
+from pcapkit.protocols.data.internet.mh import \
     BindRefreshAdviceOption as Data_BindRefreshAdviceOption
+from pcapkit.protocols.data.internet.mh import CareofTestInitMessage as Data_CareofTestInitMessage
 from pcapkit.protocols.data.internet.mh import CareofTestInitOption as Data_CareofTestInitOption
+from pcapkit.protocols.data.internet.mh import CareofTestMessage as Data_CareofTestMessage
 from pcapkit.protocols.data.internet.mh import CareofTestOption as Data_CareofTestOption
 from pcapkit.protocols.data.internet.mh import CGAExtension as Data_CGAExtension
 from pcapkit.protocols.data.internet.mh import CGAParameter as Data_CGAParameter
 from pcapkit.protocols.data.internet.mh import CGAParametersOption as Data_CGAParametersOption
 from pcapkit.protocols.data.internet.mh import \
     CGAParametersRequestOption as Data_CGAParametersRequestOption
+from pcapkit.protocols.data.internet.mh import HomeTestInitMessage as Data_HomeTestInitMessage
+from pcapkit.protocols.data.internet.mh import HomeTestMessage as Data_HomeTestMessage
 from pcapkit.protocols.data.internet.mh import LinkLayerAddressOption as Data_LinkLayerAddressOption
 from pcapkit.protocols.data.internet.mh import MesgIDOption as Data_MesgIDOption
 from pcapkit.protocols.data.internet.mh import MNIDOption as Data_MNIDOption
@@ -111,14 +117,21 @@ from pcapkit.protocols.schema.internet.mh import AuthOption as Schema_AuthOption
 from pcapkit.protocols.schema.internet.mh import \
     BindingAuthorizationDataOption as Schema_BindingAuthorizationDataOption
 from pcapkit.protocols.schema.internet.mh import \
+    BindingRefreshRequestMessage as Schema_BindingRefreshRequestMessage
+from pcapkit.protocols.schema.internet.mh import \
     BindRefreshAdviceOption as Schema_BindRefreshAdviceOption
+from pcapkit.protocols.schema.internet.mh import \
+    CareofTestInitMessage as Schema_CareofTestInitMessage
 from pcapkit.protocols.schema.internet.mh import CareofTestInitOption as Schema_CareofTestInitOption
+from pcapkit.protocols.schema.internet.mh import CareofTestMessage as Schema_CareofTestMessage
 from pcapkit.protocols.schema.internet.mh import CareofTestOption as Schema_CareofTestOption
 from pcapkit.protocols.schema.internet.mh import CGAExtension as Schema_CGAExtension
 from pcapkit.protocols.schema.internet.mh import CGAParameter as Schema_CGAParameter
 from pcapkit.protocols.schema.internet.mh import CGAParametersOption as Schema_CGAParametersOption
 from pcapkit.protocols.schema.internet.mh import \
     CGAParametersRequestOption as Schema_CGAParametersRequestOption
+from pcapkit.protocols.schema.internet.mh import HomeTestInitMessage as Schema_HomeTestInitMessage
+from pcapkit.protocols.schema.internet.mh import HomeTestMessage as Schema_HomeTestMessage
 from pcapkit.protocols.schema.internet.mh import \
     LinkLayerAddressOption as Schema_LinkLayerAddressOption
 from pcapkit.protocols.schema.internet.mh import MesgIDOption as Schema_MesgIDOption
@@ -147,10 +160,6 @@ from pcapkit.protocols.schema.internet.mh import HomeTestMessage as Schema_HomeT
 from pcapkit.protocols.data.internet.mh import HomeTestMessage as Data_HomeTestMessage
 from pcapkit.protocols.schema.internet.mh import CareofTestMessage as Schema_CareofTestMessage
 from pcapkit.protocols.data.internet.mh import CareofTestMessage as Data_CareofTestMessage
-from pcapkit.protocols.schema.internet.mh import BindingUpdateMessage as Schema_BindingUpdateMessage
-from pcapkit.protocols.data.internet.mh import BindingUpdateMessage as Data_BindingUpdateMessage
-from pcapkit.protocols.schema.internet.mh import BindingAcknowledgementMessage as Schema_BindingAcknowledgementMessage
-from pcapkit.protocols.data.internet.mh import BindingAcknowledgementMessage as Data_BindingAcknowledgementMessage
 
 if TYPE_CHECKING:
     from datetime import timedelta, datetime as dt_type

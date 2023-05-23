@@ -75,14 +75,10 @@ class Option(IntEnum):
     #: Minimum Path MTU Hop-by-Hop Option [:rfc:`9268`]
     Minimum_Path_MTU_Hop_by_Hop_Option = 0x30
 
-    #: IOAM (TEMPORARY - registered 2020-04-16, extension registered 2022-04-12,
-    #: document sent to IESG Evaluation 2022-10-31) [draft-ietf-ippm-ioam-
-    #: ipv6-options-05]
+    #: IOAM [RFC-ietf-ippm-ioam-ipv6-options-12]
     IOAM_0x11 = 0x11
 
-    #: IOAM (TEMPORARY - registered 2020-04-16, extension registered 2022-04-12,
-    #: document sent to IESG Evaluation 2022-10-31) [draft-ietf-ippm-ioam-
-    #: ipv6-options-05]
+    #: IOAM [RFC-ietf-ippm-ioam-ipv6-options-12]
     IOAM_0x31 = 0x31
 
     #: AltMark [:rfc:`9343`]
