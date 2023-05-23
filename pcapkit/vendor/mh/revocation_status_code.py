@@ -24,7 +24,7 @@ class RevocationStatusCode(Vendor):
     #: Value limit checker.
     FLAG = 'isinstance(value, int) and 0 <= value <= 255'
     #: Link to registry.
-    LINK = 'https://www.iana.org/assignments/mobility-parameters/mobility-parameters-3.csv'
+    LINK = 'https://www.iana.org/assignments/mobility-parameters/binding-revocation-status-codes.csv'
 
     def process(self, data: 'list[str]') -> 'tuple[list[str], list[str]]':
         """Process CSV data.

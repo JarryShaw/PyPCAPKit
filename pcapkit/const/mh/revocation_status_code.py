@@ -18,17 +18,35 @@ __all__ = ['RevocationStatusCode']
 class RevocationStatusCode(IntEnum):
     """[RevocationStatusCode] Binding Revocation Acknowledgement Status Codes"""
 
-    #: DNS update performed [:rfc:`5026`]
-    DNS_update_performed = 0
+    #: success [:rfc:`5846`]
+    success = 0
 
-    #: Reason unspecified [:rfc:`5026`]
-    Reason_unspecified = 128
+    #: partial success [:rfc:`5846`]
+    partial_success = 1
 
-    #: Administratively prohibited [:rfc:`5026`]
-    Administratively_prohibited = 129
+    #: Binding Does NOT Exist [:rfc:`5846`]
+    Binding_Does_NOT_Exist = 128
 
-    #: DNS Update Failed [:rfc:`5026`]
-    DNS_Update_Failed = 130
+    #: IPv4 Home Address Option Required [:rfc:`5846`]
+    IPv4_Home_Address_Option_Required = 129
+
+    #: Global Revocation NOT Authorized [:rfc:`5846`]
+    Global_Revocation_NOT_Authorized = 130
+
+    #: Revoked Mobile Nodes Identity Required [:rfc:`5846`]
+    Revoked_Mobile_Nodes_Identity_Required = 131
+
+    #: Revocation Failed - MN is Attached [:rfc:`5846`]
+    Revocation_Failed_MN_is_Attached = 132
+
+    #: Revocation Trigger NOT Supported [:rfc:`5846`]
+    Revocation_Trigger_NOT_Supported = 133
+
+    #: Revocation Function NOT Supported [:rfc:`5846`]
+    Revocation_Function_NOT_Supported = 134
+
+    #: Proxy Binding Revocation NOT Supported [:rfc:`5846`]
+    Proxy_Binding_Revocation_NOT_Supported = 135
 
     @staticmethod
     def get(key: 'int | str', default: 'int' = -1) -> 'RevocationStatusCode':
@@ -56,10 +74,10 @@ class RevocationStatusCode(IntEnum):
         """
         if not (isinstance(value, int) and 0 <= value <= 255):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))
-        if 1 <= value <= 127:
+        if 2 <= value <= 127:
             #: Unassigned
             return extend_enum(cls, 'Unassigned_%d' % value, value)
-        if 131 <= value <= 255:
+        if 136 <= value <= 255:
             #: Unassigned
             return extend_enum(cls, 'Unassigned_%d' % value, value)
         return super()._missing_(value)
