@@ -537,9 +537,9 @@ class HIP(Internet[Data_HIP, Schema_HIP],
             Constructed packet data.
 
         """
-        next_value = self._make_index(next, next_default, namespace=next_namespace,  # type: ignore[call-overload]
+        next_value = self._make_index(next, next_default, namespace=next_namespace,
                                       reversed=next_reversed, pack=False)
-        packet_value = self._make_index(packet, packet_default, namespace=packet_namespace,  # type: ignore[call-overload]
+        packet_value = self._make_index(packet, packet_default, namespace=packet_namespace,
                                         reversed=packet_reversed, pack=False)
 
         if parameters is not None:
@@ -549,7 +549,7 @@ class HIP(Internet[Data_HIP, Schema_HIP],
             parameters_value, length = [], 0
 
         return Schema_HIP(
-            next=next_value,
+            next=next_value,  # type: ignore[arg-type]
             len=length,
             pkt = {
                 'bit_0': 0,
@@ -3204,7 +3204,7 @@ class HIP(Internet[Data_HIP, Schema_HIP],
 
             group_id = []
             for group in groups:
-                group_id.append(self._make_index(group, group_default, namespace=group_namespace,  # type: ignore[call-overload]
+                group_id.append(self._make_index(group, group_default, namespace=group_namespace,  # type: ignore[arg-type]
                                                  reversed=group_reversed, pack=False))
 
         return Schema_DHGroupListParameter(
@@ -3243,7 +3243,7 @@ class HIP(Internet[Data_HIP, Schema_HIP],
             pub_len = param.pub_len
             pub_val = param.pub_val
         else:
-            group_id = self._make_index(group, group_default, namespace=group_namespace,  # type: ignore[call-overload]
+            group_id = self._make_index(group, group_default, namespace=group_namespace,  # type: ignore[assignment]
                                      reversed=group_reversed, pack=False)
             pub_len = math.ceil(pub_val.bit_length() / 8)
 
@@ -3286,7 +3286,7 @@ class HIP(Internet[Data_HIP, Schema_HIP],
 
             suite_id = []
             for suite in suites:
-                suite_id.append(self._make_index(suite, suite_default, namespace=suite_namespace,  # type: ignore[call-overload]
+                suite_id.append(self._make_index(suite, suite_default, namespace=suite_namespace,  # type: ignore[arg-type]
                                                  reversed=suite_reversed, pack=False))
 
         return Schema_HIPTransformParameter(
@@ -3326,7 +3326,7 @@ class HIP(Internet[Data_HIP, Schema_HIP],
 
             cipher_id = []
             for cipher in ciphers:
-                cipher_id.append(self._make_index(cipher, cipher_default, namespace=cipher_namespace,  # type: ignore[call-overload]
+                cipher_id.append(self._make_index(cipher, cipher_default, namespace=cipher_namespace,  # type: ignore[arg-type]
                                                   reversed=cipher_reversed, pack=False))
 
         return Schema_HIPCipherParameter(
@@ -3366,7 +3366,7 @@ class HIP(Internet[Data_HIP, Schema_HIP],
 
             mode_id = []
             for mode in modes:
-                mode_id.append(self._make_index(mode, mode_default, namespace=mode_namespace,  # type: ignore[call-overload]
+                mode_id.append(self._make_index(mode, mode_default, namespace=mode_namespace,  # type: ignore[arg-type]
                                                 reversed=mode_reversed, pack=False))
 
         return Schema_NATTraversalModeParameter(
@@ -3432,7 +3432,7 @@ class HIP(Internet[Data_HIP, Schema_HIP],
             iv = param.iv
             data = param.data
         else:
-            cipher_id = self._make_index(cipher, cipher_default, namespace=cipher_namespace,  # type: ignore[call-overload]
+            cipher_id = self._make_index(cipher, cipher_default, namespace=cipher_namespace,  # type: ignore[assignment]
                                          reversed=cipher_reversed, pack=False)
 
         if cipher_id in (Enum_Cipher.AES_128_CBC, Enum_Cipher.AES_256_CBC):
@@ -3497,9 +3497,9 @@ class HIP(Internet[Data_HIP, Schema_HIP],
             algorithm = param.algorithm  # type: int | Enum_HIAlgorithm
         else:
             di_len = len(di)
-            di_enum = self._make_index(di_type, di_type_default, namespace=di_type_namespace,  # type: ignore[call-overload]
+            di_enum = self._make_index(di_type, di_type_default, namespace=di_type_namespace,  # type: ignore[assignment]
                                        reversed=di_type_reversed, pack=False)
-            algorithm = self._make_index(hi_algorithm, hi_algorithm_default, namespace=hi_algorithm_namespace,  # type: ignore[call-overload]
+            algorithm = self._make_index(hi_algorithm, hi_algorithm_default, namespace=hi_algorithm_namespace,
                                          reversed=hi_algorithm_reversed, pack=False)
 
         if hi is None:
@@ -3598,7 +3598,7 @@ class HIP(Internet[Data_HIP, Schema_HIP],
 
             suite_id = []
             for suite in suites:
-                suite_id.append(self._make_index(suite, suite_default, namespace=suite_namespace,  # type: ignore[call-overload]
+                suite_id.append(self._make_index(suite, suite_default, namespace=suite_namespace,  # type: ignore[arg-type]
                                                  reversed=suite_reversed, pack=False))
 
         return Schema_HITSuiteListParameter(
@@ -3651,11 +3651,11 @@ class HIP(Internet[Data_HIP, Schema_HIP],
             type = param.cert_type
             cert = param.cert
         else:
-            group = self._make_index(cert_group, cert_group_default, namespace=cert_group_namespace,  # type: ignore[call-overload]
+            group = self._make_index(cert_group, cert_group_default, namespace=cert_group_namespace,  # type: ignore[assignment]
                                      reversed=cert_group_reversed, pack=False)
             count = cert_count
             id = cert_id
-            type = self._make_index(cert_type, cert_type_default, namespace=cert_type_namespace,  # type: ignore[call-overload]
+            type = self._make_index(cert_type, cert_type_default, namespace=cert_type_namespace,  # type: ignore[assignment]
                                     reversed=cert_type_reversed, pack=False)
 
         return Schema_CertParameter(
@@ -3697,7 +3697,7 @@ class HIP(Internet[Data_HIP, Schema_HIP],
             type = param.msg_type
             msg = param.msg
         else:
-            type = self._make_index(msg_type, msg_type_default, namespace=msg_type_namespace,  # type: ignore[call-overload]
+            type = self._make_index(msg_type, msg_type_default, namespace=msg_type_namespace,  # type: ignore[assignment]
                                     reversed=msg_type_reversed, pack=False)
 
         return Schema_NotificationParameter(
@@ -3770,7 +3770,7 @@ class HIP(Internet[Data_HIP, Schema_HIP],
 
             reg_type = []
             for reg in reg_info:
-                reg_type.append(self._make_index(reg, reg_info_default, namespace=reg_info_namespace,  # type: ignore[call-overload]
+                reg_type.append(self._make_index(reg, reg_info_default, namespace=reg_info_namespace,  # type: ignore[arg-type]
                                                  reversed=reg_info_reversed, pack=False))
 
             min_lt = min_lifetime if isinstance(min_lifetime, int) else math.floor(min_lifetime.total_seconds())
@@ -3818,7 +3818,7 @@ class HIP(Internet[Data_HIP, Schema_HIP],
 
             reg_type = []
             for reg in reg_request:
-                reg_type.append(self._make_index(reg, reg_request_default, namespace=reg_request_namespace,  # type: ignore[call-overload]
+                reg_type.append(self._make_index(reg, reg_request_default, namespace=reg_request_namespace,  # type: ignore[arg-type]
                                                  reversed=reg_request_reversed, pack=False))
 
             lt = lifetime if isinstance(lifetime, int) else math.floor(lifetime.total_seconds())
@@ -3858,7 +3858,7 @@ class HIP(Internet[Data_HIP, Schema_HIP],
 
             reg_type = []
             for reg in reg_response:
-                reg_type.append(self._make_index(reg, reg_response_default, namespace=reg_response_namespace,  # type: ignore[call-overload]
+                reg_type.append(self._make_index(reg, reg_response_default, namespace=reg_response_namespace,  # type: ignore[arg-type]
                                                  reversed=reg_response_reversed, pack=False))
 
             lt = lifetime if isinstance(lifetime, int) else math.floor(lifetime.total_seconds())
@@ -3903,7 +3903,7 @@ class HIP(Internet[Data_HIP, Schema_HIP],
 
             reg_type = []
             for reg in reg_failed:
-                reg_type.append(self._make_index(reg, reg_failed_default, namespace=reg_failed_namespace,  # type: ignore[call-overload]
+                reg_type.append(self._make_index(reg, reg_failed_default, namespace=reg_failed_namespace,  # type: ignore[arg-type]
                                                  reversed=reg_failed_reversed, pack=False))
 
             lt = lifetime if isinstance(lifetime, int) else math.floor(lifetime.total_seconds())
@@ -3947,7 +3947,7 @@ class HIP(Internet[Data_HIP, Schema_HIP],
             proto = param.protocol
             address = param.address
         else:
-            proto = self._make_index(protocol, protocol_default, namespace=protocol_namespace,  # type: ignore[call-overload]
+            proto = self._make_index(protocol, protocol_default, namespace=protocol_namespace,  # type: ignore[assignment]
                                      reversed=protocol_reversed, pack=False)
 
         return Schema_RegFromParameter(
@@ -4015,7 +4015,7 @@ class HIP(Internet[Data_HIP, Schema_HIP],
 
             tf_type = []
             for tf in formats:
-                tf_type.append(self._make_index(tf, format_default, namespace=format_namespace,  # type: ignore[call-overload]
+                tf_type.append(self._make_index(tf, format_default, namespace=format_namespace,  # type: ignore[arg-type]
                                                 reversed=format_reversed, pack=False))
 
         return Schema_TransportFormatListParameter(
@@ -4055,7 +4055,7 @@ class HIP(Internet[Data_HIP, Schema_HIP],
 
             suite_id = []
             for suite in suites:
-                suite_id.append(self._make_index(suite, suite_default, namespace=suite_namespace,  # type: ignore[call-overload]
+                suite_id.append(self._make_index(suite, suite_default, namespace=suite_namespace,  # type: ignore[arg-type]
                                                  reversed=suite_reversed, pack=False))
 
         return Schema_ESPTransformParameter(
@@ -4149,7 +4149,7 @@ class HIP(Internet[Data_HIP, Schema_HIP],
             payload = param.payload
             mic = param.mic
         else:
-            protocol = self._make_index(next, next_default, namespace=next_namespace,  # type: ignore[call-overload]
+            protocol = self._make_index(next, next_default, namespace=next_namespace,  # type: ignore[assignment]
                                         reversed=next_reversed, pack=False)
 
         return Schema_PayloadMICParameter(
@@ -4280,7 +4280,7 @@ class HIP(Internet[Data_HIP, Schema_HIP],
 
             mode_id = []
             for mode in modes:
-                mode_id.append(self._make_index(mode, mode_default, namespace=mode_namespace,  # type: ignore[call-overload]
+                mode_id.append(self._make_index(mode, mode_default, namespace=mode_namespace,  # type: ignore[arg-type]
                                                 reversed=mode_reversed, pack=False))
 
         return Schema_HIPTransportModeParameter(
@@ -4371,7 +4371,7 @@ class HIP(Internet[Data_HIP, Schema_HIP],
             algo = param.algorithm
             signature = param.signature
         else:
-            algo = self._make_index(algorithm, algorithm_default, namespace=algorithm_namespace,  # type: ignore[call-overload]
+            algo = self._make_index(algorithm, algorithm_default, namespace=algorithm_namespace,  # type: ignore[assignment]
                                     reversed=algorithm_reversed, pack=False)
 
         return Schema_HIPSignature2Parameter(
@@ -4410,7 +4410,7 @@ class HIP(Internet[Data_HIP, Schema_HIP],
             algo = param.algorithm
             signature = param.signature
         else:
-            algo = self._make_index(algorithm, algorithm_default, namespace=algorithm_namespace,  # type: ignore[call-overload]
+            algo = self._make_index(algorithm, algorithm_default, namespace=algorithm_namespace,  # type: ignore[assignment]
                                     reversed=algorithm_reversed, pack=False)
 
         return Schema_HIPSignatureParameter(
@@ -4501,7 +4501,7 @@ class HIP(Internet[Data_HIP, Schema_HIP],
             proto = param.protocol
             address = param.address
         else:
-            proto = self._make_index(protocol, protocol_default, namespace=protocol_namespace,  # type: ignore[call-overload]
+            proto = self._make_index(protocol, protocol_default, namespace=protocol_namespace,  # type: ignore[assignment]
                                      reversed=protocol_reversed, pack=False)
 
         return Schema_RelayFromParameter(
@@ -4544,7 +4544,7 @@ class HIP(Internet[Data_HIP, Schema_HIP],
             proto = param.protocol
             address = param.address
         else:
-            proto = self._make_index(protocol, protocol_default, namespace=protocol_namespace,  # type: ignore[call-overload]
+            proto = self._make_index(protocol, protocol_default, namespace=protocol_namespace,  # type: ignore[assignment]
                                      reversed=protocol_reversed, pack=False)
 
         return Schema_RelayToParameter(

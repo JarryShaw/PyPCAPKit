@@ -366,18 +366,18 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
             Constructed packet data.
 
         """
-        tos_pre_val = self._make_index(tos_pre, tos_pre_default, namespace=tos_pre_namespace,  # type: ignore[call-overload]
+        tos_pre_val = self._make_index(tos_pre, tos_pre_default, namespace=tos_pre_namespace,
                                        reversed=tos_pre_reversed, pack=False)
-        tos_del_val = self._make_index(tos_del, tos_del_default, namespace=tos_del_namespace,  # type: ignore[call-overload]
+        tos_del_val = self._make_index(tos_del, tos_del_default, namespace=tos_del_namespace,
                                        reversed=tos_del_reversed, pack=False)
-        tos_thr_val = self._make_index(tos_thr, tos_thr_default, namespace=tos_thr_namespace,  # type: ignore[call-overload]
+        tos_thr_val = self._make_index(tos_thr, tos_thr_default, namespace=tos_thr_namespace,
                                        reversed=tos_thr_reversed, pack=False)
-        tos_rel_val = self._make_index(tos_rel, tos_rel_default, namespace=tos_rel_namespace,  # type: ignore[call-overload]
+        tos_rel_val = self._make_index(tos_rel, tos_rel_default, namespace=tos_rel_namespace,
                                        reversed=tos_rel_reversed, pack=False)
-        tos_ecn_val = self._make_index(tos_ecn, tos_ecn_default, namespace=tos_ecn_namespace,  # type: ignore[call-overload]
+        tos_ecn_val = self._make_index(tos_ecn, tos_ecn_default, namespace=tos_ecn_namespace,
                                        reversed=tos_ecn_reversed, pack=False)
 
-        proto = self._make_index(protocol, protocol_default, namespace=protocol_namespace,  # type: ignore[call-overload]
+        proto = self._make_index(protocol, protocol_default, namespace=protocol_namespace,
                                  reversed=protocol_reversed, pack=False)
         ttl_val = ttl if isinstance(ttl, int) else math.ceil(ttl.total_seconds())
 
@@ -409,7 +409,7 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
                 'offset': offset,
             },
             ttl=ttl_val,
-            proto=proto,
+            proto=proto,  # type: ignore[arg-type]
             chksum=checksum,
             src=src,
             dst=dst,
@@ -1321,10 +1321,11 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
 
         """
         if option is not None:
-            level_val = self._make_index(level, level_default, namespace=level_namespace,  # type: ignore[call-overload]
-                                         reversed=level_reversed, pack=False)
+            level_val = option.level
             authorities = cast('list[Enum_ProtectionAuthority]', option.flags)
         else:
+            level_val = self._make_index(level, level_default, namespace=level_namespace,  # type: ignore[assignment]
+                                         reversed=level_reversed, pack=False)
             authorities = [] if authorities is None else authorities
 
         if authorities:
@@ -1705,7 +1706,7 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
         if option is not None:
             alert_val = option.alert
         else:
-            alert_val = self._make_index(alert, alert_default, namespace=alert_namespace,   # type: ignore[call-overload]
+            alert_val = self._make_index(alert, alert_default, namespace=alert_namespace,  # type: ignore[assignment]
                                          reversed=alert_reversed, pack=False)
 
         return Schema_RTRALTOption(
@@ -1747,7 +1748,7 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
             ttl = getattr(option, 'ttl', 0)
             nonce = option.nonce
         else:
-            func_enum = self._make_index(func, func_default, namespace=func_namespace,  # type: ignore[call-overload]
+            func_enum = self._make_index(func, func_default, namespace=func_namespace,  # type: ignore[assignment]
                                          reversed=func_reversed, pack=False)
         rate_val = math.floor(math.log2(rate * 1000 / 40000)) if rate > 0 else 0
 

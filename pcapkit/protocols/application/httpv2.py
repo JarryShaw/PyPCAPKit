@@ -257,8 +257,9 @@ class HTTP(HTTPBase[Data_HTTP, Schema_HTTP],
             Constructed packet data.
 
         """
-        type_val = self._make_index(type, type_default, namespace=type_namespace,  # type: ignore[call-overload]
-                                    reversed=type_reversed, pack=False)
+        type_val = cast('Enum_Frame',
+                        self._make_index(type, type_default, namespace=type_namespace,
+                                         reversed=type_reversed, pack=False))
 
         if isinstance(frame, bytes):
             length = len(frame) + 9
@@ -1035,7 +1036,7 @@ class HTTP(HTTPBase[Data_HTTP, Schema_HTTP],
         if frame is not None:
             error_val = frame.error
         else:
-            error_val = self._make_index(error, error_default, namespace=error_namespace,  # type: ignore[call-overload]
+            error_val = self._make_index(error, error_default, namespace=error_namespace,  # type: ignore[assignment]
                                          reversed=error_reversed, pack=False)
 
         return Schema_RSTStreamFrame(
@@ -1191,7 +1192,7 @@ class HTTP(HTTPBase[Data_HTTP, Schema_HTTP],
             error_val = frame.error
             debug = frame.debug_data
         else:
-            error_val = self._make_index(error, error_default, namespace=error_namespace,  # type: ignore[call-overload]
+            error_val = self._make_index(error, error_default, namespace=error_namespace,  # type: ignore[assignment]
                                          reversed=error_reversed, pack=False)
 
         return Schema_GoawayFrame(

@@ -961,6 +961,11 @@ class Protocol(Generic[PT, ST], metaclass=abc.ABCMeta):
                     reversed: 'Literal[True]',  # pylint: disable=redefined-builtin
                     pack: 'Literal[True]', size: 'int' = ..., signed: 'bool' = ...,
                     lilendian: 'bool' = ...) -> 'bytes': ...
+    @overload
+    @classmethod
+    def _make_index(cls, name: 'str | int | StdlibEnum | AenumEnum', default: 'Optional[int]' = ..., *,
+                    namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = ...,
+                    reversed: 'bool' = ..., pack: 'Literal[False]' = ...) -> 'int': ...
 
     @classmethod
     def _make_index(cls, name: 'str | int | StdlibEnum | AenumEnum', default: 'Optional[int]' = None, *,
@@ -989,7 +994,7 @@ class Protocol(Generic[PT, ST], metaclass=abc.ABCMeta):
                 and ``default`` is :data:`None`.
 
         """
-        if isinstance(name, (enum.IntEnum, aenum.IntEnum)):
+        if isinstance(name, (enum.Enum, aenum.Enum)):
             index = cast('int', name.value)
         elif isinstance(name, int):
             index = name

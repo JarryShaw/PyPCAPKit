@@ -192,7 +192,7 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
             Constructed packet data.
 
         """
-        next_val = self._make_index(next, next_default, namespace=next_namespace,  # type: ignore[call-overload]
+        next_val = self._make_index(next, next_default, namespace=next_namespace,
                                     reversed=next_reversed, pack=False)
 
         return Schema_IPv6(
@@ -202,7 +202,7 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
                 'label': flow_label,
             },
             length=len(payload),
-            next=next_val,
+            next=next_val,  # type: ignore[arg-type]
             limit=hop_limit,
             src=src,
             dst=dst,

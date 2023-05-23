@@ -331,7 +331,7 @@ class HOPOPT(Internet[Data_HOPOPT, Schema_HOPOPT],
             Constructed packet data.
 
         """
-        next_value = self._make_index(next, next_default, namespace=next_namespace,  # type: ignore[call-overload]
+        next_value = self._make_index(next, next_default, namespace=next_namespace,
                                       reversed=next_reversed, pack=False)
 
         if options is not None:
@@ -341,7 +341,7 @@ class HOPOPT(Internet[Data_HOPOPT, Schema_HOPOPT],
             options_value, length = [], 0
 
         return Schema_HOPOPT(
-            next=next_value,
+            next=next_value,  # type: ignore[arg-type]
             len=length,
             options=options_value,
             payload=payload,
@@ -1385,7 +1385,7 @@ class HOPOPT(Internet[Data_HOPOPT, Schema_HOPOPT],
         if opt is not None:
             value = opt.value
         else:
-            value = self._make_index(alert, alert_default, namespace=alert_namespace,  # type: ignore[call-overload]
+            value = self._make_index(alert, alert_default, namespace=alert_namespace,  # type: ignore[assignment]
                                      reversed=alert_reversed, pack=False)
 
         return Schema_RouterAlertOption(
@@ -1465,7 +1465,7 @@ class HOPOPT(Internet[Data_HOPOPT, Schema_HOPOPT],
             id = getattr(opt, 'id', b'')
             hav = getattr(opt, 'hav', b'')
 
-        dpd_type = self._make_index(mode, mode_default, namespace=mode_namespace,  # type: ignore[call-overload]
+        dpd_type = self._make_index(mode, mode_default, namespace=mode_namespace,  # type: ignore[assignment]
                                     reversed=mode_reversed, pack=False)
 
         if dpd_type == Enum_SMFDPDMode.I_DPD:
@@ -1626,7 +1626,7 @@ class HOPOPT(Internet[Data_HOPOPT, Schema_HOPOPT],
             ttl = getattr(opt, 'ttl', 0)
             nonce = getattr(opt, 'nonce', 0)
         else:
-            func_enum = self._make_index(func, func_default, namespace=func_namespace,  # type: ignore[call-overload]
+            func_enum = self._make_index(func, func_default, namespace=func_namespace,  # type: ignore[assignment]
                                          reversed=func_reversed, pack=False)
         rate_val = math.floor(math.log2(rate * 1000 / 40000)) if rate > 0 else 0
 

@@ -194,9 +194,9 @@ class OSPF(Link[Data_OSPF, Schema_OSPF],
             Constructed packet data.
 
         """
-        type_ = self._make_index(type, type_default, namespace=type_namespace,  # type: ignore[call-overload]
+        type_ = self._make_index(type, type_default, namespace=type_namespace,
                                  reversed=type_reversed, pack=False)
-        auth_type_ = self._make_index(auth_type, auth_type_default, namespace=auth_type_namespace,  # type: ignore[call-overload]
+        auth_type_ = self._make_index(auth_type, auth_type_default, namespace=auth_type_namespace,
                                       reversed=auth_type_reversed, pack=False)
 
         if auth_type_ == Enum_Authentication.Cryptographic_authentication:
@@ -208,12 +208,12 @@ class OSPF(Link[Data_OSPF, Schema_OSPF],
 
         return Schema_OSPF(
             version=version,
-            type=type_,
+            type=type_,  # type: ignore[arg-type]
             length=24 + len(payload),
             router_id=router_id,
             area_id=area_id,
             checksum=checksum,
-            auth_type=auth_type_,
+            auth_type=auth_type_,  # type: ignore[arg-type]
             auth_data=data,
             payload=payload,
         )

@@ -190,7 +190,7 @@ class HTTP(HTTPBase[Data_HTTP, Schema_HTTP],
 
             header_line = b'%s %s HTTP/%s\r\n' % (meth, uri_val, version)
         elif method is None and status is not None:
-            status_code = self._make_index(status, status_default, namespace=status_namespace,  # type: ignore[call-overload]
+            status_code = self._make_index(status, status_default, namespace=status_namespace,
                                            reversed=status_reversed, pack=False)
             status_code_val = int(status_code)
 
@@ -282,14 +282,14 @@ class HTTP(HTTPBase[Data_HTTP, Schema_HTTP],
         match4 = re.match(_RE_STATUS, para2)
         if match1 and match2:
             header_line = Data_RequestHeader(
-                type=Type.REQUEST,
+                type=Type.REQUEST,  # type: ignore[arg-type]
                 method=Enum_Method.get(self.decode(para1)),
                 uri=self.decode(para2),
                 version=self.decode(match2.group('version')),
             )
         elif match3 and match4:
             header_line = Data_ResponseHeader(
-                type=Type.RESPONSE,
+                type=Type.RESPONSE,  # type: ignore[arg-type]
                 version=self.decode(match3.group('version')),
                 status=Enum_StatusCode.get(int(para2)),
                 message=self.decode(para3),

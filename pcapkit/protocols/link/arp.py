@@ -253,11 +253,11 @@ class ARP(Link[Data_ARP, Schema_ARP],
             Constructed packet data.
 
         """
-        _htype = self._make_index(htype, htype_default, namespace=htype_namespace,  # type: ignore[call-overload]
+        _htype = self._make_index(htype, htype_default, namespace=htype_namespace,
                                   reversed=htype_reversed, pack=False)
-        _ptype = self._make_index(ptype, ptype_default, namespace=ptype_namespace,  # type: ignore[call-overload]
+        _ptype = self._make_index(ptype, ptype_default, namespace=ptype_namespace,
                                   reversed=ptype_reversed, pack=False)
-        _oper = self._make_index(oper, oper_default, namespace=oper_namespace,  # type: ignore[call-overload]
+        _oper = self._make_index(oper, oper_default, namespace=oper_namespace,
                                  reversed=oper_reversed, pack=False)
 
         return Schema_ARP(

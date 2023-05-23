@@ -165,9 +165,10 @@ class VLAN(Link[Data_VLAN, Schema_VLAN],
             dei = tci['dei']  # type: ignore[assignment]
             vid = tci['vid']
         else:
-            pcp_value = self._make_index(pcp, pcp_default, namespace=pcp_namespace,  # type: ignore[call-overload]
+            pcp_value = self._make_index(pcp, pcp_default, namespace=pcp_namespace,
                                          reversed=pcp_reversed, pack=False)
-        type_value = self._make_index(type, type_default, namespace=type_namespace,  # type: ignore[call-overload]
+
+        type_value = self._make_index(type, type_default, namespace=type_namespace,
                                       reversed=type_reversed, pack=False)
 
         return Schema_VLAN(
@@ -176,7 +177,7 @@ class VLAN(Link[Data_VLAN, Schema_VLAN],
                 'dei': dei,
                 'vid': vid,
             },
-            type=type_value,
+            type=type_value,  # type: ignore[arg-type]
             payload=payload,
         )
 

@@ -199,7 +199,7 @@ class L2TP(Link[Data_L2TP, Schema_L2TP],
             Constructed packet data.
 
         """
-        type_ = self._make_index(type, type_default, namespace=type_namespace,  # type: ignore[call-overload]
+        type_ = self._make_index(type, type_default, namespace=type_namespace,
                                  reversed=type_reversed, pack=False)
 
         return Schema_L2TP(

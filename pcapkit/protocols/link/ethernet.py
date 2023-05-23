@@ -162,13 +162,13 @@ class Ethernet(Link[Data_Ethernet, Schema_Ethernet],
             Constructed packet data.
 
         """
-        _type = self._make_index(type, type_default, namespace=type_namespace,  # type: ignore[call-overload]
+        _type = self._make_index(type, type_default, namespace=type_namespace,
                                  reversed=type_reversed, pack=False)
 
         return Schema_Ethernet(
             dst=self._make_mac_addr(dst),
             src=self._make_mac_addr(src),
-            type=_type,
+            type=_type,  # type: ignore[arg-type]
             payload=payload,
         )
 

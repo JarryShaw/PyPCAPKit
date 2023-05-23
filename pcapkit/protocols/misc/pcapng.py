@@ -950,8 +950,9 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
             Constructed packet data.
 
         """
-        type_val = self._make_index(type, type_default, namespace=type_namespace,  # type: ignore[call-overload]
-                                    reversed=type_reversed, pack=False)
+        type_val = cast('Enum_BlockType',
+                        self._make_index(type, type_default, namespace=type_namespace,
+                                         reversed=type_reversed, pack=False))
         self._type = type_val
 
         if isinstance(block, bytes):
@@ -3344,7 +3345,7 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
             snaplen = block.snaplen
             options = block.options
         else:
-            linktype_val = self._make_index(linktype, linktype_default, namespace=linktype_namespace,  # type: ignore[call-overload]
+            linktype_val = self._make_index(linktype, linktype_default, namespace=linktype_namespace,  # type: ignore[assignment]
                                             reversed=linktype_reversed, pack=False)
 
         if options is not None:
@@ -3603,7 +3604,7 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
             secrets_data = block.secrets_data
             options = block.options
         else:
-            secrets_type_val = self._make_index(secrets_type, secrets_type_default, namespace=secrets_type_namespace,  # type: ignore[call-overload]
+            secrets_type_val = self._make_index(secrets_type, secrets_type_default, namespace=secrets_type_namespace,  # type: ignore[assignment]
                                                 reversed=secrets_type_reversed, pack=False)
 
         if isinstance(secrets_data, bytes):
@@ -4267,7 +4268,7 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
             filter_val = option.code
             expr_val = option.expression
         else:
-            filter_val = self._make_index(filter, filter_default, namespace=filter_namespace,  # type: ignore[call-overload]
+            filter_val = self._make_index(filter, filter_default, namespace=filter_namespace,  # type: ignore[assignment]
                                           reversed=filter_reversed, pack=False)
             expr_val = expression if isinstance(expression, bytes) else expression.encode()
 
@@ -4531,10 +4532,10 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
             preamble_error = option.preamble_error
             symbol_error = option.symbol_error
         else:
-            direction_val = self._make_index(direction, direction_default, namespace=direction_namespace,  # type: ignore[call-overload]
-                                             reversed=direction_reversed, unpack=False)
-            reception_val = self._make_index(reception, reception_default, namespace=reception_namespace,  # type: ignore[call-overload]
-                                             reversed=reception_reversed, unpack=False)
+            direction_val = self._make_index(direction, direction_default, namespace=direction_namespace,  # type: ignore[assignment]
+                                             reversed=direction_reversed, pack=False)
+            reception_val = self._make_index(reception, reception_default, namespace=reception_namespace,  # type: ignore[assignment]
+                                             reversed=reception_reversed, pack=False)
 
         return Schema_EPB_FlagsOption(
             type=type,
@@ -4585,8 +4586,8 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
             algo_val = option.algorithm
             hash = option.hash
         else:
-            algo_val = self._make_index(algorithm, algorithm_default, namespace=algorithm_namespace,  # type: ignore[call-overload]
-                                        reversed=algorithm_reversed, unpack=False)
+            algo_val = self._make_index(algorithm, algorithm_default, namespace=algorithm_namespace,  # type: ignore[assignment]
+                                        reversed=algorithm_reversed, pack=False)
 
         return Schema_EPB_HashOption(
             type=type,
@@ -4722,7 +4723,7 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
             verdict_val = option.verdict
             value = option.value
         else:
-            verdict_val = self._make_index(verdict, verdict_default, namespace=verdict_namespace,  # type: ignore[call-overload]
+            verdict_val = self._make_index(verdict, verdict_default, namespace=verdict_namespace,  # type: ignore[assignment]
                                           reversed=verdict_reversed, pack=False)
 
         return Schema_EPB_VerdictOption(
@@ -5113,10 +5114,10 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
             preamble_error = option.preamble_error
             symbol_error = option.symbol_error
         else:
-            direction_val = self._make_index(direction, direction_default, namespace=direction_namespace,  # type: ignore[call-overload]
-                                             reversed=direction_reversed, unpack=False)
-            reception_val = self._make_index(reception, reception_default, namespace=reception_namespace,  # type: ignore[call-overload]
-                                             reversed=reception_reversed, unpack=False)
+            direction_val = self._make_index(direction, direction_default, namespace=direction_namespace,  # type: ignore[assignment]
+                                             reversed=direction_reversed, pack=False)
+            reception_val = self._make_index(reception, reception_default, namespace=reception_namespace,  # type: ignore[assignment]
+                                             reversed=reception_reversed, pack=False)
 
         return Schema_PACK_FlagsOption(
             type=type,
@@ -5167,8 +5168,8 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
             algo_val = option.algorithm
             hash = option.hash
         else:
-            algo_val = self._make_index(algorithm, algorithm_default, namespace=algorithm_namespace,  # type: ignore[call-overload]
-                                        reversed=algorithm_reversed, unpack=False)
+            algo_val = self._make_index(algorithm, algorithm_default, namespace=algorithm_namespace,  # type: ignore[assignment]
+                                        reversed=algorithm_reversed, pack=False)
 
         return Schema_PACK_HashOption(
             type=type,

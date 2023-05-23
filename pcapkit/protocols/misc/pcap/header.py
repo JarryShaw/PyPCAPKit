@@ -231,7 +231,7 @@ class Header(Protocol[Data_Header, Schema_Header],
             thiszone=thiszone,
             sigfigs=sigfigs,
             snaplen=snaplen,
-            network=self._make_index(network, network_default, namespace=network_namespace,  # type: ignore[call-overload]
+            network=self._make_index(network, network_default, namespace=network_namespace,
                                      reversed=network_reversed, pack=False),
         )
 

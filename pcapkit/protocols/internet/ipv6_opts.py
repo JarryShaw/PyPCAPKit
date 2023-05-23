@@ -342,7 +342,7 @@ class IPv6_Opts(Internet[Data_IPv6_Opts, Schema_IPv6_Opts],
             Constructed packet data.
 
         """
-        next_value = self._make_index(next, next_default, namespace=next_namespace,  # type: ignore[call-overload]
+        next_value = self._make_index(next, next_default, namespace=next_namespace,
                                       reversed=next_reversed, pack=False)
 
         if options is not None:
@@ -352,7 +352,7 @@ class IPv6_Opts(Internet[Data_IPv6_Opts, Schema_IPv6_Opts],
             options_value, length = [], 0
 
         return Schema_IPv6_Opts(
-            next=next_value,
+            next=next_value,  # type: ignore[arg-type]
             len=length,
             options=options_value,
             payload=payload,
@@ -1396,7 +1396,7 @@ class IPv6_Opts(Internet[Data_IPv6_Opts, Schema_IPv6_Opts],
         if opt is not None:
             value = opt.value
         else:
-            value = self._make_index(alert, alert_default, namespace=alert_namespace,  # type: ignore[call-overload]
+            value = self._make_index(alert, alert_default, namespace=alert_namespace,  # type: ignore[assignment]
                                      reversed=alert_reversed, pack=False)
 
         return Schema_RouterAlertOption(
@@ -1476,7 +1476,7 @@ class IPv6_Opts(Internet[Data_IPv6_Opts, Schema_IPv6_Opts],
             id = getattr(opt, 'id', b'')
             hav = getattr(opt, 'hav', b'')
 
-        dpd_type = self._make_index(mode, mode_default, namespace=mode_namespace,  # type: ignore[call-overload]
+        dpd_type = self._make_index(mode, mode_default, namespace=mode_namespace,  # type: ignore[assignment]
                                     reversed=mode_reversed, pack=False)
 
         if dpd_type == Enum_SMFDPDMode.I_DPD:
@@ -1637,7 +1637,7 @@ class IPv6_Opts(Internet[Data_IPv6_Opts, Schema_IPv6_Opts],
             ttl = getattr(opt, 'ttl', 0)
             nonce = getattr(opt, 'nonce', 0)
         else:
-            func_enum = self._make_index(func, func_default, namespace=func_namespace,  # type: ignore[call-overload]
+            func_enum = self._make_index(func, func_default, namespace=func_namespace,  # type: ignore[assignment]
                                          reversed=func_reversed, pack=False)
         rate_val = math.floor(math.log2(rate * 1000 / 40000)) if rate > 0 else 0
 

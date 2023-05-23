@@ -2397,7 +2397,7 @@ class TCP(Transport[Data_TCP, Schema_TCP],
         if opt is not None:
             algorithm_val = opt.chksum
         else:
-            algorithm_val = self._make_index(algorithm, algorithm_default, namespace=algorithm_namespace,  # type: ignore[call-overload]
+            algorithm_val = self._make_index(algorithm, algorithm_default, namespace=algorithm_namespace,  # type: ignore[assignment]
                                              reversed=algorithm_reversed, pack=False)
 
         return Schema_AlternateChecksumRequest(
@@ -2584,7 +2584,7 @@ class TCP(Transport[Data_TCP, Schema_TCP],
         if opt is not None:
             subtype_val = opt.subtype
         else:
-            subtype_val = self._make_index(subtype, subtype_default, namespace=subtype_namespace,  # type: ignore[call-overload]
+            subtype_val = self._make_index(subtype, subtype_default, namespace=subtype_namespace,  # type: ignore[assignment]
                                            reversed=subtype_reversed, pack=False)
 
         name = self.__mp_option__[subtype_val]

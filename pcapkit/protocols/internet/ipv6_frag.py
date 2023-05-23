@@ -174,11 +174,11 @@ class IPv6_Frag(Internet[Data_IPv6_Frag, Schema_IPv6_Frag],
             Constructed packet data.
 
         """
-        next_val = self._make_index(next, next_default, namespace=next_namespace,  # type: ignore[call-overload]
+        next_val = self._make_index(next, next_default, namespace=next_namespace,
                                     reversed=next_reversed, pack=False)
 
         return Schema_IPv6_Frag(
-            next=next_val,
+            next=next_val,  # type: ignore[arg-type]
             flags={
                 'offset': offset,
                 'mf': mf,

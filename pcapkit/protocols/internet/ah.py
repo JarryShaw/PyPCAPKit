@@ -179,12 +179,12 @@ class AH(IPsec[Data_AH, Schema_AH],
             Constructed packet data.
 
         """
-        next_value = self._make_index(next, next_default, namespace=next_namespace,  # type: ignore[call-overload]
+        next_value = self._make_index(next, next_default, namespace=next_namespace,
                                       reversed=next_reversed, pack=False)
         length = (len(icv) + 12) // 4 - 2
 
         return Schema_AH(
-            next=next_value,
+            next=next_value,  # type: ignore[arg-type]
             len=length,
             spi=spi,
             seq=seq,

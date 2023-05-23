@@ -249,10 +249,12 @@ class IPv6_Route(Internet[Data_IPv6_Route, Schema_IPv6_Route],
             Constructed packet data.
 
         """
-        next_val = self._make_index(next, next_default, namespace=next_namespace,  # type: ignore[call-overload]
-                                    reversed=next_reversed, pack=False)
-        type_val = self._make_index(type, type_default, namespace=type_namespace,  # type: ignore[call-overload]
-                                    reversed=type_reversed, pack=False)
+        next_val = cast('Enum_TransType',
+                        self._make_index(next, next_default, namespace=next_namespace,
+                                         reversed=next_reversed, pack=False))
+        type_val = cast('Enum_Routing',
+                        self._make_index(type, type_default, namespace=type_namespace,
+                                         reversed=type_reversed, pack=False))
 
         if isinstance(data, bytes):
             length = math.ceil((len(data) + 4) / 8)

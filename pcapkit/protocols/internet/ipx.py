@@ -140,14 +140,14 @@ class IPX(Internet[Data_IPX, Schema_IPX],
             bytes: Constructed packet data.
 
         """
-        type_val = self._make_index(type, type_default, namespace=type_namespace,  # type: ignore[call-overload]
+        type_val = self._make_index(type, type_default, namespace=type_namespace,
                                     reversed=type_reversed, pack=False)
 
         return Schema_IPX(
             chksum=chksum,
             len=30 + len(payload),
             count=count,
-            type=type_val,
+            type=type_val,  # type: ignore[arg-type]
             dst=dst,
             src=src,
             payload=payload,
