@@ -7,4 +7,4 @@ sphinxext-opengraph==0.8.2
 sphinx-copybutton==0.5.2
 
 # auxiliary
-typing-extensions
+typing-extensions==4.6.2
