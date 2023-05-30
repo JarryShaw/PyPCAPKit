@@ -5,6 +5,9 @@ on:
     branches: [main, ]
   schedule:
     - cron: '0 2 * * 6'
+  pull_request:
+    branches:
+      - '**'
 
 permissions:
   contents: write
@@ -42,6 +45,7 @@ jobs:
 
       - name: Deploy 🚀
         uses: JamesIves/github-pages-deploy-action@v4
+        if: ${{ github.event_name != 'pull_request' }}
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           branch: gh-pages # The branch the action should deploy to.
