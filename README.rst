@@ -19,19 +19,8 @@ report formats.
 About
 -----
 
-PyPCAPKit is an independent open source library, using only
-`DictDumper`_ as its formatted output dumper.
-
-   There is a project called |jspcapy|_ works on ``pcapkit``, which is a
-   command line tool for PCAP extraction.
-
-   .. |jspcapy| replace:: ``jspcapy``
-   .. _jspcapy: https://github.com/JarryShaw/jspcapy
-
-   .. note::
-
-      The |jspcapy|_ project is deprecated and has been merged into the
-      PyPCAPKit project as its CLI support since PyPCAPKit v0.8.0.
+PyPCAPKit is a comprehensive Python-native network packet analysis library,
+with `DictDumper`_ as its formatted output dumper.
 
 Unlike popular PCAP file extractors, such as `Scapy`_, `DPKT`_, `PyShark`_,
 and etc, ``pcapkit`` uses **streaming** strategy to read input files. That
