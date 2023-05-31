@@ -8,6 +8,7 @@ from typing import TYPE_CHECKING
 from pcapkit.corekit.infoclass import info_final
 from pcapkit.corekit.multidict import MultiDict
 from pcapkit.protocols.data.data import Data
+from pcapkit.utilities.compat import localcontext
 
 __all__ = [
     'PCAPNG',
@@ -480,7 +481,7 @@ class SimplePacketBlock(PCAPNG):
 
     def __post_init__(self) -> 'None':
         """Post-initialization handling."""
-        with decimal.localcontext(prec=64):
+        with localcontext(prec=64):
             self.__update__(
                 interface_id=0,
                 timestamp=datetime.datetime.fromtimestamp(0, datetime.timezone.utc),

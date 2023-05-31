@@ -169,7 +169,7 @@ from pcapkit.protocols.schema.misc.pcapng import UnknownSecrets as Schema_Unknow
 from pcapkit.protocols.schema.misc.pcapng import WireGuardKeyLog as Schema_WireGuardKeyLog
 from pcapkit.protocols.schema.misc.pcapng import ZigBeeAPSKey as Schema_ZigBeeAPSKey
 from pcapkit.protocols.schema.misc.pcapng import ZigBeeNWKKey as Schema_ZigBeeNWKKey
-from pcapkit.utilities.compat import StrEnum
+from pcapkit.utilities.compat import StrEnum, localcontext
 from pcapkit.utilities.exceptions import ProtocolError, UnsupportedCall, stacklevel
 from pcapkit.utilities.warnings import (AttributeWarning, DeprecatedFormatWarning, ProtocolWarning,
                                         RegistryWarning, warn)
@@ -1189,7 +1189,7 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
         tzone = self._get_timezone(interface_id)
 
         timestamp_raw = (timestamp_high << 32) | timestamp_low
-        with decimal.localcontext(prec=64):
+        with localcontext(prec=64):
             timestamp_epoch = decimal.Decimal(timestamp_raw) / self._get_resolution(interface_id) + \
                 self._get_offset(interface_id)
             ts_decimal = timestamp_epoch + decimal.Decimal(
@@ -1234,7 +1234,7 @@ class PCAPNG(Protocol[Data_PCAPNG, Schema_PCAPNG],
             based on the given offset and timezone conversion.
 
         """
-        with decimal.localcontext(prec=64):
+        with localcontext(prec=64):
             if timestamp is None:
                 if py37 and self.nanosecond:
                     timestamp = decimal.Decimal(time.time_ns()) / 1_000_000_000
