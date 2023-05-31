@@ -1,16 +1,14 @@
 # -*- coding: utf-8 -*-
 
-import builtins
-import collections.abc
 import sys
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from typing import Any, Callable, Optional, Type, Union
+    from typing import Any, Callable, Generator, Optional, Type, Union
 
 __all__ = [
     # functions
-    'final',
+    'final', 'localcontext',
 
     # exceptions
     'ModuleNotFoundError',
@@ -24,15 +22,15 @@ __all__ = [
     'pathlib',
 ]
 
-version = sys.version_info[:2]
-
-if version < (3, 6):
+if sys.version_info < (3, 6):
     class ModuleNotFoundError(ImportError):  # pylint: disable=redefined-builtin
         """Module not found."""
 else:
-    ModuleNotFoundError = builtins.ModuleNotFoundError  # type: ignore[misc,assignment]
+    from builtins import ModuleNotFoundError
 
-if version <= (3, 5):
+if sys.version_info <= (3, 5):
+    from collections.abc import Container, Iterable, Sized  # pylint: disable=unused-import
+
     def _check_methods(C: 'Type[Any]', *methods: 'str') -> 'bool | Any':
         mro = C.__mro__
         for method in methods:
@@ -45,7 +43,7 @@ if version <= (3, 5):
                 return NotImplemented
         return True
 
-    class Collection(collections.abc.Sized, collections.abc.Iterable, collections.abc.Container):  # pylint: disable=abstract-method
+    class Collection(Sized, Iterable, Container):  # pylint: disable=abstract-method
 
         __slots__ = ()
 
@@ -55,18 +53,16 @@ if version <= (3, 5):
                 return _check_methods(C, "__len__", "__iter__", "__contains__")
             return NotImplemented
 else:
-    Collection = collections.abc.Collection  # type: ignore[misc,assignment]
+    from collections.abc import Collection
 
-if version <= (3, 4):
+if sys.version_info <= (3, 4):
     import pathlib2 as pathlib  # pylint: disable=import-error
 else:
     import pathlib
 
 # functools.cached_property added in 3.8
-if version >= (3, 8):
-    from functools import cached_property
-else:
-    from _thread import RLock  # type: ignore[attr-defined]
+if sys.version_info < (3, 8):
+    from threading import RLock
     from typing import Generic, TypeVar  # isort: split
 
     _T = TypeVar("_T")
@@ -74,7 +70,7 @@ else:
 
     _NOT_FOUND = object()
 
-    class cached_property(Generic[_T]):  # type: ignore[no-redef]
+    class cached_property(Generic[_T]):
         def __init__(self, func: 'Callable[[Any], _T]') -> 'None':
             self.func = func  # type: Callable[[Any], _T]
             self.attrname = None  # type: Optional[str]
@@ -93,7 +89,7 @@ else:
         def __get__(self, instance: 'Optional[_S]',
                     owner: 'Optional[Type[Any]]' = None) -> 'Union[cached_property[_T], _T]':
             if instance is None:
-                return self  # type: ignore[return-value]
+                return self
             if self.attrname is None:
                 raise TypeError(
                     "Cannot use cached_property instance without calling __set_name__ on it.")
@@ -121,22 +117,50 @@ else:
                             )
                             raise TypeError(msg) from None
             return val
+else:
+    from functools import cached_property
 
-if version < (3, 9):
+if sys.version_info < (3, 9):
     from typing import Dict, List, Mapping, Tuple
 else:
     from collections.abc import Mapping
 
-    Tuple = tuple  # type: ignore[assignment]
-    List = list  # type: ignore[misc]
-    Dict = dict  # type: ignore[misc]
+    Tuple = tuple
+    List = list
+    Dict = dict
 
-if version < (3, 11):
+if sys.version_info < (3, 11):
     from aenum import StrEnum
 else:
     from enum import StrEnum
 
-if version < (3, 8):
+if sys.version_info < (3, 8):
     from typing_extensions import final
 else:
     from typing import final
+
+if sys.version_info < (3, 11):
+    from contextlib import contextmanager
+    from decimal import localcontext as _localcontext
+
+    if TYPE_CHECKING:
+        from decimal import Context
+        from types import TracebackType
+
+        class _ContextManager:
+            def __init__(self, new_context: Context) -> None: ...
+            def __enter__(self) -> Context: ...
+            def __exit__(self, t: type[BaseException] | None, v: BaseException | None, tb: TracebackType | None) -> None: ...
+
+    @contextmanager
+    def localcontext(ctx: 'Optional[Context]' = None, **kwargs: 'Any') -> '_ContextManager':
+        """Return a context manager that will set the default context to a copy
+        of ctx on entry to the with-statement and restore the previous default
+        context when exiting the with-statement. If no context is specified, a
+        copy of the current default context is used."""
+        with _localcontext(ctx) as lc:
+            for attr, value in kwargs.items():
+                setattr(lc, attr, value)
+            yield lc
+else:
+    from decimal import localcontext
