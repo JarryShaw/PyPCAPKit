@@ -79,6 +79,8 @@
         "eddsa",
         "edep",
         "elen",
+        "Emax",
+        "Emin",
         "emojize",
         "Encap",
         "endofopt",

@@ -34,6 +34,7 @@ from pcapkit.protocols.data.misc.pcap.frame import Frame as Data_Frame
 from pcapkit.protocols.data.misc.pcap.frame import FrameInfo as Data_FrameInfo
 from pcapkit.protocols.protocol import Protocol
 from pcapkit.protocols.schema.misc.pcap.frame import Frame as Schema_Frame
+from pcapkit.utilities.compat import localcontext
 from pcapkit.utilities.exceptions import UnsupportedCall, stacklevel
 from pcapkit.utilities.warnings import ProtocolWarning, RegistryWarning, warn
 
@@ -209,7 +210,7 @@ class Frame(Protocol[Data_Frame, Schema_Frame],
         _ilen = schema.incl_len
         _olen = schema.orig_len
 
-        with decimal.localcontext(prec=64):
+        with localcontext(prec=64):
             if self._nsec:
                 _epch = _tsss + decimal.Decimal(_tsus) / 1_000_000_000
             else:
@@ -409,7 +410,7 @@ class Frame(Protocol[Data_Frame, Schema_Frame],
             Second and microsecond/nanosecond value of timestamp.
 
         """
-        with decimal.localcontext(prec=64):
+        with localcontext(prec=64):
             if timestamp is None:
                 if py37 and nanosecond:
                     timestamp = decimal.Decimal(time.time_ns()) / 1_000_000_000

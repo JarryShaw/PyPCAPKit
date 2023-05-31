@@ -13,7 +13,7 @@ in :pep:`557`.
 import collections.abc
 import enum
 import itertools
-from typing import TYPE_CHECKING, Generic, TypeVar, cast, final
+from typing import TYPE_CHECKING, Generic, TypeVar, final
 
 from pcapkit.utilities.compat import Mapping
 from pcapkit.utilities.exceptions import UnsupportedCall, stacklevel
