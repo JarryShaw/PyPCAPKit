@@ -114,3 +114,5 @@ following objects and functions:
      - ≥ 3.11
    * - :func:`typing.final`
      - ≥ 3.8
+   * - :func:`decimal.localcontext(ctx=None, **kwargs) <decimal.localcontext>`
+     - ≥ 3.11
