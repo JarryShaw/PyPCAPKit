@@ -96,10 +96,14 @@ jobs:
     strategy:
       matrix:
         python-version:
+          - "3.7"
           - "3.8"
           - "3.9"
           - "3.10"
           - "3.11"
+          - "pypy3.7"
+          - "pypy3.8"
+          - "pypy3.9"
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -143,6 +147,15 @@ jobs:
           password: ${{ secrets.TEST_PYPI_API_TOKEN }}
           repository-url: https://test.pypi.org/legacy/
           skip-existing: true
+
+      - name: Upload package to GitHub Release
+        uses: ncipollo/release-action@v1.12.0
+        with:
+          allowUpdates: true
+          artifacts: |
+            dist/*
+          tag: "v${{ needs.version_check.outputs.PCAPKIT_VERSION }}"
+          token: "${{ secrets.GITHUB_TOKEN }}"
 
   conda:
     name: Conda deployment of package with Python ${{ matrix.python-version }}
