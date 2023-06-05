@@ -3,7 +3,7 @@
 
 import enum
 import math
-from typing import TYPE_CHECKING, Generic, TypeVar, cast
+from typing import TYPE_CHECKING, Generic, TypeVar, Union, cast
 
 import aenum
 
@@ -330,7 +330,7 @@ class UInt8Field(NumberField):
     __signed__ = False
 
 
-class EnumField(NumberField[enum.IntEnum | aenum.IntEnum]):
+class EnumField(NumberField[Union[enum.IntEnum, aenum.IntEnum]]):
     """Enumerated value for protocol fields.
 
     Args:
