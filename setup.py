@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import logging
 import os
 import sys
 from typing import TYPE_CHECKING
@@ -20,6 +21,14 @@ try:
 except:
     raise ImportError("setuptools is required to install PyPCAPKit!")
 
+# get logger
+logger = logging.getLogger('pcapkit.setup')
+formatter = logging.Formatter(fmt='[%(levelname)s] %(asctime)s - %(message)s',
+                              datefmt='%m/%d/%Y %I:%M:%S %p')
+handler = logging.StreamHandler(sys.stderr)
+handler.setFormatter(formatter)
+logger.addHandler(handler)
+
 
 def get_long_description() -> 'str':
     """Extract description from README.rst, for PyPI's usage."""
@@ -38,8 +47,8 @@ def refactor(path: 'str') -> 'None':
                 [sys.executable, '-m', 'f2format', '--no-archive', path]
             )
         except subprocess.CalledProcessError as error:
-            print('Failed to perform assignment expression backport compiling.'
-                  'Please consider manually install `bpc-f2format` and try again.', file=sys.stderr)
+            logger.error('Failed to perform assignment expression backport compiling.'
+                         'Please consider manually install `bpc-f2format` and try again.', file=sys.stderr)
             sys.exit(error.returncode)
 
     if sys.version_info < (3, 8):
@@ -48,8 +57,8 @@ def refactor(path: 'str') -> 'None':
                 [sys.executable, '-m', 'walrus', '--no-archive', path]
             )
         except subprocess.CalledProcessError as error:
-            print('Failed to perform assignment expression backport compiling.'
-                  'Please consider manually install `bpc-walrus` and try again.', file=sys.stderr)
+            logger.error('Failed to perform assignment expression backport compiling.'
+                         'Please consider manually install `bpc-walrus` and try again.', file=sys.stderr)
             sys.exit(error.returncode)
 
         try:
@@ -57,8 +66,8 @@ def refactor(path: 'str') -> 'None':
                 [sys.executable, '-m', 'poseur', '--no-archive', path]
             )
         except subprocess.CalledProcessError as error:
-            print('Failed to perform assignment expression backport compiling.'
-                  'Please consider manually install `bpc-poseur` and try again.', file=sys.stderr)
+            logger.error('Failed to perform assignment expression backport compiling. '
+                         'Please consider manually install `bpc-poseur` and try again.', file=sys.stderr)
             sys.exit(error.returncode)
 
 
@@ -67,6 +76,7 @@ class pcapkit_sdist(sdist):
 
     def make_release_tree(self, base_dir: 'str', *args: 'Any', **kwargs: 'Any') -> 'None':
         super(pcapkit_sdist, self).make_release_tree(base_dir, *args, **kwargs)
+        logger.info('running sdist')
 
         # PyBPC compatibility enforcement
         refactor(os.path.join(base_dir, 'pcapkit'))
@@ -77,6 +87,7 @@ class pcapkit_build_py(build_py):
 
     def build_package_data(self) -> 'None':
         super(pcapkit_build_py, self).build_package_data()
+        logger.info('running build_py')
 
         # PyBPC compatibility enforcement
         refactor(os.path.join(self.build_lib, 'pcapkit'))
@@ -87,6 +98,7 @@ class pcapkit_develop(develop):
 
     def run(self) -> 'None':  # type: ignore[override]
         super(pcapkit_develop, self).run()
+        logger.info('running develop')
 
         # PyBPC compatibility enforcement
         refactor(os.path.join(self.install_lib, 'pcapkit'))
@@ -97,6 +109,7 @@ class pcapkit_install(install):
 
     def run(self) -> 'None':
         super(pcapkit_install, self).run()
+        logger.info('running install')
 
         # PyBPC compatibility enforcement
         refactor(os.path.join(self.install_lib, 'pcapkit'))  # type: ignore[arg-type]

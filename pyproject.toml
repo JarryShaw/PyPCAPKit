@@ -4,7 +4,7 @@ requires = [
 
     # version compatibility
     "bpc-f2format; python_version < '3.6'",
-    "poseur; python_version < '3.8'",  # bpc-poseur
+    "bpc-poseur; python_version < '3.8'",
     "bpc-walrus; python_version < '3.8'",
     "pathlib2>=2.3.2; python_version == '3.4'",
 ]
