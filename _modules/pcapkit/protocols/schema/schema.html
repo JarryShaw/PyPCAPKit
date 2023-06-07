@@ -420,7 +420,7 @@
 
         <span class="c1"># NOTE: We iterate in reversed order to ensure that the type</span>
         <span class="c1"># annotations of the superclasses are considered first.</span>
-        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="nb">reversed</span><span class="p">(</span><span class="n">cls_</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="nb">reversed</span><span class="p">(</span><span class="n">cls_</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
             <span class="c1"># NOTE: We skip duplicated annotations to avoid duplicate</span>
             <span class="c1"># argument in function definition.</span>
             <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">args_</span><span class="p">:</span>
