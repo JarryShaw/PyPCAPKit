@@ -217,7 +217,7 @@ jobs:
           token: ${{ secrets.ANACONDA_TOKEN }} # Replace with the right name of your secret
 
       - name: Upload package to GitHub Release
-        if: ${{ matrix.os == 'ubuntu-latest' && matrix.python-version == '3.11' }}
+        if: ${{ matrix.os == 'ubuntu-latest' }}
         uses: ncipollo/release-action@v1.12.0
         with:
           allowUpdates: true
