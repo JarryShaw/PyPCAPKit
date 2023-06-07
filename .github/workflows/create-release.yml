@@ -102,6 +102,27 @@ jobs:
           ref: v${{ needs.version_check.outputs.PCAPKIT_VERSION }}
           fetch-depth: 0
 
+      - name: Reset Build Number
+        run: |
+          set -x
+
+          echo 0 > conda/build
+
+      - name: Commit Changes
+        run: |
+          set -x
+
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+
+          git add conda/build
+          git commit -m"Reset conda build number"
+
+      - name: Push Changes
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.PYPCAPKIT }}
+
       - name: Create Tag
         run: |
           set -x
@@ -110,7 +131,7 @@ jobs:
           git config --local user.name "github-actions[bot]"
           git tag "conda-${{ needs.version_check.outputs.PCAPKIT_VERSION }}+0" -m"Conda Build"
 
-      - name: Push Changes
+      - name: Push Tag
         uses: ad-m/github-push-action@master
         with:
           github_token: ${{ secrets.PYPCAPKIT }}
@@ -219,11 +240,10 @@ jobs:
 
       - name: Setup Conda Distribution
         run: |
-          export PCAPKIT_DEVMODE=1
-          export PCAPKIT_VERBOSE=1
+          set -x
 
-          echo 0 > conda/build
-          python util/conda-dist.py
+          mkdir -p conda/wheels
+          python -m pip download -r conda/requirements.txt -d conda/wheels
 
       - name: Conda environment creation and activation
         uses: conda-incubator/setup-miniconda@v2

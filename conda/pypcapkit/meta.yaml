@@ -7,16 +7,17 @@ package:
   version: "{{ version }}"
 
 source:
-  git_url: https://github.com/JarryShaw/PyPCAPKit.git
-  git_rev: "conda-{{ version }}+{{ build_number }}"
-  git_depth: 1 # (Defaults to -1/not shallow)
+  path: ../..
+  #git_url: https://github.com/JarryShaw/PyPCAPKit.git
+  #git_rev: "conda-{{ version }}+{{ build_number }}"
+  #git_depth: 1 # (Defaults to -1/not shallow)
 
 build:
   number: {{ build_number }}
   entry_points:
     - pcapkit-cli = pcapkit.__main__:main
     - pcapkit-vendor = pcapkit.vendor.__main__:main
-  script: "{{ PYTHON }} -m pip install . -vv"
+  #script: "{{ PYTHON }} -m pip install . -vv"
 
 requirements:
   build:

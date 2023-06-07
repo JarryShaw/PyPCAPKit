@@ -28,6 +28,7 @@ release
 /VERSION
 
 pcapkit/_extern
+conda/wheels/
 
 # Created by https://www.gitignore.io/api/macos,python,visualstudiocode
 

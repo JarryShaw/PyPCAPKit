@@ -1,9 +1,8 @@
 # -*- coding: utf-8 -*-
 
 import os
-import sys
+
 import pkg_resources
-import subprocess  # nosec B404
 
 req_file = os.path.join('conda', 'requirements.txt')
 
@@ -17,15 +16,3 @@ with open(req_file) as file:
 with open(req_file, 'w') as file:
     for key, value in sorted(data.items()):
         print(f'{key}=={value}', file=file)
-
-try:
-    import pcapkit
-    path = os.path.join(pcapkit.__path__[0], '_extern')
-except ImportError:
-    path = os.path.join('pcapkit', '_extern')
-os.makedirs(path, exist_ok=True)
-
-subprocess.check_call([  # nosec B603
-    sys.executable, '-m', 'pip', 'install',
-    '--target', path, '-r', req_file,
-])

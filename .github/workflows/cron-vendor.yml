@@ -7,41 +7,10 @@ on:
     branches: [main, ]
 
 jobs:
-  get-version:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-
-      - uses: actions/setup-python@v4
-        with:
-          python-version: '3.11'
-
-      - name: Install and Setup
-        run: |
-          set -x
-
-          python -m pip install -U pip setuptools wheel
-          python -m pip install -e .
-
-      - name: Get Version
-        id: get_version
-        run: |
-          set -x
-
-          echo "PCAPKIT_VERSION=$(python -c 'import pcapkit; print(pcapkit.__version__)')" >> $GITHUB_OUTPUT
-
-    outputs:
-      PCAPKIT_VERSION: ${{ steps.get_version.outputs.PCAPKIT_VERSION }}
-
   vendor-update:
     runs-on: macos-latest
-    needs: [ get-version ]
     steps:
       - uses: actions/checkout@v3
-        with:
-          ref: v${{ needs.get-version.outputs.PCAPKIT_VERSION }}
 
       - uses: actions/setup-python@v4
         with:

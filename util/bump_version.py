@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 
 import os
-import pkg_resources
 from typing import TYPE_CHECKING, cast
+
+import pkg_resources
 
 if TYPE_CHECKING:
     from packaging.version import Version
