@@ -179,7 +179,7 @@ jobs:
         if: ${{ matrix.os == 'macos-latest' }}
         env:
           PCAPKIT_VERSION: ${{ needs.conda-update.outputs.PCAPKIT_VERSION }}
-          PCAPKIT_BUILD: "0"
+          PCAPKIT_BUILD: ${{ needs.conda-update.outputs.PCAPKIT_BUILD }}
         with:
           meta_yaml_dir: conda/pypcapkit
           python-version: ${{ matrix.python-version }} # Values previously defined in `matrix`
@@ -193,7 +193,7 @@ jobs:
         if: ${{ matrix.os == 'ubuntu-latest' }}
         env:
           PCAPKIT_VERSION: ${{ needs.conda-update.outputs.PCAPKIT_VERSION }}
-          PCAPKIT_BUILD: "0"
+          PCAPKIT_BUILD: ${{ needs.conda-update.outputs.PCAPKIT_BUILD }}
         with:
           meta_yaml_dir: conda/pypcapkit
           python-version: ${{ matrix.python-version }} # Values previously defined in `matrix`
@@ -207,7 +207,7 @@ jobs:
         if: ${{ matrix.os == 'windows-latest' }}
         env:
           PCAPKIT_VERSION: ${{ needs.conda-update.outputs.PCAPKIT_VERSION }}
-          PCAPKIT_BUILD: "0"
+          PCAPKIT_BUILD: ${{ needs.conda-update.outputs.PCAPKIT_BUILD }}
         with:
           meta_yaml_dir: conda/pypcapkit
           python-version: ${{ matrix.python-version }} # Values previously defined in `matrix`
