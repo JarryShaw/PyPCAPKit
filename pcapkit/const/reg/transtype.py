@@ -476,6 +476,9 @@ class TransType(IntEnum):
     #: AGGFRAG encapsulation payload for ESP [:rfc:`9347`]
     AGGFRAG = 144
 
+    #: Network Service Header [RFC-ietf-spring-nsh-sr-14]
+    NSH = 145
+
     #: Use for experimentation and testing [:rfc:`3692`]
     Use_for_experimentation_and_testing_253 = 253
 
@@ -511,7 +514,7 @@ class TransType(IntEnum):
         """
         if not (isinstance(value, int) and 0 <= value <= 255):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))
-        if 145 <= value <= 252:
+        if 146 <= value <= 252:
             #: Unassigned [Internet Assigned Numbers Authority]
             extend_enum(cls, 'Unassigned_%d' % value, value)
             return cls(value)
