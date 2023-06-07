@@ -623,12 +623,12 @@ flow tracing (<a class="reference internal" href="../foundation/traceflow/tcp.ht
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>block</strong> (<a class="reference internal" href="../const/hip.html#pcapkit.const.hip.packet.Packet" title="pcapkit.const.hip.packet.Packet"><em>Packet</em></a>) – PCAP-NG block.</p></li>
-<li><p><strong>nanosecond</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a>) – Whether to use nanosecond precision.</p></li>
+<li><p><strong>block</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Union" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code></a>[<a class="reference internal" href="../protocols/misc/pcapng.html#pcapkit.protocols.data.misc.pcapng.EnhancedPacketBlock" title="pcapkit.protocols.data.misc.pcapng.EnhancedPacketBlock"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnhancedPacketBlock</span></code></a>, <a class="reference internal" href="../protocols/misc/pcapng.html#pcapkit.protocols.data.misc.pcapng.SimplePacketBlock" title="pcapkit.protocols.data.misc.pcapng.SimplePacketBlock"><code class="xref py py-class docutils literal notranslate"><span class="pre">SimplePacketBlock</span></code></a>, <a class="reference internal" href="../protocols/misc/pcapng.html#pcapkit.protocols.data.misc.pcapng.PacketBlock" title="pcapkit.protocols.data.misc.pcapng.PacketBlock"><code class="xref py py-class docutils literal notranslate"><span class="pre">PacketBlock</span></code></a>]) – PCAP-NG block.</p></li>
+<li><p><strong>nanosecond</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a>) – Whether to use nanosecond precision.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>Data_Frame</p>
+<dd class="field-even"><p><a class="reference internal" href="../protocols/misc/pcap.html#pcapkit.protocols.data.misc.pcap.frame.Frame" title="pcapkit.protocols.data.misc.pcap.frame.Frame"><code class="xref py py-class docutils literal notranslate"><span class="pre">Frame</span></code></a></p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>PCAP frame.</p>
