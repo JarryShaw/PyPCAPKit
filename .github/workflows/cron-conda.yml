@@ -100,11 +100,16 @@ jobs:
           echo "PCAPKIT_BUILD=$(cat conda/build)" >> $GITHUB_OUTPUT
 
       - name: Create Tag
-        if: steps.verify-changed-files.outputs.files_changed == 'true'
-        uses: laputansoft/github-tag-action@v4.6
+        run: |
+          set -x
+
+          git tag "conda-${{ steps.get_version.outputs.PCAPKIT_VERSION }}+${{ steps.get_version.outputs.PCAPKIT_BUILD }}" -m"Conda Build"
+
+      - name: Push Changes
+        uses: ad-m/github-push-action@master
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          tag: "conda-${{ steps.get_version.outputs.PCAPKIT_VERSION }}+${{ steps.get_version.outputs.PCAPKIT_BUILD }}"
+          tags: true
 
     outputs:
       CONDA_CHANGED: ${{ steps.verify-changed-files.outputs.files_changed }}
@@ -127,6 +132,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
         with:
+          ref: conda-${{ needs.conda-update.outputs.PCAPKIT_VERSION }}+${{ needs.conda-update.outputs.PCAPKIT_BUILD }}
           fetch-depth: 0
 
       - uses: actions/setup-python@v4
