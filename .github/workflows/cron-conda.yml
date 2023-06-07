@@ -9,6 +9,82 @@ on:
 jobs:
   conda-update:
     runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install and Setup
+        run: |
+          set -x
+
+          python -m pip install -U pip setuptools wheel
+          python -m pip install -e .[all]
+          python -m pip install pathlib2 typing_extensions
+
+      - name: Setup Conda Distribution
+        run: |
+          export PCAPKIT_DEVMODE=1
+          export PCAPKIT_VERBOSE=1
+
+          python util/conda-dist.py
+
+      - name: Verify Changed files
+        uses: tj-actions/verify-changed-files@v14
+        id: verify-changed-files
+
+      - name: Bump Version
+        if: steps.verify-changed-files.outputs.files_changed == 'true'
+        run: |
+          python util/conda-build.py
+
+      - name: Commit Changes
+        if: steps.verify-changed-files.outputs.files_changed == 'true'
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git commit -am"Bumped build to $(cat conda/build)
+
+          Updated conda distribution at $(date). The following files have been changed:
+            ${{ steps.verify-changed-files.outputs.changed_files }}"
+
+      - name: Push Changes
+        uses: ad-m/github-push-action@master
+        if: steps.verify-changed-files.outputs.files_changed == 'true'
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          branch: ${{ github.ref }}
+
+      - name: Get Version
+        if: steps.verify-changed-files.outputs.files_changed == 'true'
+        id: get_version
+        run: |
+          set -ex
+
+          echo "PCAPKIT_VERSION=$(python -c 'import pcapkit; print(pcapkit.__version__)')" >> $GITHUB_OUTPUT
+          echo "PCAPKIT_CONDA_LABEL=$(python -c 'import pcapkit, pkg_resources; print("dev" if pkg_resources.parse_version(pcapkit.__version__).is_prerelease else "main")')" >> $GITHUB_OUTPUT
+          echo "PCAPKIT_BUILD=$(cat conda/build)" >> $GITHUB_OUTPUT
+
+      - name: Create Tag
+        uses: rickstaa/action-create-tag@v1
+        if: steps.verify-changed-files.outputs.files_changed == 'true'
+        with:
+          tag: "conda-${{ steps.get_version.outputs.PCAPKIT_VERSION }}+${{ steps.get_version.outputs.PCAPKIT_BUILD }}"
+
+    outputs:
+      CONDA_CHANGED: ${{ steps.verify-changed-files.outputs.files_changed }}
+      PCAPKIT_VERSION: ${{ steps.get_version.outputs.PCAPKIT_VERSION }}
+      PCAPKIT_CONDA_LABEL: ${{ steps.get_version.outputs.PCAPKIT_CONDA_LABEL }}
+      PCAPKIT_BUILD: ${{ steps.get_version.outputs.PCAPKIT_BUILD }}
+
+  conda-dist:
+    runs-on: ubuntu-latest
+    needs: [ conda-update ]
+    if: needs.conda-update.outputs.CONDA_CHANGED == 'true'
     strategy:
       matrix:
         python-version:
@@ -41,54 +117,11 @@ jobs:
 
           python util/conda-dist.py
 
-      - name: Verify Changed files
-        uses: tj-actions/verify-changed-files@v14
-        id: verify-changed-files
-
-      - name: Bump Version
-        if: steps.verify-changed-files.outputs.files_changed == 'true'
-        run: |
-          python util/conda-build.py
-
-      - name: Commit Changes
-        if: steps.verify-changed-files.outputs.files_changed == 'true'
-        run: |
-          git config --local user.email "github-actions[bot]@users.noreply.github.com"
-          git config --local user.name "github-actions[bot]"
-          git commit -am"Bumped build to $(cat conda/build)')
-
-          Updated conda distribution at $(date). The following files have been changed:
-            ${{ steps.verify-changed-files.outputs.changed_files }}"
-
-      - name: Push Changes
-        uses: ad-m/github-push-action@master
-        if: steps.verify-changed-files.outputs.files_changed == 'true'
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          branch: ${{ github.ref }}
-
-      - name: Get Version
-        if: steps.verify-changed-files.outputs.files_changed == 'true'
-        id: get_version
-        run: |
-          set -ex
-
-          echo "PCAPKIT_VERSION=$(python -c 'import pcapkit; print(pcapkit.__version__)')" >> $GITHUB_OUTPUT
-          echo "PCAPKIT_CONDA_LABEL=$(python -c 'import pcapkit, pkg_resources; print("dev" if pkg_resources.parse_version(pcapkit.__version__).is_prerelease else "main")')" >> $GITHUB_OUTPUT
-          echo "PCAPKIT_BUILD=$(cat conda/build)" >> $GITHUB_OUTPUT
-
-      - name: Create Tag
-        uses: rickstaa/action-create-tag@v1
-        if: steps.verify-changed-files.outputs.files_changed == 'true'
-        with:
-          tag: "conda-${{ steps.get_version.outputs.PCAPKIT_VERSION }}+${{ steps.get_version.outputs.PCAPKIT_BUILD }}"
-
       - name: Conda environment creation and activation
-        if: steps.verify-changed-files.outputs.files_changed == 'true'
         uses: conda-incubator/setup-miniconda@v2
         env:
-          PCAPKIT_VERSION: ${{ steps.get_version.outputs.PCAPKIT_VERSION }}
-          PCAPKIT_BUILD: ${{ steps.get_version.outputs.PCAPKIT_BUILD }}
+          PCAPKIT_VERSION: ${{ needs.conda-update.outputs.PCAPKIT_VERSION }}
+          PCAPKIT_BUILD: ${{ needs.conda-update.outputs.PCAPKIT_BUILD }}
         with:
           python-version: ${{ matrix.python-version }}
           environment-file: conda/conda-build.yaml    # Path to the build conda environment
@@ -97,11 +130,10 @@ jobs:
           show-channel-urls: true
 
       - name: Build and upload the conda packages
-        if: steps.verify-changed-files.outputs.files_changed == 'true'
         uses: uibcdf/action-build-and-upload-conda-packages@v1.2.0
         env:
-          PCAPKIT_VERSION: ${{ steps.get_version.outputs.PCAPKIT_VERSION }}
-          PCAPKIT_BUILD: ${{ steps.get_version.outputs.PCAPKIT_BUILD }}
+          PCAPKIT_VERSION: ${{ needs.conda-update.outputs.PCAPKIT_VERSION }}
+          PCAPKIT_BUILD: ${{ needs.conda-update.outputs.PCAPKIT_BUILD }}
         with:
           meta_yaml_dir: conda/pypcapkit
           python-version: ${{ matrix.python-version }} # Values previously defined in `matrix`
@@ -111,11 +143,10 @@ jobs:
           token: ${{ secrets.ANACONDA_TOKEN }} # Replace with the right name of your secret
 
       - name: Upload package to GitHub Release
-        if: steps.verify-changed-files.outputs.files_changed == 'true'
         uses: ncipollo/release-action@v1.12.0
         with:
           allowUpdates: true
           artifacts: |
             /tmp/compilation-*/*.tar.bz2
-          tag: "v${{ steps.get_version.outputs.PCAPKIT_VERSION }}"
+          tag: "v${{ needs.conda-update.outputs.PCAPKIT_VERSION }}"
           token: "${{ secrets.GITHUB_TOKEN }}"
