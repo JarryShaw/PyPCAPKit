@@ -238,17 +238,32 @@ jobs:
           python-version: ${{ matrix.python-version }}
 
       - name: Install and Setup
+        if: ${{ matrix.os != 'windows-latest' }}
         run: |
-          #set -x
+          set -x
 
           python -m pip install -U pip setuptools wheel
           python -m pip install -e .[all]
           python -m pip install pathlib2 typing_extensions
 
-      - name: Setup Conda Distribution
+      - name: Install and Setup (Windows)
+        if: ${{ matrix.os == 'windows-latest' }}
         run: |
-          #set -x
+          python -m pip install -U pip setuptools wheel
+          python -m pip install -e .[all]
+          python -m pip install pathlib2 typing_extensions
 
+      - name: Setup Conda Distribution
+        if: ${{ matrix.os != 'windows-latest' }}
+        run: |
+          set -x
+
+          mkdir -p conda/wheels
+          python -m pip download -r conda/requirements.txt -d conda/wheels
+
+      - name: Setup Conda Distribution (Windows)
+        if: ${{ matrix.os == 'windows-latest' }}
+        run: |
           mkdir -p conda/wheels
           python -m pip download -r conda/requirements.txt -d conda/wheels
 
@@ -277,10 +292,21 @@ jobs:
           token: ${{ secrets.ANACONDA_TOKEN }} # Replace with the right name of your secret
 
       - name: Upload package to GitHub Release
+        if: ${{ matrix.os != 'windows-latest' }}
         uses: ncipollo/release-action@v1.12.0
         with:
           allowUpdates: true
           artifacts: |
             /tmp/compilation-*/**/*.tar.bz2
+          tag: "v${{ needs.version_check.outputs.PCAPKIT_VERSION }}"
+          token: "${{ secrets.GITHUB_TOKEN }}"
+
+      - name: Upload package to GitHub Release (Windows)
+        if: ${{ matrix.os == 'windows-latest' }}
+        uses: ncipollo/release-action@v1.12.0
+        with:
+          allowUpdates: true
+          artifacts: |
+            /c/Users/*/AppData/Local/Temp/compilation-*/**/*.tar.bz2
           tag: "v${{ needs.version_check.outputs.PCAPKIT_VERSION }}"
           token: "${{ secrets.GITHUB_TOKEN }}"
