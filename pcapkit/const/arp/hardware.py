@@ -18,6 +18,8 @@ __all__ = ['Hardware']
 class Hardware(IntEnum):
     """[Hardware] Hardware Types [:rfc:`826`][:rfc:`5494`]"""
 
+
+
     #: Reserved [:rfc:`5494`]
     Reserved_0 = 0
 
