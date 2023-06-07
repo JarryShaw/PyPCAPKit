@@ -182,8 +182,8 @@ jobs:
 
       - name: Setup Conda Distribution
         run: |
-          PCAPKIT_DEVMODE=1
-          PCAPKIT_VERBOSE=1
+          export PCAPKIT_DEVMODE=1
+          export PCAPKIT_VERBOSE=1
 
           python util/conda-dist.py
 
