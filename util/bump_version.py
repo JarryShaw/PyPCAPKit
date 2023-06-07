@@ -58,3 +58,6 @@ with open(path, 'r', encoding='utf-8') as in_file:
 with open (path, 'w', encoding='utf-8') as out_file:
     out_file.writelines(contents)
     out_file.write('\n')
+
+with open(os.path.join('conda', 'build')) as build:
+    build.write('0')

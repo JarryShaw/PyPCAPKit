@@ -1,0 +1,30 @@
+dictdumper==0.8.4.post2
+
+chardet==5.1.0
+aenum==3.1.12
+tbtrim==0.3.1
+
+emoji==2.2.0
+dpkt==1.9.8
+scapy==2.5.0
+pyshark==0.6
+  appdirs==1.4.4
+  lxml==4.9.2
+  packaging==23.1
+  termcolor==2.3.0
+
+requests==2.30.0
+  certifi==2023.5.7
+  charset-normalizer==3.1.0
+  idna==3.4
+  urllib3==2.0.2
+PySocks==1.7.1
+
+beautifulsoup4==4.12.2
+  soupsieve==2.4.1
+html5lib==1.1
+  six==1.16.0
+  webencodings==0.5.1
+
+pathlib2==2.3.7.post1
+typing_extensions==4.6.3

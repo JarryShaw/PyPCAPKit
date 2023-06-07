@@ -19,3 +19,9 @@ indent_style = tab
 
 [*.rst]
 indent_size = 3
+
+[conda/build]
+insert_final_newline = false
+
+[requirements.txt]
+indent_size = 2

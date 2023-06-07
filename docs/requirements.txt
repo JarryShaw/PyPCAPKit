@@ -8,3 +8,4 @@ sphinx-copybutton
 
 # auxiliary
 typing-extensions
+mypy-extensions

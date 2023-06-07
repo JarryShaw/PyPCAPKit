@@ -27,6 +27,8 @@ release
 
 /VERSION
 
+pcapkit/_extern
+
 # Created by https://www.gitignore.io/api/macos,python,visualstudiocode
 
 ### macOS ###
