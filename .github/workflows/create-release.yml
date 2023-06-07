@@ -197,7 +197,7 @@ jobs:
         uses: rickstaa/action-create-tag@v1
         with:
           tag: "conda-${{ needs.version_check.outputs.PCAPKIT_VERSION }}+0"
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+          github_token: ${{ secrets.PYPCAPKIT }}
 
       - name: Setup Conda Distribution
         run: |
