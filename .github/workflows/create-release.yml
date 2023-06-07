@@ -175,11 +175,6 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Create Tag
-        uses: rickstaa/action-create-tag@v1
-        with:
-          tag: "conda-${{ needs.version_check.outputs.PCAPKIT_VERSION }}+0"
-
       - uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
@@ -192,11 +187,24 @@ jobs:
           python -m pip install -e .[all]
           python -m pip install pathlib2 typing_extensions
 
+      - name: Checkout at Version
+        run: |
+          set -x
+
+          git checkout v$(python -c 'import pcapkit; print(pcapkit.__version__)')
+
+      - name: Create Tag
+        uses: rickstaa/action-create-tag@v1
+        with:
+          tag: "conda-${{ needs.version_check.outputs.PCAPKIT_VERSION }}+0"
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Setup Conda Distribution
         run: |
           export PCAPKIT_DEVMODE=1
           export PCAPKIT_VERBOSE=1
 
+          echo 0 > conda/build
           python util/conda-dist.py
 
       - name: Conda environment creation and activation
