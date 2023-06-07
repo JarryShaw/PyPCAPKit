@@ -131,7 +131,7 @@ jobs:
 
       - name: Install and Setup
         run: |
-          set -x
+          #set -x
 
           python -m pip install -U pip setuptools wheel
           python -m pip install -e .[all]
@@ -139,7 +139,7 @@ jobs:
 
       - name: Setup Conda Distribution
         run: |
-          set -x
+          #set -x
 
           mkdir -p conda/wheels
           python -m pip download -r conda/requirements.txt -d conda/wheels
