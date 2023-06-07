@@ -279,14 +279,44 @@ jobs:
           auto-activate-base: false
           show-channel-urls: true
 
-      - name: Build and upload the conda packages
+      - name: Build and upload the conda packages (macOS)
         uses: uibcdf/action-build-and-upload-conda-packages@v1.2.0
+        if: ${{ matrix.os == 'macos-latest' }}
         env:
           PCAPKIT_VERSION: ${{ needs.version_check.outputs.PCAPKIT_VERSION }}
           PCAPKIT_BUILD: "0"
         with:
           meta_yaml_dir: conda/pypcapkit
           python-version: ${{ matrix.python-version }} # Values previously defined in `matrix`
+          platform_osx-64: true
+          user: jarryshaw
+          label: ${{ needs.version_check.outputs.PCAPKIT_CONDA_LABEL }}
+          token: ${{ secrets.ANACONDA_TOKEN }} # Replace with the right name of your secret
+
+      - name: Build and upload the conda packages (Ubuntu)
+        uses: uibcdf/action-build-and-upload-conda-packages@v1.2.0
+        if: ${{ matrix.os == 'ubuntu-latest' }}
+        env:
+          PCAPKIT_VERSION: ${{ needs.version_check.outputs.PCAPKIT_VERSION }}
+          PCAPKIT_BUILD: "0"
+        with:
+          meta_yaml_dir: conda/pypcapkit
+          python-version: ${{ matrix.python-version }} # Values previously defined in `matrix`
+          platform_linux-64: true
+          user: jarryshaw
+          label: ${{ needs.version_check.outputs.PCAPKIT_CONDA_LABEL }}
+          token: ${{ secrets.ANACONDA_TOKEN }} # Replace with the right name of your secret
+
+      - name: Build and upload the conda packages (Windows)
+        uses: uibcdf/action-build-and-upload-conda-packages@v1.2.0
+        if: ${{ matrix.os == 'windows-latest' }}
+        env:
+          PCAPKIT_VERSION: ${{ needs.version_check.outputs.PCAPKIT_VERSION }}
+          PCAPKIT_BUILD: "0"
+        with:
+          meta_yaml_dir: conda/pypcapkit
+          python-version: ${{ matrix.python-version }} # Values previously defined in `matrix`
+          platform_win-64: true
           user: jarryshaw
           label: ${{ needs.version_check.outputs.PCAPKIT_CONDA_LABEL }}
           token: ${{ secrets.ANACONDA_TOKEN }} # Replace with the right name of your secret
