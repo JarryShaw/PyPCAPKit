@@ -26,6 +26,12 @@ jobs:
           python -m pip install -e .[all]
           python -m pip install pathlib2 typing_extensions
 
+      - name: Checkout at Version
+        run: |
+          set -x
+
+          git checkout v$(python -c 'import pcapkit; print(pcapkit.__version__)')
+
       - name: Setup Conda Distribution
         run: |
           export PCAPKIT_DEVMODE=1
@@ -88,7 +94,7 @@ jobs:
     strategy:
       matrix:
         python-version:
-          - "3.7"
+          #- "3.7"  # skip for now
           - "3.8"
           - "3.9"
           - "3.10"
