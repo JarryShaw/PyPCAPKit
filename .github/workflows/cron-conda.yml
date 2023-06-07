@@ -3,8 +3,8 @@ name: "Conda Update"
 on:
   schedule:
     - cron: '0 10 * * 6' # everyday at 10am
-  push:
-    branches: [main, ]
+  # push:
+  #   branches: [main, ]
 
 jobs:
   conda-update:
