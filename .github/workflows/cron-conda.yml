@@ -88,14 +88,14 @@ jobs:
           token: ${{ secrets.PYPCAPKIT }}
           fetch-depth: 0
 
-      - run: git checkout HEAD^
-
       - name: Create Tag
         run: |
           set -x
 
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
+
+          git pull
           git tag "conda-${{ needs.conda-update.outputs.PCAPKIT_VERSION }}+${{ needs.conda-update.outputs.PCAPKIT_BUILD }}" -m"Conda Build"
 
       - name: Push Tag
