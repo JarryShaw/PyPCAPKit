@@ -5,5 +5,5 @@ schedule: every week
 
 requirements:
   - docs/requirements.txt
-  - conda/requirements.txt
+  - conda/requirements.txt:
       update: False

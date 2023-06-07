@@ -164,24 +164,34 @@ jobs:
     if: ${{ startsWith(github.ref_name, 'v') || needs.version_check.outputs.PCAPKIT_TAG_EXISTS == 'false' }}
     strategy:
       matrix:
-        python-version: [ "3.8", "3.9", "3.10", "3.11" ] # ignore 3.6/7 for now
+        python-version:
+          - "3.7"
+          - "3.8"
+          - "3.9"
+          - "3.10"
+          - "3.11"
     steps:
       - uses: actions/checkout@v3
         with:
           fetch-depth: 0
 
-      - name: Get Build Version
-        id: get_version
-        run: |
-          set -x
+      - name: Create Tag
+        uses: rickstaa/action-create-tag@v1
+        with:
+          tag: "conda-${{ needs.version_check.outputs.PCAPKIT_VERSION }}+0"
 
-          echo "PCAPKIT_BUILD=$(cat conda/build)" >> $GITHUB_OUTPUT
+      - name: Setup Conda Distribution
+        run: |
+          PCAPKIT_DEVMODE=1
+          PCAPKIT_VERBOSE=1
+
+          python util/conda-dist.py
 
       - name: Conda environment creation and activation
         uses: conda-incubator/setup-miniconda@v2
         env:
           PCAPKIT_VERSION: ${{ needs.version_check.outputs.PCAPKIT_VERSION }}
-          PCAPKIT_BUILD: ${{ steps.get_version.outputs.PCAPKIT_BUILD }}
+          PCAPKIT_BUILD: "0"
         with:
           python-version: ${{ matrix.python-version }}
           environment-file: conda/conda-build.yaml    # Path to the build conda environment
@@ -193,7 +203,7 @@ jobs:
         uses: uibcdf/action-build-and-upload-conda-packages@v1.2.0
         env:
           PCAPKIT_VERSION: ${{ needs.version_check.outputs.PCAPKIT_VERSION }}
-          PCAPKIT_BUILD: ${{ steps.get_version.outputs.PCAPKIT_BUILD }}
+          PCAPKIT_BUILD: "0"
         with:
           meta_yaml_dir: conda/pypcapkit
           python-version: ${{ matrix.python-version }} # Values previously defined in `matrix`
