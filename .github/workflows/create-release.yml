@@ -220,7 +220,7 @@ jobs:
         os:
           - macos-latest
           - ubuntu-latest
-          - windows-latest
+          # - windows-latest  # skip for now
         python-version:
           # - "3.7"  # skip for now
           - "3.8"
