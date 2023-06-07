@@ -114,7 +114,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.PYPCAPKIT }}
           ref: v${{ needs.conda-update.outputs.PCAPKIT_VERSION }}
           fetch-depth: 0
 
@@ -129,7 +129,7 @@ jobs:
       - name: Push Changes
         uses: ad-m/github-push-action@master
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+          github_token: ${{ secrets.PYPCAPKIT }}
           tags: true
 
   conda-dist:
