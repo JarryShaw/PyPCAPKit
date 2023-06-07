@@ -61,6 +61,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
         with:
+          ref: v${{ needs.version_check.outputs.PCAPKIT_VERSION }}
           fetch-depth: 0
 
       - name: Changelog
@@ -88,6 +89,11 @@ jobs:
           tag: "v${{ needs.version_check.outputs.PCAPKIT_VERSION }}"
           token: "${{ secrets.GITHUB_TOKEN }}"
 
+      - name: Create Tag
+        uses: rickstaa/action-create-tag@v1
+        with:
+          tag: "conda-${{ needs.version_check.outputs.PCAPKIT_VERSION }}+0"
+
   pypi:
     name: PyPI distribution for Python ${{ matrix.python-version }}
     runs-on: ubuntu-latest
@@ -108,6 +114,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
         with:
+          ref: v${{ needs.version_check.outputs.PCAPKIT_VERSION }}
           fetch-depth: 0
 
       - uses: actions/setup-python@v4
@@ -173,6 +180,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
         with:
+          ref: v${{ needs.version_check.outputs.PCAPKIT_VERSION }}
           fetch-depth: 0
 
       - uses: actions/setup-python@v4
@@ -186,18 +194,6 @@ jobs:
           python -m pip install -U pip setuptools wheel
           python -m pip install -e .[all]
           python -m pip install pathlib2 typing_extensions
-
-      - name: Checkout at Version
-        run: |
-          set -x
-
-          git checkout v$(python -c 'import pcapkit; print(pcapkit.__version__)')
-
-      - name: Create Tag
-        uses: rickstaa/action-create-tag@v1
-        with:
-          tag: "conda-${{ needs.version_check.outputs.PCAPKIT_VERSION }}+0"
-          github_token: ${{ secrets.PYPCAPKIT }}
 
       - name: Setup Conda Distribution
         run: |
