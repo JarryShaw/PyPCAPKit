@@ -819,6 +819,9 @@
     <span class="c1">#: AGGFRAG encapsulation payload for ESP [:rfc:`9347`]</span>
     <span class="n">AGGFRAG</span> <span class="o">=</span> <span class="mi">144</span>
 
+    <span class="c1">#: Network Service Header [RFC-ietf-spring-nsh-sr-14]</span>
+    <span class="n">NSH</span> <span class="o">=</span> <span class="mi">145</span>
+
     <span class="c1">#: Use for experimentation and testing [:rfc:`3692`]</span>
     <span class="n">Use_for_experimentation_and_testing_253</span> <span class="o">=</span> <span class="mi">253</span>
 
@@ -854,7 +857,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="ow">and</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mi">255</span><span class="p">):</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%r</span><span class="s1"> is not a valid </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span><span class="p">))</span>
-        <span class="k">if</span> <span class="mi">145</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mi">252</span><span class="p">:</span>
+        <span class="k">if</span> <span class="mi">146</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mi">252</span><span class="p">:</span>
             <span class="c1">#: Unassigned [Internet Assigned Numbers Authority]</span>
             <span class="n">extend_enum</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s1">&#39;Unassigned_</span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">value</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
             <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
