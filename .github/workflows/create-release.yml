@@ -116,7 +116,7 @@ jobs:
           git config --local user.name "github-actions[bot]"
 
           git add conda/build
-          git commit -m"Reset conda build number"
+          git commit -m"Reset conda build number" || true
 
       - name: Push Changes
         uses: ad-m/github-push-action@master
