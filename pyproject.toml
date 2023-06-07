@@ -56,6 +56,11 @@ dependencies = [
     "aenum",              # for const types
     "tbtrim>=0.2.1",      # for refined exceptions
 
+    # PyBPC
+    "bpc-f2format; python_version < '3.6'",
+    "bpc-poseur; python_version < '3.8'",
+    "bpc-walrus; python_version < '3.8'",
+
     # version compatibility
     "pathlib2>=2.3.2; python_version == '3.4'",
     "typing-extensions; python_version < '3.8'",

@@ -21,6 +21,11 @@ try:
 except:
     raise ImportError("setuptools is required to install PyPCAPKit!")
 
+try:
+    from wheel.bdist_wheel import bdist_wheel
+except ImportError:
+    bdist_wheel = None
+
 # get logger
 logger = logging.getLogger('pcapkit.setup')
 formatter = logging.Formatter(fmt='[%(levelname)s] %(asctime)s - %(message)s',
@@ -47,8 +52,8 @@ def refactor(path: 'str') -> 'None':
                 [sys.executable, '-m', 'f2format', '--no-archive', path]
             )
         except subprocess.CalledProcessError as error:
-            logger.error('Failed to perform assignment expression backport compiling.'
-                         'Please consider manually install `bpc-f2format` and try again.', file=sys.stderr)
+            logger.error('Failed to perform assignment expression backport compiling. '
+                         'Please consider manually install `bpc-f2format` and try again.')
             sys.exit(error.returncode)
 
     if sys.version_info < (3, 8):
@@ -57,8 +62,8 @@ def refactor(path: 'str') -> 'None':
                 [sys.executable, '-m', 'walrus', '--no-archive', path]
             )
         except subprocess.CalledProcessError as error:
-            logger.error('Failed to perform assignment expression backport compiling.'
-                         'Please consider manually install `bpc-walrus` and try again.', file=sys.stderr)
+            logger.error('Failed to perform assignment expression backport compiling. '
+                         'Please consider manually install `bpc-walrus` and try again.')
             sys.exit(error.returncode)
 
         try:
@@ -67,7 +72,7 @@ def refactor(path: 'str') -> 'None':
             )
         except subprocess.CalledProcessError as error:
             logger.error('Failed to perform assignment expression backport compiling. '
-                         'Please consider manually install `bpc-poseur` and try again.', file=sys.stderr)
+                         'Please consider manually install `bpc-poseur` and try again.')
             sys.exit(error.returncode)
 
 
@@ -115,12 +120,26 @@ class pcapkit_install(install):
         refactor(os.path.join(self.install_lib, 'pcapkit'))  # type: ignore[arg-type]
 
 
+if bdist_wheel is not None:
+    class pcapkit_bdist_wheel(bdist_wheel):
+        """Modified bdist_wheel to run PyBPC conversion."""
+
+        def run(self) -> 'None':
+            super(pcapkit_bdist_wheel, self).run()
+            logger.info('running bdist_wheel')
+
+            # PyBPC compatibility enforcement
+            refactor(os.path.join(self.dist_dir, 'pcapkit'))
+else:
+    pcapkit_bdist_wheel = None  # type: ignore[misc,assignment]
+
 setup(
     cmdclass={
         'sdist': pcapkit_sdist,
         'build_py': pcapkit_build_py,
         'develop': pcapkit_develop,
         'install': pcapkit_install,
+        'bdist_wheel': pcapkit_bdist_wheel,
     },
     long_description=get_long_description(),
     long_description_content_type='text/x-rst',
