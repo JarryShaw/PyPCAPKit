@@ -99,11 +99,31 @@ jobs:
           echo "PCAPKIT_CONDA_LABEL=$(python -c 'import pcapkit, pkg_resources; print("dev" if pkg_resources.parse_version(pcapkit.__version__).is_prerelease else "main")')" >> $GITHUB_OUTPUT
           echo "PCAPKIT_BUILD=$(cat conda/build)" >> $GITHUB_OUTPUT
 
+    outputs:
+      CONDA_CHANGED: ${{ steps.verify-changed-files.outputs.files_changed }}
+      PCAPKIT_VERSION: ${{ steps.get_version.outputs.PCAPKIT_VERSION }}
+      PCAPKIT_CONDA_LABEL: ${{ steps.get_version.outputs.PCAPKIT_CONDA_LABEL }}
+      PCAPKIT_BUILD: ${{ steps.get_version.outputs.PCAPKIT_BUILD }}
+
+  conda-tag:
+    name: Conda Tag
+    runs-on: ubuntu-latest
+    needs: [ conda-update ]
+    if: needs.conda-update.outputs.CONDA_CHANGED == 'true'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          ref: v${{ needs.conda-update.outputs.PCAPKIT_VERSION }}
+          fetch-depth: 0
+
       - name: Create Tag
         run: |
           set -x
 
-          git tag "conda-${{ steps.get_version.outputs.PCAPKIT_VERSION }}+${{ steps.get_version.outputs.PCAPKIT_BUILD }}" -m"Conda Build"
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git tag "conda-${{ needs.conda-update.outputs.PCAPKIT_VERSION }}+0" -m"Conda Build"
 
       - name: Push Changes
         uses: ad-m/github-push-action@master
@@ -111,15 +131,9 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           tags: true
 
-    outputs:
-      CONDA_CHANGED: ${{ steps.verify-changed-files.outputs.files_changed }}
-      PCAPKIT_VERSION: ${{ steps.get_version.outputs.PCAPKIT_VERSION }}
-      PCAPKIT_CONDA_LABEL: ${{ steps.get_version.outputs.PCAPKIT_CONDA_LABEL }}
-      PCAPKIT_BUILD: ${{ steps.get_version.outputs.PCAPKIT_BUILD }}
-
   conda-dist:
     runs-on: ubuntu-latest
-    needs: [ conda-update ]
+    needs: [ conda-tag, conda-update ]
     if: needs.conda-update.outputs.CONDA_CHANGED == 'true'
     strategy:
       matrix:
