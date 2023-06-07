@@ -77,7 +77,7 @@ def schema_final(cls: 'ST', *, _finalised: 'bool' = True) -> 'ST':
 
         # NOTE: We iterate in reversed order to ensure that the type
         # annotations of the superclasses are considered first.
-        for key in reversed(cls_.__dict__):
+        for key in reversed(cls_.__dict__.keys()):
             # NOTE: We skip duplicated annotations to avoid duplicate
             # argument in function definition.
             if key in args_:
