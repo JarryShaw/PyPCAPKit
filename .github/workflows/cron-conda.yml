@@ -217,21 +217,11 @@ jobs:
           token: ${{ secrets.ANACONDA_TOKEN }} # Replace with the right name of your secret
 
       - name: Upload package to GitHub Release
-        if: ${{ matrix.os != 'windows-latest' }}
+        if: ${{ matrix.os == 'ubuntu-latest' && matrix.python-version == '3.11' }}
         uses: ncipollo/release-action@v1.12.0
         with:
           allowUpdates: true
           artifacts: |
             /tmp/compilation-*/**/*.tar.bz2
-          tag: "v${{ needs.conda-update.outputs.PCAPKIT_VERSION }}"
-          token: "${{ secrets.GITHUB_TOKEN }}"
-
-      - name: Upload package to GitHub Release (Windows)
-        if: ${{ matrix.os == 'windows-latest' }}
-        uses: ncipollo/release-action@v1.12.0
-        with:
-          allowUpdates: true
-          artifacts: |
-            /c/Users/*/AppData/Local/Temp/compilation-*/**/*.tar.bz2
           tag: "v${{ needs.conda-update.outputs.PCAPKIT_VERSION }}"
           token: "${{ secrets.GITHUB_TOKEN }}"
