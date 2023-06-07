@@ -70,6 +70,12 @@ jobs:
         env:
           REPO: ${{ github.repository }}
 
+      - name: Create Tag
+        uses: laputansoft/github-tag-action@v4.6
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          tag: "conda-${{ needs.version_check.outputs.PCAPKIT_VERSION }}+0"
+
       - name: Create Release
         id: create_release
         uses: ncipollo/release-action@v1.12.0
@@ -88,11 +94,6 @@ jobs:
           prerelease: ${{ needs.version_check.outputs.PCAPKIT_PRERELEASE }}
           tag: "v${{ needs.version_check.outputs.PCAPKIT_VERSION }}"
           token: "${{ secrets.GITHUB_TOKEN }}"
-
-      - name: Create Tag
-        uses: rickstaa/action-create-tag@v1
-        with:
-          tag: "conda-${{ needs.version_check.outputs.PCAPKIT_VERSION }}+0"
 
   pypi:
     name: PyPI distribution for Python ${{ matrix.python-version }}

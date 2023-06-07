@@ -100,9 +100,10 @@ jobs:
           echo "PCAPKIT_BUILD=$(cat conda/build)" >> $GITHUB_OUTPUT
 
       - name: Create Tag
-        uses: rickstaa/action-create-tag@v1
         if: steps.verify-changed-files.outputs.files_changed == 'true'
+        uses: laputansoft/github-tag-action@v4.6
         with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
           tag: "conda-${{ steps.get_version.outputs.PCAPKIT_VERSION }}+${{ steps.get_version.outputs.PCAPKIT_BUILD }}"
 
     outputs:
