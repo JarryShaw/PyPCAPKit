@@ -208,12 +208,16 @@ jobs:
           token: "${{ secrets.GITHUB_TOKEN }}"
 
   conda:
-    name: Conda deployment of package with Python ${{ matrix.python-version }}
-    runs-on: ubuntu-latest
+    name: Conda deployment of package for platform ${{ matrix.os }} with Python ${{ matrix.python-version }}
+    runs-on: ${{ matrix.os }}
     needs: [ tag, github, version_check ]
     if: ${{ startsWith(github.ref_name, 'v') || needs.version_check.outputs.PCAPKIT_TAG_EXISTS == 'false' }}
     strategy:
       matrix:
+        os:
+          - macos-latest
+          - ubuntu-latest
+          - windows-latest
         python-version:
           # - "3.7"  # skip for now
           - "3.8"
@@ -265,7 +269,6 @@ jobs:
         with:
           meta_yaml_dir: conda/pypcapkit
           python-version: ${{ matrix.python-version }} # Values previously defined in `matrix`
-          platform_all: true
           user: jarryshaw
           label: ${{ needs.version_check.outputs.PCAPKIT_CONDA_LABEL }}
           token: ${{ secrets.ANACONDA_TOKEN }} # Replace with the right name of your secret
@@ -275,6 +278,6 @@ jobs:
         with:
           allowUpdates: true
           artifacts: |
-            /tmp/compilation-*/*.tar.bz2
+            /tmp/compilation-*/**/*.tar.bz2
           tag: "v${{ needs.version_check.outputs.PCAPKIT_VERSION }}"
           token: "${{ secrets.GITHUB_TOKEN }}"
