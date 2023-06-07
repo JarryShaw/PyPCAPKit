@@ -1,8 +1,5 @@
 aenum==3.1.12
 appdirs==1.4.4
-
-
-
 beautifulsoup4==4.12.2
 certifi==2023.5.7
 chardet==5.1.0
