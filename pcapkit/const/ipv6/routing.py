@@ -33,12 +33,12 @@ class Routing(IntEnum):
     #: Segment Routing Header (SRH) [:rfc:`8754`]
     Segment_Routing_Header = 4
 
-    #: CRH-16 (TEMPORARY - registered 2021-06-07, extension registered 2022-04-25,
-    #: expires 2023-06-07) [draft-bonica-6man-comp-rtg-hdr-26]
+    #: CRH-16 (TEMPORARY - registered 2021-06-07, extension registered 2023-06-08,
+    #: expires 2024-06-07) [draft-bonica-6man-comp-rtg-hdr-30]
     CRH_16 = 5
 
-    #: CRH-32 (TEMPORARY - registered 2021-06-07, extension registered 2022-04-25,
-    #: expires 2023-06-07) [draft-bonica-6man-comp-rtg-hdr-26]
+    #: CRH-32 (TEMPORARY - registered 2021-06-07, extension registered 2023-06-08,
+    #: expires 2024-06-07) [draft-bonica-6man-comp-rtg-hdr-30]
     CRH_32 = 6
 
     #: RFC3692-style Experiment 1 [:rfc:`4727`]
