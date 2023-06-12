@@ -106,7 +106,7 @@ jobs:
         run: |
           set -x
 
-          echo 0 > conda/build
+          printf 0 > conda/build
 
       - name: Commit Changes
         run: |
