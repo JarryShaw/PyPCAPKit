@@ -32,6 +32,7 @@ jobs:
           export PCAPKIT_CI_MODE=1
 
           pcapkit-vendor
+          isort -l100 -ppcapkit pcapkit/const/*/*.py
 
       - name: Verify Changed files
         uses: tj-actions/verify-changed-files@v14
