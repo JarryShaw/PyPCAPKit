@@ -139,15 +139,15 @@ class Option(IntEnum):
     #: Reserved (known unauthorized use without proper IANA assignment) [**]
     Reserved_78 = 78
 
-    #: Accurate ECN Order 0 (AccECN0) (TEMPORARY - registered 2022-08-03, expires
-    #: 2023-08-03) [draft-ietf-tcpm-accurate-ecn-20]
+    #: Accurate ECN Order 0 (AccECN0) (TEMPORARY - registered 2022-08-03, extension
+    #: registered 2023-06-13, expires 2024-08-03) [draft-ietf-tcpm-accurate-ecn-20]
     Accurate_ECN_Order_0 = 172
 
     #: Reserved
     Reserved_173 = 173
 
-    #: Accurate ECN Order 1 (AccECN1) (TEMPORARY - registered 2022-08-03, expires
-    #: 2023-08-03) [draft-ietf-tcpm-accurate-ecn-20]
+    #: Accurate ECN Order 1 (AccECN1) (TEMPORARY - registered 2022-08-03, extension
+    #: registered 2023-06-13, expires 2024-08-03) [draft-ietf-tcpm-accurate-ecn-20]
     Accurate_ECN_Order_1 = 174
 
     #: RFC3692-style Experiment 1 (also improperly used for shipping
