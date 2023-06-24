@@ -1,4 +1,4 @@
-aenum==3.1.12
+aenum==3.1.14
 appdirs==1.4.4
 beautifulsoup4==4.12.2
 certifi==2023.5.7
