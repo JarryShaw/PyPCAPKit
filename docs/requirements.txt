@@ -4,7 +4,7 @@ Sphinx==7.0.1
 sphinx-autodoc-typehints==1.23.4
 furo==2023.5.20
 sphinxext-opengraph==0.8.2
-sphinx-copybutton
+sphinx-copybutton==0.5.2
 
 # auxiliary
 typing-extensions
