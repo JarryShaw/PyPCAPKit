@@ -69,6 +69,7 @@ __all__ = [
     'Packet',
     'UnknownMessage', 'BindingRefreshRequestMessage', 'HomeTestInitMessage', 'CareofTestInitMessage',
     'HomeTestMessage', 'CareofTestMessage', 'BindingUpdateMessage', 'BindingAcknowledgementMessage',
+    'BindingErrorMessage',
 
     'Option',
     'UnassignedOption', 'PadOption', 'BindRefreshAdviceOption', 'AlternateCareofAddressOption',
@@ -81,7 +82,6 @@ __all__ = [
 
     'CGAExtension',
     'UnknownExtension', 'MultiPrefixExtension',
-
 ]
 
 if TYPE_CHECKING:
@@ -172,6 +172,8 @@ def mh_data_selector(pkt: 'dict[str, Any]') -> 'Field':
         return SchemaField(length=length, schema=BindingUpdateMessage)
     if type == Enum_Packet.Binding_Acknowledgement:
         return SchemaField(length=length, schema=BindingAcknowledgementMessage)
+    if type == Enum_Packet.Binding_Error:
+        return SchemaField(length=length, schema=BindingErrorMessage)
     return SchemaField(length=length, schema=UnknownMessage)
 
 
@@ -727,3 +729,19 @@ class BindingErrorMessage(Packet):
 
     #: Status.
     status: 'Enum_BindingError' = EnumField(length=1, namespace=Enum_BindingError)
+    #: Reserved.
+    reserved: 'bytes' = PaddingField(length=1)
+    #: Home address.
+    home: 'IPv6Address' = IPv6AddressField()
+    #: Mobility options.
+    options: 'list[Option]' = OptionField(
+        length=lambda pkt: pkt['__length__'],
+        base_schema=Option,
+        type_name='type',
+        registry=mh_opt_registry(),  # type: ignore[arg-type]
+        eool=None,
+    )
+
+    if TYPE_CHECKING:
+        def __init__(self, status: 'Enum_BindingError', home: 'IPv6Address | str | int | bytes',
+                     options: 'list[Option | bytes]') -> 'None': ...

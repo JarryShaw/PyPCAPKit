@@ -3,7 +3,6 @@
 
 from typing import TYPE_CHECKING
 
-from pcapkit.const.mh import status_code
 from pcapkit.corekit.infoclass import info_final
 from pcapkit.protocols.data.data import Data
 
@@ -68,12 +67,14 @@ __all__ = [
     'MH',
     'UnknownMessage', 'BindingRefreshRequestMessage', 'HomeTestInitMessage', 'CareofTestInitMessage',
     'HomeTestMessage', 'CareofTestMessage', 'BindingUpdateMessage', 'BindingAcknowledgementMessage',
+    'BindingErrorMessage',
 
     'Option',
     'UnassignedOption', 'PadOption', 'BindRefreshAdviceOption', 'AlternateCareofAddressOption',
     'NonceIndicesOption', 'BindingAuthorizationDataOption', 'MobileNetworkPrefixOption',
     'LinkLayerAddressOption', 'MNIDOption', 'AuthOption', 'MesgIDOption', 'CGAParametersRequestOption',
     'CGAParametersOption', 'SignatureOption', 'PermanentHomeKeygenTokenOption', 'CareofTestInitOption',
+    'CareofTestOption',
 
     'CGAParameter',
 
@@ -229,6 +230,25 @@ class BindingAcknowledgementMessage(MH):
         def __init__(self, next: 'TransType', length: 'int', type: 'Packet', chksum: 'bytes',
                      status: 'Enum_StatusCode', key_mngt: 'bool', seq: 'int', lifetime: 'timedelta',
                      options: 'OrderedMultiDict[Enum_Option, Option]') -> 'None': ...
+
+
+@info_final
+class BindingErrorMessage(MH):
+    """Data model for MH Binding Error (BE) message type."""
+
+    #: Status.
+    status: 'Enum_BindingError'
+    #: Home address.
+    home: 'IPv6Address'
+    #: Mobility options.
+    options: 'OrderedMultiDict[Enum_Option, Option]'
+
+    if TYPE_CHECKING:
+        def __init__(self, next: 'TransType', length: 'int', type: 'Packet', chksum: 'bytes',
+                     status: 'Enum_BindingError', home: 'IPv6Address',
+                     options: 'OrderedMultiDict[Enum_Option, Option]') -> 'None': ...
+
+
 
 
 

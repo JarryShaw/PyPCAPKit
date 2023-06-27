@@ -134,6 +134,18 @@ __all__ = [
 
     # Mobility Header
     'MH',
+    'MH_UnknownMessage', 'MH_BindingRefreshRequestMessage', 'MH_HomeTestInitMessage', 'MH_CareofTestInitMessage',
+    'MH_HomeTestMessage', 'MH_CareofTestMessage', 'MH_BindingUpdateMessage', 'MH_BindingAcknowledgementMessage',
+    'MH_BindingErrorMessage',
+    'MH_Option',
+    'MH_UnassignedOption', 'MH_PadOption', 'MH_BindRefreshAdviceOption', 'MH_AlternateCareofAddressOption',
+    'MH_NonceIndicesOption', 'MH_BindingAuthorizationDataOption', 'MH_MobileNetworkPrefixOption',
+    'MH_LinkLayerAddressOption', 'MH_MNIDOption', 'MH_AuthOption', 'MH_MesgIDOption', 'MH_CGAParametersRequestOption',
+    'MH_CGAParametersOption', 'MH_SignatureOption', 'MH_PermanentHomeKeygenTokenOption', 'MH_CareofTestInitOption',
+    'MH_CareofTestOption',
+    'MH_CGAParameter',
+    'MH_CGAExtension',
+    'MH_UnknownExtension', 'MH_MultiPrefixExtension',
 
     # Transmission Control Protocol
     'TCP',

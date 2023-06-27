@@ -25,7 +25,6 @@ import collections
 import datetime
 import ipaddress
 import math
-from tokenize import Name
 from typing import TYPE_CHECKING, cast, overload
 
 from pcapkit.const.mh.access_type import AccessType as Enum_AccessType
@@ -82,6 +81,7 @@ from pcapkit.protocols.data.internet.mh import \
     BindingAcknowledgementMessage as Data_BindingAcknowledgementMessage
 from pcapkit.protocols.data.internet.mh import \
     BindingAuthorizationDataOption as Data_BindingAuthorizationDataOption
+from pcapkit.protocols.data.internet.mh import BindingErrorMessage as Data_BindingErrorMessage
 from pcapkit.protocols.data.internet.mh import \
     BindingRefreshRequestMessage as Data_BindingRefreshRequestMessage
 from pcapkit.protocols.data.internet.mh import BindingUpdateMessage as Data_BindingUpdateMessage
@@ -121,6 +121,7 @@ from pcapkit.protocols.schema.internet.mh import \
     BindingAcknowledgementMessage as Schema_BindingAcknowledgementMessage
 from pcapkit.protocols.schema.internet.mh import \
     BindingAuthorizationDataOption as Schema_BindingAuthorizationDataOption
+from pcapkit.protocols.schema.internet.mh import BindingErrorMessage as Schema_BindingErrorMessage
 from pcapkit.protocols.schema.internet.mh import \
     BindingRefreshRequestMessage as Schema_BindingRefreshRequestMessage
 from pcapkit.protocols.schema.internet.mh import BindingUpdateMessage as Schema_BindingUpdateMessage
@@ -154,7 +155,7 @@ from pcapkit.protocols.schema.internet.mh import UnassignedOption as Schema_Unas
 from pcapkit.protocols.schema.internet.mh import UnknownExtension as Schema_UnknownExtension
 from pcapkit.protocols.schema.internet.mh import UnknownMessage as Schema_UnknownMessage
 from pcapkit.utilities.exceptions import ProtocolError, UnsupportedCall
-from pcapkit.utilities.warnings import ProtocolWarning, warn
+from pcapkit.utilities.warnings import ProtocolWarning, RegistryWarning, warn
 
 if TYPE_CHECKING:
     from datetime import datetime as dt_type
@@ -198,7 +199,121 @@ NTPTimestamp.__doc__ = """NTP timestamp format, c.f., :rfc:`1305`."""
 
 class MH(Internet[Data_MH, Schema_MH],
          schema=Schema_MH, data=Data_MH):
-    """This class implements Mobility Header."""
+    """This class implements Mobility Header.
+
+    This class currently supports parsing og the following MH message types,
+    which are resgitered in the :attr:`self.__message__ <pcapkit.protocols.internet.mh.MH.__message__`
+    attribute:
+
+    .. list-table::
+       :header-rows: 1
+
+       * - Message Type
+         - Message Parser
+         - Message Constructor
+       * - :attr:`~pcapkit.const.mh.packet.Packet.Binding_Refresh_Request`
+         - :meth:`~pcapkit.protocols.internet.mh.MH._read_msg_brr`
+         - :meth:`~pcapkit.protocols.internet.mh.MH._make_msg_brr`
+       * - :attr:`~pcapkit.const.mh.packet.Packet.Home_Test_Init`
+         - :meth:`~pcapkit.protocols.internet.mh.MH._read_msg_hoti`
+         - :meth:`~pcapkit.protocols.internet.mh.MH._make_msg_hoti`
+       * - :attr:`~pcapkit.const.mh.packet.Packet.Care_of_Test_Init`
+         - :meth:`~pcapkit.protocols.internet.mh.MH._read_msg_coti`
+         - :meth:`~pcapkit.protocols.internet.mh.MH._make_msg_coti`
+       * - :attr:`~pcapkit.const.mh.packet.Packet.Home_Test`
+         - :meth:`~pcapkit.protocols.internet.mh.MH._read_msg_hot`
+         - :meth:`~pcapkit.protocols.internet.mh.MH._make_msg_hot`
+       * - :attr:`~pcapkit.const.mh.packet.Packet.Care_of_Test`
+         - :meth:`~pcapkit.protocols.internet.mh.MH._read_msg_cot`
+         - :meth:`~pcapkit.protocols.internet.mh.MH._make_msg_cot`
+       * - :attr:`~pcapkit.const.mh.packet.Packet.Binding_Update`
+         - :meth:`~pcapkit.protocols.internet.mh.MH._read_msg_bu`
+         - :meth:`~pcapkit.protocols.internet.mh.MH._make_msg_bu`
+       * - :attr:`~pcapkit.const.mh.packet.Packet.Binding_Acknowledgement`
+         - :meth:`~pcapkit.protocols.internet.mh.MH._read_msg_ba`
+         - :meth:`~pcapkit.protocols.internet.mh.MH._make_msg_ba`
+       * - :attr:`~pcapkit.const.mh.packet.Packet.Binding_Error`
+         - :meth:`~pcapkit.protocols.internet.mh.MH._read_msg_be`
+         - :meth:`~pcapkit.protocols.internet.mh.MH._make_msg_be`
+
+    This class currently supports parsing the following MH options, which are
+    registered in the :attr:`self.__option__ <pcapkit.protocols.internet.mh.MH.__option__`
+    attribute:
+
+    .. list-table::
+       :header-rows: 1
+
+       * - Option Code
+         - Option Parser
+         - Option Constructor
+
+       * - :attr:`~pcapkit.const.mh.option.Option.Pad1`
+         - :meth:`~pcapkit.protocols.internet.mh.MH._read_opt_pad`
+         - :meth:`~pcapkit.protocols.internet.mh.MH._make_opt_pad`
+       * - :attr:`~pcapkit.const.mh.option.Option.PadN`
+         - :meth:`~pcapkit.protocols.internet.mh.MH._read_opt_pad`
+         - :meth:`~pcapkit.protocols.internet.mh.MH._make_opt_pad`
+       * - :attr:`~pcapkit.const.mh.option.Option.Binding_Refresh_Advice`
+         - :meth:`~pcapkit.protocols.internet.mh.MH._read_opt_bra`
+         - :meth:`~pcapkit.protocols.internet.mh.MH._make_opt_bra`
+       * - :attr:`~pcapkit.const.mh.option.Option.Alternate_Care_of_Address`
+         - :meth:`~pcapkit.protocols.internet.mh.MH._read_opt_aca`
+         - :meth:`~pcapkit.protocols.internet.mh.MH._make_opt_aca`
+       * - :attr:`~pcapkit.const.mh.option.Option.Nonce_Indices`
+         - :meth:`~pcapkit.protocols.internet.mh.MH._read_opt_ni`
+         - :meth:`~pcapkit.protocols.internet.mh.MH._make_opt_ni`
+       * - :attr:`~pcapkit.const.mh.option.Option.Authorization_Data`
+         - :meth:`~pcapkit.protocols.internet.mh.MH._read_opt_bad`
+         - :meth:`~pcapkit.protocols.internet.mh.MH._make_opt_bad`
+       * - :attr:`~pcapkit.const.mh.option.Option.Mobile_Network_Prefix_Option`
+         - :meth:`~pcapkit.protocols.internet.mh.MH._read_opt_mnp`
+         - :meth:`~pcapkit.protocols.internet.mh.MH._make_opt_mnp`
+       * - :attr:`~pcapkit.const.mh.option.Option.Mobility_Header_Link_Layer_Address_option`
+         - :meth:`~pcapkit.protocols.internet.mh.MH._read_opt_lla`
+         - :meth:`~pcapkit.protocols.internet.mh.MH._make_opt_lla`
+       * - :attr:`~pcapkit.const.mh.option.Option.MN_ID_OPTION_TYPE`
+         - :meth:`~pcapkit.protocols.internet.mh.MH._read_opt_mn_id`
+         - :meth:`~pcapkit.protocols.internet.mh.MH._make_opt_mn_id`
+       * - :attr:`~pcapkit.const.mh.option.Option.AUTH_OPTION_TYPE`
+         - :meth:`~pcapkit.protocols.internet.mh.MH._read_opt_auth`
+         - :meth:`~pcapkit.protocols.internet.mh.MH._make_opt_auth`
+       * - :attr:`~pcapkit.const.mh.option.Option.MESG_ID_OPTION_TYPE`
+         - :meth:`~pcapkit.protocols.internet.mh.MH._read_opt_mesg_id`
+         - :meth:`~pcapkit.protocols.internet.mh.MH._make_opt_mesg_id`
+       * - :attr:`~pcapkit.const.mh.option.Option.CGA_Parameters_Request`
+         - :meth:`~pcapkit.protocols.internet.mh.MH._read_opt_cga_pr`
+         - :meth:`~pcapkit.protocols.internet.mh.MH._make_opt_cga_pr`
+       * - :attr:`~pcapkit.const.mh.option.Option.CGA_Parameters`
+         - :meth:`~pcapkit.protocols.internet.mh.MH._read_opt_cga_param`
+         - :meth:`~pcapkit.protocols.internet.mh.MH._make_opt_cga_param`
+       * - :attr:`~pcapkit.const.mh.option.Option.Signature`
+         - :meth:`~pcapkit.protocols.internet.mh.MH._read_opt_signature`
+         - :meth:`~pcapkit.protocols.internet.mh.MH._make_opt_signature`
+       * - :attr:`~pcapkit.const.mh.option.Option.Permanent_Home_Keygen_Token`
+         - :meth:`~pcapkit.protocols.internet.mh.MH._read_opt_phkt`
+         - :meth:`~pcapkit.protocols.internet.mh.MH._make_opt_phkt`
+       * - :attr:`~pcapkit.const.mh.option.Option.Care_of_Test_Init`
+         - :meth:`~pcapkit.protocols.internet.mh.MH._read_opt_ct_init`
+         - :meth:`~pcapkit.protocols.internet.mh.MH._make_opt_ct_init`
+       * - :attr:`~pcapkit.const.mh.option.Option.Care_of_Test`
+         - :meth:`~pcapkit.protocols.internet.mh.MH._read_opt_ct`
+         - :meth:`~pcapkit.protocols.internet.mh.MH._make_opt_ct`
+
+    This class currently supports parsing of the following MH CGA extensions,
+    which are registered in the :attr:`self.__extension__ <pcapkit.protocols.internet.mh.MH.__extension__>`
+    attribute:
+
+    .. list-table::
+       :header-rows: 1
+
+       * - CGA Extension Code
+         - CGA Extension Parser
+         - CGA Extension Constructor
+       * - :attr:`~pcapkit.const.mh.extension.cga_extension.CGAExtension.Multi_Prefix`
+         - :meth:`~pcapkit.protocols.internet.mh.MH._read_ext_multiprefix`
+         - :meth:`~pcapkit.protocols.internet.mh.MH._make_ext_multiprefix`
+
+    """
 
     ##########################################################################
     # Defaults.
@@ -219,6 +334,7 @@ class MH(Internet[Data_MH, Schema_MH],
             Enum_Packet.Care_of_Test: 'cot',
             Enum_Packet.Binding_Update: 'bu',
             Enum_Packet.Binding_Acknowledgement: 'ba',
+            Enum_Packet.Binding_Error: 'be',
         },
     )  # type: DefaultDict[Enum_Packet | int, str | tuple[PacketParser, PacketConstructor]]
 
@@ -429,6 +545,45 @@ class MH(Internet[Data_MH, Schema_MH],
             data=data_val,
             payload=payload,
         )
+
+    @classmethod
+    def register_message(cls, code: 'Enum_Packet', meth: 'str | tuple[PacketParser, PacketConstructor]') -> 'None':
+        """Register a message parser.
+
+        Args:
+            code: MH message type code.
+            meth: Method name or callable to parse and/or construct the message.
+
+        """
+        if code in cls.__message__:
+            warn(f'message type {code} already registered, overwriting', RegistryWarning)
+        cls.__message__[code] = meth
+
+    @classmethod
+    def register_option(cls, code: 'Enum_Option', meth: 'str | tuple[OptionParser, OptionConstructor]') -> 'None':
+        """Register an option parser.
+
+        Args:
+            code: MH option code.
+            meth: Method name or callable to parse and/or construct the option.
+
+        """
+        if code in cls.__option__:
+            warn(f'option {code} already registered, overwriting', RegistryWarning)
+        cls.__option__[code] = meth
+
+    @classmethod
+    def register_extension(cls, code: 'Enum_CGAExtension', meth: 'str | tuple[ExtensionParser, ExtensionConstructor]') -> 'None':
+        """Register a CGA extension parser.
+
+        Args:
+            code: CGA extension code.
+            meth: Method name or callable to parse and/or construct the extension.
+
+        """
+        if code in cls.__extension__:
+            warn(f'extension {code} already registered, overwriting', RegistryWarning)
+        cls.__extension__[code] = meth
 
     ##########################################################################
     # Data models.
@@ -812,10 +967,51 @@ class MH(Internet[Data_MH, Schema_MH],
         )
         return data
 
+    def _read_msg_be(self, schema: 'Schema_BindingErrorMessage', *,
+                     header: 'Schema_MH') -> 'Data_BindingErrorMessage':
+        """Read MH binding error (BE) message type.
 
+        Structure of MH Binding Error Message [:rfc:`6275`]:
 
+        .. code-block:: text
 
+                                           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+                                           |     Status    |   Reserved    |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |                                                               |
+           +                                                               +
+           |                                                               |
+           +                          Home Address                         +
+           |                                                               |
+           +                                                               +
+           |                                                               |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           .                                                               .
+           .                        Mobility Options                       .
+           .                                                               .
+           |                                                               |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
+        Args:
+            schema: Parsed message type schema.
+            header: Parsed MH header schema.
+
+        Returns:
+            Parsed message type data.
+
+        """
+        data = Data_BindingErrorMessage(
+            next=header.next,
+            length=(header.length + 1) * 8,
+            type=header.type,
+            chksum=header.chksum,
+            status=schema.status,
+            home=schema.home,
+            options=self._read_mh_options(schema.options),
+        )
+        return data
+
+    # TODO: Implement other message types.
 
     def _read_mh_options(self, options_schema: 'list[Schema_Option]') -> 'Option':
         """Read MH options.
@@ -1474,10 +1670,7 @@ class MH(Internet[Data_MH, Schema_MH],
         )
         return data
 
-
-
-
-
+    # TODO: Implement other options.
 
     def _read_cga_extensions(self, extensions_schema: 'list[Schema_CGAExtension]') -> 'Extension':
         """Read CGA extensions.
@@ -1589,7 +1782,7 @@ class MH(Internet[Data_MH, Schema_MH],
         )
         return data
 
-
+    # TODO: Implement other CGA extensions.
 
     def _make_msg_unknown(self, message: 'Optional[Data_UnknownMessage]', *,
                           data: 'bytes' = b'',
@@ -1768,7 +1961,7 @@ class MH(Internet[Data_MH, Schema_MH],
                      lifetime: 'int | timedelta' = 4,  # reasonable default value
                      options: 'Optional[Option | list[Schema_Option | tuple[Enum_Option, dict[str, Any]] | bytes]]' = None,
                      **kwargs: 'Any') -> 'Schema_BindingUpdateMessage':
-        """Make MH care-of test (CoT) message type.
+        """Make MH binding update (BU) message type.
 
         Args:
             message: Message data model.
@@ -1819,7 +2012,7 @@ class MH(Internet[Data_MH, Schema_MH],
                      lifetime: 'int | timedelta' = 4,  # reasonable default value
                      options: 'Optional[Option | list[Schema_Option | tuple[Enum_Option, dict[str, Any]] | bytes]]' = None,
                      **kwargs: 'Any') -> 'Schema_BindingAcknowledgementMessage':
-        """Make MH care-of test (CoT) message type.
+        """Make MH binding acknowledge (BA) message type.
 
         Args:
             message: Message data model.
@@ -1859,11 +2052,46 @@ class MH(Internet[Data_MH, Schema_MH],
             options=self._make_mh_options(options),
         )
 
+    def _make_msg_be(self, message: 'Optional[Data_BindingErrorMessage]', *,
+                     status: 'Enum_StatusCode | StdlibEnum | AenumEnum | str | int' = Enum_StatusCode.Binding_Update_accepted_Proxy_Binding_Update_accepted,
+                     status_default: 'Optional[int]' = None,
+                     status_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
+                     status_reversed: 'bool' = False,
+                     home: 'IPv6Address | int | str | bytes' = '::',
+                     options: 'Optional[Option | list[Schema_Option | tuple[Enum_Option, dict[str, Any]] | bytes]]' = None,
+                     **kwargs: 'Any') -> 'Schema_BindingErrorMessage':
+        """Make MH binding error (BE) message type.
 
+        Args:
+            message: Message data model.
+            status: Status code.
+            status_default: Default status code.
+            status_namespace: Status code namespace.
+            status_reversed: Reverse status code namespace.
+            home: Home address.
+            options: Mobility options.
+            **kwargs: Arbitrary keyword arguments.
 
+        Returns:
+            Constructed message type.
 
+        """
+        if message is not None:
+            status_val = message.status
+            home = message.home
+            options = message.options
+        else:
+            status_val = self._make_index(status, status_default, namespace=status_namespace,  # type: ignore[assignment]
+                                          reversed=status_reversed, pack=False)
+            options = options or []
 
+        return Schema_BindingErrorMessage(
+            status=status_val,
+            home=home,
+            options=self._make_mh_options(options),
+        )
 
+    # TODO: Implement other message types.
 
     def _make_mh_options(self, options: 'Option | list[Schema_Option | tuple[Enum_Option, dict[str, Any]] | bytes]') -> 'list[Schema_Option | bytes]':
         """Make options for MH.
@@ -2411,10 +2639,7 @@ class MH(Internet[Data_MH, Schema_MH],
             token=token,
         )
 
-
-
-
-
+    # TODO: Implement other options.
 
     def _make_cga_extensions(self, extensions: 'Extension | list[Schema_CGAExtension | tuple[Enum_CGAExtension, dict[str, Any]] | bytes]') -> 'tuple[list[Schema_CGAExtension | bytes], int]':
         """Make CGA extensions for MH.
@@ -2527,3 +2752,5 @@ class MH(Internet[Data_MH, Schema_MH],
             },
             prefixes=prefixes,
         )
+
+    # TODO: Implement other CGA extensions.
