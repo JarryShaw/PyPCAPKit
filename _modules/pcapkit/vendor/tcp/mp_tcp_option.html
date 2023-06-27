@@ -352,28 +352,13 @@
 
 <span class="sd">&quot;&quot;&quot;</span>
 
-<span class="kn">import</span> <span class="nn">collections</span>
+<span class="kn">import</span> <span class="nn">csv</span>
+<span class="kn">import</span> <span class="nn">re</span>
 <span class="kn">import</span> <span class="nn">sys</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
 
 <span class="kn">from</span> <span class="nn">pcapkit.vendor.default</span> <span class="kn">import</span> <span class="n">Vendor</span>
 
-<span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-    <span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">Counter</span>
-
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;MPTCPOption&#39;</span><span class="p">]</span>
-
-<span class="c1">#: Multipath TCP options.</span>
-<span class="n">DATA</span> <span class="o">=</span> <span class="p">{</span>   <span class="c1"># [RFC 6824]</span>
-    <span class="mi">0</span><span class="p">:</span> <span class="s1">&#39;MP_CAPABLE&#39;</span><span class="p">,</span>
-    <span class="mi">1</span><span class="p">:</span> <span class="s1">&#39;MP_JOIN&#39;</span><span class="p">,</span>
-    <span class="mi">2</span><span class="p">:</span> <span class="s1">&#39;DSS&#39;</span><span class="p">,</span>
-    <span class="mi">3</span><span class="p">:</span> <span class="s1">&#39;ADD_ADDR&#39;</span><span class="p">,</span>
-    <span class="mi">4</span><span class="p">:</span> <span class="s1">&#39;REMOVE_ADDR&#39;</span><span class="p">,</span>
-    <span class="mi">5</span><span class="p">:</span> <span class="s1">&#39;MP_PRIO&#39;</span><span class="p">,</span>
-    <span class="mi">6</span><span class="p">:</span> <span class="s1">&#39;MP_FAIL&#39;</span><span class="p">,</span>
-    <span class="mi">7</span><span class="p">:</span> <span class="s1">&#39;MP_FASTCLOSE&#39;</span><span class="p">,</span>
-<span class="p">}</span>  <span class="c1"># type: dict[int, str]</span>
 
 
 <div class="viewcode-block" id="MPTCPOption"><a class="viewcode-back" href="../../../../pcapkit/vendor/tcp.html#pcapkit.vendor.tcp.mp_tcp_option.MPTCPOption">[docs]</a><span class="k">class</span> <span class="nc">MPTCPOption</span><span class="p">(</span><span class="n">Vendor</span><span class="p">):</span>
@@ -381,29 +366,10 @@
 
     <span class="c1">#: Value limit checker.</span>
     <span class="n">FLAG</span> <span class="o">=</span> <span class="s1">&#39;isinstance(value, int) and 0 &lt;= value &lt;= 255&#39;</span>
+    <span class="c1">#: Link to registry.</span>
+    <span class="n">LINK</span> <span class="o">=</span> <span class="s1">&#39;https://www.iana.org/assignments/tcp-parameters/mptcp-option-subtypes.csv&#39;</span>
 
-    <span class="k">def</span> <span class="nf">request</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;dict[int, str]&#39;</span><span class="p">:</span>  <span class="c1"># type: ignore[override] # pylint: disable=arguments-differ</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Fetch registry data.</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            Multipath TCP options, i.e. :data:`~pcapkit.vendor.tcp.mp_tcp_option.DATA`.</span>
-
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="n">DATA</span>
-
-    <span class="k">def</span> <span class="nf">count</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">&#39;dict[int, str]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Counter[str]&#39;</span><span class="p">:</span>  <span class="c1"># type: ignore[override]</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Count field records.</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            data: Registry data.</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            Field recordings.</span>
-
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="n">collections</span><span class="o">.</span><span class="n">Counter</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">safe_name</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">values</span><span class="p">()))</span>
-
-    <span class="k">def</span> <span class="nf">process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">&#39;dict[int, str]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;tuple[list[str], list[str]]&#39;</span><span class="p">:</span>  <span class="c1"># type: ignore[override]</span>
+    <span class="k">def</span> <span class="nf">process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">&#39;list[str]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;tuple[list[str], list[str]]&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Process CSV data.</span>
 
 <span class="sd">        Args:</span>
@@ -413,13 +379,46 @@
 <span class="sd">            Enumeration fields and missing fields.</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">reader</span> <span class="o">=</span> <span class="n">csv</span><span class="o">.</span><span class="n">reader</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+        <span class="nb">next</span><span class="p">(</span><span class="n">reader</span><span class="p">)</span>  <span class="c1"># header</span>
+
         <span class="n">enum</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: list[str]</span>
-        <span class="n">miss</span> <span class="o">=</span> <span class="p">[</span>
-            <span class="s2">&quot;return extend_enum(cls, &#39;Unassigned_</span><span class="si">%d</span><span class="s2">&#39; % value, value)&quot;</span><span class="p">,</span>
-        <span class="p">]</span>
-        <span class="k">for</span> <span class="n">code</span><span class="p">,</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-            <span class="n">renm</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">code</span><span class="p">)</span>  <span class="c1"># type: ignore[arg-type]</span>
-            <span class="n">enum</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">renm</span><span class="si">}</span><span class="s2"> = </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">ljust</span><span class="p">(</span><span class="mi">76</span><span class="p">))</span>
+        <span class="n">miss</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: list[str]</span>
+        <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">reader</span><span class="p">:</span>
+            <span class="n">dscp</span> <span class="o">=</span> <span class="n">item</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+            <span class="n">rfcs</span> <span class="o">=</span> <span class="n">item</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
+
+            <span class="n">temp</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: list[str]</span>
+            <span class="k">for</span> <span class="n">rfc</span> <span class="ow">in</span> <span class="nb">filter</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;\[|\]&#39;</span><span class="p">,</span> <span class="n">rfcs</span><span class="p">)):</span>
+                <span class="k">if</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;\d+&#39;</span><span class="p">,</span> <span class="n">rfc</span><span class="p">):</span>
+                    <span class="k">continue</span>
+                <span class="k">if</span> <span class="s1">&#39;RFC&#39;</span> <span class="ow">in</span> <span class="n">rfc</span> <span class="ow">and</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;\d+&#39;</span><span class="p">,</span> <span class="n">rfc</span><span class="p">[</span><span class="mi">3</span><span class="p">:]):</span>
+                    <span class="c1"># temp.append(f&#39;[{rfc[:3]} {rfc[3:]}]&#39;)</span>
+                    <span class="n">temp</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;[:rfc:`</span><span class="si">{</span><span class="n">rfc</span><span class="p">[</span><span class="mi">3</span><span class="p">:]</span><span class="si">}</span><span class="s1">`]&#39;</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">temp</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;[</span><span class="si">{</span><span class="n">rfc</span><span class="si">}</span><span class="s1">]&#39;</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">,</span> <span class="s1">&#39; &#39;</span><span class="p">))</span>
+            <span class="n">tmp1</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot; </span><span class="si">{</span><span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">temp</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">if</span> <span class="n">rfcs</span> <span class="k">else</span> <span class="s1">&#39;&#39;</span>
+            <span class="n">desc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">wrap_comment</span><span class="p">(</span><span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;\r*\n&#39;</span><span class="p">,</span> <span class="s1">&#39; &#39;</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">dscp</span><span class="si">}{</span><span class="n">tmp1</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">MULTILINE</span><span class="p">))</span>
+
+            <span class="n">name</span> <span class="o">=</span> <span class="n">item</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">code</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">item</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="nb">int</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">base</span><span class="o">=</span><span class="mi">16</span><span class="p">)</span>
+                <span class="n">renm</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">name</span> <span class="ow">or</span> <span class="s1">&#39;Unassigned&#39;</span><span class="p">,</span> <span class="n">code</span><span class="p">,</span> <span class="n">original</span><span class="o">=</span><span class="n">dscp</span><span class="p">)</span>
+
+                <span class="n">pres</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">renm</span><span class="si">}</span><span class="s2"> = </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="n">sufs</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;#: </span><span class="si">{</span><span class="n">desc</span><span class="si">}</span><span class="s1">&#39;</span>
+
+                <span class="c1"># if len(pres) &gt; 74:</span>
+                <span class="c1">#     sufs = f&quot;\n{&#39; &#39;*80}{sufs}&quot;</span>
+
+                <span class="c1"># enum.append(f&#39;{pres.ljust(76)}{sufs}&#39;)</span>
+                <span class="n">enum</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">sufs</span><span class="si">}</span><span class="se">\n</span><span class="s1">    </span><span class="si">{</span><span class="n">pres</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+                <span class="n">start</span><span class="p">,</span> <span class="n">stop</span> <span class="o">=</span> <span class="n">item</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;-&#39;</span><span class="p">)</span>
+
+                <span class="n">miss</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;if </span><span class="si">{</span><span class="n">start</span><span class="si">}</span><span class="s1"> &lt;= value &lt;= </span><span class="si">{</span><span class="n">stop</span><span class="si">}</span><span class="s1">:&#39;</span><span class="p">)</span>
+                <span class="n">miss</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;    #: </span><span class="si">{</span><span class="n">desc</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+                <span class="n">miss</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;    return extend_enum(cls, &#39;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">_%d&#39; % value, value)&quot;</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">enum</span><span class="p">,</span> <span class="n">miss</span></div>
 
 

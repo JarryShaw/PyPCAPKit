@@ -361,21 +361,36 @@
 <div class="viewcode-block" id="MPTCPOption"><a class="viewcode-back" href="../../../../pcapkit/const/tcp.html#pcapkit.const.tcp.mp_tcp_option.MPTCPOption">[docs]</a><span class="k">class</span> <span class="nc">MPTCPOption</span><span class="p">(</span><span class="n">IntEnum</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;[MPTCPOption] Multipath TCP options [:rfc:`6824`]&quot;&quot;&quot;</span>
 
-    <span class="n">MP_CAPABLE</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="c1">#: Multipath Capable [:rfc:`8684, Section 3.1`]</span>
+    <span class="n">MP_CAPABLE</span> <span class="o">=</span> <span class="mh">0x0</span>
 
-    <span class="n">MP_JOIN</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="c1">#: Join Connection [:rfc:`8684, Section 3.2`]</span>
+    <span class="n">MP_JOIN</span> <span class="o">=</span> <span class="mh">0x1</span>
 
-    <span class="n">DSS</span> <span class="o">=</span> <span class="mi">2</span>
+    <span class="c1">#: Data Sequence Signal (Data ACK and Data Sequence Mapping) [:rfc:`8684,</span>
+    <span class="c1">#: Section 3.3`]</span>
+    <span class="n">DSS</span> <span class="o">=</span> <span class="mh">0x2</span>
 
-    <span class="n">ADD_ADDR</span> <span class="o">=</span> <span class="mi">3</span>
+    <span class="c1">#: Add Address [:rfc:`8684, Section 3.4.1`]</span>
+    <span class="n">ADD_ADDR</span> <span class="o">=</span> <span class="mh">0x3</span>
 
-    <span class="n">REMOVE_ADDR</span> <span class="o">=</span> <span class="mi">4</span>
+    <span class="c1">#: Remove Address [:rfc:`8684, Section 3.4.2`]</span>
+    <span class="n">REMOVE_ADDR</span> <span class="o">=</span> <span class="mh">0x4</span>
 
-    <span class="n">MP_PRIO</span> <span class="o">=</span> <span class="mi">5</span>
+    <span class="c1">#: Change Subflow Priority [:rfc:`8684, Section 3.3.8`]</span>
+    <span class="n">MP_PRIO</span> <span class="o">=</span> <span class="mh">0x5</span>
 
-    <span class="n">MP_FAIL</span> <span class="o">=</span> <span class="mi">6</span>
+    <span class="c1">#: Fallback [:rfc:`8684, Section 3.7`]</span>
+    <span class="n">MP_FAIL</span> <span class="o">=</span> <span class="mh">0x6</span>
 
-    <span class="n">MP_FASTCLOSE</span> <span class="o">=</span> <span class="mi">7</span>
+    <span class="c1">#: Fast Close [:rfc:`8684, Section 3.5`]</span>
+    <span class="n">MP_FASTCLOSE</span> <span class="o">=</span> <span class="mh">0x7</span>
+
+    <span class="c1">#: Subflow Reset [:rfc:`8684, Section 3.6`]</span>
+    <span class="n">MP_TCPRST</span> <span class="o">=</span> <span class="mh">0x8</span>
+
+    <span class="c1">#: [:rfc:`8684`]</span>
+    <span class="n">Reserved_for_Private_Use</span> <span class="o">=</span> <span class="mh">0xf</span>
 
     <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="n">key</span><span class="p">:</span> <span class="s1">&#39;int | str&#39;</span><span class="p">,</span> <span class="n">default</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;MPTCPOption&#39;</span><span class="p">:</span>
@@ -403,7 +418,10 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="ow">and</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mi">255</span><span class="p">):</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%r</span><span class="s1"> is not a valid </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span><span class="p">))</span>
-        <span class="k">return</span> <span class="n">extend_enum</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s1">&#39;Unassigned_</span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">value</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span></div></div>
+        <span class="k">if</span> <span class="mh">0x9</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mh">0xe</span><span class="p">:</span>
+            <span class="c1">#:</span>
+            <span class="k">return</span> <span class="n">extend_enum</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s1">&#39;Unassigned_</span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">value</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_missing_</span><span class="p">(</span><span class="n">value</span><span class="p">)</span></div></div>
 </pre></div>
         </article>
       </div>
