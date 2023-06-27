@@ -9,28 +9,13 @@ which is automatically generating :class:`pcapkit.const.tcp.mp_tcp_option.MPTCPO
 
 """
 
-import collections
+import csv
+import re
 import sys
-from typing import TYPE_CHECKING
 
 from pcapkit.vendor.default import Vendor
 
-if TYPE_CHECKING:
-    from collections import Counter
-
 __all__ = ['MPTCPOption']
-
-#: Multipath TCP options.
-DATA = {   # [RFC 6824]
-    0: 'MP_CAPABLE',
-    1: 'MP_JOIN',
-    2: 'DSS',
-    3: 'ADD_ADDR',
-    4: 'REMOVE_ADDR',
-    5: 'MP_PRIO',
-    6: 'MP_FAIL',
-    7: 'MP_FASTCLOSE',
-}  # type: dict[int, str]
 
 
 class MPTCPOption(Vendor):
@@ -38,29 +23,10 @@ class MPTCPOption(Vendor):
 
     #: Value limit checker.
     FLAG = 'isinstance(value, int) and 0 <= value <= 255'
+    #: Link to registry.
+    LINK = 'https://www.iana.org/assignments/tcp-parameters/mptcp-option-subtypes.csv'
 
-    def request(self) -> 'dict[int, str]':  # type: ignore[override] # pylint: disable=arguments-differ
-        """Fetch registry data.
-
-        Returns:
-            Multipath TCP options, i.e. :data:`~pcapkit.vendor.tcp.mp_tcp_option.DATA`.
-
-        """
-        return DATA
-
-    def count(self, data: 'dict[int, str]') -> 'Counter[str]':  # type: ignore[override]
-        """Count field records.
-
-        Args:
-            data: Registry data.
-
-        Returns:
-            Field recordings.
-
-        """
-        return collections.Counter(map(self.safe_name, data.values()))
-
-    def process(self, data: 'dict[int, str]') -> 'tuple[list[str], list[str]]':  # type: ignore[override]
+    def process(self, data: 'list[str]') -> 'tuple[list[str], list[str]]':
         """Process CSV data.
 
         Args:
@@ -70,13 +36,46 @@ class MPTCPOption(Vendor):
             Enumeration fields and missing fields.
 
         """
+        reader = csv.reader(data)
+        next(reader)  # header
+
         enum = []  # type: list[str]
-        miss = [
-            "return extend_enum(cls, 'Unassigned_%d' % value, value)",
-        ]
-        for code, name in data.items():
-            renm = self.rename(name, code)  # type: ignore[arg-type]
-            enum.append(f"{renm} = {code}".ljust(76))
+        miss = []  # type: list[str]
+        for item in reader:
+            dscp = item[2]
+            rfcs = item[3]
+
+            temp = []  # type: list[str]
+            for rfc in filter(None, re.split(r'\[|\]', rfcs)):
+                if re.match(r'\d+', rfc):
+                    continue
+                if 'RFC' in rfc and re.match(r'\d+', rfc[3:]):
+                    # temp.append(f'[{rfc[:3]} {rfc[3:]}]')
+                    temp.append(f'[:rfc:`{rfc[3:]}`]')
+                else:
+                    temp.append(f'[{rfc}]'.replace('_', ' '))
+            tmp1 = f" {''.join(temp)}" if rfcs else ''
+            desc = self.wrap_comment(re.sub(r'\r*\n', ' ', f'{dscp}{tmp1}', re.MULTILINE))
+
+            name = item[1]
+            try:
+                code, _ = item[0], int(item[0], base=16)
+                renm = self.rename(name or 'Unassigned', code, original=dscp)
+
+                pres = f"{renm} = {code}"
+                sufs = f'#: {desc}'
+
+                # if len(pres) > 74:
+                #     sufs = f"\n{' '*80}{sufs}"
+
+                # enum.append(f'{pres.ljust(76)}{sufs}')
+                enum.append(f'{sufs}\n    {pres}')
+            except ValueError:
+                start, stop = item[0].split('-')
+
+                miss.append(f'if {start} <= value <= {stop}:')
+                miss.append(f'    #: {desc}')
+                miss.append(f"    return extend_enum(cls, '{name}_%d' % value, value)")
         return enum, miss
 
 

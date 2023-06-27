@@ -18,21 +18,36 @@ __all__ = ['MPTCPOption']
 class MPTCPOption(IntEnum):
     """[MPTCPOption] Multipath TCP options [:rfc:`6824`]"""
 
-    MP_CAPABLE = 0
+    #: Multipath Capable [:rfc:`8684, Section 3.1`]
+    MP_CAPABLE = 0x0
 
-    MP_JOIN = 1
+    #: Join Connection [:rfc:`8684, Section 3.2`]
+    MP_JOIN = 0x1
 
-    DSS = 2
+    #: Data Sequence Signal (Data ACK and Data Sequence Mapping) [:rfc:`8684,
+    #: Section 3.3`]
+    DSS = 0x2
 
-    ADD_ADDR = 3
+    #: Add Address [:rfc:`8684, Section 3.4.1`]
+    ADD_ADDR = 0x3
 
-    REMOVE_ADDR = 4
+    #: Remove Address [:rfc:`8684, Section 3.4.2`]
+    REMOVE_ADDR = 0x4
 
-    MP_PRIO = 5
+    #: Change Subflow Priority [:rfc:`8684, Section 3.3.8`]
+    MP_PRIO = 0x5
 
-    MP_FAIL = 6
+    #: Fallback [:rfc:`8684, Section 3.7`]
+    MP_FAIL = 0x6
 
-    MP_FASTCLOSE = 7
+    #: Fast Close [:rfc:`8684, Section 3.5`]
+    MP_FASTCLOSE = 0x7
+
+    #: Subflow Reset [:rfc:`8684, Section 3.6`]
+    MP_TCPRST = 0x8
+
+    #: [:rfc:`8684`]
+    Reserved_for_Private_Use = 0xf
 
     @staticmethod
     def get(key: 'int | str', default: 'int' = -1) -> 'MPTCPOption':
@@ -60,4 +75,7 @@ class MPTCPOption(IntEnum):
         """
         if not (isinstance(value, int) and 0 <= value <= 255):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))
-        return extend_enum(cls, 'Unassigned_%d' % value, value)
+        if 0x9 <= value <= 0xe:
+            #:
+            return extend_enum(cls, 'Unassigned_%d' % value, value)
+        return super()._missing_(value)

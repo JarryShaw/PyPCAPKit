@@ -14,13 +14,14 @@ enumerations include:
    * - :class:`TCP_Checksum <pcapkit.const.tcp.checksum.Checksum>`
      - TCP Checksum [*]_
    * - :class:`TCP_MPTCPOption <pcapkit.const.tcp.mp_tcp_option.MPTCPOption>`
-     - Multipath TCP options
+     - Multipath TCP options [*]_
    * - :class:`TCP_Option <pcapkit.const.tcp.option.Option>`
      - TCP Option Kind Numbers [*]_
    * - :class:`TCP_Flags <pcapkit.const.tcp.flags.Flags>`
      - TCP Header Flags [*]_
 
 .. [*] https://www.iana.org/assignments/tcp-parameters/tcp-parameters.xhtml#tcp-parameters-2
+.. [*] https://www.iana.org/assignments/tcp-parameters/tcp-parameters.xhtml#mptcp-option-subtypes
 .. [*] https://www.iana.org/assignments/tcp-parameters/tcp-parameters.xhtml#tcp-parameters-1
 .. [*] https://www.iana.org/assignments/tcp-parameters/tcp-parameters.xhtml#tcp-header-flags
 
