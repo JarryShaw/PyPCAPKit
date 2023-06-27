@@ -71,7 +71,7 @@ __all__ = [
     # OSPF
     'OSPF_Authentication', 'OSPF_Packet',
     # TCP
-    'TCP_Checksum', 'TCP_Option',
+    'TCP_Checksum', 'TCP_Option', 'TCP_MPTCPOption', 'TCP_Flags',
     # VLAN
     'VLAN_PriorityLevel',
     # PCAPNG

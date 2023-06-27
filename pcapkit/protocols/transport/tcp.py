@@ -44,6 +44,7 @@ import ipaddress
 import math
 from typing import TYPE_CHECKING, cast
 
+from pcapkit.const.tcp.flags import Flags as Enum_Flags
 from pcapkit.const.reg.transtype import TransType
 from pcapkit.const.tcp.checksum import Checksum as Enum_Checksum
 from pcapkit.const.tcp.mp_tcp_option import MPTCPOption as Enum_MPTCPOption
@@ -161,27 +162,6 @@ if TYPE_CHECKING:
                                     KwArg(Any)], Schema_MPTCP]
 
 __all__ = ['TCP']
-
-
-class Flags(enum.IntFlag):
-    """TCP connection control flags."""
-
-    #: No more data from sender (FIN).
-    FIN = enum.auto()
-    #: Synchronize sequence numbers (SYN).
-    SYN = enum.auto()
-    #: Reset the connection (RST).
-    RST = enum.auto()
-    #: Push function (PSH).
-    PSH = enum.auto()
-    #: Acknowledgment number valid (ACK).
-    ACK = enum.auto()
-    #: Urgent pointer (URG).
-    URG = enum.auto()
-    #: ECN-Echo (ECE).
-    ECE = enum.auto()
-    #: Congestion window reduced (CWR).
-    CWR = enum.auto()
 
 
 class TCP(Transport[Data_TCP, Schema_TCP],
@@ -409,7 +389,7 @@ class TCP(Transport[Data_TCP, Schema_TCP],
         return self._info.dstport
 
     @property
-    def connection(self) -> 'Flags':
+    def connection(self) -> 'Enum_Flags':
         """Connection flags."""
         return self._flags
 
@@ -477,10 +457,10 @@ class TCP(Transport[Data_TCP, Schema_TCP],
         )
 
         # connection control flags
-        _flag = cast('Flags', 0)
+        _flag = cast('Enum_Flags', 0)
         for key, val in schema.flags.items():
             if val == 1:
-                _flag |= Flags[key.upper()]
+                _flag |= Enum_Flags.get(key.upper())
         self._flags = _flag
 
         tcp.__update__({
@@ -559,10 +539,10 @@ class TCP(Transport[Data_TCP, Schema_TCP],
             'fin': int(fin),
         }  # type: Schema_Flags
 
-        _flag = cast('Flags', 0)
+        _flag = cast('Enum_Flags', 0)
         for key, val in flags.items():
             if val == 1:
-                _flag |= Flags[key.upper()]
+                _flag |= Enum_Flags.get(key.upper())
         self._flags = _flag
 
         return Schema_TCP(
@@ -1514,11 +1494,11 @@ class TCP(Transport[Data_TCP, Schema_TCP],
             ProtocolError: If the option is not given on a valid SYN/ACK packet.
 
         """
-        if Flags.SYN in self._flags and Flags.ACK not in self._flags:  # MP_JOIN-SYN
+        if Enum_Flags.SYN in self._flags and Enum_Flags.ACK not in self._flags:  # MP_JOIN-SYN
             return self._read_join_syn(schema, options=options)  # type: ignore[arg-type]
-        if Flags.SYN in self._flags and Flags.ACK in self._flags:      # MP_JOIN-SYN/ACK
+        if Enum_Flags.SYN in self._flags and Enum_Flags.ACK in self._flags:      # MP_JOIN-SYN/ACK
             return self._read_join_synack(schema, options=options)  # type: ignore[arg-type]
-        if Flags.SYN not in self._flags and Flags.ACK in self._flags:  # MP_JOIN-ACK
+        if Enum_Flags.SYN not in self._flags and Enum_Flags.ACK in self._flags:  # MP_JOIN-ACK
             return self._read_join_ack(schema, options=options)  # type: ignore[arg-type]
         raise ProtocolError(f'{self.alias}: : [OptNo {schema.kind}] {schema.subtype}: invalid flags combination')
 
@@ -1557,7 +1537,7 @@ class TCP(Transport[Data_TCP, Schema_TCP],
             kind=Enum_Option.Multipath_TCP,  # type: ignore[arg-type]
             length=schema.length,
             subtype=schema.subtype,
-            connection=Flags.SYN,
+            connection=Enum_Flags.SYN,
             backup=bool(schema.test['backup']),
             addr_id=schema.addr_id,
             token=schema.token,
@@ -1602,7 +1582,7 @@ class TCP(Transport[Data_TCP, Schema_TCP],
             kind=Enum_Option.Multipath_TCP,  # type: ignore[arg-type]
             length=schema.length,
             subtype=schema.subtype,
-            connection=Flags.SYN | Flags.ACK,
+            connection=Enum_Flags.SYN | Enum_Flags.ACK,
             backup=bool(schema.test['backup']),
             addr_id=schema.addr_id,
             hmac=schema.hmac,
@@ -1647,7 +1627,7 @@ class TCP(Transport[Data_TCP, Schema_TCP],
             kind=Enum_Option.Multipath_TCP,  # type: ignore[arg-type]
             length=schema.length,
             subtype=schema.subtype,
-            connection=Flags.ACK,
+            connection=Enum_Flags.ACK,
             hmac=schema.hmac,
         )
         return data
@@ -2687,11 +2667,11 @@ class TCP(Transport[Data_TCP, Schema_TCP],
             Constructed option schema.
 
         """
-        if Flags.SYN in self._flags and Flags.ACK not in self._flags:  # MP_JOIN-SYN
+        if Enum_Flags.SYN in self._flags and Enum_Flags.ACK not in self._flags:  # MP_JOIN-SYN
             return self._make_join_syn(subtype, opt, **kwargs)  # type: ignore[arg-type]
-        if Flags.SYN in self._flags and Flags.ACK in self._flags:      # MP_JOIN-SYN/ACK
+        if Enum_Flags.SYN in self._flags and Enum_Flags.ACK in self._flags:      # MP_JOIN-SYN/ACK
             return self._make_join_synack(subtype, opt, **kwargs)  # type: ignore[arg-type]
-        if Flags.SYN not in self._flags and Flags.ACK in self._flags:  # MP_JOIN-ACK
+        if Enum_Flags.SYN not in self._flags and Enum_Flags.ACK in self._flags:  # MP_JOIN-ACK
             return self._make_join_ack(subtype, opt, **kwargs)  # type: ignore[arg-type]
         raise ProtocolError(f'{self.alias}: : [OptNo {Enum_Option.Multipath_TCP}] {subtype}: invalid flags combination')
 
