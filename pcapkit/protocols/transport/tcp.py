@@ -44,9 +44,9 @@ import ipaddress
 import math
 from typing import TYPE_CHECKING, cast
 
-from pcapkit.const.tcp.flags import Flags as Enum_Flags
 from pcapkit.const.reg.transtype import TransType
 from pcapkit.const.tcp.checksum import Checksum as Enum_Checksum
+from pcapkit.const.tcp.flags import Flags as Enum_Flags
 from pcapkit.const.tcp.mp_tcp_option import MPTCPOption as Enum_MPTCPOption
 from pcapkit.const.tcp.option import Option as Enum_Option
 from pcapkit.corekit.multidict import OrderedMultiDict
