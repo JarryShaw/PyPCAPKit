@@ -28,6 +28,7 @@ __all__ = [
     'register_transtype',
     'register_ipv4_option', 'register_hip_parameter', 'register_hopopt_option',
     'register_ipv6_opts_option', 'register_ipv6_route_routing',
+    'register_mh_message', 'register_mh_option', 'register_mh_extension',
 
     'register_port',
     'register_tcp', 'register_udp',

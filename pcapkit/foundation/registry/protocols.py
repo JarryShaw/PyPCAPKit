@@ -18,6 +18,7 @@ from pcapkit.protocols.internet.internet import Internet
 from pcapkit.protocols.internet.ipv4 import IPv4
 from pcapkit.protocols.internet.ipv6_opts import IPv6_Opts
 from pcapkit.protocols.internet.ipv6_route import IPv6_Route
+from pcapkit.protocols.internet.mh import MH
 from pcapkit.protocols.link.link import Link
 from pcapkit.protocols.misc.pcap.frame import Frame
 from pcapkit.protocols.misc.pcapng import PCAPNG
@@ -37,6 +38,9 @@ if TYPE_CHECKING:
     from pcapkit.const.ipv4.option_number import OptionNumber as IPv4_OptionNumber
     from pcapkit.const.ipv6.option import Option as IPv6_Option
     from pcapkit.const.ipv6.routing import Routing as IPv6_Routing
+    from pcapkit.const.mh.cga_extension import CGAExtension as MH_CGAExtension
+    from pcapkit.const.mh.option import Option as MH_Option
+    from pcapkit.const.mh.packet import Packet as MH_Packet
     from pcapkit.const.pcapng.block_type import BlockType as PCAPNG_BlockType
     from pcapkit.const.pcapng.option_type import OptionType as PCAPNG_OptionType
     from pcapkit.const.pcapng.record_type import RecordType as PCAPNG_RecordType
@@ -59,6 +63,12 @@ if TYPE_CHECKING:
     from pcapkit.protocols.internet.ipv6_opts import OptionParser as IPv6_Opts_OptionParser
     from pcapkit.protocols.internet.ipv6_route import TypeConstructor as IPv6_Route_TypeConstructor
     from pcapkit.protocols.internet.ipv6_route import TypeParser as IPv6_Route_TypeParser
+    from pcapkit.protocols.internet.mh import ExtensionConstructor as MH_ExtensionConstructor
+    from pcapkit.protocols.internet.mh import ExtensionParser as MH_ExtensionParser
+    from pcapkit.protocols.internet.mh import OptionConstructor as MH_OptionConstructor
+    from pcapkit.protocols.internet.mh import OptionParser as MH_OptionParser
+    from pcapkit.protocols.internet.mh import PacketConstructor as MH_PacketConstructor
+    from pcapkit.protocols.internet.mh import PacketParser as MH_PacketParser
     from pcapkit.protocols.misc.pcapng import BlockConstructor as PCAPNG_BlockConstructor
     from pcapkit.protocols.misc.pcapng import BlockParser as PCAPNG_BlockParser
     from pcapkit.protocols.misc.pcapng import OptionConstructor as PCAPNG_OptionConstructor
@@ -72,10 +82,6 @@ if TYPE_CHECKING:
     from pcapkit.protocols.transport.tcp import OptionConstructor as TCP_OptionConstructor
     from pcapkit.protocols.transport.tcp import OptionParser as TCP_OptionParser
 
-    from pcapkit.protocols.internet.mh import PacketParser as MH_PacketParser, PacketConstructor as MH_PacketConstructor, \
-        OptionParser as MH_OptionParser, OptionConstructor as MH_OptionConstructor, \
-        ExtensionParser as MH_ExtensionParser, ExtensionConstructor as MH_ExtensionConstructor
-
 __all__ = [
     'register_protocol',
 
@@ -87,6 +93,7 @@ __all__ = [
     'register_transtype',
     'register_ipv4_option', 'register_hip_parameter', 'register_hopopt_option',
     'register_ipv6_opts_option', 'register_ipv6_route_routing',
+    'register_mh_message', 'register_mh_option', 'register_mh_extension',
 
     'register_port',
     'register_tcp', 'register_udp',
@@ -357,12 +364,12 @@ def register_ipv6_opts_option(code: 'IPv6_Option', meth: 'str | tuple[IPv6_Opts_
         raise RegistryError('method must be a valid IPv6-Opts option parser function')
 
     IPv6_Opts.register_option(code, meth)
-    logger.info('registered IPv6_Opts option parser: %s', code.name)
+    logger.info('registered IPv6-Opts option parser: %s', code.name)
 
 
 # NOTE: pcapkit.protocols.internet.ipv6_route.IPv6_Route.__routing__
 def register_ipv6_route_routing(code: 'IPv6_Routing', meth: 'str | tuple[IPv6_Route_TypeParser, IPv6_Route_TypeConstructor]') -> 'None':
-    r"""Register a routing data parser.
+    """Register a routing data parser.
 
     The function will register the given routing data parser to the
     :data:`pcapkit.protocols.internet.ipv6_route.IPv6_Route.__routing__` registry.
@@ -377,7 +384,67 @@ def register_ipv6_route_routing(code: 'IPv6_Routing', meth: 'str | tuple[IPv6_Ro
         raise RegistryError('method must be a valid IPv6-Route routing data parser function')
 
     IPv6_Route.register_routing(code, meth)
-    logger.info('registered IPv6_Route routing data parser: %s', code.name)
+    logger.info('registered IPv6-Route routing data parser: %s', code.name)
+
+
+# NOTE: pcapkit.protocols.internet.mh.MH.__message__
+def register_mh_message(code: 'MH_Packet', meth: 'str | tuple[MH_PacketParser, MH_PacketConstructor]') -> 'None':
+    """Register a message type parser.
+
+    The function will register the given message type parser to the
+    :data:`pcapkit.protocols.internet.mh.MH.__message__` registry.
+
+    Args:
+        code: :class:`~pcapkit.protocols.internet.mh.MH>`
+            data type code as in :class:`~pcapkit.const.mh.packet.Packet`.
+        meth: Method name or callable to parse and/or construct the data.
+
+    """
+    if isinstance(meth, str) and not hasattr(MH, f'_read_msg_{meth}'):
+        raise RegistryError('method must be a valid MH message type parser function')
+
+    MH.register_message(code, meth)
+    logger.info('registered MH message type parser: %s', code.name)
+
+
+# NOTE: pcapkit.protocols.internet.mh.MH.__option__
+def register_mh_option(code: 'MH_Option', meth: 'str | tuple[MH_OptionParser, MH_OptionConstructor]') -> 'None':
+    """Register a option parser.
+
+    The function will register the given option parser to the
+    :data:`pcapkit.protocols.internet.mh.MH.__option__` registry.
+
+    Args:
+        code: :class:`~pcapkit.protocols.internet.mh.MH>`
+            data type code as in :class:`~pcapkit.const.mh.option.Option`.
+        meth: Method name or callable to parse and/or construct the data.
+
+    """
+    if isinstance(meth, str) and not hasattr(MH, f'_read_opt_{meth}'):
+        raise RegistryError('method must be a valid MH option parser function')
+
+    MH.register_option(code, meth)
+    logger.info('registered MH option parser: %s', code.name)
+
+
+# NOTE: pcapkit.protocols.internet.mh.MH.__extension__
+def register_mh_extension(code: 'MH_CGAExtension', meth: 'str | tuple[MH_ExtensionParser, MH_ExtensionConstructor]') -> 'None':
+    """Register a CGA extension parser.
+
+    The function will register the given CGA extension to the
+    :data:`pcapkit.protocols.internet.mh.MH.__extension__` registry.
+
+    Args:
+        code: :class:`~pcapkit.protocols.internet.mh.MH>`
+            data type code as in :class:`~pcapkit.const.mh.cga_extension.CGAExtension`.
+        meth: Method name or callable to parse and/or construct the data.
+
+    """
+    if isinstance(meth, str) and not hasattr(MH, f'_read_ext_{meth}'):
+        raise RegistryError('method must be a valid MH CGA extension function')
+
+    MH.register_extension(code, meth)
+    logger.info('registered MH CGA extension: %s', code.name)
 
 
 ###############################################################################
