@@ -43,6 +43,12 @@ Internet Layer Registries
 
 .. autofunction:: pcapkit.foundation.registry.protocols.register_ipv6_route_routing
 
+.. autofunction:: pcapkit.foundation.registry.protocols.register_mh_message
+
+.. autofunction:: pcapkit.foundation.registry.protocols.register_mh_option
+
+.. autofunction:: pcapkit.foundation.registry.protocols.register_mh_extension
+
 Transport Layer Registries
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
