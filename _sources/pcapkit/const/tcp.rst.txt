@@ -13,9 +13,11 @@ enumerations include:
    * - :class:`TCP_Checksum <pcapkit.const.tcp.checksum.Checksum>`
      - TCP Checksum [*]_
    * - :class:`TCP_MPTCPOption <pcapkit.const.tcp.mp_tcp_option.MPTCPOption>`
-     - Multipath TCP options [*]_
+     - Multipath TCP options
    * - :class:`TCP_Option <pcapkit.const.tcp.option.Option>`
-     - TCP Option Kind Numbers
+     - TCP Option Kind Numbers [*]_
+   * - :class:`TCP_Flags <pcapkit.const.tcp.flags.Flags>`
+     - TCP Header Flags [*]_
 
 TCP Checksum
 ============
@@ -56,9 +58,23 @@ which is automatically generated from :class:`pcapkit.vendor.tcp.option.Option`.
    :undoc-members:
    :show-inheritance:
 
+TCP Header Flags
+================
+
+.. module:: pcapkit.const.tcp.flags
+
+This module contains the constant enumeration for **TCP Header Flags**,
+which is automatically generated from :class:`pcapkit.vendor.tcp.flags.Flags`.
+
+.. autoclass:: pcapkit.const.tcp.flags.Flags
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 .. raw:: html
 
    <hr />
 
 .. [*] https://www.iana.org/assignments/tcp-parameters/tcp-parameters.xhtml#tcp-parameters-2
 .. [*] https://www.iana.org/assignments/tcp-parameters/tcp-parameters.xhtml#tcp-parameters-1
+.. [*] https://www.iana.org/assignments/tcp-parameters/tcp-parameters.xhtml#tcp-header-flags

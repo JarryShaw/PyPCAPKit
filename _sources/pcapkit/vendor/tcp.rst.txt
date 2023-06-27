@@ -13,9 +13,11 @@ vendor crawlers include:
    * - :class:`TCP_Checksum <pcapkit.vendor.tcp.checksum.Checksum>`
      - TCP Checksum [*]_
    * - :class:`TCP_MPTCPOption <pcapkit.vendor.tcp.mp_tcp_option.MPTCPOption>`
-     - Multipath TCP options [*]_
+     - Multipath TCP options
    * - :class:`TCP_Option <pcapkit.vendor.tcp.option.Option>`
-     - TCP Option Kind Numbers
+     - TCP Option Kind Numbers [*]_
+   * - :class:`TCP_Flags <pcapkit.vendor.tcp.flags.Flags>`
+     - TCP Header Flags [*]_
 
 TCP Checksum
 ============
@@ -53,9 +55,22 @@ which is automatically generating :class:`pcapkit.const.tcp.option.Option`.
    :members: FLAG, LINK
    :show-inheritance:
 
+TCP Header Flags
+================
+
+.. module:: pcapkit.vendor.tcp.flags
+
+This module contains the vendor crawler for **TCP Header Flags**,
+which is automatically generating :class:`pcapkit.const.tcp.flags.Flags`.
+
+.. autoclass:: pcapkit.vendor.tcp.flags.Flags
+   :members: FLAG, LINK
+   :show-inheritance:
+
 .. raw:: html
 
    <hr />
 
 .. [*] https://www.iana.org/assignments/tcp-parameters/tcp-parameters.xhtml#tcp-parameters-2
 .. [*] https://www.iana.org/assignments/tcp-parameters/tcp-parameters.xhtml#tcp-parameters-1
+.. [*] https://www.iana.org/assignments/tcp-parameters/tcp-parameters.xhtml#tcp-header-flags

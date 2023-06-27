@@ -7,12 +7,12 @@
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://pypcapkit.jarryshaw.me/pcapkit/const/tcp.html" />
 <meta property="og:site_name" content="PyPCAPKit" />
-<meta property="og:description" content="This module contains all constant enumerations of TCP implementations. Available enumerations include:,, TCP_Checksum, TCP Checksum*,, TCP_MPTCPOption, Multipath TCP options †,, TCP_Option, TCP Opt..." />
+<meta property="og:description" content="This module contains all constant enumerations of TCP implementations. Available enumerations include:,, TCP_Checksum, TCP Checksum*,, TCP_MPTCPOption, Multipath TCP options,, TCP_Option, TCP Optio..." />
 <meta property="og:image:width" content="1146" />
 <meta property="og:image:height" content="600" />
 <meta property="og:image" content="https://pypcapkit.jarryshaw.me/_images/social_previews/summary_pcapkit_const_tcp_86e05fc9.png" />
 <meta property="og:image:alt" content="This module contains all constant enumerations of TCP implementations. Available enumerations include:,, TCP_Checksum, TCP Checksum*,, TCP_MPTCPOption, Multi..." />
-<meta name="description" content="This module contains all constant enumerations of TCP implementations. Available enumerations include:,, TCP_Checksum, TCP Checksum*,, TCP_MPTCPOption, Multipath TCP options †,, TCP_Option, TCP Opt..." />
+<meta name="description" content="This module contains all constant enumerations of TCP implementations. Available enumerations include:,, TCP_Checksum, TCP Checksum*,, TCP_MPTCPOption, Multipath TCP options,, TCP_Option, TCP Optio..." />
 <meta name="twitter:card" content="summary_large_image" />
 <link rel="index" title="Index" href="../../genindex.html" /><link rel="search" title="Search" href="../../search.html" /><link rel="next" title="FTP Constant Enumerations" href="ftp.html" /><link rel="prev" title="MH Constant Enumerations" href="mh.html" />
 
@@ -370,13 +370,16 @@ enumerations include:</p>
 <table class="docutils align-default">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="#pcapkit.const.tcp.checksum.Checksum" title="pcapkit.const.tcp.checksum.Checksum"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP_Checksum</span></code></a></p></td>
-<td><p>TCP Checksum <a class="footnote-reference brackets" href="#id7" id="id1" role="doc-noteref"><span class="fn-bracket">[</span>*<span class="fn-bracket">]</span></a></p></td>
+<td><p>TCP Checksum <a class="footnote-reference brackets" href="#id8" id="id1" role="doc-noteref"><span class="fn-bracket">[</span>*<span class="fn-bracket">]</span></a></p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#pcapkit.const.tcp.mp_tcp_option.MPTCPOption" title="pcapkit.const.tcp.mp_tcp_option.MPTCPOption"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP_MPTCPOption</span></code></a></p></td>
-<td><p>Multipath TCP options <a class="footnote-reference brackets" href="#id8" id="id2" role="doc-noteref"><span class="fn-bracket">[</span>†<span class="fn-bracket">]</span></a></p></td>
+<td><p>Multipath TCP options</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#pcapkit.const.tcp.option.Option" title="pcapkit.const.tcp.option.Option"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP_Option</span></code></a></p></td>
-<td><p>TCP Option Kind Numbers</p></td>
+<td><p>TCP Option Kind Numbers <a class="footnote-reference brackets" href="#id9" id="id2" role="doc-noteref"><span class="fn-bracket">[</span>†<span class="fn-bracket">]</span></a></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#pcapkit.const.tcp.flags.Flags" title="pcapkit.const.tcp.flags.Flags"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP_Flags</span></code></a></p></td>
+<td><p>TCP Header Flags <a class="footnote-reference brackets" href="#id10" id="id3" role="doc-noteref"><span class="fn-bracket">[</span>‡<span class="fn-bracket">]</span></a></p></td>
 </tr>
 </tbody>
 </table>
@@ -673,7 +676,7 @@ which is automatically generated from <a class="reference internal" href="../ven
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.tcp.option.Option.User_Timeout_Option">
 <span class="sig-name descname"><span class="pre">User_Timeout_Option</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">28</span></em><a class="headerlink" href="#pcapkit.const.tcp.option.Option.User_Timeout_Option" title="Permalink to this definition">#</a></dt>
-<dd><p>User Timeout Option (also, other known unauthorized use) [<a href="#id3"><span class="problematic" id="id4">**</span></a><a href="#id5"><span class="problematic" id="id6">*</span></a>][1]
+<dd><p>User Timeout Option (also, other known unauthorized use) [<a href="#id4"><span class="problematic" id="id5">**</span></a><a href="#id6"><span class="problematic" id="id7">*</span></a>][1]
 [<span class="target" id="index-29"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5482.html"><strong>RFC 5482</strong></a>]</p>
 </dd></dl>
 
@@ -793,14 +796,102 @@ products) [*] [<span class="target" id="index-35"></span><a class="rfc reference
 
 </dd></dl>
 
+</section>
+<section id="module-pcapkit.const.tcp.flags">
+<span id="tcp-header-flags"></span><h2>TCP Header Flags<a class="headerlink" href="#module-pcapkit.const.tcp.flags" title="Permalink to this heading">#</a></h2>
+<p>This module contains the constant enumeration for <strong>TCP Header Flags</strong>,
+which is automatically generated from <a class="reference internal" href="../vendor/tcp.html#pcapkit.vendor.tcp.flags.Flags" title="pcapkit.vendor.tcp.flags.Flags"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.vendor.tcp.flags.Flags</span></code></a>.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="pcapkit.const.tcp.flags.Flags">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.const.tcp.flags.</span></span><span class="sig-name descname"><span class="pre">Flags</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value=&lt;no_arg&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">names=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">module=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qualname=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start=1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">boundary=None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/const/tcp/flags.html#Flags"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.tcp.flags.Flags" title="Permalink to this definition">#</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">IntFlag</span></code></p>
+<p>[Flags] TCP Header Flags</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.tcp.flags.Flags.Reserved_4">
+<span class="sig-name descname"><span class="pre">Reserved_4</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">16</span></em><a class="headerlink" href="#pcapkit.const.tcp.flags.Flags.Reserved_4" title="Permalink to this definition">#</a></dt>
+<dd><p>Reserved for future use [<span class="target" id="index-36"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9293.html"><strong>RFC 9293</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.tcp.flags.Flags.Reserved_5">
+<span class="sig-name descname"><span class="pre">Reserved_5</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">32</span></em><a class="headerlink" href="#pcapkit.const.tcp.flags.Flags.Reserved_5" title="Permalink to this definition">#</a></dt>
+<dd><p>Reserved for future use [<span class="target" id="index-37"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9293.html"><strong>RFC 9293</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.tcp.flags.Flags.Reserved_6">
+<span class="sig-name descname"><span class="pre">Reserved_6</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">64</span></em><a class="headerlink" href="#pcapkit.const.tcp.flags.Flags.Reserved_6" title="Permalink to this definition">#</a></dt>
+<dd><p>Reserved for future use [<span class="target" id="index-38"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9293.html"><strong>RFC 9293</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.tcp.flags.Flags.Reserved_7">
+<span class="sig-name descname"><span class="pre">Reserved_7</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">128</span></em><a class="headerlink" href="#pcapkit.const.tcp.flags.Flags.Reserved_7" title="Permalink to this definition">#</a></dt>
+<dd><p>Reserved for future use [<span class="target" id="index-39"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8311.html"><strong>RFC 8311</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.tcp.flags.Flags.CWR">
+<span class="sig-name descname"><span class="pre">CWR</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">256</span></em><a class="headerlink" href="#pcapkit.const.tcp.flags.Flags.CWR" title="Permalink to this definition">#</a></dt>
+<dd><p>CWR (Congestion Window Reduced) [<span class="target" id="index-40"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3168.html"><strong>RFC 3168</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.tcp.flags.Flags.ECE">
+<span class="sig-name descname"><span class="pre">ECE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">512</span></em><a class="headerlink" href="#pcapkit.const.tcp.flags.Flags.ECE" title="Permalink to this definition">#</a></dt>
+<dd><p>ECE (ECN-Echo) [<span class="target" id="index-41"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3168.html"><strong>RFC 3168</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.tcp.flags.Flags.URG">
+<span class="sig-name descname"><span class="pre">URG</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1024</span></em><a class="headerlink" href="#pcapkit.const.tcp.flags.Flags.URG" title="Permalink to this definition">#</a></dt>
+<dd><p>Urgent Pointer field is significant (URG) [<span class="target" id="index-42"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9293.html"><strong>RFC 9293</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.tcp.flags.Flags.ACK">
+<span class="sig-name descname"><span class="pre">ACK</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">2048</span></em><a class="headerlink" href="#pcapkit.const.tcp.flags.Flags.ACK" title="Permalink to this definition">#</a></dt>
+<dd><p>Acknowledgment field is significant (ACK) [<span class="target" id="index-43"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9293.html"><strong>RFC 9293</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.tcp.flags.Flags.PSH">
+<span class="sig-name descname"><span class="pre">PSH</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">4096</span></em><a class="headerlink" href="#pcapkit.const.tcp.flags.Flags.PSH" title="Permalink to this definition">#</a></dt>
+<dd><p>Push Function (PSH) [<span class="target" id="index-44"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9293.html"><strong>RFC 9293</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.tcp.flags.Flags.RST">
+<span class="sig-name descname"><span class="pre">RST</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">8192</span></em><a class="headerlink" href="#pcapkit.const.tcp.flags.Flags.RST" title="Permalink to this definition">#</a></dt>
+<dd><p>Reset the connection (RST) [<span class="target" id="index-45"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9293.html"><strong>RFC 9293</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.tcp.flags.Flags.SYN">
+<span class="sig-name descname"><span class="pre">SYN</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">16384</span></em><a class="headerlink" href="#pcapkit.const.tcp.flags.Flags.SYN" title="Permalink to this definition">#</a></dt>
+<dd><p>Synchronize sequence numbers (SYN) [<span class="target" id="index-46"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9293.html"><strong>RFC 9293</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.tcp.flags.Flags.FIN">
+<span class="sig-name descname"><span class="pre">FIN</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">32768</span></em><a class="headerlink" href="#pcapkit.const.tcp.flags.Flags.FIN" title="Permalink to this definition">#</a></dt>
+<dd><p>No more data from sender (FIN) [<span class="target" id="index-47"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9293.html"><strong>RFC 9293</strong></a>]</p>
+</dd></dl>
+
+</dd></dl>
+
 <hr /><aside class="footnote-list brackets">
-<aside class="footnote brackets" id="id7" role="doc-footnote">
+<aside class="footnote brackets" id="id8" role="doc-footnote">
 <span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id1">*</a><span class="fn-bracket">]</span></span>
 <p><a class="reference external" href="https://www.iana.org/assignments/tcp-parameters/tcp-parameters.xhtml#tcp-parameters-2">https://www.iana.org/assignments/tcp-parameters/tcp-parameters.xhtml#tcp-parameters-2</a></p>
 </aside>
-<aside class="footnote brackets" id="id8" role="doc-footnote">
+<aside class="footnote brackets" id="id9" role="doc-footnote">
 <span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id2">†</a><span class="fn-bracket">]</span></span>
 <p><a class="reference external" href="https://www.iana.org/assignments/tcp-parameters/tcp-parameters.xhtml#tcp-parameters-1">https://www.iana.org/assignments/tcp-parameters/tcp-parameters.xhtml#tcp-parameters-1</a></p>
+</aside>
+<aside class="footnote brackets" id="id10" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id3">‡</a><span class="fn-bracket">]</span></span>
+<p><a class="reference external" href="https://www.iana.org/assignments/tcp-parameters/tcp-parameters.xhtml#tcp-header-flags">https://www.iana.org/assignments/tcp-parameters/tcp-parameters.xhtml#tcp-header-flags</a></p>
 </aside>
 </aside>
 </section>
@@ -865,6 +956,7 @@ products) [*] [<span class="target" id="index-35"></span><a class="rfc reference
 <li><a class="reference internal" href="#module-pcapkit.const.tcp.checksum">TCP Checksum</a></li>
 <li><a class="reference internal" href="#module-pcapkit.const.tcp.mp_tcp_option">Multipath TCP options</a></li>
 <li><a class="reference internal" href="#module-pcapkit.const.tcp.option">TCP Option Kind Numbers</a></li>
+<li><a class="reference internal" href="#module-pcapkit.const.tcp.flags">TCP Header Flags</a></li>
 </ul>
 </li>
 </ul>

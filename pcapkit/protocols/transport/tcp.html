@@ -688,7 +688,7 @@ enumeration:</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.TCP.connection">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">connection</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#pcapkit.protocols.transport.tcp.Flags" title="pcapkit.protocols.transport.tcp.Flags"><span class="pre">Flags</span></a></em><a class="headerlink" href="#pcapkit.protocols.transport.tcp.TCP.connection" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">connection</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="../../const/tcp.html#pcapkit.const.tcp.flags.Flags" title="pcapkit.const.tcp.flags.Flags"><span class="pre">Flags</span></a></em><a class="headerlink" href="#pcapkit.protocols.transport.tcp.TCP.connection" title="Permalink to this definition">#</a></dt>
 <dd><p>Connection flags.</p>
 </dd></dl>
 
@@ -2799,69 +2799,6 @@ then be a method that can parse the option by itself.</p>
 
 <section id="auxiliary-data">
 <h2>Auxiliary Data<a class="headerlink" href="#auxiliary-data" title="Permalink to this heading">#</a></h2>
-<dl class="py class">
-<dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.Flags">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.transport.tcp.</span></span><span class="sig-name descname"><span class="pre">Flags</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">names</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">module</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qualname</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">boundary</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/transport/tcp.html#Flags"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.transport.tcp.Flags" title="Permalink to this definition">#</a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/enum.html#enum.IntFlag" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">IntFlag</span></code></a></p>
-<p>TCP connection control flags.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>*args</strong> – Arbitrary positional arguments.</p></li>
-<li><p><strong>**kwargs</strong> – Arbitrary keyword arguments.</p></li>
-</ul>
-</dd>
-</dl>
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.Flags.FIN">
-<span class="sig-name descname"><span class="pre">FIN</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1</span></em><a class="headerlink" href="#pcapkit.protocols.transport.tcp.Flags.FIN" title="Permalink to this definition">#</a></dt>
-<dd><p>No more data from sender (FIN).</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.Flags.SYN">
-<span class="sig-name descname"><span class="pre">SYN</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">2</span></em><a class="headerlink" href="#pcapkit.protocols.transport.tcp.Flags.SYN" title="Permalink to this definition">#</a></dt>
-<dd><p>Synchronize sequence numbers (SYN).</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.Flags.RST">
-<span class="sig-name descname"><span class="pre">RST</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">4</span></em><a class="headerlink" href="#pcapkit.protocols.transport.tcp.Flags.RST" title="Permalink to this definition">#</a></dt>
-<dd><p>Reset the connection (RST).</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.Flags.PSH">
-<span class="sig-name descname"><span class="pre">PSH</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">8</span></em><a class="headerlink" href="#pcapkit.protocols.transport.tcp.Flags.PSH" title="Permalink to this definition">#</a></dt>
-<dd><p>Push function (PSH).</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.Flags.ACK">
-<span class="sig-name descname"><span class="pre">ACK</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">16</span></em><a class="headerlink" href="#pcapkit.protocols.transport.tcp.Flags.ACK" title="Permalink to this definition">#</a></dt>
-<dd><p>Acknowledgment number valid (ACK).</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.Flags.URG">
-<span class="sig-name descname"><span class="pre">URG</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">32</span></em><a class="headerlink" href="#pcapkit.protocols.transport.tcp.Flags.URG" title="Permalink to this definition">#</a></dt>
-<dd><p>Urgent pointer (URG).</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.Flags.ECE">
-<span class="sig-name descname"><span class="pre">ECE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">64</span></em><a class="headerlink" href="#pcapkit.protocols.transport.tcp.Flags.ECE" title="Permalink to this definition">#</a></dt>
-<dd><p>ECN-Echo (ECE).</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.Flags.CWR">
-<span class="sig-name descname"><span class="pre">CWR</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">128</span></em><a class="headerlink" href="#pcapkit.protocols.transport.tcp.Flags.CWR" title="Permalink to this definition">#</a></dt>
-<dd><p>Congestion window reduced (CWR).</p>
-</dd></dl>
-
-</dd></dl>
-
 </section>
 <section id="module-pcapkit.protocols.schema.transport.tcp">
 <span id="header-schemas"></span><h2>Header Schemas<a class="headerlink" href="#module-pcapkit.protocols.schema.transport.tcp" title="Permalink to this heading">#</a></h2>
