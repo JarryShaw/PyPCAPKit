@@ -166,7 +166,7 @@
 						"hex": "7c8e"
 					},
 					"urgent_pointer": 0,
-					"connection": "Flags::FIN|ACK [17]",
+					"connection": "Flags::ACK|FIN [34816]",
 					"nopayload": {
 					}
 				}
@@ -240,7 +240,7 @@
 						"hex": "f93e"
 					},
 					"urgent_pointer": 0,
-					"connection": "Flags::ACK [16]",
+					"connection": "Flags::ACK [2048]",
 					"nopayload": {
 					}
 				}
@@ -314,7 +314,7 @@
 						"hex": "2af4"
 					},
 					"urgent_pointer": 0,
-					"connection": "Flags::FIN|ACK [17]",
+					"connection": "Flags::ACK|FIN [34816]",
 					"nopayload": {
 					}
 				}

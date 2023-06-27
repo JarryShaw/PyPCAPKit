@@ -143,7 +143,7 @@ Frame 3
   |                 |-- window_size -> 31920
   |                 |-- checksum -> 7c 8e
   |                 |-- urgent_pointer -> 0
-  |                 |-- connection -> Flags::FIN|ACK [17]
+  |                 |-- connection -> Flags::ACK|FIN [34816]
   |                 |-- nopayload  -> NIL
   |-- protocols -> Ethernet:IPv4:TCP
 
@@ -203,7 +203,7 @@ Frame 4
   |                 |-- window_size -> 65535
   |                 |-- checksum -> f9 3e
   |                 |-- urgent_pointer -> 0
-  |                 |-- connection -> Flags::ACK [16]
+  |                 |-- connection -> Flags::ACK [2048]
   |                 |-- nopayload  -> NIL
   |-- protocols -> Ethernet:IPv4:TCP
 
@@ -263,7 +263,7 @@ Frame 5
   |                 |-- window_size -> 65535
   |                 |-- checksum -> 2a f4
   |                 |-- urgent_pointer -> 0
-  |                 |-- connection -> Flags::FIN|ACK [17]
+  |                 |-- connection -> Flags::ACK|FIN [34816]
   |                 |-- nopayload  -> NIL
   |-- protocols -> Ethernet:IPv4:TCP
 

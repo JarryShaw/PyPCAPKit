@@ -279,7 +279,7 @@
 					<key>urgent_pointer</key>
 					<integer>0</integer>
 					<key>connection</key>
-					<string>Flags::FIN|ACK [17]</string>
+					<string>Flags::ACK|FIN [34816]</string>
 					<key>nopayload</key>
 					<dict>
 					</dict>
@@ -402,7 +402,7 @@
 					<key>urgent_pointer</key>
 					<integer>0</integer>
 					<key>connection</key>
-					<string>Flags::ACK [16]</string>
+					<string>Flags::ACK [2048]</string>
 					<key>nopayload</key>
 					<dict>
 					</dict>
@@ -525,7 +525,7 @@
 					<key>urgent_pointer</key>
 					<integer>0</integer>
 					<key>connection</key>
-					<string>Flags::FIN|ACK [17]</string>
+					<string>Flags::ACK|FIN [34816]</string>
 					<key>nopayload</key>
 					<dict>
 					</dict>
