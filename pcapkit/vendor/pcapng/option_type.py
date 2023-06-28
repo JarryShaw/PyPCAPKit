@@ -38,6 +38,7 @@ This module contains the constant enumeration for **{name}**,
 which is automatically generated from :class:`{MODL}.{NAME}`.
 
 """
+from collections import defaultdict
 from typing import TYPE_CHECKING
 
 from aenum import StrEnum, extend_enum
@@ -45,7 +46,7 @@ from aenum import StrEnum, extend_enum
 __all__ = ['{NAME}']
 
 if TYPE_CHECKING:
-    from typing import Optional, Type
+    from typing import DefaultDict, Optional, Type
 
 
 class {NAME}(StrEnum):
@@ -57,9 +58,10 @@ class {NAME}(StrEnum):
         #: Numeric value of the option type.
         opt_value: 'int'
 
-    def __new__(cls, value: 'int', name: 'Optional[str]' = None) -> 'Type[{NAME}]':
-        if name is None:
-            name = 'opt_unknown'
+    #: Mapping of members based on namespace.
+    __members_ns__: 'DefaultDict[str, dict[int, {NAME}]]' = defaultdict(dict)
+
+    def __new__(cls, value: 'int', name: 'str' = 'opt_unknown') -> 'Type[{NAME}]':
         temp = '%d_%s' % (value, name)
 
         obj = str.__new__(cls, temp)
@@ -67,6 +69,9 @@ class {NAME}(StrEnum):
 
         obj.opt_name = name
         obj.opt_value = value
+
+        namespace = name.split('_', maxsplit=1)[0]
+        cls.__members_ns__[namespace][value] = obj
 
         return obj
 
@@ -87,13 +92,14 @@ class {NAME}(StrEnum):
         :meta private:
         """
         if isinstance(key, int):
-            for enum_key, enum_val in {NAME}.__members__.items():
-                if (enum_key.startswith(namespace) or enum_key.startswith('opt')) and enum_val.opt_value == key:
-                    return enum_val
-            return extend_enum({NAME}, 'opt_unknown_%d' % key, key, 'opt_unknown')
-        if key not in {NAME}._member_map_:  # pylint: disable=no-member
-            return extend_enum({NAME}, key, default)
-        return {NAME}[key]  # type: ignore[misc]
+            temp_ns = {NAME}.__members_ns__.get('opt', {{}}).copy()
+            temp_ns.update({NAME}.__members_ns__.get(namespace, {{}}))
+            if key in temp_ns:
+                return temp_ns[key]
+            return extend_enum({NAME}, '%s_unknown_%d' % (namespace, key), key, '%s_unknown' % namespace)
+        if key in {NAME}.__members__:
+            return getattr({NAME}, key)
+        return extend_enum({NAME}, key, default, key)
 
     @classmethod
     def _missing_(cls, value: 'int') -> '{NAME}':
@@ -105,6 +111,8 @@ class {NAME}(StrEnum):
         """
         if not ({FLAG}):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))
+        if value in cls.__members_ns__.get('opt', {{}}):
+            return cls.__members_ns__['opt'][value]
         {MISS}
         {'' if ''.join(MISS.splitlines()[-1:]).startswith('return') else 'return super()._missing_(value)'}
 '''.strip()  # type: Callable[[str, str, str, str, str, str], str]

@@ -10,6 +10,7 @@ This module contains the constant enumeration for **Option Types**,
 which is automatically generated from :class:`pcapkit.vendor.pcapng.option_type.OptionType`.
 
 """
+from collections import defaultdict
 from typing import TYPE_CHECKING
 
 from aenum import StrEnum, extend_enum
@@ -17,7 +18,7 @@ from aenum import StrEnum, extend_enum
 __all__ = ['OptionType']
 
 if TYPE_CHECKING:
-    from typing import Optional, Type
+    from typing import DefaultDict, Optional, Type
 
 
 class OptionType(StrEnum):
@@ -29,9 +30,10 @@ class OptionType(StrEnum):
         #: Numeric value of the option type.
         opt_value: 'int'
 
-    def __new__(cls, value: 'int', name: 'Optional[str]' = None) -> 'Type[OptionType]':
-        if name is None:
-            name = 'opt_unknown'
+    #: Mapping of members based on namespace.
+    __members_ns__: 'DefaultDict[str, dict[int, OptionType]]' = defaultdict(dict)
+
+    def __new__(cls, value: 'int', name: 'str' = 'opt_unknown') -> 'Type[OptionType]':
         temp = '%d_%s' % (value, name)
 
         obj = str.__new__(cls, temp)
@@ -39,6 +41,9 @@ class OptionType(StrEnum):
 
         obj.opt_name = name
         obj.opt_value = value
+
+        namespace = name.split('_', maxsplit=1)[0]
+        cls.__members_ns__[namespace][value] = obj
 
         return obj
 
@@ -177,13 +182,14 @@ class OptionType(StrEnum):
         :meta private:
         """
         if isinstance(key, int):
-            for enum_key, enum_val in OptionType.__members__.items():
-                if (enum_key.startswith(namespace) or enum_key.startswith('opt')) and enum_val.opt_value == key:
-                    return enum_val
-            return extend_enum(OptionType, 'opt_unknown_%d' % key, key, 'opt_unknown')
-        if key not in OptionType._member_map_:  # pylint: disable=no-member
-            return extend_enum(OptionType, key, default)
-        return OptionType[key]  # type: ignore[misc]
+            temp_ns = OptionType.__members_ns__.get('opt', {}).copy()
+            temp_ns.update(OptionType.__members_ns__.get(namespace, {}))
+            if key in temp_ns:
+                return temp_ns[key]
+            return extend_enum(OptionType, '%s_unknown_%d' % (namespace, key), key, '%s_unknown' % namespace)
+        if key in OptionType.__members__:
+            return getattr(OptionType, key)
+        return extend_enum(OptionType, key, default, key)
 
     @classmethod
     def _missing_(cls, value: 'int') -> 'OptionType':
@@ -195,4 +201,6 @@ class OptionType(StrEnum):
         """
         if not (isinstance(value, int) and 0 <= value <= 0xFFFF):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))
+        if value in cls.__members_ns__.get('opt', {}):
+            return cls.__members_ns__['opt'][value]
         return extend_enum(cls, 'opt_unknown_%d' % value, value, 'opt_unknown')
