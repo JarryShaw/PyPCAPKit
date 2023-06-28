@@ -24,6 +24,7 @@ __all__ = ['StatusCode']
 #: Default constant template of enumerate registry from IANA CSV.
 LINE = lambda NAME, DOCS, FLAG, ENUM, MISS, MODL: f'''\
 # -*- coding: utf-8 -*-
+# mypy: disable-error-code=assignment
 # pylint: disable=line-too-long,consider-using-f-string
 """{(name := DOCS.split(' [', maxsplit=1)[0])}
 {'=' * (len(name) + 6)}
@@ -52,13 +53,19 @@ class {NAME}(IntEnum):
         #: Status message.
         message: 'str'
 
-    def __new__(cls, value: 'int', message: 'str' = '') -> 'Type[{NAME}]':
+    def __new__(cls, value: 'int', message: 'str' = '(Unknown)') -> 'Type[{NAME}]':
         obj = int.__new__(cls, value)
         obj._value_ = value
 
         obj.message = message
 
         return obj
+
+    def __repr__(self) -> 'str':
+        return "<%s [%s]>" % (self.__class__.__name__, self._value_)
+
+    def __str__(self) -> 'str':
+        return "[%s] %s" % (self._value_, self.message)
 
     {ENUM}
 
@@ -89,7 +96,7 @@ class {NAME}(IntEnum):
         if not ({FLAG}):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))
         {MISS}
-        {'' if 'return' in ''.join(MISS.splitlines()[-1:]) else 'return super()._missing_(value)'}
+        {'' if (test := ''.join(MISS.splitlines()[-1:])).startswith('return') or test[8:].startswith('return') else 'return super()._missing_(value)'}
 '''.strip()  # type: Callable[[str, str, str, str, str, str], str]
 
 
@@ -137,9 +144,10 @@ class StatusCode(Vendor):
 
             try:
                 code, _ = item[0], int(item[0])
-                renm = self.rename(name, code)
+                if name != '(Unused)':
+                    name = re.sub(r'\(.*\)', '', name).strip()
 
-                pres = f'{renm.upper()} = {code}, {name!r}'
+                pres = f'CODE_{code} = {code}, {name!r}'
                 sufs = f'#: {desc}'
 
                 #if len(pres) > 74:
@@ -152,7 +160,7 @@ class StatusCode(Vendor):
 
                 miss.append(f'if {start} <= value <= {stop}:')
                 miss.append(f'    #: {desc}')
-                miss.append(f"    extend_enum(cls, '{self.safe_name(name)}_%d' % value, value)")
+                miss.append(f"    extend_enum(cls, 'CODE_%d' % value, value, {name!r})")
                 miss.append('    return cls(value)')
         return enum, miss
 

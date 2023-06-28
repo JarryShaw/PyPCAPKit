@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+# mypy: disable-error-code=assignment
 # pylint: disable=line-too-long,consider-using-f-string
 """HTTP Status Code
 ======================
@@ -27,7 +28,7 @@ class StatusCode(IntEnum):
         #: Status message.
         message: 'str'
 
-    def __new__(cls, value: 'int', message: 'str' = '') -> 'Type[StatusCode]':
+    def __new__(cls, value: 'int', message: 'str' = '(Unknown)') -> 'Type[StatusCode]':
         obj = int.__new__(cls, value)
         obj._value_ = value
 
@@ -35,204 +36,210 @@ class StatusCode(IntEnum):
 
         return obj
 
+    def __repr__(self) -> 'str':
+        return "<%s [%s]>" % (self.__class__.__name__, self._value_)
+
+    def __str__(self) -> 'str':
+        return "[%s] %s" % (self._value_, self.message)
+
     #: Continue [:rfc:`9110#section-15.2.1`]
-    CONTINUE = 100, 'Continue'
+    CODE_100 = 100, 'Continue'
 
     #: Switching Protocols [:rfc:`9110#section-15.2.2`]
-    SWITCHING_PROTOCOLS = 101, 'Switching Protocols'
+    CODE_101 = 101, 'Switching Protocols'
 
     #: Processing [:rfc:`2518`]
-    PROCESSING = 102, 'Processing'
+    CODE_102 = 102, 'Processing'
 
     #: Early Hints [:rfc:`8297`]
-    EARLY_HINTS = 103, 'Early Hints'
+    CODE_103 = 103, 'Early Hints'
 
     #: OK [:rfc:`9110#section-15.3.1`]
-    OK = 200, 'OK'
+    CODE_200 = 200, 'OK'
 
     #: Created [:rfc:`9110#section-15.3.2`]
-    CREATED = 201, 'Created'
+    CODE_201 = 201, 'Created'
 
     #: Accepted [:rfc:`9110#section-15.3.3`]
-    ACCEPTED = 202, 'Accepted'
+    CODE_202 = 202, 'Accepted'
 
     #: Non-Authoritative Information [:rfc:`9110#section-15.3.4`]
-    NON_AUTHORITATIVE_INFORMATION = 203, 'Non-Authoritative Information'
+    CODE_203 = 203, 'Non-Authoritative Information'
 
     #: No Content [:rfc:`9110#section-15.3.5`]
-    NO_CONTENT = 204, 'No Content'
+    CODE_204 = 204, 'No Content'
 
     #: Reset Content [:rfc:`9110#section-15.3.6`]
-    RESET_CONTENT = 205, 'Reset Content'
+    CODE_205 = 205, 'Reset Content'
 
     #: Partial Content [:rfc:`9110#section-15.3.7`]
-    PARTIAL_CONTENT = 206, 'Partial Content'
+    CODE_206 = 206, 'Partial Content'
 
     #: Multi-Status [:rfc:`4918`]
-    MULTI_STATUS = 207, 'Multi-Status'
+    CODE_207 = 207, 'Multi-Status'
 
     #: Already Reported [:rfc:`5842`]
-    ALREADY_REPORTED = 208, 'Already Reported'
+    CODE_208 = 208, 'Already Reported'
 
     #: IM Used [:rfc:`3229`]
-    IM_USED = 226, 'IM Used'
+    CODE_226 = 226, 'IM Used'
 
     #: Multiple Choices [:rfc:`9110#section-15.4.1`]
-    MULTIPLE_CHOICES = 300, 'Multiple Choices'
+    CODE_300 = 300, 'Multiple Choices'
 
     #: Moved Permanently [:rfc:`9110#section-15.4.2`]
-    MOVED_PERMANENTLY = 301, 'Moved Permanently'
+    CODE_301 = 301, 'Moved Permanently'
 
     #: Found [:rfc:`9110#section-15.4.3`]
-    FOUND = 302, 'Found'
+    CODE_302 = 302, 'Found'
 
     #: See Other [:rfc:`9110#section-15.4.4`]
-    SEE_OTHER = 303, 'See Other'
+    CODE_303 = 303, 'See Other'
 
     #: Not Modified [:rfc:`9110#section-15.4.5`]
-    NOT_MODIFIED = 304, 'Not Modified'
+    CODE_304 = 304, 'Not Modified'
 
     #: Use Proxy [:rfc:`9110#section-15.4.6`]
-    USE_PROXY = 305, 'Use Proxy'
+    CODE_305 = 305, 'Use Proxy'
 
     #: (Unused) [:rfc:`9110#section-15.4.7`]
-    STATUSCODE_306 = 306, '(Unused)'
+    CODE_306 = 306, '(Unused)'
 
     #: Temporary Redirect [:rfc:`9110#section-15.4.8`]
-    TEMPORARY_REDIRECT = 307, 'Temporary Redirect'
+    CODE_307 = 307, 'Temporary Redirect'
 
     #: Permanent Redirect [:rfc:`9110#section-15.4.9`]
-    PERMANENT_REDIRECT = 308, 'Permanent Redirect'
+    CODE_308 = 308, 'Permanent Redirect'
 
     #: Bad Request [:rfc:`9110#section-15.5.1`]
-    BAD_REQUEST = 400, 'Bad Request'
+    CODE_400 = 400, 'Bad Request'
 
     #: Unauthorized [:rfc:`9110#section-15.5.2`]
-    UNAUTHORIZED = 401, 'Unauthorized'
+    CODE_401 = 401, 'Unauthorized'
 
     #: Payment Required [:rfc:`9110#section-15.5.3`]
-    PAYMENT_REQUIRED = 402, 'Payment Required'
+    CODE_402 = 402, 'Payment Required'
 
     #: Forbidden [:rfc:`9110#section-15.5.4`]
-    FORBIDDEN = 403, 'Forbidden'
+    CODE_403 = 403, 'Forbidden'
 
     #: Not Found [:rfc:`9110#section-15.5.5`]
-    NOT_FOUND = 404, 'Not Found'
+    CODE_404 = 404, 'Not Found'
 
     #: Method Not Allowed [:rfc:`9110#section-15.5.6`]
-    METHOD_NOT_ALLOWED = 405, 'Method Not Allowed'
+    CODE_405 = 405, 'Method Not Allowed'
 
     #: Not Acceptable [:rfc:`9110#section-15.5.7`]
-    NOT_ACCEPTABLE = 406, 'Not Acceptable'
+    CODE_406 = 406, 'Not Acceptable'
 
     #: Proxy Authentication Required [:rfc:`9110#section-15.5.8`]
-    PROXY_AUTHENTICATION_REQUIRED = 407, 'Proxy Authentication Required'
+    CODE_407 = 407, 'Proxy Authentication Required'
 
     #: Request Timeout [:rfc:`9110#section-15.5.9`]
-    REQUEST_TIMEOUT = 408, 'Request Timeout'
+    CODE_408 = 408, 'Request Timeout'
 
     #: Conflict [:rfc:`9110#section-15.5.10`]
-    CONFLICT = 409, 'Conflict'
+    CODE_409 = 409, 'Conflict'
 
     #: Gone [:rfc:`9110#section-15.5.11`]
-    GONE = 410, 'Gone'
+    CODE_410 = 410, 'Gone'
 
     #: Length Required [:rfc:`9110#section-15.5.12`]
-    LENGTH_REQUIRED = 411, 'Length Required'
+    CODE_411 = 411, 'Length Required'
 
     #: Precondition Failed [:rfc:`9110#section-15.5.13`]
-    PRECONDITION_FAILED = 412, 'Precondition Failed'
+    CODE_412 = 412, 'Precondition Failed'
 
     #: Content Too Large [:rfc:`9110#section-15.5.14`]
-    CONTENT_TOO_LARGE = 413, 'Content Too Large'
+    CODE_413 = 413, 'Content Too Large'
 
     #: URI Too Long [:rfc:`9110#section-15.5.15`]
-    URI_TOO_LONG = 414, 'URI Too Long'
+    CODE_414 = 414, 'URI Too Long'
 
     #: Unsupported Media Type [:rfc:`9110#section-15.5.16`]
-    UNSUPPORTED_MEDIA_TYPE = 415, 'Unsupported Media Type'
+    CODE_415 = 415, 'Unsupported Media Type'
 
     #: Range Not Satisfiable [:rfc:`9110#section-15.5.17`]
-    RANGE_NOT_SATISFIABLE = 416, 'Range Not Satisfiable'
+    CODE_416 = 416, 'Range Not Satisfiable'
 
     #: Expectation Failed [:rfc:`9110#section-15.5.18`]
-    EXPECTATION_FAILED = 417, 'Expectation Failed'
+    CODE_417 = 417, 'Expectation Failed'
 
     #: (Unused) [:rfc:`9110#section-15.5.19`]
-    STATUSCODE_418 = 418, '(Unused)'
+    CODE_418 = 418, '(Unused)'
 
     #: Misdirected Request [:rfc:`9110#section-15.5.20`]
-    MISDIRECTED_REQUEST = 421, 'Misdirected Request'
+    CODE_421 = 421, 'Misdirected Request'
 
     #: Unprocessable Content [:rfc:`9110#section-15.5.21`]
-    UNPROCESSABLE_CONTENT = 422, 'Unprocessable Content'
+    CODE_422 = 422, 'Unprocessable Content'
 
     #: Locked [:rfc:`4918`]
-    LOCKED = 423, 'Locked'
+    CODE_423 = 423, 'Locked'
 
     #: Failed Dependency [:rfc:`4918`]
-    FAILED_DEPENDENCY = 424, 'Failed Dependency'
+    CODE_424 = 424, 'Failed Dependency'
 
     #: Too Early [:rfc:`8470`]
-    TOO_EARLY = 425, 'Too Early'
+    CODE_425 = 425, 'Too Early'
 
     #: Upgrade Required [:rfc:`9110#section-15.5.22`]
-    UPGRADE_REQUIRED = 426, 'Upgrade Required'
+    CODE_426 = 426, 'Upgrade Required'
 
     #: Unassigned
-    UNASSIGNED_427 = 427, 'Unassigned'
+    CODE_427 = 427, 'Unassigned'
 
     #: Precondition Required [:rfc:`6585`]
-    PRECONDITION_REQUIRED = 428, 'Precondition Required'
+    CODE_428 = 428, 'Precondition Required'
 
     #: Too Many Requests [:rfc:`6585`]
-    TOO_MANY_REQUESTS = 429, 'Too Many Requests'
+    CODE_429 = 429, 'Too Many Requests'
 
     #: Unassigned
-    UNASSIGNED_430 = 430, 'Unassigned'
+    CODE_430 = 430, 'Unassigned'
 
     #: Request Header Fields Too Large [:rfc:`6585`]
-    REQUEST_HEADER_FIELDS_TOO_LARGE = 431, 'Request Header Fields Too Large'
+    CODE_431 = 431, 'Request Header Fields Too Large'
 
     #: Unavailable For Legal Reasons [:rfc:`7725`]
-    UNAVAILABLE_FOR_LEGAL_REASONS = 451, 'Unavailable For Legal Reasons'
+    CODE_451 = 451, 'Unavailable For Legal Reasons'
 
     #: Internal Server Error [:rfc:`9110#section-15.6.1`]
-    INTERNAL_SERVER_ERROR = 500, 'Internal Server Error'
+    CODE_500 = 500, 'Internal Server Error'
 
     #: Not Implemented [:rfc:`9110#section-15.6.2`]
-    NOT_IMPLEMENTED = 501, 'Not Implemented'
+    CODE_501 = 501, 'Not Implemented'
 
     #: Bad Gateway [:rfc:`9110#section-15.6.3`]
-    BAD_GATEWAY = 502, 'Bad Gateway'
+    CODE_502 = 502, 'Bad Gateway'
 
     #: Service Unavailable [:rfc:`9110#section-15.6.4`]
-    SERVICE_UNAVAILABLE = 503, 'Service Unavailable'
+    CODE_503 = 503, 'Service Unavailable'
 
     #: Gateway Timeout [:rfc:`9110#section-15.6.5`]
-    GATEWAY_TIMEOUT = 504, 'Gateway Timeout'
+    CODE_504 = 504, 'Gateway Timeout'
 
     #: HTTP Version Not Supported [:rfc:`9110#section-15.6.6`]
-    HTTP_VERSION_NOT_SUPPORTED = 505, 'HTTP Version Not Supported'
+    CODE_505 = 505, 'HTTP Version Not Supported'
 
     #: Variant Also Negotiates [:rfc:`2295`]
-    VARIANT_ALSO_NEGOTIATES = 506, 'Variant Also Negotiates'
+    CODE_506 = 506, 'Variant Also Negotiates'
 
     #: Insufficient Storage [:rfc:`4918`]
-    INSUFFICIENT_STORAGE = 507, 'Insufficient Storage'
+    CODE_507 = 507, 'Insufficient Storage'
 
     #: Loop Detected [:rfc:`5842`]
-    LOOP_DETECTED = 508, 'Loop Detected'
+    CODE_508 = 508, 'Loop Detected'
 
     #: Unassigned
-    UNASSIGNED_509 = 509, 'Unassigned'
+    CODE_509 = 509, 'Unassigned'
 
     #: Not Extended (OBSOLETED) [:rfc:`2774`][status-change-http-experiments-to-
     #: historic]
-    NOT_EXTENDED = 510, 'Not Extended (OBSOLETED)'
+    CODE_510 = 510, 'Not Extended'
 
     #: Network Authentication Required [:rfc:`6585`]
-    NETWORK_AUTHENTICATION_REQUIRED = 511, 'Network Authentication Required'
+    CODE_511 = 511, 'Network Authentication Required'
 
     @staticmethod
     def get(key: 'int | str', default: 'int' = -1) -> 'StatusCode':
@@ -262,33 +269,34 @@ class StatusCode(IntEnum):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))
         if 104 <= value <= 199:
             #: Unassigned
-            extend_enum(cls, 'Unassigned_%d' % value, value)
+            extend_enum(cls, 'CODE_%d' % value, value, 'Unassigned')
             return cls(value)
         if 209 <= value <= 225:
             #: Unassigned
-            extend_enum(cls, 'Unassigned_%d' % value, value)
+            extend_enum(cls, 'CODE_%d' % value, value, 'Unassigned')
             return cls(value)
         if 227 <= value <= 299:
             #: Unassigned
-            extend_enum(cls, 'Unassigned_%d' % value, value)
+            extend_enum(cls, 'CODE_%d' % value, value, 'Unassigned')
             return cls(value)
         if 309 <= value <= 399:
             #: Unassigned
-            extend_enum(cls, 'Unassigned_%d' % value, value)
+            extend_enum(cls, 'CODE_%d' % value, value, 'Unassigned')
             return cls(value)
         if 419 <= value <= 420:
             #: Unassigned
-            extend_enum(cls, 'Unassigned_%d' % value, value)
+            extend_enum(cls, 'CODE_%d' % value, value, 'Unassigned')
             return cls(value)
         if 432 <= value <= 450:
             #: Unassigned
-            extend_enum(cls, 'Unassigned_%d' % value, value)
+            extend_enum(cls, 'CODE_%d' % value, value, 'Unassigned')
             return cls(value)
         if 452 <= value <= 499:
             #: Unassigned
-            extend_enum(cls, 'Unassigned_%d' % value, value)
+            extend_enum(cls, 'CODE_%d' % value, value, 'Unassigned')
             return cls(value)
         if 512 <= value <= 599:
             #: Unassigned
-            extend_enum(cls, 'Unassigned_%d' % value, value)
+            extend_enum(cls, 'CODE_%d' % value, value, 'Unassigned')
             return cls(value)
+        return super()._missing_(value)

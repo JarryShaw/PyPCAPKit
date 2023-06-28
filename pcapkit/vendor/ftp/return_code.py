@@ -10,6 +10,7 @@ which is automatically generating :class:`pcapkit.const.ftp.return_code.ReturnCo
 """
 
 import collections
+import re
 import sys
 from typing import TYPE_CHECKING
 
@@ -27,6 +28,7 @@ __all__ = ['ReturnCode']
 
 LINE = lambda NAME, DOCS, FLAG, ENUM, MODL: f'''\
 # -*- coding: utf-8 -*-
+# mypy: disable-error-code=assignment
 # pylint: disable=line-too-long,consider-using-f-string
 """{(name := DOCS.split(' [', maxsplit=1)[0])}
 {'=' * (len(name) + 6)}
@@ -47,16 +49,6 @@ if TYPE_CHECKING:
 
 __all__ = ['{NAME}']
 
-#: Response kind; whether the response is good, bad or incomplete.
-KIND = {{
-    '1': 'Positive Preliminary',
-    '2': 'Positive Completion',
-    '3': 'Positive Intermediate',
-    '4': 'Transient Negative Completion',
-    '5': 'Permanent Negative Completion',
-    '6': 'Protected',
-}}  # type: dict[str, str]
-
 #: Grouping information.
 INFO = {{
     '0': 'Syntax',
@@ -68,6 +60,50 @@ INFO = {{
 }}  # type: dict[str, str]
 
 
+class ResponseKind(IntEnum):
+    """Response kind; whether the response is good, bad or incomplete."""
+
+    PositivePreliminary = 1
+    PositiveCompletion = 2
+    PositiveIntermediate = 3
+    TransientNegativeCompletion = 4
+    PermanentNegativeCompletion = 5
+    Protected = 6
+
+    def _missing_(cls, value: 'int') -> 'ResponseKind':
+        """Lookup function used when value is not found.
+
+        Args:
+            value: Value to lookup.
+
+        """
+        if isinstance(value, int) and 0 <= value <= 9:
+            return extend_enum(cls, 'Unknown_%d' % value, value)
+        return super()._missing_(value)
+
+
+class GroupingInformation(IntEnum):
+    """Grouping information."""
+
+    Syntax = 0
+    Information = 1
+    Connections = 2
+    AuthenticationAccounting = 3
+    Unspecified = 4
+    FileSystem = 5
+
+    def _missing_(cls, value: 'int') -> 'GroupingInformation':
+        """Lookup function used when value is not found.
+
+        Args:
+            value: Value to lookup.
+
+        """
+        if isinstance(value, int) and 0 <= value <= 9:
+            return extend_enum(cls, 'Unknown_%d' % value, value)
+        return super()._missing_(value)
+
+
 class {NAME}(IntEnum):
     """[{NAME}] {DOCS}"""
 
@@ -75,9 +111,9 @@ class {NAME}(IntEnum):
         #: Description of the return code.
         description: 'Optional[str]'
         #: Response kind.
-        kind: 'str'
+        kind: 'ResponseKind'
         #: Grouping information.
-        group: 'str'
+        group: 'GroupingInformation'
 
     def __new__(cls, value: 'int', description: 'Optional[str]' = None) -> 'Type[{NAME}]':
         obj = int.__new__(cls, value)
@@ -85,13 +121,16 @@ class {NAME}(IntEnum):
 
         code = str(value)
         obj.description = description
-        obj.kind = KIND.get(str(value)[0], 'Reserved')
-        obj.group = INFO.get(str(value)[1], 'Reserved')
+        obj.kind = ResponseKind(int(code[0]))
+        obj.group = GroupingInformation(int(code[1]))
 
         return obj
 
     def __repr__(self) -> 'str':
         return "<%s [%s]>" % (self.__class__.__name__, self._value_)
+
+    def __str__(self) -> 'str':
+        return "[%s] %s" % (self._value_, self.description)
 
     {ENUM}
 
@@ -184,10 +223,12 @@ class ReturnCode(Vendor):
             #desc = f"{' '.join(line[1].stripped_strings).split('.')[0].strip()}."
             #enum.append(f'{self.NAME}[{self.rename(desc, code)!r}] = {code}')
 
-            cmmt = '. '.join(map(lambda s: s.strip(), ' '.join(
-                line[1].stripped_strings).split('.'))).replace('e. g. ,', 'e.g.,').strip()
+            cmmt = re.sub(r'  +', r' ', '. '.join(map(lambda s: s.strip(), ' '.join(
+                line[1].stripped_strings).split('.'))).replace('e. g. ,', 'e.g.,').strip())
             sufs = self.wrap_comment(cmmt)  # pylint: disable=line-too-long
-            pref = f"CODE_{code} = {code}, {cmmt!r}"
+
+            desc = re.sub(r'\(.*\)', r'', cmmt.split('.', maxsplit=1)[0]).strip() + '.'
+            pref = f"CODE_{code}: 'ReturnCode' = {code}, {desc!r}"
 
             enum.append(f'#: {sufs}\n    {pref}')
         return enum
