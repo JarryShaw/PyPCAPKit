@@ -11,7 +11,7 @@ html5lib == 1.1
 idna == 3.4
 lxml == 4.9.2
 packaging == 23.1
-pathlib2 == 2.3.7.post1
+pathlib2== 2.3.7.post1 ; python_version < '3.5'
 pyshark == 0.6
 pysocks == 1.7.1
 requests == 2.31.0
@@ -20,6 +20,6 @@ six == 1.16.0
 soupsieve == 2.4.1
 tbtrim == 0.3.1
 termcolor == 2.3.0
-typing-extensions == 4.6.3
-urllib3 == 2.0.3
+typing-extensions == 4.6.3 ; python_version < '3.8'
+urllib3== 2.0.3
 webencodings == 0.5.1
