@@ -486,6 +486,7 @@
     <span class="kn">from</span> <span class="nn">mypy_extensions</span> <span class="kn">import</span> <span class="n">DefaultArg</span><span class="p">,</span> <span class="n">KwArg</span><span class="p">,</span> <span class="n">NamedArg</span>
     <span class="kn">from</span> <span class="nn">typing_extensions</span> <span class="kn">import</span> <span class="n">Literal</span>
 
+    <span class="kn">from</span> <span class="nn">pcapkit.const.reg.apptype</span> <span class="kn">import</span> <span class="n">AppType</span> <span class="k">as</span> <span class="n">Enum_AppType</span>
     <span class="kn">from</span> <span class="nn">pcapkit.protocols.data.transport.tcp</span> <span class="kn">import</span> <span class="n">MPTCP</span> <span class="k">as</span> <span class="n">Data_MPTCP</span>
     <span class="kn">from</span> <span class="nn">pcapkit.protocols.data.transport.tcp</span> <span class="kn">import</span> <span class="n">MPTCPJoin</span> <span class="k">as</span> <span class="n">Data_MPTCPJoin</span>
     <span class="kn">from</span> <span class="nn">pcapkit.protocols.data.transport.tcp</span> <span class="kn">import</span> <span class="n">Option</span> <span class="k">as</span> <span class="n">Data_Option</span>
@@ -495,7 +496,6 @@
     <span class="kn">from</span> <span class="nn">pcapkit.protocols.schema.transport.tcp</span> <span class="kn">import</span> <span class="n">Flags</span> <span class="k">as</span> <span class="n">Schema_Flags</span>
     <span class="kn">from</span> <span class="nn">pcapkit.protocols.schema.transport.tcp</span> <span class="kn">import</span> <span class="n">MPTCPJoin</span> <span class="k">as</span> <span class="n">Schema_MPTCPJoin</span>
     <span class="kn">from</span> <span class="nn">pcapkit.protocols.schema.transport.tcp</span> <span class="kn">import</span> <span class="n">Option</span> <span class="k">as</span> <span class="n">Schema_Option</span>
-    <span class="kn">from</span> <span class="nn">pcapkit.const.reg.apptype</span> <span class="kn">import</span> <span class="n">AppType</span> <span class="k">as</span> <span class="n">Enum_AppType</span>
 
     <span class="n">Option</span> <span class="o">=</span> <span class="n">OrderedMultiDict</span><span class="p">[</span><span class="n">Enum_Option</span><span class="p">,</span> <span class="n">Data_Option</span><span class="p">]</span>
     <span class="n">OptionParser</span> <span class="o">=</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">Schema_Option</span><span class="p">,</span> <span class="n">NamedArg</span><span class="p">(</span><span class="n">Option</span><span class="p">,</span> <span class="s1">&#39;options&#39;</span><span class="p">)],</span> <span class="n">Data_Option</span><span class="p">]</span>
