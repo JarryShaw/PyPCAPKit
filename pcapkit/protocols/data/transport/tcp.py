@@ -12,10 +12,10 @@ if TYPE_CHECKING:
     from typing import Optional, Union
 
     from pcapkit.const.tcp.checksum import Checksum
+    from pcapkit.const.tcp.flags import Flags as TCP_Flags
     from pcapkit.const.tcp.mp_tcp_option import MPTCPOption
     from pcapkit.const.tcp.option import Option as OptionNumber
     from pcapkit.corekit.multidict import OrderedMultiDict
-    from pcapkit.const.tcp.flags import Flags as TCP_Flags
 
     IPAddress = Union[IPv4Address, IPv6Address]
 

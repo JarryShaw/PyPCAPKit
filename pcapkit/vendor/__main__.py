@@ -18,7 +18,7 @@ from typing import TYPE_CHECKING
 
 from pcapkit import __version__
 from pcapkit import vendor as vendor_module
-from pcapkit.utilities.logging import VERBOSE
+from pcapkit.utilities.logging import VERBOSE, logger
 from pcapkit.utilities.warnings import InvalidVendorWarning, VendorRuntimeWarning, warn
 
 if TYPE_CHECKING:
@@ -48,7 +48,7 @@ def run(vendor: 'Type[Vendor]') -> 'None':
         VendorRuntimeWarning: If failed to initiate the ``vendor`` class.
 
     """
-    print(f'{vendor.__module__}.{vendor.__name__}: {vendor.__doc__}')
+    logger.info(f'{vendor.__module__}.{vendor.__name__}: {vendor.__doc__}')
     try:
         vendor()
     except Exception as error:
