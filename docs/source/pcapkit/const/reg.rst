@@ -15,6 +15,8 @@ implementations. Available enumerations include:
      - Ethertype IEEE 802 Numbers [*]_
    * - :class:`TRANSTYPE <pcapkit.const.reg.transtype.TransType>`
      - Transport Layer Protocol Numbers [*]_
+   * - :class:`APPTYPE <pcapkit.const.reg.apptype.AppType>`
+     - Application Layer Protocol Numbers (Service Name and Transport Protocol Port Number Registry) [*]_
 
 Link-Layer Header Type Values
 =============================
@@ -55,6 +57,19 @@ which is automatically generated from :class:`pcapkit.vendor.reg.transtype.Trans
    :undoc-members:
    :show-inheritance:
 
+Application Layer Protocol Numbers
+==================================
+
+.. module:: pcapkit.const.reg.apptype
+
+This module contains the constant enumeration for **Application Layer Protocol Numbers**,
+which is automatically generated from :class:`pcapkit.vendor.reg.apptype.AppType`.
+
+.. autoclass:: pcapkit.const.reg.apptype.AppType
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 .. raw:: html
 
    <hr />
@@ -62,3 +77,4 @@ which is automatically generated from :class:`pcapkit.vendor.reg.transtype.Trans
 .. [*] http://www.tcpdump.org/linktypes.html
 .. [*] https://www.iana.org/assignments/ieee-802-numbers/ieee-802-numbers.xhtml#ieee-802-numbers-1
 .. [*] https://www.iana.org/assignments/protocol-numbers/protocol-numbers.xhtml#protocol-numbers-1
+.. [*] https://www.iana.org/assignments/service-names-port-numbers/service-names-port-numbers.xhtml?

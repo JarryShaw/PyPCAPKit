@@ -30,7 +30,7 @@ from pcapkit.const.vlan import *
 
 __all__ = [
     # Protocol Registration
-    'ETHERTYPE', 'LINKTYPE', 'TRANSTYPE',
+    'ETHERTYPE', 'LINKTYPE', 'TRANSTYPE', 'APPTYPE',
     # ARP
     'ARP_Hardware', 'ARP_Operation',
     # FTP

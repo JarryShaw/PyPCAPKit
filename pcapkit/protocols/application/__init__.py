@@ -24,7 +24,11 @@ from pcapkit.protocols.application.httpv2 import HTTP as HTTPv2
 # Deprecated / Base Classes
 from pcapkit.protocols.application.http import HTTP
 
+# Transport Layer Protocol Numbers
+from pcapkit.const.reg.apptype import AppType as APPTYPE
+
 __all__ = [
+    'APPTYPE',
     'FTP', 'FTP_DATA',
     'HTTP', 'HTTPv1', 'HTTPv2',
 ]

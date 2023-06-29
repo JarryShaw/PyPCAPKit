@@ -54,7 +54,7 @@ from pcapkit.vendor.vlan import *
 
 __all__ = [
     # Protocol Registration
-    'EtherType', 'LinkType', 'TransType',
+    'EtherType', 'LinkType', 'TransType', 'AppType',
     # ARP
     'ARP_Hardware', 'ARP_Operation',
     # FTP

@@ -15,6 +15,8 @@ implementations. Available vendor crawlers include:
      - Ethertype IEEE 802 Numbers [*]_
    * - :class:`TRANSTYPE <pcapkit.vendor.reg.transtype.TransType>`
      - Transport Layer Protocol Numbers [*]_
+   * - :class:`APPTYPE <pcapkit.vendor.reg.apptype.AppType>`
+     - Application Layer Protocol Numbers (Service Name and Transport Protocol Port Number Registry) [*]_
 
 Link-Layer Header Type Values
 =============================
@@ -52,6 +54,18 @@ which is automatically generating :class:`pcapkit.const.reg.transtype.TransType`
    :members: FLAG, LINK
    :show-inheritance:
 
+Application Layer Protocol Numbers
+==================================
+
+.. module:: pcapkit.vendor.reg.apptype
+
+This module contains the vendor crawler for **Application Layer Protocol Numbers**,
+which is automatically generating :class:`pcapkit.const.reg.apptype.AppType`.
+
+.. autoclass:: pcapkit.vendor.reg.apptype.AppType
+   :members: FLAG, LINK
+   :show-inheritance:
+
 .. raw:: html
 
    <hr />
@@ -59,3 +73,4 @@ which is automatically generating :class:`pcapkit.const.reg.transtype.TransType`
 .. [*] http://www.tcpdump.org/linktypes.html
 .. [*] https://www.iana.org/assignments/ieee-802-numbers/ieee-802-numbers.xhtml#ieee-802-numbers-1
 .. [*] https://www.iana.org/assignments/protocol-numbers/protocol-numbers.xhtml#protocol-numbers-1
+.. [*] https://www.iana.org/assignments/service-names-port-numbers/service-names-port-numbers.xhtml?

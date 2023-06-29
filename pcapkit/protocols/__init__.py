@@ -70,7 +70,7 @@ for name in __all__:
 
 __all__.extend((
     # Protocol Numbers
-    'LINKTYPE', 'ETHERTYPE', 'TRANSTYPE',
+    'LINKTYPE', 'ETHERTYPE', 'TRANSTYPE', 'APPTYPE',
 
     # Protocol Data
     'Data', 'data',

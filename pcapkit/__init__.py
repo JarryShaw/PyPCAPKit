@@ -105,8 +105,7 @@ __all__ = [
     'LINK', 'INET', 'TRANS', 'APP', 'RAW',                  # Layer Macros
     'DPKT', 'Scapy', 'PyShark', 'PCAPKit',                  # Engine Macros
 
-    # Protocol Numbers
-    'LINKTYPE', 'ETHERTYPE', 'TRANSTYPE',
+    'LINKTYPE', 'ETHERTYPE', 'TRANSTYPE', 'APPTYPE',        # Protocol Numbers
 
     'NoPayload',                                            # No Payload
     'Raw',                                                  # Raw Packet
