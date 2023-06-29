@@ -367,21 +367,22 @@
 
 <span class="c1">#: Command type.</span>
 <span class="n">KIND</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s1">&#39;a&#39;</span><span class="p">:</span> <span class="s1">&#39;access control&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;p&#39;</span><span class="p">:</span> <span class="s1">&#39;parameter setting&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;s&#39;</span><span class="p">:</span> <span class="s1">&#39;service execution&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;a&#39;</span><span class="p">:</span> <span class="s1">&#39;CommandType.A&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;p&#39;</span><span class="p">:</span> <span class="s1">&#39;CommandType.P&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;s&#39;</span><span class="p">:</span> <span class="s1">&#39;CommandType.S&#39;</span><span class="p">,</span>
 <span class="p">}</span>  <span class="c1"># type: dict[str, str]</span>
 
 <span class="c1">#: Conformance requirements.</span>
 <span class="n">CONF</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s1">&#39;m&#39;</span><span class="p">:</span> <span class="s1">&#39;mandatory to implement&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;o&#39;</span><span class="p">:</span> <span class="s1">&#39;optional&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;h&#39;</span><span class="p">:</span> <span class="s1">&#39;historic&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;m&#39;</span><span class="p">:</span> <span class="s1">&#39;ConformanceRequirement.M&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;o&#39;</span><span class="p">:</span> <span class="s1">&#39;ConformanceRequirement.O&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;h&#39;</span><span class="p">:</span> <span class="s1">&#39;ConformanceRequirement.H&#39;</span><span class="p">,</span>
 <span class="p">}</span>  <span class="c1"># type: dict[str, str]</span>
 
 <span class="c1">#: Default constant template of enumerate registry from IANA CSV.</span>
 <span class="n">LINE</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">NAME</span><span class="p">,</span> <span class="n">DOCS</span><span class="p">,</span> <span class="n">ENUM</span><span class="p">,</span> <span class="n">MODL</span><span class="p">:</span> <span class="sa">f</span><span class="s1">&#39;&#39;&#39;</span><span class="se">\</span>
 <span class="s1"># -*- coding: utf-8 -*-</span>
+<span class="s1"># mypy: disable-error-code=assignment</span>
 <span class="s1"># pylint: disable=line-too-long,consider-using-f-string</span>
 <span class="s1">&quot;&quot;&quot;</span><span class="si">{</span><span class="p">(</span><span class="n">name</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="n">DOCS</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39; [&#39;</span><span class="p">,</span><span class="w"> </span><span class="n">maxsplit</span><span class="o">=</span><span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span><span class="si">}</span>
 <span class="si">{</span><span class="s1">&#39;=&#39;</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">name</span><span class="p">)</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">6</span><span class="p">)</span><span class="si">}</span>
@@ -395,7 +396,7 @@
 
 <span class="s1">from typing import TYPE_CHECKING</span>
 
-<span class="s1">from aenum import StrEnum, extend_enum</span>
+<span class="s1">from aenum import IntEnum, IntFlag, StrEnum, auto, extend_enum</span>
 
 <span class="s1">if TYPE_CHECKING:</span>
 <span class="s1">    from typing import Optional, Type</span>
@@ -403,24 +404,76 @@
 <span class="s1">__all__ = [&#39;</span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">&#39;]</span>
 
 
+<span class="s1">class FEATCode(StrEnum):</span>
+<span class="s1">    &quot;&quot;&quot;Keyword returned in FEAT response line for this command/extension,</span>
+<span class="s1">    c.f., :rfc:`5797#secion-3`.&quot;&quot;&quot;</span>
+
+<span class="s1">    #: FTP standard commands [:rfc:`0959`].</span>
+<span class="s1">    base = &#39;&lt;base&gt;&#39;</span>
+<span class="s1">    #: Historic experimental commands [:rfc:`0775`][:rfc:`1639`].</span>
+<span class="s1">    hist = &#39;&lt;hist&gt;&#39;</span>
+<span class="s1">    #: FTP Security Extensions [:rfc:`2228`].</span>
+<span class="s1">    secu = &#39;&lt;secu&gt;&#39;</span>
+<span class="s1">    #: FTP Feature Negotiation [:rfc:`2389`].</span>
+<span class="s1">    feat = &#39;&lt;feat&gt;&#39;</span>
+<span class="s1">    #: FTP Extensions for NAT/IPv6 [:rfc:`2428`].</span>
+<span class="s1">    nat6 = &#39;&lt;nat6&gt;&#39;</span>
+
+<span class="s1">    def __repr__(self) -&gt; &#39;str&#39;:</span>
+<span class="s1">        return &quot;&lt;%s [%s]&gt;&quot; % (self.__class__.__name__, self._name_)</span>
+
+<span class="s1">    @classmethod</span>
+<span class="s1">    def _missing_(cls, value: &#39;str&#39;) -&gt; &#39;FEATCode&#39;:</span>
+<span class="s1">        &quot;&quot;&quot;Lookup function used when value is not found.</span>
+
+<span class="s1">        Args:</span>
+<span class="s1">            value: Value to get enum item.</span>
+
+<span class="s1">        &quot;&quot;&quot;</span>
+<span class="s1">        return extend_enum(cls, value.upper(), value)</span>
+
+
+<span class="s1">class CommandType(IntFlag):</span>
+<span class="s1">    &quot;&quot;&quot;Type of &quot;kind&quot; of command, based on :rfc:`959#section-4.1`.&quot;&quot;&quot;</span>
+
+<span class="s1">    undefined = 0</span>
+
+<span class="s1">    #: Access control.</span>
+<span class="s1">    A = auto()</span>
+<span class="s1">    #: Parameter setting.</span>
+<span class="s1">    P = auto()</span>
+<span class="s1">    #: Service execution.</span>
+<span class="s1">    S = auto()</span>
+
+
+<span class="s1">class ConformanceRequirement(IntEnum):</span>
+<span class="s1">    &quot;&quot;&quot;Expectation for support in modern FTP implementations.&quot;&quot;&quot;</span>
+
+<span class="s1">    #: Mandatory to implement.</span>
+<span class="s1">    M = auto()</span>
+<span class="s1">    #: Optional.</span>
+<span class="s1">    O = auto()</span>
+<span class="s1">    #: Historic.</span>
+<span class="s1">    H = auto()</span>
+
+
 <span class="s1">class </span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">(StrEnum):</span>
 <span class="s1">    &quot;&quot;&quot;[</span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">] </span><span class="si">{</span><span class="n">DOCS</span><span class="si">}</span><span class="s1">&quot;&quot;&quot;</span>
 
 <span class="s1">    if TYPE_CHECKING:</span>
-<span class="s1">        #: Feature of command.</span>
-<span class="s1">        feat: &#39;Optional[str]&#39;</span>
-<span class="s1">        #: Description of command.</span>
+<span class="s1">        #: Feature code. Keyword returned in FEAT response line for this command/extension,</span>
+<span class="s1">        #: c.f., :rfc:`5797#secion-2.2`.</span>
+<span class="s1">        feat: &#39;Optional[FEATCode]&#39;</span>
+<span class="s1">        #: Brief description of command / extension.</span>
 <span class="s1">        desc: &#39;Optional[str]&#39;</span>
-<span class="s1">        #: Type of command.</span>
-<span class="s1">        type: &#39;Optional[tuple[str, ...]]&#39;</span>
-<span class="s1">        #: Conformance of command.</span>
-<span class="s1">        conf: &#39;Optional[str]&#39;</span>
-<span class="s1">        #: Note of command.</span>
-<span class="s1">        note: &#39;Optional[tuple[str, ...]]&#39;</span>
+<span class="s1">        #: Type of &quot;kind&quot; of command, based on :rfc:`959#section-4.1`.</span>
+<span class="s1">        type: &#39;CommandType&#39;</span>
+<span class="s1">        #: Expectation for support in modern FTP implementations.</span>
+<span class="s1">        conf: &#39;ConformanceRequirement&#39;</span>
 
-<span class="s1">    def __new__(cls, name: &#39;str&#39;, feat: &#39;Optional[str]&#39; = None, desc: &#39;Optional[str]&#39; = None,</span>
-<span class="s1">                type: &#39;Optional[tuple[str, ...]]&#39; = None, conf: &#39;Optional[str]&#39; = None,</span>
-<span class="s1">                note: &#39;Optional[tuple[str, ...]]&#39; = None) -&gt; &#39;Type[</span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">]&#39;:</span>
+<span class="s1">    def __new__(cls, name: &#39;str&#39;, feat: &#39;Optional[FEATCode]&#39; = None,</span>
+<span class="s1">                desc: &#39;Optional[str]&#39; = None, type: &#39;CommandType&#39; = CommandType.undefined,</span>
+<span class="s1">                conf: &#39;ConformanceRequirement&#39; = ConformanceRequirement.O) -&gt; &#39;Type[</span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">]&#39;:</span>
 <span class="s1">        obj = str.__new__(cls, name)</span>
 <span class="s1">        obj._value_ = name</span>
 
@@ -428,12 +481,11 @@
 <span class="s1">        obj.desc = desc</span>
 <span class="s1">        obj.type = type</span>
 <span class="s1">        obj.conf = conf</span>
-<span class="s1">        obj.note = note</span>
 
 <span class="s1">        return obj</span>
 
 <span class="s1">    def __repr__(self) -&gt; &#39;str&#39;:</span>
-<span class="s1">        return &quot;&lt;%s.%s&gt;&quot; % (self.__class__.__name__, self._name_)</span>
+<span class="s1">        return &quot;&lt;%s.%s: %s&gt;&quot; % (self.__class__.__name__, self._name_, self.desc)</span>
 
 <span class="s1">    </span><span class="si">{</span><span class="n">ENUM</span><span class="si">}</span>
 
@@ -487,29 +539,29 @@
             <span class="n">cmmd</span> <span class="o">=</span> <span class="n">item</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s1">&#39;+&#39;</span><span class="p">)</span>
             <span class="n">feat</span> <span class="o">=</span> <span class="n">item</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="ow">or</span> <span class="kc">None</span>
             <span class="n">desc</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;{.*}&#39;</span><span class="p">,</span> <span class="sa">r</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">item</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="ow">or</span> <span class="kc">None</span>
-            <span class="n">kind</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">KIND</span><span class="p">[</span><span class="n">s</span><span class="p">]</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">item</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)</span> <span class="k">if</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">KIND</span><span class="p">)</span> <span class="ow">or</span> <span class="kc">None</span>
+            <span class="n">kind</span> <span class="o">=</span> <span class="s1">&#39; | &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">KIND</span><span class="p">[</span><span class="n">s</span><span class="p">]</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">item</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)</span> <span class="k">if</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">KIND</span><span class="p">)</span> <span class="ow">or</span> <span class="kc">None</span>
             <span class="n">conf</span> <span class="o">=</span> <span class="n">CONF</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">0</span><span class="p">])</span>
 
             <span class="n">temp</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: list[str]</span>
-            <span class="n">rfcs_temp</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: list[str]</span>
             <span class="c1">#for rfc in filter(lambda s: &#39;RFC&#39; in s, re.split(r&#39;\[|\]&#39;, item[5])):</span>
             <span class="c1">#    temp.append(f&#39;[{rfc[:3]} {rfc[3:]}]&#39;)</span>
             <span class="k">for</span> <span class="n">rfc</span> <span class="ow">in</span> <span class="nb">filter</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">s</span><span class="p">:</span> <span class="n">s</span><span class="o">.</span><span class="n">strip</span><span class="p">(),</span> <span class="n">re</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;\[|\]&#39;</span><span class="p">,</span> <span class="n">item</span><span class="p">[</span><span class="mi">5</span><span class="p">]))):</span>
                 <span class="k">if</span> <span class="s1">&#39;RFC&#39;</span> <span class="ow">in</span> <span class="n">rfc</span> <span class="ow">and</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;\d+&#39;</span><span class="p">,</span> <span class="n">rfc</span><span class="p">[</span><span class="mi">3</span><span class="p">:]):</span>
                     <span class="n">temp</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;[:rfc:`</span><span class="si">{</span><span class="n">rfc</span><span class="p">[</span><span class="mi">3</span><span class="p">:]</span><span class="si">}</span><span class="s1">`]&#39;</span><span class="p">)</span>
-                    <span class="n">rfcs_temp</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">rfc</span><span class="p">[:</span><span class="mi">3</span><span class="p">]</span><span class="si">}</span><span class="s1"> </span><span class="si">{</span><span class="n">rfc</span><span class="p">[</span><span class="mi">3</span><span class="p">:]</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="n">temp</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;[</span><span class="si">{</span><span class="n">rfc</span><span class="si">}</span><span class="s1">]&#39;</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">,</span> <span class="s1">&#39; &#39;</span><span class="p">))</span>
-            <span class="n">rfcs</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">rfcs_temp</span><span class="p">)</span> <span class="ow">or</span> <span class="kc">None</span>
             <span class="n">cmmt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">wrap_comment</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">desc</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">temp</span><span class="p">)))</span>  <span class="c1"># pylint: disable=consider-using-f-string</span>
-
-            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">feat</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">feat</span><span class="o">.</span><span class="n">isupper</span><span class="p">():</span>
-                <span class="n">feat</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;&lt;</span><span class="si">{</span><span class="n">feat</span><span class="si">}</span><span class="s1">&gt;&#39;</span>
 
             <span class="k">if</span> <span class="n">cmmd</span> <span class="o">==</span> <span class="s1">&#39;-N/A-&#39;</span><span class="p">:</span>
                 <span class="n">cmmd</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">&#39;str&#39;</span><span class="p">,</span> <span class="n">feat</span><span class="p">)</span>
 
-            <span class="n">pres</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">cmmd</span><span class="si">}</span><span class="s1"> = </span><span class="si">{</span><span class="n">cmmd</span><span class="si">!r}</span><span class="s1">, </span><span class="si">{</span><span class="n">feat</span><span class="si">!r}</span><span class="s1">, </span><span class="si">{</span><span class="n">desc</span><span class="si">!r}</span><span class="s1">, </span><span class="si">{</span><span class="n">kind</span><span class="si">!r}</span><span class="s1">, </span><span class="si">{</span><span class="n">conf</span><span class="si">!r}</span><span class="s1">, </span><span class="si">{</span><span class="n">rfcs</span><span class="si">!r}</span><span class="s1">&#39;</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">feat</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">feat</span><span class="o">.</span><span class="n">isupper</span><span class="p">():</span>
+                    <span class="n">feat</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;FEATCode.</span><span class="si">{</span><span class="n">feat</span><span class="si">}</span><span class="s1">&#39;</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">feat</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;FEATCode(</span><span class="si">{</span><span class="n">feat</span><span class="si">!r}</span><span class="s1">)&#39;</span>
+
+            <span class="n">pres</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">cmmd</span><span class="si">}</span><span class="s2">: &#39;Command&#39; = </span><span class="si">{</span><span class="n">cmmd</span><span class="si">!r}</span><span class="s2">, </span><span class="si">{</span><span class="n">feat</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">desc</span><span class="si">!r}</span><span class="s2">, </span><span class="si">{</span><span class="n">kind</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="mi">0</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">conf</span><span class="si">}</span><span class="s2">&quot;</span>
             <span class="n">sufs</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;#: </span><span class="si">{</span><span class="n">cmmt</span><span class="si">}</span><span class="s1">&#39;</span>
 
             <span class="n">enum</span><span class="p">[</span><span class="n">cmmd</span><span class="p">]</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">sufs</span><span class="si">}</span><span class="se">\n</span><span class="s1">    </span><span class="si">{</span><span class="n">pres</span><span class="si">}</span><span class="s1">&#39;</span>

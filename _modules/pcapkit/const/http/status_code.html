@@ -342,6 +342,7 @@
         <article role="main">
           <h1>Source code for pcapkit.const.http.status_code</h1><div class="highlight"><pre>
 <span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="c1"># mypy: disable-error-code=assignment</span>
 <span class="c1"># pylint: disable=line-too-long,consider-using-f-string</span>
 <span class="sd">&quot;&quot;&quot;HTTP Status Code</span>
 <span class="sd">======================</span>
@@ -370,7 +371,7 @@
         <span class="c1">#: Status message.</span>
         <span class="n">message</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span>
 
-    <span class="k">def</span> <span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">message</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Type[StatusCode]&#39;</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">message</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span> <span class="o">=</span> <span class="s1">&#39;(Unknown)&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Type[StatusCode]&#39;</span><span class="p">:</span>
         <span class="n">obj</span> <span class="o">=</span> <span class="nb">int</span><span class="o">.</span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
         <span class="n">obj</span><span class="o">.</span><span class="n">_value_</span> <span class="o">=</span> <span class="n">value</span>
 
@@ -378,204 +379,210 @@
 
         <span class="k">return</span> <span class="n">obj</span>
 
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;str&#39;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s2">&quot;&lt;</span><span class="si">%s</span><span class="s2"> [</span><span class="si">%s</span><span class="s2">]&gt;&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_value_</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;str&#39;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s2">&quot;[</span><span class="si">%s</span><span class="s2">] </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_value_</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">message</span><span class="p">)</span>
+
     <span class="c1">#: Continue [:rfc:`9110#section-15.2.1`]</span>
-    <span class="n">CONTINUE</span> <span class="o">=</span> <span class="mi">100</span><span class="p">,</span> <span class="s1">&#39;Continue&#39;</span>
+    <span class="n">CODE_100</span> <span class="o">=</span> <span class="mi">100</span><span class="p">,</span> <span class="s1">&#39;Continue&#39;</span>
 
     <span class="c1">#: Switching Protocols [:rfc:`9110#section-15.2.2`]</span>
-    <span class="n">SWITCHING_PROTOCOLS</span> <span class="o">=</span> <span class="mi">101</span><span class="p">,</span> <span class="s1">&#39;Switching Protocols&#39;</span>
+    <span class="n">CODE_101</span> <span class="o">=</span> <span class="mi">101</span><span class="p">,</span> <span class="s1">&#39;Switching Protocols&#39;</span>
 
     <span class="c1">#: Processing [:rfc:`2518`]</span>
-    <span class="n">PROCESSING</span> <span class="o">=</span> <span class="mi">102</span><span class="p">,</span> <span class="s1">&#39;Processing&#39;</span>
+    <span class="n">CODE_102</span> <span class="o">=</span> <span class="mi">102</span><span class="p">,</span> <span class="s1">&#39;Processing&#39;</span>
 
     <span class="c1">#: Early Hints [:rfc:`8297`]</span>
-    <span class="n">EARLY_HINTS</span> <span class="o">=</span> <span class="mi">103</span><span class="p">,</span> <span class="s1">&#39;Early Hints&#39;</span>
+    <span class="n">CODE_103</span> <span class="o">=</span> <span class="mi">103</span><span class="p">,</span> <span class="s1">&#39;Early Hints&#39;</span>
 
     <span class="c1">#: OK [:rfc:`9110#section-15.3.1`]</span>
-    <span class="n">OK</span> <span class="o">=</span> <span class="mi">200</span><span class="p">,</span> <span class="s1">&#39;OK&#39;</span>
+    <span class="n">CODE_200</span> <span class="o">=</span> <span class="mi">200</span><span class="p">,</span> <span class="s1">&#39;OK&#39;</span>
 
     <span class="c1">#: Created [:rfc:`9110#section-15.3.2`]</span>
-    <span class="n">CREATED</span> <span class="o">=</span> <span class="mi">201</span><span class="p">,</span> <span class="s1">&#39;Created&#39;</span>
+    <span class="n">CODE_201</span> <span class="o">=</span> <span class="mi">201</span><span class="p">,</span> <span class="s1">&#39;Created&#39;</span>
 
     <span class="c1">#: Accepted [:rfc:`9110#section-15.3.3`]</span>
-    <span class="n">ACCEPTED</span> <span class="o">=</span> <span class="mi">202</span><span class="p">,</span> <span class="s1">&#39;Accepted&#39;</span>
+    <span class="n">CODE_202</span> <span class="o">=</span> <span class="mi">202</span><span class="p">,</span> <span class="s1">&#39;Accepted&#39;</span>
 
     <span class="c1">#: Non-Authoritative Information [:rfc:`9110#section-15.3.4`]</span>
-    <span class="n">NON_AUTHORITATIVE_INFORMATION</span> <span class="o">=</span> <span class="mi">203</span><span class="p">,</span> <span class="s1">&#39;Non-Authoritative Information&#39;</span>
+    <span class="n">CODE_203</span> <span class="o">=</span> <span class="mi">203</span><span class="p">,</span> <span class="s1">&#39;Non-Authoritative Information&#39;</span>
 
     <span class="c1">#: No Content [:rfc:`9110#section-15.3.5`]</span>
-    <span class="n">NO_CONTENT</span> <span class="o">=</span> <span class="mi">204</span><span class="p">,</span> <span class="s1">&#39;No Content&#39;</span>
+    <span class="n">CODE_204</span> <span class="o">=</span> <span class="mi">204</span><span class="p">,</span> <span class="s1">&#39;No Content&#39;</span>
 
     <span class="c1">#: Reset Content [:rfc:`9110#section-15.3.6`]</span>
-    <span class="n">RESET_CONTENT</span> <span class="o">=</span> <span class="mi">205</span><span class="p">,</span> <span class="s1">&#39;Reset Content&#39;</span>
+    <span class="n">CODE_205</span> <span class="o">=</span> <span class="mi">205</span><span class="p">,</span> <span class="s1">&#39;Reset Content&#39;</span>
 
     <span class="c1">#: Partial Content [:rfc:`9110#section-15.3.7`]</span>
-    <span class="n">PARTIAL_CONTENT</span> <span class="o">=</span> <span class="mi">206</span><span class="p">,</span> <span class="s1">&#39;Partial Content&#39;</span>
+    <span class="n">CODE_206</span> <span class="o">=</span> <span class="mi">206</span><span class="p">,</span> <span class="s1">&#39;Partial Content&#39;</span>
 
     <span class="c1">#: Multi-Status [:rfc:`4918`]</span>
-    <span class="n">MULTI_STATUS</span> <span class="o">=</span> <span class="mi">207</span><span class="p">,</span> <span class="s1">&#39;Multi-Status&#39;</span>
+    <span class="n">CODE_207</span> <span class="o">=</span> <span class="mi">207</span><span class="p">,</span> <span class="s1">&#39;Multi-Status&#39;</span>
 
     <span class="c1">#: Already Reported [:rfc:`5842`]</span>
-    <span class="n">ALREADY_REPORTED</span> <span class="o">=</span> <span class="mi">208</span><span class="p">,</span> <span class="s1">&#39;Already Reported&#39;</span>
+    <span class="n">CODE_208</span> <span class="o">=</span> <span class="mi">208</span><span class="p">,</span> <span class="s1">&#39;Already Reported&#39;</span>
 
     <span class="c1">#: IM Used [:rfc:`3229`]</span>
-    <span class="n">IM_USED</span> <span class="o">=</span> <span class="mi">226</span><span class="p">,</span> <span class="s1">&#39;IM Used&#39;</span>
+    <span class="n">CODE_226</span> <span class="o">=</span> <span class="mi">226</span><span class="p">,</span> <span class="s1">&#39;IM Used&#39;</span>
 
     <span class="c1">#: Multiple Choices [:rfc:`9110#section-15.4.1`]</span>
-    <span class="n">MULTIPLE_CHOICES</span> <span class="o">=</span> <span class="mi">300</span><span class="p">,</span> <span class="s1">&#39;Multiple Choices&#39;</span>
+    <span class="n">CODE_300</span> <span class="o">=</span> <span class="mi">300</span><span class="p">,</span> <span class="s1">&#39;Multiple Choices&#39;</span>
 
     <span class="c1">#: Moved Permanently [:rfc:`9110#section-15.4.2`]</span>
-    <span class="n">MOVED_PERMANENTLY</span> <span class="o">=</span> <span class="mi">301</span><span class="p">,</span> <span class="s1">&#39;Moved Permanently&#39;</span>
+    <span class="n">CODE_301</span> <span class="o">=</span> <span class="mi">301</span><span class="p">,</span> <span class="s1">&#39;Moved Permanently&#39;</span>
 
     <span class="c1">#: Found [:rfc:`9110#section-15.4.3`]</span>
-    <span class="n">FOUND</span> <span class="o">=</span> <span class="mi">302</span><span class="p">,</span> <span class="s1">&#39;Found&#39;</span>
+    <span class="n">CODE_302</span> <span class="o">=</span> <span class="mi">302</span><span class="p">,</span> <span class="s1">&#39;Found&#39;</span>
 
     <span class="c1">#: See Other [:rfc:`9110#section-15.4.4`]</span>
-    <span class="n">SEE_OTHER</span> <span class="o">=</span> <span class="mi">303</span><span class="p">,</span> <span class="s1">&#39;See Other&#39;</span>
+    <span class="n">CODE_303</span> <span class="o">=</span> <span class="mi">303</span><span class="p">,</span> <span class="s1">&#39;See Other&#39;</span>
 
     <span class="c1">#: Not Modified [:rfc:`9110#section-15.4.5`]</span>
-    <span class="n">NOT_MODIFIED</span> <span class="o">=</span> <span class="mi">304</span><span class="p">,</span> <span class="s1">&#39;Not Modified&#39;</span>
+    <span class="n">CODE_304</span> <span class="o">=</span> <span class="mi">304</span><span class="p">,</span> <span class="s1">&#39;Not Modified&#39;</span>
 
     <span class="c1">#: Use Proxy [:rfc:`9110#section-15.4.6`]</span>
-    <span class="n">USE_PROXY</span> <span class="o">=</span> <span class="mi">305</span><span class="p">,</span> <span class="s1">&#39;Use Proxy&#39;</span>
+    <span class="n">CODE_305</span> <span class="o">=</span> <span class="mi">305</span><span class="p">,</span> <span class="s1">&#39;Use Proxy&#39;</span>
 
     <span class="c1">#: (Unused) [:rfc:`9110#section-15.4.7`]</span>
-    <span class="n">STATUSCODE_306</span> <span class="o">=</span> <span class="mi">306</span><span class="p">,</span> <span class="s1">&#39;(Unused)&#39;</span>
+    <span class="n">CODE_306</span> <span class="o">=</span> <span class="mi">306</span><span class="p">,</span> <span class="s1">&#39;(Unused)&#39;</span>
 
     <span class="c1">#: Temporary Redirect [:rfc:`9110#section-15.4.8`]</span>
-    <span class="n">TEMPORARY_REDIRECT</span> <span class="o">=</span> <span class="mi">307</span><span class="p">,</span> <span class="s1">&#39;Temporary Redirect&#39;</span>
+    <span class="n">CODE_307</span> <span class="o">=</span> <span class="mi">307</span><span class="p">,</span> <span class="s1">&#39;Temporary Redirect&#39;</span>
 
     <span class="c1">#: Permanent Redirect [:rfc:`9110#section-15.4.9`]</span>
-    <span class="n">PERMANENT_REDIRECT</span> <span class="o">=</span> <span class="mi">308</span><span class="p">,</span> <span class="s1">&#39;Permanent Redirect&#39;</span>
+    <span class="n">CODE_308</span> <span class="o">=</span> <span class="mi">308</span><span class="p">,</span> <span class="s1">&#39;Permanent Redirect&#39;</span>
 
     <span class="c1">#: Bad Request [:rfc:`9110#section-15.5.1`]</span>
-    <span class="n">BAD_REQUEST</span> <span class="o">=</span> <span class="mi">400</span><span class="p">,</span> <span class="s1">&#39;Bad Request&#39;</span>
+    <span class="n">CODE_400</span> <span class="o">=</span> <span class="mi">400</span><span class="p">,</span> <span class="s1">&#39;Bad Request&#39;</span>
 
     <span class="c1">#: Unauthorized [:rfc:`9110#section-15.5.2`]</span>
-    <span class="n">UNAUTHORIZED</span> <span class="o">=</span> <span class="mi">401</span><span class="p">,</span> <span class="s1">&#39;Unauthorized&#39;</span>
+    <span class="n">CODE_401</span> <span class="o">=</span> <span class="mi">401</span><span class="p">,</span> <span class="s1">&#39;Unauthorized&#39;</span>
 
     <span class="c1">#: Payment Required [:rfc:`9110#section-15.5.3`]</span>
-    <span class="n">PAYMENT_REQUIRED</span> <span class="o">=</span> <span class="mi">402</span><span class="p">,</span> <span class="s1">&#39;Payment Required&#39;</span>
+    <span class="n">CODE_402</span> <span class="o">=</span> <span class="mi">402</span><span class="p">,</span> <span class="s1">&#39;Payment Required&#39;</span>
 
     <span class="c1">#: Forbidden [:rfc:`9110#section-15.5.4`]</span>
-    <span class="n">FORBIDDEN</span> <span class="o">=</span> <span class="mi">403</span><span class="p">,</span> <span class="s1">&#39;Forbidden&#39;</span>
+    <span class="n">CODE_403</span> <span class="o">=</span> <span class="mi">403</span><span class="p">,</span> <span class="s1">&#39;Forbidden&#39;</span>
 
     <span class="c1">#: Not Found [:rfc:`9110#section-15.5.5`]</span>
-    <span class="n">NOT_FOUND</span> <span class="o">=</span> <span class="mi">404</span><span class="p">,</span> <span class="s1">&#39;Not Found&#39;</span>
+    <span class="n">CODE_404</span> <span class="o">=</span> <span class="mi">404</span><span class="p">,</span> <span class="s1">&#39;Not Found&#39;</span>
 
     <span class="c1">#: Method Not Allowed [:rfc:`9110#section-15.5.6`]</span>
-    <span class="n">METHOD_NOT_ALLOWED</span> <span class="o">=</span> <span class="mi">405</span><span class="p">,</span> <span class="s1">&#39;Method Not Allowed&#39;</span>
+    <span class="n">CODE_405</span> <span class="o">=</span> <span class="mi">405</span><span class="p">,</span> <span class="s1">&#39;Method Not Allowed&#39;</span>
 
     <span class="c1">#: Not Acceptable [:rfc:`9110#section-15.5.7`]</span>
-    <span class="n">NOT_ACCEPTABLE</span> <span class="o">=</span> <span class="mi">406</span><span class="p">,</span> <span class="s1">&#39;Not Acceptable&#39;</span>
+    <span class="n">CODE_406</span> <span class="o">=</span> <span class="mi">406</span><span class="p">,</span> <span class="s1">&#39;Not Acceptable&#39;</span>
 
     <span class="c1">#: Proxy Authentication Required [:rfc:`9110#section-15.5.8`]</span>
-    <span class="n">PROXY_AUTHENTICATION_REQUIRED</span> <span class="o">=</span> <span class="mi">407</span><span class="p">,</span> <span class="s1">&#39;Proxy Authentication Required&#39;</span>
+    <span class="n">CODE_407</span> <span class="o">=</span> <span class="mi">407</span><span class="p">,</span> <span class="s1">&#39;Proxy Authentication Required&#39;</span>
 
     <span class="c1">#: Request Timeout [:rfc:`9110#section-15.5.9`]</span>
-    <span class="n">REQUEST_TIMEOUT</span> <span class="o">=</span> <span class="mi">408</span><span class="p">,</span> <span class="s1">&#39;Request Timeout&#39;</span>
+    <span class="n">CODE_408</span> <span class="o">=</span> <span class="mi">408</span><span class="p">,</span> <span class="s1">&#39;Request Timeout&#39;</span>
 
     <span class="c1">#: Conflict [:rfc:`9110#section-15.5.10`]</span>
-    <span class="n">CONFLICT</span> <span class="o">=</span> <span class="mi">409</span><span class="p">,</span> <span class="s1">&#39;Conflict&#39;</span>
+    <span class="n">CODE_409</span> <span class="o">=</span> <span class="mi">409</span><span class="p">,</span> <span class="s1">&#39;Conflict&#39;</span>
 
     <span class="c1">#: Gone [:rfc:`9110#section-15.5.11`]</span>
-    <span class="n">GONE</span> <span class="o">=</span> <span class="mi">410</span><span class="p">,</span> <span class="s1">&#39;Gone&#39;</span>
+    <span class="n">CODE_410</span> <span class="o">=</span> <span class="mi">410</span><span class="p">,</span> <span class="s1">&#39;Gone&#39;</span>
 
     <span class="c1">#: Length Required [:rfc:`9110#section-15.5.12`]</span>
-    <span class="n">LENGTH_REQUIRED</span> <span class="o">=</span> <span class="mi">411</span><span class="p">,</span> <span class="s1">&#39;Length Required&#39;</span>
+    <span class="n">CODE_411</span> <span class="o">=</span> <span class="mi">411</span><span class="p">,</span> <span class="s1">&#39;Length Required&#39;</span>
 
     <span class="c1">#: Precondition Failed [:rfc:`9110#section-15.5.13`]</span>
-    <span class="n">PRECONDITION_FAILED</span> <span class="o">=</span> <span class="mi">412</span><span class="p">,</span> <span class="s1">&#39;Precondition Failed&#39;</span>
+    <span class="n">CODE_412</span> <span class="o">=</span> <span class="mi">412</span><span class="p">,</span> <span class="s1">&#39;Precondition Failed&#39;</span>
 
     <span class="c1">#: Content Too Large [:rfc:`9110#section-15.5.14`]</span>
-    <span class="n">CONTENT_TOO_LARGE</span> <span class="o">=</span> <span class="mi">413</span><span class="p">,</span> <span class="s1">&#39;Content Too Large&#39;</span>
+    <span class="n">CODE_413</span> <span class="o">=</span> <span class="mi">413</span><span class="p">,</span> <span class="s1">&#39;Content Too Large&#39;</span>
 
     <span class="c1">#: URI Too Long [:rfc:`9110#section-15.5.15`]</span>
-    <span class="n">URI_TOO_LONG</span> <span class="o">=</span> <span class="mi">414</span><span class="p">,</span> <span class="s1">&#39;URI Too Long&#39;</span>
+    <span class="n">CODE_414</span> <span class="o">=</span> <span class="mi">414</span><span class="p">,</span> <span class="s1">&#39;URI Too Long&#39;</span>
 
     <span class="c1">#: Unsupported Media Type [:rfc:`9110#section-15.5.16`]</span>
-    <span class="n">UNSUPPORTED_MEDIA_TYPE</span> <span class="o">=</span> <span class="mi">415</span><span class="p">,</span> <span class="s1">&#39;Unsupported Media Type&#39;</span>
+    <span class="n">CODE_415</span> <span class="o">=</span> <span class="mi">415</span><span class="p">,</span> <span class="s1">&#39;Unsupported Media Type&#39;</span>
 
     <span class="c1">#: Range Not Satisfiable [:rfc:`9110#section-15.5.17`]</span>
-    <span class="n">RANGE_NOT_SATISFIABLE</span> <span class="o">=</span> <span class="mi">416</span><span class="p">,</span> <span class="s1">&#39;Range Not Satisfiable&#39;</span>
+    <span class="n">CODE_416</span> <span class="o">=</span> <span class="mi">416</span><span class="p">,</span> <span class="s1">&#39;Range Not Satisfiable&#39;</span>
 
     <span class="c1">#: Expectation Failed [:rfc:`9110#section-15.5.18`]</span>
-    <span class="n">EXPECTATION_FAILED</span> <span class="o">=</span> <span class="mi">417</span><span class="p">,</span> <span class="s1">&#39;Expectation Failed&#39;</span>
+    <span class="n">CODE_417</span> <span class="o">=</span> <span class="mi">417</span><span class="p">,</span> <span class="s1">&#39;Expectation Failed&#39;</span>
 
     <span class="c1">#: (Unused) [:rfc:`9110#section-15.5.19`]</span>
-    <span class="n">STATUSCODE_418</span> <span class="o">=</span> <span class="mi">418</span><span class="p">,</span> <span class="s1">&#39;(Unused)&#39;</span>
+    <span class="n">CODE_418</span> <span class="o">=</span> <span class="mi">418</span><span class="p">,</span> <span class="s1">&#39;(Unused)&#39;</span>
 
     <span class="c1">#: Misdirected Request [:rfc:`9110#section-15.5.20`]</span>
-    <span class="n">MISDIRECTED_REQUEST</span> <span class="o">=</span> <span class="mi">421</span><span class="p">,</span> <span class="s1">&#39;Misdirected Request&#39;</span>
+    <span class="n">CODE_421</span> <span class="o">=</span> <span class="mi">421</span><span class="p">,</span> <span class="s1">&#39;Misdirected Request&#39;</span>
 
     <span class="c1">#: Unprocessable Content [:rfc:`9110#section-15.5.21`]</span>
-    <span class="n">UNPROCESSABLE_CONTENT</span> <span class="o">=</span> <span class="mi">422</span><span class="p">,</span> <span class="s1">&#39;Unprocessable Content&#39;</span>
+    <span class="n">CODE_422</span> <span class="o">=</span> <span class="mi">422</span><span class="p">,</span> <span class="s1">&#39;Unprocessable Content&#39;</span>
 
     <span class="c1">#: Locked [:rfc:`4918`]</span>
-    <span class="n">LOCKED</span> <span class="o">=</span> <span class="mi">423</span><span class="p">,</span> <span class="s1">&#39;Locked&#39;</span>
+    <span class="n">CODE_423</span> <span class="o">=</span> <span class="mi">423</span><span class="p">,</span> <span class="s1">&#39;Locked&#39;</span>
 
     <span class="c1">#: Failed Dependency [:rfc:`4918`]</span>
-    <span class="n">FAILED_DEPENDENCY</span> <span class="o">=</span> <span class="mi">424</span><span class="p">,</span> <span class="s1">&#39;Failed Dependency&#39;</span>
+    <span class="n">CODE_424</span> <span class="o">=</span> <span class="mi">424</span><span class="p">,</span> <span class="s1">&#39;Failed Dependency&#39;</span>
 
     <span class="c1">#: Too Early [:rfc:`8470`]</span>
-    <span class="n">TOO_EARLY</span> <span class="o">=</span> <span class="mi">425</span><span class="p">,</span> <span class="s1">&#39;Too Early&#39;</span>
+    <span class="n">CODE_425</span> <span class="o">=</span> <span class="mi">425</span><span class="p">,</span> <span class="s1">&#39;Too Early&#39;</span>
 
     <span class="c1">#: Upgrade Required [:rfc:`9110#section-15.5.22`]</span>
-    <span class="n">UPGRADE_REQUIRED</span> <span class="o">=</span> <span class="mi">426</span><span class="p">,</span> <span class="s1">&#39;Upgrade Required&#39;</span>
+    <span class="n">CODE_426</span> <span class="o">=</span> <span class="mi">426</span><span class="p">,</span> <span class="s1">&#39;Upgrade Required&#39;</span>
 
     <span class="c1">#: Unassigned</span>
-    <span class="n">UNASSIGNED_427</span> <span class="o">=</span> <span class="mi">427</span><span class="p">,</span> <span class="s1">&#39;Unassigned&#39;</span>
+    <span class="n">CODE_427</span> <span class="o">=</span> <span class="mi">427</span><span class="p">,</span> <span class="s1">&#39;Unassigned&#39;</span>
 
     <span class="c1">#: Precondition Required [:rfc:`6585`]</span>
-    <span class="n">PRECONDITION_REQUIRED</span> <span class="o">=</span> <span class="mi">428</span><span class="p">,</span> <span class="s1">&#39;Precondition Required&#39;</span>
+    <span class="n">CODE_428</span> <span class="o">=</span> <span class="mi">428</span><span class="p">,</span> <span class="s1">&#39;Precondition Required&#39;</span>
 
     <span class="c1">#: Too Many Requests [:rfc:`6585`]</span>
-    <span class="n">TOO_MANY_REQUESTS</span> <span class="o">=</span> <span class="mi">429</span><span class="p">,</span> <span class="s1">&#39;Too Many Requests&#39;</span>
+    <span class="n">CODE_429</span> <span class="o">=</span> <span class="mi">429</span><span class="p">,</span> <span class="s1">&#39;Too Many Requests&#39;</span>
 
     <span class="c1">#: Unassigned</span>
-    <span class="n">UNASSIGNED_430</span> <span class="o">=</span> <span class="mi">430</span><span class="p">,</span> <span class="s1">&#39;Unassigned&#39;</span>
+    <span class="n">CODE_430</span> <span class="o">=</span> <span class="mi">430</span><span class="p">,</span> <span class="s1">&#39;Unassigned&#39;</span>
 
     <span class="c1">#: Request Header Fields Too Large [:rfc:`6585`]</span>
-    <span class="n">REQUEST_HEADER_FIELDS_TOO_LARGE</span> <span class="o">=</span> <span class="mi">431</span><span class="p">,</span> <span class="s1">&#39;Request Header Fields Too Large&#39;</span>
+    <span class="n">CODE_431</span> <span class="o">=</span> <span class="mi">431</span><span class="p">,</span> <span class="s1">&#39;Request Header Fields Too Large&#39;</span>
 
     <span class="c1">#: Unavailable For Legal Reasons [:rfc:`7725`]</span>
-    <span class="n">UNAVAILABLE_FOR_LEGAL_REASONS</span> <span class="o">=</span> <span class="mi">451</span><span class="p">,</span> <span class="s1">&#39;Unavailable For Legal Reasons&#39;</span>
+    <span class="n">CODE_451</span> <span class="o">=</span> <span class="mi">451</span><span class="p">,</span> <span class="s1">&#39;Unavailable For Legal Reasons&#39;</span>
 
     <span class="c1">#: Internal Server Error [:rfc:`9110#section-15.6.1`]</span>
-    <span class="n">INTERNAL_SERVER_ERROR</span> <span class="o">=</span> <span class="mi">500</span><span class="p">,</span> <span class="s1">&#39;Internal Server Error&#39;</span>
+    <span class="n">CODE_500</span> <span class="o">=</span> <span class="mi">500</span><span class="p">,</span> <span class="s1">&#39;Internal Server Error&#39;</span>
 
     <span class="c1">#: Not Implemented [:rfc:`9110#section-15.6.2`]</span>
-    <span class="n">NOT_IMPLEMENTED</span> <span class="o">=</span> <span class="mi">501</span><span class="p">,</span> <span class="s1">&#39;Not Implemented&#39;</span>
+    <span class="n">CODE_501</span> <span class="o">=</span> <span class="mi">501</span><span class="p">,</span> <span class="s1">&#39;Not Implemented&#39;</span>
 
     <span class="c1">#: Bad Gateway [:rfc:`9110#section-15.6.3`]</span>
-    <span class="n">BAD_GATEWAY</span> <span class="o">=</span> <span class="mi">502</span><span class="p">,</span> <span class="s1">&#39;Bad Gateway&#39;</span>
+    <span class="n">CODE_502</span> <span class="o">=</span> <span class="mi">502</span><span class="p">,</span> <span class="s1">&#39;Bad Gateway&#39;</span>
 
     <span class="c1">#: Service Unavailable [:rfc:`9110#section-15.6.4`]</span>
-    <span class="n">SERVICE_UNAVAILABLE</span> <span class="o">=</span> <span class="mi">503</span><span class="p">,</span> <span class="s1">&#39;Service Unavailable&#39;</span>
+    <span class="n">CODE_503</span> <span class="o">=</span> <span class="mi">503</span><span class="p">,</span> <span class="s1">&#39;Service Unavailable&#39;</span>
 
     <span class="c1">#: Gateway Timeout [:rfc:`9110#section-15.6.5`]</span>
-    <span class="n">GATEWAY_TIMEOUT</span> <span class="o">=</span> <span class="mi">504</span><span class="p">,</span> <span class="s1">&#39;Gateway Timeout&#39;</span>
+    <span class="n">CODE_504</span> <span class="o">=</span> <span class="mi">504</span><span class="p">,</span> <span class="s1">&#39;Gateway Timeout&#39;</span>
 
     <span class="c1">#: HTTP Version Not Supported [:rfc:`9110#section-15.6.6`]</span>
-    <span class="n">HTTP_VERSION_NOT_SUPPORTED</span> <span class="o">=</span> <span class="mi">505</span><span class="p">,</span> <span class="s1">&#39;HTTP Version Not Supported&#39;</span>
+    <span class="n">CODE_505</span> <span class="o">=</span> <span class="mi">505</span><span class="p">,</span> <span class="s1">&#39;HTTP Version Not Supported&#39;</span>
 
     <span class="c1">#: Variant Also Negotiates [:rfc:`2295`]</span>
-    <span class="n">VARIANT_ALSO_NEGOTIATES</span> <span class="o">=</span> <span class="mi">506</span><span class="p">,</span> <span class="s1">&#39;Variant Also Negotiates&#39;</span>
+    <span class="n">CODE_506</span> <span class="o">=</span> <span class="mi">506</span><span class="p">,</span> <span class="s1">&#39;Variant Also Negotiates&#39;</span>
 
     <span class="c1">#: Insufficient Storage [:rfc:`4918`]</span>
-    <span class="n">INSUFFICIENT_STORAGE</span> <span class="o">=</span> <span class="mi">507</span><span class="p">,</span> <span class="s1">&#39;Insufficient Storage&#39;</span>
+    <span class="n">CODE_507</span> <span class="o">=</span> <span class="mi">507</span><span class="p">,</span> <span class="s1">&#39;Insufficient Storage&#39;</span>
 
     <span class="c1">#: Loop Detected [:rfc:`5842`]</span>
-    <span class="n">LOOP_DETECTED</span> <span class="o">=</span> <span class="mi">508</span><span class="p">,</span> <span class="s1">&#39;Loop Detected&#39;</span>
+    <span class="n">CODE_508</span> <span class="o">=</span> <span class="mi">508</span><span class="p">,</span> <span class="s1">&#39;Loop Detected&#39;</span>
 
     <span class="c1">#: Unassigned</span>
-    <span class="n">UNASSIGNED_509</span> <span class="o">=</span> <span class="mi">509</span><span class="p">,</span> <span class="s1">&#39;Unassigned&#39;</span>
+    <span class="n">CODE_509</span> <span class="o">=</span> <span class="mi">509</span><span class="p">,</span> <span class="s1">&#39;Unassigned&#39;</span>
 
     <span class="c1">#: Not Extended (OBSOLETED) [:rfc:`2774`][status-change-http-experiments-to-</span>
     <span class="c1">#: historic]</span>
-    <span class="n">NOT_EXTENDED</span> <span class="o">=</span> <span class="mi">510</span><span class="p">,</span> <span class="s1">&#39;Not Extended (OBSOLETED)&#39;</span>
+    <span class="n">CODE_510</span> <span class="o">=</span> <span class="mi">510</span><span class="p">,</span> <span class="s1">&#39;Not Extended&#39;</span>
 
     <span class="c1">#: Network Authentication Required [:rfc:`6585`]</span>
-    <span class="n">NETWORK_AUTHENTICATION_REQUIRED</span> <span class="o">=</span> <span class="mi">511</span><span class="p">,</span> <span class="s1">&#39;Network Authentication Required&#39;</span>
+    <span class="n">CODE_511</span> <span class="o">=</span> <span class="mi">511</span><span class="p">,</span> <span class="s1">&#39;Network Authentication Required&#39;</span>
 
     <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="n">key</span><span class="p">:</span> <span class="s1">&#39;int | str&#39;</span><span class="p">,</span> <span class="n">default</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;StatusCode&#39;</span><span class="p">:</span>
@@ -605,36 +612,37 @@
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%r</span><span class="s1"> is not a valid </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span><span class="p">))</span>
         <span class="k">if</span> <span class="mi">104</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mi">199</span><span class="p">:</span>
             <span class="c1">#: Unassigned</span>
-            <span class="n">extend_enum</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s1">&#39;Unassigned_</span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">value</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+            <span class="n">extend_enum</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s1">&#39;CODE_</span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">value</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="s1">&#39;Unassigned&#39;</span><span class="p">)</span>
             <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
         <span class="k">if</span> <span class="mi">209</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mi">225</span><span class="p">:</span>
             <span class="c1">#: Unassigned</span>
-            <span class="n">extend_enum</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s1">&#39;Unassigned_</span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">value</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+            <span class="n">extend_enum</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s1">&#39;CODE_</span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">value</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="s1">&#39;Unassigned&#39;</span><span class="p">)</span>
             <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
         <span class="k">if</span> <span class="mi">227</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mi">299</span><span class="p">:</span>
             <span class="c1">#: Unassigned</span>
-            <span class="n">extend_enum</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s1">&#39;Unassigned_</span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">value</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+            <span class="n">extend_enum</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s1">&#39;CODE_</span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">value</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="s1">&#39;Unassigned&#39;</span><span class="p">)</span>
             <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
         <span class="k">if</span> <span class="mi">309</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mi">399</span><span class="p">:</span>
             <span class="c1">#: Unassigned</span>
-            <span class="n">extend_enum</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s1">&#39;Unassigned_</span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">value</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+            <span class="n">extend_enum</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s1">&#39;CODE_</span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">value</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="s1">&#39;Unassigned&#39;</span><span class="p">)</span>
             <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
         <span class="k">if</span> <span class="mi">419</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mi">420</span><span class="p">:</span>
             <span class="c1">#: Unassigned</span>
-            <span class="n">extend_enum</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s1">&#39;Unassigned_</span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">value</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+            <span class="n">extend_enum</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s1">&#39;CODE_</span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">value</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="s1">&#39;Unassigned&#39;</span><span class="p">)</span>
             <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
         <span class="k">if</span> <span class="mi">432</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mi">450</span><span class="p">:</span>
             <span class="c1">#: Unassigned</span>
-            <span class="n">extend_enum</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s1">&#39;Unassigned_</span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">value</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+            <span class="n">extend_enum</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s1">&#39;CODE_</span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">value</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="s1">&#39;Unassigned&#39;</span><span class="p">)</span>
             <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
         <span class="k">if</span> <span class="mi">452</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mi">499</span><span class="p">:</span>
             <span class="c1">#: Unassigned</span>
-            <span class="n">extend_enum</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s1">&#39;Unassigned_</span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">value</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+            <span class="n">extend_enum</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s1">&#39;CODE_</span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">value</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="s1">&#39;Unassigned&#39;</span><span class="p">)</span>
             <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
         <span class="k">if</span> <span class="mi">512</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mi">599</span><span class="p">:</span>
             <span class="c1">#: Unassigned</span>
-            <span class="n">extend_enum</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s1">&#39;Unassigned_</span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">value</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
-            <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">value</span><span class="p">)</span></div></div>
+            <span class="n">extend_enum</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s1">&#39;CODE_</span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">value</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="s1">&#39;Unassigned&#39;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_missing_</span><span class="p">(</span><span class="n">value</span><span class="p">)</span></div></div>
 </pre></div>
         </article>
       </div>

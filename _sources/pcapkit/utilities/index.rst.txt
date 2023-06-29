@@ -116,3 +116,5 @@ following objects and functions:
      - ≥ 3.8
    * - :func:`decimal.localcontext(ctx=None, **kwargs) <decimal.localcontext>`
      - ≥ 3.11
+   * - :func:`enum.show_flag_values`
+     - ≥ 3.11

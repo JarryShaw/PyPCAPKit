@@ -353,6 +353,7 @@
 <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="kn">import</span> <span class="nn">collections</span>
+<span class="kn">import</span> <span class="nn">re</span>
 <span class="kn">import</span> <span class="nn">sys</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
 
@@ -370,6 +371,7 @@
 
 <span class="n">LINE</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">NAME</span><span class="p">,</span> <span class="n">DOCS</span><span class="p">,</span> <span class="n">FLAG</span><span class="p">,</span> <span class="n">ENUM</span><span class="p">,</span> <span class="n">MODL</span><span class="p">:</span> <span class="sa">f</span><span class="s1">&#39;&#39;&#39;</span><span class="se">\</span>
 <span class="s1"># -*- coding: utf-8 -*-</span>
+<span class="s1"># mypy: disable-error-code=assignment</span>
 <span class="s1"># pylint: disable=line-too-long,consider-using-f-string</span>
 <span class="s1">&quot;&quot;&quot;</span><span class="si">{</span><span class="p">(</span><span class="n">name</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="n">DOCS</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39; [&#39;</span><span class="p">,</span><span class="w"> </span><span class="n">maxsplit</span><span class="o">=</span><span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span><span class="si">}</span>
 <span class="si">{</span><span class="s1">&#39;=&#39;</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">name</span><span class="p">)</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">6</span><span class="p">)</span><span class="si">}</span>
@@ -390,16 +392,6 @@
 
 <span class="s1">__all__ = [&#39;</span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">&#39;]</span>
 
-<span class="s1">#: Response kind; whether the response is good, bad or incomplete.</span>
-<span class="s1">KIND = </span><span class="se">{{</span>
-<span class="s1">    &#39;1&#39;: &#39;Positive Preliminary&#39;,</span>
-<span class="s1">    &#39;2&#39;: &#39;Positive Completion&#39;,</span>
-<span class="s1">    &#39;3&#39;: &#39;Positive Intermediate&#39;,</span>
-<span class="s1">    &#39;4&#39;: &#39;Transient Negative Completion&#39;,</span>
-<span class="s1">    &#39;5&#39;: &#39;Permanent Negative Completion&#39;,</span>
-<span class="s1">    &#39;6&#39;: &#39;Protected&#39;,</span>
-<span class="se">}}</span><span class="s1">  # type: dict[str, str]</span>
-
 <span class="s1">#: Grouping information.</span>
 <span class="s1">INFO = </span><span class="se">{{</span>
 <span class="s1">    &#39;0&#39;: &#39;Syntax&#39;,</span>
@@ -411,6 +403,50 @@
 <span class="se">}}</span><span class="s1">  # type: dict[str, str]</span>
 
 
+<span class="s1">class ResponseKind(IntEnum):</span>
+<span class="s1">    &quot;&quot;&quot;Response kind; whether the response is good, bad or incomplete.&quot;&quot;&quot;</span>
+
+<span class="s1">    PositivePreliminary = 1</span>
+<span class="s1">    PositiveCompletion = 2</span>
+<span class="s1">    PositiveIntermediate = 3</span>
+<span class="s1">    TransientNegativeCompletion = 4</span>
+<span class="s1">    PermanentNegativeCompletion = 5</span>
+<span class="s1">    Protected = 6</span>
+
+<span class="s1">    def _missing_(cls, value: &#39;int&#39;) -&gt; &#39;ResponseKind&#39;:</span>
+<span class="s1">        &quot;&quot;&quot;Lookup function used when value is not found.</span>
+
+<span class="s1">        Args:</span>
+<span class="s1">            value: Value to lookup.</span>
+
+<span class="s1">        &quot;&quot;&quot;</span>
+<span class="s1">        if isinstance(value, int) and 0 &lt;= value &lt;= 9:</span>
+<span class="s1">            return extend_enum(cls, &#39;Unknown_%d&#39; % value, value)</span>
+<span class="s1">        return super()._missing_(value)</span>
+
+
+<span class="s1">class GroupingInformation(IntEnum):</span>
+<span class="s1">    &quot;&quot;&quot;Grouping information.&quot;&quot;&quot;</span>
+
+<span class="s1">    Syntax = 0</span>
+<span class="s1">    Information = 1</span>
+<span class="s1">    Connections = 2</span>
+<span class="s1">    AuthenticationAccounting = 3</span>
+<span class="s1">    Unspecified = 4</span>
+<span class="s1">    FileSystem = 5</span>
+
+<span class="s1">    def _missing_(cls, value: &#39;int&#39;) -&gt; &#39;GroupingInformation&#39;:</span>
+<span class="s1">        &quot;&quot;&quot;Lookup function used when value is not found.</span>
+
+<span class="s1">        Args:</span>
+<span class="s1">            value: Value to lookup.</span>
+
+<span class="s1">        &quot;&quot;&quot;</span>
+<span class="s1">        if isinstance(value, int) and 0 &lt;= value &lt;= 9:</span>
+<span class="s1">            return extend_enum(cls, &#39;Unknown_%d&#39; % value, value)</span>
+<span class="s1">        return super()._missing_(value)</span>
+
+
 <span class="s1">class </span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">(IntEnum):</span>
 <span class="s1">    &quot;&quot;&quot;[</span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">] </span><span class="si">{</span><span class="n">DOCS</span><span class="si">}</span><span class="s1">&quot;&quot;&quot;</span>
 
@@ -418,9 +454,9 @@
 <span class="s1">        #: Description of the return code.</span>
 <span class="s1">        description: &#39;Optional[str]&#39;</span>
 <span class="s1">        #: Response kind.</span>
-<span class="s1">        kind: &#39;str&#39;</span>
+<span class="s1">        kind: &#39;ResponseKind&#39;</span>
 <span class="s1">        #: Grouping information.</span>
-<span class="s1">        group: &#39;str&#39;</span>
+<span class="s1">        group: &#39;GroupingInformation&#39;</span>
 
 <span class="s1">    def __new__(cls, value: &#39;int&#39;, description: &#39;Optional[str]&#39; = None) -&gt; &#39;Type[</span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">]&#39;:</span>
 <span class="s1">        obj = int.__new__(cls, value)</span>
@@ -428,13 +464,16 @@
 
 <span class="s1">        code = str(value)</span>
 <span class="s1">        obj.description = description</span>
-<span class="s1">        obj.kind = KIND.get(str(value)[0], &#39;Reserved&#39;)</span>
-<span class="s1">        obj.group = INFO.get(str(value)[1], &#39;Reserved&#39;)</span>
+<span class="s1">        obj.kind = ResponseKind(int(code[0]))</span>
+<span class="s1">        obj.group = GroupingInformation(int(code[1]))</span>
 
 <span class="s1">        return obj</span>
 
 <span class="s1">    def __repr__(self) -&gt; &#39;str&#39;:</span>
 <span class="s1">        return &quot;&lt;%s [%s]&gt;&quot; % (self.__class__.__name__, self._value_)</span>
+
+<span class="s1">    def __str__(self) -&gt; &#39;str&#39;:</span>
+<span class="s1">        return &quot;[%s] %s&quot; % (self._value_, self.description)</span>
 
 <span class="s1">    </span><span class="si">{</span><span class="n">ENUM</span><span class="si">}</span>
 
@@ -527,10 +566,12 @@
             <span class="c1">#desc = f&quot;{&#39; &#39;.join(line[1].stripped_strings).split(&#39;.&#39;)[0].strip()}.&quot;</span>
             <span class="c1">#enum.append(f&#39;{self.NAME}[{self.rename(desc, code)!r}] = {code}&#39;)</span>
 
-            <span class="n">cmmt</span> <span class="o">=</span> <span class="s1">&#39;. &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">s</span><span class="p">:</span> <span class="n">s</span><span class="o">.</span><span class="n">strip</span><span class="p">(),</span> <span class="s1">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
-                <span class="n">line</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">stripped_strings</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)))</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;e. g. ,&#39;</span><span class="p">,</span> <span class="s1">&#39;e.g.,&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+            <span class="n">cmmt</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;  +&#39;</span><span class="p">,</span> <span class="sa">r</span><span class="s1">&#39; &#39;</span><span class="p">,</span> <span class="s1">&#39;. &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">s</span><span class="p">:</span> <span class="n">s</span><span class="o">.</span><span class="n">strip</span><span class="p">(),</span> <span class="s1">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+                <span class="n">line</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">stripped_strings</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)))</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;e. g. ,&#39;</span><span class="p">,</span> <span class="s1">&#39;e.g.,&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span>
             <span class="n">sufs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">wrap_comment</span><span class="p">(</span><span class="n">cmmt</span><span class="p">)</span>  <span class="c1"># pylint: disable=line-too-long</span>
-            <span class="n">pref</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;CODE_</span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s2"> = </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">cmmt</span><span class="si">!r}</span><span class="s2">&quot;</span>
+
+            <span class="n">desc</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;\(.*\)&#39;</span><span class="p">,</span> <span class="sa">r</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">cmmt</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">,</span> <span class="n">maxsplit</span><span class="o">=</span><span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="o">+</span> <span class="s1">&#39;.&#39;</span>
+            <span class="n">pref</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;CODE_</span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s2">: &#39;ReturnCode&#39; = </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">desc</span><span class="si">!r}</span><span class="s2">&quot;</span>
 
             <span class="n">enum</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;#: </span><span class="si">{</span><span class="n">sufs</span><span class="si">}</span><span class="se">\n</span><span class="s1">    </span><span class="si">{</span><span class="n">pref</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">enum</span>

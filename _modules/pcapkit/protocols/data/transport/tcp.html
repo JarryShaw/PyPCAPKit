@@ -358,7 +358,7 @@
     <span class="kn">from</span> <span class="nn">pcapkit.const.tcp.mp_tcp_option</span> <span class="kn">import</span> <span class="n">MPTCPOption</span>
     <span class="kn">from</span> <span class="nn">pcapkit.const.tcp.option</span> <span class="kn">import</span> <span class="n">Option</span> <span class="k">as</span> <span class="n">OptionNumber</span>
     <span class="kn">from</span> <span class="nn">pcapkit.corekit.multidict</span> <span class="kn">import</span> <span class="n">OrderedMultiDict</span>
-    <span class="kn">from</span> <span class="nn">pcapkit.protocols.transport.tcp</span> <span class="kn">import</span> <span class="n">Flags</span> <span class="k">as</span> <span class="n">TCP_Flags</span>
+    <span class="kn">from</span> <span class="nn">pcapkit.const.tcp.flags</span> <span class="kn">import</span> <span class="n">Flags</span> <span class="k">as</span> <span class="n">TCP_Flags</span>
 
     <span class="n">IPAddress</span> <span class="o">=</span> <span class="n">Union</span><span class="p">[</span><span class="n">IPv4Address</span><span class="p">,</span> <span class="n">IPv6Address</span><span class="p">]</span>
 
@@ -390,7 +390,7 @@
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for TCP flags.&quot;&quot;&quot;</span>
 
     <span class="c1">#: ECN-nonce concealment protection.</span>
-    <span class="n">ns</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span>
+    <span class="c1">#ns: &#39;bool&#39;</span>
     <span class="c1">#: Congestion window reduced.</span>
     <span class="n">cwr</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span>
     <span class="c1">#: ECN-Echo.</span>
@@ -409,7 +409,7 @@
     <span class="n">fin</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ns</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span><span class="p">,</span> <span class="n">cwr</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span><span class="p">,</span> <span class="n">ece</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span><span class="p">,</span> <span class="n">urg</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span><span class="p">,</span> <span class="n">ack</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span><span class="p">,</span> <span class="n">psh</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span><span class="p">,</span> <span class="n">rst</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span><span class="p">,</span> <span class="n">syn</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span><span class="p">,</span> <span class="n">fin</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
+        <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cwr</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span><span class="p">,</span> <span class="n">ece</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span><span class="p">,</span> <span class="n">urg</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span><span class="p">,</span> <span class="n">ack</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span><span class="p">,</span> <span class="n">psh</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span><span class="p">,</span> <span class="n">rst</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span><span class="p">,</span> <span class="n">syn</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span><span class="p">,</span> <span class="n">fin</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
 
 
 <div class="viewcode-block" id="TCP"><a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.data.transport.tcp.TCP">[docs]</a><span class="nd">@info_final</span>

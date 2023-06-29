@@ -342,6 +342,7 @@
         <article role="main">
           <h1>Source code for pcapkit.const.ftp.return_code</h1><div class="highlight"><pre>
 <span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="c1"># mypy: disable-error-code=assignment</span>
 <span class="c1"># pylint: disable=line-too-long,consider-using-f-string</span>
 <span class="sd">&quot;&quot;&quot;FTP Server Return Code</span>
 <span class="sd">============================</span>
@@ -362,16 +363,6 @@
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;ReturnCode&#39;</span><span class="p">]</span>
 
-<span class="c1">#: Response kind; whether the response is good, bad or incomplete.</span>
-<span class="n">KIND</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s1">&#39;1&#39;</span><span class="p">:</span> <span class="s1">&#39;Positive Preliminary&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;2&#39;</span><span class="p">:</span> <span class="s1">&#39;Positive Completion&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;3&#39;</span><span class="p">:</span> <span class="s1">&#39;Positive Intermediate&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;4&#39;</span><span class="p">:</span> <span class="s1">&#39;Transient Negative Completion&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;5&#39;</span><span class="p">:</span> <span class="s1">&#39;Permanent Negative Completion&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;6&#39;</span><span class="p">:</span> <span class="s1">&#39;Protected&#39;</span><span class="p">,</span>
-<span class="p">}</span>  <span class="c1"># type: dict[str, str]</span>
-
 <span class="c1">#: Grouping information.</span>
 <span class="n">INFO</span> <span class="o">=</span> <span class="p">{</span>
     <span class="s1">&#39;0&#39;</span><span class="p">:</span> <span class="s1">&#39;Syntax&#39;</span><span class="p">,</span>
@@ -383,6 +374,50 @@
 <span class="p">}</span>  <span class="c1"># type: dict[str, str]</span>
 
 
+<span class="k">class</span> <span class="nc">ResponseKind</span><span class="p">(</span><span class="n">IntEnum</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Response kind; whether the response is good, bad or incomplete.&quot;&quot;&quot;</span>
+
+    <span class="n">PositivePreliminary</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">PositiveCompletion</span> <span class="o">=</span> <span class="mi">2</span>
+    <span class="n">PositiveIntermediate</span> <span class="o">=</span> <span class="mi">3</span>
+    <span class="n">TransientNegativeCompletion</span> <span class="o">=</span> <span class="mi">4</span>
+    <span class="n">PermanentNegativeCompletion</span> <span class="o">=</span> <span class="mi">5</span>
+    <span class="n">Protected</span> <span class="o">=</span> <span class="mi">6</span>
+
+    <span class="k">def</span> <span class="nf">_missing_</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;ResponseKind&#39;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Lookup function used when value is not found.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            value: Value to lookup.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="ow">and</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mi">9</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">extend_enum</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s1">&#39;Unknown_</span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">value</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_missing_</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">GroupingInformation</span><span class="p">(</span><span class="n">IntEnum</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Grouping information.&quot;&quot;&quot;</span>
+
+    <span class="n">Syntax</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">Information</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">Connections</span> <span class="o">=</span> <span class="mi">2</span>
+    <span class="n">AuthenticationAccounting</span> <span class="o">=</span> <span class="mi">3</span>
+    <span class="n">Unspecified</span> <span class="o">=</span> <span class="mi">4</span>
+    <span class="n">FileSystem</span> <span class="o">=</span> <span class="mi">5</span>
+
+    <span class="k">def</span> <span class="nf">_missing_</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;GroupingInformation&#39;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Lookup function used when value is not found.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            value: Value to lookup.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="ow">and</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mi">9</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">extend_enum</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s1">&#39;Unknown_</span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">value</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_missing_</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+
+
 <div class="viewcode-block" id="ReturnCode"><a class="viewcode-back" href="../../../../pcapkit/const/ftp.html#pcapkit.const.ftp.return_code.ReturnCode">[docs]</a><span class="k">class</span> <span class="nc">ReturnCode</span><span class="p">(</span><span class="n">IntEnum</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;[ReturnCode] FTP Server Return Code&quot;&quot;&quot;</span>
 
@@ -390,9 +425,9 @@
         <span class="c1">#: Description of the return code.</span>
         <span class="n">description</span><span class="p">:</span> <span class="s1">&#39;Optional[str]&#39;</span>
         <span class="c1">#: Response kind.</span>
-        <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span>
+        <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;ResponseKind&#39;</span>
         <span class="c1">#: Grouping information.</span>
-        <span class="n">group</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span>
+        <span class="n">group</span><span class="p">:</span> <span class="s1">&#39;GroupingInformation&#39;</span>
 
     <span class="k">def</span> <span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">description</span><span class="p">:</span> <span class="s1">&#39;Optional[str]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Type[ReturnCode]&#39;</span><span class="p">:</span>
         <span class="n">obj</span> <span class="o">=</span> <span class="nb">int</span><span class="o">.</span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
@@ -400,195 +435,198 @@
 
         <span class="n">code</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
         <span class="n">obj</span><span class="o">.</span><span class="n">description</span> <span class="o">=</span> <span class="n">description</span>
-        <span class="n">obj</span><span class="o">.</span><span class="n">kind</span> <span class="o">=</span> <span class="n">KIND</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)[</span><span class="mi">0</span><span class="p">],</span> <span class="s1">&#39;Reserved&#39;</span><span class="p">)</span>
-        <span class="n">obj</span><span class="o">.</span><span class="n">group</span> <span class="o">=</span> <span class="n">INFO</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)[</span><span class="mi">1</span><span class="p">],</span> <span class="s1">&#39;Reserved&#39;</span><span class="p">)</span>
+        <span class="n">obj</span><span class="o">.</span><span class="n">kind</span> <span class="o">=</span> <span class="n">ResponseKind</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">code</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+        <span class="n">obj</span><span class="o">.</span><span class="n">group</span> <span class="o">=</span> <span class="n">GroupingInformation</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">code</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
 
         <span class="k">return</span> <span class="n">obj</span>
 
     <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;str&#39;</span><span class="p">:</span>
         <span class="k">return</span> <span class="s2">&quot;&lt;</span><span class="si">%s</span><span class="s2"> [</span><span class="si">%s</span><span class="s2">]&gt;&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_value_</span><span class="p">)</span>
 
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;str&#39;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s2">&quot;[</span><span class="si">%s</span><span class="s2">] </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_value_</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">description</span><span class="p">)</span>
+
     <span class="c1">#: Restart marker replay. In this case, the text is exact and not left to the</span>
     <span class="c1">#: particular implementation; it must read: MARK yyyy = mmmm where yyyy is</span>
     <span class="c1">#: User-process data stream marker, and mmmm server&#39;s equivalent marker (note</span>
     <span class="c1">#: the spaces between markers and &quot;=&quot;).</span>
-    <span class="n">CODE_110</span> <span class="o">=</span> <span class="mi">110</span><span class="p">,</span> <span class="s1">&#39;Restart marker replay. In this case, the text is exact and not left to the particular implementation; it must read: MARK yyyy = mmmm where yyyy is User-process data stream marker, and mmmm server</span><span class="se">\&#39;</span><span class="s1">s equivalent marker (note the spaces between markers and &quot;=&quot;).&#39;</span>
+    <span class="n">CODE_110</span><span class="p">:</span> <span class="s1">&#39;ReturnCode&#39;</span> <span class="o">=</span> <span class="mi">110</span><span class="p">,</span> <span class="s1">&#39;Restart marker replay.&#39;</span>
 
     <span class="c1">#: Service ready in nnn minutes.</span>
-    <span class="n">CODE_120</span> <span class="o">=</span> <span class="mi">120</span><span class="p">,</span> <span class="s1">&#39;Service ready in nnn minutes.&#39;</span>
+    <span class="n">CODE_120</span><span class="p">:</span> <span class="s1">&#39;ReturnCode&#39;</span> <span class="o">=</span> <span class="mi">120</span><span class="p">,</span> <span class="s1">&#39;Service ready in nnn minutes.&#39;</span>
 
     <span class="c1">#: Data connection already open; transfer starting.</span>
-    <span class="n">CODE_125</span> <span class="o">=</span> <span class="mi">125</span><span class="p">,</span> <span class="s1">&#39;Data connection already open; transfer starting.&#39;</span>
+    <span class="n">CODE_125</span><span class="p">:</span> <span class="s1">&#39;ReturnCode&#39;</span> <span class="o">=</span> <span class="mi">125</span><span class="p">,</span> <span class="s1">&#39;Data connection already open; transfer starting.&#39;</span>
 
     <span class="c1">#: File status okay; about to open data connection.</span>
-    <span class="n">CODE_150</span> <span class="o">=</span> <span class="mi">150</span><span class="p">,</span> <span class="s1">&#39;File status okay; about to open data connection.&#39;</span>
+    <span class="n">CODE_150</span><span class="p">:</span> <span class="s1">&#39;ReturnCode&#39;</span> <span class="o">=</span> <span class="mi">150</span><span class="p">,</span> <span class="s1">&#39;File status okay; about to open data connection.&#39;</span>
 
     <span class="c1">#: Command not implemented, superfluous at this site.</span>
-    <span class="n">CODE_202</span> <span class="o">=</span> <span class="mi">202</span><span class="p">,</span> <span class="s1">&#39;Command not implemented, superfluous at this site.&#39;</span>
+    <span class="n">CODE_202</span><span class="p">:</span> <span class="s1">&#39;ReturnCode&#39;</span> <span class="o">=</span> <span class="mi">202</span><span class="p">,</span> <span class="s1">&#39;Command not implemented, superfluous at this site.&#39;</span>
 
     <span class="c1">#: System status, or system help reply.</span>
-    <span class="n">CODE_211</span> <span class="o">=</span> <span class="mi">211</span><span class="p">,</span> <span class="s1">&#39;System status, or system help reply.&#39;</span>
+    <span class="n">CODE_211</span><span class="p">:</span> <span class="s1">&#39;ReturnCode&#39;</span> <span class="o">=</span> <span class="mi">211</span><span class="p">,</span> <span class="s1">&#39;System status, or system help reply.&#39;</span>
 
     <span class="c1">#: Directory status.</span>
-    <span class="n">CODE_212</span> <span class="o">=</span> <span class="mi">212</span><span class="p">,</span> <span class="s1">&#39;Directory status.&#39;</span>
+    <span class="n">CODE_212</span><span class="p">:</span> <span class="s1">&#39;ReturnCode&#39;</span> <span class="o">=</span> <span class="mi">212</span><span class="p">,</span> <span class="s1">&#39;Directory status.&#39;</span>
 
     <span class="c1">#: File status.</span>
-    <span class="n">CODE_213</span> <span class="o">=</span> <span class="mi">213</span><span class="p">,</span> <span class="s1">&#39;File status.&#39;</span>
+    <span class="n">CODE_213</span><span class="p">:</span> <span class="s1">&#39;ReturnCode&#39;</span> <span class="o">=</span> <span class="mi">213</span><span class="p">,</span> <span class="s1">&#39;File status.&#39;</span>
 
     <span class="c1">#: Help message. Explains how to use the server or the meaning of a particular</span>
     <span class="c1">#: non-standard command. This reply is useful only to the human user.</span>
-    <span class="n">CODE_214</span> <span class="o">=</span> <span class="mi">214</span><span class="p">,</span> <span class="s1">&#39;Help message. Explains how to use the server or the meaning of a particular non-standard command. This reply is useful only to the human user.&#39;</span>
+    <span class="n">CODE_214</span><span class="p">:</span> <span class="s1">&#39;ReturnCode&#39;</span> <span class="o">=</span> <span class="mi">214</span><span class="p">,</span> <span class="s1">&#39;Help message.&#39;</span>
 
     <span class="c1">#: NAME system type. Where NAME is an official system name from the registry</span>
     <span class="c1">#: kept by IANA.</span>
-    <span class="n">CODE_215</span> <span class="o">=</span> <span class="mi">215</span><span class="p">,</span> <span class="s1">&#39;NAME system type. Where NAME is an official system name from the registry kept by IANA.&#39;</span>
+    <span class="n">CODE_215</span><span class="p">:</span> <span class="s1">&#39;ReturnCode&#39;</span> <span class="o">=</span> <span class="mi">215</span><span class="p">,</span> <span class="s1">&#39;NAME system type.&#39;</span>
 
     <span class="c1">#: Service ready for new user.</span>
-    <span class="n">CODE_220</span> <span class="o">=</span> <span class="mi">220</span><span class="p">,</span> <span class="s1">&#39;Service ready for new user.&#39;</span>
+    <span class="n">CODE_220</span><span class="p">:</span> <span class="s1">&#39;ReturnCode&#39;</span> <span class="o">=</span> <span class="mi">220</span><span class="p">,</span> <span class="s1">&#39;Service ready for new user.&#39;</span>
 
     <span class="c1">#: Service closing control connection. Logged out if appropriate.</span>
-    <span class="n">CODE_221</span> <span class="o">=</span> <span class="mi">221</span><span class="p">,</span> <span class="s1">&#39;Service closing control connection. Logged out if appropriate.&#39;</span>
+    <span class="n">CODE_221</span><span class="p">:</span> <span class="s1">&#39;ReturnCode&#39;</span> <span class="o">=</span> <span class="mi">221</span><span class="p">,</span> <span class="s1">&#39;Service closing control connection.&#39;</span>
 
     <span class="c1">#: Data connection open; no transfer in progress.</span>
-    <span class="n">CODE_225</span> <span class="o">=</span> <span class="mi">225</span><span class="p">,</span> <span class="s1">&#39;Data connection open; no transfer in progress.&#39;</span>
+    <span class="n">CODE_225</span><span class="p">:</span> <span class="s1">&#39;ReturnCode&#39;</span> <span class="o">=</span> <span class="mi">225</span><span class="p">,</span> <span class="s1">&#39;Data connection open; no transfer in progress.&#39;</span>
 
     <span class="c1">#: Closing data connection. Requested file action successful (for example, file</span>
     <span class="c1">#: transfer or file abort).</span>
-    <span class="n">CODE_226</span> <span class="o">=</span> <span class="mi">226</span><span class="p">,</span> <span class="s1">&#39;Closing data connection. Requested file action successful (for example, file transfer or file abort).&#39;</span>
+    <span class="n">CODE_226</span><span class="p">:</span> <span class="s1">&#39;ReturnCode&#39;</span> <span class="o">=</span> <span class="mi">226</span><span class="p">,</span> <span class="s1">&#39;Closing data connection.&#39;</span>
 
     <span class="c1">#: Entering Passive Mode (h1,h2,h3,h4,p1,p2).</span>
-    <span class="n">CODE_227</span> <span class="o">=</span> <span class="mi">227</span><span class="p">,</span> <span class="s1">&#39;Entering Passive Mode (h1,h2,h3,h4,p1,p2).&#39;</span>
+    <span class="n">CODE_227</span><span class="p">:</span> <span class="s1">&#39;ReturnCode&#39;</span> <span class="o">=</span> <span class="mi">227</span><span class="p">,</span> <span class="s1">&#39;Entering Passive Mode.&#39;</span>
 
     <span class="c1">#: Entering Long Passive Mode (long address, port).</span>
-    <span class="n">CODE_228</span> <span class="o">=</span> <span class="mi">228</span><span class="p">,</span> <span class="s1">&#39;Entering Long Passive Mode (long address, port).&#39;</span>
+    <span class="n">CODE_228</span><span class="p">:</span> <span class="s1">&#39;ReturnCode&#39;</span> <span class="o">=</span> <span class="mi">228</span><span class="p">,</span> <span class="s1">&#39;Entering Long Passive Mode.&#39;</span>
 
     <span class="c1">#: Entering Extended Passive Mode (|||port|).</span>
-    <span class="n">CODE_229</span> <span class="o">=</span> <span class="mi">229</span><span class="p">,</span> <span class="s1">&#39;Entering Extended Passive Mode (|||port|).&#39;</span>
+    <span class="n">CODE_229</span><span class="p">:</span> <span class="s1">&#39;ReturnCode&#39;</span> <span class="o">=</span> <span class="mi">229</span><span class="p">,</span> <span class="s1">&#39;Entering Extended Passive Mode.&#39;</span>
 
     <span class="c1">#: User logged in, proceed.</span>
-    <span class="n">CODE_230</span> <span class="o">=</span> <span class="mi">230</span><span class="p">,</span> <span class="s1">&#39;User logged in, proceed.&#39;</span>
+    <span class="n">CODE_230</span><span class="p">:</span> <span class="s1">&#39;ReturnCode&#39;</span> <span class="o">=</span> <span class="mi">230</span><span class="p">,</span> <span class="s1">&#39;User logged in, proceed.&#39;</span>
 
     <span class="c1">#: User logged in, authorized by security data exchange.</span>
-    <span class="n">CODE_232</span> <span class="o">=</span> <span class="mi">232</span><span class="p">,</span> <span class="s1">&#39;User logged in, authorized by security data exchange.&#39;</span>
+    <span class="n">CODE_232</span><span class="p">:</span> <span class="s1">&#39;ReturnCode&#39;</span> <span class="o">=</span> <span class="mi">232</span><span class="p">,</span> <span class="s1">&#39;User logged in, authorized by security data exchange.&#39;</span>
 
-    <span class="c1">#: Server accepts the security  mechanism specified by the client; no security</span>
+    <span class="c1">#: Server accepts the security mechanism specified by the client; no security</span>
     <span class="c1">#: data needs to be exchanged.</span>
-    <span class="n">CODE_234</span> <span class="o">=</span> <span class="mi">234</span><span class="p">,</span> <span class="s1">&#39;Server accepts the security  mechanism specified by the client; no security data needs to be exchanged.&#39;</span>
+    <span class="n">CODE_234</span><span class="p">:</span> <span class="s1">&#39;ReturnCode&#39;</span> <span class="o">=</span> <span class="mi">234</span><span class="p">,</span> <span class="s1">&#39;Server accepts the security mechanism specified by the client; no security data needs to be exchanged.&#39;</span>
 
     <span class="c1">#: Server accepts the security data given by the client; no further security</span>
     <span class="c1">#: data needs to be exchanged.</span>
-    <span class="n">CODE_235</span> <span class="o">=</span> <span class="mi">235</span><span class="p">,</span> <span class="s1">&#39;Server accepts the security data given by the client; no further security data needs to be exchanged.&#39;</span>
+    <span class="n">CODE_235</span><span class="p">:</span> <span class="s1">&#39;ReturnCode&#39;</span> <span class="o">=</span> <span class="mi">235</span><span class="p">,</span> <span class="s1">&#39;Server accepts the security data given by the client; no further security data needs to be exchanged.&#39;</span>
 
     <span class="c1">#: Requested file action okay, completed.</span>
-    <span class="n">CODE_250</span> <span class="o">=</span> <span class="mi">250</span><span class="p">,</span> <span class="s1">&#39;Requested file action okay, completed.&#39;</span>
+    <span class="n">CODE_250</span><span class="p">:</span> <span class="s1">&#39;ReturnCode&#39;</span> <span class="o">=</span> <span class="mi">250</span><span class="p">,</span> <span class="s1">&#39;Requested file action okay, completed.&#39;</span>
 
     <span class="c1">#: &quot;PATHNAME&quot; created.</span>
-    <span class="n">CODE_257</span> <span class="o">=</span> <span class="mi">257</span><span class="p">,</span> <span class="s1">&#39;&quot;PATHNAME&quot; created.&#39;</span>
+    <span class="n">CODE_257</span><span class="p">:</span> <span class="s1">&#39;ReturnCode&#39;</span> <span class="o">=</span> <span class="mi">257</span><span class="p">,</span> <span class="s1">&#39;&quot;PATHNAME&quot; created.&#39;</span>
 
     <span class="c1">#: User name okay, need password.</span>
-    <span class="n">CODE_331</span> <span class="o">=</span> <span class="mi">331</span><span class="p">,</span> <span class="s1">&#39;User name okay, need password.&#39;</span>
+    <span class="n">CODE_331</span><span class="p">:</span> <span class="s1">&#39;ReturnCode&#39;</span> <span class="o">=</span> <span class="mi">331</span><span class="p">,</span> <span class="s1">&#39;User name okay, need password.&#39;</span>
 
     <span class="c1">#: Need account for login.</span>
-    <span class="n">CODE_332</span> <span class="o">=</span> <span class="mi">332</span><span class="p">,</span> <span class="s1">&#39;Need account for login.&#39;</span>
+    <span class="n">CODE_332</span><span class="p">:</span> <span class="s1">&#39;ReturnCode&#39;</span> <span class="o">=</span> <span class="mi">332</span><span class="p">,</span> <span class="s1">&#39;Need account for login.&#39;</span>
 
     <span class="c1">#: Server accepts the security mechanism specified by the client; some security</span>
     <span class="c1">#: data needs to be exchanged.</span>
-    <span class="n">CODE_334</span> <span class="o">=</span> <span class="mi">334</span><span class="p">,</span> <span class="s1">&#39;Server accepts the security mechanism specified by the client; some security data needs to be exchanged.&#39;</span>
+    <span class="n">CODE_334</span><span class="p">:</span> <span class="s1">&#39;ReturnCode&#39;</span> <span class="o">=</span> <span class="mi">334</span><span class="p">,</span> <span class="s1">&#39;Server accepts the security mechanism specified by the client; some security data needs to be exchanged.&#39;</span>
 
     <span class="c1">#: Server accepts the security data given by the client; more security data</span>
     <span class="c1">#: needs to be exchanged.</span>
-    <span class="n">CODE_335</span> <span class="o">=</span> <span class="mi">335</span><span class="p">,</span> <span class="s1">&#39;Server accepts the security data given by the client; more security data needs to be exchanged.&#39;</span>
+    <span class="n">CODE_335</span><span class="p">:</span> <span class="s1">&#39;ReturnCode&#39;</span> <span class="o">=</span> <span class="mi">335</span><span class="p">,</span> <span class="s1">&#39;Server accepts the security data given by the client; more security data needs to be exchanged.&#39;</span>
 
     <span class="c1">#: Username okay, need password. Challenge is &quot;. . . . &quot;.</span>
-    <span class="n">CODE_336</span> <span class="o">=</span> <span class="mi">336</span><span class="p">,</span> <span class="s1">&#39;Username okay, need password. Challenge is &quot;. . . . &quot;.&#39;</span>
+    <span class="n">CODE_336</span><span class="p">:</span> <span class="s1">&#39;ReturnCode&#39;</span> <span class="o">=</span> <span class="mi">336</span><span class="p">,</span> <span class="s1">&#39;Username okay, need password.&#39;</span>
 
     <span class="c1">#: Requested file action pending further information</span>
-    <span class="n">CODE_350</span> <span class="o">=</span> <span class="mi">350</span><span class="p">,</span> <span class="s1">&#39;Requested file action pending further information&#39;</span>
+    <span class="n">CODE_350</span><span class="p">:</span> <span class="s1">&#39;ReturnCode&#39;</span> <span class="o">=</span> <span class="mi">350</span><span class="p">,</span> <span class="s1">&#39;Requested file action pending further information.&#39;</span>
 
     <span class="c1">#: Service not available, closing control connection. This may be a reply to</span>
     <span class="c1">#: any command if the service knows it must shut down.</span>
-    <span class="n">CODE_421</span> <span class="o">=</span> <span class="mi">421</span><span class="p">,</span> <span class="s1">&#39;Service not available, closing control connection. This may be a reply to any command if the service knows it must shut down.&#39;</span>
+    <span class="n">CODE_421</span><span class="p">:</span> <span class="s1">&#39;ReturnCode&#39;</span> <span class="o">=</span> <span class="mi">421</span><span class="p">,</span> <span class="s1">&#39;Service not available, closing control connection.&#39;</span>
 
     <span class="c1">#: Can&#39;t open data connection.</span>
-    <span class="n">CODE_425</span> <span class="o">=</span> <span class="mi">425</span><span class="p">,</span> <span class="s2">&quot;Can&#39;t open data connection.&quot;</span>
+    <span class="n">CODE_425</span><span class="p">:</span> <span class="s1">&#39;ReturnCode&#39;</span> <span class="o">=</span> <span class="mi">425</span><span class="p">,</span> <span class="s2">&quot;Can&#39;t open data connection.&quot;</span>
 
     <span class="c1">#: Connection closed; transfer aborted.</span>
-    <span class="n">CODE_426</span> <span class="o">=</span> <span class="mi">426</span><span class="p">,</span> <span class="s1">&#39;Connection closed; transfer aborted.&#39;</span>
+    <span class="n">CODE_426</span><span class="p">:</span> <span class="s1">&#39;ReturnCode&#39;</span> <span class="o">=</span> <span class="mi">426</span><span class="p">,</span> <span class="s1">&#39;Connection closed; transfer aborted.&#39;</span>
 
     <span class="c1">#: Invalid username or password</span>
-    <span class="n">CODE_430</span> <span class="o">=</span> <span class="mi">430</span><span class="p">,</span> <span class="s1">&#39;Invalid username or password&#39;</span>
+    <span class="n">CODE_430</span><span class="p">:</span> <span class="s1">&#39;ReturnCode&#39;</span> <span class="o">=</span> <span class="mi">430</span><span class="p">,</span> <span class="s1">&#39;Invalid username or password.&#39;</span>
 
     <span class="c1">#: Need some unavailable resource to process security.</span>
-    <span class="n">CODE_431</span> <span class="o">=</span> <span class="mi">431</span><span class="p">,</span> <span class="s1">&#39;Need some unavailable resource to process security.&#39;</span>
+    <span class="n">CODE_431</span><span class="p">:</span> <span class="s1">&#39;ReturnCode&#39;</span> <span class="o">=</span> <span class="mi">431</span><span class="p">,</span> <span class="s1">&#39;Need some unavailable resource to process security.&#39;</span>
 
     <span class="c1">#: Requested host unavailable.</span>
-    <span class="n">CODE_434</span> <span class="o">=</span> <span class="mi">434</span><span class="p">,</span> <span class="s1">&#39;Requested host unavailable.&#39;</span>
+    <span class="n">CODE_434</span><span class="p">:</span> <span class="s1">&#39;ReturnCode&#39;</span> <span class="o">=</span> <span class="mi">434</span><span class="p">,</span> <span class="s1">&#39;Requested host unavailable.&#39;</span>
 
     <span class="c1">#: Requested file action not taken.</span>
-    <span class="n">CODE_450</span> <span class="o">=</span> <span class="mi">450</span><span class="p">,</span> <span class="s1">&#39;Requested file action not taken.&#39;</span>
+    <span class="n">CODE_450</span><span class="p">:</span> <span class="s1">&#39;ReturnCode&#39;</span> <span class="o">=</span> <span class="mi">450</span><span class="p">,</span> <span class="s1">&#39;Requested file action not taken.&#39;</span>
 
     <span class="c1">#: Requested action aborted. Local error in processing.</span>
-    <span class="n">CODE_451</span> <span class="o">=</span> <span class="mi">451</span><span class="p">,</span> <span class="s1">&#39;Requested action aborted. Local error in processing.&#39;</span>
+    <span class="n">CODE_451</span><span class="p">:</span> <span class="s1">&#39;ReturnCode&#39;</span> <span class="o">=</span> <span class="mi">451</span><span class="p">,</span> <span class="s1">&#39;Requested action aborted.&#39;</span>
 
     <span class="c1">#: Requested action not taken. Insufficient storage space in system. File</span>
     <span class="c1">#: unavailable (e.g., file busy).</span>
-    <span class="n">CODE_452</span> <span class="o">=</span> <span class="mi">452</span><span class="p">,</span> <span class="s1">&#39;Requested action not taken. Insufficient storage space in system. File unavailable (e.g., file busy).&#39;</span>
+    <span class="n">CODE_452</span><span class="p">:</span> <span class="s1">&#39;ReturnCode&#39;</span> <span class="o">=</span> <span class="mi">452</span><span class="p">,</span> <span class="s1">&#39;Requested action not taken.&#39;</span>
 
     <span class="c1">#: Syntax error in parameters or arguments.</span>
-    <span class="n">CODE_501</span> <span class="o">=</span> <span class="mi">501</span><span class="p">,</span> <span class="s1">&#39;Syntax error in parameters or arguments.&#39;</span>
+    <span class="n">CODE_501</span><span class="p">:</span> <span class="s1">&#39;ReturnCode&#39;</span> <span class="o">=</span> <span class="mi">501</span><span class="p">,</span> <span class="s1">&#39;Syntax error in parameters or arguments.&#39;</span>
 
     <span class="c1">#: Command not implemented.</span>
-    <span class="n">CODE_502</span> <span class="o">=</span> <span class="mi">502</span><span class="p">,</span> <span class="s1">&#39;Command not implemented.&#39;</span>
+    <span class="n">CODE_502</span><span class="p">:</span> <span class="s1">&#39;ReturnCode&#39;</span> <span class="o">=</span> <span class="mi">502</span><span class="p">,</span> <span class="s1">&#39;Command not implemented.&#39;</span>
 
     <span class="c1">#: Bad sequence of commands.</span>
-    <span class="n">CODE_503</span> <span class="o">=</span> <span class="mi">503</span><span class="p">,</span> <span class="s1">&#39;Bad sequence of commands.&#39;</span>
+    <span class="n">CODE_503</span><span class="p">:</span> <span class="s1">&#39;ReturnCode&#39;</span> <span class="o">=</span> <span class="mi">503</span><span class="p">,</span> <span class="s1">&#39;Bad sequence of commands.&#39;</span>
 
     <span class="c1">#: Command not implemented for that parameter.</span>
-    <span class="n">CODE_504</span> <span class="o">=</span> <span class="mi">504</span><span class="p">,</span> <span class="s1">&#39;Command not implemented for that parameter.&#39;</span>
+    <span class="n">CODE_504</span><span class="p">:</span> <span class="s1">&#39;ReturnCode&#39;</span> <span class="o">=</span> <span class="mi">504</span><span class="p">,</span> <span class="s1">&#39;Command not implemented for that parameter.&#39;</span>
 
     <span class="c1">#: Not logged in.</span>
-    <span class="n">CODE_530</span> <span class="o">=</span> <span class="mi">530</span><span class="p">,</span> <span class="s1">&#39;Not logged in.&#39;</span>
+    <span class="n">CODE_530</span><span class="p">:</span> <span class="s1">&#39;ReturnCode&#39;</span> <span class="o">=</span> <span class="mi">530</span><span class="p">,</span> <span class="s1">&#39;Not logged in.&#39;</span>
 
     <span class="c1">#: Need account for storing files.</span>
-    <span class="n">CODE_532</span> <span class="o">=</span> <span class="mi">532</span><span class="p">,</span> <span class="s1">&#39;Need account for storing files.&#39;</span>
+    <span class="n">CODE_532</span><span class="p">:</span> <span class="s1">&#39;ReturnCode&#39;</span> <span class="o">=</span> <span class="mi">532</span><span class="p">,</span> <span class="s1">&#39;Need account for storing files.&#39;</span>
 
     <span class="c1">#: Command protection level denied for policy reasons.</span>
-    <span class="n">CODE_533</span> <span class="o">=</span> <span class="mi">533</span><span class="p">,</span> <span class="s1">&#39;Command protection level denied for policy reasons.&#39;</span>
+    <span class="n">CODE_533</span><span class="p">:</span> <span class="s1">&#39;ReturnCode&#39;</span> <span class="o">=</span> <span class="mi">533</span><span class="p">,</span> <span class="s1">&#39;Command protection level denied for policy reasons.&#39;</span>
 
     <span class="c1">#: Request denied for policy reasons.</span>
-    <span class="n">CODE_534</span> <span class="o">=</span> <span class="mi">534</span><span class="p">,</span> <span class="s1">&#39;Request denied for policy reasons.&#39;</span>
+    <span class="n">CODE_534</span><span class="p">:</span> <span class="s1">&#39;ReturnCode&#39;</span> <span class="o">=</span> <span class="mi">534</span><span class="p">,</span> <span class="s1">&#39;Request denied for policy reasons.&#39;</span>
 
     <span class="c1">#: Failed security check.</span>
-    <span class="n">CODE_535</span> <span class="o">=</span> <span class="mi">535</span><span class="p">,</span> <span class="s1">&#39;Failed security check.&#39;</span>
+    <span class="n">CODE_535</span><span class="p">:</span> <span class="s1">&#39;ReturnCode&#39;</span> <span class="o">=</span> <span class="mi">535</span><span class="p">,</span> <span class="s1">&#39;Failed security check.&#39;</span>
 
     <span class="c1">#: Data protection level not supported by security mechanism.</span>
-    <span class="n">CODE_536</span> <span class="o">=</span> <span class="mi">536</span><span class="p">,</span> <span class="s1">&#39;Data protection level not supported by security mechanism.&#39;</span>
+    <span class="n">CODE_536</span><span class="p">:</span> <span class="s1">&#39;ReturnCode&#39;</span> <span class="o">=</span> <span class="mi">536</span><span class="p">,</span> <span class="s1">&#39;Data protection level not supported by security mechanism.&#39;</span>
 
     <span class="c1">#: Command protection level not supported by security mechanism.</span>
-    <span class="n">CODE_537</span> <span class="o">=</span> <span class="mi">537</span><span class="p">,</span> <span class="s1">&#39;Command protection level not supported by security mechanism.&#39;</span>
+    <span class="n">CODE_537</span><span class="p">:</span> <span class="s1">&#39;ReturnCode&#39;</span> <span class="o">=</span> <span class="mi">537</span><span class="p">,</span> <span class="s1">&#39;Command protection level not supported by security mechanism.&#39;</span>
 
     <span class="c1">#: Requested action not taken. File unavailable (e.g., file not found, no</span>
     <span class="c1">#: access).</span>
-    <span class="n">CODE_550</span> <span class="o">=</span> <span class="mi">550</span><span class="p">,</span> <span class="s1">&#39;Requested action not taken. File unavailable (e.g., file not found, no access).&#39;</span>
+    <span class="n">CODE_550</span><span class="p">:</span> <span class="s1">&#39;ReturnCode&#39;</span> <span class="o">=</span> <span class="mi">550</span><span class="p">,</span> <span class="s1">&#39;Requested action not taken.&#39;</span>
 
     <span class="c1">#: Requested action aborted. Page type unknown.</span>
-    <span class="n">CODE_551</span> <span class="o">=</span> <span class="mi">551</span><span class="p">,</span> <span class="s1">&#39;Requested action aborted. Page type unknown.&#39;</span>
+    <span class="n">CODE_551</span><span class="p">:</span> <span class="s1">&#39;ReturnCode&#39;</span> <span class="o">=</span> <span class="mi">551</span><span class="p">,</span> <span class="s1">&#39;Requested action aborted.&#39;</span>
 
     <span class="c1">#: Requested file action aborted. Exceeded storage allocation (for current</span>
     <span class="c1">#: directory or dataset).</span>
-    <span class="n">CODE_552</span> <span class="o">=</span> <span class="mi">552</span><span class="p">,</span> <span class="s1">&#39;Requested file action aborted. Exceeded storage allocation (for current directory or dataset).&#39;</span>
+    <span class="n">CODE_552</span><span class="p">:</span> <span class="s1">&#39;ReturnCode&#39;</span> <span class="o">=</span> <span class="mi">552</span><span class="p">,</span> <span class="s1">&#39;Requested file action aborted.&#39;</span>
 
     <span class="c1">#: Requested action not taken. File name not allowed.</span>
-    <span class="n">CODE_553</span> <span class="o">=</span> <span class="mi">553</span><span class="p">,</span> <span class="s1">&#39;Requested action not taken. File name not allowed.&#39;</span>
+    <span class="n">CODE_553</span><span class="p">:</span> <span class="s1">&#39;ReturnCode&#39;</span> <span class="o">=</span> <span class="mi">553</span><span class="p">,</span> <span class="s1">&#39;Requested action not taken.&#39;</span>
 
     <span class="c1">#: Integrity protected reply.</span>
-    <span class="n">CODE_631</span> <span class="o">=</span> <span class="mi">631</span><span class="p">,</span> <span class="s1">&#39;Integrity protected reply.&#39;</span>
+    <span class="n">CODE_631</span><span class="p">:</span> <span class="s1">&#39;ReturnCode&#39;</span> <span class="o">=</span> <span class="mi">631</span><span class="p">,</span> <span class="s1">&#39;Integrity protected reply.&#39;</span>
 
     <span class="c1">#: Confidentiality and integrity protected reply.</span>
-    <span class="n">CODE_632</span> <span class="o">=</span> <span class="mi">632</span><span class="p">,</span> <span class="s1">&#39;Confidentiality and integrity protected reply.&#39;</span>
+    <span class="n">CODE_632</span><span class="p">:</span> <span class="s1">&#39;ReturnCode&#39;</span> <span class="o">=</span> <span class="mi">632</span><span class="p">,</span> <span class="s1">&#39;Confidentiality and integrity protected reply.&#39;</span>
 
     <span class="c1">#: Confidentiality protected reply.</span>
-    <span class="n">CODE_633</span> <span class="o">=</span> <span class="mi">633</span><span class="p">,</span> <span class="s1">&#39;Confidentiality protected reply.&#39;</span>
+    <span class="n">CODE_633</span><span class="p">:</span> <span class="s1">&#39;ReturnCode&#39;</span> <span class="o">=</span> <span class="mi">633</span><span class="p">,</span> <span class="s1">&#39;Confidentiality protected reply.&#39;</span>
 
     <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="n">key</span><span class="p">:</span> <span class="s1">&#39;int | str&#39;</span><span class="p">,</span> <span class="n">default</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;ReturnCode&#39;</span><span class="p">:</span>

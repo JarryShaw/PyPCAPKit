@@ -389,392 +389,387 @@ which is automatically generated from <a class="reference internal" href="../ven
 <p>[Command] FTP Command</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.ftp.command.Command.feat">
-<span class="sig-name descname"><span class="pre">feat</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional[str]</span></em><a class="headerlink" href="#pcapkit.const.ftp.command.Command.feat" title="Permalink to this definition">#</a></dt>
-<dd><p>Feature of command.</p>
+<span class="sig-name descname"><span class="pre">feat</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional[FEATCode]</span></em><a class="headerlink" href="#pcapkit.const.ftp.command.Command.feat" title="Permalink to this definition">#</a></dt>
+<dd><p>Feature code. Keyword returned in FEAT response line for this command/extension,
+c.f., <span class="target" id="index-0"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5797.html#secion-2.2"><strong>RFC 5797#secion-2.2</strong></a>.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.ftp.command.Command.desc">
 <span class="sig-name descname"><span class="pre">desc</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional[str]</span></em><a class="headerlink" href="#pcapkit.const.ftp.command.Command.desc" title="Permalink to this definition">#</a></dt>
-<dd><p>Description of command.</p>
+<dd><p>Brief description of command / extension.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.ftp.command.Command.type">
-<span class="sig-name descname"><span class="pre">type</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional[tuple[str,</span> <span class="pre">...]]</span></em><a class="headerlink" href="#pcapkit.const.ftp.command.Command.type" title="Permalink to this definition">#</a></dt>
-<dd><p>Type of command.</p>
+<span class="sig-name descname"><span class="pre">type</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">CommandType</span></em><a class="headerlink" href="#pcapkit.const.ftp.command.Command.type" title="Permalink to this definition">#</a></dt>
+<dd><p>Type of “kind” of command, based on <span class="target" id="index-1"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc959.html#section-4.1"><strong>RFC 959#section-4.1</strong></a>.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.ftp.command.Command.conf">
-<span class="sig-name descname"><span class="pre">conf</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional[str]</span></em><a class="headerlink" href="#pcapkit.const.ftp.command.Command.conf" title="Permalink to this definition">#</a></dt>
-<dd><p>Conformance of command.</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.const.ftp.command.Command.note">
-<span class="sig-name descname"><span class="pre">note</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional[tuple[str,</span> <span class="pre">...]]</span></em><a class="headerlink" href="#pcapkit.const.ftp.command.Command.note" title="Permalink to this definition">#</a></dt>
-<dd><p>Note of command.</p>
+<span class="sig-name descname"><span class="pre">conf</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ConformanceRequirement</span></em><a class="headerlink" href="#pcapkit.const.ftp.command.Command.conf" title="Permalink to this definition">#</a></dt>
+<dd><p>Expectation for support in modern FTP implementations.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.ftp.command.Command.ABOR">
-<span class="sig-name descname"><span class="pre">ABOR</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'ABOR'</span></em><a class="headerlink" href="#pcapkit.const.ftp.command.Command.ABOR" title="Permalink to this definition">#</a></dt>
-<dd><p>Abort [<span class="target" id="index-0"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc959.html"><strong>RFC 959</strong></a>]</p>
+<span class="sig-name descname"><span class="pre">ABOR</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Command</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'ABOR'</span></em><a class="headerlink" href="#pcapkit.const.ftp.command.Command.ABOR" title="Permalink to this definition">#</a></dt>
+<dd><p>Abort [<span class="target" id="index-2"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc959.html"><strong>RFC 959</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.ftp.command.Command.ACCT">
-<span class="sig-name descname"><span class="pre">ACCT</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'ACCT'</span></em><a class="headerlink" href="#pcapkit.const.ftp.command.Command.ACCT" title="Permalink to this definition">#</a></dt>
-<dd><p>Account [<span class="target" id="index-1"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc959.html"><strong>RFC 959</strong></a>]</p>
+<span class="sig-name descname"><span class="pre">ACCT</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Command</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'ACCT'</span></em><a class="headerlink" href="#pcapkit.const.ftp.command.Command.ACCT" title="Permalink to this definition">#</a></dt>
+<dd><p>Account [<span class="target" id="index-3"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc959.html"><strong>RFC 959</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.ftp.command.Command.ADAT">
-<span class="sig-name descname"><span class="pre">ADAT</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'ADAT'</span></em><a class="headerlink" href="#pcapkit.const.ftp.command.Command.ADAT" title="Permalink to this definition">#</a></dt>
-<dd><p>Authentication/Security Data [<span class="target" id="index-2"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2228.html"><strong>RFC 2228</strong></a>][<span class="target" id="index-3"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2773.html"><strong>RFC 2773</strong></a>][<span class="target" id="index-4"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4217.html"><strong>RFC 4217</strong></a>]</p>
+<span class="sig-name descname"><span class="pre">ADAT</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Command</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'ADAT'</span></em><a class="headerlink" href="#pcapkit.const.ftp.command.Command.ADAT" title="Permalink to this definition">#</a></dt>
+<dd><p>Authentication/Security Data [<span class="target" id="index-4"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2228.html"><strong>RFC 2228</strong></a>][<span class="target" id="index-5"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2773.html"><strong>RFC 2773</strong></a>][<span class="target" id="index-6"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4217.html"><strong>RFC 4217</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.ftp.command.Command.ALGS">
-<span class="sig-name descname"><span class="pre">ALGS</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'ALGS'</span></em><a class="headerlink" href="#pcapkit.const.ftp.command.Command.ALGS" title="Permalink to this definition">#</a></dt>
-<dd><p>FTP64 ALG status [<span class="target" id="index-5"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6384.html"><strong>RFC 6384</strong></a>][Section 11]</p>
+<span class="sig-name descname"><span class="pre">ALGS</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Command</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'ALGS'</span></em><a class="headerlink" href="#pcapkit.const.ftp.command.Command.ALGS" title="Permalink to this definition">#</a></dt>
+<dd><p>FTP64 ALG status [<span class="target" id="index-7"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6384.html"><strong>RFC 6384</strong></a>][Section 11]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.ftp.command.Command.ALLO">
-<span class="sig-name descname"><span class="pre">ALLO</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'ALLO'</span></em><a class="headerlink" href="#pcapkit.const.ftp.command.Command.ALLO" title="Permalink to this definition">#</a></dt>
-<dd><p>Allocate [<span class="target" id="index-6"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc959.html"><strong>RFC 959</strong></a>]</p>
+<span class="sig-name descname"><span class="pre">ALLO</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Command</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'ALLO'</span></em><a class="headerlink" href="#pcapkit.const.ftp.command.Command.ALLO" title="Permalink to this definition">#</a></dt>
+<dd><p>Allocate [<span class="target" id="index-8"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc959.html"><strong>RFC 959</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.ftp.command.Command.APPE">
-<span class="sig-name descname"><span class="pre">APPE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'APPE'</span></em><a class="headerlink" href="#pcapkit.const.ftp.command.Command.APPE" title="Permalink to this definition">#</a></dt>
-<dd><p>Append (with create) [<span class="target" id="index-7"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc959.html"><strong>RFC 959</strong></a>]</p>
+<span class="sig-name descname"><span class="pre">APPE</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Command</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'APPE'</span></em><a class="headerlink" href="#pcapkit.const.ftp.command.Command.APPE" title="Permalink to this definition">#</a></dt>
+<dd><p>Append (with create) [<span class="target" id="index-9"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc959.html"><strong>RFC 959</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.ftp.command.Command.AUTH">
-<span class="sig-name descname"><span class="pre">AUTH</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'AUTH'</span></em><a class="headerlink" href="#pcapkit.const.ftp.command.Command.AUTH" title="Permalink to this definition">#</a></dt>
-<dd><p>Authentication/Security Mechanism [2][<span class="target" id="index-8"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2773.html"><strong>RFC 2773</strong></a>][<span class="target" id="index-9"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4217.html"><strong>RFC 4217</strong></a>]</p>
+<span class="sig-name descname"><span class="pre">AUTH</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Command</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'AUTH'</span></em><a class="headerlink" href="#pcapkit.const.ftp.command.Command.AUTH" title="Permalink to this definition">#</a></dt>
+<dd><p>Authentication/Security Mechanism [2][<span class="target" id="index-10"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2773.html"><strong>RFC 2773</strong></a>][<span class="target" id="index-11"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4217.html"><strong>RFC 4217</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.ftp.command.Command.CCC">
-<span class="sig-name descname"><span class="pre">CCC</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'CCC'</span></em><a class="headerlink" href="#pcapkit.const.ftp.command.Command.CCC" title="Permalink to this definition">#</a></dt>
-<dd><p>Clear Command Channel [<span class="target" id="index-10"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2228.html"><strong>RFC 2228</strong></a>]</p>
+<span class="sig-name descname"><span class="pre">CCC</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Command</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'CCC'</span></em><a class="headerlink" href="#pcapkit.const.ftp.command.Command.CCC" title="Permalink to this definition">#</a></dt>
+<dd><p>Clear Command Channel [<span class="target" id="index-12"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2228.html"><strong>RFC 2228</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.ftp.command.Command.CDUP">
-<span class="sig-name descname"><span class="pre">CDUP</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'CDUP'</span></em><a class="headerlink" href="#pcapkit.const.ftp.command.Command.CDUP" title="Permalink to this definition">#</a></dt>
-<dd><p>Change to Parent Directory [<span class="target" id="index-11"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc959.html"><strong>RFC 959</strong></a>]</p>
+<span class="sig-name descname"><span class="pre">CDUP</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Command</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'CDUP'</span></em><a class="headerlink" href="#pcapkit.const.ftp.command.Command.CDUP" title="Permalink to this definition">#</a></dt>
+<dd><p>Change to Parent Directory [<span class="target" id="index-13"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc959.html"><strong>RFC 959</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.ftp.command.Command.CONF">
-<span class="sig-name descname"><span class="pre">CONF</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'CONF'</span></em><a class="headerlink" href="#pcapkit.const.ftp.command.Command.CONF" title="Permalink to this definition">#</a></dt>
-<dd><p>Confidentiality Protected Command [<span class="target" id="index-12"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2228.html"><strong>RFC 2228</strong></a>]</p>
+<span class="sig-name descname"><span class="pre">CONF</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Command</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'CONF'</span></em><a class="headerlink" href="#pcapkit.const.ftp.command.Command.CONF" title="Permalink to this definition">#</a></dt>
+<dd><p>Confidentiality Protected Command [<span class="target" id="index-14"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2228.html"><strong>RFC 2228</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.ftp.command.Command.CWD">
-<span class="sig-name descname"><span class="pre">CWD</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'CWD'</span></em><a class="headerlink" href="#pcapkit.const.ftp.command.Command.CWD" title="Permalink to this definition">#</a></dt>
-<dd><p>Change Working Directory [<span class="target" id="index-13"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc959.html"><strong>RFC 959</strong></a>]</p>
+<span class="sig-name descname"><span class="pre">CWD</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Command</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'CWD'</span></em><a class="headerlink" href="#pcapkit.const.ftp.command.Command.CWD" title="Permalink to this definition">#</a></dt>
+<dd><p>Change Working Directory [<span class="target" id="index-15"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc959.html"><strong>RFC 959</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.ftp.command.Command.DELE">
-<span class="sig-name descname"><span class="pre">DELE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'DELE'</span></em><a class="headerlink" href="#pcapkit.const.ftp.command.Command.DELE" title="Permalink to this definition">#</a></dt>
-<dd><p>Delete File [<span class="target" id="index-14"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc959.html"><strong>RFC 959</strong></a>]</p>
+<span class="sig-name descname"><span class="pre">DELE</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Command</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'DELE'</span></em><a class="headerlink" href="#pcapkit.const.ftp.command.Command.DELE" title="Permalink to this definition">#</a></dt>
+<dd><p>Delete File [<span class="target" id="index-16"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc959.html"><strong>RFC 959</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.ftp.command.Command.ENC">
-<span class="sig-name descname"><span class="pre">ENC</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'ENC'</span></em><a class="headerlink" href="#pcapkit.const.ftp.command.Command.ENC" title="Permalink to this definition">#</a></dt>
-<dd><p>Privacy Protected Command [<span class="target" id="index-15"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2228.html"><strong>RFC 2228</strong></a>][<span class="target" id="index-16"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2773.html"><strong>RFC 2773</strong></a>][<span class="target" id="index-17"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4217.html"><strong>RFC 4217</strong></a>]</p>
+<span class="sig-name descname"><span class="pre">ENC</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Command</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'ENC'</span></em><a class="headerlink" href="#pcapkit.const.ftp.command.Command.ENC" title="Permalink to this definition">#</a></dt>
+<dd><p>Privacy Protected Command [<span class="target" id="index-17"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2228.html"><strong>RFC 2228</strong></a>][<span class="target" id="index-18"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2773.html"><strong>RFC 2773</strong></a>][<span class="target" id="index-19"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4217.html"><strong>RFC 4217</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.ftp.command.Command.EPRT">
-<span class="sig-name descname"><span class="pre">EPRT</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'EPRT'</span></em><a class="headerlink" href="#pcapkit.const.ftp.command.Command.EPRT" title="Permalink to this definition">#</a></dt>
-<dd><p>Extended Port [<span class="target" id="index-18"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2428.html"><strong>RFC 2428</strong></a>]</p>
+<span class="sig-name descname"><span class="pre">EPRT</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Command</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'EPRT'</span></em><a class="headerlink" href="#pcapkit.const.ftp.command.Command.EPRT" title="Permalink to this definition">#</a></dt>
+<dd><p>Extended Port [<span class="target" id="index-20"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2428.html"><strong>RFC 2428</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.ftp.command.Command.EPSV">
-<span class="sig-name descname"><span class="pre">EPSV</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'EPSV'</span></em><a class="headerlink" href="#pcapkit.const.ftp.command.Command.EPSV" title="Permalink to this definition">#</a></dt>
-<dd><p>Extended Passive Mode [<span class="target" id="index-19"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2428.html"><strong>RFC 2428</strong></a>]</p>
+<span class="sig-name descname"><span class="pre">EPSV</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Command</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'EPSV'</span></em><a class="headerlink" href="#pcapkit.const.ftp.command.Command.EPSV" title="Permalink to this definition">#</a></dt>
+<dd><p>Extended Passive Mode [<span class="target" id="index-21"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2428.html"><strong>RFC 2428</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.ftp.command.Command.FEAT">
-<span class="sig-name descname"><span class="pre">FEAT</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'FEAT'</span></em><a class="headerlink" href="#pcapkit.const.ftp.command.Command.FEAT" title="Permalink to this definition">#</a></dt>
-<dd><p>Feature Negotiation [<span class="target" id="index-20"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2389.html"><strong>RFC 2389</strong></a>]</p>
+<span class="sig-name descname"><span class="pre">FEAT</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Command</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'FEAT'</span></em><a class="headerlink" href="#pcapkit.const.ftp.command.Command.FEAT" title="Permalink to this definition">#</a></dt>
+<dd><p>Feature Negotiation [<span class="target" id="index-22"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2389.html"><strong>RFC 2389</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.ftp.command.Command.HELP">
-<span class="sig-name descname"><span class="pre">HELP</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'HELP'</span></em><a class="headerlink" href="#pcapkit.const.ftp.command.Command.HELP" title="Permalink to this definition">#</a></dt>
-<dd><p>Help [<span class="target" id="index-21"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc959.html"><strong>RFC 959</strong></a>]</p>
+<span class="sig-name descname"><span class="pre">HELP</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Command</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'HELP'</span></em><a class="headerlink" href="#pcapkit.const.ftp.command.Command.HELP" title="Permalink to this definition">#</a></dt>
+<dd><p>Help [<span class="target" id="index-23"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc959.html"><strong>RFC 959</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.ftp.command.Command.HOST">
-<span class="sig-name descname"><span class="pre">HOST</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'HOST'</span></em><a class="headerlink" href="#pcapkit.const.ftp.command.Command.HOST" title="Permalink to this definition">#</a></dt>
-<dd><p>Hostname [<span class="target" id="index-22"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc7151.html"><strong>RFC 7151</strong></a>]</p>
+<span class="sig-name descname"><span class="pre">HOST</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Command</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'HOST'</span></em><a class="headerlink" href="#pcapkit.const.ftp.command.Command.HOST" title="Permalink to this definition">#</a></dt>
+<dd><p>Hostname [<span class="target" id="index-24"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc7151.html"><strong>RFC 7151</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.ftp.command.Command.LANG">
-<span class="sig-name descname"><span class="pre">LANG</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'LANG'</span></em><a class="headerlink" href="#pcapkit.const.ftp.command.Command.LANG" title="Permalink to this definition">#</a></dt>
-<dd><p>Language (for Server Messages) [<span class="target" id="index-23"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2640.html"><strong>RFC 2640</strong></a>]</p>
+<span class="sig-name descname"><span class="pre">LANG</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Command</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'LANG'</span></em><a class="headerlink" href="#pcapkit.const.ftp.command.Command.LANG" title="Permalink to this definition">#</a></dt>
+<dd><p>Language (for Server Messages) [<span class="target" id="index-25"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2640.html"><strong>RFC 2640</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.ftp.command.Command.LIST">
-<span class="sig-name descname"><span class="pre">LIST</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'LIST'</span></em><a class="headerlink" href="#pcapkit.const.ftp.command.Command.LIST" title="Permalink to this definition">#</a></dt>
-<dd><p>List [<span class="target" id="index-24"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc959.html"><strong>RFC 959</strong></a>][<span class="target" id="index-25"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1123.html"><strong>RFC 1123</strong></a>]</p>
+<span class="sig-name descname"><span class="pre">LIST</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Command</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'LIST'</span></em><a class="headerlink" href="#pcapkit.const.ftp.command.Command.LIST" title="Permalink to this definition">#</a></dt>
+<dd><p>List [<span class="target" id="index-26"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc959.html"><strong>RFC 959</strong></a>][<span class="target" id="index-27"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1123.html"><strong>RFC 1123</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.ftp.command.Command.LPRT">
-<span class="sig-name descname"><span class="pre">LPRT</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'LPRT'</span></em><a class="headerlink" href="#pcapkit.const.ftp.command.Command.LPRT" title="Permalink to this definition">#</a></dt>
-<dd><p>Data Port [<span class="target" id="index-26"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1545.html"><strong>RFC 1545</strong></a>][<span class="target" id="index-27"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1639.html"><strong>RFC 1639</strong></a>]</p>
+<span class="sig-name descname"><span class="pre">LPRT</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Command</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'LPRT'</span></em><a class="headerlink" href="#pcapkit.const.ftp.command.Command.LPRT" title="Permalink to this definition">#</a></dt>
+<dd><p>Data Port [<span class="target" id="index-28"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1545.html"><strong>RFC 1545</strong></a>][<span class="target" id="index-29"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1639.html"><strong>RFC 1639</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.ftp.command.Command.LPSV">
-<span class="sig-name descname"><span class="pre">LPSV</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'LPSV'</span></em><a class="headerlink" href="#pcapkit.const.ftp.command.Command.LPSV" title="Permalink to this definition">#</a></dt>
-<dd><p>Passive Mode [<span class="target" id="index-28"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1545.html"><strong>RFC 1545</strong></a>][<span class="target" id="index-29"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1639.html"><strong>RFC 1639</strong></a>]</p>
+<span class="sig-name descname"><span class="pre">LPSV</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Command</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'LPSV'</span></em><a class="headerlink" href="#pcapkit.const.ftp.command.Command.LPSV" title="Permalink to this definition">#</a></dt>
+<dd><p>Passive Mode [<span class="target" id="index-30"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1545.html"><strong>RFC 1545</strong></a>][<span class="target" id="index-31"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1639.html"><strong>RFC 1639</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.ftp.command.Command.MDTM">
-<span class="sig-name descname"><span class="pre">MDTM</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'MDTM'</span></em><a class="headerlink" href="#pcapkit.const.ftp.command.Command.MDTM" title="Permalink to this definition">#</a></dt>
-<dd><p>File Modification Time [<span class="target" id="index-30"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3659.html"><strong>RFC 3659</strong></a>]</p>
+<span class="sig-name descname"><span class="pre">MDTM</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Command</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'MDTM'</span></em><a class="headerlink" href="#pcapkit.const.ftp.command.Command.MDTM" title="Permalink to this definition">#</a></dt>
+<dd><p>File Modification Time [<span class="target" id="index-32"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3659.html"><strong>RFC 3659</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.ftp.command.Command.MIC">
-<span class="sig-name descname"><span class="pre">MIC</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'MIC'</span></em><a class="headerlink" href="#pcapkit.const.ftp.command.Command.MIC" title="Permalink to this definition">#</a></dt>
-<dd><p>Integrity Protected Command [<span class="target" id="index-31"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2228.html"><strong>RFC 2228</strong></a>][<span class="target" id="index-32"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2773.html"><strong>RFC 2773</strong></a>][<span class="target" id="index-33"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4217.html"><strong>RFC 4217</strong></a>]</p>
+<span class="sig-name descname"><span class="pre">MIC</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Command</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'MIC'</span></em><a class="headerlink" href="#pcapkit.const.ftp.command.Command.MIC" title="Permalink to this definition">#</a></dt>
+<dd><p>Integrity Protected Command [<span class="target" id="index-33"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2228.html"><strong>RFC 2228</strong></a>][<span class="target" id="index-34"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2773.html"><strong>RFC 2773</strong></a>][<span class="target" id="index-35"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4217.html"><strong>RFC 4217</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.ftp.command.Command.MKD">
-<span class="sig-name descname"><span class="pre">MKD</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'MKD'</span></em><a class="headerlink" href="#pcapkit.const.ftp.command.Command.MKD" title="Permalink to this definition">#</a></dt>
-<dd><p>Make Directory [<span class="target" id="index-34"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc959.html"><strong>RFC 959</strong></a>]</p>
+<span class="sig-name descname"><span class="pre">MKD</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Command</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'MKD'</span></em><a class="headerlink" href="#pcapkit.const.ftp.command.Command.MKD" title="Permalink to this definition">#</a></dt>
+<dd><p>Make Directory [<span class="target" id="index-36"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc959.html"><strong>RFC 959</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.ftp.command.Command.MLSD">
-<span class="sig-name descname"><span class="pre">MLSD</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'MLSD'</span></em><a class="headerlink" href="#pcapkit.const.ftp.command.Command.MLSD" title="Permalink to this definition">#</a></dt>
-<dd><p>List Directory (for machine) [<span class="target" id="index-35"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3659.html"><strong>RFC 3659</strong></a>]</p>
+<span class="sig-name descname"><span class="pre">MLSD</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Command</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'MLSD'</span></em><a class="headerlink" href="#pcapkit.const.ftp.command.Command.MLSD" title="Permalink to this definition">#</a></dt>
+<dd><p>List Directory (for machine) [<span class="target" id="index-37"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3659.html"><strong>RFC 3659</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.ftp.command.Command.MLST">
-<span class="sig-name descname"><span class="pre">MLST</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'MLST'</span></em><a class="headerlink" href="#pcapkit.const.ftp.command.Command.MLST" title="Permalink to this definition">#</a></dt>
-<dd><p>List Single Object [<span class="target" id="index-36"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3659.html"><strong>RFC 3659</strong></a>]</p>
+<span class="sig-name descname"><span class="pre">MLST</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Command</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'MLST'</span></em><a class="headerlink" href="#pcapkit.const.ftp.command.Command.MLST" title="Permalink to this definition">#</a></dt>
+<dd><p>List Single Object [<span class="target" id="index-38"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3659.html"><strong>RFC 3659</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.ftp.command.Command.MODE">
-<span class="sig-name descname"><span class="pre">MODE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'MODE'</span></em><a class="headerlink" href="#pcapkit.const.ftp.command.Command.MODE" title="Permalink to this definition">#</a></dt>
-<dd><p>Transfer Mode [<span class="target" id="index-37"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc959.html"><strong>RFC 959</strong></a>]</p>
+<span class="sig-name descname"><span class="pre">MODE</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Command</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'MODE'</span></em><a class="headerlink" href="#pcapkit.const.ftp.command.Command.MODE" title="Permalink to this definition">#</a></dt>
+<dd><p>Transfer Mode [<span class="target" id="index-39"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc959.html"><strong>RFC 959</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.ftp.command.Command.NLST">
-<span class="sig-name descname"><span class="pre">NLST</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'NLST'</span></em><a class="headerlink" href="#pcapkit.const.ftp.command.Command.NLST" title="Permalink to this definition">#</a></dt>
-<dd><p>Name List [<span class="target" id="index-38"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc959.html"><strong>RFC 959</strong></a>][<span class="target" id="index-39"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1123.html"><strong>RFC 1123</strong></a>]</p>
+<span class="sig-name descname"><span class="pre">NLST</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Command</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'NLST'</span></em><a class="headerlink" href="#pcapkit.const.ftp.command.Command.NLST" title="Permalink to this definition">#</a></dt>
+<dd><p>Name List [<span class="target" id="index-40"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc959.html"><strong>RFC 959</strong></a>][<span class="target" id="index-41"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1123.html"><strong>RFC 1123</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.ftp.command.Command.NOOP">
-<span class="sig-name descname"><span class="pre">NOOP</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'NOOP'</span></em><a class="headerlink" href="#pcapkit.const.ftp.command.Command.NOOP" title="Permalink to this definition">#</a></dt>
-<dd><p>No-Op [<span class="target" id="index-40"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc959.html"><strong>RFC 959</strong></a>]</p>
+<span class="sig-name descname"><span class="pre">NOOP</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Command</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'NOOP'</span></em><a class="headerlink" href="#pcapkit.const.ftp.command.Command.NOOP" title="Permalink to this definition">#</a></dt>
+<dd><p>No-Op [<span class="target" id="index-42"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc959.html"><strong>RFC 959</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.ftp.command.Command.OPTS">
-<span class="sig-name descname"><span class="pre">OPTS</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'OPTS'</span></em><a class="headerlink" href="#pcapkit.const.ftp.command.Command.OPTS" title="Permalink to this definition">#</a></dt>
-<dd><p>Options [<span class="target" id="index-41"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2389.html"><strong>RFC 2389</strong></a>]</p>
+<span class="sig-name descname"><span class="pre">OPTS</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Command</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'OPTS'</span></em><a class="headerlink" href="#pcapkit.const.ftp.command.Command.OPTS" title="Permalink to this definition">#</a></dt>
+<dd><p>Options [<span class="target" id="index-43"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2389.html"><strong>RFC 2389</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.ftp.command.Command.PASS">
-<span class="sig-name descname"><span class="pre">PASS</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'PASS'</span></em><a class="headerlink" href="#pcapkit.const.ftp.command.Command.PASS" title="Permalink to this definition">#</a></dt>
-<dd><p>Password [<span class="target" id="index-42"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc959.html"><strong>RFC 959</strong></a>]</p>
+<span class="sig-name descname"><span class="pre">PASS</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Command</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'PASS'</span></em><a class="headerlink" href="#pcapkit.const.ftp.command.Command.PASS" title="Permalink to this definition">#</a></dt>
+<dd><p>Password [<span class="target" id="index-44"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc959.html"><strong>RFC 959</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.ftp.command.Command.PASV">
-<span class="sig-name descname"><span class="pre">PASV</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'PASV'</span></em><a class="headerlink" href="#pcapkit.const.ftp.command.Command.PASV" title="Permalink to this definition">#</a></dt>
-<dd><p>Passive Mode [<span class="target" id="index-43"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc959.html"><strong>RFC 959</strong></a>][<span class="target" id="index-44"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1123.html"><strong>RFC 1123</strong></a>]</p>
+<span class="sig-name descname"><span class="pre">PASV</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Command</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'PASV'</span></em><a class="headerlink" href="#pcapkit.const.ftp.command.Command.PASV" title="Permalink to this definition">#</a></dt>
+<dd><p>Passive Mode [<span class="target" id="index-45"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc959.html"><strong>RFC 959</strong></a>][<span class="target" id="index-46"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1123.html"><strong>RFC 1123</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.ftp.command.Command.PBSZ">
-<span class="sig-name descname"><span class="pre">PBSZ</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'PBSZ'</span></em><a class="headerlink" href="#pcapkit.const.ftp.command.Command.PBSZ" title="Permalink to this definition">#</a></dt>
-<dd><p>Protection Buffer Size [<span class="target" id="index-45"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4217.html"><strong>RFC 4217</strong></a>]</p>
+<span class="sig-name descname"><span class="pre">PBSZ</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Command</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'PBSZ'</span></em><a class="headerlink" href="#pcapkit.const.ftp.command.Command.PBSZ" title="Permalink to this definition">#</a></dt>
+<dd><p>Protection Buffer Size [<span class="target" id="index-47"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4217.html"><strong>RFC 4217</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.ftp.command.Command.PORT">
-<span class="sig-name descname"><span class="pre">PORT</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'PORT'</span></em><a class="headerlink" href="#pcapkit.const.ftp.command.Command.PORT" title="Permalink to this definition">#</a></dt>
-<dd><p>Data Port [<span class="target" id="index-46"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc959.html"><strong>RFC 959</strong></a>]</p>
+<span class="sig-name descname"><span class="pre">PORT</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Command</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'PORT'</span></em><a class="headerlink" href="#pcapkit.const.ftp.command.Command.PORT" title="Permalink to this definition">#</a></dt>
+<dd><p>Data Port [<span class="target" id="index-48"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc959.html"><strong>RFC 959</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.ftp.command.Command.PROT">
-<span class="sig-name descname"><span class="pre">PROT</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'PROT'</span></em><a class="headerlink" href="#pcapkit.const.ftp.command.Command.PROT" title="Permalink to this definition">#</a></dt>
-<dd><p>Data Channel Protection Level [<span class="target" id="index-47"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4217.html"><strong>RFC 4217</strong></a>]</p>
+<span class="sig-name descname"><span class="pre">PROT</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Command</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'PROT'</span></em><a class="headerlink" href="#pcapkit.const.ftp.command.Command.PROT" title="Permalink to this definition">#</a></dt>
+<dd><p>Data Channel Protection Level [<span class="target" id="index-49"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4217.html"><strong>RFC 4217</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.ftp.command.Command.PWD">
-<span class="sig-name descname"><span class="pre">PWD</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'PWD'</span></em><a class="headerlink" href="#pcapkit.const.ftp.command.Command.PWD" title="Permalink to this definition">#</a></dt>
-<dd><p>Print Directory [<span class="target" id="index-48"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc959.html"><strong>RFC 959</strong></a>]</p>
+<span class="sig-name descname"><span class="pre">PWD</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Command</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'PWD'</span></em><a class="headerlink" href="#pcapkit.const.ftp.command.Command.PWD" title="Permalink to this definition">#</a></dt>
+<dd><p>Print Directory [<span class="target" id="index-50"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc959.html"><strong>RFC 959</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.ftp.command.Command.QUIT">
-<span class="sig-name descname"><span class="pre">QUIT</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'QUIT'</span></em><a class="headerlink" href="#pcapkit.const.ftp.command.Command.QUIT" title="Permalink to this definition">#</a></dt>
-<dd><p>Logout [<span class="target" id="index-49"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc959.html"><strong>RFC 959</strong></a>]</p>
+<span class="sig-name descname"><span class="pre">QUIT</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Command</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'QUIT'</span></em><a class="headerlink" href="#pcapkit.const.ftp.command.Command.QUIT" title="Permalink to this definition">#</a></dt>
+<dd><p>Logout [<span class="target" id="index-51"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc959.html"><strong>RFC 959</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.ftp.command.Command.REIN">
-<span class="sig-name descname"><span class="pre">REIN</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'REIN'</span></em><a class="headerlink" href="#pcapkit.const.ftp.command.Command.REIN" title="Permalink to this definition">#</a></dt>
-<dd><p>Reinitialize [<span class="target" id="index-50"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc959.html"><strong>RFC 959</strong></a>]</p>
+<span class="sig-name descname"><span class="pre">REIN</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Command</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'REIN'</span></em><a class="headerlink" href="#pcapkit.const.ftp.command.Command.REIN" title="Permalink to this definition">#</a></dt>
+<dd><p>Reinitialize [<span class="target" id="index-52"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc959.html"><strong>RFC 959</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.ftp.command.Command.REST">
-<span class="sig-name descname"><span class="pre">REST</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'REST'</span></em><a class="headerlink" href="#pcapkit.const.ftp.command.Command.REST" title="Permalink to this definition">#</a></dt>
-<dd><p>Restart (for STREAM mode) [3][<span class="target" id="index-51"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3659.html"><strong>RFC 3659</strong></a>]</p>
+<span class="sig-name descname"><span class="pre">REST</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Command</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'REST'</span></em><a class="headerlink" href="#pcapkit.const.ftp.command.Command.REST" title="Permalink to this definition">#</a></dt>
+<dd><p>Restart (for STREAM mode) [3][<span class="target" id="index-53"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3659.html"><strong>RFC 3659</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.ftp.command.Command.RETR">
-<span class="sig-name descname"><span class="pre">RETR</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'RETR'</span></em><a class="headerlink" href="#pcapkit.const.ftp.command.Command.RETR" title="Permalink to this definition">#</a></dt>
-<dd><p>Retrieve [<span class="target" id="index-52"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc959.html"><strong>RFC 959</strong></a>]</p>
+<span class="sig-name descname"><span class="pre">RETR</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Command</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'RETR'</span></em><a class="headerlink" href="#pcapkit.const.ftp.command.Command.RETR" title="Permalink to this definition">#</a></dt>
+<dd><p>Retrieve [<span class="target" id="index-54"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc959.html"><strong>RFC 959</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.ftp.command.Command.RMD">
-<span class="sig-name descname"><span class="pre">RMD</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'RMD'</span></em><a class="headerlink" href="#pcapkit.const.ftp.command.Command.RMD" title="Permalink to this definition">#</a></dt>
-<dd><p>Remove Directory [<span class="target" id="index-53"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc959.html"><strong>RFC 959</strong></a>]</p>
+<span class="sig-name descname"><span class="pre">RMD</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Command</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'RMD'</span></em><a class="headerlink" href="#pcapkit.const.ftp.command.Command.RMD" title="Permalink to this definition">#</a></dt>
+<dd><p>Remove Directory [<span class="target" id="index-55"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc959.html"><strong>RFC 959</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.ftp.command.Command.RNFR">
-<span class="sig-name descname"><span class="pre">RNFR</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'RNFR'</span></em><a class="headerlink" href="#pcapkit.const.ftp.command.Command.RNFR" title="Permalink to this definition">#</a></dt>
-<dd><p>Rename From [<span class="target" id="index-54"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc959.html"><strong>RFC 959</strong></a>]</p>
+<span class="sig-name descname"><span class="pre">RNFR</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Command</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'RNFR'</span></em><a class="headerlink" href="#pcapkit.const.ftp.command.Command.RNFR" title="Permalink to this definition">#</a></dt>
+<dd><p>Rename From [<span class="target" id="index-56"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc959.html"><strong>RFC 959</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.ftp.command.Command.RNTO">
-<span class="sig-name descname"><span class="pre">RNTO</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'RNTO'</span></em><a class="headerlink" href="#pcapkit.const.ftp.command.Command.RNTO" title="Permalink to this definition">#</a></dt>
-<dd><p>Rename From [<span class="target" id="index-55"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc959.html"><strong>RFC 959</strong></a>]</p>
+<span class="sig-name descname"><span class="pre">RNTO</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Command</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'RNTO'</span></em><a class="headerlink" href="#pcapkit.const.ftp.command.Command.RNTO" title="Permalink to this definition">#</a></dt>
+<dd><p>Rename From [<span class="target" id="index-57"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc959.html"><strong>RFC 959</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.ftp.command.Command.SITE">
-<span class="sig-name descname"><span class="pre">SITE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'SITE'</span></em><a class="headerlink" href="#pcapkit.const.ftp.command.Command.SITE" title="Permalink to this definition">#</a></dt>
-<dd><p>Site Parameters [<span class="target" id="index-56"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc959.html"><strong>RFC 959</strong></a>][<span class="target" id="index-57"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1123.html"><strong>RFC 1123</strong></a>]</p>
+<span class="sig-name descname"><span class="pre">SITE</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Command</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'SITE'</span></em><a class="headerlink" href="#pcapkit.const.ftp.command.Command.SITE" title="Permalink to this definition">#</a></dt>
+<dd><p>Site Parameters [<span class="target" id="index-58"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc959.html"><strong>RFC 959</strong></a>][<span class="target" id="index-59"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1123.html"><strong>RFC 1123</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.ftp.command.Command.SIZE">
-<span class="sig-name descname"><span class="pre">SIZE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'SIZE'</span></em><a class="headerlink" href="#pcapkit.const.ftp.command.Command.SIZE" title="Permalink to this definition">#</a></dt>
-<dd><p>File Size [<span class="target" id="index-58"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3659.html"><strong>RFC 3659</strong></a>]</p>
+<span class="sig-name descname"><span class="pre">SIZE</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Command</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'SIZE'</span></em><a class="headerlink" href="#pcapkit.const.ftp.command.Command.SIZE" title="Permalink to this definition">#</a></dt>
+<dd><p>File Size [<span class="target" id="index-60"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3659.html"><strong>RFC 3659</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.ftp.command.Command.SMNT">
-<span class="sig-name descname"><span class="pre">SMNT</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'SMNT'</span></em><a class="headerlink" href="#pcapkit.const.ftp.command.Command.SMNT" title="Permalink to this definition">#</a></dt>
-<dd><p>Structure Mount [<span class="target" id="index-59"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc959.html"><strong>RFC 959</strong></a>]</p>
+<span class="sig-name descname"><span class="pre">SMNT</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Command</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'SMNT'</span></em><a class="headerlink" href="#pcapkit.const.ftp.command.Command.SMNT" title="Permalink to this definition">#</a></dt>
+<dd><p>Structure Mount [<span class="target" id="index-61"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc959.html"><strong>RFC 959</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.ftp.command.Command.STAT">
-<span class="sig-name descname"><span class="pre">STAT</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'STAT'</span></em><a class="headerlink" href="#pcapkit.const.ftp.command.Command.STAT" title="Permalink to this definition">#</a></dt>
-<dd><p>Status [<span class="target" id="index-60"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc959.html"><strong>RFC 959</strong></a>]</p>
+<span class="sig-name descname"><span class="pre">STAT</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Command</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'STAT'</span></em><a class="headerlink" href="#pcapkit.const.ftp.command.Command.STAT" title="Permalink to this definition">#</a></dt>
+<dd><p>Status [<span class="target" id="index-62"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc959.html"><strong>RFC 959</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.ftp.command.Command.STOR">
-<span class="sig-name descname"><span class="pre">STOR</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'STOR'</span></em><a class="headerlink" href="#pcapkit.const.ftp.command.Command.STOR" title="Permalink to this definition">#</a></dt>
-<dd><p>Store [<span class="target" id="index-61"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc959.html"><strong>RFC 959</strong></a>]</p>
+<span class="sig-name descname"><span class="pre">STOR</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Command</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'STOR'</span></em><a class="headerlink" href="#pcapkit.const.ftp.command.Command.STOR" title="Permalink to this definition">#</a></dt>
+<dd><p>Store [<span class="target" id="index-63"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc959.html"><strong>RFC 959</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.ftp.command.Command.STOU">
-<span class="sig-name descname"><span class="pre">STOU</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'STOU'</span></em><a class="headerlink" href="#pcapkit.const.ftp.command.Command.STOU" title="Permalink to this definition">#</a></dt>
-<dd><p>Store Unique [<span class="target" id="index-62"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc959.html"><strong>RFC 959</strong></a>][<span class="target" id="index-63"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1123.html"><strong>RFC 1123</strong></a>]</p>
+<span class="sig-name descname"><span class="pre">STOU</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Command</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'STOU'</span></em><a class="headerlink" href="#pcapkit.const.ftp.command.Command.STOU" title="Permalink to this definition">#</a></dt>
+<dd><p>Store Unique [<span class="target" id="index-64"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc959.html"><strong>RFC 959</strong></a>][<span class="target" id="index-65"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1123.html"><strong>RFC 1123</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.ftp.command.Command.STRU">
-<span class="sig-name descname"><span class="pre">STRU</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'STRU'</span></em><a class="headerlink" href="#pcapkit.const.ftp.command.Command.STRU" title="Permalink to this definition">#</a></dt>
-<dd><p>File Structure [<span class="target" id="index-64"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc959.html"><strong>RFC 959</strong></a>]</p>
+<span class="sig-name descname"><span class="pre">STRU</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Command</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'STRU'</span></em><a class="headerlink" href="#pcapkit.const.ftp.command.Command.STRU" title="Permalink to this definition">#</a></dt>
+<dd><p>File Structure [<span class="target" id="index-66"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc959.html"><strong>RFC 959</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.ftp.command.Command.SYST">
-<span class="sig-name descname"><span class="pre">SYST</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'SYST'</span></em><a class="headerlink" href="#pcapkit.const.ftp.command.Command.SYST" title="Permalink to this definition">#</a></dt>
-<dd><p>System [<span class="target" id="index-65"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc959.html"><strong>RFC 959</strong></a>]</p>
+<span class="sig-name descname"><span class="pre">SYST</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Command</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'SYST'</span></em><a class="headerlink" href="#pcapkit.const.ftp.command.Command.SYST" title="Permalink to this definition">#</a></dt>
+<dd><p>System [<span class="target" id="index-67"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc959.html"><strong>RFC 959</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.ftp.command.Command.TYPE">
-<span class="sig-name descname"><span class="pre">TYPE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'TYPE'</span></em><a class="headerlink" href="#pcapkit.const.ftp.command.Command.TYPE" title="Permalink to this definition">#</a></dt>
-<dd><p>Representation Type [4][<span class="target" id="index-66"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc959.html"><strong>RFC 959</strong></a>]</p>
+<span class="sig-name descname"><span class="pre">TYPE</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Command</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'TYPE'</span></em><a class="headerlink" href="#pcapkit.const.ftp.command.Command.TYPE" title="Permalink to this definition">#</a></dt>
+<dd><p>Representation Type [4][<span class="target" id="index-68"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc959.html"><strong>RFC 959</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.ftp.command.Command.USER">
-<span class="sig-name descname"><span class="pre">USER</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'USER'</span></em><a class="headerlink" href="#pcapkit.const.ftp.command.Command.USER" title="Permalink to this definition">#</a></dt>
-<dd><p>User Name [<span class="target" id="index-67"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc959.html"><strong>RFC 959</strong></a>]</p>
+<span class="sig-name descname"><span class="pre">USER</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Command</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'USER'</span></em><a class="headerlink" href="#pcapkit.const.ftp.command.Command.USER" title="Permalink to this definition">#</a></dt>
+<dd><p>User Name [<span class="target" id="index-69"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc959.html"><strong>RFC 959</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.ftp.command.Command.XCUP">
-<span class="sig-name descname"><span class="pre">XCUP</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'XCUP'</span></em><a class="headerlink" href="#pcapkit.const.ftp.command.Command.XCUP" title="Permalink to this definition">#</a></dt>
-<dd><p>None [<span class="target" id="index-68"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc775.html"><strong>RFC 775</strong></a>][<span class="target" id="index-69"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1123.html"><strong>RFC 1123</strong></a>]</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.const.ftp.command.Command.XCWD">
-<span class="sig-name descname"><span class="pre">XCWD</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'XCWD'</span></em><a class="headerlink" href="#pcapkit.const.ftp.command.Command.XCWD" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">XCUP</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Command</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'XCUP'</span></em><a class="headerlink" href="#pcapkit.const.ftp.command.Command.XCUP" title="Permalink to this definition">#</a></dt>
 <dd><p>None [<span class="target" id="index-70"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc775.html"><strong>RFC 775</strong></a>][<span class="target" id="index-71"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1123.html"><strong>RFC 1123</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.const.ftp.command.Command.XMKD">
-<span class="sig-name descname"><span class="pre">XMKD</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'XMKD'</span></em><a class="headerlink" href="#pcapkit.const.ftp.command.Command.XMKD" title="Permalink to this definition">#</a></dt>
+<dt class="sig sig-object py" id="pcapkit.const.ftp.command.Command.XCWD">
+<span class="sig-name descname"><span class="pre">XCWD</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Command</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'XCWD'</span></em><a class="headerlink" href="#pcapkit.const.ftp.command.Command.XCWD" title="Permalink to this definition">#</a></dt>
 <dd><p>None [<span class="target" id="index-72"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc775.html"><strong>RFC 775</strong></a>][<span class="target" id="index-73"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1123.html"><strong>RFC 1123</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.const.ftp.command.Command.XPWD">
-<span class="sig-name descname"><span class="pre">XPWD</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'XPWD'</span></em><a class="headerlink" href="#pcapkit.const.ftp.command.Command.XPWD" title="Permalink to this definition">#</a></dt>
+<dt class="sig sig-object py" id="pcapkit.const.ftp.command.Command.XMKD">
+<span class="sig-name descname"><span class="pre">XMKD</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Command</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'XMKD'</span></em><a class="headerlink" href="#pcapkit.const.ftp.command.Command.XMKD" title="Permalink to this definition">#</a></dt>
 <dd><p>None [<span class="target" id="index-74"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc775.html"><strong>RFC 775</strong></a>][<span class="target" id="index-75"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1123.html"><strong>RFC 1123</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.const.ftp.command.Command.XRMD">
-<span class="sig-name descname"><span class="pre">XRMD</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'XRMD'</span></em><a class="headerlink" href="#pcapkit.const.ftp.command.Command.XRMD" title="Permalink to this definition">#</a></dt>
+<dt class="sig sig-object py" id="pcapkit.const.ftp.command.Command.XPWD">
+<span class="sig-name descname"><span class="pre">XPWD</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Command</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'XPWD'</span></em><a class="headerlink" href="#pcapkit.const.ftp.command.Command.XPWD" title="Permalink to this definition">#</a></dt>
 <dd><p>None [<span class="target" id="index-76"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc775.html"><strong>RFC 775</strong></a>][<span class="target" id="index-77"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1123.html"><strong>RFC 1123</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ftp.command.Command.XRMD">
+<span class="sig-name descname"><span class="pre">XRMD</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Command</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'XRMD'</span></em><a class="headerlink" href="#pcapkit.const.ftp.command.Command.XRMD" title="Permalink to this definition">#</a></dt>
+<dd><p>None [<span class="target" id="index-78"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc775.html"><strong>RFC 775</strong></a>][<span class="target" id="index-79"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1123.html"><strong>RFC 1123</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.ftp.command.Command.TVFS">
-<span class="sig-name descname"><span class="pre">TVFS</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'TVFS'</span></em><a class="headerlink" href="#pcapkit.const.ftp.command.Command.TVFS" title="Permalink to this definition">#</a></dt>
-<dd><p>Trivial Virtual File Store [<span class="target" id="index-78"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3659.html"><strong>RFC 3659</strong></a>]</p>
+<span class="sig-name descname"><span class="pre">TVFS</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Command</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'TVFS'</span></em><a class="headerlink" href="#pcapkit.const.ftp.command.Command.TVFS" title="Permalink to this definition">#</a></dt>
+<dd><p>Trivial Virtual File Store [<span class="target" id="index-80"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3659.html"><strong>RFC 3659</strong></a>]</p>
 </dd></dl>
 
 <dl class="py method">
@@ -811,19 +806,19 @@ which is automatically generated from <a class="reference internal" href="../ven
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.ftp.return_code.ReturnCode.kind">
-<span class="sig-name descname"><span class="pre">kind</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#pcapkit.const.ftp.return_code.ReturnCode.kind" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">kind</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ResponseKind</span></em><a class="headerlink" href="#pcapkit.const.ftp.return_code.ReturnCode.kind" title="Permalink to this definition">#</a></dt>
 <dd><p>Response kind.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.ftp.return_code.ReturnCode.group">
-<span class="sig-name descname"><span class="pre">group</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#pcapkit.const.ftp.return_code.ReturnCode.group" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">group</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">GroupingInformation</span></em><a class="headerlink" href="#pcapkit.const.ftp.return_code.ReturnCode.group" title="Permalink to this definition">#</a></dt>
 <dd><p>Grouping information.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.ftp.return_code.ReturnCode.CODE_110">
-<span class="sig-name descname"><span class="pre">CODE_110</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">110</span></em><a class="headerlink" href="#pcapkit.const.ftp.return_code.ReturnCode.CODE_110" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">CODE_110</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ReturnCode</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">110</span></em><a class="headerlink" href="#pcapkit.const.ftp.return_code.ReturnCode.CODE_110" title="Permalink to this definition">#</a></dt>
 <dd><p>Restart marker replay. In this case, the text is exact and not left to the
 particular implementation; it must read: MARK yyyy = mmmm where yyyy is
 User-process data stream marker, and mmmm server’s equivalent marker (note
@@ -832,342 +827,342 @@ the spaces between markers and “=”).</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.ftp.return_code.ReturnCode.CODE_120">
-<span class="sig-name descname"><span class="pre">CODE_120</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">120</span></em><a class="headerlink" href="#pcapkit.const.ftp.return_code.ReturnCode.CODE_120" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">CODE_120</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ReturnCode</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">120</span></em><a class="headerlink" href="#pcapkit.const.ftp.return_code.ReturnCode.CODE_120" title="Permalink to this definition">#</a></dt>
 <dd><p>Service ready in nnn minutes.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.ftp.return_code.ReturnCode.CODE_125">
-<span class="sig-name descname"><span class="pre">CODE_125</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">125</span></em><a class="headerlink" href="#pcapkit.const.ftp.return_code.ReturnCode.CODE_125" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">CODE_125</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ReturnCode</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">125</span></em><a class="headerlink" href="#pcapkit.const.ftp.return_code.ReturnCode.CODE_125" title="Permalink to this definition">#</a></dt>
 <dd><p>Data connection already open; transfer starting.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.ftp.return_code.ReturnCode.CODE_150">
-<span class="sig-name descname"><span class="pre">CODE_150</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">150</span></em><a class="headerlink" href="#pcapkit.const.ftp.return_code.ReturnCode.CODE_150" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">CODE_150</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ReturnCode</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">150</span></em><a class="headerlink" href="#pcapkit.const.ftp.return_code.ReturnCode.CODE_150" title="Permalink to this definition">#</a></dt>
 <dd><p>File status okay; about to open data connection.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.ftp.return_code.ReturnCode.CODE_202">
-<span class="sig-name descname"><span class="pre">CODE_202</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">202</span></em><a class="headerlink" href="#pcapkit.const.ftp.return_code.ReturnCode.CODE_202" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">CODE_202</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ReturnCode</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">202</span></em><a class="headerlink" href="#pcapkit.const.ftp.return_code.ReturnCode.CODE_202" title="Permalink to this definition">#</a></dt>
 <dd><p>Command not implemented, superfluous at this site.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.ftp.return_code.ReturnCode.CODE_211">
-<span class="sig-name descname"><span class="pre">CODE_211</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">211</span></em><a class="headerlink" href="#pcapkit.const.ftp.return_code.ReturnCode.CODE_211" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">CODE_211</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ReturnCode</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">211</span></em><a class="headerlink" href="#pcapkit.const.ftp.return_code.ReturnCode.CODE_211" title="Permalink to this definition">#</a></dt>
 <dd><p>System status, or system help reply.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.ftp.return_code.ReturnCode.CODE_212">
-<span class="sig-name descname"><span class="pre">CODE_212</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">212</span></em><a class="headerlink" href="#pcapkit.const.ftp.return_code.ReturnCode.CODE_212" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">CODE_212</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ReturnCode</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">212</span></em><a class="headerlink" href="#pcapkit.const.ftp.return_code.ReturnCode.CODE_212" title="Permalink to this definition">#</a></dt>
 <dd><p>Directory status.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.ftp.return_code.ReturnCode.CODE_213">
-<span class="sig-name descname"><span class="pre">CODE_213</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">213</span></em><a class="headerlink" href="#pcapkit.const.ftp.return_code.ReturnCode.CODE_213" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">CODE_213</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ReturnCode</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">213</span></em><a class="headerlink" href="#pcapkit.const.ftp.return_code.ReturnCode.CODE_213" title="Permalink to this definition">#</a></dt>
 <dd><p>File status.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.ftp.return_code.ReturnCode.CODE_214">
-<span class="sig-name descname"><span class="pre">CODE_214</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">214</span></em><a class="headerlink" href="#pcapkit.const.ftp.return_code.ReturnCode.CODE_214" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">CODE_214</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ReturnCode</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">214</span></em><a class="headerlink" href="#pcapkit.const.ftp.return_code.ReturnCode.CODE_214" title="Permalink to this definition">#</a></dt>
 <dd><p>Help message. Explains how to use the server or the meaning of a particular
 non-standard command. This reply is useful only to the human user.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.ftp.return_code.ReturnCode.CODE_215">
-<span class="sig-name descname"><span class="pre">CODE_215</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">215</span></em><a class="headerlink" href="#pcapkit.const.ftp.return_code.ReturnCode.CODE_215" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">CODE_215</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ReturnCode</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">215</span></em><a class="headerlink" href="#pcapkit.const.ftp.return_code.ReturnCode.CODE_215" title="Permalink to this definition">#</a></dt>
 <dd><p>NAME system type. Where NAME is an official system name from the registry
 kept by IANA.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.ftp.return_code.ReturnCode.CODE_220">
-<span class="sig-name descname"><span class="pre">CODE_220</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">220</span></em><a class="headerlink" href="#pcapkit.const.ftp.return_code.ReturnCode.CODE_220" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">CODE_220</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ReturnCode</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">220</span></em><a class="headerlink" href="#pcapkit.const.ftp.return_code.ReturnCode.CODE_220" title="Permalink to this definition">#</a></dt>
 <dd><p>Service ready for new user.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.ftp.return_code.ReturnCode.CODE_221">
-<span class="sig-name descname"><span class="pre">CODE_221</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">221</span></em><a class="headerlink" href="#pcapkit.const.ftp.return_code.ReturnCode.CODE_221" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">CODE_221</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ReturnCode</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">221</span></em><a class="headerlink" href="#pcapkit.const.ftp.return_code.ReturnCode.CODE_221" title="Permalink to this definition">#</a></dt>
 <dd><p>Service closing control connection. Logged out if appropriate.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.ftp.return_code.ReturnCode.CODE_225">
-<span class="sig-name descname"><span class="pre">CODE_225</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">225</span></em><a class="headerlink" href="#pcapkit.const.ftp.return_code.ReturnCode.CODE_225" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">CODE_225</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ReturnCode</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">225</span></em><a class="headerlink" href="#pcapkit.const.ftp.return_code.ReturnCode.CODE_225" title="Permalink to this definition">#</a></dt>
 <dd><p>Data connection open; no transfer in progress.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.ftp.return_code.ReturnCode.CODE_226">
-<span class="sig-name descname"><span class="pre">CODE_226</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">226</span></em><a class="headerlink" href="#pcapkit.const.ftp.return_code.ReturnCode.CODE_226" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">CODE_226</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ReturnCode</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">226</span></em><a class="headerlink" href="#pcapkit.const.ftp.return_code.ReturnCode.CODE_226" title="Permalink to this definition">#</a></dt>
 <dd><p>Closing data connection. Requested file action successful (for example, file
 transfer or file abort).</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.ftp.return_code.ReturnCode.CODE_227">
-<span class="sig-name descname"><span class="pre">CODE_227</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">227</span></em><a class="headerlink" href="#pcapkit.const.ftp.return_code.ReturnCode.CODE_227" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">CODE_227</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ReturnCode</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">227</span></em><a class="headerlink" href="#pcapkit.const.ftp.return_code.ReturnCode.CODE_227" title="Permalink to this definition">#</a></dt>
 <dd><p>Entering Passive Mode (h1,h2,h3,h4,p1,p2).</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.ftp.return_code.ReturnCode.CODE_228">
-<span class="sig-name descname"><span class="pre">CODE_228</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">228</span></em><a class="headerlink" href="#pcapkit.const.ftp.return_code.ReturnCode.CODE_228" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">CODE_228</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ReturnCode</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">228</span></em><a class="headerlink" href="#pcapkit.const.ftp.return_code.ReturnCode.CODE_228" title="Permalink to this definition">#</a></dt>
 <dd><p>Entering Long Passive Mode (long address, port).</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.ftp.return_code.ReturnCode.CODE_229">
-<span class="sig-name descname"><span class="pre">CODE_229</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">229</span></em><a class="headerlink" href="#pcapkit.const.ftp.return_code.ReturnCode.CODE_229" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">CODE_229</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ReturnCode</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">229</span></em><a class="headerlink" href="#pcapkit.const.ftp.return_code.ReturnCode.CODE_229" title="Permalink to this definition">#</a></dt>
 <dd><p>Entering Extended Passive Mode (|||port|).</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.ftp.return_code.ReturnCode.CODE_230">
-<span class="sig-name descname"><span class="pre">CODE_230</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">230</span></em><a class="headerlink" href="#pcapkit.const.ftp.return_code.ReturnCode.CODE_230" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">CODE_230</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ReturnCode</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">230</span></em><a class="headerlink" href="#pcapkit.const.ftp.return_code.ReturnCode.CODE_230" title="Permalink to this definition">#</a></dt>
 <dd><p>User logged in, proceed.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.ftp.return_code.ReturnCode.CODE_232">
-<span class="sig-name descname"><span class="pre">CODE_232</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">232</span></em><a class="headerlink" href="#pcapkit.const.ftp.return_code.ReturnCode.CODE_232" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">CODE_232</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ReturnCode</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">232</span></em><a class="headerlink" href="#pcapkit.const.ftp.return_code.ReturnCode.CODE_232" title="Permalink to this definition">#</a></dt>
 <dd><p>User logged in, authorized by security data exchange.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.ftp.return_code.ReturnCode.CODE_234">
-<span class="sig-name descname"><span class="pre">CODE_234</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">234</span></em><a class="headerlink" href="#pcapkit.const.ftp.return_code.ReturnCode.CODE_234" title="Permalink to this definition">#</a></dt>
-<dd><p>Server accepts the security  mechanism specified by the client; no security
+<span class="sig-name descname"><span class="pre">CODE_234</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ReturnCode</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">234</span></em><a class="headerlink" href="#pcapkit.const.ftp.return_code.ReturnCode.CODE_234" title="Permalink to this definition">#</a></dt>
+<dd><p>Server accepts the security mechanism specified by the client; no security
 data needs to be exchanged.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.ftp.return_code.ReturnCode.CODE_235">
-<span class="sig-name descname"><span class="pre">CODE_235</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">235</span></em><a class="headerlink" href="#pcapkit.const.ftp.return_code.ReturnCode.CODE_235" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">CODE_235</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ReturnCode</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">235</span></em><a class="headerlink" href="#pcapkit.const.ftp.return_code.ReturnCode.CODE_235" title="Permalink to this definition">#</a></dt>
 <dd><p>Server accepts the security data given by the client; no further security
 data needs to be exchanged.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.ftp.return_code.ReturnCode.CODE_250">
-<span class="sig-name descname"><span class="pre">CODE_250</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">250</span></em><a class="headerlink" href="#pcapkit.const.ftp.return_code.ReturnCode.CODE_250" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">CODE_250</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ReturnCode</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">250</span></em><a class="headerlink" href="#pcapkit.const.ftp.return_code.ReturnCode.CODE_250" title="Permalink to this definition">#</a></dt>
 <dd><p>Requested file action okay, completed.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.ftp.return_code.ReturnCode.CODE_257">
-<span class="sig-name descname"><span class="pre">CODE_257</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">257</span></em><a class="headerlink" href="#pcapkit.const.ftp.return_code.ReturnCode.CODE_257" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">CODE_257</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ReturnCode</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">257</span></em><a class="headerlink" href="#pcapkit.const.ftp.return_code.ReturnCode.CODE_257" title="Permalink to this definition">#</a></dt>
 <dd><p>“PATHNAME” created.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.ftp.return_code.ReturnCode.CODE_331">
-<span class="sig-name descname"><span class="pre">CODE_331</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">331</span></em><a class="headerlink" href="#pcapkit.const.ftp.return_code.ReturnCode.CODE_331" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">CODE_331</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ReturnCode</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">331</span></em><a class="headerlink" href="#pcapkit.const.ftp.return_code.ReturnCode.CODE_331" title="Permalink to this definition">#</a></dt>
 <dd><p>User name okay, need password.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.ftp.return_code.ReturnCode.CODE_332">
-<span class="sig-name descname"><span class="pre">CODE_332</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">332</span></em><a class="headerlink" href="#pcapkit.const.ftp.return_code.ReturnCode.CODE_332" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">CODE_332</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ReturnCode</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">332</span></em><a class="headerlink" href="#pcapkit.const.ftp.return_code.ReturnCode.CODE_332" title="Permalink to this definition">#</a></dt>
 <dd><p>Need account for login.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.ftp.return_code.ReturnCode.CODE_334">
-<span class="sig-name descname"><span class="pre">CODE_334</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">334</span></em><a class="headerlink" href="#pcapkit.const.ftp.return_code.ReturnCode.CODE_334" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">CODE_334</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ReturnCode</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">334</span></em><a class="headerlink" href="#pcapkit.const.ftp.return_code.ReturnCode.CODE_334" title="Permalink to this definition">#</a></dt>
 <dd><p>Server accepts the security mechanism specified by the client; some security
 data needs to be exchanged.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.ftp.return_code.ReturnCode.CODE_335">
-<span class="sig-name descname"><span class="pre">CODE_335</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">335</span></em><a class="headerlink" href="#pcapkit.const.ftp.return_code.ReturnCode.CODE_335" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">CODE_335</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ReturnCode</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">335</span></em><a class="headerlink" href="#pcapkit.const.ftp.return_code.ReturnCode.CODE_335" title="Permalink to this definition">#</a></dt>
 <dd><p>Server accepts the security data given by the client; more security data
 needs to be exchanged.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.ftp.return_code.ReturnCode.CODE_336">
-<span class="sig-name descname"><span class="pre">CODE_336</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">336</span></em><a class="headerlink" href="#pcapkit.const.ftp.return_code.ReturnCode.CODE_336" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">CODE_336</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ReturnCode</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">336</span></em><a class="headerlink" href="#pcapkit.const.ftp.return_code.ReturnCode.CODE_336" title="Permalink to this definition">#</a></dt>
 <dd><p>Username okay, need password. Challenge is “… . “.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.ftp.return_code.ReturnCode.CODE_350">
-<span class="sig-name descname"><span class="pre">CODE_350</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">350</span></em><a class="headerlink" href="#pcapkit.const.ftp.return_code.ReturnCode.CODE_350" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">CODE_350</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ReturnCode</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">350</span></em><a class="headerlink" href="#pcapkit.const.ftp.return_code.ReturnCode.CODE_350" title="Permalink to this definition">#</a></dt>
 <dd><p>Requested file action pending further information</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.ftp.return_code.ReturnCode.CODE_421">
-<span class="sig-name descname"><span class="pre">CODE_421</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">421</span></em><a class="headerlink" href="#pcapkit.const.ftp.return_code.ReturnCode.CODE_421" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">CODE_421</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ReturnCode</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">421</span></em><a class="headerlink" href="#pcapkit.const.ftp.return_code.ReturnCode.CODE_421" title="Permalink to this definition">#</a></dt>
 <dd><p>Service not available, closing control connection. This may be a reply to
 any command if the service knows it must shut down.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.ftp.return_code.ReturnCode.CODE_425">
-<span class="sig-name descname"><span class="pre">CODE_425</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">425</span></em><a class="headerlink" href="#pcapkit.const.ftp.return_code.ReturnCode.CODE_425" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">CODE_425</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ReturnCode</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">425</span></em><a class="headerlink" href="#pcapkit.const.ftp.return_code.ReturnCode.CODE_425" title="Permalink to this definition">#</a></dt>
 <dd><p>Can’t open data connection.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.ftp.return_code.ReturnCode.CODE_426">
-<span class="sig-name descname"><span class="pre">CODE_426</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">426</span></em><a class="headerlink" href="#pcapkit.const.ftp.return_code.ReturnCode.CODE_426" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">CODE_426</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ReturnCode</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">426</span></em><a class="headerlink" href="#pcapkit.const.ftp.return_code.ReturnCode.CODE_426" title="Permalink to this definition">#</a></dt>
 <dd><p>Connection closed; transfer aborted.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.ftp.return_code.ReturnCode.CODE_430">
-<span class="sig-name descname"><span class="pre">CODE_430</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">430</span></em><a class="headerlink" href="#pcapkit.const.ftp.return_code.ReturnCode.CODE_430" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">CODE_430</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ReturnCode</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">430</span></em><a class="headerlink" href="#pcapkit.const.ftp.return_code.ReturnCode.CODE_430" title="Permalink to this definition">#</a></dt>
 <dd><p>Invalid username or password</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.ftp.return_code.ReturnCode.CODE_431">
-<span class="sig-name descname"><span class="pre">CODE_431</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">431</span></em><a class="headerlink" href="#pcapkit.const.ftp.return_code.ReturnCode.CODE_431" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">CODE_431</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ReturnCode</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">431</span></em><a class="headerlink" href="#pcapkit.const.ftp.return_code.ReturnCode.CODE_431" title="Permalink to this definition">#</a></dt>
 <dd><p>Need some unavailable resource to process security.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.ftp.return_code.ReturnCode.CODE_434">
-<span class="sig-name descname"><span class="pre">CODE_434</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">434</span></em><a class="headerlink" href="#pcapkit.const.ftp.return_code.ReturnCode.CODE_434" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">CODE_434</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ReturnCode</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">434</span></em><a class="headerlink" href="#pcapkit.const.ftp.return_code.ReturnCode.CODE_434" title="Permalink to this definition">#</a></dt>
 <dd><p>Requested host unavailable.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.ftp.return_code.ReturnCode.CODE_450">
-<span class="sig-name descname"><span class="pre">CODE_450</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">450</span></em><a class="headerlink" href="#pcapkit.const.ftp.return_code.ReturnCode.CODE_450" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">CODE_450</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ReturnCode</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">450</span></em><a class="headerlink" href="#pcapkit.const.ftp.return_code.ReturnCode.CODE_450" title="Permalink to this definition">#</a></dt>
 <dd><p>Requested file action not taken.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.ftp.return_code.ReturnCode.CODE_451">
-<span class="sig-name descname"><span class="pre">CODE_451</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">451</span></em><a class="headerlink" href="#pcapkit.const.ftp.return_code.ReturnCode.CODE_451" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">CODE_451</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ReturnCode</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">451</span></em><a class="headerlink" href="#pcapkit.const.ftp.return_code.ReturnCode.CODE_451" title="Permalink to this definition">#</a></dt>
 <dd><p>Requested action aborted. Local error in processing.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.ftp.return_code.ReturnCode.CODE_452">
-<span class="sig-name descname"><span class="pre">CODE_452</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">452</span></em><a class="headerlink" href="#pcapkit.const.ftp.return_code.ReturnCode.CODE_452" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">CODE_452</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ReturnCode</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">452</span></em><a class="headerlink" href="#pcapkit.const.ftp.return_code.ReturnCode.CODE_452" title="Permalink to this definition">#</a></dt>
 <dd><p>Requested action not taken. Insufficient storage space in system. File
 unavailable (e.g., file busy).</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.ftp.return_code.ReturnCode.CODE_501">
-<span class="sig-name descname"><span class="pre">CODE_501</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">501</span></em><a class="headerlink" href="#pcapkit.const.ftp.return_code.ReturnCode.CODE_501" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">CODE_501</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ReturnCode</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">501</span></em><a class="headerlink" href="#pcapkit.const.ftp.return_code.ReturnCode.CODE_501" title="Permalink to this definition">#</a></dt>
 <dd><p>Syntax error in parameters or arguments.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.ftp.return_code.ReturnCode.CODE_502">
-<span class="sig-name descname"><span class="pre">CODE_502</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">502</span></em><a class="headerlink" href="#pcapkit.const.ftp.return_code.ReturnCode.CODE_502" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">CODE_502</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ReturnCode</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">502</span></em><a class="headerlink" href="#pcapkit.const.ftp.return_code.ReturnCode.CODE_502" title="Permalink to this definition">#</a></dt>
 <dd><p>Command not implemented.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.ftp.return_code.ReturnCode.CODE_503">
-<span class="sig-name descname"><span class="pre">CODE_503</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">503</span></em><a class="headerlink" href="#pcapkit.const.ftp.return_code.ReturnCode.CODE_503" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">CODE_503</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ReturnCode</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">503</span></em><a class="headerlink" href="#pcapkit.const.ftp.return_code.ReturnCode.CODE_503" title="Permalink to this definition">#</a></dt>
 <dd><p>Bad sequence of commands.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.ftp.return_code.ReturnCode.CODE_504">
-<span class="sig-name descname"><span class="pre">CODE_504</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">504</span></em><a class="headerlink" href="#pcapkit.const.ftp.return_code.ReturnCode.CODE_504" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">CODE_504</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ReturnCode</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">504</span></em><a class="headerlink" href="#pcapkit.const.ftp.return_code.ReturnCode.CODE_504" title="Permalink to this definition">#</a></dt>
 <dd><p>Command not implemented for that parameter.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.ftp.return_code.ReturnCode.CODE_530">
-<span class="sig-name descname"><span class="pre">CODE_530</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">530</span></em><a class="headerlink" href="#pcapkit.const.ftp.return_code.ReturnCode.CODE_530" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">CODE_530</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ReturnCode</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">530</span></em><a class="headerlink" href="#pcapkit.const.ftp.return_code.ReturnCode.CODE_530" title="Permalink to this definition">#</a></dt>
 <dd><p>Not logged in.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.ftp.return_code.ReturnCode.CODE_532">
-<span class="sig-name descname"><span class="pre">CODE_532</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">532</span></em><a class="headerlink" href="#pcapkit.const.ftp.return_code.ReturnCode.CODE_532" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">CODE_532</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ReturnCode</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">532</span></em><a class="headerlink" href="#pcapkit.const.ftp.return_code.ReturnCode.CODE_532" title="Permalink to this definition">#</a></dt>
 <dd><p>Need account for storing files.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.ftp.return_code.ReturnCode.CODE_533">
-<span class="sig-name descname"><span class="pre">CODE_533</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">533</span></em><a class="headerlink" href="#pcapkit.const.ftp.return_code.ReturnCode.CODE_533" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">CODE_533</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ReturnCode</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">533</span></em><a class="headerlink" href="#pcapkit.const.ftp.return_code.ReturnCode.CODE_533" title="Permalink to this definition">#</a></dt>
 <dd><p>Command protection level denied for policy reasons.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.ftp.return_code.ReturnCode.CODE_534">
-<span class="sig-name descname"><span class="pre">CODE_534</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">534</span></em><a class="headerlink" href="#pcapkit.const.ftp.return_code.ReturnCode.CODE_534" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">CODE_534</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ReturnCode</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">534</span></em><a class="headerlink" href="#pcapkit.const.ftp.return_code.ReturnCode.CODE_534" title="Permalink to this definition">#</a></dt>
 <dd><p>Request denied for policy reasons.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.ftp.return_code.ReturnCode.CODE_535">
-<span class="sig-name descname"><span class="pre">CODE_535</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">535</span></em><a class="headerlink" href="#pcapkit.const.ftp.return_code.ReturnCode.CODE_535" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">CODE_535</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ReturnCode</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">535</span></em><a class="headerlink" href="#pcapkit.const.ftp.return_code.ReturnCode.CODE_535" title="Permalink to this definition">#</a></dt>
 <dd><p>Failed security check.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.ftp.return_code.ReturnCode.CODE_536">
-<span class="sig-name descname"><span class="pre">CODE_536</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">536</span></em><a class="headerlink" href="#pcapkit.const.ftp.return_code.ReturnCode.CODE_536" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">CODE_536</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ReturnCode</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">536</span></em><a class="headerlink" href="#pcapkit.const.ftp.return_code.ReturnCode.CODE_536" title="Permalink to this definition">#</a></dt>
 <dd><p>Data protection level not supported by security mechanism.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.ftp.return_code.ReturnCode.CODE_537">
-<span class="sig-name descname"><span class="pre">CODE_537</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">537</span></em><a class="headerlink" href="#pcapkit.const.ftp.return_code.ReturnCode.CODE_537" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">CODE_537</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ReturnCode</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">537</span></em><a class="headerlink" href="#pcapkit.const.ftp.return_code.ReturnCode.CODE_537" title="Permalink to this definition">#</a></dt>
 <dd><p>Command protection level not supported by security mechanism.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.ftp.return_code.ReturnCode.CODE_550">
-<span class="sig-name descname"><span class="pre">CODE_550</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">550</span></em><a class="headerlink" href="#pcapkit.const.ftp.return_code.ReturnCode.CODE_550" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">CODE_550</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ReturnCode</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">550</span></em><a class="headerlink" href="#pcapkit.const.ftp.return_code.ReturnCode.CODE_550" title="Permalink to this definition">#</a></dt>
 <dd><p>Requested action not taken. File unavailable (e.g., file not found, no
 access).</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.ftp.return_code.ReturnCode.CODE_551">
-<span class="sig-name descname"><span class="pre">CODE_551</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">551</span></em><a class="headerlink" href="#pcapkit.const.ftp.return_code.ReturnCode.CODE_551" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">CODE_551</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ReturnCode</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">551</span></em><a class="headerlink" href="#pcapkit.const.ftp.return_code.ReturnCode.CODE_551" title="Permalink to this definition">#</a></dt>
 <dd><p>Requested action aborted. Page type unknown.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.ftp.return_code.ReturnCode.CODE_552">
-<span class="sig-name descname"><span class="pre">CODE_552</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">552</span></em><a class="headerlink" href="#pcapkit.const.ftp.return_code.ReturnCode.CODE_552" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">CODE_552</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ReturnCode</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">552</span></em><a class="headerlink" href="#pcapkit.const.ftp.return_code.ReturnCode.CODE_552" title="Permalink to this definition">#</a></dt>
 <dd><p>Requested file action aborted. Exceeded storage allocation (for current
 directory or dataset).</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.ftp.return_code.ReturnCode.CODE_553">
-<span class="sig-name descname"><span class="pre">CODE_553</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">553</span></em><a class="headerlink" href="#pcapkit.const.ftp.return_code.ReturnCode.CODE_553" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">CODE_553</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ReturnCode</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">553</span></em><a class="headerlink" href="#pcapkit.const.ftp.return_code.ReturnCode.CODE_553" title="Permalink to this definition">#</a></dt>
 <dd><p>Requested action not taken. File name not allowed.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.ftp.return_code.ReturnCode.CODE_631">
-<span class="sig-name descname"><span class="pre">CODE_631</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">631</span></em><a class="headerlink" href="#pcapkit.const.ftp.return_code.ReturnCode.CODE_631" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">CODE_631</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ReturnCode</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">631</span></em><a class="headerlink" href="#pcapkit.const.ftp.return_code.ReturnCode.CODE_631" title="Permalink to this definition">#</a></dt>
 <dd><p>Integrity protected reply.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.ftp.return_code.ReturnCode.CODE_632">
-<span class="sig-name descname"><span class="pre">CODE_632</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">632</span></em><a class="headerlink" href="#pcapkit.const.ftp.return_code.ReturnCode.CODE_632" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">CODE_632</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ReturnCode</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">632</span></em><a class="headerlink" href="#pcapkit.const.ftp.return_code.ReturnCode.CODE_632" title="Permalink to this definition">#</a></dt>
 <dd><p>Confidentiality and integrity protected reply.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.ftp.return_code.ReturnCode.CODE_633">
-<span class="sig-name descname"><span class="pre">CODE_633</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">633</span></em><a class="headerlink" href="#pcapkit.const.ftp.return_code.ReturnCode.CODE_633" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">CODE_633</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">ReturnCode</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">633</span></em><a class="headerlink" href="#pcapkit.const.ftp.return_code.ReturnCode.CODE_633" title="Permalink to this definition">#</a></dt>
 <dd><p>Confidentiality protected reply.</p>
 </dd></dl>
 

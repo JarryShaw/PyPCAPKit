@@ -381,6 +381,7 @@
 <span class="s1">which is automatically generated from :class:`</span><span class="si">{</span><span class="n">MODL</span><span class="si">}</span><span class="s1">.</span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">`.</span>
 
 <span class="s1">&quot;&quot;&quot;</span>
+<span class="s1">from collections import defaultdict</span>
 <span class="s1">from typing import TYPE_CHECKING</span>
 
 <span class="s1">from aenum import StrEnum, extend_enum</span>
@@ -388,7 +389,7 @@
 <span class="s1">__all__ = [&#39;</span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">&#39;]</span>
 
 <span class="s1">if TYPE_CHECKING:</span>
-<span class="s1">    from typing import Optional, Type</span>
+<span class="s1">    from typing import DefaultDict, Optional, Type</span>
 
 
 <span class="s1">class </span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">(StrEnum):</span>
@@ -400,9 +401,10 @@
 <span class="s1">        #: Numeric value of the option type.</span>
 <span class="s1">        opt_value: &#39;int&#39;</span>
 
-<span class="s1">    def __new__(cls, value: &#39;int&#39;, name: &#39;Optional[str]&#39; = None) -&gt; &#39;Type[</span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">]&#39;:</span>
-<span class="s1">        if name is None:</span>
-<span class="s1">            name = &#39;opt_unknown&#39;</span>
+<span class="s1">    #: Mapping of members based on namespace.</span>
+<span class="s1">    __members_ns__: &#39;DefaultDict[str, dict[int, </span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">]]&#39; = defaultdict(dict)</span>
+
+<span class="s1">    def __new__(cls, value: &#39;int&#39;, name: &#39;str&#39; = &#39;opt_unknown&#39;) -&gt; &#39;Type[</span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">]&#39;:</span>
 <span class="s1">        temp = &#39;%d_%s&#39; % (value, name)</span>
 
 <span class="s1">        obj = str.__new__(cls, temp)</span>
@@ -410,6 +412,9 @@
 
 <span class="s1">        obj.opt_name = name</span>
 <span class="s1">        obj.opt_value = value</span>
+
+<span class="s1">        namespace = name.split(&#39;_&#39;, maxsplit=1)[0]</span>
+<span class="s1">        cls.__members_ns__[namespace][value] = obj</span>
 
 <span class="s1">        return obj</span>
 
@@ -430,13 +435,14 @@
 <span class="s1">        :meta private:</span>
 <span class="s1">        &quot;&quot;&quot;</span>
 <span class="s1">        if isinstance(key, int):</span>
-<span class="s1">            for enum_key, enum_val in </span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">.__members__.items():</span>
-<span class="s1">                if (enum_key.startswith(namespace) or enum_key.startswith(&#39;opt&#39;)) and enum_val.opt_value == key:</span>
-<span class="s1">                    return enum_val</span>
-<span class="s1">            return extend_enum(</span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">, &#39;opt_unknown_%d&#39; % key, key, &#39;opt_unknown&#39;)</span>
-<span class="s1">        if key not in </span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">._member_map_:  # pylint: disable=no-member</span>
-<span class="s1">            return extend_enum(</span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">, key, default)</span>
-<span class="s1">        return </span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">[key]  # type: ignore[misc]</span>
+<span class="s1">            temp_ns = </span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">.__members_ns__.get(&#39;opt&#39;, </span><span class="se">{{}}</span><span class="s1">).copy()</span>
+<span class="s1">            temp_ns.update(</span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">.__members_ns__.get(namespace, </span><span class="se">{{}}</span><span class="s1">))</span>
+<span class="s1">            if key in temp_ns:</span>
+<span class="s1">                return temp_ns[key]</span>
+<span class="s1">            return extend_enum(</span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">, &#39;%s_unknown_%d&#39; % (namespace, key), key, &#39;%s_unknown&#39; % namespace)</span>
+<span class="s1">        if key in </span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">.__members__:</span>
+<span class="s1">            return getattr(</span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">, key)</span>
+<span class="s1">        return extend_enum(</span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">, key, default, key)</span>
 
 <span class="s1">    @classmethod</span>
 <span class="s1">    def _missing_(cls, value: &#39;int&#39;) -&gt; &#39;</span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">&#39;:</span>
@@ -448,6 +454,8 @@
 <span class="s1">        &quot;&quot;&quot;</span>
 <span class="s1">        if not (</span><span class="si">{</span><span class="n">FLAG</span><span class="si">}</span><span class="s1">):</span>
 <span class="s1">            raise ValueError(&#39;%r is not a valid %s&#39; % (value, cls.__name__))</span>
+<span class="s1">        if value in cls.__members_ns__.get(&#39;opt&#39;, </span><span class="se">{{}}</span><span class="s1">):</span>
+<span class="s1">            return cls.__members_ns__[&#39;opt&#39;][value]</span>
 <span class="s1">        </span><span class="si">{</span><span class="n">MISS</span><span class="si">}</span>
 <span class="s1">        </span><span class="si">{</span><span class="s1">&#39;&#39;</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">MISS</span><span class="o">.</span><span class="n">splitlines</span><span class="p">()[</span><span class="o">-</span><span class="mi">1</span><span class="p">:])</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;return&#39;</span><span class="p">)</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="s1">&#39;return super()._missing_(value)&#39;</span><span class="si">}</span>
 <span class="s1">&#39;&#39;&#39;</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>  <span class="c1"># type: Callable[[str, str, str, str, str, str], str]</span>
