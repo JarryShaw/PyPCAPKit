@@ -143,13 +143,22 @@
 				"src": "123.129.210.135",
 				"dst": "192.168.1.100",
 				"tcp": {
-					"srcport": 80,
-					"dstport": 55232,
+					"srcport": {
+						"enum": "AppType::www_http [tcp|udp_80_www-http]",
+						"svc": "www-http",
+						"port": 80,
+						"proto": "TransportProtocol::tcp|udp [3]"
+					},
+					"dstport": {
+						"enum": "AppType::PORT_55232_tcp [tcp_55232_unknown]",
+						"svc": "unknown",
+						"port": 55232,
+						"proto": "TransportProtocol::tcp [1]"
+					},
 					"seq": 3584012628,
 					"ack": 2793054463,
 					"hdr_len": 20,
 					"flags": {
-						"ns": false,
 						"cwr": false,
 						"ece": false,
 						"urg": false,
@@ -217,13 +226,22 @@
 				"src": "192.168.1.100",
 				"dst": "123.129.210.135",
 				"tcp": {
-					"srcport": 55232,
-					"dstport": 80,
+					"srcport": {
+						"enum": "AppType::PORT_55232_tcp [tcp_55232_unknown]",
+						"svc": "unknown",
+						"port": 55232,
+						"proto": "TransportProtocol::tcp [1]"
+					},
+					"dstport": {
+						"enum": "AppType::www_http [tcp|udp_80_www-http]",
+						"svc": "www-http",
+						"port": 80,
+						"proto": "TransportProtocol::tcp|udp [3]"
+					},
 					"seq": 2793054463,
 					"ack": 3584012629,
 					"hdr_len": 20,
 					"flags": {
-						"ns": false,
 						"cwr": false,
 						"ece": false,
 						"urg": false,
@@ -291,13 +309,22 @@
 				"src": "192.168.1.100",
 				"dst": "123.129.210.135",
 				"tcp": {
-					"srcport": 55216,
-					"dstport": 80,
+					"srcport": {
+						"enum": "AppType::PORT_55216_tcp [tcp_55216_unknown]",
+						"svc": "unknown",
+						"port": 55216,
+						"proto": "TransportProtocol::tcp [1]"
+					},
+					"dstport": {
+						"enum": "AppType::www_http [tcp|udp_80_www-http]",
+						"svc": "www-http",
+						"port": 80,
+						"proto": "TransportProtocol::tcp|udp [3]"
+					},
 					"seq": 768904481,
 					"ack": 1835365486,
 					"hdr_len": 20,
 					"flags": {
-						"ns": false,
 						"cwr": false,
 						"ece": false,
 						"urg": false,
@@ -365,8 +392,18 @@
 				"src": "192.168.1.1",
 				"dst": "255.255.255.255",
 				"udp": {
-					"srcport": 37444,
-					"dstport": 5001,
+					"srcport": {
+						"enum": "AppType::unassigned_37444 [undefined_37444_unassigned]",
+						"svc": "unassigned",
+						"port": 37444,
+						"proto": "TransportProtocol::undefined [0]"
+					},
+					"dstport": {
+						"enum": "AppType::commplex_link [tcp|udp_5001_commplex-link]",
+						"svc": "commplex-link",
+						"port": 5001,
+						"proto": "TransportProtocol::tcp|udp [3]"
+					},
 					"len": 125,
 					"checksum": {
 						"type": "bytes",

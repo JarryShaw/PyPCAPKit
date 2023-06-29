@@ -242,9 +242,27 @@
 				<key>tcp</key>
 				<dict>
 					<key>srcport</key>
-					<integer>80</integer>
+					<dict>
+						<key>enum</key>
+						<string>AppType::www_http [tcp|udp_80_www-http]</string>
+						<key>svc</key>
+						<string>www-http</string>
+						<key>port</key>
+						<integer>80</integer>
+						<key>proto</key>
+						<string>TransportProtocol::tcp|udp [3]</string>
+					</dict>
 					<key>dstport</key>
-					<integer>55232</integer>
+					<dict>
+						<key>enum</key>
+						<string>AppType::PORT_55232_tcp [tcp_55232_unknown]</string>
+						<key>svc</key>
+						<string>unknown</string>
+						<key>port</key>
+						<integer>55232</integer>
+						<key>proto</key>
+						<string>TransportProtocol::tcp [1]</string>
+					</dict>
 					<key>seq</key>
 					<integer>3584012628</integer>
 					<key>ack</key>
@@ -253,8 +271,6 @@
 					<integer>20</integer>
 					<key>flags</key>
 					<dict>
-						<key>ns</key>
-						<false/>
 						<key>cwr</key>
 						<false/>
 						<key>ece</key>
@@ -365,9 +381,27 @@
 				<key>tcp</key>
 				<dict>
 					<key>srcport</key>
-					<integer>55232</integer>
+					<dict>
+						<key>enum</key>
+						<string>AppType::PORT_55232_tcp [tcp_55232_unknown]</string>
+						<key>svc</key>
+						<string>unknown</string>
+						<key>port</key>
+						<integer>55232</integer>
+						<key>proto</key>
+						<string>TransportProtocol::tcp [1]</string>
+					</dict>
 					<key>dstport</key>
-					<integer>80</integer>
+					<dict>
+						<key>enum</key>
+						<string>AppType::www_http [tcp|udp_80_www-http]</string>
+						<key>svc</key>
+						<string>www-http</string>
+						<key>port</key>
+						<integer>80</integer>
+						<key>proto</key>
+						<string>TransportProtocol::tcp|udp [3]</string>
+					</dict>
 					<key>seq</key>
 					<integer>2793054463</integer>
 					<key>ack</key>
@@ -376,8 +410,6 @@
 					<integer>20</integer>
 					<key>flags</key>
 					<dict>
-						<key>ns</key>
-						<false/>
 						<key>cwr</key>
 						<false/>
 						<key>ece</key>
@@ -488,9 +520,27 @@
 				<key>tcp</key>
 				<dict>
 					<key>srcport</key>
-					<integer>55216</integer>
+					<dict>
+						<key>enum</key>
+						<string>AppType::PORT_55216_tcp [tcp_55216_unknown]</string>
+						<key>svc</key>
+						<string>unknown</string>
+						<key>port</key>
+						<integer>55216</integer>
+						<key>proto</key>
+						<string>TransportProtocol::tcp [1]</string>
+					</dict>
 					<key>dstport</key>
-					<integer>80</integer>
+					<dict>
+						<key>enum</key>
+						<string>AppType::www_http [tcp|udp_80_www-http]</string>
+						<key>svc</key>
+						<string>www-http</string>
+						<key>port</key>
+						<integer>80</integer>
+						<key>proto</key>
+						<string>TransportProtocol::tcp|udp [3]</string>
+					</dict>
 					<key>seq</key>
 					<integer>768904481</integer>
 					<key>ack</key>
@@ -499,8 +549,6 @@
 					<integer>20</integer>
 					<key>flags</key>
 					<dict>
-						<key>ns</key>
-						<false/>
 						<key>cwr</key>
 						<false/>
 						<key>ece</key>
@@ -611,9 +659,27 @@
 				<key>udp</key>
 				<dict>
 					<key>srcport</key>
-					<integer>37444</integer>
+					<dict>
+						<key>enum</key>
+						<string>AppType::unassigned_37444 [undefined_37444_unassigned]</string>
+						<key>svc</key>
+						<string>unassigned</string>
+						<key>port</key>
+						<integer>37444</integer>
+						<key>proto</key>
+						<string>TransportProtocol::undefined [0]</string>
+					</dict>
 					<key>dstport</key>
-					<integer>5001</integer>
+					<dict>
+						<key>enum</key>
+						<string>AppType::commplex_link [tcp|udp_5001_commplex-link]</string>
+						<key>svc</key>
+						<string>commplex-link</string>
+						<key>port</key>
+						<integer>5001</integer>
+						<key>proto</key>
+						<string>TransportProtocol::tcp|udp [3]</string>
+					</dict>
 					<key>len</key>
 					<integer>125</integer>
 					<key>checksum</key>
