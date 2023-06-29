@@ -4,11 +4,11 @@ import sys
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from typing import Any, Callable, Generator, Optional, Type, Union
+    from typing import Any, Callable, Iterator, Optional, Type, Union
 
 __all__ = [
     # functions
-    'final', 'localcontext',
+    'final', 'localcontext', 'show_flag_values',
 
     # exceptions
     'ModuleNotFoundError',
@@ -164,3 +164,26 @@ if sys.version_info < (3, 11):
             yield lc
 else:
     from decimal import localcontext
+
+if sys.version_info < (3, 11):
+    from enum import Enum
+
+    if TYPE_CHECKING:
+        from enum import IntFlag
+
+    def _iter_bits_lsb(num: 'int') -> 'Iterator[int]':
+        # num must be a positive integer
+        original = num
+        if isinstance(num, Enum):
+            num = num.value
+        if num < 0:
+            raise ValueError('%r is not a positive integer' % original)
+        while num:
+            b = num & (~num + 1)
+            yield b
+            num ^= b
+
+    def show_flag_values(value: 'IntFlag') -> 'list[int]':
+        return list(_iter_bits_lsb(value))
+else:
+    from enum import show_flag_values  # type: ignore[attr-defined]
