@@ -346,8 +346,9 @@
 <span class="sd">&quot;&quot;&quot;header schema for transmission control protocol&quot;&quot;&quot;</span>
 
 <span class="kn">import</span> <span class="nn">collections</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">cast</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
 
+<span class="kn">from</span> <span class="nn">pcapkit.const.reg.apptype</span> <span class="kn">import</span> <span class="n">AppType</span> <span class="k">as</span> <span class="n">Enum_AppType</span><span class="p">,</span> <span class="n">TransportProtocol</span> <span class="k">as</span> <span class="n">Enum_TransportProtocol</span>
 <span class="kn">from</span> <span class="nn">pcapkit.const.tcp.checksum</span> <span class="kn">import</span> <span class="n">Checksum</span> <span class="k">as</span> <span class="n">Enum_Checksum</span>
 <span class="kn">from</span> <span class="nn">pcapkit.const.tcp.mp_tcp_option</span> <span class="kn">import</span> <span class="n">MPTCPOption</span> <span class="k">as</span> <span class="n">Enum_MPTCPOption</span>
 <span class="kn">from</span> <span class="nn">pcapkit.const.tcp.option</span> <span class="kn">import</span> <span class="n">Option</span> <span class="k">as</span> <span class="n">Enum_Option</span>
@@ -584,6 +585,57 @@
     <span class="k">if</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">&#39;test&#39;</span><span class="p">][</span><span class="s1">&#39;version&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">6</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">IPv6AddressField</span><span class="p">()</span>
     <span class="k">raise</span> <span class="n">FieldError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;TCP: [OptNo </span><span class="si">{</span><span class="n">Enum_Option</span><span class="o">.</span><span class="n">Multipath_TCP</span><span class="si">}</span><span class="s1">] </span><span class="si">{</span><span class="n">Enum_MPTCPOption</span><span class="o">.</span><span class="n">ADD_ADDR</span><span class="si">}</span><span class="s1"> invalid IP version&#39;</span><span class="p">)</span></div>
+
+
+<span class="k">class</span> <span class="nc">PortEnumField</span><span class="p">(</span><span class="n">EnumField</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Enumerated value for protocol fields.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        length: Field size (in bytes); if a callable is given, it should return</span>
+<span class="sd">            an integer value and accept the current packet as its only argument.</span>
+<span class="sd">        default: Field default value, if any.</span>
+<span class="sd">        signed: Whether the field is signed.</span>
+<span class="sd">        byteorder: Field byte order.</span>
+<span class="sd">        bit_length: Field bit length.</span>
+<span class="sd">        callback: Callback function to be called upon</span>
+<span class="sd">            :meth:`self.__call__ &lt;pcapkit.corekit.fields.field._Field.__call__&gt;`.</span>
+
+<span class="sd">    Important:</span>
+<span class="sd">        This class is specifically designed for :class:`~pcapkit.const.reg.apptype.AppType`</span>
+<span class="sd">        as it is actually a :class:`~enum.StrEnum` class.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+        <span class="n">_namespace</span><span class="p">:</span> <span class="s1">&#39;Enum_AppType&#39;</span>
+
+    <span class="k">def</span> <span class="nf">pre_process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="s1">&#39;int | Enum_AppType&#39;</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">&#39;dict[str, Any]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;int | bytes&#39;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Process field value before construction (packing).</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            value: Field value.</span>
+<span class="sd">            packet: Packet data.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Processed field value.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">Enum_AppType</span><span class="p">):</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">port</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">pre_process</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">packet</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">post_process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="s1">&#39;int | bytes&#39;</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">&#39;dict[str, Any]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Enum_AppType&#39;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Process field value after parsing (unpacked).</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            value: Field value.</span>
+<span class="sd">            packet: Packet data.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Processed field value.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">EnumField</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">post_process</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">packet</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_namespace</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">proto</span><span class="o">=</span><span class="n">Enum_TransportProtocol</span><span class="o">.</span><span class="n">tcp</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="Option"><a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.schema.transport.tcp.Option">[docs]</a><span class="k">class</span> <span class="nc">Option</span><span class="p">(</span><span class="n">Schema</span><span class="p">):</span>
@@ -1166,9 +1218,9 @@
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for TCP packet.&quot;&quot;&quot;</span>
 
     <span class="c1">#: Source port.</span>
-    <span class="n">srcport</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span> <span class="o">=</span> <span class="n">UInt16Field</span><span class="p">()</span>
+    <span class="n">srcport</span><span class="p">:</span> <span class="s1">&#39;Enum_AppType&#39;</span> <span class="o">=</span> <span class="n">PortEnumField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="n">Enum_AppType</span><span class="p">)</span>
     <span class="c1">#: Destination port.</span>
-    <span class="n">dstport</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span> <span class="o">=</span> <span class="n">UInt16Field</span><span class="p">()</span>
+    <span class="n">dstport</span><span class="p">:</span> <span class="s1">&#39;Enum_AppType&#39;</span> <span class="o">=</span> <span class="n">PortEnumField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="n">Enum_AppType</span><span class="p">)</span>
     <span class="c1">#: Sequence number.</span>
     <span class="n">seq</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span> <span class="o">=</span> <span class="n">UInt32Field</span><span class="p">()</span>
     <span class="c1">#: Acknowledgement number.</span>
@@ -1232,7 +1284,7 @@
     <span class="n">payload</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span> <span class="o">=</span> <span class="n">PayloadField</span><span class="p">()</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">srcport</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">dstport</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">seq</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">ack</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span>
+        <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">srcport</span><span class="p">:</span> <span class="s1">&#39;Enum_AppType | int&#39;</span><span class="p">,</span> <span class="n">dstport</span><span class="p">:</span> <span class="s1">&#39;Enum_AppType | int&#39;</span><span class="p">,</span> <span class="n">seq</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">ack</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span>
                      <span class="n">offset</span><span class="p">:</span> <span class="s1">&#39;OffsetFlag&#39;</span><span class="p">,</span> <span class="n">flags</span><span class="p">:</span> <span class="s1">&#39;Flags&#39;</span><span class="p">,</span> <span class="n">window</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">checksum</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">,</span>
                      <span class="n">urgent</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;list[Option | bytes] | bytes&#39;</span><span class="p">,</span> <span class="n">payload</span><span class="p">:</span> <span class="s1">&#39;bytes | Protocol | Schema&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
 </pre></div>

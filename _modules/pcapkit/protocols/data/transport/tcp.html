@@ -354,6 +354,7 @@
     <span class="kn">from</span> <span class="nn">ipaddress</span> <span class="kn">import</span> <span class="n">IPv4Address</span><span class="p">,</span> <span class="n">IPv6Address</span>
     <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span>
 
+    <span class="kn">from</span> <span class="nn">pcapkit.const.reg.apptype</span> <span class="kn">import</span> <span class="n">AppType</span>
     <span class="kn">from</span> <span class="nn">pcapkit.const.tcp.checksum</span> <span class="kn">import</span> <span class="n">Checksum</span>
     <span class="kn">from</span> <span class="nn">pcapkit.const.tcp.flags</span> <span class="kn">import</span> <span class="n">Flags</span> <span class="k">as</span> <span class="n">TCP_Flags</span>
     <span class="kn">from</span> <span class="nn">pcapkit.const.tcp.mp_tcp_option</span> <span class="kn">import</span> <span class="n">MPTCPOption</span>
@@ -417,9 +418,9 @@
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Data model for TCP packet.&quot;&quot;&quot;</span>
 
     <span class="c1">#: Source port.</span>
-    <span class="n">srcport</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span>
+    <span class="n">srcport</span><span class="p">:</span> <span class="s1">&#39;AppType&#39;</span>
     <span class="c1">#: Destination port.</span>
-    <span class="n">dstport</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span>
+    <span class="n">dstport</span><span class="p">:</span> <span class="s1">&#39;AppType&#39;</span>
     <span class="c1">#: Sequence number.</span>
     <span class="n">seq</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span>
     <span class="c1">#: Acknowledgment number.</span>
@@ -441,7 +442,7 @@
         <span class="c1">#: Connection control flags.</span>
         <span class="n">connection</span><span class="p">:</span> <span class="s1">&#39;TCP_Flags&#39;</span>
 
-        <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">srcport</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">dstport</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">seq</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">ack</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">hdr_len</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">flags</span><span class="p">:</span> <span class="s1">&#39;Flags&#39;</span><span class="p">,</span> <span class="n">window_size</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">checksum</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">,</span> <span class="n">urgent_pointer</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
+        <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">srcport</span><span class="p">:</span> <span class="s1">&#39;AppType&#39;</span><span class="p">,</span> <span class="n">dstport</span><span class="p">:</span> <span class="s1">&#39;AppType&#39;</span><span class="p">,</span> <span class="n">seq</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">ack</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">hdr_len</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">flags</span><span class="p">:</span> <span class="s1">&#39;Flags&#39;</span><span class="p">,</span> <span class="n">window_size</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">checksum</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">,</span> <span class="n">urgent_pointer</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
 
 
 <div class="viewcode-block" id="Option"><a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.data.transport.tcp.Option">[docs]</a><span class="k">class</span> <span class="nc">Option</span><span class="p">(</span><span class="n">Data</span><span class="p">):</span>

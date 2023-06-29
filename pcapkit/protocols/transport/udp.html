@@ -447,13 +447,13 @@ attribute:</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="pcapkit.protocols.transport.udp.UDP.src">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">src</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a></em><a class="headerlink" href="#pcapkit.protocols.transport.udp.UDP.src" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">src</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="../../const/reg.html#pcapkit.const.reg.apptype.AppType" title="pcapkit.const.reg.apptype.AppType"><span class="pre">AppType</span></a></em><a class="headerlink" href="#pcapkit.protocols.transport.udp.UDP.src" title="Permalink to this definition">#</a></dt>
 <dd><p>Source port.</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="pcapkit.protocols.transport.udp.UDP.dst">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">dst</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a></em><a class="headerlink" href="#pcapkit.protocols.transport.udp.UDP.dst" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">dst</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="../../const/reg.html#pcapkit.const.reg.apptype.AppType" title="pcapkit.const.reg.apptype.AppType"><span class="pre">AppType</span></a></em><a class="headerlink" href="#pcapkit.protocols.transport.udp.UDP.dst" title="Permalink to this definition">#</a></dt>
 <dd><p>Destination port.</p>
 </dd></dl>
 
@@ -498,8 +498,8 @@ attribute:</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>srcport</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>) – Source port.</p></li>
-<li><p><strong>dstport</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>) – Destination port.</p></li>
+<li><p><strong>srcport</strong> (<a class="reference internal" href="../../const/reg.html#pcapkit.const.reg.apptype.AppType" title="pcapkit.const.reg.apptype.AppType"><code class="xref py py-class docutils literal notranslate"><span class="pre">AppType</span></code></a> | <a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>) – Source port.</p></li>
+<li><p><strong>dstport</strong> (<a class="reference internal" href="../../const/reg.html#pcapkit.const.reg.apptype.AppType" title="pcapkit.const.reg.apptype.AppType"><code class="xref py py-class docutils literal notranslate"><span class="pre">AppType</span></code></a> | <a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>) – Destination port.</p></li>
 <li><p><strong>checksum</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a>) – Checksum.</p></li>
 <li><p><strong>payload</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a> | <a class="reference internal" href="../index.html#pcapkit.protocols.schema.schema.Schema" title="pcapkit.protocols.schema.schema.Schema"><code class="xref py py-class docutils literal notranslate"><span class="pre">Schema</span></code></a> | <a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.Protocol" title="pcapkit.protocols.protocol.Protocol"><code class="xref py py-class docutils literal notranslate"><span class="pre">Protocol</span></code></a>) – Payload data.</p></li>
 <li><p><strong>**kwargs</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>) – Arbitrary keyword arguments.</p></li>
@@ -580,7 +580,7 @@ c.f. <a class="reference internal" href="transport.html#pcapkit.protocols.transp
 </dl>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.transport.udp.UDP.srcport">
-<span class="sig-name descname"><span class="pre">srcport</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;UInt16Field</span> <span class="pre">srcport&gt;</span></em><a class="headerlink" href="#pcapkit.protocols.schema.transport.udp.UDP.srcport" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">srcport</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Enum_AppType</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;PortEnumField</span> <span class="pre">srcport&gt;</span></em><a class="headerlink" href="#pcapkit.protocols.schema.transport.udp.UDP.srcport" title="Permalink to this definition">#</a></dt>
 <dd><p>Source port.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -594,7 +594,7 @@ c.f. <a class="reference internal" href="transport.html#pcapkit.protocols.transp
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.transport.udp.UDP.dstport">
-<span class="sig-name descname"><span class="pre">dstport</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;UInt16Field</span> <span class="pre">dstport&gt;</span></em><a class="headerlink" href="#pcapkit.protocols.schema.transport.udp.UDP.dstport" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">dstport</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Enum_AppType</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;PortEnumField</span> <span class="pre">dstport&gt;</span></em><a class="headerlink" href="#pcapkit.protocols.schema.transport.udp.UDP.dstport" title="Permalink to this definition">#</a></dt>
 <dd><p>Destination port.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -668,13 +668,13 @@ c.f. <a class="reference internal" href="transport.html#pcapkit.protocols.transp
 </dl>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.transport.udp.UDP.srcport">
-<span class="sig-name descname"><span class="pre">srcport</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#pcapkit.protocols.data.transport.udp.UDP.srcport" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">srcport</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">AppType</span></em><a class="headerlink" href="#pcapkit.protocols.data.transport.udp.UDP.srcport" title="Permalink to this definition">#</a></dt>
 <dd><p>Source port.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.transport.udp.UDP.dstport">
-<span class="sig-name descname"><span class="pre">dstport</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#pcapkit.protocols.data.transport.udp.UDP.dstport" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">dstport</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">AppType</span></em><a class="headerlink" href="#pcapkit.protocols.data.transport.udp.UDP.dstport" title="Permalink to this definition">#</a></dt>
 <dd><p>Destination port.</p>
 </dd></dl>
 

@@ -676,13 +676,13 @@ enumeration:</p>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.TCP.src">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">src</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a></em><a class="headerlink" href="#pcapkit.protocols.transport.tcp.TCP.src" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">src</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="../../const/reg.html#pcapkit.const.reg.apptype.AppType" title="pcapkit.const.reg.apptype.AppType"><span class="pre">AppType</span></a></em><a class="headerlink" href="#pcapkit.protocols.transport.tcp.TCP.src" title="Permalink to this definition">#</a></dt>
 <dd><p>Source port.</p>
 </dd></dl>
 
 <dl class="py property">
 <dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.TCP.dst">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">dst</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a></em><a class="headerlink" href="#pcapkit.protocols.transport.tcp.TCP.dst" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">dst</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="../../const/reg.html#pcapkit.const.reg.apptype.AppType" title="pcapkit.const.reg.apptype.AppType"><span class="pre">AppType</span></a></em><a class="headerlink" href="#pcapkit.protocols.transport.tcp.TCP.dst" title="Permalink to this definition">#</a></dt>
 <dd><p>Destination port.</p>
 </dd></dl>
 
@@ -775,8 +775,8 @@ enumeration:</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>srcport</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>) – Source port.</p></li>
-<li><p><strong>dstport</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>) – Destination port.</p></li>
+<li><p><strong>srcport</strong> (<a class="reference internal" href="../../const/reg.html#pcapkit.const.reg.apptype.AppType" title="pcapkit.const.reg.apptype.AppType"><code class="xref py py-class docutils literal notranslate"><span class="pre">AppType</span></code></a> | <a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>) – Source port.</p></li>
+<li><p><strong>dstport</strong> (<a class="reference internal" href="../../const/reg.html#pcapkit.const.reg.apptype.AppType" title="pcapkit.const.reg.apptype.AppType"><code class="xref py py-class docutils literal notranslate"><span class="pre">AppType</span></code></a> | <a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>) – Destination port.</p></li>
 <li><p><strong>seq_no</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>) – Sequence number.</p></li>
 <li><p><strong>ack_no</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>) – Acknowledgement number.</p></li>
 <li><p><strong>ns</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a>) – ECN-nonce concealment protection.</p></li>
@@ -2820,7 +2820,7 @@ then be a method that can parse the option by itself.</p>
 </dl>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.transport.tcp.TCP.srcport">
-<span class="sig-name descname"><span class="pre">srcport</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;UInt16Field</span> <span class="pre">srcport&gt;</span></em><a class="headerlink" href="#pcapkit.protocols.schema.transport.tcp.TCP.srcport" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">srcport</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Enum_AppType</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;PortEnumField</span> <span class="pre">srcport&gt;</span></em><a class="headerlink" href="#pcapkit.protocols.schema.transport.tcp.TCP.srcport" title="Permalink to this definition">#</a></dt>
 <dd><p>Source port.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -2834,7 +2834,7 @@ then be a method that can parse the option by itself.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.transport.tcp.TCP.dstport">
-<span class="sig-name descname"><span class="pre">dstport</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;UInt16Field</span> <span class="pre">dstport&gt;</span></em><a class="headerlink" href="#pcapkit.protocols.schema.transport.tcp.TCP.dstport" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">dstport</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Enum_AppType</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;PortEnumField</span> <span class="pre">dstport&gt;</span></em><a class="headerlink" href="#pcapkit.protocols.schema.transport.tcp.TCP.dstport" title="Permalink to this definition">#</a></dt>
 <dd><p>Destination port.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -5090,13 +5090,13 @@ instance.</p></li>
 </dl>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.transport.tcp.TCP.srcport">
-<span class="sig-name descname"><span class="pre">srcport</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.TCP.srcport" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">srcport</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">AppType</span></em><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.TCP.srcport" title="Permalink to this definition">#</a></dt>
 <dd><p>Source port.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.transport.tcp.TCP.dstport">
-<span class="sig-name descname"><span class="pre">dstport</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.TCP.dstport" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">dstport</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">AppType</span></em><a class="headerlink" href="#pcapkit.protocols.data.transport.tcp.TCP.dstport" title="Permalink to this definition">#</a></dt>
 <dd><p>Destination port.</p>
 </dd></dl>
 

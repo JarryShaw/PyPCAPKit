@@ -451,6 +451,8 @@
 
 <span class="s1">        for namespace in show_flag_values(proto):</span>
 <span class="s1">            cls.__members_proto__[TransportProtocol(namespace)][value] = obj</span>
+<span class="s1">        if proto is TransportProtocol.undefined:</span>
+<span class="s1">            cls.__members_proto__[proto][value] = obj</span>
 
 <span class="s1">        return obj</span>
 
@@ -478,9 +480,13 @@
 <span class="s1">            if key in temp_ns:</span>
 <span class="s1">                return temp_ns[key]</span>
 <span class="s1">            try:</span>
-<span class="s1">                return </span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">._missing_(key)</span>
+<span class="s1">                ret = </span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">._missing_(key)</span>
+<span class="s1">                if ret is None:</span>
+<span class="s1">                    raise ValueError</span>
 <span class="s1">            except ValueError:</span>
-<span class="s1">                return extend_enum(</span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">, &#39;PORT_%d_%s&#39; % (key, proto.name), key, &#39;unknown&#39;, proto)</span>
+
+<span class="s1">                ret = extend_enum(</span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">, &#39;PORT_%d_%s&#39; % (key, proto.name), key, &#39;unknown&#39;, proto)</span>
+<span class="s1">            return ret</span>
 <span class="s1">        if key in </span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">.__members_proto__:</span>
 <span class="s1">            return getattr(</span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">, key)</span>
 <span class="s1">        return extend_enum(</span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">, key, default, key)</span>

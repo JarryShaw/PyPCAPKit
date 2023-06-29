@@ -495,6 +495,7 @@
     <span class="kn">from</span> <span class="nn">pcapkit.protocols.schema.transport.tcp</span> <span class="kn">import</span> <span class="n">Flags</span> <span class="k">as</span> <span class="n">Schema_Flags</span>
     <span class="kn">from</span> <span class="nn">pcapkit.protocols.schema.transport.tcp</span> <span class="kn">import</span> <span class="n">MPTCPJoin</span> <span class="k">as</span> <span class="n">Schema_MPTCPJoin</span>
     <span class="kn">from</span> <span class="nn">pcapkit.protocols.schema.transport.tcp</span> <span class="kn">import</span> <span class="n">Option</span> <span class="k">as</span> <span class="n">Schema_Option</span>
+    <span class="kn">from</span> <span class="nn">pcapkit.const.reg.apptype</span> <span class="kn">import</span> <span class="n">AppType</span> <span class="k">as</span> <span class="n">Enum_AppType</span>
 
     <span class="n">Option</span> <span class="o">=</span> <span class="n">OrderedMultiDict</span><span class="p">[</span><span class="n">Enum_Option</span><span class="p">,</span> <span class="n">Data_Option</span><span class="p">]</span>
     <span class="n">OptionParser</span> <span class="o">=</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">Schema_Option</span><span class="p">,</span> <span class="n">NamedArg</span><span class="p">(</span><span class="n">Option</span><span class="p">,</span> <span class="s1">&#39;options&#39;</span><span class="p">)],</span> <span class="n">Data_Option</span><span class="p">]</span>
@@ -722,12 +723,12 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_info</span><span class="o">.</span><span class="n">hdr_len</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">src</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;int&#39;</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">src</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Enum_AppType&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Source port.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_info</span><span class="o">.</span><span class="n">srcport</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">dst</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;int&#39;</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">dst</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Enum_AppType&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Destination port.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_info</span><span class="o">.</span><span class="n">dstport</span>
 
@@ -816,11 +817,11 @@
                 <span class="s1">&#39;options&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_tcp_options</span><span class="p">(</span><span class="n">_optl</span><span class="p">),</span>
             <span class="p">})</span>
 
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_decode_next_layer</span><span class="p">(</span><span class="n">tcp</span><span class="p">,</span> <span class="p">(</span><span class="n">tcp</span><span class="o">.</span><span class="n">srcport</span><span class="p">,</span> <span class="n">tcp</span><span class="o">.</span><span class="n">dstport</span><span class="p">),</span> <span class="n">length</span> <span class="o">-</span> <span class="n">tcp</span><span class="o">.</span><span class="n">hdr_len</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_decode_next_layer</span><span class="p">(</span><span class="n">tcp</span><span class="p">,</span> <span class="p">(</span><span class="n">tcp</span><span class="o">.</span><span class="n">srcport</span><span class="o">.</span><span class="n">port</span><span class="p">,</span> <span class="n">tcp</span><span class="o">.</span><span class="n">dstport</span><span class="o">.</span><span class="n">port</span><span class="p">),</span> <span class="n">length</span> <span class="o">-</span> <span class="n">tcp</span><span class="o">.</span><span class="n">hdr_len</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="TCP.make"><a class="viewcode-back" href="../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP.make">[docs]</a>    <span class="k">def</span> <span class="nf">make</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
-             <span class="n">srcport</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
-             <span class="n">dstport</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+             <span class="n">srcport</span><span class="p">:</span> <span class="s1">&#39;Enum_AppType | int&#39;</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+             <span class="n">dstport</span><span class="p">:</span> <span class="s1">&#39;Enum_AppType | int&#39;</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
              <span class="n">seq_no</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
              <span class="n">ack_no</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
              <span class="n">ns</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
