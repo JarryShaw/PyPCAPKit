@@ -108,6 +108,8 @@ class {NAME}(StrEnum):
 
         for namespace in show_flag_values(proto):
             cls.__members_proto__[TransportProtocol(namespace)][value] = obj
+        if proto is TransportProtocol.undefined:
+            cls.__members_proto__[proto][value] = obj
 
         return obj
 
@@ -135,9 +137,13 @@ class {NAME}(StrEnum):
             if key in temp_ns:
                 return temp_ns[key]
             try:
-                return {NAME}._missing_(key)
+                ret = {NAME}._missing_(key)
+                if ret is None:
+                    raise ValueError
             except ValueError:
-                return extend_enum({NAME}, 'PORT_%d_%s' % (key, proto.name), key, 'unknown', proto)
+
+                ret = extend_enum({NAME}, 'PORT_%d_%s' % (key, proto.name), key, 'unknown', proto)
+            return ret
         if key in {NAME}.__members_proto__:
             return getattr({NAME}, key)
         return extend_enum({NAME}, key, default, key)

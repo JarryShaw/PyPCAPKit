@@ -81,6 +81,8 @@ class AppType(StrEnum):
 
         for namespace in show_flag_values(proto):
             cls.__members_proto__[TransportProtocol(namespace)][value] = obj
+        if proto is TransportProtocol.undefined:
+            cls.__members_proto__[proto][value] = obj
 
         return obj
 
@@ -30269,9 +30271,13 @@ class AppType(StrEnum):
             if key in temp_ns:
                 return temp_ns[key]
             try:
-                return AppType._missing_(key)
+                ret = AppType._missing_(key)
+                if ret is None:
+                    raise ValueError
             except ValueError:
-                return extend_enum(AppType, 'PORT_%d_%s' % (key, proto.name), key, 'unknown', proto)
+
+                ret = extend_enum(AppType, 'PORT_%d_%s' % (key, proto.name), key, 'unknown', proto)
+            return ret
         if key in AppType.__members_proto__:
             return getattr(AppType, key)
         return extend_enum(AppType, key, default, key)
