@@ -396,6 +396,8 @@
 <span class="k">class</span> <span class="nc">CommandType</span><span class="p">(</span><span class="n">IntFlag</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Type of &quot;kind&quot; of command, based on :rfc:`959#section-4.1`.&quot;&quot;&quot;</span>
 
+    <span class="n">undefined</span> <span class="o">=</span> <span class="mi">0</span>
+
     <span class="c1">#: Access control.</span>
     <span class="n">A</span> <span class="o">=</span> <span class="n">auto</span><span class="p">()</span>
     <span class="c1">#: Parameter setting.</span>
@@ -430,7 +432,7 @@
         <span class="n">conf</span><span class="p">:</span> <span class="s1">&#39;ConformanceRequirement&#39;</span>
 
     <span class="k">def</span> <span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">,</span> <span class="n">feat</span><span class="p">:</span> <span class="s1">&#39;Optional[FEATCode]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                <span class="n">desc</span><span class="p">:</span> <span class="s1">&#39;Optional[str]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;CommandType&#39;</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>  <span class="c1"># type: ignore[assignment]</span>
+                <span class="n">desc</span><span class="p">:</span> <span class="s1">&#39;Optional[str]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;CommandType&#39;</span> <span class="o">=</span> <span class="n">CommandType</span><span class="o">.</span><span class="n">undefined</span><span class="p">,</span>
                 <span class="n">conf</span><span class="p">:</span> <span class="s1">&#39;ConformanceRequirement&#39;</span> <span class="o">=</span> <span class="n">ConformanceRequirement</span><span class="o">.</span><span class="n">O</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Type[Command]&#39;</span><span class="p">:</span>
         <span class="n">obj</span> <span class="o">=</span> <span class="nb">str</span><span class="o">.</span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
         <span class="n">obj</span><span class="o">.</span><span class="n">_value_</span> <span class="o">=</span> <span class="n">name</span>
