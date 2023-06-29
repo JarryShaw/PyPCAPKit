@@ -269,34 +269,26 @@ class StatusCode(IntEnum):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))
         if 104 <= value <= 199:
             #: Unassigned
-            extend_enum(cls, 'CODE_%d' % value, value, 'Unassigned')
-            return cls(value)
+            return extend_enum(cls, 'CODE_%d' % value, value, 'Unassigned')
         if 209 <= value <= 225:
             #: Unassigned
-            extend_enum(cls, 'CODE_%d' % value, value, 'Unassigned')
-            return cls(value)
+            return extend_enum(cls, 'CODE_%d' % value, value, 'Unassigned')
         if 227 <= value <= 299:
             #: Unassigned
-            extend_enum(cls, 'CODE_%d' % value, value, 'Unassigned')
-            return cls(value)
+            return extend_enum(cls, 'CODE_%d' % value, value, 'Unassigned')
         if 309 <= value <= 399:
             #: Unassigned
-            extend_enum(cls, 'CODE_%d' % value, value, 'Unassigned')
-            return cls(value)
+            return extend_enum(cls, 'CODE_%d' % value, value, 'Unassigned')
         if 419 <= value <= 420:
             #: Unassigned
-            extend_enum(cls, 'CODE_%d' % value, value, 'Unassigned')
-            return cls(value)
+            return extend_enum(cls, 'CODE_%d' % value, value, 'Unassigned')
         if 432 <= value <= 450:
             #: Unassigned
-            extend_enum(cls, 'CODE_%d' % value, value, 'Unassigned')
-            return cls(value)
+            return extend_enum(cls, 'CODE_%d' % value, value, 'Unassigned')
         if 452 <= value <= 499:
             #: Unassigned
-            extend_enum(cls, 'CODE_%d' % value, value, 'Unassigned')
-            return cls(value)
+            return extend_enum(cls, 'CODE_%d' % value, value, 'Unassigned')
         if 512 <= value <= 599:
             #: Unassigned
-            extend_enum(cls, 'CODE_%d' % value, value, 'Unassigned')
-            return cls(value)
+            return extend_enum(cls, 'CODE_%d' % value, value, 'Unassigned')
         return super()._missing_(value)

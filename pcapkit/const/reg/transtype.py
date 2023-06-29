@@ -516,6 +516,5 @@ class TransType(IntEnum):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))
         if 146 <= value <= 252:
             #: Unassigned [Internet Assigned Numbers Authority]
-            extend_enum(cls, 'Unassigned_%d' % value, value)
-            return cls(value)
+            return extend_enum(cls, 'Unassigned_%d' % value, value)
         return super()._missing_(value)

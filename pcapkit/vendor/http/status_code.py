@@ -160,8 +160,7 @@ class StatusCode(Vendor):
 
                 miss.append(f'if {start} <= value <= {stop}:')
                 miss.append(f'    #: {desc}')
-                miss.append(f"    extend_enum(cls, 'CODE_%d' % value, value, {name!r})")
-                miss.append('    return cls(value)')
+                miss.append(f"    return extend_enum(cls, 'CODE_%d' % value, value, {name!r})")
         return enum, miss
 
     def context(self, data: 'list[str]') -> 'str':
