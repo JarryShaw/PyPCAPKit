@@ -143,6 +143,7 @@ if TYPE_CHECKING:
     from mypy_extensions import DefaultArg, KwArg, NamedArg
     from typing_extensions import Literal
 
+    from pcapkit.const.reg.apptype import AppType as Enum_AppType
     from pcapkit.protocols.data.transport.tcp import MPTCP as Data_MPTCP
     from pcapkit.protocols.data.transport.tcp import MPTCPJoin as Data_MPTCPJoin
     from pcapkit.protocols.data.transport.tcp import Option as Data_Option
@@ -152,7 +153,6 @@ if TYPE_CHECKING:
     from pcapkit.protocols.schema.transport.tcp import Flags as Schema_Flags
     from pcapkit.protocols.schema.transport.tcp import MPTCPJoin as Schema_MPTCPJoin
     from pcapkit.protocols.schema.transport.tcp import Option as Schema_Option
-    from pcapkit.const.reg.apptype import AppType as Enum_AppType
 
     Option = OrderedMultiDict[Enum_Option, Data_Option]
     OptionParser = Callable[[Schema_Option, NamedArg(Option, 'options')], Data_Option]

@@ -4,17 +4,19 @@
 
 from typing import TYPE_CHECKING
 
-from pcapkit.const.reg.apptype import AppType as Enum_AppType, TransportProtocol as Enum_TransportProtocol
+from pcapkit.const.reg.apptype import AppType as Enum_AppType
+from pcapkit.const.reg.apptype import TransportProtocol as Enum_TransportProtocol
 from pcapkit.corekit.fields.misc import PayloadField
-from pcapkit.corekit.fields.numbers import UInt16Field, EnumField
+from pcapkit.corekit.fields.numbers import EnumField, UInt16Field
 from pcapkit.corekit.fields.strings import BytesField
 from pcapkit.protocols.schema.schema import Schema, schema_final
 
 __all__ = ['UDP']
 
 if TYPE_CHECKING:
-    from pcapkit.protocols.protocol import Protocol
     from typing import Any
+
+    from pcapkit.protocols.protocol import Protocol
 
 
 class PortEnumField(EnumField):

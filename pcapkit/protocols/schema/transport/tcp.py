@@ -5,7 +5,8 @@
 import collections
 from typing import TYPE_CHECKING
 
-from pcapkit.const.reg.apptype import AppType as Enum_AppType, TransportProtocol as Enum_TransportProtocol
+from pcapkit.const.reg.apptype import AppType as Enum_AppType
+from pcapkit.const.reg.apptype import TransportProtocol as Enum_TransportProtocol
 from pcapkit.const.tcp.checksum import Checksum as Enum_Checksum
 from pcapkit.const.tcp.mp_tcp_option import MPTCPOption as Enum_MPTCPOption
 from pcapkit.const.tcp.option import Option as Enum_Option
