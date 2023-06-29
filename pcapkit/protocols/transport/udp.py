@@ -36,6 +36,7 @@ if TYPE_CHECKING:
 
     from pcapkit.protocols.protocol import Protocol
     from pcapkit.protocols.schema.schema import Schema
+    from pcapkit.const.reg.apptype import AppType as Enum_AppType
 
 __all__ = ['UDP']
 
@@ -87,12 +88,12 @@ class UDP(Transport[Data_UDP, Schema_UDP],
         return 8
 
     @property
-    def src(self) -> 'int':
+    def src(self) -> 'Enum_AppType':
         """Source port."""
         return self._info.srcport
 
     @property
-    def dst(self) -> 'int':
+    def dst(self) -> 'Enum_AppType':
         """Destination port."""
         return self._info.dstport
 
@@ -138,11 +139,11 @@ class UDP(Transport[Data_UDP, Schema_UDP],
             checksum=schema.checksum,
         )
 
-        return self._decode_next_layer(udp, (udp.srcport, udp.dstport), udp.len - 8)
+        return self._decode_next_layer(udp, (udp.srcport.port, udp.dstport.port), udp.len - 8)
 
     def make(self,
-             srcport: 'int' = 0,
-             dstport: 'int' = 0,
+             srcport: 'Enum_AppType | int' = 0,
+             dstport: 'Enum_AppType | int' = 0,
              checksum: 'bytes' = b'\x00\x00',
              payload: 'bytes | Schema | Protocol' = b'',
              **kwargs: 'Any') -> 'Schema_UDP':

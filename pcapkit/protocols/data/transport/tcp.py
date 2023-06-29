@@ -11,6 +11,7 @@ if TYPE_CHECKING:
     from ipaddress import IPv4Address, IPv6Address
     from typing import Optional, Union
 
+    from pcapkit.const.reg.apptype import AppType
     from pcapkit.const.tcp.checksum import Checksum
     from pcapkit.const.tcp.flags import Flags as TCP_Flags
     from pcapkit.const.tcp.mp_tcp_option import MPTCPOption
@@ -74,9 +75,9 @@ class TCP(Data):
     """Data model for TCP packet."""
 
     #: Source port.
-    srcport: 'int'
+    srcport: 'AppType'
     #: Destination port.
-    dstport: 'int'
+    dstport: 'AppType'
     #: Sequence number.
     seq: 'int'
     #: Acknowledgment number.
@@ -98,7 +99,7 @@ class TCP(Data):
         #: Connection control flags.
         connection: 'TCP_Flags'
 
-        def __init__(self, srcport: 'int', dstport: 'int', seq: 'int', ack: 'int', hdr_len: 'int', flags: 'Flags', window_size: 'int', checksum: 'bytes', urgent_pointer: 'int') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
+        def __init__(self, srcport: 'AppType', dstport: 'AppType', seq: 'int', ack: 'int', hdr_len: 'int', flags: 'Flags', window_size: 'int', checksum: 'bytes', urgent_pointer: 'int') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
 class Option(Data):

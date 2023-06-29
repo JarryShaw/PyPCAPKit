@@ -3,8 +3,9 @@
 """header schema for transmission control protocol"""
 
 import collections
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING
 
+from pcapkit.const.reg.apptype import AppType as Enum_AppType, TransportProtocol as Enum_TransportProtocol
 from pcapkit.const.tcp.checksum import Checksum as Enum_Checksum
 from pcapkit.const.tcp.mp_tcp_option import MPTCPOption as Enum_MPTCPOption
 from pcapkit.const.tcp.option import Option as Enum_Option
@@ -241,6 +242,57 @@ def mptcp_add_address_selector(pkt: 'dict[str, Any]') -> 'Field':
     if pkt['test']['version'] == 6:
         return IPv6AddressField()
     raise FieldError(f'TCP: [OptNo {Enum_Option.Multipath_TCP}] {Enum_MPTCPOption.ADD_ADDR} invalid IP version')
+
+
+class PortEnumField(EnumField):
+    """Enumerated value for protocol fields.
+
+    Args:
+        length: Field size (in bytes); if a callable is given, it should return
+            an integer value and accept the current packet as its only argument.
+        default: Field default value, if any.
+        signed: Whether the field is signed.
+        byteorder: Field byte order.
+        bit_length: Field bit length.
+        callback: Callback function to be called upon
+            :meth:`self.__call__ <pcapkit.corekit.fields.field._Field.__call__>`.
+
+    Important:
+        This class is specifically designed for :class:`~pcapkit.const.reg.apptype.AppType`
+        as it is actually a :class:`~enum.StrEnum` class.
+
+    """
+    if TYPE_CHECKING:
+        _namespace: 'Enum_AppType'
+
+    def pre_process(self, value: 'int | Enum_AppType', packet: 'dict[str, Any]') -> 'int | bytes':
+        """Process field value before construction (packing).
+
+        Arguments:
+            value: Field value.
+            packet: Packet data.
+
+        Returns:
+            Processed field value.
+
+        """
+        if isinstance(value, Enum_AppType):
+            value = value.port
+        return super().pre_process(value, packet)
+
+    def post_process(self, value: 'int | bytes', packet: 'dict[str, Any]') -> 'Enum_AppType':
+        """Process field value after parsing (unpacked).
+
+        Args:
+            value: Field value.
+            packet: Packet data.
+
+        Returns:
+            Processed field value.
+
+        """
+        value = super(EnumField, self).post_process(value, packet)
+        return self._namespace.get(value, proto=Enum_TransportProtocol.tcp)
 
 
 class Option(Schema):
@@ -823,9 +875,9 @@ class TCP(Schema):
     """Header schema for TCP packet."""
 
     #: Source port.
-    srcport: 'int' = UInt16Field()
+    srcport: 'Enum_AppType' = PortEnumField(length=2, namespace=Enum_AppType)
     #: Destination port.
-    dstport: 'int' = UInt16Field()
+    dstport: 'Enum_AppType' = PortEnumField(length=2, namespace=Enum_AppType)
     #: Sequence number.
     seq: 'int' = UInt32Field()
     #: Acknowledgement number.
@@ -889,6 +941,6 @@ class TCP(Schema):
     payload: 'bytes' = PayloadField()
 
     if TYPE_CHECKING:
-        def __init__(self, srcport: 'int', dstport: 'int', seq: 'int', ack: 'int',
+        def __init__(self, srcport: 'Enum_AppType | int', dstport: 'Enum_AppType | int', seq: 'int', ack: 'int',
                      offset: 'OffsetFlag', flags: 'Flags', window: 'int', checksum: 'bytes',
                      urgent: 'int', options: 'list[Option | bytes] | bytes', payload: 'bytes | Protocol | Schema') -> 'None': ...

@@ -152,6 +152,7 @@ if TYPE_CHECKING:
     from pcapkit.protocols.schema.transport.tcp import Flags as Schema_Flags
     from pcapkit.protocols.schema.transport.tcp import MPTCPJoin as Schema_MPTCPJoin
     from pcapkit.protocols.schema.transport.tcp import Option as Schema_Option
+    from pcapkit.const.reg.apptype import AppType as Enum_AppType
 
     Option = OrderedMultiDict[Enum_Option, Data_Option]
     OptionParser = Callable[[Schema_Option, NamedArg(Option, 'options')], Data_Option]
@@ -379,12 +380,12 @@ class TCP(Transport[Data_TCP, Schema_TCP],
         return self._info.hdr_len
 
     @property
-    def src(self) -> 'int':
+    def src(self) -> 'Enum_AppType':
         """Source port."""
         return self._info.srcport
 
     @property
-    def dst(self) -> 'int':
+    def dst(self) -> 'Enum_AppType':
         """Destination port."""
         return self._info.dstport
 
@@ -473,11 +474,11 @@ class TCP(Transport[Data_TCP, Schema_TCP],
                 'options': self._read_tcp_options(_optl),
             })
 
-        return self._decode_next_layer(tcp, (tcp.srcport, tcp.dstport), length - tcp.hdr_len)
+        return self._decode_next_layer(tcp, (tcp.srcport.port, tcp.dstport.port), length - tcp.hdr_len)
 
     def make(self,
-             srcport: 'int' = 0,
-             dstport: 'int' = 0,
+             srcport: 'Enum_AppType | int' = 0,
+             dstport: 'Enum_AppType | int' = 0,
              seq_no: 'int' = 0,
              ack_no: 'int' = 0,
              ns: 'bool' = False,
