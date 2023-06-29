@@ -441,7 +441,7 @@ class TCP(Transport[Data_TCP, Schema_TCP],
             ack=schema.ack,
             hdr_len=schema.offset['offset'] * 4,
             flags=Data_Flags(
-                ns=bool(schema.offset['ns']),
+                #ns=bool(schema.offset['ns']),
                 cwr=bool(schema.flags['cwr']),
                 ece=bool(schema.flags['ece']),
                 urg=bool(schema.flags['urg']),
@@ -628,7 +628,7 @@ class TCP(Transport[Data_TCP, Schema_TCP],
             'dstport': data.dstport,
             'seq_no': data.seq,
             'ack_no': data.ack,
-            'ns': data.flags.ns,
+            #'ns': data.flags.ns,
             'cwr': data.flags.cwr,
             'ece': data.flags.ece,
             'urg': data.flags.urg,
@@ -1537,7 +1537,7 @@ class TCP(Transport[Data_TCP, Schema_TCP],
             kind=Enum_Option.Multipath_TCP,  # type: ignore[arg-type]
             length=schema.length,
             subtype=schema.subtype,
-            connection=Enum_Flags.SYN,
+            connection=Enum_Flags.SYN,  # type: ignore[arg-type]
             backup=bool(schema.test['backup']),
             addr_id=schema.addr_id,
             token=schema.token,
@@ -1582,7 +1582,7 @@ class TCP(Transport[Data_TCP, Schema_TCP],
             kind=Enum_Option.Multipath_TCP,  # type: ignore[arg-type]
             length=schema.length,
             subtype=schema.subtype,
-            connection=Enum_Flags.SYN | Enum_Flags.ACK,
+            connection=Enum_Flags.SYN | Enum_Flags.ACK,  # type: ignore[arg-type]
             backup=bool(schema.test['backup']),
             addr_id=schema.addr_id,
             hmac=schema.hmac,
@@ -1627,7 +1627,7 @@ class TCP(Transport[Data_TCP, Schema_TCP],
             kind=Enum_Option.Multipath_TCP,  # type: ignore[arg-type]
             length=schema.length,
             subtype=schema.subtype,
-            connection=Enum_Flags.ACK,
+            connection=Enum_Flags.ACK,  # type: ignore[arg-type]
             hmac=schema.hmac,
         )
         return data
