@@ -93,6 +93,8 @@ class FEATCode(StrEnum):
 class CommandType(IntFlag):
     """Type of "kind" of command, based on :rfc:`959#section-4.1`."""
 
+    undefined = 0
+
     #: Access control.
     A = auto()
     #: Parameter setting.
@@ -127,7 +129,7 @@ class {NAME}(StrEnum):
         conf: 'ConformanceRequirement'
 
     def __new__(cls, name: 'str', feat: 'Optional[FEATCode]' = None,
-                desc: 'Optional[str]' = None, type: 'CommandType' = 0,  # type: ignore[assignment]
+                desc: 'Optional[str]' = None, type: 'CommandType' = CommandType.undefined,
                 conf: 'ConformanceRequirement' = ConformanceRequirement.O) -> 'Type[{NAME}]':
         obj = str.__new__(cls, name)
         obj._value_ = name
