@@ -421,6 +421,9 @@
 <span class="s1">    def __repr__(self) -&gt; &#39;str&#39;:</span>
 <span class="s1">        return &quot;&lt;%s.%s: %d&gt;&quot; % (self.__class__.__name__, self.opt_name, self.opt_value)</span>
 
+<span class="s1">    def __str__(self) -&gt; &#39;str&#39;:</span>
+<span class="s1">        return &#39;%s [%d]&#39; % (self.opt_name, self.opt_value)</span>
+
 <span class="s1">    </span><span class="si">{</span><span class="n">ENUM</span><span class="si">}</span>
 
 <span class="s1">    @staticmethod</span>
