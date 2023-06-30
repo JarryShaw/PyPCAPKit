@@ -116,6 +116,9 @@ class {NAME}(StrEnum):
     def __repr__(self) -> 'str':
         return "<%s.%s: %d [%s]>" % (self.__class__.__name__, self.svc, self.port, self.proto.name)
 
+    def __str__(self) -> 'str':
+        return '%s [%d (%s)]' % (self.svc, self.port, self.proto.name)
+
     {ENUM}
 
     @staticmethod
