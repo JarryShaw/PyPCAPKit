@@ -89,6 +89,9 @@ class AppType(StrEnum):
     def __repr__(self) -> 'str':
         return "<%s.%s: %d [%s]>" % (self.__class__.__name__, self.svc, self.port, self.proto.name)
 
+    def __str__(self) -> 'str':
+        return '%s [%d (%s)]' % (self.svc, self.port, self.proto.name)
+
     #: [TCP] Reserved
     #: [UDP] Reserved
     reserved_0 = 0, 'reserved', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
@@ -8669,8 +8672,9 @@ class AppType(StrEnum):
     #: [UDP] OpenTable
     opentable = 2368, 'opentable', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
 
-    #: [N/A] Unassigned
-    unassigned_2369 = 2369, 'unassigned', TransportProtocol.get('undefined')
+    #: [TCP] Blockchain Identifier InFrastructure P2P
+    #: [UDP] Blockchain Identifier InFrastructure P2P
+    bif_p2p = 2369, 'bif-p2p', TransportProtocol.get('tcp') | TransportProtocol.get('udp')
 
     #: [TCP] L3-HBMon
     #: [UDP] L3-HBMon
