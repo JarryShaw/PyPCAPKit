@@ -393,6 +393,9 @@
     <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;str&#39;</span><span class="p">:</span>
         <span class="k">return</span> <span class="s2">&quot;&lt;</span><span class="si">%s</span><span class="s2">.</span><span class="si">%s</span><span class="s2">: </span><span class="si">%d</span><span class="s2">&gt;&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">opt_name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">opt_value</span><span class="p">)</span>
 
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;str&#39;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> [</span><span class="si">%d</span><span class="s1">]&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">opt_name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">opt_value</span><span class="p">)</span>
+
     <span class="c1">#: opt_endofopt</span>
     <span class="n">opt_endofopt</span><span class="p">:</span> <span class="s1">&#39;OptionType&#39;</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;opt_endofopt&#39;</span>
 
