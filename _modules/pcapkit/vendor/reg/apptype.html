@@ -440,7 +440,7 @@
 
 <span class="s1">    def __new__(cls, value: &#39;int&#39;, name: &#39;str&#39; = &#39;&lt;null&gt;&#39;,</span>
 <span class="s1">                proto: &#39;TransportProtocol&#39; = TransportProtocol.undefined) -&gt; &#39;Type[</span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">]&#39;:</span>
-<span class="s1">        temp = &#39;%s_%d_%s&#39; % (proto.name, value, name)</span>
+<span class="s1">        temp = &#39;%s [%d - %s]&#39; % (name, value, proto.name)</span>
 
 <span class="s1">        obj = str.__new__(cls, temp)</span>
 <span class="s1">        obj._value_ = temp</span>
@@ -460,7 +460,7 @@
 <span class="s1">        return &quot;&lt;%s.%s: %d [%s]&gt;&quot; % (self.__class__.__name__, self.svc, self.port, self.proto.name)</span>
 
 <span class="s1">    def __str__(self) -&gt; &#39;str&#39;:</span>
-<span class="s1">        return &#39;%s [%d (%s)]&#39; % (self.svc, self.port, self.proto.name)</span>
+<span class="s1">        return &#39;%s [%d - %s]&#39; % (self.svc, self.port, self.proto.name)</span>
 
 <span class="s1">    </span><span class="si">{</span><span class="n">ENUM</span><span class="si">}</span>
 
@@ -572,7 +572,10 @@
                 <span class="k">if</span> <span class="n">renm</span> <span class="ow">in</span> <span class="n">line</span><span class="p">:</span>
                     <span class="k">if</span> <span class="n">port</span> <span class="o">==</span> <span class="n">line</span><span class="p">[</span><span class="n">renm</span><span class="p">][</span><span class="mi">1</span><span class="p">]:</span>
                         <span class="n">line</span><span class="p">[</span><span class="n">renm</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">line</span><span class="p">[</span><span class="n">renm</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span><span class="si">}</span><span class="s1"> | </span><span class="si">{</span><span class="n">proto</span><span class="si">}</span><span class="s1">&#39;</span>
-                        <span class="n">line</span><span class="p">[</span><span class="n">renm</span><span class="p">][</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">line</span><span class="p">[</span><span class="n">renm</span><span class="p">][</span><span class="mi">3</span><span class="p">]</span><span class="si">}</span><span class="se">\n</span><span class="s1">    #: </span><span class="si">{</span><span class="n">cmmt</span><span class="si">}</span><span class="s1">&#39;</span>
+                        <span class="k">if</span> <span class="n">line</span><span class="p">[</span><span class="n">renm</span><span class="p">][</span><span class="mi">3</span><span class="p">]</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;-&#39;</span><span class="p">):</span>
+                            <span class="n">line</span><span class="p">[</span><span class="n">renm</span><span class="p">][</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">line</span><span class="p">[</span><span class="n">renm</span><span class="p">][</span><span class="mi">3</span><span class="p">]</span><span class="si">}</span><span class="se">\n</span><span class="s1">    #: - </span><span class="si">{</span><span class="n">cmmt</span><span class="si">}</span><span class="s1">&#39;</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="n">line</span><span class="p">[</span><span class="n">renm</span><span class="p">][</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;- </span><span class="si">{</span><span class="n">line</span><span class="p">[</span><span class="n">renm</span><span class="p">][</span><span class="mi">3</span><span class="p">]</span><span class="si">}</span><span class="se">\n</span><span class="s1">    #: - </span><span class="si">{</span><span class="n">cmmt</span><span class="si">}</span><span class="s1">&#39;</span>
                     <span class="k">else</span><span class="p">:</span>
                         <span class="n">line</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">renm</span><span class="si">}</span><span class="s1">_</span><span class="si">{</span><span class="n">line</span><span class="p">[</span><span class="n">renm</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">line</span><span class="p">[</span><span class="n">renm</span><span class="p">]</span>
                         <span class="n">line</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">renm</span><span class="si">}</span><span class="s1">_</span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">svc</span><span class="p">,</span> <span class="n">port</span><span class="p">,</span> <span class="n">proto</span><span class="p">,</span> <span class="n">cmmt</span><span class="p">]</span>

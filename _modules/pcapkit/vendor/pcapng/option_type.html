@@ -405,7 +405,7 @@
 <span class="s1">    __members_ns__: &#39;DefaultDict[str, dict[int, </span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">]]&#39; = defaultdict(dict)</span>
 
 <span class="s1">    def __new__(cls, value: &#39;int&#39;, name: &#39;str&#39; = &#39;opt_unknown&#39;) -&gt; &#39;Type[</span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">]&#39;:</span>
-<span class="s1">        temp = &#39;%d_%s&#39; % (value, name)</span>
+<span class="s1">        temp = &#39;%s [%d]&#39; % (name, value)</span>
 
 <span class="s1">        obj = str.__new__(cls, temp)</span>
 <span class="s1">        obj._value_ = temp</span>
