@@ -67,43 +67,43 @@ Octets      Bits        Name                    Description
 
    .. automethod:: _read_mh_options
    .. automethod:: _read_opt_none
-   .. autoemthod:: _read_opt_pad
-   .. autoemthod:: _read_opt_pad
-   .. autoemthod:: _read_opt_bra
-   .. autoemthod:: _read_opt_aca
-   .. autoemthod:: _read_opt_ni
-   .. autoemthod:: _read_opt_bad
-   .. autoemthod:: _read_opt_mnp
-   .. autoemthod:: _read_opt_lla
-   .. autoemthod:: _read_opt_mn_id
-   .. autoemthod:: _read_opt_auth
-   .. autoemthod:: _read_opt_mesg_id
-   .. autoemthod:: _read_opt_cga_pr
-   .. autoemthod:: _read_opt_cga_param
-   .. autoemthod:: _read_opt_signature
-   .. autoemthod:: _read_opt_phkt
-   .. autoemthod:: _read_opt_ct_init
-   .. autoemthod:: _read_opt_ct
+   .. automethod:: _read_opt_pad
+   .. automethod:: _read_opt_pad
+   .. automethod:: _read_opt_bra
+   .. automethod:: _read_opt_aca
+   .. automethod:: _read_opt_ni
+   .. automethod:: _read_opt_bad
+   .. automethod:: _read_opt_mnp
+   .. automethod:: _read_opt_lla
+   .. automethod:: _read_opt_mn_id
+   .. automethod:: _read_opt_auth
+   .. automethod:: _read_opt_mesg_id
+   .. automethod:: _read_opt_cga_pr
+   .. automethod:: _read_opt_cga_param
+   .. automethod:: _read_opt_signature
+   .. automethod:: _read_opt_phkt
+   .. automethod:: _read_opt_ct_init
+   .. automethod:: _read_opt_ct
 
    .. automethod:: _make_mh_options
    .. automethod:: _make_opt_none
-   .. autoemthod:: _make_opt_pad
-   .. autoemthod:: _make_opt_pad
-   .. autoemthod:: _make_opt_bra
-   .. autoemthod:: _make_opt_aca
-   .. autoemthod:: _make_opt_ni
-   .. autoemthod:: _make_opt_bad
-   .. autoemthod:: _make_opt_mnp
-   .. autoemthod:: _make_opt_lla
-   .. autoemthod:: _make_opt_mn_id
-   .. autoemthod:: _make_opt_auth
-   .. autoemthod:: _make_opt_mesg_id
-   .. autoemthod:: _make_opt_cga_pr
-   .. autoemthod:: _make_opt_cga_param
-   .. autoemthod:: _make_opt_signature
-   .. autoemthod:: _make_opt_phkt
-   .. autoemthod:: _make_opt_ct_init
-   .. autoemthod:: _make_opt_ct
+   .. automethod:: _make_opt_pad
+   .. automethod:: _make_opt_pad
+   .. automethod:: _make_opt_bra
+   .. automethod:: _make_opt_aca
+   .. automethod:: _make_opt_ni
+   .. automethod:: _make_opt_bad
+   .. automethod:: _make_opt_mnp
+   .. automethod:: _make_opt_lla
+   .. automethod:: _make_opt_mn_id
+   .. automethod:: _make_opt_auth
+   .. automethod:: _make_opt_mesg_id
+   .. automethod:: _make_opt_cga_pr
+   .. automethod:: _make_opt_cga_param
+   .. automethod:: _make_opt_signature
+   .. automethod:: _make_opt_phkt
+   .. automethod:: _make_opt_ct_init
+   .. automethod:: _make_opt_ct
 
    .. automethod:: _read_cga_extensions
    .. automethod:: _read_ext_none
@@ -139,13 +139,6 @@ Header Schemas
 .. module:: pcapkit.protocols.schema.internet.mh
 
 .. autoclass:: pcapkit.protocols.schema.internet.mh.MH
-   :members:
-   :show-inheritance:
-
-   :param \*args: Arbitrary positional arguments.
-   :param \*\*kwargs: Arbitrary keyword arguments.
-
-.. autoclass:: pcapkit.protocols.schema.internet.mh.
    :members:
    :show-inheritance:
 

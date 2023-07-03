@@ -1414,7 +1414,7 @@
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">data</span></div>
 
-    <span class="k">def</span> <span class="nf">_read_opt_pad</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">&#39;Schema_PadOption&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+<div class="viewcode-block" id="MH._read_opt_pad"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.internet.mh.MH._read_opt_pad">[docs]</a>    <span class="k">def</span> <span class="nf">_read_opt_pad</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">&#39;Schema_PadOption&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
                       <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Data_PadOption&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Read MH padding option.</span>
 
@@ -1466,9 +1466,9 @@
             <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="n">length</span><span class="o">=</span><span class="n">size</span><span class="p">,</span>
         <span class="p">)</span>
-        <span class="k">return</span> <span class="n">data</span>
+        <span class="k">return</span> <span class="n">data</span></div>
 
-    <span class="k">def</span> <span class="nf">_read_opt_bra</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">&#39;Schema_BindRefreshAdviceOption&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+<div class="viewcode-block" id="MH._read_opt_bra"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.internet.mh.MH._read_opt_bra">[docs]</a>    <span class="k">def</span> <span class="nf">_read_opt_bra</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">&#39;Schema_BindRefreshAdviceOption&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
                       <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Data_BindRefreshAdviceOption&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Read MH binding refresh advice option.</span>
 
@@ -1500,9 +1500,9 @@
             <span class="n">length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span>
             <span class="n">interval</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">interval</span><span class="p">,</span>
         <span class="p">)</span>
-        <span class="k">return</span> <span class="n">data</span>
+        <span class="k">return</span> <span class="n">data</span></div>
 
-    <span class="k">def</span> <span class="nf">_read_opt_aca</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">&#39;Schema_AlternateCareofAddressOption&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+<div class="viewcode-block" id="MH._read_opt_aca"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.internet.mh.MH._read_opt_aca">[docs]</a>    <span class="k">def</span> <span class="nf">_read_opt_aca</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">&#39;Schema_AlternateCareofAddressOption&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
                       <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Data_AlternateCareofAddressOption&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Read MH alternate care-of address option.</span>
 
@@ -1540,9 +1540,9 @@
             <span class="n">length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span>
             <span class="n">address</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">address</span><span class="p">,</span>
         <span class="p">)</span>
-        <span class="k">return</span> <span class="n">data</span>
+        <span class="k">return</span> <span class="n">data</span></div>
 
-    <span class="k">def</span> <span class="nf">_read_opt_ni</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">&#39;Schema_NonceIndicesOption&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+<div class="viewcode-block" id="MH._read_opt_ni"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.internet.mh.MH._read_opt_ni">[docs]</a>    <span class="k">def</span> <span class="nf">_read_opt_ni</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">&#39;Schema_NonceIndicesOption&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
                      <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Data_NonceIndicesOption&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Read MH nonce indices option.</span>
 
@@ -1575,9 +1575,9 @@
             <span class="n">home</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">home</span><span class="p">,</span>
             <span class="n">careof</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">careof</span><span class="p">,</span>
         <span class="p">)</span>
-        <span class="k">return</span> <span class="n">data</span>
+        <span class="k">return</span> <span class="n">data</span></div>
 
-    <span class="k">def</span> <span class="nf">_read_opt_bad</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">&#39;Schema_BindingAuthorizationDataOption&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+<div class="viewcode-block" id="MH._read_opt_bad"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.internet.mh.MH._read_opt_bad">[docs]</a>    <span class="k">def</span> <span class="nf">_read_opt_bad</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">&#39;Schema_BindingAuthorizationDataOption&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
                       <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Data_BindingAuthorizationDataOption&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Read MH binding authorization data option.</span>
 
@@ -1613,9 +1613,9 @@
             <span class="n">length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span>
             <span class="n">data</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">data</span><span class="p">,</span>
         <span class="p">)</span>
-        <span class="k">return</span> <span class="n">data</span>
+        <span class="k">return</span> <span class="n">data</span></div>
 
-    <span class="k">def</span> <span class="nf">_read_opt_mnp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">&#39;Schema_MobileNetworkPrefixOption&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+<div class="viewcode-block" id="MH._read_opt_mnp"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.internet.mh.MH._read_opt_mnp">[docs]</a>    <span class="k">def</span> <span class="nf">_read_opt_mnp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">&#39;Schema_MobileNetworkPrefixOption&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
                       <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Data_MobileNetworkPrefixOption&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Read MH mobile network prefix option.</span>
 
@@ -1656,9 +1656,9 @@
             <span class="n">length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span>
             <span class="n">prefix</span><span class="o">=</span><span class="n">prefix</span><span class="p">,</span>
         <span class="p">)</span>
-        <span class="k">return</span> <span class="n">data</span>
+        <span class="k">return</span> <span class="n">data</span></div>
 
-    <span class="k">def</span> <span class="nf">_read_opt_lla</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">&#39;Schema_LinkLayerAddressOption&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+<div class="viewcode-block" id="MH._read_opt_lla"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.internet.mh.MH._read_opt_lla">[docs]</a>    <span class="k">def</span> <span class="nf">_read_opt_lla</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">&#39;Schema_LinkLayerAddressOption&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
                       <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Data_LinkLayerAddressOption&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Read MH link-layer address (MH-LLA) option.</span>
 
@@ -1691,9 +1691,9 @@
             <span class="n">code</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">code</span><span class="p">,</span>
             <span class="n">lla</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">lla</span><span class="p">,</span>
         <span class="p">)</span>
-        <span class="k">return</span> <span class="n">data</span>
+        <span class="k">return</span> <span class="n">data</span></div>
 
-    <span class="k">def</span> <span class="nf">_read_opt_mn_id</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">&#39;Schema_MNIDOption&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+<div class="viewcode-block" id="MH._read_opt_mn_id"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.internet.mh.MH._read_opt_mn_id">[docs]</a>    <span class="k">def</span> <span class="nf">_read_opt_mn_id</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">&#39;Schema_MNIDOption&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
                        <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Data_MNIDOption&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Read MH mobile node identifier option.</span>
 
@@ -1723,9 +1723,9 @@
             <span class="n">subtype</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">subtype</span><span class="p">,</span>
             <span class="n">identifier</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">identifier</span><span class="p">,</span>
         <span class="p">)</span>
-        <span class="k">return</span> <span class="n">data</span>
+        <span class="k">return</span> <span class="n">data</span></div>
 
-    <span class="k">def</span> <span class="nf">_read_opt_auth</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">&#39;Schema_AuthOption&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+<div class="viewcode-block" id="MH._read_opt_auth"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.internet.mh.MH._read_opt_auth">[docs]</a>    <span class="k">def</span> <span class="nf">_read_opt_auth</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">&#39;Schema_AuthOption&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
                        <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Data_AuthOption&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Read MH mobility message authentication option.</span>
 
@@ -1761,9 +1761,9 @@
             <span class="n">spi</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">spi</span><span class="p">,</span>
             <span class="n">data</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">data</span><span class="p">,</span>
         <span class="p">)</span>
-        <span class="k">return</span> <span class="n">data</span>
+        <span class="k">return</span> <span class="n">data</span></div>
 
-    <span class="k">def</span> <span class="nf">_read_opt_mesg_id</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">&#39;Schema_MesgIDOption&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+<div class="viewcode-block" id="MH._read_opt_mesg_id"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.internet.mh.MH._read_opt_mesg_id">[docs]</a>    <span class="k">def</span> <span class="nf">_read_opt_mesg_id</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">&#39;Schema_MesgIDOption&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
                           <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Data_MesgIDOption&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Read MH mobility message replay protection option.</span>
 
@@ -1798,9 +1798,9 @@
             <span class="n">timestamp</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">timestamp</span><span class="p">,</span>
             <span class="n">ntp_timestamp</span><span class="o">=</span><span class="n">NTPTimestamp</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">seconds</span><span class="p">,</span> <span class="n">schema</span><span class="o">.</span><span class="n">fraction</span><span class="p">),</span>
         <span class="p">)</span>
-        <span class="k">return</span> <span class="n">data</span>
+        <span class="k">return</span> <span class="n">data</span></div>
 
-    <span class="k">def</span> <span class="nf">_read_opt_cga_pr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">&#39;Schema_CGAParametersRequestOption&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+<div class="viewcode-block" id="MH._read_opt_cga_pr"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.internet.mh.MH._read_opt_cga_pr">[docs]</a>    <span class="k">def</span> <span class="nf">_read_opt_cga_pr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">&#39;Schema_CGAParametersRequestOption&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
                          <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Data_CGAParametersRequestOption&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Read MH CGA parameters request option.</span>
 
@@ -1829,9 +1829,9 @@
             <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="n">length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span>
         <span class="p">)</span>
-        <span class="k">return</span> <span class="n">data</span>
+        <span class="k">return</span> <span class="n">data</span></div>
 
-    <span class="k">def</span> <span class="nf">_read_opt_cga_param</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">&#39;Schema_CGAParametersOption&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+<div class="viewcode-block" id="MH._read_opt_cga_param"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.internet.mh.MH._read_opt_cga_param">[docs]</a>    <span class="k">def</span> <span class="nf">_read_opt_cga_param</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">&#39;Schema_CGAParametersOption&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
                             <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Data_CGAParametersOption&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Read MH CGA parameters option.</span>
 
@@ -1874,9 +1874,9 @@
                 <span class="n">extensions</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_read_cga_extensions</span><span class="p">(</span><span class="n">param</span><span class="o">.</span><span class="n">extensions</span><span class="p">),</span>
             <span class="p">)</span> <span class="k">for</span> <span class="n">param</span> <span class="ow">in</span> <span class="n">schema</span><span class="o">.</span><span class="n">parameters</span><span class="p">),</span>
         <span class="p">)</span>
-        <span class="k">return</span> <span class="n">data</span>
+        <span class="k">return</span> <span class="n">data</span></div>
 
-    <span class="k">def</span> <span class="nf">_read_opt_signature</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">&#39;Schema_SignatureOption&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+<div class="viewcode-block" id="MH._read_opt_signature"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.internet.mh.MH._read_opt_signature">[docs]</a>    <span class="k">def</span> <span class="nf">_read_opt_signature</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">&#39;Schema_SignatureOption&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
                             <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Data_SignatureOption&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Read MH signature option.</span>
 
@@ -1909,9 +1909,9 @@
             <span class="n">length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span>
             <span class="n">signature</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">signature</span><span class="p">,</span>
         <span class="p">)</span>
-        <span class="k">return</span> <span class="n">data</span>
+        <span class="k">return</span> <span class="n">data</span></div>
 
-    <span class="k">def</span> <span class="nf">_read_opt_phkt</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">&#39;Schema_PermanentHomeKeygenTokenOption&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+<div class="viewcode-block" id="MH._read_opt_phkt"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.internet.mh.MH._read_opt_phkt">[docs]</a>    <span class="k">def</span> <span class="nf">_read_opt_phkt</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">&#39;Schema_PermanentHomeKeygenTokenOption&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
                        <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Data_PermanentHomeKeygenTokenOption&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Read MH permanent home keygen token option.</span>
 
@@ -1944,9 +1944,9 @@
             <span class="n">length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span>
             <span class="n">token</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">token</span><span class="p">,</span>
         <span class="p">)</span>
-        <span class="k">return</span> <span class="n">data</span>
+        <span class="k">return</span> <span class="n">data</span></div>
 
-    <span class="k">def</span> <span class="nf">_read_opt_ct_init</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">&#39;Schema_CareofTestInitOption&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+<div class="viewcode-block" id="MH._read_opt_ct_init"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.internet.mh.MH._read_opt_ct_init">[docs]</a>    <span class="k">def</span> <span class="nf">_read_opt_ct_init</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">&#39;Schema_CareofTestInitOption&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
                           <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Data_CareofTestInitOption&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Read MH Care-of Test Init option.</span>
 
@@ -1975,9 +1975,9 @@
             <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="n">length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span>
         <span class="p">)</span>
-        <span class="k">return</span> <span class="n">data</span>
+        <span class="k">return</span> <span class="n">data</span></div>
 
-    <span class="k">def</span> <span class="nf">_read_opt_ct</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">&#39;Schema_CareofTestOption&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+<div class="viewcode-block" id="MH._read_opt_ct"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.internet.mh.MH._read_opt_ct">[docs]</a>    <span class="k">def</span> <span class="nf">_read_opt_ct</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">&#39;Schema_CareofTestOption&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
                      <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Data_CareofTestOption&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Read MH Care-of Test option.</span>
 
@@ -2011,7 +2011,7 @@
             <span class="n">length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span>
             <span class="n">token</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">token</span><span class="p">,</span>
         <span class="p">)</span>
-        <span class="k">return</span> <span class="n">data</span>
+        <span class="k">return</span> <span class="n">data</span></div>
 
     <span class="c1"># TODO: Implement other options.</span>
 
@@ -2507,7 +2507,7 @@
             <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span>
         <span class="p">)</span></div>
 
-    <span class="k">def</span> <span class="nf">_make_opt_pad</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span><span class="p">,</span> <span class="n">option</span><span class="p">:</span> <span class="s1">&#39;Optional[Data_PadOption]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+<div class="viewcode-block" id="MH._make_opt_pad"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.internet.mh.MH._make_opt_pad">[docs]</a>    <span class="k">def</span> <span class="nf">_make_opt_pad</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span><span class="p">,</span> <span class="n">option</span><span class="p">:</span> <span class="s1">&#39;Optional[Data_PadOption]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
                       <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
                       <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Schema_PadOption&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Make MH pad option.</span>
@@ -2537,9 +2537,9 @@
         <span class="k">return</span> <span class="n">Schema_PadOption</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="nb">type</span><span class="p">,</span>
             <span class="n">length</span><span class="o">=</span><span class="n">length</span><span class="p">,</span>
-        <span class="p">)</span>
+        <span class="p">)</span></div>
 
-    <span class="k">def</span> <span class="nf">_make_opt_bra</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span><span class="p">,</span> <span class="n">option</span><span class="p">:</span> <span class="s1">&#39;Optional[Data_BindRefreshAdviceOption]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+<div class="viewcode-block" id="MH._make_opt_bra"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.internet.mh.MH._make_opt_bra">[docs]</a>    <span class="k">def</span> <span class="nf">_make_opt_bra</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span><span class="p">,</span> <span class="n">option</span><span class="p">:</span> <span class="s1">&#39;Optional[Data_BindRefreshAdviceOption]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
                       <span class="n">interval</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
                       <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Schema_BindRefreshAdviceOption&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Make MH binding refresh advice option.</span>
@@ -2561,9 +2561,9 @@
             <span class="nb">type</span><span class="o">=</span><span class="nb">type</span><span class="p">,</span>
             <span class="n">length</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
             <span class="n">interval</span><span class="o">=</span><span class="n">interval</span><span class="p">,</span>
-        <span class="p">)</span>
+        <span class="p">)</span></div>
 
-    <span class="k">def</span> <span class="nf">_make_opt_aca</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span><span class="p">,</span> <span class="n">option</span><span class="p">:</span> <span class="s1">&#39;Optional[Data_AlternateCareofAddressOption]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+<div class="viewcode-block" id="MH._make_opt_aca"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.internet.mh.MH._make_opt_aca">[docs]</a>    <span class="k">def</span> <span class="nf">_make_opt_aca</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span><span class="p">,</span> <span class="n">option</span><span class="p">:</span> <span class="s1">&#39;Optional[Data_AlternateCareofAddressOption]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
                       <span class="n">address</span><span class="p">:</span> <span class="s1">&#39;bytes | str | int | IPv6Address&#39;</span> <span class="o">=</span> <span class="s1">&#39;::&#39;</span><span class="p">,</span>
                       <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Schema_AlternateCareofAddressOption&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Make MH alternate care-of address option.</span>
@@ -2585,9 +2585,9 @@
             <span class="nb">type</span><span class="o">=</span><span class="nb">type</span><span class="p">,</span>
             <span class="n">length</span><span class="o">=</span><span class="mi">16</span><span class="p">,</span>
             <span class="n">address</span><span class="o">=</span><span class="n">address</span><span class="p">,</span>
-        <span class="p">)</span>
+        <span class="p">)</span></div>
 
-    <span class="k">def</span> <span class="nf">_make_opt_ni</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span><span class="p">,</span> <span class="n">option</span><span class="p">:</span> <span class="s1">&#39;Optional[Data_NonceIndicesOption]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+<div class="viewcode-block" id="MH._make_opt_ni"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.internet.mh.MH._make_opt_ni">[docs]</a>    <span class="k">def</span> <span class="nf">_make_opt_ni</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span><span class="p">,</span> <span class="n">option</span><span class="p">:</span> <span class="s1">&#39;Optional[Data_NonceIndicesOption]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
                      <span class="n">home</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
                      <span class="n">careof</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
                      <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Schema_NonceIndicesOption&#39;</span><span class="p">:</span>
@@ -2613,9 +2613,9 @@
             <span class="n">length</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
             <span class="n">home</span><span class="o">=</span><span class="n">home</span><span class="p">,</span>
             <span class="n">careof</span><span class="o">=</span><span class="n">careof</span><span class="p">,</span>
-        <span class="p">)</span>
+        <span class="p">)</span></div>
 
-    <span class="k">def</span> <span class="nf">_make_opt_bad</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span><span class="p">,</span> <span class="n">option</span><span class="p">:</span> <span class="s1">&#39;Optional[Data_BindingAuthorizationDataOption]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+<div class="viewcode-block" id="MH._make_opt_bad"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.internet.mh.MH._make_opt_bad">[docs]</a>    <span class="k">def</span> <span class="nf">_make_opt_bad</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span><span class="p">,</span> <span class="n">option</span><span class="p">:</span> <span class="s1">&#39;Optional[Data_BindingAuthorizationDataOption]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
                       <span class="n">data</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">&#39;&#39;</span><span class="p">,</span>
                       <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Schema_BindingAuthorizationDataOption&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Make MH binding authorization data option.</span>
@@ -2640,9 +2640,9 @@
             <span class="nb">type</span><span class="o">=</span><span class="nb">type</span><span class="p">,</span>
             <span class="n">length</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">),</span>
             <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span>
-        <span class="p">)</span>
+        <span class="p">)</span></div>
 
-    <span class="k">def</span> <span class="nf">_make_opt_mnp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span><span class="p">,</span> <span class="n">option</span><span class="p">:</span> <span class="s1">&#39;Optional[Data_MobileNetworkPrefixOption]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+<div class="viewcode-block" id="MH._make_opt_mnp"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.internet.mh.MH._make_opt_mnp">[docs]</a>    <span class="k">def</span> <span class="nf">_make_opt_mnp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span><span class="p">,</span> <span class="n">option</span><span class="p">:</span> <span class="s1">&#39;Optional[Data_MobileNetworkPrefixOption]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
                       <span class="n">prefix</span><span class="p">:</span> <span class="s1">&#39;bytes | str | IPv6Network&#39;</span> <span class="o">=</span> <span class="s1">&#39;::/0&#39;</span><span class="p">,</span>
                       <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Schema_MobileNetworkPrefixOption&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Make MH mobile network prefix option.</span>
@@ -2671,9 +2671,9 @@
             <span class="n">length</span><span class="o">=</span><span class="mi">18</span><span class="p">,</span>
             <span class="n">prefix_length</span><span class="o">=</span><span class="n">prefix_length</span><span class="p">,</span>
             <span class="n">prefix</span><span class="o">=</span><span class="n">prefix_addr</span><span class="p">,</span>
-        <span class="p">)</span>
+        <span class="p">)</span></div>
 
-    <span class="k">def</span> <span class="nf">_make_opt_lla</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span><span class="p">,</span> <span class="n">option</span><span class="p">:</span> <span class="s1">&#39;Optional[Data_LinkLayerAddressOption]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+<div class="viewcode-block" id="MH._make_opt_lla"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.internet.mh.MH._make_opt_lla">[docs]</a>    <span class="k">def</span> <span class="nf">_make_opt_lla</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span><span class="p">,</span> <span class="n">option</span><span class="p">:</span> <span class="s1">&#39;Optional[Data_LinkLayerAddressOption]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
                       <span class="n">address</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">&#39;&#39;</span><span class="p">,</span>
                       <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Schema_LinkLayerAddressOption&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Make MH link-layer address option.</span>
@@ -2696,9 +2696,9 @@
             <span class="n">length</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">address</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span>
             <span class="n">code</span><span class="o">=</span><span class="n">Enum_LLACode</span><span class="o">.</span><span class="n">MH</span><span class="p">,</span>  <span class="c1"># type: ignore[arg-type]</span>
             <span class="n">lla</span><span class="o">=</span><span class="n">address</span><span class="p">,</span>
-        <span class="p">)</span>
+        <span class="p">)</span></div>
 
-    <span class="k">def</span> <span class="nf">_make_opt_mn_id</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span><span class="p">,</span> <span class="n">option</span><span class="p">:</span> <span class="s1">&#39;Optional[Data_MNIDOption]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+<div class="viewcode-block" id="MH._make_opt_mn_id"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.internet.mh.MH._make_opt_mn_id">[docs]</a>    <span class="k">def</span> <span class="nf">_make_opt_mn_id</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span><span class="p">,</span> <span class="n">option</span><span class="p">:</span> <span class="s1">&#39;Optional[Data_MNIDOption]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
                        <span class="n">subtype</span><span class="p">:</span> <span class="s1">&#39;Enum_MNIDSubtype | StdlibEnum | AenumEnum | str | int&#39;</span> <span class="o">=</span> <span class="n">Enum_MNIDSubtype</span><span class="o">.</span><span class="n">IPv6_Address</span><span class="p">,</span>
                        <span class="n">subtype_default</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                        <span class="n">subtype_namespace</span><span class="p">:</span> <span class="s1">&#39;Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># pylint: disable=line-too-long</span>
@@ -2740,9 +2740,9 @@
             <span class="n">length</span><span class="o">=</span><span class="mi">1</span> <span class="o">+</span> <span class="n">id_len</span><span class="p">,</span>
             <span class="n">subtype</span><span class="o">=</span><span class="n">subtype_val</span><span class="p">,</span>
             <span class="n">identifier</span><span class="o">=</span><span class="n">identifier</span><span class="p">,</span>
-        <span class="p">)</span>
+        <span class="p">)</span></div>
 
-    <span class="k">def</span> <span class="nf">_make_opt_auth</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span><span class="p">,</span> <span class="n">option</span><span class="p">:</span> <span class="s1">&#39;Optional[Data_AuthOption]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+<div class="viewcode-block" id="MH._make_opt_auth"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.internet.mh.MH._make_opt_auth">[docs]</a>    <span class="k">def</span> <span class="nf">_make_opt_auth</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span><span class="p">,</span> <span class="n">option</span><span class="p">:</span> <span class="s1">&#39;Optional[Data_AuthOption]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
                        <span class="n">subtype</span><span class="p">:</span> <span class="s1">&#39;Enum_AuthSubtype | StdlibEnum | AenumEnum | str | int&#39;</span> <span class="o">=</span> <span class="n">Enum_AuthSubtype</span><span class="o">.</span><span class="n">MN_HA</span><span class="p">,</span>
                        <span class="n">subtype_default</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                        <span class="n">subtype_namespace</span><span class="p">:</span> <span class="s1">&#39;Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># pylint: disable=line-too-long</span>
@@ -2784,9 +2784,9 @@
             <span class="n">subtype</span><span class="o">=</span><span class="n">subtype_val</span><span class="p">,</span>
             <span class="n">spi</span><span class="o">=</span><span class="n">spi</span><span class="p">,</span>
             <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span>
-        <span class="p">)</span>
+        <span class="p">)</span></div>
 
-    <span class="k">def</span> <span class="nf">_make_opt_mesg_id</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span><span class="p">,</span> <span class="n">option</span><span class="p">:</span> <span class="s1">&#39;Optional[Data_MesgIDOption]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+<div class="viewcode-block" id="MH._make_opt_mesg_id"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.internet.mh.MH._make_opt_mesg_id">[docs]</a>    <span class="k">def</span> <span class="nf">_make_opt_mesg_id</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span><span class="p">,</span> <span class="n">option</span><span class="p">:</span> <span class="s1">&#39;Optional[Data_MesgIDOption]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
                           <span class="n">timestamp</span><span class="p">:</span> <span class="s1">&#39;Optional[NTPTimestamp]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                           <span class="n">interval</span><span class="p">:</span> <span class="s1">&#39;Optional[dt_type]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                           <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Schema_MesgIDOption&#39;</span><span class="p">:</span>
@@ -2821,9 +2821,9 @@
             <span class="n">length</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span>
             <span class="n">seconds</span><span class="o">=</span><span class="n">timestamp</span><span class="o">.</span><span class="n">seconds</span><span class="p">,</span>
             <span class="n">fraction</span><span class="o">=</span><span class="n">timestamp</span><span class="o">.</span><span class="n">fraction</span><span class="p">,</span>
-        <span class="p">)</span>
+        <span class="p">)</span></div>
 
-    <span class="k">def</span> <span class="nf">_make_opt_cga_pr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span><span class="p">,</span> <span class="n">option</span><span class="p">:</span> <span class="s1">&#39;Optional[Data_CGAParametersRequestOption]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<div class="viewcode-block" id="MH._make_opt_cga_pr"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.internet.mh.MH._make_opt_cga_pr">[docs]</a>    <span class="k">def</span> <span class="nf">_make_opt_cga_pr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span><span class="p">,</span> <span class="n">option</span><span class="p">:</span> <span class="s1">&#39;Optional[Data_CGAParametersRequestOption]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                          <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Schema_CGAParametersRequestOption&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Make MH CGA parameters request option.</span>
 
@@ -2839,9 +2839,9 @@
         <span class="k">return</span> <span class="n">Schema_CGAParametersRequestOption</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="nb">type</span><span class="p">,</span>
             <span class="n">length</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
-        <span class="p">)</span>
+        <span class="p">)</span></div>
 
-    <span class="k">def</span> <span class="nf">_make_opt_cga_param</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span><span class="p">,</span> <span class="n">option</span><span class="p">:</span> <span class="s1">&#39;Optional[Data_CGAParametersOption]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+<div class="viewcode-block" id="MH._make_opt_cga_param"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.internet.mh.MH._make_opt_cga_param">[docs]</a>    <span class="k">def</span> <span class="nf">_make_opt_cga_param</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span><span class="p">,</span> <span class="n">option</span><span class="p">:</span> <span class="s1">&#39;Optional[Data_CGAParametersOption]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
                             <span class="n">parameters</span><span class="p">:</span> <span class="s1">&#39;Optional[list[Schema_CGAParameter | Data_CGAParameter | dict[str, Any] | bytes]]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                             <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Schema_CGAParametersOption&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Make MH CGA paramters option.</span>
@@ -2890,9 +2890,9 @@
             <span class="nb">type</span><span class="o">=</span><span class="nb">type</span><span class="p">,</span>
             <span class="n">length</span><span class="o">=</span><span class="n">length</span><span class="p">,</span>
             <span class="n">parameters</span><span class="o">=</span><span class="n">param</span><span class="p">,</span>
-        <span class="p">)</span>
+        <span class="p">)</span></div>
 
-    <span class="k">def</span> <span class="nf">_make_opt_signature</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span><span class="p">,</span> <span class="n">option</span><span class="p">:</span> <span class="s1">&#39;Optional[Data_SignatureOption]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+<div class="viewcode-block" id="MH._make_opt_signature"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.internet.mh.MH._make_opt_signature">[docs]</a>    <span class="k">def</span> <span class="nf">_make_opt_signature</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span><span class="p">,</span> <span class="n">option</span><span class="p">:</span> <span class="s1">&#39;Optional[Data_SignatureOption]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
                             <span class="n">signature</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">&#39;&#39;</span><span class="p">,</span>
                             <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Schema_SignatureOption&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Make MH signature option.</span>
@@ -2914,9 +2914,9 @@
             <span class="nb">type</span><span class="o">=</span><span class="nb">type</span><span class="p">,</span>
             <span class="n">length</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">signature</span><span class="p">),</span>
             <span class="n">signature</span><span class="o">=</span><span class="n">signature</span><span class="p">,</span>
-        <span class="p">)</span>
+        <span class="p">)</span></div>
 
-    <span class="k">def</span> <span class="nf">_make_opt_phkt</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span><span class="p">,</span> <span class="n">option</span><span class="p">:</span> <span class="s1">&#39;Optional[Data_PermanentHomeKeygenTokenOption]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+<div class="viewcode-block" id="MH._make_opt_phkt"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.internet.mh.MH._make_opt_phkt">[docs]</a>    <span class="k">def</span> <span class="nf">_make_opt_phkt</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span><span class="p">,</span> <span class="n">option</span><span class="p">:</span> <span class="s1">&#39;Optional[Data_PermanentHomeKeygenTokenOption]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
                        <span class="n">token</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">&#39;&#39;</span><span class="p">,</span>
                        <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Schema_PermanentHomeKeygenTokenOption&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Make MH permanent home keygen token option.</span>
@@ -2938,9 +2938,9 @@
             <span class="nb">type</span><span class="o">=</span><span class="nb">type</span><span class="p">,</span>
             <span class="n">length</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">token</span><span class="p">),</span>
             <span class="n">token</span><span class="o">=</span><span class="n">token</span><span class="p">,</span>
-        <span class="p">)</span>
+        <span class="p">)</span></div>
 
-    <span class="k">def</span> <span class="nf">_make_opt_ct_init</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span><span class="p">,</span> <span class="n">option</span><span class="p">:</span> <span class="s1">&#39;Optional[Data_CareofTestInitOption]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<div class="viewcode-block" id="MH._make_opt_ct_init"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.internet.mh.MH._make_opt_ct_init">[docs]</a>    <span class="k">def</span> <span class="nf">_make_opt_ct_init</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span><span class="p">,</span> <span class="n">option</span><span class="p">:</span> <span class="s1">&#39;Optional[Data_CareofTestInitOption]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                           <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Schema_CareofTestInitOption&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Make MH Care-of Test Init option.</span>
 
@@ -2956,9 +2956,9 @@
         <span class="k">return</span> <span class="n">Schema_CareofTestInitOption</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="nb">type</span><span class="p">,</span>
             <span class="n">length</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
-        <span class="p">)</span>
+        <span class="p">)</span></div>
 
-    <span class="k">def</span> <span class="nf">_make_opt_ct</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span><span class="p">,</span> <span class="n">option</span><span class="p">:</span> <span class="s1">&#39;Optional[Data_CareofTestOption]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<div class="viewcode-block" id="MH._make_opt_ct"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.internet.mh.MH._make_opt_ct">[docs]</a>    <span class="k">def</span> <span class="nf">_make_opt_ct</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_Option&#39;</span><span class="p">,</span> <span class="n">option</span><span class="p">:</span> <span class="s1">&#39;Optional[Data_CareofTestOption]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                      <span class="n">token</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">&#39;</span><span class="se">\x00\x00\x00\x00\x00\x00\x00\x00</span><span class="s1">&#39;</span><span class="p">,</span>
                      <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Schema_CareofTestOption&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Make MH Care-of Test option.</span>
@@ -2980,7 +2980,7 @@
             <span class="nb">type</span><span class="o">=</span><span class="nb">type</span><span class="p">,</span>
             <span class="n">length</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span>
             <span class="n">token</span><span class="o">=</span><span class="n">token</span><span class="p">,</span>
-        <span class="p">)</span>
+        <span class="p">)</span></div>
 
     <span class="c1"># TODO: Implement other options.</span>
 

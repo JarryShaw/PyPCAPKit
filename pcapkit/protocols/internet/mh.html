@@ -366,7 +366,7 @@
 <p><a class="reference internal" href="#module-pcapkit.protocols.internet.mh" title="pcapkit.protocols.internet.mh"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.internet.mh</span></code></a> contains
 <a class="reference internal" href="#pcapkit.protocols.internet.mh.MH" title="pcapkit.protocols.internet.mh.MH"><code class="xref py py-class docutils literal notranslate"><span class="pre">MH</span></code></a> only,
 which implements extractor for Mobility Header
-(MH) <a class="footnote-reference brackets" href="#id4" id="id1" role="doc-noteref"><span class="fn-bracket">[</span>*<span class="fn-bracket">]</span></a>, whose structure is described as below:</p>
+(MH) <a class="footnote-reference brackets" href="#id6" id="id1" role="doc-noteref"><span class="fn-bracket">[</span>*<span class="fn-bracket">]</span></a>, whose structure is described as below:</p>
 <div class="table-wrapper docutils container">
 <table class="docutils align-default">
 <thead>
@@ -479,72 +479,72 @@ attribute:</p>
 </thead>
 <tbody>
 <tr class="row-even"><td><p><a class="reference internal" href="../../const/mh.html#pcapkit.const.mh.option.Option.Pad1" title="pcapkit.const.mh.option.Option.Pad1"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Pad1</span></code></a></p></td>
-<td><p><code class="xref py py-meth docutils literal notranslate"><span class="pre">_read_opt_pad()</span></code></p></td>
-<td><p><code class="xref py py-meth docutils literal notranslate"><span class="pre">_make_opt_pad()</span></code></p></td>
+<td><p><a class="reference internal" href="#id0" title="pcapkit.protocols.internet.mh.MH._read_opt_pad"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_read_opt_pad()</span></code></a></p></td>
+<td><p><a class="reference internal" href="#id3" title="pcapkit.protocols.internet.mh.MH._make_opt_pad"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_make_opt_pad()</span></code></a></p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="../../const/mh.html#pcapkit.const.mh.option.Option.PadN" title="pcapkit.const.mh.option.Option.PadN"><code class="xref py py-attr docutils literal notranslate"><span class="pre">PadN</span></code></a></p></td>
-<td><p><code class="xref py py-meth docutils literal notranslate"><span class="pre">_read_opt_pad()</span></code></p></td>
-<td><p><code class="xref py py-meth docutils literal notranslate"><span class="pre">_make_opt_pad()</span></code></p></td>
+<td><p><a class="reference internal" href="#id0" title="pcapkit.protocols.internet.mh.MH._read_opt_pad"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_read_opt_pad()</span></code></a></p></td>
+<td><p><a class="reference internal" href="#id3" title="pcapkit.protocols.internet.mh.MH._make_opt_pad"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_make_opt_pad()</span></code></a></p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="../../const/mh.html#pcapkit.const.mh.option.Option.Binding_Refresh_Advice" title="pcapkit.const.mh.option.Option.Binding_Refresh_Advice"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Binding_Refresh_Advice</span></code></a></p></td>
-<td><p><code class="xref py py-meth docutils literal notranslate"><span class="pre">_read_opt_bra()</span></code></p></td>
-<td><p><code class="xref py py-meth docutils literal notranslate"><span class="pre">_make_opt_bra()</span></code></p></td>
+<td><p><a class="reference internal" href="#pcapkit.protocols.internet.mh.MH._read_opt_bra" title="pcapkit.protocols.internet.mh.MH._read_opt_bra"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_read_opt_bra()</span></code></a></p></td>
+<td><p><a class="reference internal" href="#pcapkit.protocols.internet.mh.MH._make_opt_bra" title="pcapkit.protocols.internet.mh.MH._make_opt_bra"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_make_opt_bra()</span></code></a></p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="../../const/mh.html#pcapkit.const.mh.option.Option.Alternate_Care_of_Address" title="pcapkit.const.mh.option.Option.Alternate_Care_of_Address"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Alternate_Care_of_Address</span></code></a></p></td>
-<td><p><code class="xref py py-meth docutils literal notranslate"><span class="pre">_read_opt_aca()</span></code></p></td>
-<td><p><code class="xref py py-meth docutils literal notranslate"><span class="pre">_make_opt_aca()</span></code></p></td>
+<td><p><a class="reference internal" href="#pcapkit.protocols.internet.mh.MH._read_opt_aca" title="pcapkit.protocols.internet.mh.MH._read_opt_aca"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_read_opt_aca()</span></code></a></p></td>
+<td><p><a class="reference internal" href="#pcapkit.protocols.internet.mh.MH._make_opt_aca" title="pcapkit.protocols.internet.mh.MH._make_opt_aca"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_make_opt_aca()</span></code></a></p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="../../const/mh.html#pcapkit.const.mh.option.Option.Nonce_Indices" title="pcapkit.const.mh.option.Option.Nonce_Indices"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Nonce_Indices</span></code></a></p></td>
-<td><p><code class="xref py py-meth docutils literal notranslate"><span class="pre">_read_opt_ni()</span></code></p></td>
-<td><p><code class="xref py py-meth docutils literal notranslate"><span class="pre">_make_opt_ni()</span></code></p></td>
+<td><p><a class="reference internal" href="#pcapkit.protocols.internet.mh.MH._read_opt_ni" title="pcapkit.protocols.internet.mh.MH._read_opt_ni"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_read_opt_ni()</span></code></a></p></td>
+<td><p><a class="reference internal" href="#pcapkit.protocols.internet.mh.MH._make_opt_ni" title="pcapkit.protocols.internet.mh.MH._make_opt_ni"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_make_opt_ni()</span></code></a></p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="../../const/mh.html#pcapkit.const.mh.option.Option.Authorization_Data" title="pcapkit.const.mh.option.Option.Authorization_Data"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Authorization_Data</span></code></a></p></td>
-<td><p><code class="xref py py-meth docutils literal notranslate"><span class="pre">_read_opt_bad()</span></code></p></td>
-<td><p><code class="xref py py-meth docutils literal notranslate"><span class="pre">_make_opt_bad()</span></code></p></td>
+<td><p><a class="reference internal" href="#pcapkit.protocols.internet.mh.MH._read_opt_bad" title="pcapkit.protocols.internet.mh.MH._read_opt_bad"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_read_opt_bad()</span></code></a></p></td>
+<td><p><a class="reference internal" href="#pcapkit.protocols.internet.mh.MH._make_opt_bad" title="pcapkit.protocols.internet.mh.MH._make_opt_bad"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_make_opt_bad()</span></code></a></p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="../../const/mh.html#pcapkit.const.mh.option.Option.Mobile_Network_Prefix_Option" title="pcapkit.const.mh.option.Option.Mobile_Network_Prefix_Option"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Mobile_Network_Prefix_Option</span></code></a></p></td>
-<td><p><code class="xref py py-meth docutils literal notranslate"><span class="pre">_read_opt_mnp()</span></code></p></td>
-<td><p><code class="xref py py-meth docutils literal notranslate"><span class="pre">_make_opt_mnp()</span></code></p></td>
+<td><p><a class="reference internal" href="#pcapkit.protocols.internet.mh.MH._read_opt_mnp" title="pcapkit.protocols.internet.mh.MH._read_opt_mnp"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_read_opt_mnp()</span></code></a></p></td>
+<td><p><a class="reference internal" href="#pcapkit.protocols.internet.mh.MH._make_opt_mnp" title="pcapkit.protocols.internet.mh.MH._make_opt_mnp"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_make_opt_mnp()</span></code></a></p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="../../const/mh.html#pcapkit.const.mh.option.Option.Mobility_Header_Link_Layer_Address_option" title="pcapkit.const.mh.option.Option.Mobility_Header_Link_Layer_Address_option"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Mobility_Header_Link_Layer_Address_option</span></code></a></p></td>
-<td><p><code class="xref py py-meth docutils literal notranslate"><span class="pre">_read_opt_lla()</span></code></p></td>
-<td><p><code class="xref py py-meth docutils literal notranslate"><span class="pre">_make_opt_lla()</span></code></p></td>
+<td><p><a class="reference internal" href="#pcapkit.protocols.internet.mh.MH._read_opt_lla" title="pcapkit.protocols.internet.mh.MH._read_opt_lla"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_read_opt_lla()</span></code></a></p></td>
+<td><p><a class="reference internal" href="#pcapkit.protocols.internet.mh.MH._make_opt_lla" title="pcapkit.protocols.internet.mh.MH._make_opt_lla"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_make_opt_lla()</span></code></a></p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="../../const/mh.html#pcapkit.const.mh.option.Option.MN_ID_OPTION_TYPE" title="pcapkit.const.mh.option.Option.MN_ID_OPTION_TYPE"><code class="xref py py-attr docutils literal notranslate"><span class="pre">MN_ID_OPTION_TYPE</span></code></a></p></td>
-<td><p><code class="xref py py-meth docutils literal notranslate"><span class="pre">_read_opt_mn_id()</span></code></p></td>
-<td><p><code class="xref py py-meth docutils literal notranslate"><span class="pre">_make_opt_mn_id()</span></code></p></td>
+<td><p><a class="reference internal" href="#pcapkit.protocols.internet.mh.MH._read_opt_mn_id" title="pcapkit.protocols.internet.mh.MH._read_opt_mn_id"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_read_opt_mn_id()</span></code></a></p></td>
+<td><p><a class="reference internal" href="#pcapkit.protocols.internet.mh.MH._make_opt_mn_id" title="pcapkit.protocols.internet.mh.MH._make_opt_mn_id"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_make_opt_mn_id()</span></code></a></p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="../../const/mh.html#pcapkit.const.mh.option.Option.AUTH_OPTION_TYPE" title="pcapkit.const.mh.option.Option.AUTH_OPTION_TYPE"><code class="xref py py-attr docutils literal notranslate"><span class="pre">AUTH_OPTION_TYPE</span></code></a></p></td>
-<td><p><code class="xref py py-meth docutils literal notranslate"><span class="pre">_read_opt_auth()</span></code></p></td>
-<td><p><code class="xref py py-meth docutils literal notranslate"><span class="pre">_make_opt_auth()</span></code></p></td>
+<td><p><a class="reference internal" href="#pcapkit.protocols.internet.mh.MH._read_opt_auth" title="pcapkit.protocols.internet.mh.MH._read_opt_auth"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_read_opt_auth()</span></code></a></p></td>
+<td><p><a class="reference internal" href="#pcapkit.protocols.internet.mh.MH._make_opt_auth" title="pcapkit.protocols.internet.mh.MH._make_opt_auth"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_make_opt_auth()</span></code></a></p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="../../const/mh.html#pcapkit.const.mh.option.Option.MESG_ID_OPTION_TYPE" title="pcapkit.const.mh.option.Option.MESG_ID_OPTION_TYPE"><code class="xref py py-attr docutils literal notranslate"><span class="pre">MESG_ID_OPTION_TYPE</span></code></a></p></td>
-<td><p><code class="xref py py-meth docutils literal notranslate"><span class="pre">_read_opt_mesg_id()</span></code></p></td>
-<td><p><code class="xref py py-meth docutils literal notranslate"><span class="pre">_make_opt_mesg_id()</span></code></p></td>
+<td><p><a class="reference internal" href="#pcapkit.protocols.internet.mh.MH._read_opt_mesg_id" title="pcapkit.protocols.internet.mh.MH._read_opt_mesg_id"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_read_opt_mesg_id()</span></code></a></p></td>
+<td><p><a class="reference internal" href="#pcapkit.protocols.internet.mh.MH._make_opt_mesg_id" title="pcapkit.protocols.internet.mh.MH._make_opt_mesg_id"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_make_opt_mesg_id()</span></code></a></p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="../../const/mh.html#pcapkit.const.mh.option.Option.CGA_Parameters_Request" title="pcapkit.const.mh.option.Option.CGA_Parameters_Request"><code class="xref py py-attr docutils literal notranslate"><span class="pre">CGA_Parameters_Request</span></code></a></p></td>
-<td><p><code class="xref py py-meth docutils literal notranslate"><span class="pre">_read_opt_cga_pr()</span></code></p></td>
-<td><p><code class="xref py py-meth docutils literal notranslate"><span class="pre">_make_opt_cga_pr()</span></code></p></td>
+<td><p><a class="reference internal" href="#pcapkit.protocols.internet.mh.MH._read_opt_cga_pr" title="pcapkit.protocols.internet.mh.MH._read_opt_cga_pr"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_read_opt_cga_pr()</span></code></a></p></td>
+<td><p><a class="reference internal" href="#pcapkit.protocols.internet.mh.MH._make_opt_cga_pr" title="pcapkit.protocols.internet.mh.MH._make_opt_cga_pr"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_make_opt_cga_pr()</span></code></a></p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="../../const/mh.html#pcapkit.const.mh.option.Option.CGA_Parameters" title="pcapkit.const.mh.option.Option.CGA_Parameters"><code class="xref py py-attr docutils literal notranslate"><span class="pre">CGA_Parameters</span></code></a></p></td>
-<td><p><code class="xref py py-meth docutils literal notranslate"><span class="pre">_read_opt_cga_param()</span></code></p></td>
-<td><p><code class="xref py py-meth docutils literal notranslate"><span class="pre">_make_opt_cga_param()</span></code></p></td>
+<td><p><a class="reference internal" href="#pcapkit.protocols.internet.mh.MH._read_opt_cga_param" title="pcapkit.protocols.internet.mh.MH._read_opt_cga_param"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_read_opt_cga_param()</span></code></a></p></td>
+<td><p><a class="reference internal" href="#pcapkit.protocols.internet.mh.MH._make_opt_cga_param" title="pcapkit.protocols.internet.mh.MH._make_opt_cga_param"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_make_opt_cga_param()</span></code></a></p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="../../const/mh.html#pcapkit.const.mh.option.Option.Signature" title="pcapkit.const.mh.option.Option.Signature"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Signature</span></code></a></p></td>
-<td><p><code class="xref py py-meth docutils literal notranslate"><span class="pre">_read_opt_signature()</span></code></p></td>
-<td><p><code class="xref py py-meth docutils literal notranslate"><span class="pre">_make_opt_signature()</span></code></p></td>
+<td><p><a class="reference internal" href="#pcapkit.protocols.internet.mh.MH._read_opt_signature" title="pcapkit.protocols.internet.mh.MH._read_opt_signature"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_read_opt_signature()</span></code></a></p></td>
+<td><p><a class="reference internal" href="#pcapkit.protocols.internet.mh.MH._make_opt_signature" title="pcapkit.protocols.internet.mh.MH._make_opt_signature"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_make_opt_signature()</span></code></a></p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="../../const/mh.html#pcapkit.const.mh.option.Option.Permanent_Home_Keygen_Token" title="pcapkit.const.mh.option.Option.Permanent_Home_Keygen_Token"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Permanent_Home_Keygen_Token</span></code></a></p></td>
-<td><p><code class="xref py py-meth docutils literal notranslate"><span class="pre">_read_opt_phkt()</span></code></p></td>
-<td><p><code class="xref py py-meth docutils literal notranslate"><span class="pre">_make_opt_phkt()</span></code></p></td>
+<td><p><a class="reference internal" href="#pcapkit.protocols.internet.mh.MH._read_opt_phkt" title="pcapkit.protocols.internet.mh.MH._read_opt_phkt"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_read_opt_phkt()</span></code></a></p></td>
+<td><p><a class="reference internal" href="#pcapkit.protocols.internet.mh.MH._make_opt_phkt" title="pcapkit.protocols.internet.mh.MH._make_opt_phkt"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_make_opt_phkt()</span></code></a></p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="../../const/mh.html#pcapkit.const.mh.option.Option.Care_of_Test_Init" title="pcapkit.const.mh.option.Option.Care_of_Test_Init"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Care_of_Test_Init</span></code></a></p></td>
-<td><p><code class="xref py py-meth docutils literal notranslate"><span class="pre">_read_opt_ct_init()</span></code></p></td>
-<td><p><code class="xref py py-meth docutils literal notranslate"><span class="pre">_make_opt_ct_init()</span></code></p></td>
+<td><p><a class="reference internal" href="#pcapkit.protocols.internet.mh.MH._read_opt_ct_init" title="pcapkit.protocols.internet.mh.MH._read_opt_ct_init"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_read_opt_ct_init()</span></code></a></p></td>
+<td><p><a class="reference internal" href="#pcapkit.protocols.internet.mh.MH._make_opt_ct_init" title="pcapkit.protocols.internet.mh.MH._make_opt_ct_init"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_make_opt_ct_init()</span></code></a></p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="../../const/mh.html#pcapkit.const.mh.option.Option.Care_of_Test" title="pcapkit.const.mh.option.Option.Care_of_Test"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Care_of_Test</span></code></a></p></td>
-<td><p><code class="xref py py-meth docutils literal notranslate"><span class="pre">_read_opt_ct()</span></code></p></td>
-<td><p><code class="xref py py-meth docutils literal notranslate"><span class="pre">_make_opt_ct()</span></code></p></td>
+<td><p><a class="reference internal" href="#pcapkit.protocols.internet.mh.MH._read_opt_ct" title="pcapkit.protocols.internet.mh.MH._read_opt_ct"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_read_opt_ct()</span></code></a></p></td>
+<td><p><a class="reference internal" href="#pcapkit.protocols.internet.mh.MH._make_opt_ct" title="pcapkit.protocols.internet.mh.MH._make_opt_ct"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_make_opt_ct()</span></code></a></p></td>
 </tr>
 </tbody>
 </table>
@@ -1330,6 +1330,568 @@ attribute:</p>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.protocols.internet.mh.MH._read_opt_pad">
+<span class="sig-name descname"><span class="pre">_read_opt_pad</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">schema</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">options</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/internet/mh.html#MH._read_opt_pad"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.mh.MH._read_opt_pad" title="Permalink to this definition">#</a></dt>
+<dd><p>Read MH padding option.</p>
+<p>Structure of MH padding option [<span class="target" id="index-10"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6275.html"><strong>RFC 6275</strong></a>]:</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">Pad1</span></code> option:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span> 0
+ 0 1 2 3 4 5 6 7
++-+-+-+-+-+-+-+-+
+|   Type = 0    |
++-+-+-+-+-+-+-+-+
+</pre></div>
+</div>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">PadN</span></code> option:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span> 0                   1
+ 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+- - - - - - - - -
+|   Type = 1    | Option Length | Option Data
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+- - - - - - - - -
+</pre></div>
+</div>
+</li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>schema</strong> (<a class="reference internal" href="#pcapkit.protocols.schema.internet.mh.PadOption" title="pcapkit.protocols.schema.internet.mh.PadOption"><code class="xref py py-class docutils literal notranslate"><span class="pre">PadOption</span></code></a>) – Parsed option schema.</p></li>
+<li><p><strong>options</strong> (<a class="reference internal" href="../../corekit/multidict.html#pcapkit.corekit.multidict.OrderedMultiDict" title="pcapkit.corekit.multidict.OrderedMultiDict"><code class="xref py py-class docutils literal notranslate"><span class="pre">OrderedMultiDict</span></code></a>[<a class="reference internal" href="../../const/mh.html#pcapkit.const.mh.option.Option" title="pcapkit.const.mh.option.Option"><code class="xref py py-class docutils literal notranslate"><span class="pre">Option</span></code></a>, <a class="reference internal" href="#pcapkit.protocols.data.internet.mh.Option" title="pcapkit.protocols.data.internet.mh.Option"><code class="xref py py-class docutils literal notranslate"><span class="pre">Option</span></code></a>]) – Parsed MH options.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#pcapkit.protocols.data.internet.mh.PadOption" title="pcapkit.protocols.data.internet.mh.PadOption"><code class="xref py py-class docutils literal notranslate"><span class="pre">PadOption</span></code></a></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Constructed option data.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="id0">
+<span class="sig-name descname"><span class="pre">_read_opt_pad</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">schema</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">options</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/internet/mh.html#MH._read_opt_pad"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id0" title="Permalink to this definition">#</a></dt>
+<dd><p>Read MH padding option.</p>
+<p>Structure of MH padding option [<span class="target" id="index-11"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6275.html"><strong>RFC 6275</strong></a>]:</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">Pad1</span></code> option:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span> 0
+ 0 1 2 3 4 5 6 7
++-+-+-+-+-+-+-+-+
+|   Type = 0    |
++-+-+-+-+-+-+-+-+
+</pre></div>
+</div>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">PadN</span></code> option:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span> 0                   1
+ 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+- - - - - - - - -
+|   Type = 1    | Option Length | Option Data
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+- - - - - - - - -
+</pre></div>
+</div>
+</li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>schema</strong> (<a class="reference internal" href="#pcapkit.protocols.schema.internet.mh.PadOption" title="pcapkit.protocols.schema.internet.mh.PadOption"><code class="xref py py-class docutils literal notranslate"><span class="pre">PadOption</span></code></a>) – Parsed option schema.</p></li>
+<li><p><strong>options</strong> (<a class="reference internal" href="../../corekit/multidict.html#pcapkit.corekit.multidict.OrderedMultiDict" title="pcapkit.corekit.multidict.OrderedMultiDict"><code class="xref py py-class docutils literal notranslate"><span class="pre">OrderedMultiDict</span></code></a>[<a class="reference internal" href="../../const/mh.html#pcapkit.const.mh.option.Option" title="pcapkit.const.mh.option.Option"><code class="xref py py-class docutils literal notranslate"><span class="pre">Option</span></code></a>, <a class="reference internal" href="#pcapkit.protocols.data.internet.mh.Option" title="pcapkit.protocols.data.internet.mh.Option"><code class="xref py py-class docutils literal notranslate"><span class="pre">Option</span></code></a>]) – Parsed MH options.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#pcapkit.protocols.data.internet.mh.PadOption" title="pcapkit.protocols.data.internet.mh.PadOption"><code class="xref py py-class docutils literal notranslate"><span class="pre">PadOption</span></code></a></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Constructed option data.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.protocols.internet.mh.MH._read_opt_bra">
+<span class="sig-name descname"><span class="pre">_read_opt_bra</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">schema</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">options</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/internet/mh.html#MH._read_opt_bra"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.mh.MH._read_opt_bra" title="Permalink to this definition">#</a></dt>
+<dd><p>Read MH binding refresh advice option.</p>
+<p>Structure of MH Binding Refresh Advice option [<span class="target" id="index-12"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6275.html"><strong>RFC 6275</strong></a>]:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span> 0                   1                   2                   3
+ 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+                                +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+                                |   Type = 2    |   Length = 2  |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|       Refresh Interval        |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>schema</strong> (<a class="reference internal" href="#pcapkit.protocols.schema.internet.mh.BindRefreshAdviceOption" title="pcapkit.protocols.schema.internet.mh.BindRefreshAdviceOption"><code class="xref py py-class docutils literal notranslate"><span class="pre">BindRefreshAdviceOption</span></code></a>) – Parsed option schema.</p></li>
+<li><p><strong>options</strong> (<a class="reference internal" href="../../corekit/multidict.html#pcapkit.corekit.multidict.OrderedMultiDict" title="pcapkit.corekit.multidict.OrderedMultiDict"><code class="xref py py-class docutils literal notranslate"><span class="pre">OrderedMultiDict</span></code></a>[<a class="reference internal" href="../../const/mh.html#pcapkit.const.mh.option.Option" title="pcapkit.const.mh.option.Option"><code class="xref py py-class docutils literal notranslate"><span class="pre">Option</span></code></a>, <a class="reference internal" href="#pcapkit.protocols.data.internet.mh.Option" title="pcapkit.protocols.data.internet.mh.Option"><code class="xref py py-class docutils literal notranslate"><span class="pre">Option</span></code></a>]) – Parsed MH options.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#pcapkit.protocols.data.internet.mh.BindRefreshAdviceOption" title="pcapkit.protocols.data.internet.mh.BindRefreshAdviceOption"><code class="xref py py-class docutils literal notranslate"><span class="pre">BindRefreshAdviceOption</span></code></a></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Constructed option data.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.protocols.internet.mh.MH._read_opt_aca">
+<span class="sig-name descname"><span class="pre">_read_opt_aca</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">schema</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">options</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/internet/mh.html#MH._read_opt_aca"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.mh.MH._read_opt_aca" title="Permalink to this definition">#</a></dt>
+<dd><p>Read MH alternate care-of address option.</p>
+<p>Structure of MH Alternate Care-of Address option [<span class="target" id="index-13"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6275.html"><strong>RFC 6275</strong></a>]:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span> 0                   1                   2                   3
+ 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+                                +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+                                |   Type = 3    |  Length = 16  |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                                                               |
++                                                               +
+|                                                               |
++                   Alternate Care-of Address                   +
+|                                                               |
++                                                               +
+|                                                               |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>schema</strong> (<a class="reference internal" href="#pcapkit.protocols.schema.internet.mh.AlternateCareofAddressOption" title="pcapkit.protocols.schema.internet.mh.AlternateCareofAddressOption"><code class="xref py py-class docutils literal notranslate"><span class="pre">AlternateCareofAddressOption</span></code></a>) – Parsed option schema.</p></li>
+<li><p><strong>options</strong> (<a class="reference internal" href="../../corekit/multidict.html#pcapkit.corekit.multidict.OrderedMultiDict" title="pcapkit.corekit.multidict.OrderedMultiDict"><code class="xref py py-class docutils literal notranslate"><span class="pre">OrderedMultiDict</span></code></a>[<a class="reference internal" href="../../const/mh.html#pcapkit.const.mh.option.Option" title="pcapkit.const.mh.option.Option"><code class="xref py py-class docutils literal notranslate"><span class="pre">Option</span></code></a>, <a class="reference internal" href="#pcapkit.protocols.data.internet.mh.Option" title="pcapkit.protocols.data.internet.mh.Option"><code class="xref py py-class docutils literal notranslate"><span class="pre">Option</span></code></a>]) – Parsed MH options.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#pcapkit.protocols.data.internet.mh.AlternateCareofAddressOption" title="pcapkit.protocols.data.internet.mh.AlternateCareofAddressOption"><code class="xref py py-class docutils literal notranslate"><span class="pre">AlternateCareofAddressOption</span></code></a></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Constructed option data.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.protocols.internet.mh.MH._read_opt_ni">
+<span class="sig-name descname"><span class="pre">_read_opt_ni</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">schema</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">options</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/internet/mh.html#MH._read_opt_ni"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.mh.MH._read_opt_ni" title="Permalink to this definition">#</a></dt>
+<dd><p>Read MH nonce indices option.</p>
+<p>Structure of MH Nonce Indices option [<span class="target" id="index-14"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6275.html"><strong>RFC 6275</strong></a>]:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span> 0                   1                   2                   3
+ 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+                                +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+                                |   Type = 4    |   Length = 4  |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|         Home Nonce Index      |     Care-of Nonce Index       |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>schema</strong> (<a class="reference internal" href="#pcapkit.protocols.schema.internet.mh.NonceIndicesOption" title="pcapkit.protocols.schema.internet.mh.NonceIndicesOption"><code class="xref py py-class docutils literal notranslate"><span class="pre">NonceIndicesOption</span></code></a>) – Parsed option schema.</p></li>
+<li><p><strong>options</strong> (<a class="reference internal" href="../../corekit/multidict.html#pcapkit.corekit.multidict.OrderedMultiDict" title="pcapkit.corekit.multidict.OrderedMultiDict"><code class="xref py py-class docutils literal notranslate"><span class="pre">OrderedMultiDict</span></code></a>[<a class="reference internal" href="../../const/mh.html#pcapkit.const.mh.option.Option" title="pcapkit.const.mh.option.Option"><code class="xref py py-class docutils literal notranslate"><span class="pre">Option</span></code></a>, <a class="reference internal" href="#pcapkit.protocols.data.internet.mh.Option" title="pcapkit.protocols.data.internet.mh.Option"><code class="xref py py-class docutils literal notranslate"><span class="pre">Option</span></code></a>]) – Parsed MH options.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#pcapkit.protocols.data.internet.mh.NonceIndicesOption" title="pcapkit.protocols.data.internet.mh.NonceIndicesOption"><code class="xref py py-class docutils literal notranslate"><span class="pre">NonceIndicesOption</span></code></a></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Constructed option data.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.protocols.internet.mh.MH._read_opt_bad">
+<span class="sig-name descname"><span class="pre">_read_opt_bad</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">schema</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">options</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/internet/mh.html#MH._read_opt_bad"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.mh.MH._read_opt_bad" title="Permalink to this definition">#</a></dt>
+<dd><p>Read MH binding authorization data option.</p>
+<p>Structure of MH Binding Authorization Data option [<span class="target" id="index-15"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6275.html"><strong>RFC 6275</strong></a>]:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span> 0                   1                   2                   3
+ 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+                                +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+                                |   Type = 5    | Option Length |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                                                               |
++                                                               +
+|                         Authenticator                         |
++                                                               +
+|                                                               |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>schema</strong> (<a class="reference internal" href="#pcapkit.protocols.schema.internet.mh.BindingAuthorizationDataOption" title="pcapkit.protocols.schema.internet.mh.BindingAuthorizationDataOption"><code class="xref py py-class docutils literal notranslate"><span class="pre">BindingAuthorizationDataOption</span></code></a>) – Parsed option schema.</p></li>
+<li><p><strong>options</strong> (<a class="reference internal" href="../../corekit/multidict.html#pcapkit.corekit.multidict.OrderedMultiDict" title="pcapkit.corekit.multidict.OrderedMultiDict"><code class="xref py py-class docutils literal notranslate"><span class="pre">OrderedMultiDict</span></code></a>[<a class="reference internal" href="../../const/mh.html#pcapkit.const.mh.option.Option" title="pcapkit.const.mh.option.Option"><code class="xref py py-class docutils literal notranslate"><span class="pre">Option</span></code></a>, <a class="reference internal" href="#pcapkit.protocols.data.internet.mh.Option" title="pcapkit.protocols.data.internet.mh.Option"><code class="xref py py-class docutils literal notranslate"><span class="pre">Option</span></code></a>]) – Parsed MH options.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#pcapkit.protocols.data.internet.mh.BindingAuthorizationDataOption" title="pcapkit.protocols.data.internet.mh.BindingAuthorizationDataOption"><code class="xref py py-class docutils literal notranslate"><span class="pre">BindingAuthorizationDataOption</span></code></a></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Constructed option data.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.protocols.internet.mh.MH._read_opt_mnp">
+<span class="sig-name descname"><span class="pre">_read_opt_mnp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">schema</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">options</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/internet/mh.html#MH._read_opt_mnp"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.mh.MH._read_opt_mnp" title="Permalink to this definition">#</a></dt>
+<dd><p>Read MH mobile network prefix option.</p>
+<p>Structure of MH Mobile Network Prefix option [<span class="target" id="index-16"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3963.html"><strong>RFC 3963</strong></a>]:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span> 0                   1                   2                   3
+ 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|      Type     |   Length      |   Reserved    | Prefix Length |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                                                               |
++                                                               +
+|                                                               |
++                   Mobile Network Prefix                       +
+|                                                               |
++                                                               +
+|                                                               |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>schema</strong> (<a class="reference internal" href="#pcapkit.protocols.schema.internet.mh.MobileNetworkPrefixOption" title="pcapkit.protocols.schema.internet.mh.MobileNetworkPrefixOption"><code class="xref py py-class docutils literal notranslate"><span class="pre">MobileNetworkPrefixOption</span></code></a>) – Parsed option schema.</p></li>
+<li><p><strong>options</strong> (<a class="reference internal" href="../../corekit/multidict.html#pcapkit.corekit.multidict.OrderedMultiDict" title="pcapkit.corekit.multidict.OrderedMultiDict"><code class="xref py py-class docutils literal notranslate"><span class="pre">OrderedMultiDict</span></code></a>[<a class="reference internal" href="../../const/mh.html#pcapkit.const.mh.option.Option" title="pcapkit.const.mh.option.Option"><code class="xref py py-class docutils literal notranslate"><span class="pre">Option</span></code></a>, <a class="reference internal" href="#pcapkit.protocols.data.internet.mh.Option" title="pcapkit.protocols.data.internet.mh.Option"><code class="xref py py-class docutils literal notranslate"><span class="pre">Option</span></code></a>]) – Parsed MH options.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#pcapkit.protocols.data.internet.mh.MobileNetworkPrefixOption" title="pcapkit.protocols.data.internet.mh.MobileNetworkPrefixOption"><code class="xref py py-class docutils literal notranslate"><span class="pre">MobileNetworkPrefixOption</span></code></a></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Constructed option data.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.protocols.internet.mh.MH._read_opt_lla">
+<span class="sig-name descname"><span class="pre">_read_opt_lla</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">schema</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">options</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/internet/mh.html#MH._read_opt_lla"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.mh.MH._read_opt_lla" title="Permalink to this definition">#</a></dt>
+<dd><p>Read MH link-layer address (MH-LLA) option.</p>
+<p>Structure of MH Link-Layer Address option [<span class="target" id="index-17"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5568.html"><strong>RFC 5568</strong></a>]:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span> 0                   1                   2                   3
+ 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+                              +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+                              |     Type      |     Length    |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+| Option-Code   |                  LLA                     ....
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>schema</strong> (<a class="reference internal" href="#pcapkit.protocols.schema.internet.mh.LinkLayerAddressOption" title="pcapkit.protocols.schema.internet.mh.LinkLayerAddressOption"><code class="xref py py-class docutils literal notranslate"><span class="pre">LinkLayerAddressOption</span></code></a>) – Parsed option schema.</p></li>
+<li><p><strong>options</strong> (<a class="reference internal" href="../../corekit/multidict.html#pcapkit.corekit.multidict.OrderedMultiDict" title="pcapkit.corekit.multidict.OrderedMultiDict"><code class="xref py py-class docutils literal notranslate"><span class="pre">OrderedMultiDict</span></code></a>[<a class="reference internal" href="../../const/mh.html#pcapkit.const.mh.option.Option" title="pcapkit.const.mh.option.Option"><code class="xref py py-class docutils literal notranslate"><span class="pre">Option</span></code></a>, <a class="reference internal" href="#pcapkit.protocols.data.internet.mh.Option" title="pcapkit.protocols.data.internet.mh.Option"><code class="xref py py-class docutils literal notranslate"><span class="pre">Option</span></code></a>]) – Parsed MH options.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#pcapkit.protocols.data.internet.mh.LinkLayerAddressOption" title="pcapkit.protocols.data.internet.mh.LinkLayerAddressOption"><code class="xref py py-class docutils literal notranslate"><span class="pre">LinkLayerAddressOption</span></code></a></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Constructed option data.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.protocols.internet.mh.MH._read_opt_mn_id">
+<span class="sig-name descname"><span class="pre">_read_opt_mn_id</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">schema</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">options</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/internet/mh.html#MH._read_opt_mn_id"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.mh.MH._read_opt_mn_id" title="Permalink to this definition">#</a></dt>
+<dd><p>Read MH mobile node identifier option.</p>
+<p>Structure of MH Mobile Node Identifier option [<span class="target" id="index-18"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4283.html"><strong>RFC 4283</strong></a>]:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>0                   1                   2                   3
+0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+                                +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+                                |  Option Type  | Option Length |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|  Subtype      |          Identifier ...
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>schema</strong> (<a class="reference internal" href="#pcapkit.protocols.schema.internet.mh.MNIDOption" title="pcapkit.protocols.schema.internet.mh.MNIDOption"><code class="xref py py-class docutils literal notranslate"><span class="pre">MNIDOption</span></code></a>) – Parsed option schema.</p></li>
+<li><p><strong>options</strong> (<a class="reference internal" href="../../corekit/multidict.html#pcapkit.corekit.multidict.OrderedMultiDict" title="pcapkit.corekit.multidict.OrderedMultiDict"><code class="xref py py-class docutils literal notranslate"><span class="pre">OrderedMultiDict</span></code></a>[<a class="reference internal" href="../../const/mh.html#pcapkit.const.mh.option.Option" title="pcapkit.const.mh.option.Option"><code class="xref py py-class docutils literal notranslate"><span class="pre">Option</span></code></a>, <a class="reference internal" href="#pcapkit.protocols.data.internet.mh.Option" title="pcapkit.protocols.data.internet.mh.Option"><code class="xref py py-class docutils literal notranslate"><span class="pre">Option</span></code></a>]) – Parsed MH options.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#pcapkit.protocols.data.internet.mh.MNIDOption" title="pcapkit.protocols.data.internet.mh.MNIDOption"><code class="xref py py-class docutils literal notranslate"><span class="pre">MNIDOption</span></code></a></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Constructed option data.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.protocols.internet.mh.MH._read_opt_auth">
+<span class="sig-name descname"><span class="pre">_read_opt_auth</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">schema</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">options</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/internet/mh.html#MH._read_opt_auth"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.mh.MH._read_opt_auth" title="Permalink to this definition">#</a></dt>
+<dd><p>Read MH mobility message authentication option.</p>
+<p>Structure of MH Mobility Message Authentication option [<span class="target" id="index-19"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4285.html"><strong>RFC 4285</strong></a>]:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>0                   1                   2                   3
+0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+                +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+                |  Option Type  | Option Length |  Subtype      |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                  Mobility SPI                                 |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                  Authentication Data ....
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>schema</strong> (<a class="reference internal" href="#pcapkit.protocols.schema.internet.mh.AuthOption" title="pcapkit.protocols.schema.internet.mh.AuthOption"><code class="xref py py-class docutils literal notranslate"><span class="pre">AuthOption</span></code></a>) – Parsed option schema.</p></li>
+<li><p><strong>options</strong> (<a class="reference internal" href="../../corekit/multidict.html#pcapkit.corekit.multidict.OrderedMultiDict" title="pcapkit.corekit.multidict.OrderedMultiDict"><code class="xref py py-class docutils literal notranslate"><span class="pre">OrderedMultiDict</span></code></a>[<a class="reference internal" href="../../const/mh.html#pcapkit.const.mh.option.Option" title="pcapkit.const.mh.option.Option"><code class="xref py py-class docutils literal notranslate"><span class="pre">Option</span></code></a>, <a class="reference internal" href="#pcapkit.protocols.data.internet.mh.Option" title="pcapkit.protocols.data.internet.mh.Option"><code class="xref py py-class docutils literal notranslate"><span class="pre">Option</span></code></a>]) – Parsed MH options.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#pcapkit.protocols.data.internet.mh.AuthOption" title="pcapkit.protocols.data.internet.mh.AuthOption"><code class="xref py py-class docutils literal notranslate"><span class="pre">AuthOption</span></code></a></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Constructed option data.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.protocols.internet.mh.MH._read_opt_mesg_id">
+<span class="sig-name descname"><span class="pre">_read_opt_mesg_id</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">schema</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">options</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/internet/mh.html#MH._read_opt_mesg_id"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.mh.MH._read_opt_mesg_id" title="Permalink to this definition">#</a></dt>
+<dd><p>Read MH mobility message replay protection option.</p>
+<p>Structure of MH Mobility Message Replay Protection option [<span class="target" id="index-20"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4285.html"><strong>RFC 4285</strong></a>]:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>0                   1                   2                   3
+0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+                            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+                            |      Option Type  | Option Length |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                  Timestamp ...                                |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                  Timestamp                                    |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>schema</strong> (<a class="reference internal" href="#pcapkit.protocols.schema.internet.mh.MesgIDOption" title="pcapkit.protocols.schema.internet.mh.MesgIDOption"><code class="xref py py-class docutils literal notranslate"><span class="pre">MesgIDOption</span></code></a>) – Parsed option schema.</p></li>
+<li><p><strong>options</strong> (<a class="reference internal" href="../../corekit/multidict.html#pcapkit.corekit.multidict.OrderedMultiDict" title="pcapkit.corekit.multidict.OrderedMultiDict"><code class="xref py py-class docutils literal notranslate"><span class="pre">OrderedMultiDict</span></code></a>[<a class="reference internal" href="../../const/mh.html#pcapkit.const.mh.option.Option" title="pcapkit.const.mh.option.Option"><code class="xref py py-class docutils literal notranslate"><span class="pre">Option</span></code></a>, <a class="reference internal" href="#pcapkit.protocols.data.internet.mh.Option" title="pcapkit.protocols.data.internet.mh.Option"><code class="xref py py-class docutils literal notranslate"><span class="pre">Option</span></code></a>]) – Parsed MH options.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#pcapkit.protocols.data.internet.mh.MesgIDOption" title="pcapkit.protocols.data.internet.mh.MesgIDOption"><code class="xref py py-class docutils literal notranslate"><span class="pre">MesgIDOption</span></code></a></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Constructed option data.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.protocols.internet.mh.MH._read_opt_cga_pr">
+<span class="sig-name descname"><span class="pre">_read_opt_cga_pr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">schema</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">options</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/internet/mh.html#MH._read_opt_cga_pr"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.mh.MH._read_opt_cga_pr" title="Permalink to this definition">#</a></dt>
+<dd><p>Read MH CGA parameters request option.</p>
+<p>Structure of MH CGA Parameters Request option [<span class="target" id="index-21"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4866.html"><strong>RFC 4866</strong></a>]:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>0                   1                   2                   3
+0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+                               +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+                               |  Option Type  | Option Length |
+                               +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>schema</strong> (<a class="reference internal" href="#pcapkit.protocols.schema.internet.mh.CGAParametersRequestOption" title="pcapkit.protocols.schema.internet.mh.CGAParametersRequestOption"><code class="xref py py-class docutils literal notranslate"><span class="pre">CGAParametersRequestOption</span></code></a>) – Parsed option schema.</p></li>
+<li><p><strong>options</strong> (<a class="reference internal" href="../../corekit/multidict.html#pcapkit.corekit.multidict.OrderedMultiDict" title="pcapkit.corekit.multidict.OrderedMultiDict"><code class="xref py py-class docutils literal notranslate"><span class="pre">OrderedMultiDict</span></code></a>[<a class="reference internal" href="../../const/mh.html#pcapkit.const.mh.option.Option" title="pcapkit.const.mh.option.Option"><code class="xref py py-class docutils literal notranslate"><span class="pre">Option</span></code></a>, <a class="reference internal" href="#pcapkit.protocols.data.internet.mh.Option" title="pcapkit.protocols.data.internet.mh.Option"><code class="xref py py-class docutils literal notranslate"><span class="pre">Option</span></code></a>]) – Parsed MH options.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#pcapkit.protocols.data.internet.mh.CGAParametersRequestOption" title="pcapkit.protocols.data.internet.mh.CGAParametersRequestOption"><code class="xref py py-class docutils literal notranslate"><span class="pre">CGAParametersRequestOption</span></code></a></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Constructed option data.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.protocols.internet.mh.MH._read_opt_cga_param">
+<span class="sig-name descname"><span class="pre">_read_opt_cga_param</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">schema</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">options</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/internet/mh.html#MH._read_opt_cga_param"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.mh.MH._read_opt_cga_param" title="Permalink to this definition">#</a></dt>
+<dd><p>Read MH CGA parameters option.</p>
+<p>Structure of MH CGA Parameters option [<span class="target" id="index-22"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4866.html"><strong>RFC 4866</strong></a>]:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span> 0                   1                   2                   3
+ 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+                                +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+                                |  Option Type  | Option Length |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                                                               |
+:                                                               :
+:                          CGA Parameters                       :
+:                                                               :
+|                                                               |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>schema</strong> (<a class="reference internal" href="#pcapkit.protocols.schema.internet.mh.CGAParametersOption" title="pcapkit.protocols.schema.internet.mh.CGAParametersOption"><code class="xref py py-class docutils literal notranslate"><span class="pre">CGAParametersOption</span></code></a>) – Parsed option schema.</p></li>
+<li><p><strong>options</strong> (<a class="reference internal" href="../../corekit/multidict.html#pcapkit.corekit.multidict.OrderedMultiDict" title="pcapkit.corekit.multidict.OrderedMultiDict"><code class="xref py py-class docutils literal notranslate"><span class="pre">OrderedMultiDict</span></code></a>[<a class="reference internal" href="../../const/mh.html#pcapkit.const.mh.option.Option" title="pcapkit.const.mh.option.Option"><code class="xref py py-class docutils literal notranslate"><span class="pre">Option</span></code></a>, <a class="reference internal" href="#pcapkit.protocols.data.internet.mh.Option" title="pcapkit.protocols.data.internet.mh.Option"><code class="xref py py-class docutils literal notranslate"><span class="pre">Option</span></code></a>]) – Parsed MH options.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#pcapkit.protocols.data.internet.mh.CGAParametersOption" title="pcapkit.protocols.data.internet.mh.CGAParametersOption"><code class="xref py py-class docutils literal notranslate"><span class="pre">CGAParametersOption</span></code></a></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Constructed option data.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.protocols.internet.mh.MH._read_opt_signature">
+<span class="sig-name descname"><span class="pre">_read_opt_signature</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">schema</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">options</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/internet/mh.html#MH._read_opt_signature"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.mh.MH._read_opt_signature" title="Permalink to this definition">#</a></dt>
+<dd><p>Read MH signature option.</p>
+<p>Structure of MH Signature option [<span class="target" id="index-23"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4866.html"><strong>RFC 4866</strong></a>]:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span> 0                   1                   2                   3
+ 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+                                +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+                                |  Option Type  | Option Length |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                                                               |
+:                                                               :
+:                            Signature                          :
+:                                                               :
+|                                                               |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>schema</strong> (<a class="reference internal" href="#pcapkit.protocols.schema.internet.mh.SignatureOption" title="pcapkit.protocols.schema.internet.mh.SignatureOption"><code class="xref py py-class docutils literal notranslate"><span class="pre">SignatureOption</span></code></a>) – Parsed option schema.</p></li>
+<li><p><strong>options</strong> (<a class="reference internal" href="../../corekit/multidict.html#pcapkit.corekit.multidict.OrderedMultiDict" title="pcapkit.corekit.multidict.OrderedMultiDict"><code class="xref py py-class docutils literal notranslate"><span class="pre">OrderedMultiDict</span></code></a>[<a class="reference internal" href="../../const/mh.html#pcapkit.const.mh.option.Option" title="pcapkit.const.mh.option.Option"><code class="xref py py-class docutils literal notranslate"><span class="pre">Option</span></code></a>, <a class="reference internal" href="#pcapkit.protocols.data.internet.mh.Option" title="pcapkit.protocols.data.internet.mh.Option"><code class="xref py py-class docutils literal notranslate"><span class="pre">Option</span></code></a>]) – Parsed MH options.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#pcapkit.protocols.data.internet.mh.SignatureOption" title="pcapkit.protocols.data.internet.mh.SignatureOption"><code class="xref py py-class docutils literal notranslate"><span class="pre">SignatureOption</span></code></a></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Constructed option data.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.protocols.internet.mh.MH._read_opt_phkt">
+<span class="sig-name descname"><span class="pre">_read_opt_phkt</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">schema</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">options</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/internet/mh.html#MH._read_opt_phkt"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.mh.MH._read_opt_phkt" title="Permalink to this definition">#</a></dt>
+<dd><p>Read MH permanent home keygen token option.</p>
+<p>Structure of MH Permanent Home Keygen Token option [<span class="target" id="index-24"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4866.html"><strong>RFC 4866</strong></a>]:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span> 0                   1                   2                   3
+ 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+                                +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+                                |  Option Type  | Option Length |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                                                               |
+:                                                               :
+:                  Permanent Home Keygen Token                  :
+:                                                               :
+|                                                               |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>schema</strong> (<a class="reference internal" href="#pcapkit.protocols.schema.internet.mh.PermanentHomeKeygenTokenOption" title="pcapkit.protocols.schema.internet.mh.PermanentHomeKeygenTokenOption"><code class="xref py py-class docutils literal notranslate"><span class="pre">PermanentHomeKeygenTokenOption</span></code></a>) – Parsed option schema.</p></li>
+<li><p><strong>options</strong> (<a class="reference internal" href="../../corekit/multidict.html#pcapkit.corekit.multidict.OrderedMultiDict" title="pcapkit.corekit.multidict.OrderedMultiDict"><code class="xref py py-class docutils literal notranslate"><span class="pre">OrderedMultiDict</span></code></a>[<a class="reference internal" href="../../const/mh.html#pcapkit.const.mh.option.Option" title="pcapkit.const.mh.option.Option"><code class="xref py py-class docutils literal notranslate"><span class="pre">Option</span></code></a>, <a class="reference internal" href="#pcapkit.protocols.data.internet.mh.Option" title="pcapkit.protocols.data.internet.mh.Option"><code class="xref py py-class docutils literal notranslate"><span class="pre">Option</span></code></a>]) – Parsed MH options.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#pcapkit.protocols.data.internet.mh.PermanentHomeKeygenTokenOption" title="pcapkit.protocols.data.internet.mh.PermanentHomeKeygenTokenOption"><code class="xref py py-class docutils literal notranslate"><span class="pre">PermanentHomeKeygenTokenOption</span></code></a></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Constructed option data.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.protocols.internet.mh.MH._read_opt_ct_init">
+<span class="sig-name descname"><span class="pre">_read_opt_ct_init</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">schema</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">options</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/internet/mh.html#MH._read_opt_ct_init"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.mh.MH._read_opt_ct_init" title="Permalink to this definition">#</a></dt>
+<dd><p>Read MH Care-of Test Init option.</p>
+<p>Structure of MH Care-of Test Init option [<span class="target" id="index-25"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4866.html"><strong>RFC 4866</strong></a>]:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>0                   1                   2                   3
+0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+                               +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+                               |  Option Type  | Option Length |
+                               +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>schema</strong> (<a class="reference internal" href="#pcapkit.protocols.schema.internet.mh.CareofTestInitOption" title="pcapkit.protocols.schema.internet.mh.CareofTestInitOption"><code class="xref py py-class docutils literal notranslate"><span class="pre">CareofTestInitOption</span></code></a>) – Parsed option schema.</p></li>
+<li><p><strong>options</strong> (<a class="reference internal" href="../../corekit/multidict.html#pcapkit.corekit.multidict.OrderedMultiDict" title="pcapkit.corekit.multidict.OrderedMultiDict"><code class="xref py py-class docutils literal notranslate"><span class="pre">OrderedMultiDict</span></code></a>[<a class="reference internal" href="../../const/mh.html#pcapkit.const.mh.option.Option" title="pcapkit.const.mh.option.Option"><code class="xref py py-class docutils literal notranslate"><span class="pre">Option</span></code></a>, <a class="reference internal" href="#pcapkit.protocols.data.internet.mh.Option" title="pcapkit.protocols.data.internet.mh.Option"><code class="xref py py-class docutils literal notranslate"><span class="pre">Option</span></code></a>]) – Parsed MH options.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#pcapkit.protocols.data.internet.mh.CareofTestInitOption" title="pcapkit.protocols.data.internet.mh.CareofTestInitOption"><code class="xref py py-class docutils literal notranslate"><span class="pre">CareofTestInitOption</span></code></a></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Constructed option data.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.protocols.internet.mh.MH._read_opt_ct">
+<span class="sig-name descname"><span class="pre">_read_opt_ct</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">schema</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">options</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/internet/mh.html#MH._read_opt_ct"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.mh.MH._read_opt_ct" title="Permalink to this definition">#</a></dt>
+<dd><p>Read MH Care-of Test option.</p>
+<p>Structure of MH Care-of Test option [<span class="target" id="index-26"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4866.html"><strong>RFC 4866</strong></a>]:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span> 0                   1                   2                   3
+ 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+                                +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+                                |  Option Type  | Option Length |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                                                               |
++                     Care-of Keygen Token                      +
+|                                                               |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>schema</strong> (<a class="reference internal" href="#pcapkit.protocols.schema.internet.mh.CareofTestOption" title="pcapkit.protocols.schema.internet.mh.CareofTestOption"><code class="xref py py-class docutils literal notranslate"><span class="pre">CareofTestOption</span></code></a>) – Parsed option schema.</p></li>
+<li><p><strong>options</strong> (<a class="reference internal" href="../../corekit/multidict.html#pcapkit.corekit.multidict.OrderedMultiDict" title="pcapkit.corekit.multidict.OrderedMultiDict"><code class="xref py py-class docutils literal notranslate"><span class="pre">OrderedMultiDict</span></code></a>[<a class="reference internal" href="../../const/mh.html#pcapkit.const.mh.option.Option" title="pcapkit.const.mh.option.Option"><code class="xref py py-class docutils literal notranslate"><span class="pre">Option</span></code></a>, <a class="reference internal" href="#pcapkit.protocols.data.internet.mh.Option" title="pcapkit.protocols.data.internet.mh.Option"><code class="xref py py-class docutils literal notranslate"><span class="pre">Option</span></code></a>]) – Parsed MH options.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#pcapkit.protocols.data.internet.mh.CareofTestOption" title="pcapkit.protocols.data.internet.mh.CareofTestOption"><code class="xref py py-class docutils literal notranslate"><span class="pre">CareofTestOption</span></code></a></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Constructed option data.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.protocols.internet.mh.MH._make_mh_options">
 <span class="sig-name descname"><span class="pre">_make_mh_options</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">options</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/internet/mh.html#MH._make_mh_options"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.mh.MH._make_mh_options" title="Permalink to this definition">#</a></dt>
 <dd><p>Make options for MH.</p>
@@ -1369,10 +1931,393 @@ attribute:</p>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.protocols.internet.mh.MH._make_opt_pad">
+<span class="sig-name descname"><span class="pre">_make_opt_pad</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">option</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/internet/mh.html#MH._make_opt_pad"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.mh.MH._make_opt_pad" title="Permalink to this definition">#</a></dt>
+<dd><p>Make MH pad option.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>type</strong> (<a class="reference internal" href="../../const/mh.html#pcapkit.const.mh.option.Option" title="pcapkit.const.mh.option.Option"><code class="xref py py-class docutils literal notranslate"><span class="pre">Option</span></code></a>) – Option type.</p></li>
+<li><p><strong>option</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a>[<a class="reference internal" href="#pcapkit.protocols.data.internet.mh.PadOption" title="pcapkit.protocols.data.internet.mh.PadOption"><code class="xref py py-class docutils literal notranslate"><span class="pre">PadOption</span></code></a>]) – Option data model.</p></li>
+<li><p><strong>length</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>) – Padding length.</p></li>
+<li><p><strong>**kwargs</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>) – Arbitrary keyword arguments.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#pcapkit.protocols.schema.internet.mh.PadOption" title="pcapkit.protocols.schema.internet.mh.PadOption"><code class="xref py py-class docutils literal notranslate"><span class="pre">PadOption</span></code></a></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Constructed option schema.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="id3">
+<span class="sig-name descname"><span class="pre">_make_opt_pad</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">option</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/internet/mh.html#MH._make_opt_pad"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id3" title="Permalink to this definition">#</a></dt>
+<dd><p>Make MH pad option.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>type</strong> (<a class="reference internal" href="../../const/mh.html#pcapkit.const.mh.option.Option" title="pcapkit.const.mh.option.Option"><code class="xref py py-class docutils literal notranslate"><span class="pre">Option</span></code></a>) – Option type.</p></li>
+<li><p><strong>option</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a>[<a class="reference internal" href="#pcapkit.protocols.data.internet.mh.PadOption" title="pcapkit.protocols.data.internet.mh.PadOption"><code class="xref py py-class docutils literal notranslate"><span class="pre">PadOption</span></code></a>]) – Option data model.</p></li>
+<li><p><strong>length</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>) – Padding length.</p></li>
+<li><p><strong>**kwargs</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>) – Arbitrary keyword arguments.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#pcapkit.protocols.schema.internet.mh.PadOption" title="pcapkit.protocols.schema.internet.mh.PadOption"><code class="xref py py-class docutils literal notranslate"><span class="pre">PadOption</span></code></a></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Constructed option schema.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.protocols.internet.mh.MH._make_opt_bra">
+<span class="sig-name descname"><span class="pre">_make_opt_bra</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">option</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interval</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/internet/mh.html#MH._make_opt_bra"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.mh.MH._make_opt_bra" title="Permalink to this definition">#</a></dt>
+<dd><p>Make MH binding refresh advice option.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>type</strong> (<a class="reference internal" href="../../const/mh.html#pcapkit.const.mh.option.Option" title="pcapkit.const.mh.option.Option"><code class="xref py py-class docutils literal notranslate"><span class="pre">Option</span></code></a>) – Option type.</p></li>
+<li><p><strong>option</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a>[<a class="reference internal" href="#pcapkit.protocols.data.internet.mh.BindRefreshAdviceOption" title="pcapkit.protocols.data.internet.mh.BindRefreshAdviceOption"><code class="xref py py-class docutils literal notranslate"><span class="pre">BindRefreshAdviceOption</span></code></a>]) – Option data model.</p></li>
+<li><p><strong>interval</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>) – Refresh interval.</p></li>
+<li><p><strong>**kwargs</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>) – Arbitrary keyword arguments.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#pcapkit.protocols.schema.internet.mh.BindRefreshAdviceOption" title="pcapkit.protocols.schema.internet.mh.BindRefreshAdviceOption"><code class="xref py py-class docutils literal notranslate"><span class="pre">BindRefreshAdviceOption</span></code></a></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Constructed option schema.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.protocols.internet.mh.MH._make_opt_aca">
+<span class="sig-name descname"><span class="pre">_make_opt_aca</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">option</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">address</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'::'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/internet/mh.html#MH._make_opt_aca"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.mh.MH._make_opt_aca" title="Permalink to this definition">#</a></dt>
+<dd><p>Make MH alternate care-of address option.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>type</strong> (<a class="reference internal" href="../../const/mh.html#pcapkit.const.mh.option.Option" title="pcapkit.const.mh.option.Option"><code class="xref py py-class docutils literal notranslate"><span class="pre">Option</span></code></a>) – Option type.</p></li>
+<li><p><strong>option</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a>[<a class="reference internal" href="#pcapkit.protocols.data.internet.mh.AlternateCareofAddressOption" title="pcapkit.protocols.data.internet.mh.AlternateCareofAddressOption"><code class="xref py py-class docutils literal notranslate"><span class="pre">AlternateCareofAddressOption</span></code></a>]) – Option data model.</p></li>
+<li><p><strong>address</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a> | <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> | <a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> | <a class="reference external" href="https://docs.python.org/3/library/ipaddress.html#ipaddress.IPv6Address" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6Address</span></code></a>) – Alternate care-of address.</p></li>
+<li><p><strong>**kwargs</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>) – Arbitrary keyword arguments.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#pcapkit.protocols.schema.internet.mh.AlternateCareofAddressOption" title="pcapkit.protocols.schema.internet.mh.AlternateCareofAddressOption"><code class="xref py py-class docutils literal notranslate"><span class="pre">AlternateCareofAddressOption</span></code></a></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Constructed option schema.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.protocols.internet.mh.MH._make_opt_ni">
+<span class="sig-name descname"><span class="pre">_make_opt_ni</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">option</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">home</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">careof</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/internet/mh.html#MH._make_opt_ni"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.mh.MH._make_opt_ni" title="Permalink to this definition">#</a></dt>
+<dd><p>Make MH nonce indices option.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>type</strong> (<a class="reference internal" href="../../const/mh.html#pcapkit.const.mh.option.Option" title="pcapkit.const.mh.option.Option"><code class="xref py py-class docutils literal notranslate"><span class="pre">Option</span></code></a>) – Option type.</p></li>
+<li><p><strong>option</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a>[<a class="reference internal" href="#pcapkit.protocols.data.internet.mh.NonceIndicesOption" title="pcapkit.protocols.data.internet.mh.NonceIndicesOption"><code class="xref py py-class docutils literal notranslate"><span class="pre">NonceIndicesOption</span></code></a>]) – Option data model.</p></li>
+<li><p><strong>home</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>) – Home nonce index.</p></li>
+<li><p><strong>careof</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>) – Care-of nonce index.</p></li>
+<li><p><strong>**kwargs</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>) – Arbitrary keyword arguments.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#pcapkit.protocols.schema.internet.mh.NonceIndicesOption" title="pcapkit.protocols.schema.internet.mh.NonceIndicesOption"><code class="xref py py-class docutils literal notranslate"><span class="pre">NonceIndicesOption</span></code></a></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Constructed option schema.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.protocols.internet.mh.MH._make_opt_bad">
+<span class="sig-name descname"><span class="pre">_make_opt_bad</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">option</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">b''</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/internet/mh.html#MH._make_opt_bad"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.mh.MH._make_opt_bad" title="Permalink to this definition">#</a></dt>
+<dd><p>Make MH binding authorization data option.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>type</strong> (<a class="reference internal" href="../../const/mh.html#pcapkit.const.mh.option.Option" title="pcapkit.const.mh.option.Option"><code class="xref py py-class docutils literal notranslate"><span class="pre">Option</span></code></a>) – Option type.</p></li>
+<li><p><strong>option</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a>[<a class="reference internal" href="#pcapkit.protocols.data.internet.mh.BindingAuthorizationDataOption" title="pcapkit.protocols.data.internet.mh.BindingAuthorizationDataOption"><code class="xref py py-class docutils literal notranslate"><span class="pre">BindingAuthorizationDataOption</span></code></a>]) – Option data model.</p></li>
+<li><p><strong>data</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a>) – Authenticator.</p></li>
+<li><p><strong>**kwargs</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>) – Arbitrary keyword arguments.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#pcapkit.protocols.schema.internet.mh.BindingAuthorizationDataOption" title="pcapkit.protocols.schema.internet.mh.BindingAuthorizationDataOption"><code class="xref py py-class docutils literal notranslate"><span class="pre">BindingAuthorizationDataOption</span></code></a></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Constructed option schema.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.protocols.internet.mh.MH._make_opt_mnp">
+<span class="sig-name descname"><span class="pre">_make_opt_mnp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">option</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prefix</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'::/0'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/internet/mh.html#MH._make_opt_mnp"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.mh.MH._make_opt_mnp" title="Permalink to this definition">#</a></dt>
+<dd><p>Make MH mobile network prefix option.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>type</strong> (<a class="reference internal" href="../../const/mh.html#pcapkit.const.mh.option.Option" title="pcapkit.const.mh.option.Option"><code class="xref py py-class docutils literal notranslate"><span class="pre">Option</span></code></a>) – Option type.</p></li>
+<li><p><strong>option</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a>[<a class="reference internal" href="#pcapkit.protocols.data.internet.mh.MobileNetworkPrefixOption" title="pcapkit.protocols.data.internet.mh.MobileNetworkPrefixOption"><code class="xref py py-class docutils literal notranslate"><span class="pre">MobileNetworkPrefixOption</span></code></a>]) – Option data model.</p></li>
+<li><p><strong>prefix</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a> | <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> | <a class="reference external" href="https://docs.python.org/3/library/ipaddress.html#ipaddress.IPv6Network" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6Network</span></code></a>) – Mobile network prefix.</p></li>
+<li><p><strong>**kwargs</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>) – Arbitrary keyword arguments.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#pcapkit.protocols.schema.internet.mh.MobileNetworkPrefixOption" title="pcapkit.protocols.schema.internet.mh.MobileNetworkPrefixOption"><code class="xref py py-class docutils literal notranslate"><span class="pre">MobileNetworkPrefixOption</span></code></a></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Constructed option schema.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.protocols.internet.mh.MH._make_opt_lla">
+<span class="sig-name descname"><span class="pre">_make_opt_lla</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">option</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">address</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">b''</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/internet/mh.html#MH._make_opt_lla"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.mh.MH._make_opt_lla" title="Permalink to this definition">#</a></dt>
+<dd><p>Make MH link-layer address option.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>type</strong> (<a class="reference internal" href="../../const/mh.html#pcapkit.const.mh.option.Option" title="pcapkit.const.mh.option.Option"><code class="xref py py-class docutils literal notranslate"><span class="pre">Option</span></code></a>) – Option type.</p></li>
+<li><p><strong>option</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a>[<a class="reference internal" href="#pcapkit.protocols.data.internet.mh.LinkLayerAddressOption" title="pcapkit.protocols.data.internet.mh.LinkLayerAddressOption"><code class="xref py py-class docutils literal notranslate"><span class="pre">LinkLayerAddressOption</span></code></a>]) – Option data model.</p></li>
+<li><p><strong>address</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a>) – Link-layer address.</p></li>
+<li><p><strong>**kwargs</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>) – Arbitrary keyword arguments.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#pcapkit.protocols.schema.internet.mh.LinkLayerAddressOption" title="pcapkit.protocols.schema.internet.mh.LinkLayerAddressOption"><code class="xref py py-class docutils literal notranslate"><span class="pre">LinkLayerAddressOption</span></code></a></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Constructed option schema.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.protocols.internet.mh.MH._make_opt_mn_id">
+<span class="sig-name descname"><span class="pre">_make_opt_mn_id</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">option</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">subtype</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">MNIDSubtype.IPv6_Address</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">subtype_default</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">subtype_namespace</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">subtype_reversed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">identifier</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'::'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/internet/mh.html#MH._make_opt_mn_id"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.mh.MH._make_opt_mn_id" title="Permalink to this definition">#</a></dt>
+<dd><p>Make MH mobile node identifier option.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>type</strong> (<a class="reference internal" href="../../const/mh.html#pcapkit.const.mh.option.Option" title="pcapkit.const.mh.option.Option"><code class="xref py py-class docutils literal notranslate"><span class="pre">Option</span></code></a>) – Option type.</p></li>
+<li><p><strong>option</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a>[<a class="reference internal" href="#pcapkit.protocols.data.internet.mh.MNIDOption" title="pcapkit.protocols.data.internet.mh.MNIDOption"><code class="xref py py-class docutils literal notranslate"><span class="pre">MNIDOption</span></code></a>]) – Option data model.</p></li>
+<li><p><strong>subtype</strong> (<a class="reference internal" href="../../const/mh.html#pcapkit.const.mh.mn_id_subtype.MNIDSubtype" title="pcapkit.const.mh.mn_id_subtype.MNIDSubtype"><code class="xref py py-class docutils literal notranslate"><span class="pre">MNIDSubtype</span></code></a> | <a class="reference external" href="https://docs.python.org/3/library/enum.html#enum.IntEnum" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">IntEnum</span></code></a> | <code class="xref py py-class docutils literal notranslate"><span class="pre">IntEnum</span></code> | <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> | <a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>) – MN-ID subtype.</p></li>
+<li><p><strong>subtype_default</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>]) – MN-ID subtype default value.</p></li>
+<li><p><strong>subtype_namespace</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Union" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>], <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>], <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Type</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/enum.html#enum.IntEnum" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">IntEnum</span></code></a>], <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Type</span></code></a>[<code class="xref py py-class docutils literal notranslate"><span class="pre">IntEnum</span></code>], <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a>]) – MN-ID subtype namespace.</p></li>
+<li><p><strong>subtype_reversed</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a>) – MN-ID subtype reversed flag.</p></li>
+<li><p><strong>identifier</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a> | <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> | <a class="reference external" href="https://docs.python.org/3/library/ipaddress.html#ipaddress.IPv6Address" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6Address</span></code></a> | <a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>) – Identifier.</p></li>
+<li><p><strong>**kwargs</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>) – Arbitrary keyword arguments.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#pcapkit.protocols.schema.internet.mh.MNIDOption" title="pcapkit.protocols.schema.internet.mh.MNIDOption"><code class="xref py py-class docutils literal notranslate"><span class="pre">MNIDOption</span></code></a></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Constructed option schema.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.protocols.internet.mh.MH._make_opt_auth">
+<span class="sig-name descname"><span class="pre">_make_opt_auth</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">option</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">subtype</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">AuthSubtype.MN_HA</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">subtype_default</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">subtype_namespace</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">subtype_reversed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spi</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">b''</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/internet/mh.html#MH._make_opt_auth"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.mh.MH._make_opt_auth" title="Permalink to this definition">#</a></dt>
+<dd><p>Make MH authentication option.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>type</strong> (<a class="reference internal" href="../../const/mh.html#pcapkit.const.mh.option.Option" title="pcapkit.const.mh.option.Option"><code class="xref py py-class docutils literal notranslate"><span class="pre">Option</span></code></a>) – Option type.</p></li>
+<li><p><strong>option</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a>[<a class="reference internal" href="#pcapkit.protocols.data.internet.mh.AuthOption" title="pcapkit.protocols.data.internet.mh.AuthOption"><code class="xref py py-class docutils literal notranslate"><span class="pre">AuthOption</span></code></a>]) – Option data model.</p></li>
+<li><p><strong>subtype</strong> (<a class="reference internal" href="../../const/mh.html#pcapkit.const.mh.auth_subtype.AuthSubtype" title="pcapkit.const.mh.auth_subtype.AuthSubtype"><code class="xref py py-class docutils literal notranslate"><span class="pre">AuthSubtype</span></code></a> | <a class="reference external" href="https://docs.python.org/3/library/enum.html#enum.IntEnum" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">IntEnum</span></code></a> | <code class="xref py py-class docutils literal notranslate"><span class="pre">IntEnum</span></code> | <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> | <a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>) – Authentication subtype.</p></li>
+<li><p><strong>subtype_default</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>]) – Authentication subtype default value.</p></li>
+<li><p><strong>subtype_namespace</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Union" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>], <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>], <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Type</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/enum.html#enum.IntEnum" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">IntEnum</span></code></a>], <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Type</span></code></a>[<code class="xref py py-class docutils literal notranslate"><span class="pre">IntEnum</span></code>], <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.11)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a>]) – Authentication subtype namespace.</p></li>
+<li><p><strong>subtype_reversed</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a>) – Authentication subtype reversed flag.</p></li>
+<li><p><strong>spi</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>) – Security parameter index.</p></li>
+<li><p><strong>data</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a>) – Authentication data.</p></li>
+<li><p><strong>**kwargs</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>) – Arbitrary keyword arguments.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#pcapkit.protocols.schema.internet.mh.AuthOption" title="pcapkit.protocols.schema.internet.mh.AuthOption"><code class="xref py py-class docutils literal notranslate"><span class="pre">AuthOption</span></code></a></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Constructed option schema.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.protocols.internet.mh.MH._make_opt_mesg_id">
+<span class="sig-name descname"><span class="pre">_make_opt_mesg_id</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">option</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timestamp</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interval</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/internet/mh.html#MH._make_opt_mesg_id"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.mh.MH._make_opt_mesg_id" title="Permalink to this definition">#</a></dt>
+<dd><p>Make MH mobility message replay protection option.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>type</strong> (<a class="reference internal" href="../../const/mh.html#pcapkit.const.mh.option.Option" title="pcapkit.const.mh.option.Option"><code class="xref py py-class docutils literal notranslate"><span class="pre">Option</span></code></a>) – Option type.</p></li>
+<li><p><strong>option</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a>[<a class="reference internal" href="#pcapkit.protocols.data.internet.mh.MesgIDOption" title="pcapkit.protocols.data.internet.mh.MesgIDOption"><code class="xref py py-class docutils literal notranslate"><span class="pre">MesgIDOption</span></code></a>]) – Option data model.</p></li>
+<li><p><strong>timestamp</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a>[<a class="reference internal" href="#pcapkit.protocols.internet.mh.NTPTimestamp" title="pcapkit.protocols.internet.mh.NTPTimestamp"><code class="xref py py-class docutils literal notranslate"><span class="pre">NTPTimestamp</span></code></a>]) – NTP timestamp, c.f., <span class="target" id="index-27"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1305.html"><strong>RFC 1305</strong></a>.</p></li>
+<li><p><strong>interval</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime</span></code></a>]) – Timestamp interval (since UNIX-epoch).</p></li>
+<li><p><strong>**kwargs</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>) – Arbitrary keyword arguments.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#pcapkit.protocols.schema.internet.mh.MesgIDOption" title="pcapkit.protocols.schema.internet.mh.MesgIDOption"><code class="xref py py-class docutils literal notranslate"><span class="pre">MesgIDOption</span></code></a></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Constructed option schema.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.protocols.internet.mh.MH._make_opt_cga_pr">
+<span class="sig-name descname"><span class="pre">_make_opt_cga_pr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">option</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/internet/mh.html#MH._make_opt_cga_pr"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.mh.MH._make_opt_cga_pr" title="Permalink to this definition">#</a></dt>
+<dd><p>Make MH CGA parameters request option.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>type</strong> (<a class="reference internal" href="../../const/mh.html#pcapkit.const.mh.option.Option" title="pcapkit.const.mh.option.Option"><code class="xref py py-class docutils literal notranslate"><span class="pre">Option</span></code></a>) – Option type.</p></li>
+<li><p><strong>option</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a>[<a class="reference internal" href="#pcapkit.protocols.data.internet.mh.CGAParametersRequestOption" title="pcapkit.protocols.data.internet.mh.CGAParametersRequestOption"><code class="xref py py-class docutils literal notranslate"><span class="pre">CGAParametersRequestOption</span></code></a>]) – Option data model.</p></li>
+<li><p><strong>**kwargs</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>) – Arbitrary keyword arguments.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#pcapkit.protocols.schema.internet.mh.CGAParametersRequestOption" title="pcapkit.protocols.schema.internet.mh.CGAParametersRequestOption"><code class="xref py py-class docutils literal notranslate"><span class="pre">CGAParametersRequestOption</span></code></a></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Constructed option schema.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.protocols.internet.mh.MH._make_opt_cga_param">
+<span class="sig-name descname"><span class="pre">_make_opt_cga_param</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">option</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parameters</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/internet/mh.html#MH._make_opt_cga_param"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.mh.MH._make_opt_cga_param" title="Permalink to this definition">#</a></dt>
+<dd><p>Make MH CGA paramters option.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>type</strong> (<a class="reference internal" href="../../const/mh.html#pcapkit.const.mh.option.Option" title="pcapkit.const.mh.option.Option"><code class="xref py py-class docutils literal notranslate"><span class="pre">Option</span></code></a>) – Option type.</p></li>
+<li><p><strong>option</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a>[<a class="reference internal" href="#pcapkit.protocols.data.internet.mh.CGAParametersOption" title="pcapkit.protocols.data.internet.mh.CGAParametersOption"><code class="xref py py-class docutils literal notranslate"><span class="pre">CGAParametersOption</span></code></a>]) – Option data model.</p></li>
+<li><p><strong>parameters</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code></a>[<a class="reference internal" href="#pcapkit.protocols.schema.internet.mh.CGAParameter" title="pcapkit.protocols.schema.internet.mh.CGAParameter"><code class="xref py py-class docutils literal notranslate"><span class="pre">CGAParameter</span></code></a> | <a class="reference internal" href="#pcapkit.protocols.data.internet.mh.CGAParameter" title="pcapkit.protocols.data.internet.mh.CGAParameter"><code class="xref py py-class docutils literal notranslate"><span class="pre">CGAParameter</span></code></a> | <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>] | <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a>]]) – CGA parameters.</p></li>
+<li><p><strong>**kwargs</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>) – Arbitrary keyword arguments.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#pcapkit.protocols.schema.internet.mh.CGAParametersOption" title="pcapkit.protocols.schema.internet.mh.CGAParametersOption"><code class="xref py py-class docutils literal notranslate"><span class="pre">CGAParametersOption</span></code></a></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Constructed option schema.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.protocols.internet.mh.MH._make_opt_signature">
+<span class="sig-name descname"><span class="pre">_make_opt_signature</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">option</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">signature</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">b''</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/internet/mh.html#MH._make_opt_signature"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.mh.MH._make_opt_signature" title="Permalink to this definition">#</a></dt>
+<dd><p>Make MH signature option.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>type</strong> (<a class="reference internal" href="../../const/mh.html#pcapkit.const.mh.option.Option" title="pcapkit.const.mh.option.Option"><code class="xref py py-class docutils literal notranslate"><span class="pre">Option</span></code></a>) – Option type.</p></li>
+<li><p><strong>option</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a>[<a class="reference internal" href="#pcapkit.protocols.data.internet.mh.SignatureOption" title="pcapkit.protocols.data.internet.mh.SignatureOption"><code class="xref py py-class docutils literal notranslate"><span class="pre">SignatureOption</span></code></a>]) – Option data model.</p></li>
+<li><p><strong>signature</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a>) – Signature data.</p></li>
+<li><p><strong>**kwargs</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>) – Arbitrary keyword arguments.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#pcapkit.protocols.schema.internet.mh.SignatureOption" title="pcapkit.protocols.schema.internet.mh.SignatureOption"><code class="xref py py-class docutils literal notranslate"><span class="pre">SignatureOption</span></code></a></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Constructed option schema.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.protocols.internet.mh.MH._make_opt_phkt">
+<span class="sig-name descname"><span class="pre">_make_opt_phkt</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">option</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">token</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">b''</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/internet/mh.html#MH._make_opt_phkt"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.mh.MH._make_opt_phkt" title="Permalink to this definition">#</a></dt>
+<dd><p>Make MH permanent home keygen token option.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>type</strong> (<a class="reference internal" href="../../const/mh.html#pcapkit.const.mh.option.Option" title="pcapkit.const.mh.option.Option"><code class="xref py py-class docutils literal notranslate"><span class="pre">Option</span></code></a>) – Option type.</p></li>
+<li><p><strong>option</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a>[<a class="reference internal" href="#pcapkit.protocols.data.internet.mh.PermanentHomeKeygenTokenOption" title="pcapkit.protocols.data.internet.mh.PermanentHomeKeygenTokenOption"><code class="xref py py-class docutils literal notranslate"><span class="pre">PermanentHomeKeygenTokenOption</span></code></a>]) – Option data model.</p></li>
+<li><p><strong>token</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a>) – Token data.</p></li>
+<li><p><strong>**kwargs</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>) – Arbitrary keyword arguments.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#pcapkit.protocols.schema.internet.mh.PermanentHomeKeygenTokenOption" title="pcapkit.protocols.schema.internet.mh.PermanentHomeKeygenTokenOption"><code class="xref py py-class docutils literal notranslate"><span class="pre">PermanentHomeKeygenTokenOption</span></code></a></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Constructed option schema.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.protocols.internet.mh.MH._make_opt_ct_init">
+<span class="sig-name descname"><span class="pre">_make_opt_ct_init</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">option</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/internet/mh.html#MH._make_opt_ct_init"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.mh.MH._make_opt_ct_init" title="Permalink to this definition">#</a></dt>
+<dd><p>Make MH Care-of Test Init option.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>type</strong> (<a class="reference internal" href="../../const/mh.html#pcapkit.const.mh.option.Option" title="pcapkit.const.mh.option.Option"><code class="xref py py-class docutils literal notranslate"><span class="pre">Option</span></code></a>) – Option type.</p></li>
+<li><p><strong>option</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a>[<a class="reference internal" href="#pcapkit.protocols.data.internet.mh.CareofTestInitOption" title="pcapkit.protocols.data.internet.mh.CareofTestInitOption"><code class="xref py py-class docutils literal notranslate"><span class="pre">CareofTestInitOption</span></code></a>]) – Option data model.</p></li>
+<li><p><strong>**kwargs</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>) – Arbitrary keyword arguments.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#pcapkit.protocols.schema.internet.mh.CareofTestInitOption" title="pcapkit.protocols.schema.internet.mh.CareofTestInitOption"><code class="xref py py-class docutils literal notranslate"><span class="pre">CareofTestInitOption</span></code></a></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Constructed option schema.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.protocols.internet.mh.MH._make_opt_ct">
+<span class="sig-name descname"><span class="pre">_make_opt_ct</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">option</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">token</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">b'\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/internet/mh.html#MH._make_opt_ct"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.mh.MH._make_opt_ct" title="Permalink to this definition">#</a></dt>
+<dd><p>Make MH Care-of Test option.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>type</strong> (<a class="reference internal" href="../../const/mh.html#pcapkit.const.mh.option.Option" title="pcapkit.const.mh.option.Option"><code class="xref py py-class docutils literal notranslate"><span class="pre">Option</span></code></a>) – Option type.</p></li>
+<li><p><strong>option</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a>[<a class="reference internal" href="#pcapkit.protocols.data.internet.mh.CareofTestOption" title="pcapkit.protocols.data.internet.mh.CareofTestOption"><code class="xref py py-class docutils literal notranslate"><span class="pre">CareofTestOption</span></code></a>]) – Option data model.</p></li>
+<li><p><strong>token</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a>) – Care-of keygen token.</p></li>
+<li><p><strong>**kwargs</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>) – Arbitrary keyword arguments.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#pcapkit.protocols.schema.internet.mh.CareofTestOption" title="pcapkit.protocols.schema.internet.mh.CareofTestOption"><code class="xref py py-class docutils literal notranslate"><span class="pre">CareofTestOption</span></code></a></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Constructed option schema.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.protocols.internet.mh.MH._read_cga_extensions">
 <span class="sig-name descname"><span class="pre">_read_cga_extensions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">extensions_schema</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/internet/mh.html#MH._read_cga_extensions"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.mh.MH._read_cga_extensions" title="Permalink to this definition">#</a></dt>
 <dd><p>Read CGA extensions.</p>
-<p>Structure of CGA extensions [<span class="target" id="index-10"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4581.html"><strong>RFC 4581</strong></a>]:</p>
+<p>Structure of CGA extensions [<span class="target" id="index-28"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4581.html"><strong>RFC 4581</strong></a>]:</p>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span> 0                   1                   2                   3
  0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -1421,7 +2366,7 @@ attribute:</p>
 <dt class="sig sig-object py" id="pcapkit.protocols.internet.mh.MH._read_ext_multiprefix">
 <span class="sig-name descname"><span class="pre">_read_ext_multiprefix</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">schema</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extensions</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/internet/mh.html#MH._read_ext_multiprefix"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.mh.MH._read_ext_multiprefix" title="Permalink to this definition">#</a></dt>
 <dd><p>Read multi-prefix CGA extension.</p>
-<p>Structure of Multi-Prefix CGA extension [<span class="target" id="index-11"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5535.html"><strong>RFC 5535</strong></a>]:</p>
+<p>Structure of Multi-Prefix CGA extension [<span class="target" id="index-29"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5535.html"><strong>RFC 5535</strong></a>]:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">..</span> <span class="n">code</span><span class="o">-</span><span class="n">block</span><span class="p">::</span> <span class="n">text</span>
 </pre></div>
 </div>
@@ -1580,7 +2525,7 @@ attribute:</p>
 <dt class="sig sig-object py" id="pcapkit.protocols.internet.mh.NTPTimestamp">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.internet.mh.</span></span><span class="sig-name descname"><span class="pre">NTPTimestamp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">seconds</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fraction</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pcapkit.protocols.internet.mh.NTPTimestamp" title="Permalink to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code></a></p>
-<p>NTP timestamp format, c.f., <span class="target" id="index-12"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1305.html"><strong>RFC 1305</strong></a>.</p>
+<p>NTP timestamp format, c.f., <span class="target" id="index-30"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1305.html"><strong>RFC 1305</strong></a>.</p>
 <dl class="py property">
 <dt class="sig sig-object py" id="pcapkit.protocols.internet.mh.NTPTimestamp.seconds">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">seconds</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a></em><a class="headerlink" href="#pcapkit.protocols.internet.mh.NTPTimestamp.seconds" title="Permalink to this definition">#</a></dt>
@@ -1594,14 +2539,14 @@ attribute:</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="id0">
-<span class="sig-name descname"><span class="pre">fraction</span></span><a class="headerlink" href="#id0" title="Permalink to this definition">#</a></dt>
+<dt class="sig sig-object py" id="id4">
+<span class="sig-name descname"><span class="pre">fraction</span></span><a class="headerlink" href="#id4" title="Permalink to this definition">#</a></dt>
 <dd><p>Alias for field number 1</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="id3">
-<span class="sig-name descname"><span class="pre">seconds</span></span><a class="headerlink" href="#id3" title="Permalink to this definition">#</a></dt>
+<dt class="sig sig-object py" id="id5">
+<span class="sig-name descname"><span class="pre">seconds</span></span><a class="headerlink" href="#id5" title="Permalink to this definition">#</a></dt>
 <dd><p>Alias for field number 0</p>
 </dd></dl>
 
@@ -2227,7 +3172,7 @@ attribute:</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.internet.mh.MesgIDOption.seconds">
 <span class="sig-name descname"><span class="pre">seconds</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;UInt32Field</span> <span class="pre">seconds&gt;</span></em><a class="headerlink" href="#pcapkit.protocols.schema.internet.mh.MesgIDOption.seconds" title="Permalink to this definition">#</a></dt>
-<dd><p>Timestamp (seconds since January 1st, 1970, c.f., <span class="target" id="index-13"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1305.html"><strong>RFC 1305</strong></a>).</p>
+<dd><p>Timestamp (seconds since January 1st, 1970, c.f., <span class="target" id="index-31"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1305.html"><strong>RFC 1305</strong></a>).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>packet</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><em>dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>, </em><em>Any</em><em>]</em>) – </p>
@@ -2241,7 +3186,7 @@ attribute:</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.internet.mh.MesgIDOption.fraction">
 <span class="sig-name descname"><span class="pre">fraction</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;UInt32Field</span> <span class="pre">fraction&gt;</span></em><a class="headerlink" href="#pcapkit.protocols.schema.internet.mh.MesgIDOption.fraction" title="Permalink to this definition">#</a></dt>
-<dd><p>Timestamp fractions (1/2**32 seconds per unit, c.f., <span class="target" id="index-14"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1305.html"><strong>RFC 1305</strong></a>).</p>
+<dd><p>Timestamp fractions (1/2**32 seconds per unit, c.f., <span class="target" id="index-32"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1305.html"><strong>RFC 1305</strong></a>).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>packet</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><em>dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>, </em><em>Any</em><em>]</em>) – </p>
@@ -2462,7 +3407,7 @@ attribute:</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.internet.mh.CGAParametersOption.parameters">
 <span class="sig-name descname"><span class="pre">parameters</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">list[CGAParameter]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;ListField</span> <span class="pre">parameters&gt;</span></em><a class="headerlink" href="#pcapkit.protocols.schema.internet.mh.CGAParametersOption.parameters" title="Permalink to this definition">#</a></dt>
-<dd><p>CGA parameters, c.f., <span class="target" id="index-15"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3972.html"><strong>RFC 3972</strong></a>.</p>
+<dd><p>CGA parameters, c.f., <span class="target" id="index-33"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3972.html"><strong>RFC 3972</strong></a>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>packet</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><em>dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><em>str</em></a><em>, </em><em>Any</em><em>]</em>) – </p>
@@ -3598,7 +4543,7 @@ attribute:</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.internet.mh.MesgIDOption.ntp_timestamp">
 <span class="sig-name descname"><span class="pre">ntp_timestamp</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">NTPTimestamp</span></em><a class="headerlink" href="#pcapkit.protocols.data.internet.mh.MesgIDOption.ntp_timestamp" title="Permalink to this definition">#</a></dt>
-<dd><p>NTP timestamp, c.f., <span class="target" id="index-16"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1305.html"><strong>RFC 1305</strong></a>.</p>
+<dd><p>NTP timestamp, c.f., <span class="target" id="index-34"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1305.html"><strong>RFC 1305</strong></a>.</p>
 </dd></dl>
 
 </dd></dl>
@@ -3709,7 +4654,7 @@ attribute:</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.internet.mh.CGAParametersOption.parameters">
 <span class="sig-name descname"><span class="pre">parameters</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">tuple[CGAParameter,</span> <span class="pre">...]</span></em><a class="headerlink" href="#pcapkit.protocols.data.internet.mh.CGAParametersOption.parameters" title="Permalink to this definition">#</a></dt>
-<dd><p>CGA parameters, c.f., <span class="target" id="index-17"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3972.html"><strong>RFC 3972</strong></a>.</p>
+<dd><p>CGA parameters, c.f., <span class="target" id="index-35"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3972.html"><strong>RFC 3972</strong></a>.</p>
 </dd></dl>
 
 </dd></dl>
@@ -4151,7 +5096,7 @@ the CGA Parameter Data Structure, reset otherwise.</p>
 </dd></dl>
 
 <hr /><aside class="footnote-list brackets">
-<aside class="footnote brackets" id="id4" role="doc-footnote">
+<aside class="footnote brackets" id="id6" role="doc-footnote">
 <span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id1">*</a><span class="fn-bracket">]</span></span>
 <p><a class="reference external" href="https://en.wikipedia.org/wiki/Mobile_IP#Changes_in_IPv6_for_Mobile_IPv6">https://en.wikipedia.org/wiki/Mobile_IP#Changes_in_IPv6_for_Mobile_IPv6</a></p>
 </aside>
