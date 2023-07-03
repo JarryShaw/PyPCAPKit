@@ -345,6 +345,7 @@
 <span class="c1"># mypy: disable-error-code=assignment</span>
 <span class="sd">&quot;&quot;&quot;header schema for IPv6 Routing Header&quot;&quot;&quot;</span>
 
+<span class="kn">import</span> <span class="nn">collections</span>
 <span class="kn">import</span> <span class="nn">ipaddress</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">cast</span>
 
@@ -367,7 +368,7 @@
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
     <span class="kn">from</span> <span class="nn">ipaddress</span> <span class="kn">import</span> <span class="n">IPv6Address</span>
-    <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Optional</span>
+    <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">DefaultDict</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Type</span>
 
     <span class="kn">from</span> <span class="nn">pcapkit.corekit.fields.field</span> <span class="kn">import</span> <span class="n">_Field</span> <span class="k">as</span> <span class="n">Field</span>
     <span class="kn">from</span> <span class="nn">pcapkit.protocols.protocol</span> <span class="kn">import</span> <span class="n">Protocol</span>
@@ -388,25 +389,18 @@
 <span class="sd">        pkt: Packet data.</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        * If ``type`` is ``0``, returns a :class:`~pcapkit.corekit.fields.misc.SchemaField`</span>
-<span class="sd">          wrapped :class:`~pcapkit.protocols.schema.internet.ipv6_route.SourceRoute`</span>
-<span class="sd">          instance.</span>
-<span class="sd">        * If ``type`` is ``2``, returns a :class:`~pcapkit.corekit.fields.misc.SchemaField`</span>
-<span class="sd">          wrapped :class:`~pcapkit.protocols.schema.internet.ipv6_route.Type2`</span>
-<span class="sd">          instance.</span>
-<span class="sd">        * If ``type`` is ``3``, returns a :class:`~pcapkit.corekit.fields.misc.SchemaField`</span>
-<span class="sd">          wrapped :class:`~pcapkit.protocols.schema.internet.ipv6_route.RPL`</span>
-<span class="sd">          instance.</span>
+<span class="sd">        A :class:`~pcapkit.corekit.fields.misc.SchemaField` wrapped</span>
+<span class="sd">        :class:`~pcapkit.protocols.schema.internet.ipv6_route.RoutingType`</span>
+<span class="sd">        instance based on :attr:`IPv6_Route.type &lt;pcapkit.protocols.schema.internet.ipv6_route.IPv6_Route.type&gt;`.</span>
+
+<span class="sd">    See Also:</span>
+<span class="sd">        * :class:`pcapkit.const.ipv6.routing.Routing`</span>
+<span class="sd">        * :data:`pcapkit.protocols.schema.internet.ipv6_route.MAP_IPV6_ROUTE_DATA`</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="nb">type</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">&#39;Enum_Routing&#39;</span><span class="p">,</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">])</span>
-    <span class="k">if</span> <span class="nb">type</span> <span class="o">==</span> <span class="n">Enum_Routing</span><span class="o">.</span><span class="n">Source_Route</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">SchemaField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="n">pkt</span><span class="p">[</span><span class="s1">&#39;length&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="mi">8</span> <span class="o">-</span> <span class="mi">4</span><span class="p">,</span> <span class="n">schema</span><span class="o">=</span><span class="n">SourceRoute</span><span class="p">)</span>
-    <span class="k">if</span> <span class="nb">type</span> <span class="o">==</span> <span class="n">Enum_Routing</span><span class="o">.</span><span class="n">Type_2_Routing_Header</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">SchemaField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="n">pkt</span><span class="p">[</span><span class="s1">&#39;length&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="mi">8</span> <span class="o">-</span> <span class="mi">4</span><span class="p">,</span> <span class="n">schema</span><span class="o">=</span><span class="n">Type2</span><span class="p">)</span>
-    <span class="k">if</span> <span class="nb">type</span> <span class="o">==</span> <span class="n">Enum_Routing</span><span class="o">.</span><span class="n">RPL_Source_Route_Header</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">SchemaField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="n">pkt</span><span class="p">[</span><span class="s1">&#39;length&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="mi">8</span> <span class="o">-</span> <span class="mi">4</span><span class="p">,</span> <span class="n">schema</span><span class="o">=</span><span class="n">RPL</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">SchemaField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="n">pkt</span><span class="p">[</span><span class="s1">&#39;length&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="mi">8</span> <span class="o">-</span> <span class="mi">4</span><span class="p">,</span> <span class="n">schema</span><span class="o">=</span><span class="n">UnknownType</span><span class="p">)</span></div>
+    <span class="n">schema</span> <span class="o">=</span> <span class="n">MAP_IPV6_ROUTE_DATA</span><span class="p">[</span><span class="nb">type</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">SchemaField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="n">pkt</span><span class="p">[</span><span class="s1">&#39;length&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="mi">8</span> <span class="o">-</span> <span class="mi">4</span><span class="p">,</span> <span class="n">schema</span><span class="o">=</span><span class="n">schema</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="IPv6_Route"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/ipv6_route.html#pcapkit.protocols.schema.internet.ipv6_route.IPv6_Route">[docs]</a><span class="nd">@schema_final</span>
@@ -548,6 +542,14 @@
 
         <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cmpr_i</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">cmpr_e</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">pad</span><span class="p">:</span> <span class="s1">&#39;PadInfo&#39;</span><span class="p">,</span>
                      <span class="n">addresses</span><span class="p">:</span> <span class="s1">&#39;list[bytes]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
+
+
+<span class="c1">#: DefaultDict[Enum_Routing, Type[RoutingType]]: Mapping of IPv6-Route routing type numbers to schemas.</span>
+<span class="n">MAP_IPV6_ROUTE_DATA</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">defaultdict</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="n">UnknownType</span><span class="p">,</span> <span class="p">{</span>
+    <span class="n">Enum_Routing</span><span class="o">.</span><span class="n">Source_Route</span><span class="p">:</span> <span class="n">SourceRoute</span><span class="p">,</span>
+    <span class="n">Enum_Routing</span><span class="o">.</span><span class="n">Type_2_Routing_Header</span><span class="p">:</span> <span class="n">Type2</span><span class="p">,</span>
+    <span class="n">Enum_Routing</span><span class="o">.</span><span class="n">RPL_Source_Route_Header</span><span class="p">:</span> <span class="n">RPL</span><span class="p">,</span>
+<span class="p">})</span>  <span class="c1"># type: DefaultDict[Enum_Routing | int, Type[RoutingType]]</span>
 </pre></div>
         </article>
       </div>

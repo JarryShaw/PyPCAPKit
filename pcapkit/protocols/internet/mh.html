@@ -2367,41 +2367,31 @@ attribute:</p>
 <span class="sig-name descname"><span class="pre">_read_ext_multiprefix</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">schema</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extensions</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/internet/mh.html#MH._read_ext_multiprefix"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.mh.MH._read_ext_multiprefix" title="Permalink to this definition">#</a></dt>
 <dd><p>Read multi-prefix CGA extension.</p>
 <p>Structure of Multi-Prefix CGA extension [<span class="target" id="index-29"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5535.html"><strong>RFC 5535</strong></a>]:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">..</span> <span class="n">code</span><span class="o">-</span><span class="n">block</span><span class="p">::</span> <span class="n">text</span>
-</pre></div>
-</div>
-<blockquote>
-<div><blockquote>
-<div><p>0                   1                   2                   3
-0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1</p>
-</div></blockquote>
-<div class="table-wrapper docutils container">
-<table class="docutils align-default">
-<tbody>
-<tr class="row-odd"><td colspan="16"><p>Extension Type</p></td>
-<td colspan="16"><p>Extension Data Length</p></td>
-</tr>
-<tr class="row-even"><td><p>P</p></td>
-<td colspan="31"><p>Reserved</p></td>
-</tr>
-<tr class="row-odd"><td colspan="32" rowspan="2"><p>Prefix[1]</p></td>
-</tr>
-<tr class="row-even"></tr>
-<tr class="row-odd"><td colspan="32" rowspan="2"><p>Prefix[2]</p></td>
-</tr>
-<tr class="row-even"></tr>
-</tbody>
-</table>
-</div>
-<p>.                               .                               .
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span> 0                   1                   2                   3
+ 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|         Extension Type        |   Extension Data Length       |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|P|                         Reserved                            |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                                                               |
++                           Prefix[1]                           +
+|                                                               |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                                                               |
++                           Prefix[2]                           +
+|                                                               |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+.                               .                               .
 .                               .                               .
 .                               .                               .
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 |                                                               |
 +                           Prefix[n]                           +
 |                                                               |
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</p>
-</div></blockquote>
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+</pre></div>
+</div>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -4212,6 +4202,124 @@ attribute:</p>
 
 </dd></dl>
 
+<section id="type-stubs">
+<h3>Type Stubs<a class="headerlink" href="#type-stubs" title="Permalink to this heading">#</a></h3>
+<dl class="py class">
+<dt class="sig sig-object py" id="pcapkit.protocols.schema.internet.mh.ANSIKeyLengthTest">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.schema.internet.mh.</span></span><span class="sig-name descname"><span class="pre">ANSIKeyLengthTest</span></span><a class="reference internal" href="../../../_modules/pcapkit/protocols/schema/internet/mh.html#ANSIKeyLengthTest"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.schema.internet.mh.ANSIKeyLengthTest" title="Permalink to this definition">#</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">TypedDict</span></code></p>
+<p>Length test for ANSI.1 encoded data, c.f.,
+<a class="reference internal" href="#pcapkit.protocols.schema.internet.mh.CGAParameter.public_key_test" title="pcapkit.protocols.schema.internet.mh.CGAParameter.public_key_test"><code class="xref py py-attr docutils literal notranslate"><span class="pre">CGAParameter.public_key_test</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>*args</strong> – Arbitrary positional arguments.</p></li>
+<li><p><strong>**kwargs</strong> – Arbitrary keyword arguments.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pcapkit.protocols.schema.internet.mh.MultiPrefixExtensionFlags">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.schema.internet.mh.</span></span><span class="sig-name descname"><span class="pre">MultiPrefixExtensionFlags</span></span><a class="reference internal" href="../../../_modules/pcapkit/protocols/schema/internet/mh.html#MultiPrefixExtensionFlags"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.schema.internet.mh.MultiPrefixExtensionFlags" title="Permalink to this definition">#</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">TypedDict</span></code></p>
+<p>Flags for <a class="reference internal" href="#pcapkit.protocols.schema.internet.mh.MultiPrefixExtension.flags" title="pcapkit.protocols.schema.internet.mh.MultiPrefixExtension.flags"><code class="xref py py-attr docutils literal notranslate"><span class="pre">MultiPrefixExtension.flags</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>*args</strong> – Arbitrary positional arguments.</p></li>
+<li><p><strong>**kwargs</strong> – Arbitrary keyword arguments.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pcapkit.protocols.schema.internet.mh.BindingUpdateMessageFlags">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.schema.internet.mh.</span></span><span class="sig-name descname"><span class="pre">BindingUpdateMessageFlags</span></span><a class="reference internal" href="../../../_modules/pcapkit/protocols/schema/internet/mh.html#BindingUpdateMessageFlags"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.schema.internet.mh.BindingUpdateMessageFlags" title="Permalink to this definition">#</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">TypedDict</span></code></p>
+<p>Flags for <a class="reference internal" href="#pcapkit.protocols.schema.internet.mh.BindingUpdateMessage.flags" title="pcapkit.protocols.schema.internet.mh.BindingUpdateMessage.flags"><code class="xref py py-attr docutils literal notranslate"><span class="pre">BindingUpdateMessage.flags</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>*args</strong> – Arbitrary positional arguments.</p></li>
+<li><p><strong>**kwargs</strong> – Arbitrary keyword arguments.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pcapkit.protocols.schema.internet.mh.BindingAcknowledgementMessageFlags">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.schema.internet.mh.</span></span><span class="sig-name descname"><span class="pre">BindingAcknowledgementMessageFlags</span></span><a class="reference internal" href="../../../_modules/pcapkit/protocols/schema/internet/mh.html#BindingAcknowledgementMessageFlags"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.schema.internet.mh.BindingAcknowledgementMessageFlags" title="Permalink to this definition">#</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">TypedDict</span></code></p>
+<p>Flags for <a class="reference internal" href="#pcapkit.protocols.schema.internet.mh.BindingAcknowledgementMessage.flags" title="pcapkit.protocols.schema.internet.mh.BindingAcknowledgementMessage.flags"><code class="xref py py-attr docutils literal notranslate"><span class="pre">BindingAcknowledgementMessage.flags</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>*args</strong> – Arbitrary positional arguments.</p></li>
+<li><p><strong>**kwargs</strong> – Arbitrary keyword arguments.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="auxiliary-functions">
+<h3>Auxiliary Functions<a class="headerlink" href="#auxiliary-functions" title="Permalink to this heading">#</a></h3>
+<dl class="py function">
+<dt class="sig sig-object py" id="pcapkit.protocols.schema.internet.mh.mh_opt_registry">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.schema.internet.mh.</span></span><span class="sig-name descname"><span class="pre">mh_opt_registry</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/schema/internet/mh.html#mh_opt_registry"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.schema.internet.mh.mh_opt_registry" title="Permalink to this definition">#</a></dt>
+<dd><p>Registry for MH type-specific message <code class="xref py py-attr docutils literal notranslate"><span class="pre">options</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.DefaultDict" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">DefaultDict</span></code></a>[<a class="reference internal" href="../../const/mh.html#pcapkit.const.mh.option.Option" title="pcapkit.const.mh.option.Option"><code class="xref py py-class docutils literal notranslate"><span class="pre">Option</span></code></a> | <a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Type</span></code></a>[<a class="reference internal" href="#pcapkit.protocols.schema.internet.mh.Option" title="pcapkit.protocols.schema.internet.mh.Option"><code class="xref py py-class docutils literal notranslate"><span class="pre">Option</span></code></a>]]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pcapkit.protocols.schema.internet.mh.mh_data_selector">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.schema.internet.mh.</span></span><span class="sig-name descname"><span class="pre">mh_data_selector</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pkt</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/schema/internet/mh.html#mh_data_selector"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.schema.internet.mh.mh_data_selector" title="Permalink to this definition">#</a></dt>
+<dd><p>Selector function for <a class="reference internal" href="#pcapkit.protocols.schema.internet.mh.MH.data" title="pcapkit.protocols.schema.internet.mh.MH.data"><code class="xref py py-attr docutils literal notranslate"><span class="pre">MH.data</span></code></a> field.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>pkt</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>]) – Packet data.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="../../corekit/fields.html#pcapkit.corekit.fields.field._Field" title="pcapkit.corekit.fields.field._Field"><code class="xref py py-class docutils literal notranslate"><span class="pre">_Field</span></code></a></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Returns a <code class="xref py py-class docutils literal notranslate"><span class="pre">SchemaField</span></code>
+wrapped <a class="reference internal" href="#pcapkit.protocols.schema.internet.mh.Packet" title="pcapkit.protocols.schema.internet.mh.Packet"><code class="xref py py-class docutils literal notranslate"><span class="pre">Packet</span></code></a>
+subclass instance.</p>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="../../const/mh.html#pcapkit.const.mh.packet.Packet" title="pcapkit.const.mh.packet.Packet"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.const.mh.packet.Packet</span></code></a></p></li>
+<li><p><code class="xref py py-data docutils literal notranslate"><span class="pre">ppcapkit.protocols.schema.internet.mh.MAP_MH_DATA</span></code></p></li>
+</ul>
+</div>
+</dd></dl>
+
+</section>
+<section id="miscellaneous-data">
+<h3>Miscellaneous Data<a class="headerlink" href="#miscellaneous-data" title="Permalink to this heading">#</a></h3>
+<dl class="py data">
+<dt class="sig sig-object py" id="pcapkit.protocols.schema.internet.mh.MAP_MH_DATA">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.schema.internet.mh.</span></span><span class="sig-name descname"><span class="pre">MAP_MH_DATA</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.DefaultDict" title="(in Python v3.11)"><span class="pre">DefaultDict</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="../../const/mh.html#pcapkit.const.mh.packet.Packet" title="pcapkit.const.mh.packet.Packet"><span class="pre">Packet</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.11)"><span class="pre">Type</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#pcapkit.protocols.schema.internet.mh.Packet" title="pcapkit.protocols.schema.internet.mh.Packet"><span class="pre">Packet</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pcapkit.protocols.schema.internet.mh.MAP_MH_DATA" title="Permalink to this definition">#</a></dt>
+<dd><p>Mapping of MH message type numbers to schemas.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>DefaultDict[Enum_Packet, <a class="reference internal" href="../../const/l2tp.html#pcapkit.const.l2tp.type.Type" title="pcapkit.const.l2tp.type.Type">Type</a>[<a class="reference internal" href="#pcapkit.protocols.schema.internet.mh.Packet" title="pcapkit.protocols.schema.internet.mh.Packet">Packet</a>]]</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
 </section>
 <section id="module-pcapkit.protocols.data.internet.mh">
 <span id="data-models"></span><h2>Data Models<a class="headerlink" href="#module-pcapkit.protocols.data.internet.mh" title="Permalink to this heading">#</a></h2>
@@ -5161,7 +5269,12 @@ the CGA Parameter Data Structure, reset otherwise.</p>
             <ul>
 <li><a class="reference internal" href="#">MH - Mobility Header</a><ul>
 <li><a class="reference internal" href="#auxiliary-data">Auxiliary Data</a></li>
-<li><a class="reference internal" href="#module-pcapkit.protocols.schema.internet.mh">Header Schemas</a></li>
+<li><a class="reference internal" href="#module-pcapkit.protocols.schema.internet.mh">Header Schemas</a><ul>
+<li><a class="reference internal" href="#type-stubs">Type Stubs</a></li>
+<li><a class="reference internal" href="#auxiliary-functions">Auxiliary Functions</a></li>
+<li><a class="reference internal" href="#miscellaneous-data">Miscellaneous Data</a></li>
+</ul>
+</li>
 <li><a class="reference internal" href="#module-pcapkit.protocols.data.internet.mh">Data Models</a></li>
 </ul>
 </li>

@@ -737,6 +737,15 @@ Auxiliary Functions
 .. autofunction:: pcapkit.protocols.schema.misc.pcapng.pcapng_block_selector
 .. autofunction:: pcapkit.protocols.schema.misc.pcapng.dsb_secrets_selector
 
+Miscellaneous Data
+~~~~~~~~~~~~~~~~~~
+
+.. autodata:: pcapkit.protocols.schema.misc.pcapng.MAP_PCAPNG_BLOCK
+   :no-value:
+
+.. autodata:: pcapkit.protocols.schema.misc.pcapng.MAP_DSB_SECRETS
+   :no-value:
+
 Data Models
 -----------
 

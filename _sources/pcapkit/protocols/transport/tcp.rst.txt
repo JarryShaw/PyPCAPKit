@@ -530,6 +530,12 @@ Auxiliary Functions
 .. autofunction:: pcapkit.protocols.schema.transport.tcp.mptcp_data_selector
 .. autofunction:: pcapkit.protocols.schema.transport.tcp.mptcp_add_address_selector
 
+Miscellaneous Data
+~~~~~~~~~~~~~~~~~~
+
+.. autodata:: pcapkit.protocols.schema.transport.tcp.MAP_MPTCP_DATA
+   :no-value:
+
 Data Models
 -----------
 

@@ -438,32 +438,32 @@
 <span class="k">if</span> <span class="n">SPHINX_TYPE_CHECKING</span><span class="p">:</span>
     <span class="kn">from</span> <span class="nn">typing_extensions</span> <span class="kn">import</span> <span class="n">TypedDict</span>
 
-    <span class="k">class</span> <span class="nc">ANSIKeyLengthTest</span><span class="p">(</span><span class="n">TypedDict</span><span class="p">):</span>
+<div class="viewcode-block" id="ANSIKeyLengthTest"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.schema.internet.mh.ANSIKeyLengthTest">[docs]</a>    <span class="k">class</span> <span class="nc">ANSIKeyLengthTest</span><span class="p">(</span><span class="n">TypedDict</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Length test for ANSI.1 encoded data, c.f.,</span>
 <span class="sd">        :attr:`CGAParameter.public_key_test`.&quot;&quot;&quot;</span>
 
-        <span class="nb">len</span><span class="p">:</span> <span class="nb">int</span>
+        <span class="nb">len</span><span class="p">:</span> <span class="nb">int</span></div>
 
-    <span class="k">class</span> <span class="nc">MultiPrefixExtensionFlags</span><span class="p">(</span><span class="n">TypedDict</span><span class="p">):</span>
+<div class="viewcode-block" id="MultiPrefixExtensionFlags"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.schema.internet.mh.MultiPrefixExtensionFlags">[docs]</a>    <span class="k">class</span> <span class="nc">MultiPrefixExtensionFlags</span><span class="p">(</span><span class="n">TypedDict</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Flags for :attr:`MultiPrefixExtension.flags`.&quot;&quot;&quot;</span>
 
-        <span class="n">P</span><span class="p">:</span> <span class="nb">int</span>
+        <span class="n">P</span><span class="p">:</span> <span class="nb">int</span></div>
 
-    <span class="k">class</span> <span class="nc">BindingUpdateMessageFlags</span><span class="p">(</span><span class="n">TypedDict</span><span class="p">):</span>
+<div class="viewcode-block" id="BindingUpdateMessageFlags"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.schema.internet.mh.BindingUpdateMessageFlags">[docs]</a>    <span class="k">class</span> <span class="nc">BindingUpdateMessageFlags</span><span class="p">(</span><span class="n">TypedDict</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Flags for :attr:`BindingUpdateMessage.flags`.&quot;&quot;&quot;</span>
 
         <span class="n">A</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span>
         <span class="n">H</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span>
         <span class="n">L</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span>
-        <span class="n">K</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span>
+        <span class="n">K</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span></div>
 
-    <span class="k">class</span> <span class="nc">BindingAcknowledgementMessageFlags</span><span class="p">(</span><span class="n">TypedDict</span><span class="p">):</span>
+<div class="viewcode-block" id="BindingAcknowledgementMessageFlags"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.schema.internet.mh.BindingAcknowledgementMessageFlags">[docs]</a>    <span class="k">class</span> <span class="nc">BindingAcknowledgementMessageFlags</span><span class="p">(</span><span class="n">TypedDict</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Flags for :attr:`BindingAcknowledgementMessage.flags`.&quot;&quot;&quot;</span>
 
-        <span class="n">K</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span>
+        <span class="n">K</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span></div>
 
 
-<span class="k">def</span> <span class="nf">mh_opt_registry</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="s1">&#39;DefaultDict[Enum_Option | int, Type[Option]]&#39;</span><span class="p">:</span>
+<div class="viewcode-block" id="mh_opt_registry"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.schema.internet.mh.mh_opt_registry">[docs]</a><span class="k">def</span> <span class="nf">mh_opt_registry</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="s1">&#39;DefaultDict[Enum_Option | int, Type[Option]]&#39;</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Registry for MH type-specific message :attr:`~Packet.options`.&quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">collections</span><span class="o">.</span><span class="n">defaultdict</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="n">UnassignedOption</span><span class="p">,</span> <span class="p">{</span>
         <span class="n">Enum_Option</span><span class="o">.</span><span class="n">Pad1</span><span class="p">:</span> <span class="n">PadOption</span><span class="p">,</span>
@@ -483,10 +483,10 @@
         <span class="n">Enum_Option</span><span class="o">.</span><span class="n">Permanent_Home_Keygen_Token</span><span class="p">:</span> <span class="n">PermanentHomeKeygenTokenOption</span><span class="p">,</span>
         <span class="n">Enum_Option</span><span class="o">.</span><span class="n">Care_of_Test_Init</span><span class="p">:</span> <span class="n">CareofTestInitOption</span><span class="p">,</span>
         <span class="n">Enum_Option</span><span class="o">.</span><span class="n">Care_of_Test</span><span class="p">:</span> <span class="n">CareofTestOption</span><span class="p">,</span>
-    <span class="p">})</span>
+    <span class="p">})</span></div>
 
 
-<span class="k">def</span> <span class="nf">mh_data_selector</span><span class="p">(</span><span class="n">pkt</span><span class="p">:</span> <span class="s1">&#39;dict[str, Any]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Field&#39;</span><span class="p">:</span>
+<div class="viewcode-block" id="mh_data_selector"><a class="viewcode-back" href="../../../../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.schema.internet.mh.mh_data_selector">[docs]</a><span class="k">def</span> <span class="nf">mh_data_selector</span><span class="p">(</span><span class="n">pkt</span><span class="p">:</span> <span class="s1">&#39;dict[str, Any]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Field&#39;</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Selector function for :attr:`MH.data` field.</span>
 
 <span class="sd">    Args:</span>
@@ -494,30 +494,18 @@
 
 <span class="sd">    Returns:</span>
 <span class="sd">        Returns a :class:`~pcapkit.corekit.fields.misc.SchemaField`</span>
-<span class="sd">        wrapped :class:`~pcapkit.protocols.schema.misc.mh.Packet`</span>
+<span class="sd">        wrapped :class:`~pcapkit.protocols.schema.internet.mh.Packet`</span>
 <span class="sd">        subclass instance.</span>
+
+<span class="sd">    See Also:</span>
+<span class="sd">        * :class:`pcapkit.const.mh.packet.Packet`</span>
+<span class="sd">        * :data:`ppcapkit.protocols.schema.internet.mh.MAP_MH_DATA`</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="nb">type</span> <span class="o">=</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span>  <span class="c1"># type: Enum_Packet</span>
     <span class="n">length</span> <span class="o">=</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">&#39;length&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="mi">8</span> <span class="o">+</span> <span class="mi">2</span>
-
-    <span class="k">if</span> <span class="nb">type</span> <span class="o">==</span> <span class="n">Enum_Packet</span><span class="o">.</span><span class="n">Binding_Refresh_Request</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">SchemaField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="n">length</span><span class="p">,</span> <span class="n">schema</span><span class="o">=</span><span class="n">BindingRefreshRequestMessage</span><span class="p">)</span>
-    <span class="k">if</span> <span class="nb">type</span> <span class="o">==</span> <span class="n">Enum_Packet</span><span class="o">.</span><span class="n">Home_Test_Init</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">SchemaField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="n">length</span><span class="p">,</span> <span class="n">schema</span><span class="o">=</span><span class="n">HomeTestInitMessage</span><span class="p">)</span>
-    <span class="k">if</span> <span class="nb">type</span> <span class="o">==</span> <span class="n">Enum_Packet</span><span class="o">.</span><span class="n">Care_of_Test_Init</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">SchemaField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="n">length</span><span class="p">,</span> <span class="n">schema</span><span class="o">=</span><span class="n">CareofTestInitMessage</span><span class="p">)</span>
-    <span class="k">if</span> <span class="nb">type</span> <span class="o">==</span> <span class="n">Enum_Packet</span><span class="o">.</span><span class="n">Home_Test</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">SchemaField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="n">length</span><span class="p">,</span> <span class="n">schema</span><span class="o">=</span><span class="n">HomeTestMessage</span><span class="p">)</span>
-    <span class="k">if</span> <span class="nb">type</span> <span class="o">==</span> <span class="n">Enum_Packet</span><span class="o">.</span><span class="n">Care_of_Test</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">SchemaField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="n">length</span><span class="p">,</span> <span class="n">schema</span><span class="o">=</span><span class="n">CareofTestMessage</span><span class="p">)</span>
-    <span class="k">if</span> <span class="nb">type</span> <span class="o">==</span> <span class="n">Enum_Packet</span><span class="o">.</span><span class="n">Binding_Update</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">SchemaField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="n">length</span><span class="p">,</span> <span class="n">schema</span><span class="o">=</span><span class="n">BindingUpdateMessage</span><span class="p">)</span>
-    <span class="k">if</span> <span class="nb">type</span> <span class="o">==</span> <span class="n">Enum_Packet</span><span class="o">.</span><span class="n">Binding_Acknowledgement</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">SchemaField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="n">length</span><span class="p">,</span> <span class="n">schema</span><span class="o">=</span><span class="n">BindingAcknowledgementMessage</span><span class="p">)</span>
-    <span class="k">if</span> <span class="nb">type</span> <span class="o">==</span> <span class="n">Enum_Packet</span><span class="o">.</span><span class="n">Binding_Error</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">SchemaField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="n">length</span><span class="p">,</span> <span class="n">schema</span><span class="o">=</span><span class="n">BindingErrorMessage</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">SchemaField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="n">length</span><span class="p">,</span> <span class="n">schema</span><span class="o">=</span><span class="n">UnknownMessage</span><span class="p">)</span>
+    <span class="n">schema</span> <span class="o">=</span> <span class="n">MAP_MH_DATA</span><span class="p">[</span><span class="nb">type</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">SchemaField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="n">length</span><span class="p">,</span> <span class="n">schema</span><span class="o">=</span><span class="n">schema</span><span class="p">)</span></div>
 
 
 <span class="k">def</span> <span class="nf">mn_id_selector</span><span class="p">(</span><span class="n">pkt</span><span class="p">:</span> <span class="s1">&#39;dict[str, Any]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Field&#39;</span><span class="p">:</span>
@@ -819,7 +807,7 @@
         <span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">&#39;length&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="mi">25</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">pkt</span><span class="p">[</span><span class="s1">&#39;public_key&#39;</span><span class="p">]),</span>
         <span class="n">base_schema</span><span class="o">=</span><span class="n">CGAExtension</span><span class="p">,</span>
         <span class="n">type_name</span><span class="o">=</span><span class="s1">&#39;type&#39;</span><span class="p">,</span>
-        <span class="n">registry</span><span class="o">=</span><span class="n">collections</span><span class="o">.</span><span class="n">defaultdict</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="n">UnknownExtension</span><span class="p">,</span> <span class="p">{</span>
+        <span class="n">registry</span><span class="o">=</span><span class="n">collections</span><span class="o">.</span><span class="n">defaultdict</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="n">UnknownExtension</span><span class="p">,</span> <span class="p">{</span>  <span class="c1"># type: ignore[arg-type,return-value]</span>
             <span class="n">Enum_CGAExtension</span><span class="o">.</span><span class="n">Multi_Prefix</span><span class="p">:</span> <span class="n">MultiPrefixExtension</span><span class="p">,</span>
         <span class="p">}),</span>
         <span class="n">eool</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -914,7 +902,7 @@
         <span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">&#39;__length__&#39;</span><span class="p">],</span>
         <span class="n">base_schema</span><span class="o">=</span><span class="n">Option</span><span class="p">,</span>
         <span class="n">type_name</span><span class="o">=</span><span class="s1">&#39;type&#39;</span><span class="p">,</span>
-        <span class="n">registry</span><span class="o">=</span><span class="n">mh_opt_registry</span><span class="p">(),</span>  <span class="c1"># type: ignore[arg-type]</span>
+        <span class="n">registry</span><span class="o">=</span><span class="n">mh_opt_registry</span><span class="p">(),</span>
         <span class="n">eool</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span>
 
@@ -935,7 +923,7 @@
         <span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">&#39;__length__&#39;</span><span class="p">],</span>
         <span class="n">base_schema</span><span class="o">=</span><span class="n">Option</span><span class="p">,</span>
         <span class="n">type_name</span><span class="o">=</span><span class="s1">&#39;type&#39;</span><span class="p">,</span>
-        <span class="n">registry</span><span class="o">=</span><span class="n">mh_opt_registry</span><span class="p">(),</span>  <span class="c1"># type: ignore[arg-type]</span>
+        <span class="n">registry</span><span class="o">=</span><span class="n">mh_opt_registry</span><span class="p">(),</span>
         <span class="n">eool</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span>
 
@@ -956,7 +944,7 @@
         <span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">&#39;__length__&#39;</span><span class="p">],</span>
         <span class="n">base_schema</span><span class="o">=</span><span class="n">Option</span><span class="p">,</span>
         <span class="n">type_name</span><span class="o">=</span><span class="s1">&#39;type&#39;</span><span class="p">,</span>
-        <span class="n">registry</span><span class="o">=</span><span class="n">mh_opt_registry</span><span class="p">(),</span>  <span class="c1"># type: ignore[arg-type]</span>
+        <span class="n">registry</span><span class="o">=</span><span class="n">mh_opt_registry</span><span class="p">(),</span>
         <span class="n">eool</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span>
 
@@ -979,7 +967,7 @@
         <span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">&#39;__length__&#39;</span><span class="p">],</span>
         <span class="n">base_schema</span><span class="o">=</span><span class="n">Option</span><span class="p">,</span>
         <span class="n">type_name</span><span class="o">=</span><span class="s1">&#39;type&#39;</span><span class="p">,</span>
-        <span class="n">registry</span><span class="o">=</span><span class="n">mh_opt_registry</span><span class="p">(),</span>  <span class="c1"># type: ignore[arg-type]</span>
+        <span class="n">registry</span><span class="o">=</span><span class="n">mh_opt_registry</span><span class="p">(),</span>
         <span class="n">eool</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span>
 
@@ -1003,7 +991,7 @@
         <span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">&#39;__length__&#39;</span><span class="p">],</span>
         <span class="n">base_schema</span><span class="o">=</span><span class="n">Option</span><span class="p">,</span>
         <span class="n">type_name</span><span class="o">=</span><span class="s1">&#39;type&#39;</span><span class="p">,</span>
-        <span class="n">registry</span><span class="o">=</span><span class="n">mh_opt_registry</span><span class="p">(),</span>  <span class="c1"># type: ignore[arg-type]</span>
+        <span class="n">registry</span><span class="o">=</span><span class="n">mh_opt_registry</span><span class="p">(),</span>
         <span class="n">eool</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span>
 
@@ -1032,7 +1020,7 @@
         <span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">&#39;__length__&#39;</span><span class="p">],</span>
         <span class="n">base_schema</span><span class="o">=</span><span class="n">Option</span><span class="p">,</span>
         <span class="n">type_name</span><span class="o">=</span><span class="s1">&#39;type&#39;</span><span class="p">,</span>
-        <span class="n">registry</span><span class="o">=</span><span class="n">mh_opt_registry</span><span class="p">(),</span>  <span class="c1"># type: ignore[arg-type]</span>
+        <span class="n">registry</span><span class="o">=</span><span class="n">mh_opt_registry</span><span class="p">(),</span>
         <span class="n">eool</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span>
 
@@ -1060,7 +1048,7 @@
         <span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">&#39;__length__&#39;</span><span class="p">],</span>
         <span class="n">base_schema</span><span class="o">=</span><span class="n">Option</span><span class="p">,</span>
         <span class="n">type_name</span><span class="o">=</span><span class="s1">&#39;type&#39;</span><span class="p">,</span>
-        <span class="n">registry</span><span class="o">=</span><span class="n">mh_opt_registry</span><span class="p">(),</span>  <span class="c1"># type: ignore[arg-type]</span>
+        <span class="n">registry</span><span class="o">=</span><span class="n">mh_opt_registry</span><span class="p">(),</span>
         <span class="n">eool</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span>
 
@@ -1084,7 +1072,7 @@
         <span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">&#39;__length__&#39;</span><span class="p">],</span>
         <span class="n">base_schema</span><span class="o">=</span><span class="n">Option</span><span class="p">,</span>
         <span class="n">type_name</span><span class="o">=</span><span class="s1">&#39;type&#39;</span><span class="p">,</span>
-        <span class="n">registry</span><span class="o">=</span><span class="n">mh_opt_registry</span><span class="p">(),</span>  <span class="c1"># type: ignore[arg-type]</span>
+        <span class="n">registry</span><span class="o">=</span><span class="n">mh_opt_registry</span><span class="p">(),</span>
         <span class="n">eool</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span>
 
@@ -1094,6 +1082,18 @@
 
 
 <span class="c1"># TODO: Implement other message types.</span>
+
+<span class="c1">#: DefaultDict[Enum_Packet, Type[Packet]]: Mapping of MH message type numbers to schemas.</span>
+<span class="n">MAP_MH_DATA</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">defaultdict</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="n">UnknownMessage</span><span class="p">,</span> <span class="p">{</span>
+    <span class="n">Enum_Packet</span><span class="o">.</span><span class="n">Binding_Refresh_Request</span><span class="p">:</span> <span class="n">BindingRefreshRequestMessage</span><span class="p">,</span>
+    <span class="n">Enum_Packet</span><span class="o">.</span><span class="n">Home_Test_Init</span><span class="p">:</span> <span class="n">HomeTestInitMessage</span><span class="p">,</span>
+    <span class="n">Enum_Packet</span><span class="o">.</span><span class="n">Care_of_Test_Init</span><span class="p">:</span> <span class="n">CareofTestInitMessage</span><span class="p">,</span>
+    <span class="n">Enum_Packet</span><span class="o">.</span><span class="n">Home_Test</span><span class="p">:</span> <span class="n">HomeTestMessage</span><span class="p">,</span>
+    <span class="n">Enum_Packet</span><span class="o">.</span><span class="n">Care_of_Test</span><span class="p">:</span> <span class="n">CareofTestMessage</span><span class="p">,</span>
+    <span class="n">Enum_Packet</span><span class="o">.</span><span class="n">Binding_Update</span><span class="p">:</span> <span class="n">BindingUpdateMessage</span><span class="p">,</span>
+    <span class="n">Enum_Packet</span><span class="o">.</span><span class="n">Binding_Acknowledgement</span><span class="p">:</span> <span class="n">BindingAcknowledgementMessage</span><span class="p">,</span>
+    <span class="n">Enum_Packet</span><span class="o">.</span><span class="n">Binding_Error</span><span class="p">:</span> <span class="n">BindingErrorMessage</span><span class="p">,</span>
+<span class="p">})</span>  <span class="c1"># type: DefaultDict[Enum_Packet | int, Type[Packet]]</span>
 </pre></div>
         </article>
       </div>

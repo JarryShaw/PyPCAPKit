@@ -345,6 +345,7 @@
 <span class="c1"># mypy: disable-error-code=assignment</span>
 <span class="sd">&quot;&quot;&quot;header schema for HTTP/2 protocol&quot;&quot;&quot;</span>
 
+<span class="kn">import</span> <span class="nn">collections</span>
 <span class="kn">import</span> <span class="nn">enum</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">cast</span>
 
@@ -368,7 +369,7 @@
 <span class="p">]</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-    <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Optional</span>
+    <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">DefaultDict</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Type</span>
 
     <span class="kn">from</span> <span class="nn">pcapkit.corekit.fields.field</span> <span class="kn">import</span> <span class="n">_Field</span> <span class="k">as</span> <span class="n">Field</span>
 
@@ -421,27 +422,8 @@
 
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="nb">type</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">&#39;Enum_Frame&#39;</span><span class="p">,</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">])</span>
-    <span class="k">if</span> <span class="nb">type</span> <span class="o">==</span> <span class="n">Enum_Frame</span><span class="o">.</span><span class="n">DATA</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">SchemaField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="n">pkt</span><span class="p">[</span><span class="s1">&#39;__length__&#39;</span><span class="p">],</span> <span class="n">schema</span><span class="o">=</span><span class="n">DataFrame</span><span class="p">)</span>
-    <span class="k">if</span> <span class="nb">type</span> <span class="o">==</span> <span class="n">Enum_Frame</span><span class="o">.</span><span class="n">HEADERS</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">SchemaField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="n">pkt</span><span class="p">[</span><span class="s1">&#39;__length__&#39;</span><span class="p">],</span> <span class="n">schema</span><span class="o">=</span><span class="n">HeadersFrame</span><span class="p">)</span>
-    <span class="k">if</span> <span class="nb">type</span> <span class="o">==</span> <span class="n">Enum_Frame</span><span class="o">.</span><span class="n">PRIORITY</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">SchemaField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="n">pkt</span><span class="p">[</span><span class="s1">&#39;__length__&#39;</span><span class="p">],</span> <span class="n">schema</span><span class="o">=</span><span class="n">PriorityFrame</span><span class="p">)</span>
-    <span class="k">if</span> <span class="nb">type</span> <span class="o">==</span> <span class="n">Enum_Frame</span><span class="o">.</span><span class="n">RST_STREAM</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">SchemaField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="n">pkt</span><span class="p">[</span><span class="s1">&#39;__length__&#39;</span><span class="p">],</span> <span class="n">schema</span><span class="o">=</span><span class="n">RSTStreamFrame</span><span class="p">)</span>
-    <span class="k">if</span> <span class="nb">type</span> <span class="o">==</span> <span class="n">Enum_Frame</span><span class="o">.</span><span class="n">SETTINGS</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">SchemaField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="n">pkt</span><span class="p">[</span><span class="s1">&#39;__length__&#39;</span><span class="p">],</span> <span class="n">schema</span><span class="o">=</span><span class="n">SettingsFrame</span><span class="p">)</span>
-    <span class="k">if</span> <span class="nb">type</span> <span class="o">==</span> <span class="n">Enum_Frame</span><span class="o">.</span><span class="n">PUSH_PROMISE</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">SchemaField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="n">pkt</span><span class="p">[</span><span class="s1">&#39;__length__&#39;</span><span class="p">],</span> <span class="n">schema</span><span class="o">=</span><span class="n">PushPromiseFrame</span><span class="p">)</span>
-    <span class="k">if</span> <span class="nb">type</span> <span class="o">==</span> <span class="n">Enum_Frame</span><span class="o">.</span><span class="n">PING</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">SchemaField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="n">pkt</span><span class="p">[</span><span class="s1">&#39;__length__&#39;</span><span class="p">],</span> <span class="n">schema</span><span class="o">=</span><span class="n">PingFrame</span><span class="p">)</span>
-    <span class="k">if</span> <span class="nb">type</span> <span class="o">==</span> <span class="n">Enum_Frame</span><span class="o">.</span><span class="n">GOAWAY</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">SchemaField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="n">pkt</span><span class="p">[</span><span class="s1">&#39;__length__&#39;</span><span class="p">],</span> <span class="n">schema</span><span class="o">=</span><span class="n">GoawayFrame</span><span class="p">)</span>
-    <span class="k">if</span> <span class="nb">type</span> <span class="o">==</span> <span class="n">Enum_Frame</span><span class="o">.</span><span class="n">WINDOW_UPDATE</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">SchemaField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="n">pkt</span><span class="p">[</span><span class="s1">&#39;__length__&#39;</span><span class="p">],</span> <span class="n">schema</span><span class="o">=</span><span class="n">WindowUpdateFrame</span><span class="p">)</span>
-    <span class="k">if</span> <span class="nb">type</span> <span class="o">==</span> <span class="n">Enum_Frame</span><span class="o">.</span><span class="n">CONTINUATION</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">SchemaField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="n">pkt</span><span class="p">[</span><span class="s1">&#39;__length__&#39;</span><span class="p">],</span> <span class="n">schema</span><span class="o">=</span><span class="n">ContinuationFrame</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">SchemaField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="n">pkt</span><span class="p">[</span><span class="s1">&#39;__length__&#39;</span><span class="p">],</span> <span class="n">schema</span><span class="o">=</span><span class="n">UnassignedFrame</span><span class="p">)</span></div>
+    <span class="n">schema</span> <span class="o">=</span> <span class="n">MAP_HTTP_FRAME</span><span class="p">[</span><span class="nb">type</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">SchemaField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="n">pkt</span><span class="p">[</span><span class="s1">&#39;__length__&#39;</span><span class="p">],</span> <span class="n">schema</span><span class="o">=</span><span class="n">schema</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="HTTP"><a class="viewcode-back" href="../../../../../pcapkit/protocols/application/httpv2.html#pcapkit.protocols.schema.application.httpv2.HTTP">[docs]</a><span class="nd">@schema_final</span>
@@ -741,6 +723,21 @@
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
         <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fragment</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
+
+
+<span class="c1">#: DefaultDict[Enum_Frame, Type[FrameType]]: Mapping of HTTP/2 frame type numbers to schemas.</span>
+<span class="n">MAP_HTTP_FRAME</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">defaultdict</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="n">UnassignedFrame</span><span class="p">,</span> <span class="p">{</span>
+    <span class="n">Enum_Frame</span><span class="o">.</span><span class="n">DATA</span><span class="p">:</span> <span class="n">DataFrame</span><span class="p">,</span>
+    <span class="n">Enum_Frame</span><span class="o">.</span><span class="n">HEADERS</span><span class="p">:</span> <span class="n">HeadersFrame</span><span class="p">,</span>
+    <span class="n">Enum_Frame</span><span class="o">.</span><span class="n">PRIORITY</span><span class="p">:</span> <span class="n">PriorityFrame</span><span class="p">,</span>
+    <span class="n">Enum_Frame</span><span class="o">.</span><span class="n">RST_STREAM</span><span class="p">:</span> <span class="n">RSTStreamFrame</span><span class="p">,</span>
+    <span class="n">Enum_Frame</span><span class="o">.</span><span class="n">SETTINGS</span><span class="p">:</span> <span class="n">SettingsFrame</span><span class="p">,</span>
+    <span class="n">Enum_Frame</span><span class="o">.</span><span class="n">PUSH_PROMISE</span><span class="p">:</span> <span class="n">PushPromiseFrame</span><span class="p">,</span>
+    <span class="n">Enum_Frame</span><span class="o">.</span><span class="n">PING</span><span class="p">:</span> <span class="n">PingFrame</span><span class="p">,</span>
+    <span class="n">Enum_Frame</span><span class="o">.</span><span class="n">GOAWAY</span><span class="p">:</span> <span class="n">GoawayFrame</span><span class="p">,</span>
+    <span class="n">Enum_Frame</span><span class="o">.</span><span class="n">WINDOW_UPDATE</span><span class="p">:</span> <span class="n">WindowUpdateFrame</span><span class="p">,</span>
+    <span class="n">Enum_Frame</span><span class="o">.</span><span class="n">CONTINUATION</span><span class="p">:</span> <span class="n">ContinuationFrame</span><span class="p">,</span>
+<span class="p">})</span>  <span class="c1"># type: DefaultDict[Enum_Frame | int, Type[FrameType]]</span>
 </pre></div>
         </article>
       </div>

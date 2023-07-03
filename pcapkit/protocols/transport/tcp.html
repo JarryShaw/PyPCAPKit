@@ -5043,6 +5043,13 @@ Length, and Checksum present.</p>
 instance.</p>
 </dd>
 </dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="../../const/tcp.html#pcapkit.const.tcp.mp_tcp_option.MPTCPOption" title="pcapkit.const.tcp.mp_tcp_option.MPTCPOption"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.const.tcp.mp_tcp_option.MPTCPOption</span></code></a></p></li>
+<li><p><a class="reference internal" href="#pcapkit.protocols.schema.transport.tcp.MAP_MPTCP_DATA" title="pcapkit.protocols.schema.transport.tcp.MAP_MPTCP_DATA"><code class="xref py py-data docutils literal notranslate"><span class="pre">pcapkit.protocols.schema.transport.tcp.MAP_MPTCP_DATA</span></code></a></p></li>
+</ul>
+</div>
 </dd></dl>
 
 <dl class="py function">
@@ -5064,6 +5071,20 @@ instance.</p></li>
 instance.</p></li>
 </ul>
 </p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="miscellaneous-data">
+<h3>Miscellaneous Data<a class="headerlink" href="#miscellaneous-data" title="Permalink to this heading">#</a></h3>
+<dl class="py data">
+<dt class="sig sig-object py" id="pcapkit.protocols.schema.transport.tcp.MAP_MPTCP_DATA">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.schema.transport.tcp.</span></span><span class="sig-name descname"><span class="pre">MAP_MPTCP_DATA</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.DefaultDict" title="(in Python v3.11)"><span class="pre">DefaultDict</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="../../const/tcp.html#pcapkit.const.tcp.mp_tcp_option.MPTCPOption" title="pcapkit.const.tcp.mp_tcp_option.MPTCPOption"><span class="pre">MPTCPOption</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.11)"><span class="pre">Type</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#pcapkit.protocols.schema.transport.tcp.MPTCP" title="pcapkit.protocols.schema.transport.tcp.MPTCP"><span class="pre">MPTCP</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pcapkit.protocols.schema.transport.tcp.MAP_MPTCP_DATA" title="Permalink to this definition">#</a></dt>
+<dd><p>Mapping of MPTCP type numbers to schemas.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>DefaultDict[Enum_MPTCPOption, <a class="reference internal" href="../../const/l2tp.html#pcapkit.const.l2tp.type.Type" title="pcapkit.const.l2tp.type.Type">Type</a>[<a class="reference internal" href="#pcapkit.protocols.schema.transport.tcp.MPTCP" title="pcapkit.protocols.schema.transport.tcp.MPTCP">MPTCP</a>]]</p>
 </dd>
 </dl>
 </dd></dl>
@@ -6175,6 +6196,7 @@ instance.</p></li>
 <li><a class="reference internal" href="#module-pcapkit.protocols.schema.transport.tcp">Header Schemas</a><ul>
 <li><a class="reference internal" href="#type-stubs">Type Stubs</a></li>
 <li><a class="reference internal" href="#auxiliary-functions">Auxiliary Functions</a></li>
+<li><a class="reference internal" href="#miscellaneous-data">Miscellaneous Data</a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#module-pcapkit.protocols.data.transport.tcp">Data Models</a></li>

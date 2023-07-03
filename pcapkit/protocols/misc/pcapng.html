@@ -7,12 +7,12 @@
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://pypcapkit.jarryshaw.me/pcapkit/protocols/misc/pcapng.html" />
 <meta property="og:site_name" content="PyPCAPKit" />
-<meta property="og:description" content="pcapkit.protocols.misc.pcapng contains PCAPNG only, which implements extractor for PCAP-NG file format*. Auxiliary Data: Header Schemas: Type Stubs: Auxiliary Functions: Data Models:*, https://www...." />
+<meta property="og:description" content="pcapkit.protocols.misc.pcapng contains PCAPNG only, which implements extractor for PCAP-NG file format*. Auxiliary Data: Header Schemas: Type Stubs: Auxiliary Functions: Miscellaneous Data: Data Mo..." />
 <meta property="og:image:width" content="1146" />
 <meta property="og:image:height" content="600" />
 <meta property="og:image" content="https://pypcapkit.jarryshaw.me/_images/social_previews/summary_pcapkit_protocols_misc_pcapng_39505f28.png" />
 <meta property="og:image:alt" content="pcapkit.protocols.misc.pcapng contains PCAPNG only, which implements extractor for PCAP-NG file format*. Auxiliary Data: Header Schemas: Type Stubs: Auxiliar..." />
-<meta name="description" content="pcapkit.protocols.misc.pcapng contains PCAPNG only, which implements extractor for PCAP-NG file format*. Auxiliary Data: Header Schemas: Type Stubs: Auxiliary Functions: Data Models:*, https://www...." />
+<meta name="description" content="pcapkit.protocols.misc.pcapng contains PCAPNG only, which implements extractor for PCAP-NG file format*. Auxiliary Data: Header Schemas: Type Stubs: Auxiliary Functions: Miscellaneous Data: Data Mo..." />
 <meta name="twitter:card" content="summary_large_image" />
 <link rel="index" title="Index" href="../../../genindex.html" /><link rel="search" title="Search" href="../../../search.html" /><link rel="next" title="Raw Packet Data" href="raw.html" /><link rel="prev" title="PCAP File Headers" href="pcap.html" />
 
@@ -8504,6 +8504,13 @@ wrapped <a class="reference internal" href="#pcapkit.protocols.schema.misc.pcapn
 subclass instance.</p>
 </dd>
 </dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="../../const/pcapng.html#pcapkit.const.pcapng.block_type.BlockType" title="pcapkit.const.pcapng.block_type.BlockType"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.const.pcapng.block_type.BlockType</span></code></a></p></li>
+<li><p><a class="reference internal" href="#pcapkit.protocols.schema.misc.pcapng.MAP_PCAPNG_BLOCK" title="pcapkit.protocols.schema.misc.pcapng.MAP_PCAPNG_BLOCK"><code class="xref py py-data docutils literal notranslate"><span class="pre">pcapkit.protocols.schema.misc.pcapng.MAP_PCAPNG_BLOCK</span></code></a></p></li>
+</ul>
+</div>
 </dd></dl>
 
 <dl class="py function">
@@ -8536,6 +8543,31 @@ subclass instance.</p></li>
 </dl>
 </dd></dl>
 
+<section id="miscellaneous-data">
+<h3>Miscellaneous Data<a class="headerlink" href="#miscellaneous-data" title="Permalink to this heading">#</a></h3>
+<dl class="py data">
+<dt class="sig sig-object py" id="pcapkit.protocols.schema.misc.pcapng.MAP_PCAPNG_BLOCK">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.schema.misc.pcapng.</span></span><span class="sig-name descname"><span class="pre">MAP_PCAPNG_BLOCK</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.DefaultDict" title="(in Python v3.11)"><span class="pre">DefaultDict</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="../../const/pcapng.html#pcapkit.const.pcapng.block_type.BlockType" title="pcapkit.const.pcapng.block_type.BlockType"><span class="pre">BlockType</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.11)"><span class="pre">Type</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#pcapkit.protocols.schema.misc.pcapng.BlockType" title="pcapkit.protocols.schema.misc.pcapng.BlockType"><span class="pre">BlockType</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pcapkit.protocols.schema.misc.pcapng.MAP_PCAPNG_BLOCK" title="Permalink to this definition">#</a></dt>
+<dd><p>Mapping of PCAP-NG block type numbers to schemas.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>DefaultDict[Enum_BlockType, <a class="reference internal" href="../../const/l2tp.html#pcapkit.const.l2tp.type.Type" title="pcapkit.const.l2tp.type.Type">Type</a>[<a class="reference internal" href="#pcapkit.protocols.schema.misc.pcapng.BlockType" title="pcapkit.protocols.schema.misc.pcapng.BlockType">BlockType</a>]]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="pcapkit.protocols.schema.misc.pcapng.MAP_DSB_SECRETS">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.schema.misc.pcapng.</span></span><span class="sig-name descname"><span class="pre">MAP_DSB_SECRETS</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.DefaultDict" title="(in Python v3.11)"><span class="pre">DefaultDict</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="../../const/pcapng.html#pcapkit.const.pcapng.secrets_type.SecretsType" title="pcapkit.const.pcapng.secrets_type.SecretsType"><span class="pre">SecretsType</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><span class="pre">int</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.11)"><span class="pre">Type</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#pcapkit.protocols.schema.misc.pcapng.DSBSecrets" title="pcapkit.protocols.schema.misc.pcapng.DSBSecrets"><span class="pre">DSBSecrets</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pcapkit.protocols.schema.misc.pcapng.MAP_DSB_SECRETS" title="Permalink to this definition">#</a></dt>
+<dd><p>Mapping of PCAP-NG description secrets type numbers to schemas.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>DefaultDict[Enum_SecretsType, <a class="reference internal" href="../../const/l2tp.html#pcapkit.const.l2tp.type.Type" title="pcapkit.const.l2tp.type.Type">Type</a>[<a class="reference internal" href="#pcapkit.protocols.schema.misc.pcapng.DSBSecrets" title="pcapkit.protocols.schema.misc.pcapng.DSBSecrets">DSBSecrets</a>]]</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
 </section>
 <section id="module-pcapkit.protocols.data.misc.pcapng">
 <span id="data-models"></span><h2>Data Models<a class="headerlink" href="#module-pcapkit.protocols.data.misc.pcapng" title="Permalink to this heading">#</a></h2>
@@ -10369,7 +10401,10 @@ subclass instance.</p></li>
 <li><a class="reference internal" href="#auxiliary-data">Auxiliary Data</a></li>
 <li><a class="reference internal" href="#module-pcapkit.protocols.schema.misc.pcapng">Header Schemas</a></li>
 <li><a class="reference internal" href="#type-stubs">Type Stubs</a></li>
-<li><a class="reference internal" href="#auxiliary-functions">Auxiliary Functions</a></li>
+<li><a class="reference internal" href="#auxiliary-functions">Auxiliary Functions</a><ul>
+<li><a class="reference internal" href="#miscellaneous-data">Miscellaneous Data</a></li>
+</ul>
+</li>
 <li><a class="reference internal" href="#module-pcapkit.protocols.data.misc.pcapng">Data Models</a></li>
 </ul>
 </li>
