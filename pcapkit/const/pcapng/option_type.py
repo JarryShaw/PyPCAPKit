@@ -34,7 +34,7 @@ class OptionType(StrEnum):
     __members_ns__: 'DefaultDict[str, dict[int, OptionType]]' = defaultdict(dict)
 
     def __new__(cls, value: 'int', name: 'str' = 'opt_unknown') -> 'Type[OptionType]':
-        temp = '%d_%s' % (value, name)
+        temp = '%s [%d]' % (name, value)
 
         obj = str.__new__(cls, temp)
         obj._value_ = temp
