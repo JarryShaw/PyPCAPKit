@@ -369,6 +369,50 @@ Header Schemas
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
+Type Stubs
+~~~~~~~~~~
+
+.. autoclass:: pcapkit.protocols.schema.internet.mh.ANSIKeyLengthTest
+   :members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
+.. autoclass:: pcapkit.protocols.schema.internet.mh.MultiPrefixExtensionFlags
+   :members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
+.. autoclass:: pcapkit.protocols.schema.internet.mh.BindingUpdateMessageFlags
+   :members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
+.. autoclass:: pcapkit.protocols.schema.internet.mh.BindingAcknowledgementMessageFlags
+   :members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
+Auxiliary Functions
+~~~~~~~~~~~~~~~~~~~
+
+.. autofunction:: pcapkit.protocols.schema.internet.mh.mh_opt_registry
+.. autofunction:: pcapkit.protocols.schema.internet.mh.mh_data_selector
+.. autofunction:: pcapkit.protocols.schema.internet.mh.mh_id_selector
+
+Miscellaneous Data
+~~~~~~~~~~~~~~~~~~
+
+.. autodata:: pcapkit.protocols.schema.internet.mh.MAP_MH_DATA
+   :no-value:
+
 Data Models
 -----------
 

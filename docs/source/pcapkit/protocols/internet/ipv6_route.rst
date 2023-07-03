@@ -114,6 +114,12 @@ Auxiliary Functions
 
 .. autofunction:: pcapkit.protocols.schema.internet.ipv6_route.ipv6_route_data_selector
 
+Miscellaneous Data
+~~~~~~~~~~~~~~~~~~
+
+.. autodata:: pcapkit.protocols.schema.internet.ipv6_route.MAP_IPV6_ROUTE_DATA
+   :no-value:
+
 Data Models
 -----------
 

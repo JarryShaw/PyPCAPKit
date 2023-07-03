@@ -3,7 +3,7 @@
 
 import copy
 import io
-from typing import TYPE_CHECKING, TypeVar, cast
+from typing import TYPE_CHECKING, Generic, TypeVar, cast
 
 from pcapkit.corekit.fields.field import _Field
 from pcapkit.corekit.multidict import OrderedMultiDict
@@ -25,9 +25,10 @@ if TYPE_CHECKING:
     from pcapkit.protocols.schema.schema import Schema
 
 _TL = TypeVar('_TL', 'Schema', '_Field', 'bytes')
+_TS = TypeVar('_TS', bound='Schema')
 
 
-class ListField(_Field[List[_TL]]):
+class ListField(_Field[List[_TL]], Generic[_TL]):
     """Field list for protocol fields.
 
     Args:
@@ -160,7 +161,7 @@ class ListField(_Field[List[_TL]]):
         return temp
 
 
-class OptionField(ListField):
+class OptionField(ListField, Generic[_TS]):
     """Field list for protocol options.
 
     Args:
@@ -181,7 +182,7 @@ class OptionField(ListField):
     """
 
     @property
-    def base_schema(self) -> 'Type[Schema]':
+    def base_schema(self) -> 'Type[_TS]':
         """Base schema."""
         return self._base_schema
 
@@ -191,7 +192,7 @@ class OptionField(ListField):
         return self._type_name
 
     @property
-    def registry(self) -> 'defaultdict[int | StdlibEnum | AenumEnum, Type[Schema]]':
+    def registry(self) -> 'defaultdict[int | StdlibEnum | AenumEnum, Type[_TS]]':
         """Option registry."""
         return self._registry
 
@@ -206,9 +207,9 @@ class OptionField(ListField):
         return self._option_padding
 
     def __init__(self, length: 'int | Callable[[dict[str, Any]], int]' = lambda _: -1,
-                 base_schema: 'Optional[Type[Schema]]' = None,
+                 base_schema: 'Optional[Type[_TS]]' = None,
                  type_name: 'str' = 'type',
-                 registry: 'Optional[defaultdict[int | StdlibEnum | AenumEnum, Type[Schema]]]' = None,
+                 registry: 'Optional[defaultdict[int | StdlibEnum | AenumEnum, Type[_TS]]]' = None,
                  eool: 'Optional[int | StdlibEnum | AenumEnum]' = None,
                  callback: 'Callable[[Self, dict[str, Any]], None]' = lambda *_: None) -> 'None':
         super().__init__(length, None, callback)
@@ -228,7 +229,7 @@ class OptionField(ListField):
             raise FieldValueError('Field <option> has no registry.')
         self._registry = registry
 
-    def unpack(self, buffer: 'bytes | IO[bytes]', packet: 'dict[str, Any]') -> 'list[Schema]':
+    def unpack(self, buffer: 'bytes | IO[bytes]', packet: 'dict[str, Any]') -> 'list[_TS]':
         """Unpack field value from :obj:`bytes`.
 
         Args:
@@ -256,7 +257,7 @@ class OptionField(ListField):
         new_packet = packet.copy()
         new_packet[self.name] = OrderedMultiDict()
 
-        temp = []  # type: list[Schema]
+        temp = []  # type: list[_TS]
         while length > 0:
             # unpack option type using base schema
             meta = self._base_schema.unpack(file, length, packet)  # type: ignore[call-arg,misc,var-annotated]

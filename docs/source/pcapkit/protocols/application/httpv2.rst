@@ -209,6 +209,12 @@ Auxiliary Functions
 
 .. autofunction:: pcapkit.protocols.schema.application.httpv2.http_frame_selector
 
+Miscellaneous Data
+~~~~~~~~~~~~~~~~~~
+
+.. autodata:: pcapkit.protocols.schema.application.httpv2.MAP_HTTP_FRAME
+   :no-value:
+
 Data Models
 -----------
 

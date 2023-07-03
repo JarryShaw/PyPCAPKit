@@ -60,7 +60,7 @@ __all__ = [
 
 if TYPE_CHECKING:
     from ipaddress import IPv4Address, IPv4Interface, IPv6Address, IPv6Interface
-    from typing import Any, Callable, Optional
+    from typing import Any, Callable, DefaultDict, Optional, Type
 
     from typing_extensions import Literal, Self
 
@@ -190,31 +190,14 @@ def pcapng_block_selector(packet: 'dict[str, Any]') -> 'Field':
         wrapped :class:`~pcapkit.protocols.schema.misc.pcapng.BlockType`
         subclass instance.
 
+    See Also:
+        * :class:`pcapkit.const.pcapng.block_type.BlockType`
+        * :data:`pcapkit.protocols.schema.misc.pcapng.MAP_PCAPNG_BLOCK`
+
     """
     block_type = packet['type']  # type: Enum_BlockType
-    if block_type == Enum_BlockType.Section_Header_Block:
-        return SchemaField(length=packet['__length__'], schema=SectionHeaderBlock)
-    elif block_type == Enum_BlockType.Interface_Description_Block:
-        return SchemaField(length=packet['__length__'], schema=InterfaceDescriptionBlock)
-    elif block_type == Enum_BlockType.Enhanced_Packet_Block:
-        return SchemaField(length=packet['__length__'], schema=EnhancedPacketBlock)
-    elif block_type == Enum_BlockType.Simple_Packet_Block:
-        return SchemaField(length=packet['__length__'], schema=SimplePacketBlock)
-    elif block_type == Enum_BlockType.Name_Resolution_Block:
-        return SchemaField(length=packet['__length__'], schema=NameResolutionBlock)
-    elif block_type == Enum_BlockType.Interface_Statistics_Block:
-        return SchemaField(length=packet['__length__'], schema=InterfaceStatisticsBlock)
-    elif block_type == Enum_BlockType.systemd_Journal_Export_Block:
-        return SchemaField(length=packet['__length__'], schema=SystemdJournalExportBlock)
-    elif block_type == Enum_BlockType.Decryption_Secrets_Block:
-        return SchemaField(length=packet['__length__'], schema=DecryptionSecretsBlock)
-    elif block_type == Enum_BlockType.Custom_Block_that_rewriters_can_copy_into_new_files:
-        return SchemaField(length=packet['__length__'], schema=CustomBlock)
-    elif block_type == Enum_BlockType.Custom_Block_that_rewriters_should_not_copy_into_new_files:
-        return SchemaField(length=packet['__length__'], schema=CustomBlock)
-    elif block_type == Enum_BlockType.Packet_Block:
-        return SchemaField(length=packet['__length__'], schema=PacketBlock)
-    return SchemaField(length=packet['__length__'], schema=UnknownBlock)
+    schema = MAP_PCAPNG_BLOCK[block_type]
+    return SchemaField(length=packet['__length__'], schema=schema)
 
 
 def dsb_secrets_selector(packet: 'dict[str, Any]') -> 'Field':
@@ -458,7 +441,7 @@ class SectionHeaderBlock(BlockType):
         length=lambda pkt: pkt['length'] - 28,
         base_schema=_OPT_Option,
         type_name='type',
-        registry=collections.defaultdict(lambda: UnknownOption, {
+        registry=collections.defaultdict(lambda: UnknownOption, {  # type: ignore[arg-type]
             Enum_OptionType.opt_endofopt: EndOfOption,
             Enum_OptionType.opt_comment: CommentOption,
             Enum_OptionType.opt_custom_2988: CustomOption,
@@ -783,7 +766,7 @@ class InterfaceDescriptionBlock(BlockType):
         length=lambda pkt: pkt['length'] - 20,
         base_schema=_IF_Option,
         type_name='type',
-        registry=collections.defaultdict(lambda: UnknownOption, {
+        registry=collections.defaultdict(lambda: UnknownOption, {  # type: ignore[arg-type]
             Enum_OptionType.opt_endofopt: EndOfOption,
             Enum_OptionType.opt_comment: CommentOption,
             Enum_OptionType.opt_custom_2988: CustomOption,
@@ -949,7 +932,7 @@ class EnhancedPacketBlock(BlockType):
         length=lambda pkt: pkt['length'] - 32 - pkt['captured_len'] - len(pkt['padding_data']),
         base_schema=_EPB_Option,
         type_name='type',
-        registry=collections.defaultdict(lambda: UnknownOption, {
+        registry=collections.defaultdict(lambda: UnknownOption, {  # type: ignore[arg-type]
             Enum_OptionType.opt_endofopt: EndOfOption,
             Enum_OptionType.opt_comment: CommentOption,
             Enum_OptionType.opt_custom_2988: CustomOption,
@@ -1146,7 +1129,7 @@ class NameResolutionBlock(BlockType):
         length=lambda pkt: pkt['length'] - 12,
         base_schema=NameResolutionRecord,
         type_name='type',
-        registry=collections.defaultdict(lambda: UnknownRecord, {
+        registry=collections.defaultdict(lambda: UnknownRecord, {  # type: ignore[arg-type]
             Enum_RecordType.nrb_record_end: EndRecord,
             Enum_RecordType.nrb_record_ipv4: IPv4Record,
             Enum_RecordType.nrb_record_ipv6: IPv6Record,
@@ -1158,7 +1141,7 @@ class NameResolutionBlock(BlockType):
         length=lambda pkt: pkt['__option_padding__'] - 4 if pkt['__option_padding__'] else 0,
         base_schema=_NS_Option,
         type_name='type',
-        registry=collections.defaultdict(lambda: UnknownOption, {
+        registry=collections.defaultdict(lambda: UnknownOption, {  # type: ignore[arg-type]
             Enum_OptionType.opt_endofopt: EndOfOption,
             Enum_OptionType.opt_comment: CommentOption,
             Enum_OptionType.opt_custom_2988: CustomOption,
@@ -1319,7 +1302,7 @@ class InterfaceStatisticsBlock(BlockType):
         length=lambda pkt: pkt['length'] - 20,
         base_schema=_ISB_Option,
         type_name='type',
-        registry=collections.defaultdict(lambda: UnknownOption, {
+        registry=collections.defaultdict(lambda: UnknownOption, {  # type: ignore[arg-type]
             Enum_OptionType.opt_endofopt: EndOfOption,
             Enum_OptionType.opt_comment: CommentOption,
             Enum_OptionType.opt_custom_2988: CustomOption,
@@ -1558,7 +1541,7 @@ class DecryptionSecretsBlock(BlockType):
         length=lambda pkt: pkt['length'] - 20 - pkt['secrets_length'] - len(pkt['padding_data']),
         base_schema=_DSB_Option,
         type_name='type',
-        registry=collections.defaultdict(lambda: UnknownOption, {
+        registry=collections.defaultdict(lambda: UnknownOption, {  # type: ignore[arg-type]
             Enum_OptionType.opt_endofopt: EndOfOption,
             Enum_OptionType.opt_comment: CommentOption,
             Enum_OptionType.opt_custom_2988: CustomOption,
@@ -1676,7 +1659,7 @@ class PacketBlock(BlockType):
         length=lambda pkt: pkt['length'] - 32 - pkt['captured_length'] - len(pkt['padding_data']),
         base_schema=_PACK_Option,
         type_name='type',
-        registry=collections.defaultdict(lambda: UnknownOption, {
+        registry=collections.defaultdict(lambda: UnknownOption, {  # type: ignore[arg-type]
             Enum_OptionType.opt_endofopt: EndOfOption,
             Enum_OptionType.opt_comment: CommentOption,
             Enum_OptionType.opt_custom_2988: CustomOption,
@@ -1698,3 +1681,26 @@ class PacketBlock(BlockType):
                      timestamp_high: 'int', timestamp_low: 'int', captured_length: 'int',
                      original_length: 'int', packet_data: 'bytes | Protocol | Schema',
                      options: 'list[Option | bytes] | bytes', length2: 'int') -> 'None': ...
+
+
+#: DefaultDict[Enum_BlockType, Type[BlockType]]: Mapping of PCAP-NG block type numbers to schemas.
+MAP_PCAPNG_BLOCK = collections.defaultdict(lambda: UnknownBlock, {
+    Enum_BlockType.Section_Header_Block: SectionHeaderBlock,
+    Enum_BlockType.Interface_Description_Block: InterfaceDescriptionBlock,
+    Enum_BlockType.Enhanced_Packet_Block: EnhancedPacketBlock,
+    Enum_BlockType.Simple_Packet_Block: SimplePacketBlock,
+    Enum_BlockType.Name_Resolution_Block: NameResolutionBlock,
+    Enum_BlockType.systemd_Journal_Export_Block: SystemdJournalExportBlock,
+    Enum_BlockType.Decryption_Secrets_Block: DecryptionSecretsBlock,
+    Enum_BlockType.Custom_Block_that_rewriters_can_copy_into_new_files: CustomBlock,
+    Enum_BlockType.Custom_Block_that_rewriters_should_not_copy_into_new_files: CustomBlock,
+    Enum_BlockType.Packet_Block: PacketBlock,
+})  # type: DefaultDict[Enum_BlockType | int, Type[BlockType]]
+
+#: DefaultDict[Enum_SecretsType, Type[DSBSecrets]]: Mapping of PCAP-NG description secrets type numbers to schemas.
+MAP_DSB_SECRETS = collections.defaultdict(lambda: UnknownSecrets, {
+    Enum_SecretsType.TLS_Key_Log: TLSKeyLog,
+    Enum_SecretsType.WireGuard_Key_Log: WireGuardKeyLog,
+    Enum_SecretsType.ZigBee_NWK_Key: ZigBeeNWKKey,
+    Enum_SecretsType.ZigBee_APS_Key: ZigBeeAPSKey,
+})  # type: DefaultDict[Enum_SecretsType | int, Type[DSBSecrets]]

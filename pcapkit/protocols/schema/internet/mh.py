@@ -151,30 +151,18 @@ def mh_data_selector(pkt: 'dict[str, Any]') -> 'Field':
 
     Returns:
         Returns a :class:`~pcapkit.corekit.fields.misc.SchemaField`
-        wrapped :class:`~pcapkit.protocols.schema.misc.mh.Packet`
+        wrapped :class:`~pcapkit.protocols.schema.internet.mh.Packet`
         subclass instance.
+
+    See Also:
+        * :class:`pcapkit.const.mh.packet.Packet`
+        * :data:`ppcapkit.protocols.schema.internet.mh.MAP_MH_DATA`
 
     """
     type = pkt['type']  # type: Enum_Packet
     length = pkt['length'] * 8 + 2
-
-    if type == Enum_Packet.Binding_Refresh_Request:
-        return SchemaField(length=length, schema=BindingRefreshRequestMessage)
-    if type == Enum_Packet.Home_Test_Init:
-        return SchemaField(length=length, schema=HomeTestInitMessage)
-    if type == Enum_Packet.Care_of_Test_Init:
-        return SchemaField(length=length, schema=CareofTestInitMessage)
-    if type == Enum_Packet.Home_Test:
-        return SchemaField(length=length, schema=HomeTestMessage)
-    if type == Enum_Packet.Care_of_Test:
-        return SchemaField(length=length, schema=CareofTestMessage)
-    if type == Enum_Packet.Binding_Update:
-        return SchemaField(length=length, schema=BindingUpdateMessage)
-    if type == Enum_Packet.Binding_Acknowledgement:
-        return SchemaField(length=length, schema=BindingAcknowledgementMessage)
-    if type == Enum_Packet.Binding_Error:
-        return SchemaField(length=length, schema=BindingErrorMessage)
-    return SchemaField(length=length, schema=UnknownMessage)
+    schema = MAP_MH_DATA[type]
+    return SchemaField(length=length, schema=schema)
 
 
 def mn_id_selector(pkt: 'dict[str, Any]') -> 'Field':
@@ -476,7 +464,7 @@ class CGAParameter(Schema):
         length=lambda pkt: pkt['length'] - 25 - len(pkt['public_key']),
         base_schema=CGAExtension,
         type_name='type',
-        registry=collections.defaultdict(lambda: UnknownExtension, {
+        registry=collections.defaultdict(lambda: UnknownExtension, {  # type: ignore[arg-type,return-value]
             Enum_CGAExtension.Multi_Prefix: MultiPrefixExtension,
         }),
         eool=None,
@@ -571,7 +559,7 @@ class BindingRefreshRequestMessage(Packet):
         length=lambda pkt: pkt['__length__'],
         base_schema=Option,
         type_name='type',
-        registry=mh_opt_registry(),  # type: ignore[arg-type]
+        registry=mh_opt_registry(),
         eool=None,
     )
 
@@ -592,7 +580,7 @@ class HomeTestInitMessage(Packet):
         length=lambda pkt: pkt['__length__'],
         base_schema=Option,
         type_name='type',
-        registry=mh_opt_registry(),  # type: ignore[arg-type]
+        registry=mh_opt_registry(),
         eool=None,
     )
 
@@ -613,7 +601,7 @@ class CareofTestInitMessage(Packet):
         length=lambda pkt: pkt['__length__'],
         base_schema=Option,
         type_name='type',
-        registry=mh_opt_registry(),  # type: ignore[arg-type]
+        registry=mh_opt_registry(),
         eool=None,
     )
 
@@ -636,7 +624,7 @@ class HomeTestMessage(Packet):
         length=lambda pkt: pkt['__length__'],
         base_schema=Option,
         type_name='type',
-        registry=mh_opt_registry(),  # type: ignore[arg-type]
+        registry=mh_opt_registry(),
         eool=None,
     )
 
@@ -660,7 +648,7 @@ class CareofTestMessage(Packet):
         length=lambda pkt: pkt['__length__'],
         base_schema=Option,
         type_name='type',
-        registry=mh_opt_registry(),  # type: ignore[arg-type]
+        registry=mh_opt_registry(),
         eool=None,
     )
 
@@ -689,7 +677,7 @@ class BindingUpdateMessage(Packet):
         length=lambda pkt: pkt['__length__'],
         base_schema=Option,
         type_name='type',
-        registry=mh_opt_registry(),  # type: ignore[arg-type]
+        registry=mh_opt_registry(),
         eool=None,
     )
 
@@ -717,7 +705,7 @@ class BindingAcknowledgementMessage(Packet):
         length=lambda pkt: pkt['__length__'],
         base_schema=Option,
         type_name='type',
-        registry=mh_opt_registry(),  # type: ignore[arg-type]
+        registry=mh_opt_registry(),
         eool=None,
     )
 
@@ -741,7 +729,7 @@ class BindingErrorMessage(Packet):
         length=lambda pkt: pkt['__length__'],
         base_schema=Option,
         type_name='type',
-        registry=mh_opt_registry(),  # type: ignore[arg-type]
+        registry=mh_opt_registry(),
         eool=None,
     )
 
@@ -751,3 +739,15 @@ class BindingErrorMessage(Packet):
 
 
 # TODO: Implement other message types.
+
+#: DefaultDict[Enum_Packet, Type[Packet]]: Mapping of MH message type numbers to schemas.
+MAP_MH_DATA = collections.defaultdict(lambda: UnknownMessage, {
+    Enum_Packet.Binding_Refresh_Request: BindingRefreshRequestMessage,
+    Enum_Packet.Home_Test_Init: HomeTestInitMessage,
+    Enum_Packet.Care_of_Test_Init: CareofTestInitMessage,
+    Enum_Packet.Home_Test: HomeTestMessage,
+    Enum_Packet.Care_of_Test: CareofTestMessage,
+    Enum_Packet.Binding_Update: BindingUpdateMessage,
+    Enum_Packet.Binding_Acknowledgement: BindingAcknowledgementMessage,
+    Enum_Packet.Binding_Error: BindingErrorMessage,
+})  # type: DefaultDict[Enum_Packet | int, Type[Packet]]

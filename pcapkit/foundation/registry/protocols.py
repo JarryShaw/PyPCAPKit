@@ -8,7 +8,7 @@ This module provides the protocol registries for :mod:`pcapkit`.
 
 """
 import importlib
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 from pcapkit.protocols import __proto__ as protocol_registry
 from pcapkit.protocols.application.httpv2 import HTTP as HTTPv2
@@ -23,13 +23,28 @@ from pcapkit.protocols.link.link import Link
 from pcapkit.protocols.misc.pcap.frame import Frame
 from pcapkit.protocols.misc.pcapng import PCAPNG
 from pcapkit.protocols.protocol import Protocol
+from pcapkit.protocols.schema.application.httpv2 import MAP_HTTP_FRAME
+from pcapkit.protocols.schema.internet.hip import HIP as Schema_HIP
+from pcapkit.protocols.schema.internet.hopopt import HOPOPT as Schema_HOPOPT
+from pcapkit.protocols.schema.internet.ipv4 import IPv4 as Schema_IPv4
+from pcapkit.protocols.schema.internet.ipv6_opts import IPv6_Opts as Schema_IPv6_Opts
+from pcapkit.protocols.schema.internet.ipv6_route import MAP_IPV6_ROUTE_DATA
+from pcapkit.protocols.schema.internet.mh import MAP_MH_DATA
+from pcapkit.protocols.schema.internet.mh import CGAParameter as Schema_MH_CGAParameter
+from pcapkit.protocols.schema.internet.mh import Packet as Schema_MH_Packet
+from pcapkit.protocols.schema.misc.pcapng import MAP_DSB_SECRETS, MAP_PCAPNG_BLOCK
+from pcapkit.protocols.schema.misc.pcapng import BlockType as Schema_PCAPNG_BlockType
+from pcapkit.protocols.schema.misc.pcapng import \
+    NameResolutionBlock as Schema_PCAPNG_NameResolutionBlock
+from pcapkit.protocols.schema.transport.tcp import MAP_MPTCP_DATA
+from pcapkit.protocols.schema.transport.tcp import TCP as Schema_TCP
 from pcapkit.protocols.transport.tcp import TCP
 from pcapkit.protocols.transport.udp import UDP
 from pcapkit.utilities.exceptions import RegistryError
 from pcapkit.utilities.logging import logger
 
 if TYPE_CHECKING:
-    from typing import Type
+    from typing import Optional, Type
 
     from typing_extensions import Literal
 
@@ -50,6 +65,7 @@ if TYPE_CHECKING:
     from pcapkit.const.reg.transtype import TransType
     from pcapkit.const.tcp.mp_tcp_option import MPTCPOption as TCP_MPTCPOption
     from pcapkit.const.tcp.option import Option as TCP_Option
+    from pcapkit.corekit.fields.collections import OptionField
     from pcapkit.protocols.application.httpv2 import FrameConstructor as HTTP_FrameConstructor
     from pcapkit.protocols.application.httpv2 import FrameParser as HTTP_FrameParser
     from pcapkit.protocols.internet.hip import ParameterConstructor as HIP_ParameterConstructor
@@ -77,6 +93,22 @@ if TYPE_CHECKING:
     from pcapkit.protocols.misc.pcapng import RecordParser as PCAPNG_RecordParser
     from pcapkit.protocols.misc.pcapng import SecretsConstructor as PCAPNG_SecretsConstructor
     from pcapkit.protocols.misc.pcapng import SecretsParser as PCAPNG_SecretsParser
+    from pcapkit.protocols.schema.application.httpv2 import FrameType as Schema_HTTP_FrameType
+    from pcapkit.protocols.schema.internet.hip import Parameter as Schema_HIP_Parameter
+    from pcapkit.protocols.schema.internet.hopopt import Option as Schema_HOPOPT_Option
+    from pcapkit.protocols.schema.internet.ipv4 import Option as Schema_IPv4_Option
+    from pcapkit.protocols.schema.internet.ipv6_opts import Option as Schema_IPv6_Opts_Option
+    from pcapkit.protocols.schema.internet.ipv6_route import \
+        RoutingType as Schema_IPv6_Route_RoutingType
+    from pcapkit.protocols.schema.internet.mh import CGAExtension as Schema_MH_CGAExtension
+    from pcapkit.protocols.schema.internet.mh import Option as Schema_MH_Option
+    from pcapkit.protocols.schema.internet.mh import Packet as Schema_MH_Packet
+    from pcapkit.protocols.schema.misc.pcapng import DSBSecrets as Schema_PCAPNG_DSBSecrets
+    from pcapkit.protocols.schema.misc.pcapng import \
+        NameResolutionRecord as Schema_PCAPNG_NameResolutionRecord
+    from pcapkit.protocols.schema.misc.pcapng import Option as Schema_PCAPNG_Option
+    from pcapkit.protocols.schema.transport.tcp import MPTCP as Schema_TCP_MPTCP
+    from pcapkit.protocols.schema.transport.tcp import Option as Schema_TCP_Option
     from pcapkit.protocols.transport.tcp import MPOptionConstructor as TCP_MPOptionConstructor
     from pcapkit.protocols.transport.tcp import MPOptionParser as TCP_MPOptionParser
     from pcapkit.protocols.transport.tcp import OptionConstructor as TCP_OptionConstructor
@@ -288,7 +320,8 @@ def register_transtype(code: 'TransType', module: 'str', class_: 'str') -> 'None
 
 
 # NOTE: pcapkit.protocols.internet.internet.IPv4
-def register_ipv4_option(code: 'IPv4_OptionNumber', meth: 'str | tuple[IPv4_OptionParser, IPv4_OptionConstructor]') -> 'None':
+def register_ipv4_option(code: 'IPv4_OptionNumber', meth: 'str | tuple[IPv4_OptionParser, IPv4_OptionConstructor]', *,
+                         schema: 'Optional[Type[Schema_IPv4_Option]]' = None) -> 'None':
     """Register an option parser.
 
     The function will register the given option parser to the
@@ -298,17 +331,22 @@ def register_ipv4_option(code: 'IPv4_OptionNumber', meth: 'str | tuple[IPv4_Opti
         code: :class:`IPv4 <pcapkit.protocols.internet.internet.IPv4>` option code as
             in :class:`~pcapkit.const.ipv4.option_number.OptionNumber`.
         meth: Method name or callable to parse and/or construct the option.
+        schema: :class:`~pcapkit.protocols.schema.schema.Schema` class for the option.
+            It should be a subclass of :class:`~pcapkit.protocols.schema.internet.ipv4.Option`.
 
     """
     if isinstance(meth, str) and not hasattr(IPv4, f'_read_opt_{meth}'):
         raise RegistryError('method must be a valid IPv4 option parser function')
 
     IPv4.register_option(code, meth)
+    if schema is not None:
+        cast('OptionField[Schema_IPv4_Option]', Schema_IPv4.options).registry[code] = schema
     logger.info('registered IPv4 option parser: %s', code.name)
 
 
 # NOTE: pcapkit.protocols.internet.hip.HIP
-def register_hip_parameter(code: 'HIP_Parameter', meth: 'str | tuple[HIP_ParameterParser, HIP_ParameterConstructor]') -> 'None':
+def register_hip_parameter(code: 'HIP_Parameter', meth: 'str | tuple[HIP_ParameterParser, HIP_ParameterConstructor]', *,
+                           schema: 'Optional[Type[Schema_HIP_Parameter]]' = None) -> 'None':
     """Register a parameter parser.
 
     The function will register the given parameter parser to the
@@ -318,17 +356,22 @@ def register_hip_parameter(code: 'HIP_Parameter', meth: 'str | tuple[HIP_Paramet
         code: :class:`~pcapkit.protocols.internet.hip.HIP` parameter code as
             in :class:`~pcapkit.const.hip.parameter.Parameter`.
         meth: Method name or callable to parse and/or construct the parameter.
+        schema: :class:`~pcapkit.protocols.schema.schema.Schema` class for the parameter.
+            It should be a subclass of :class:`~pcapkit.protocols.schema.internet.hip.Parameter`.
 
     """
     if isinstance(meth, str) and not hasattr(HIP, f'_read_param_{meth}'):
         raise RegistryError('method must be a valid HIP parameter parser function')
 
     HIP.register_parameter(code, meth)
+    if schema is not None:
+        cast('OptionField[Schema_HIP_Parameter]', Schema_HIP.param).registry[code] = schema
     logger.info('registered HIP parameter parser: %s', code.name)
 
 
 # NOTE: pcapkit.protocols.internet.hopopt.HOPOPT.__option__
-def register_hopopt_option(code: 'IPv6_Option', meth: 'str | tuple[HOPOPT_OptionParser, HOPOPT_OptionConstructor]') -> 'None':
+def register_hopopt_option(code: 'IPv6_Option', meth: 'str | tuple[HOPOPT_OptionParser, HOPOPT_OptionConstructor]', *,
+                           schema: 'Optional[Type[Schema_HOPOPT_Option]]' = None) -> 'None':
     """Register an option parser.
 
     The function will register the given option parser to the
@@ -338,17 +381,22 @@ def register_hopopt_option(code: 'IPv6_Option', meth: 'str | tuple[HOPOPT_Option
         code: :class:`~pcapkit.protocols.internet.hopopt.HOPOPT` option code as
             in :class:`~pcapkit.const.ipv6.option.Option`.
         meth: Method name or callable to parse and/or construct the option.
+        schema: :class:`~pcapkit.protocols.schema.schema.Schema` class for the option.
+            It should be a subclass of :class:`~pcapkit.protocols.schema.internet.hopopt.Option`.
 
     """
     if isinstance(meth, str) and not hasattr(HOPOPT, f'_read_opt_{meth}'):
         raise RegistryError('method must be a valid HOPOPT option parser function')
 
     HOPOPT.register_option(code, meth)
+    if schema is not None:
+        cast('OptionField[Schema_HOPOPT_Option]', Schema_HOPOPT.options).registry[code] = schema
     logger.info('registered HOPOPT option parser: %s', code.name)
 
 
 # NOTE: pcapkit.protocols.internet.ipv6_opts.IPv6_Opts.__option__
-def register_ipv6_opts_option(code: 'IPv6_Option', meth: 'str | tuple[IPv6_Opts_OptionParser, IPv6_Opts_OptionConstructor]') -> 'None':
+def register_ipv6_opts_option(code: 'IPv6_Option', meth: 'str | tuple[IPv6_Opts_OptionParser, IPv6_Opts_OptionConstructor]', *,
+                              schema: 'Optional[Type[Schema_IPv6_Opts_Option]]' = None) -> 'None':
     """Register an option parser.
 
     The function will register the given option parser to the
@@ -358,17 +406,22 @@ def register_ipv6_opts_option(code: 'IPv6_Option', meth: 'str | tuple[IPv6_Opts_
         code: :class:`IPv6-Opts <pcapkit.protocols.internet.ipv6_opts.IPv6_Opts>`
             option code as in :class:`~pcapkit.const.ipv6.option.Option`.
         meth: Method name or callable to parse and/or construct the option.
+        schema: :class:`~pcapkit.protocols.schema.schema.Schema` class for the option.
+            It should be a subclass of :class:`~pcapkit.protocols.schema.internet.ipv6_opts.Option`.
 
     """
     if isinstance(meth, str) and not hasattr(IPv6_Opts, f'_read_opt_{meth}'):
         raise RegistryError('method must be a valid IPv6-Opts option parser function')
 
     IPv6_Opts.register_option(code, meth)
+    if schema is not None:
+        cast('OptionField[Schema_IPv6_Opts_Option]', Schema_IPv6_Opts.options).registry[code] = schema
     logger.info('registered IPv6-Opts option parser: %s', code.name)
 
 
 # NOTE: pcapkit.protocols.internet.ipv6_route.IPv6_Route.__routing__
-def register_ipv6_route_routing(code: 'IPv6_Routing', meth: 'str | tuple[IPv6_Route_TypeParser, IPv6_Route_TypeConstructor]') -> 'None':
+def register_ipv6_route_routing(code: 'IPv6_Routing', meth: 'str | tuple[IPv6_Route_TypeParser, IPv6_Route_TypeConstructor]', *,
+                                schema: 'Optional[Type[Schema_IPv6_Route_RoutingType]]' = None) -> 'None':
     """Register a routing data parser.
 
     The function will register the given routing data parser to the
@@ -378,17 +431,22 @@ def register_ipv6_route_routing(code: 'IPv6_Routing', meth: 'str | tuple[IPv6_Ro
         code: :class:`IPv6-Route <pcapkit.protocols.internet.ipv6_route.IPv6_Route>`
             data type code as in :class:`~pcapkit.const.ipv6.routing.Routing`.
         meth: Method name or callable to parse and/or construct the data.
+        schema: :class:`~pcapkit.protocols.schema.schema.Schema` class for the routing data.
+            It should be a subclass of :class:`~pcapkit.protocols.schema.internet.ipv6_route.RoutingType`.
 
     """
     if isinstance(meth, str) and not hasattr(IPv6_Route, f'_read_data_type_{meth}'):
         raise RegistryError('method must be a valid IPv6-Route routing data parser function')
 
     IPv6_Route.register_routing(code, meth)
+    if schema is not None:
+        MAP_IPV6_ROUTE_DATA[code] = schema
     logger.info('registered IPv6-Route routing data parser: %s', code.name)
 
 
 # NOTE: pcapkit.protocols.internet.mh.MH.__message__
-def register_mh_message(code: 'MH_Packet', meth: 'str | tuple[MH_PacketParser, MH_PacketConstructor]') -> 'None':
+def register_mh_message(code: 'MH_Packet', meth: 'str | tuple[MH_PacketParser, MH_PacketConstructor]', *,
+                        schema: 'Optional[Type[Schema_MH_Packet]]' = None) -> 'None':
     """Register a message type parser.
 
     The function will register the given message type parser to the
@@ -398,17 +456,22 @@ def register_mh_message(code: 'MH_Packet', meth: 'str | tuple[MH_PacketParser, M
         code: :class:`~pcapkit.protocols.internet.mh.MH>`
             data type code as in :class:`~pcapkit.const.mh.packet.Packet`.
         meth: Method name or callable to parse and/or construct the data.
+        schema: :class:`~pcapkit.protocols.schema.schema.Schema` class for the message type.
+            It should be a subclass of :class:`~pcapkit.protocols.schema.internet.mh.Packet`.
 
     """
     if isinstance(meth, str) and not hasattr(MH, f'_read_msg_{meth}'):
         raise RegistryError('method must be a valid MH message type parser function')
 
     MH.register_message(code, meth)
+    if schema is not None:
+        MAP_MH_DATA[code] = schema
     logger.info('registered MH message type parser: %s', code.name)
 
 
 # NOTE: pcapkit.protocols.internet.mh.MH.__option__
-def register_mh_option(code: 'MH_Option', meth: 'str | tuple[MH_OptionParser, MH_OptionConstructor]') -> 'None':
+def register_mh_option(code: 'MH_Option', meth: 'str | tuple[MH_OptionParser, MH_OptionConstructor]', *,
+                       schema: 'Optional[Type[Schema_MH_Option]]' = None) -> 'None':
     """Register a option parser.
 
     The function will register the given option parser to the
@@ -418,17 +481,25 @@ def register_mh_option(code: 'MH_Option', meth: 'str | tuple[MH_OptionParser, MH
         code: :class:`~pcapkit.protocols.internet.mh.MH>`
             data type code as in :class:`~pcapkit.const.mh.option.Option`.
         meth: Method name or callable to parse and/or construct the data.
+        schema: :class:`~pcapkit.protocols.schema.schema.Schema` class for the message type.
+            It should be a subclass of :class:`~pcapkit.protocols.schema.internet.mh.Option`.
 
     """
     if isinstance(meth, str) and not hasattr(MH, f'_read_opt_{meth}'):
         raise RegistryError('method must be a valid MH option parser function')
 
     MH.register_option(code, meth)
+    if schema is not None:
+        for subclass in Schema_MH_Packet.__subclasses__():
+            if not hasattr(subclass, 'options'):
+                continue
+            cast('OptionField[Schema_MH_Option]', subclass.options).registry[code] = schema
     logger.info('registered MH option parser: %s', code.name)
 
 
 # NOTE: pcapkit.protocols.internet.mh.MH.__extension__
-def register_mh_extension(code: 'MH_CGAExtension', meth: 'str | tuple[MH_ExtensionParser, MH_ExtensionConstructor]') -> 'None':
+def register_mh_extension(code: 'MH_CGAExtension', meth: 'str | tuple[MH_ExtensionParser, MH_ExtensionConstructor]',
+                          schema: 'Optional[Type[Schema_MH_CGAExtension]]' = None) -> 'None':
     """Register a CGA extension parser.
 
     The function will register the given CGA extension to the
@@ -438,12 +509,16 @@ def register_mh_extension(code: 'MH_CGAExtension', meth: 'str | tuple[MH_Extensi
         code: :class:`~pcapkit.protocols.internet.mh.MH>`
             data type code as in :class:`~pcapkit.const.mh.cga_extension.CGAExtension`.
         meth: Method name or callable to parse and/or construct the data.
+        schema: :class:`~pcapkit.protocols.schema.schema.Schema` class for the message type.
+            It should be a subclass of :class:`~pcapkit.protocols.schema.internet.mh.CGAExtension`.
 
     """
     if isinstance(meth, str) and not hasattr(MH, f'_read_ext_{meth}'):
         raise RegistryError('method must be a valid MH CGA extension function')
 
     MH.register_extension(code, meth)
+    if schema is not None:
+        cast('OptionField[Schema_MH_CGAExtension]', Schema_MH_CGAParameter.extensions).registry[code] = schema
     logger.info('registered MH CGA extension: %s', code.name)
 
 
@@ -521,7 +596,8 @@ def register_tcp(code: 'int', module: 'str', class_: 'str') -> 'None':
 
 
 # NOTE: pcapkit.protocols.transport.tcp.TCP.__option__
-def register_tcp_option(code: 'TCP_Option', meth: 'str | tuple[TCP_OptionParser, TCP_OptionConstructor]') -> 'None':
+def register_tcp_option(code: 'TCP_Option', meth: 'str | tuple[TCP_OptionParser, TCP_OptionConstructor]', *,
+                        schema: 'Optional[Type[Schema_TCP_Option]]' = None) -> 'None':
     """Register an option parser.
 
     The function will register the given option parser to the
@@ -531,17 +607,22 @@ def register_tcp_option(code: 'TCP_Option', meth: 'str | tuple[TCP_OptionParser,
         code: :class:`~pcapkit.protocols.transport.tcp.TCP` option code as in
             :class:`~pcapkit.const.tcp.option.Option`.
         meth: Method name or callable to parse and/or construct the option.
+        schema: :class:`~pcapkit.protocols.schema.schema.Schema` class for the option.
+            It should be a subclass of :class:`~pcapkit.protocols.schema.transport.tcp.Option`.
 
     """
     if isinstance(meth, str) and not hasattr(TCP, f'_read_mode_{meth}'):
         raise RegistryError('method must be a TCP option parser function')
 
     TCP.register_option(code, meth)
+    if schema is not None:
+        cast('OptionField[Schema_TCP_Option]', Schema_TCP.options).registry[code] = schema
     logger.info('registered TCP option parser: %s', code.name)
 
 
 # NOTE: pcapkit.protocols.transport.tcp.TCP.__mp_option__
-def register_tcp_mp_option(code: 'TCP_MPTCPOption', meth: 'str | tuple[TCP_MPOptionParser, TCP_MPOptionConstructor]') -> 'None':
+def register_tcp_mp_option(code: 'TCP_MPTCPOption', meth: 'str | tuple[TCP_MPOptionParser, TCP_MPOptionConstructor]', *,
+                           schema: 'Optional[Type[Schema_TCP_MPTCP]]' = None) -> 'None':
     """Register an MPTCP option parser.
 
     The function will register the given option parser to the
@@ -551,12 +632,16 @@ def register_tcp_mp_option(code: 'TCP_MPTCPOption', meth: 'str | tuple[TCP_MPOpt
         code: Multipath :class:`~pcapkit.protocols.transport.tcp.TCP` option code as in
             :class:`~pcapkit.const.tcp.mp_tcp_option.MPTCPOption`.
         meth: Method name or callable to parse and/or construct the option.
+        schema: :class:`~pcapkit.protocols.schema.schema.Schema` class for the option.
+            It should be a subclass of :class:`~pcapkit.protocols.schema.transport.tcp.MPTCP`.
 
     """
     if isinstance(meth, str) and not hasattr(TCP, f'_read_mptcp_{meth}'):
         raise RegistryError('method must be a MPTCP option parser function')
 
     TCP.register_mp_option(code, meth)
+    if schema is not None:
+        MAP_MPTCP_DATA[code] = schema
     logger.info('registered MPTCP option parser: %s', code.name)
 
 
@@ -594,7 +679,8 @@ def register_udp(code: 'int', module: str, class_: str) -> 'None':
 
 
 # NOTE: pcapkit.protocols.application.httpv2.HTTPv2.__frame__
-def register_http_frame(code: 'HTTP_Frame', meth: 'str | tuple[HTTP_FrameParser, HTTP_FrameConstructor]') -> 'None':
+def register_http_frame(code: 'HTTP_Frame', meth: 'str | tuple[HTTP_FrameParser, HTTP_FrameConstructor]', *,
+                        schema: 'Optional[Type[Schema_HTTP_FrameType]]' = None) -> 'None':
     """Registered a frame parser.
 
     The function will register the given frame parser to the
@@ -604,12 +690,16 @@ def register_http_frame(code: 'HTTP_Frame', meth: 'str | tuple[HTTP_FrameParser,
         code: :class:`HTTP/2 <pcapkit.protocols.application.httpv2.HTTPv2>` frame type
             code as in :class:`~pcapkit.const.http.frame.Frame`.
         meth: Method name or callable to parse and/or construct the frame.
+        schema: :class:`~pcapkit.protocols.schema.schema.Schema` class for the frame.
+            It should be a subclass of :class:`~pcapkit.protocols.schema.application.httpv2.FrameType`.
 
     """
     if isinstance(meth, str) and not hasattr(HTTPv2, f'_read_http_{meth}'):
         raise RegistryError('method must be a frame parser function')
 
     HTTPv2.register_frame(code, meth)
+    if schema is not None:
+        MAP_HTTP_FRAME[code] = schema
     logger.info('registered HTTP/2 frame parser: %s', code.name)
 
 
@@ -619,7 +709,8 @@ def register_http_frame(code: 'HTTP_Frame', meth: 'str | tuple[HTTP_FrameParser,
 
 
 # NOTE: pcapkit.protocols.misc.pcapng.PCAPNG.__block__
-def register_pcapng_block(code: 'PCAPNG_BlockType', meth: 'str | tuple[PCAPNG_BlockParser, PCAPNG_BlockConstructor]') -> 'None':
+def register_pcapng_block(code: 'PCAPNG_BlockType', meth: 'str | tuple[PCAPNG_BlockParser, PCAPNG_BlockConstructor]', *,
+                          schema: 'Optional[Type[Schema_PCAPNG_BlockType]]' = None) -> 'None':
     """Registered a block parser.
 
     The function will register the given block parser to the
@@ -629,17 +720,22 @@ def register_pcapng_block(code: 'PCAPNG_BlockType', meth: 'str | tuple[PCAPNG_Bl
         code: :class:`HTTP/2 <pcapkit.protocols.misc.pcapng.PCAPNG>` block type
             code as in :class:`~pcapkit.const.pcapng.block_type.BlockType`.
         meth: Method name or callable to parse and/or construct the block.
+        schema: :class:`~pcapkit.protocols.schema.schema.Schema` class for the block.
+            It should be a subclass of :class:`~pcapkit.protocols.schema.misc.pcapng.BlockType`.
 
     """
     if isinstance(meth, str) and not hasattr(PCAPNG, f'_read_block_{meth}'):
         raise RegistryError('method must be a block parser function')
 
     PCAPNG.register_block(code, meth)
+    if schema is not None:
+        MAP_PCAPNG_BLOCK[code] = schema
     logger.info('registered PCAP-NG block parser: %s', code.name)
 
 
 # NOTE: pcapkit.protocols.misc.pcapng.PCAPNG.__option__
-def register_pcapng_option(code: 'PCAPNG_OptionType', meth: 'str | tuple[PCAPNG_OptionParser, PCAPNG_OptionConstructor]') -> 'None':
+def register_pcapng_option(code: 'PCAPNG_OptionType', meth: 'str | tuple[PCAPNG_OptionParser, PCAPNG_OptionConstructor]', *,
+                           schema: 'Optional[Type[Schema_PCAPNG_Option]]' = None) -> 'None':
     """Registered a option parser.
 
     The function will register the given option parser to the
@@ -649,17 +745,25 @@ def register_pcapng_option(code: 'PCAPNG_OptionType', meth: 'str | tuple[PCAPNG_
         code: :class:`PCAPNG <pcapkit.protocols.misc.pcapng.PCAPNG>` option type
             code as in :class:`~pcapkit.const.pcapng.option_type.OptionType`.
         meth: Method name or callable to parse and/or construct the option.
+        schema: :class:`~pcapkit.protocols.schema.schema.Schema` class for the option.
+            It should be a subclass of :class:`~pcapkit.protocols.schema.misc.pcapng.Option`.
 
     """
     if isinstance(meth, str) and not hasattr(PCAPNG, f'_read_option_{meth}'):
         raise RegistryError('method must be a option parser function')
 
     PCAPNG.register_option(code, meth)
+    if schema is not None:
+        for subclass in Schema_PCAPNG_BlockType.__subclasses__():
+            if not hasattr(subclass, 'options'):
+                continue
+            cast('OptionField[Schema_PCAPNG_Option]', subclass.options).registry[code] = schema
     logger.info('registered PCAP-NG option parser: %s', code.name)
 
 
 # NOTE: pcapkit.protocols.misc.pcapng.PCAPNG.__record__
-def register_pcapng_record(code: 'PCAPNG_RecordType', meth: 'str | tuple[PCAPNG_RecordParser, PCAPNG_RecordConstructor]') -> 'None':
+def register_pcapng_record(code: 'PCAPNG_RecordType', meth: 'str | tuple[PCAPNG_RecordParser, PCAPNG_RecordConstructor]', *,
+                           schema: 'Optional[Type[Schema_PCAPNG_NameResolutionRecord]]' = None) -> 'None':
     """Registered a name resolution record parser.
 
     The function will register the given name resolution record parser to the
@@ -670,17 +774,22 @@ def register_pcapng_record(code: 'PCAPNG_RecordType', meth: 'str | tuple[PCAPNG_
             resolution record type code as in :class:`~pcapkit.const.pcapng.record_type.RecordType`.
         meth: Method name or callable to parse and/or construct the name
             resolution record.
+        schema: :class:`~pcapkit.protocols.schema.schema.Schema` class for the name resolution record.
+            It should be a subclass of :class:`~pcapkit.protocols.schema.misc.pcapng.NameResolutionRecord`.
 
     """
     if isinstance(meth, str) and not hasattr(PCAPNG, f'_read_record_{meth}'):
         raise RegistryError('method must be a name resolution record parser function')
 
     PCAPNG.register_record(code, meth)
+    if schema is not None:
+        cast('OptionField[Schema_PCAPNG_NameResolutionRecord]', Schema_PCAPNG_NameResolutionBlock.records).registry[code] = schema
     logger.info('registered PCAP-NG name resolution record parser: %s', code.name)
 
 
 # NOTE: pcapkit.protocols.misc.pcapng.PCAPNG.__secrets__
-def register_pcapng_secrets(code: 'PCAPNG_SecretsType', meth: 'str | tuple[PCAPNG_SecretsParser, PCAPNG_SecretsConstructor]') -> 'None':
+def register_pcapng_secrets(code: 'PCAPNG_SecretsType', meth: 'str | tuple[PCAPNG_SecretsParser, PCAPNG_SecretsConstructor]', *,
+                            schema: 'Optional[Type[Schema_PCAPNG_DSBSecrets]]' = None) -> 'None':
     """Registered a decryption secrets parser.
 
     The function will register the given decryption secrets parser to the
@@ -690,10 +799,14 @@ def register_pcapng_secrets(code: 'PCAPNG_SecretsType', meth: 'str | tuple[PCAPN
         code: :class:`PCAPNG <pcapkit.protocols.misc.pcapng.PCAPNG>` decryption
             secrets type code as in :class:`~pcapkit.const.pcapng.secrets_type.SecretsType`.
         meth: Method name or callable to parse and/or construct the decryption secrets.
+        schema: :class:`~pcapkit.protocols.schema.schema.Schema` class for the decryption secrets.
+            It should be a subclass of :class:`~pcapkit.protocols.schema.misc.pcapng.DSBSecrets`.
 
     """
     if isinstance(meth, str) and not hasattr(PCAPNG, f'_read_secrets_{meth}'):
         raise RegistryError('method must be a decryption secrets parser function')
 
     PCAPNG.register_secrets(code, meth)
+    if schema is not None:
+        MAP_DSB_SECRETS[code] = schema
     logger.info('registered PCAP-NG decryption secrets parser: %s', code.name)

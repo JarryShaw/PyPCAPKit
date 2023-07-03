@@ -41,7 +41,7 @@ __all__ = [
 
 if TYPE_CHECKING:
     from ipaddress import IPv4Address, IPv6Address
-    from typing import Any, Optional
+    from typing import Any, DefaultDict, Optional, Type
 
     from pcapkit.corekit.fields.field import _Field as Field
     from pcapkit.protocols.protocol import Protocol
@@ -196,13 +196,16 @@ def mptcp_data_selector(pkt: 'dict[str, Any]') -> 'Field':
         :class:`~pcapkit.protocols.schema.transport.tcp.MPTCP` subclass
         instance.
 
+    See Also:
+        * :class:`pcapkit.const.tcp.mp_tcp_option.MPTCPOption`
+        * :data:`pcapkit.protocols.schema.transport.tcp.MAP_MPTCP_DATA`
+
     """
     subtype = Enum_MPTCPOption.get(pkt['test']['subtype'])
     pkt['test']['subtype'] = subtype
+    schema = MAP_MPTCP_DATA[subtype]
 
-    if subtype == Enum_MPTCPOption.MP_CAPABLE:
-        return SchemaField(length=pkt['test']['length'], schema=MPTCPCapable)
-    if subtype == Enum_MPTCPOption.MP_JOIN:
+    if subtype == Enum_MPTCPOption.MP_JOIN and schema is MPTCPUnknown:
         if pkt['flags']['syn'] == 1 and pkt['flags']['ack'] == 0:
             return SchemaField(length=pkt['test']['length'], schema=MPTCPJoinSYN)
         if pkt['flags']['syn'] == 1 and pkt['flags']['ack'] == 1:
@@ -210,19 +213,7 @@ def mptcp_data_selector(pkt: 'dict[str, Any]') -> 'Field':
         if pkt['flags']['syn'] == 0 and pkt['flags']['ack'] == 1:
             return SchemaField(length=pkt['test']['length'], schema=MPTCPJoinACK)
         raise FieldError(f'TCP: [OptNo {Enum_Option.Multipath_TCP}] {Enum_MPTCPOption.MP_JOIN} invalid flags')
-    if subtype == Enum_MPTCPOption.DSS:
-        return SchemaField(length=pkt['test']['length'], schema=MPTCPDSS)
-    if subtype == Enum_MPTCPOption.ADD_ADDR:
-        return SchemaField(length=pkt['test']['length'], schema=MPTCPAddAddress)
-    if subtype == Enum_MPTCPOption.REMOVE_ADDR:
-        return SchemaField(length=pkt['test']['length'], schema=MPTCPRemoveAddress)
-    if subtype == Enum_MPTCPOption.MP_PRIO:
-        return SchemaField(length=pkt['test']['length'], schema=MPTCPPriority)
-    if subtype == Enum_MPTCPOption.MP_FAIL:
-        return SchemaField(length=pkt['test']['length'], schema=MPTCPFallback)
-    if subtype == Enum_MPTCPOption.MP_FASTCLOSE:
-        return SchemaField(length=pkt['test']['length'], schema=MPTCPFastclose)
-    return SchemaField(length=pkt['test']['length'], schema=MPTCPUnknown)
+    return SchemaField(length=pkt['test']['length'], schema=schema)
 
 
 def mptcp_add_address_selector(pkt: 'dict[str, Any]') -> 'Field':
@@ -945,3 +936,16 @@ class TCP(Schema):
         def __init__(self, srcport: 'Enum_AppType | int', dstport: 'Enum_AppType | int', seq: 'int', ack: 'int',
                      offset: 'OffsetFlag', flags: 'Flags', window: 'int', checksum: 'bytes',
                      urgent: 'int', options: 'list[Option | bytes] | bytes', payload: 'bytes | Protocol | Schema') -> 'None': ...
+
+
+#: DefaultDict[Enum_MPTCPOption, Type[MPTCP]]: Mapping of MPTCP type numbers to schemas.
+MAP_MPTCP_DATA = collections.defaultdict(lambda: MPTCPUnknown, {
+    Enum_MPTCPOption.MP_CAPABLE: MPTCPCapable,
+    #Enum_MPTCPOption.MP_JOIN: MPTCPJoin,
+    Enum_MPTCPOption.DSS: MPTCPDSS,
+    Enum_MPTCPOption.ADD_ADDR: MPTCPAddAddress,
+    Enum_MPTCPOption.REMOVE_ADDR: MPTCPRemoveAddress,
+    Enum_MPTCPOption.MP_PRIO: MPTCPPriority,
+    Enum_MPTCPOption.MP_FAIL: MPTCPFallback,
+    Enum_MPTCPOption.MP_FASTCLOSE: MPTCPFastclose,
+})  # type: DefaultDict[Enum_MPTCPOption | int, Type[MPTCP]]

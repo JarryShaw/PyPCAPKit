@@ -2,6 +2,7 @@
 # mypy: disable-error-code=assignment
 """header schema for HTTP/2 protocol"""
 
+import collections
 import enum
 from typing import TYPE_CHECKING, cast
 
@@ -25,7 +26,7 @@ __all__ = [
 ]
 
 if TYPE_CHECKING:
-    from typing import Any, Optional
+    from typing import Any, DefaultDict, Optional, Type
 
     from pcapkit.corekit.fields.field import _Field as Field
 
@@ -78,27 +79,8 @@ def http_frame_selector(pkt: 'dict[str, Any]') -> 'Field':
 
     """
     type = cast('Enum_Frame', pkt['type'])
-    if type == Enum_Frame.DATA:
-        return SchemaField(length=pkt['__length__'], schema=DataFrame)
-    if type == Enum_Frame.HEADERS:
-        return SchemaField(length=pkt['__length__'], schema=HeadersFrame)
-    if type == Enum_Frame.PRIORITY:
-        return SchemaField(length=pkt['__length__'], schema=PriorityFrame)
-    if type == Enum_Frame.RST_STREAM:
-        return SchemaField(length=pkt['__length__'], schema=RSTStreamFrame)
-    if type == Enum_Frame.SETTINGS:
-        return SchemaField(length=pkt['__length__'], schema=SettingsFrame)
-    if type == Enum_Frame.PUSH_PROMISE:
-        return SchemaField(length=pkt['__length__'], schema=PushPromiseFrame)
-    if type == Enum_Frame.PING:
-        return SchemaField(length=pkt['__length__'], schema=PingFrame)
-    if type == Enum_Frame.GOAWAY:
-        return SchemaField(length=pkt['__length__'], schema=GoawayFrame)
-    if type == Enum_Frame.WINDOW_UPDATE:
-        return SchemaField(length=pkt['__length__'], schema=WindowUpdateFrame)
-    if type == Enum_Frame.CONTINUATION:
-        return SchemaField(length=pkt['__length__'], schema=ContinuationFrame)
-    return SchemaField(length=pkt['__length__'], schema=UnassignedFrame)
+    schema = MAP_HTTP_FRAME[type]
+    return SchemaField(length=pkt['__length__'], schema=schema)
 
 
 @schema_final
@@ -398,3 +380,18 @@ class ContinuationFrame(FrameType):
 
     if TYPE_CHECKING:
         def __init__(self, fragment: 'bytes') -> 'None': ...
+
+
+#: DefaultDict[Enum_Frame, Type[FrameType]]: Mapping of HTTP/2 frame type numbers to schemas.
+MAP_HTTP_FRAME = collections.defaultdict(lambda: UnassignedFrame, {
+    Enum_Frame.DATA: DataFrame,
+    Enum_Frame.HEADERS: HeadersFrame,
+    Enum_Frame.PRIORITY: PriorityFrame,
+    Enum_Frame.RST_STREAM: RSTStreamFrame,
+    Enum_Frame.SETTINGS: SettingsFrame,
+    Enum_Frame.PUSH_PROMISE: PushPromiseFrame,
+    Enum_Frame.PING: PingFrame,
+    Enum_Frame.GOAWAY: GoawayFrame,
+    Enum_Frame.WINDOW_UPDATE: WindowUpdateFrame,
+    Enum_Frame.CONTINUATION: ContinuationFrame,
+})  # type: DefaultDict[Enum_Frame | int, Type[FrameType]]

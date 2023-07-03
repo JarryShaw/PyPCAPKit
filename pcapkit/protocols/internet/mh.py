@@ -1738,7 +1738,7 @@ class MH(Internet[Data_MH, Schema_MH],
                                 extensions: 'Extension') -> 'Data_MultiPrefixExtension':
         """Read multi-prefix CGA extension.
 
-        Structure of Multi-Prefix CGA extension [:rfc:`5535`]::
+        Structure of Multi-Prefix CGA extension [:rfc:`5535`]:
 
         .. code-block:: text
 
