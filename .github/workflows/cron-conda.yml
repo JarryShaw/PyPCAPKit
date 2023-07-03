@@ -23,9 +23,9 @@ jobs:
         run: |
           set -x
 
-          python -m pip install -U pip setuptools wheel
+          python -m pip install -U pip setuptools wheel packaging
           python -m pip install -e .[all]
-          python -m pip install pathlib2 typing_extensions
+          #python -m pip install pathlib2 typing_extensions
 
       - name: Setup Conda Distribution
         run: |
