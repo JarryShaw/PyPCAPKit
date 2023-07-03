@@ -97,7 +97,7 @@ class {NAME}(StrEnum):
 
     def __new__(cls, value: 'int', name: 'str' = '<null>',
                 proto: 'TransportProtocol' = TransportProtocol.undefined) -> 'Type[{NAME}]':
-        temp = '%s_%d_%s' % (proto.name, value, name)
+        temp = '%s [%d - %s]' % (name, value, proto.name)
 
         obj = str.__new__(cls, temp)
         obj._value_ = temp
@@ -117,7 +117,7 @@ class {NAME}(StrEnum):
         return "<%s.%s: %d [%s]>" % (self.__class__.__name__, self.svc, self.port, self.proto.name)
 
     def __str__(self) -> 'str':
-        return '%s [%d (%s)]' % (self.svc, self.port, self.proto.name)
+        return '%s [%d - %s]' % (self.svc, self.port, self.proto.name)
 
     {ENUM}
 
@@ -229,7 +229,10 @@ class AppType(Vendor):
                 if renm in line:
                     if port == line[renm][1]:
                         line[renm][2] = f'{line[renm][2]} | {proto}'
-                        line[renm][3] = f'{line[renm][3]}\n    #: {cmmt}'
+                        if line[renm][3].startswith('-'):
+                            line[renm][3] = f'{line[renm][3]}\n    #: - {cmmt}'
+                        else:
+                            line[renm][3] = f'- {line[renm][3]}\n    #: - {cmmt}'
                     else:
                         line[f'{renm}_{line[renm][1]}'] = line[renm]
                         line[f'{renm}_{code}'] = [svc, port, proto, cmmt]
