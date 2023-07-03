@@ -1,21 +1,28 @@
 # -*- coding: utf-8 -*-
 
-import os
+import importlib.metadata as imp_meta
+import os.path as os_path
 
-import pkg_resources
+import packaging.requirements as pkg_req
 
-req_file = os.path.join('conda', 'requirements.txt')
+req_file = os_path.join('conda', 'requirements.txt')
 
-data = {}  # dict[str, tuple[str, str]]
+data = {}  # dict[str, str]
 with open(req_file) as file:
-    req_map = pkg_resources.parse_requirements(file)
-    for req in req_map:
-        dist = pkg_resources.get_distribution(req.key)
-        data[req.key] = (dist.version, req.marker)
+    for line in file:
+        req = pkg_req.Requirement(line)
+
+        try:
+            ver = imp_meta.version(req.name)
+            if req.marker is None:
+                data[req.name] = f'{req.name} == {ver}'
+            else:
+                data[req.name] = f'{req.name} == {ver} ; {req.marker}'
+        except imp_meta.PackageNotFoundError:
+            if req.marker is None:
+                raise
+            data[req.name] = f'{req.name} ; {req.marker}'
 
 with open(req_file, 'w') as file:
-    for key, (version, marker) in sorted(data.items()):
-        if marker is None:
-            print(f'{key} == {version}', file=file)
-        else:
-            print(f'{key} == {version} ; {marker}', file=file)
+    for key, line in sorted(data.items()):
+        print(line, file=file)
