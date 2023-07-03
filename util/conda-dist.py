@@ -10,6 +10,8 @@ req_file = os_path.join('conda', 'requirements.txt')
 data = {}  # dict[str, str]
 with open(req_file) as file:
     for line in file:
+        if not line:
+            continue
         req = pkg_req.Requirement(line)
 
         try:
