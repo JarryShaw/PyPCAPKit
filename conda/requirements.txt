@@ -1,4 +1,4 @@
-aenum == 3.1.12
+aenum == 3.1.15
 appdirs == 1.4.4
 beautifulsoup4 == 4.12.2
 certifi == 2023.5.7
@@ -6,7 +6,7 @@ chardet == 5.1.0
 charset-normalizer == 3.1.0
 dictdumper == 0.8.4.post2
 dpkt == 1.9.8
-emoji == 2.2.0
+emoji == 2.6.0
 html5lib == 1.1
 idna == 3.4
 lxml == 4.9.2
@@ -14,12 +14,12 @@ packaging == 23.1
 pathlib2 == 2.3.7.post1 ; python_version < "3.5"
 pyshark == 0.6
 pysocks == 1.7.1
-requests == 2.30.0
+requests == 2.31.0
 scapy == 2.5.0
 six == 1.16.0
 soupsieve == 2.4.1
 tbtrim == 0.3.1
 termcolor == 2.3.0
-typing-extensions == 4.5.0 ; python_version < "3.8"
-urllib3 == 2.0.2
+typing-extensions == 4.7.1 ; python_version < "3.8"
+urllib3 == 2.0.3
 webencodings == 0.5.1
