@@ -542,6 +542,9 @@ class CareofTestOption(Option):
         def __init__(self, type: 'Enum_Option', length: 'int', token: 'bytes') -> 'None': ...
 
 
+# TODO: Implement other options.
+
+
 class Packet(Schema):
     """Header schema for MH packet data."""
 
@@ -745,3 +748,6 @@ class BindingErrorMessage(Packet):
     if TYPE_CHECKING:
         def __init__(self, status: 'Enum_BindingError', home: 'IPv6Address | str | int | bytes',
                      options: 'list[Option | bytes]') -> 'None': ...
+
+
+# TODO: Implement other message types.

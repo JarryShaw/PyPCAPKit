@@ -249,8 +249,7 @@ class BindingErrorMessage(MH):
                      options: 'OrderedMultiDict[Enum_Option, Option]') -> 'None': ...
 
 
-
-
+# TODO: Implement other message types.
 
 
 class Option(Data):
@@ -504,3 +503,6 @@ class CareofTestOption(Option):
 
     if TYPE_CHECKING:
         def __init__(self, type: 'Enum_Option', length: 'int', token: 'bytes') -> 'None': ...
+
+
+# TODO: Implement other options.
