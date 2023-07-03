@@ -141,16 +141,6 @@ Octets      Bits        Name                    Description
 
    .. automethod:: __index__
 
-Auxiliary Data
---------------
-
-.. autoclass:: pcapkit.protocols.transport.tcp.Flags
-   :members:
-   :show-inheritance:
-
-   :param \*args: Arbitrary positional arguments.
-   :param \*\*kwargs: Arbitrary keyword arguments.
-
 Header Schemas
 --------------
 
