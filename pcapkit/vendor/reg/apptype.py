@@ -260,7 +260,7 @@ class AppType(Vendor):
             if keyword.iskeyword(key):
                 key = '%s_' % key
 
-            pres = f'{key} = {code}, {svc!r}, {proto}'
+            pres = f"{key}: 'AppType' = {code}, {svc!r}, {proto}"
             sufs = f'#: {cmmt}'
 
             enum.append(f'{sufs}\n    {pres}')
