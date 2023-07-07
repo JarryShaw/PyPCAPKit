@@ -877,18 +877,35 @@ in the <code class="docutils literal notranslate"><span class="pre">packet</span
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.schema.schema.</span></span><span class="sig-name descname"><span class="pre">EnumSchema</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dict_</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/protocols/schema/schema.html#EnumSchema"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.schema.schema.EnumSchema" title="Permalink to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#pcapkit.protocols.schema.schema.Schema" title="pcapkit.protocols.schema.schema.Schema"><code class="xref py py-class docutils literal notranslate"><span class="pre">Schema</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Generic" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Generic</span></code></a>[<code class="xref py py-obj docutils literal notranslate"><span class="pre">ET</span></code>]</p>
 <p><a class="reference internal" href="#pcapkit.protocols.schema.schema.Schema" title="pcapkit.protocols.schema.schema.Schema"><code class="xref py py-class docutils literal notranslate"><span class="pre">Schema</span></code></a> with enumeration mapping support.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pcapkit.const.pcapng.block_type</span> <span class="kn">import</span> <span class="n">BlockType</span> <span class="k">as</span> <span class="n">Enum_BlockType</span>
-<span class="kn">from</span> <span class="nn">pcapkit.protocols.schema.misc.pcapng</span> <span class="n">improt</span> <span class="n">BlockType</span>
+<div class="admonition-examples admonition">
+<p class="admonition-title">Examples</p>
+<p>To create an enumeration mapping supported schema, simply</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">MySchema</span><span class="p">(</span><span class="n">EnumSchema</span><span class="p">[</span><span class="n">MyEnum</span><span class="p">]):</span>
 
-
-<span class="k">class</span> <span class="nc">NewBlock</span><span class="p">(</span><span class="n">BlockType</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">Enum_BlockType</span><span class="o">.</span><span class="n">New_Block</span><span class="p">):</span>
+    <span class="c1"># optional, set the default schema for enumeration mapping</span>
+    <span class="c1"># if the enumeration number is not found in the mapping</span>
+    <span class="n">__default__</span> <span class="o">=</span> <span class="k">lambda</span><span class="p">:</span> <span class="n">UnknownSchema</span>  <span class="c1"># by default, None</span>
+</pre></div>
+</div>
+<p>then, you can use inheritance to create a list of schemas
+for this given enumeration mapping:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">OneSchema</span><span class="p">(</span><span class="n">MySchema</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">MyEnum</span><span class="o">.</span><span class="n">ONE</span><span class="p">):</span>
     <span class="o">...</span>
 
-
-<span class="c1"># NewBlock is now registered to BlockType.registry</span>
-<span class="c1"># alternatively, you can use the BlockType.register() method</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">BlockType</span><span class="o">.</span><span class="n">registry</span><span class="p">[</span><span class="n">Enum_BlockType</span><span class="o">.</span><span class="n">New_Block</span><span class="p">]</span> <span class="ow">is</span> <span class="n">NewBlock</span><span class="p">)</span>  <span class="c1"># True</span>
+<span class="k">class</span> <span class="nc">MultipleSchema</span><span class="p">(</span><span class="n">MySchema</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="p">[</span><span class="n">MyEnum</span><span class="o">.</span><span class="n">TWO</span><span class="p">,</span> <span class="n">MyEnum</span><span class="o">.</span><span class="n">THREE</span><span class="p">]):</span>
+    <span class="o">...</span>
 </pre></div>
+</div>
+<p>or optionally, using the <a class="reference internal" href="#id11" title="pcapkit.protocols.schema.schema.EnumSchema.register"><code class="xref py py-meth docutils literal notranslate"><span class="pre">register()</span></code></a> method to register a
+schema to the enumeration mapping:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">MySchema</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">MyEnum</span><span class="o">.</span><span class="n">ZERO</span><span class="p">,</span> <span class="n">ZeroSchema</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>And now you can access the enumeration mapping via the <a class="reference internal" href="#id9" title="pcapkit.protocols.schema.schema.EnumSchema.registry"><code class="xref py py-attr docutils literal notranslate"><span class="pre">registry</span></code></a>
+property (more specifically, class attribute):</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">MySchema</span><span class="o">.</span><span class="n">registry</span><span class="p">[</span><span class="n">MyEnum</span><span class="o">.</span><span class="n">ONE</span><span class="p">]</span>  <span class="c1"># OneSchema</span>
+</pre></div>
+</div>
 </div>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -944,6 +961,21 @@ or a list of enumerations.</p></li>
 <p>If <code class="docutils literal notranslate"><span class="pre">code</span></code> is provided, the subclass will be registered to the
 <a class="reference internal" href="#id9" title="pcapkit.protocols.schema.schema.EnumSchema.registry"><code class="xref py py-attr docutils literal notranslate"><span class="pre">registry</span></code></a> mapping with the given <code class="docutils literal notranslate"><span class="pre">code</span></code>. If <code class="docutils literal notranslate"><span class="pre">code</span></code> is
 not given, the subclass will not be registered.</p>
+<div class="admonition-notes admonition">
+<p class="admonition-title">Notes</p>
+<p>If <a class="reference internal" href="#pcapkit.protocols.schema.schema.EnumSchema.__enum__" title="pcapkit.protocols.schema.schema.EnumSchema.__enum__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__enum__</span></code></a> is not yet defined at function call, it will
+automatically be defined as a <a class="reference external" href="https://docs.python.org/3/library/collections.html#collections.defaultdict" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">collections.defaultdict</span></code></a>
+object, with the default value set to <a class="reference internal" href="#pcapkit.protocols.schema.schema.EnumSchema.__default__" title="pcapkit.protocols.schema.schema.EnumSchema.__default__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__default__</span></code></a>.</p>
+<p>If intended to customise the <a class="reference internal" href="#pcapkit.protocols.schema.schema.EnumSchema.__enum__" title="pcapkit.protocols.schema.schema.EnumSchema.__enum__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__enum__</span></code></a> mapping, it is
+possible to override the <a class="reference internal" href="#id10" title="pcapkit.protocols.schema.schema.EnumSchema.__init_subclass__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__init_subclass__()</span></code></a> method and
+define <a class="reference internal" href="#pcapkit.protocols.schema.schema.EnumSchema.__enum__" title="pcapkit.protocols.schema.schema.EnumSchema.__enum__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__enum__</span></code></a> manually.</p>
+</div>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.schema.schema.EnumSchema.__default__">
+<span class="sig-name descname"><span class="pre">__default__</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Callable</span></code></a><span class="pre">[[],</span> <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Type</span></code></a><span class="pre">[</span><code class="xref py py-class docutils literal notranslate"><span class="pre">Self</span></code><span class="pre">]]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;function</span> <span class="pre">EnumSchema.&lt;lambda&gt;&gt;</span></em><a class="headerlink" href="#pcapkit.protocols.schema.schema.EnumSchema.__default__" title="Permalink to this definition">#</a></dt>
+<dd><p>Callback to return the default schema for enumeration mapping.</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -978,6 +1010,15 @@ or a list of enumerations.</p></li>
 <p>If <code class="docutils literal notranslate"><span class="pre">code</span></code> is provided, the subclass will be registered to the
 <a class="reference internal" href="#id9" title="pcapkit.protocols.schema.schema.EnumSchema.registry"><code class="xref py py-attr docutils literal notranslate"><span class="pre">registry</span></code></a> mapping with the given <code class="docutils literal notranslate"><span class="pre">code</span></code>. If <code class="docutils literal notranslate"><span class="pre">code</span></code> is
 not given, the subclass will not be registered.</p>
+<div class="admonition-notes admonition">
+<p class="admonition-title">Notes</p>
+<p>If <a class="reference internal" href="#pcapkit.protocols.schema.schema.EnumSchema.__enum__" title="pcapkit.protocols.schema.schema.EnumSchema.__enum__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__enum__</span></code></a> is not yet defined at function call, it will
+automatically be defined as a <a class="reference external" href="https://docs.python.org/3/library/collections.html#collections.defaultdict" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">collections.defaultdict</span></code></a>
+object, with the default value set to <a class="reference internal" href="#pcapkit.protocols.schema.schema.EnumSchema.__default__" title="pcapkit.protocols.schema.schema.EnumSchema.__default__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__default__</span></code></a>.</p>
+<p>If intended to customise the <a class="reference internal" href="#pcapkit.protocols.schema.schema.EnumSchema.__enum__" title="pcapkit.protocols.schema.schema.EnumSchema.__enum__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__enum__</span></code></a> mapping, it is
+possible to override the <a class="reference internal" href="#id10" title="pcapkit.protocols.schema.schema.EnumSchema.__init_subclass__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__init_subclass__()</span></code></a> method and
+define <a class="reference internal" href="#pcapkit.protocols.schema.schema.EnumSchema.__enum__" title="pcapkit.protocols.schema.schema.EnumSchema.__enum__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__enum__</span></code></a> manually.</p>
+</div>
 </dd></dl>
 
 <dl class="py method">

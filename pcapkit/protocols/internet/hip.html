@@ -4092,7 +4092,7 @@ enumeration:</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.internet.hip.Parameter">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.schema.internet.hip.</span></span><span class="sig-name descname"><span class="pre">Parameter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dict_</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/schema/internet/hip.html#Parameter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.schema.internet.hip.Parameter" title="Permalink to this definition">#</a></dt>
-<dd><p>Bases: <a class="reference internal" href="../index.html#pcapkit.protocols.schema.schema.Schema" title="pcapkit.protocols.schema.schema.Schema"><code class="xref py py-class docutils literal notranslate"><span class="pre">Schema</span></code></a></p>
+<dd><p>Bases: <a class="reference internal" href="../index.html#pcapkit.protocols.schema.schema.EnumSchema" title="pcapkit.protocols.schema.schema.EnumSchema"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnumSchema</span></code></a>[<a class="reference internal" href="../../const/hip.html#pcapkit.const.hip.parameter.Parameter" title="pcapkit.const.hip.parameter.Parameter"><code class="xref py py-class docutils literal notranslate"><span class="pre">Parameter</span></code></a>]</p>
 <p>Base schema for HIP parameters.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -5325,7 +5325,7 @@ enumeration:</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.internet.hip.HostIdentity">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.schema.internet.hip.</span></span><span class="sig-name descname"><span class="pre">HostIdentity</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dict_</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/schema/internet/hip.html#HostIdentity"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.schema.internet.hip.HostIdentity" title="Permalink to this definition">#</a></dt>
-<dd><p>Bases: <a class="reference internal" href="../index.html#pcapkit.protocols.schema.schema.Schema" title="pcapkit.protocols.schema.schema.Schema"><code class="xref py py-class docutils literal notranslate"><span class="pre">Schema</span></code></a></p>
+<dd><p>Bases: <a class="reference internal" href="../index.html#pcapkit.protocols.schema.schema.EnumSchema" title="pcapkit.protocols.schema.schema.EnumSchema"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnumSchema</span></code></a>[<a class="reference internal" href="../../const/hip.html#pcapkit.const.hip.hi_algorithm.HIAlgorithm" title="pcapkit.const.hip.hi_algorithm.HIAlgorithm"><code class="xref py py-class docutils literal notranslate"><span class="pre">HIAlgorithm</span></code></a>]</p>
 <p>Host identity schema.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -5338,6 +5338,12 @@ enumeration:</p>
 <dd class="field-even"><p>Self</p>
 </dd>
 </dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.schema.internet.hip.HostIdentity.registry">
+<span class="sig-name descname"><span class="pre">registry</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">DefaultDict[ET,</span> <span class="pre">Type[Self]]</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{HIAlgorithm.ECDSA:</span> <span class="pre">&lt;class</span> <span class="pre">'pcapkit.protocols.schema.internet.hip.ECDSACurveHostIdentity'&gt;,</span> <span class="pre">HIAlgorithm.ECDSA_LOW:</span> <span class="pre">&lt;class</span> <span class="pre">'pcapkit.protocols.schema.internet.hip.ECDSALowCurveHostIdentity'&gt;,</span> <span class="pre">HIAlgorithm.EdDSA:</span> <span class="pre">&lt;class</span> <span class="pre">'pcapkit.protocols.schema.internet.hip.EdDSACurveHostIdentity'&gt;}</span></em><a class="headerlink" href="#pcapkit.protocols.schema.internet.hip.HostIdentity.registry" title="Permalink to this definition">#</a></dt>
+<dd><p>Mapping of enumeration numbers to schemas.</p>
+</dd></dl>
+
 </dd></dl>
 
 <dl class="py class">

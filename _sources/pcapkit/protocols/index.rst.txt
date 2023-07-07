@@ -72,6 +72,8 @@ Header Schema
    .. automethod:: register
 
    .. automethod:: __init_subclass__
+
+   .. autoattribute:: __default__
    .. autoattribute:: __enum__
 
 .. autodecorator:: pcapkit.protocols.schema.schema.schema_final

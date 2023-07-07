@@ -365,7 +365,7 @@
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
     <span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">OrderedDict</span>
     <span class="kn">from</span> <span class="nn">enum</span> <span class="kn">import</span> <span class="n">Enum</span>
-    <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">IO</span><span class="p">,</span> <span class="n">Any</span><span class="p">,</span> <span class="n">DefaultDict</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">Iterator</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Type</span>
+    <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">IO</span><span class="p">,</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">DefaultDict</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">Iterator</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Type</span>
 
     <span class="kn">from</span> <span class="nn">typing_extensions</span> <span class="kn">import</span> <span class="n">Self</span>
 
@@ -1011,24 +1011,50 @@
 <div class="viewcode-block" id="EnumSchema"><a class="viewcode-back" href="../../../../pcapkit/protocols/index.html#pcapkit.protocols.schema.schema.EnumSchema">[docs]</a><span class="k">class</span> <span class="nc">EnumSchema</span><span class="p">(</span><span class="n">Schema</span><span class="p">,</span> <span class="n">Generic</span><span class="p">[</span><span class="n">ET</span><span class="p">],</span> <span class="n">metaclass</span><span class="o">=</span><span class="n">EnumMeta</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;:class:`Schema` with enumeration mapping support.</span>
 
-<span class="sd">    .. code-block:: python</span>
+<span class="sd">    Examples:</span>
 
-<span class="sd">        from pcapkit.const.pcapng.block_type import BlockType as Enum_BlockType</span>
-<span class="sd">        from pcapkit.protocols.schema.misc.pcapng improt BlockType</span>
+<span class="sd">        To create an enumeration mapping supported schema, simply</span>
 
+<span class="sd">        .. code-block:: python</span>
 
-<span class="sd">        class NewBlock(BlockType, code=Enum_BlockType.New_Block):</span>
-<span class="sd">            ...</span>
+<span class="sd">           class MySchema(EnumSchema[MyEnum]):</span>
 
+<span class="sd">               # optional, set the default schema for enumeration mapping</span>
+<span class="sd">               # if the enumeration number is not found in the mapping</span>
+<span class="sd">               __default__ = lambda: UnknownSchema  # by default, None</span>
 
-<span class="sd">        # NewBlock is now registered to BlockType.registry</span>
-<span class="sd">        # alternatively, you can use the BlockType.register() method</span>
-<span class="sd">        print(BlockType.registry[Enum_BlockType.New_Block] is NewBlock)  # True</span>
+<span class="sd">        then, you can use inheritance to create a list of schemas</span>
+<span class="sd">        for this given enumeration mapping:</span>
+
+<span class="sd">        .. code-block:: python</span>
+
+<span class="sd">           class OneSchema(MySchema, code=MyEnum.ONE):</span>
+<span class="sd">               ...</span>
+
+<span class="sd">           class MultipleSchema(MySchema, code=[MyEnum.TWO, MyEnum.THREE]):</span>
+<span class="sd">               ...</span>
+
+<span class="sd">        or optionally, using the :meth:`register` method to register a</span>
+<span class="sd">        schema to the enumeration mapping:</span>
+
+<span class="sd">        .. code-block:: python</span>
+
+<span class="sd">           MySchema.register(MyEnum.ZERO, ZeroSchema)</span>
+
+<span class="sd">        And now you can access the enumeration mapping via the :attr:`registry`</span>
+<span class="sd">        property (more specifically, class attribute):</span>
+
+<span class="sd">        .. code-block:: python</span>
+
+<span class="sd">           &gt;&gt;&gt; MySchema.registry[MyEnum.ONE]  # OneSchema</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="n">__additional__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;__enum__&#39;</span><span class="p">]</span>
-    <span class="n">__excluded__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;__enum__&#39;</span><span class="p">]</span>
+    <span class="n">__additional__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;__enum__&#39;</span><span class="p">,</span> <span class="s1">&#39;__default__&#39;</span><span class="p">]</span>
+    <span class="n">__excluded__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;__enum__&#39;</span><span class="p">,</span> <span class="s1">&#39;__default__&#39;</span><span class="p">]</span>
+
+    <span class="c1">#: Callback to return the default schema for enumeration mapping.</span>
+    <span class="n">__default__</span><span class="p">:</span> <span class="s1">&#39;Callable[[], Type[Self]]&#39;</span> <span class="o">=</span> <span class="k">lambda</span><span class="p">:</span> <span class="kc">None</span>  <span class="c1"># type: ignore[assignment,return-value]</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
         <span class="c1">#: Mapping of enumeration numbers to schemas (**internal use only**).</span>
@@ -1049,7 +1075,19 @@
 <span class="sd">        :attr:`registry` mapping with the given ``code``. If ``code`` is</span>
 <span class="sd">        not given, the subclass will not be registered.</span>
 
+<span class="sd">        Notes:</span>
+<span class="sd">            If :attr:`__enum__` is not yet defined at function call, it will</span>
+<span class="sd">            automatically be defined as a :class:`collections.defaultdict`</span>
+<span class="sd">            object, with the default value set to :attr:`__default__`.</span>
+
+<span class="sd">            If intended to customise the :attr:`__enum__` mapping, it is</span>
+<span class="sd">            possible to override the :meth:`__init_subclass__` method and</span>
+<span class="sd">            define :attr:`__enum__` manually.</span>
+
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s1">&#39;__enum__&#39;</span><span class="p">):</span>
+            <span class="bp">cls</span><span class="o">.</span><span class="n">__enum__</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">defaultdict</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">__default__</span><span class="p">)</span>
+
         <span class="k">if</span> <span class="n">code</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">collections</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Iterable</span><span class="p">):</span>
                 <span class="k">for</span> <span class="n">_code</span> <span class="ow">in</span> <span class="n">code</span><span class="p">:</span>
