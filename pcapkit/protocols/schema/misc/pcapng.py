@@ -307,7 +307,7 @@ class PCAPNG(Schema):
 class BlockType(EnumSchema[Enum_BlockType]):
     """Header schema for PCAP-NG file blocks."""
 
-    __enum__ = collections.defaultdict(lambda: UnknownBlock)
+    __default__ = lambda: UnknownBlock
 
     def post_process(self, packet: 'dict[str, Any]') -> 'Schema':
         """Revise ``schema`` data after unpacking process.
@@ -1032,7 +1032,7 @@ class SimplePacketBlock(BlockType, code=Enum_BlockType.Simple_Packet_Block):
 class NameResolutionRecord(EnumSchema[Enum_RecordType]):
     """Header schema for PCAP-NG NRB records."""
 
-    __enum__ = collections.defaultdict(lambda: UnknownRecord)
+    __default__ = lambda: UnknownRecord
 
     #: Record type.
     type: 'Enum_RecordType' = EnumField(length=2, namespace=Enum_RecordType, callback=byteorder_callback)
@@ -1405,7 +1405,7 @@ class SystemdJournalExportBlock(BlockType, code=Enum_BlockType.systemd_Journal_E
 class DSBSecrets(EnumSchema[Enum_SecretsType]):
     """Header schema for DSB secrets data."""
 
-    __enum__ = collections.defaultdict(lambda: UnknownSecrets)
+    __default__ = lambda: UnknownSecrets
 
 
 @schema_final

@@ -2,7 +2,6 @@
 # mypy: disable-error-code=assignment
 """header schema for Host Identity Protocol"""
 
-import collections
 from typing import TYPE_CHECKING, cast
 
 from pcapkit.const.hip.certificate import Certificate as Enum_Certificate
@@ -24,7 +23,6 @@ from pcapkit.const.hip.suite import Suite as Enum_Suite
 from pcapkit.const.hip.transport import Transport as Enum_Transport
 from pcapkit.const.reg.transtype import TransType as Enum_TransType
 from pcapkit.corekit.fields.collections import ListField, OptionField
-from pcapkit.corekit.fields.field import NoValue
 from pcapkit.corekit.fields.ipaddress import IPv6AddressField
 from pcapkit.corekit.fields.misc import ConditionalField, PayloadField, SchemaField, SwitchField
 from pcapkit.corekit.fields.numbers import (EnumField, NumberField, UInt8Field, UInt16Field,
@@ -61,7 +59,7 @@ __all__ = [
 
 if TYPE_CHECKING:
     from ipaddress import IPv6Address
-    from typing import Any, Optional, Type
+    from typing import Any, Optional
 
     from pcapkit.corekit.fields.field import _Field as Field
     from pcapkit.protocols.data.internet.hip import EncryptedParameter as Data_EncryptedParameter
@@ -160,7 +158,7 @@ def host_id_hi_selector(pkt: 'dict[str, Any]') -> 'Field':
     """
     algo = pkt['algorithm']
     schema = HostIdentity.registry[algo]
-    if schema is NoValue:
+    if schema is None:
         return BytesField(length=pkt['hi_len'])
     return SchemaField(length=pkt['hi_len'], schema=schema)
 
@@ -168,7 +166,7 @@ def host_id_hi_selector(pkt: 'dict[str, Any]') -> 'Field':
 class Parameter(EnumSchema[Enum_Parameter]):
     """Base schema for HIP parameters."""
 
-    __enum__ = collections.defaultdict(lambda: UnassignedParameter)
+    __default__ = lambda: UnassignedParameter
 
     #: Parameter type.
     type: 'Enum_Parameter' = EnumField(length=2, namespace=Enum_Parameter)
@@ -560,8 +558,6 @@ class HostIDParameter(Parameter, code=Enum_Parameter.HOST_ID):
 
 class HostIdentity(EnumSchema[Enum_HIAlgorithm]):
     """Host identity schema."""
-
-    __enum__ = collections.defaultdict(lambda: cast('Type[HostIdentity]', NoValue))
 
 
 @schema_final

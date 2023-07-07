@@ -22,7 +22,7 @@ from pcapkit.utilities.warnings import SchemaWarning, UnknownFieldWarning, warn
 if TYPE_CHECKING:
     from collections import OrderedDict
     from enum import Enum
-    from typing import IO, Any, DefaultDict, Iterable, Iterator, Optional, Type
+    from typing import Callable, IO, Any, DefaultDict, Iterable, Iterator, Optional, Type
 
     from typing_extensions import Self
 
@@ -668,24 +668,50 @@ class EnumMeta(SchemaMeta):
 class EnumSchema(Schema, Generic[ET], metaclass=EnumMeta):
     """:class:`Schema` with enumeration mapping support.
 
-    .. code-block:: python
+    Examples:
 
-        from pcapkit.const.pcapng.block_type import BlockType as Enum_BlockType
-        from pcapkit.protocols.schema.misc.pcapng improt BlockType
+        To create an enumeration mapping supported schema, simply
 
+        .. code-block:: python
 
-        class NewBlock(BlockType, code=Enum_BlockType.New_Block):
-            ...
+           class MySchema(EnumSchema[MyEnum]):
 
+               # optional, set the default schema for enumeration mapping
+               # if the enumeration number is not found in the mapping
+               __default__ = lambda: UnknownSchema  # by default, None
 
-        # NewBlock is now registered to BlockType.registry
-        # alternatively, you can use the BlockType.register() method
-        print(BlockType.registry[Enum_BlockType.New_Block] is NewBlock)  # True
+        then, you can use inheritance to create a list of schemas
+        for this given enumeration mapping:
+
+        .. code-block:: python
+
+           class OneSchema(MySchema, code=MyEnum.ONE):
+               ...
+
+           class MultipleSchema(MySchema, code=[MyEnum.TWO, MyEnum.THREE]):
+               ...
+
+        or optionally, using the :meth:`register` method to register a
+        schema to the enumeration mapping:
+
+        .. code-block:: python
+
+           MySchema.register(MyEnum.ZERO, ZeroSchema)
+
+        And now you can access the enumeration mapping via the :attr:`registry`
+        property (more specifically, class attribute):
+
+        .. code-block:: python
+
+           >>> MySchema.registry[MyEnum.ONE]  # OneSchema
 
     """
 
-    __additional__ = ['__enum__']
-    __excluded__ = ['__enum__']
+    __additional__ = ['__enum__', '__default__']
+    __excluded__ = ['__enum__', '__default__']
+
+    #: Callback to return the default schema for enumeration mapping.
+    __default__: 'Callable[[], Type[Self]]' = lambda: None  # type: ignore[assignment,return-value]
 
     if TYPE_CHECKING:
         #: Mapping of enumeration numbers to schemas (**internal use only**).
@@ -706,7 +732,19 @@ class EnumSchema(Schema, Generic[ET], metaclass=EnumMeta):
         :attr:`registry` mapping with the given ``code``. If ``code`` is
         not given, the subclass will not be registered.
 
+        Notes:
+            If :attr:`__enum__` is not yet defined at function call, it will
+            automatically be defined as a :class:`collections.defaultdict`
+            object, with the default value set to :attr:`__default__`.
+
+            If intended to customise the :attr:`__enum__` mapping, it is
+            possible to override the :meth:`__init_subclass__` method and
+            define :attr:`__enum__` manually.
+
         """
+        if not hasattr(cls, '__enum__'):
+            cls.__enum__ = collections.defaultdict(cls.__default__)
+
         if code is not None:
             if isinstance(code, collections.abc.Iterable):
                 for _code in code:
