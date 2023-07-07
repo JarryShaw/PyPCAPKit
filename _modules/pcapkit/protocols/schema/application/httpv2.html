@@ -356,7 +356,7 @@
 <span class="kn">from</span> <span class="nn">pcapkit.corekit.fields.misc</span> <span class="kn">import</span> <span class="n">ConditionalField</span><span class="p">,</span> <span class="n">SchemaField</span><span class="p">,</span> <span class="n">SwitchField</span>
 <span class="kn">from</span> <span class="nn">pcapkit.corekit.fields.numbers</span> <span class="kn">import</span> <span class="n">EnumField</span><span class="p">,</span> <span class="n">NumberField</span><span class="p">,</span> <span class="n">UInt8Field</span><span class="p">,</span> <span class="n">UInt32Field</span>
 <span class="kn">from</span> <span class="nn">pcapkit.corekit.fields.strings</span> <span class="kn">import</span> <span class="n">BitField</span><span class="p">,</span> <span class="n">BytesField</span><span class="p">,</span> <span class="n">PaddingField</span>
-<span class="kn">from</span> <span class="nn">pcapkit.protocols.schema.schema</span> <span class="kn">import</span> <span class="n">Schema</span><span class="p">,</span> <span class="n">schema_final</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.schema.schema</span> <span class="kn">import</span> <span class="n">Schema</span><span class="p">,</span> <span class="n">EnumSchema</span><span class="p">,</span> <span class="n">schema_final</span>
 <span class="kn">from</span> <span class="nn">pcapkit.utilities.logging</span> <span class="kn">import</span> <span class="n">SPHINX_TYPE_CHECKING</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
@@ -422,7 +422,7 @@
 
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="nb">type</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">&#39;Enum_Frame&#39;</span><span class="p">,</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">])</span>
-    <span class="n">schema</span> <span class="o">=</span> <span class="n">MAP_HTTP_FRAME</span><span class="p">[</span><span class="nb">type</span><span class="p">]</span>
+    <span class="n">schema</span> <span class="o">=</span> <span class="n">FrameType</span><span class="o">.</span><span class="n">registry</span><span class="p">[</span><span class="nb">type</span><span class="p">]</span>
     <span class="k">return</span> <span class="n">SchemaField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="n">pkt</span><span class="p">[</span><span class="s1">&#39;__length__&#39;</span><span class="p">],</span> <span class="n">schema</span><span class="o">=</span><span class="n">schema</span><span class="p">)</span></div>
 
 
@@ -458,11 +458,13 @@
         <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_Frame&#39;</span><span class="p">,</span> <span class="n">flags</span><span class="p">:</span> <span class="s1">&#39;FrameFlags&#39;</span><span class="p">,</span> <span class="n">stream</span><span class="p">:</span> <span class="s1">&#39;StreamID&#39;</span><span class="p">,</span> <span class="n">frame</span><span class="p">:</span> <span class="s1">&#39;FrameType | bytes&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
 
 
-<div class="viewcode-block" id="FrameType"><a class="viewcode-back" href="../../../../../pcapkit/protocols/application/httpv2.html#pcapkit.protocols.schema.application.httpv2.FrameType">[docs]</a><span class="k">class</span> <span class="nc">FrameType</span><span class="p">(</span><span class="n">Schema</span><span class="p">):</span>
+<div class="viewcode-block" id="FrameType"><a class="viewcode-back" href="../../../../../pcapkit/protocols/application/httpv2.html#pcapkit.protocols.schema.application.httpv2.FrameType">[docs]</a><span class="k">class</span> <span class="nc">FrameType</span><span class="p">(</span><span class="n">EnumSchema</span><span class="p">[</span><span class="n">Enum_Frame</span><span class="p">]):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for HTTP/2 frame payload.&quot;&quot;&quot;</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
         <span class="n">__flags__</span><span class="p">:</span> <span class="s1">&#39;Flags&#39;</span>
+
+    <span class="n">__enum__</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">defaultdict</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="n">UnassignedFrame</span><span class="p">)</span>
 
 <div class="viewcode-block" id="FrameType.Flags"><a class="viewcode-back" href="../../../../../pcapkit/protocols/application/httpv2.html#pcapkit.protocols.schema.application.httpv2.FrameType.Flags">[docs]</a>    <span class="k">class</span> <span class="nc">Flags</span><span class="p">(</span><span class="n">enum</span><span class="o">.</span><span class="n">IntFlag</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Flags enumeration for HTTP/2 frames.&quot;&quot;&quot;</span></div>
@@ -501,7 +503,7 @@
 
 
 <div class="viewcode-block" id="DataFrame"><a class="viewcode-back" href="../../../../../pcapkit/protocols/application/httpv2.html#pcapkit.protocols.schema.application.httpv2.DataFrame">[docs]</a><span class="nd">@schema_final</span>
-<span class="k">class</span> <span class="nc">DataFrame</span><span class="p">(</span><span class="n">FrameType</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">DataFrame</span><span class="p">(</span><span class="n">FrameType</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">Enum_Frame</span><span class="o">.</span><span class="n">DATA</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for HTTP/2 ``DATA`` frames.&quot;&quot;&quot;</span>
 
 <div class="viewcode-block" id="DataFrame.Flags"><a class="viewcode-back" href="../../../../../pcapkit/protocols/application/httpv2.html#pcapkit.protocols.schema.application.httpv2.DataFrame.Flags">[docs]</a>    <span class="k">class</span> <span class="nc">Flags</span><span class="p">(</span><span class="n">FrameType</span><span class="o">.</span><span class="n">Flags</span><span class="p">):</span>
@@ -528,7 +530,7 @@
 
 
 <div class="viewcode-block" id="HeadersFrame"><a class="viewcode-back" href="../../../../../pcapkit/protocols/application/httpv2.html#pcapkit.protocols.schema.application.httpv2.HeadersFrame">[docs]</a><span class="nd">@schema_final</span>
-<span class="k">class</span> <span class="nc">HeadersFrame</span><span class="p">(</span><span class="n">FrameType</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">HeadersFrame</span><span class="p">(</span><span class="n">FrameType</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">Enum_Frame</span><span class="o">.</span><span class="n">HEADERS</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for HTTP/2 ``HEADERS`` frames.&quot;&quot;&quot;</span>
 
 <div class="viewcode-block" id="HeadersFrame.Flags"><a class="viewcode-back" href="../../../../../pcapkit/protocols/application/httpv2.html#pcapkit.protocols.schema.application.httpv2.HeadersFrame.Flags">[docs]</a>    <span class="k">class</span> <span class="nc">Flags</span><span class="p">(</span><span class="n">FrameType</span><span class="o">.</span><span class="n">Flags</span><span class="p">):</span>
@@ -572,7 +574,7 @@
 
 
 <div class="viewcode-block" id="PriorityFrame"><a class="viewcode-back" href="../../../../../pcapkit/protocols/application/httpv2.html#pcapkit.protocols.schema.application.httpv2.PriorityFrame">[docs]</a><span class="nd">@schema_final</span>
-<span class="k">class</span> <span class="nc">PriorityFrame</span><span class="p">(</span><span class="n">FrameType</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">PriorityFrame</span><span class="p">(</span><span class="n">FrameType</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">Enum_Frame</span><span class="o">.</span><span class="n">PRIORITY</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for HTTP/2 ``PRIORITY`` frames.&quot;&quot;&quot;</span>
 
     <span class="c1">#: Stream dependency (exclusive, stream ID).</span>
@@ -588,7 +590,7 @@
 
 
 <div class="viewcode-block" id="RSTStreamFrame"><a class="viewcode-back" href="../../../../../pcapkit/protocols/application/httpv2.html#pcapkit.protocols.schema.application.httpv2.RSTStreamFrame">[docs]</a><span class="nd">@schema_final</span>
-<span class="k">class</span> <span class="nc">RSTStreamFrame</span><span class="p">(</span><span class="n">FrameType</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">RSTStreamFrame</span><span class="p">(</span><span class="n">FrameType</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">Enum_Frame</span><span class="o">.</span><span class="n">RST_STREAM</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for HTTP/2 ``RST_STREAM`` frames.&quot;&quot;&quot;</span>
 
     <span class="c1">#: Error code.</span>
@@ -612,7 +614,7 @@
 
 
 <div class="viewcode-block" id="SettingsFrame"><a class="viewcode-back" href="../../../../../pcapkit/protocols/application/httpv2.html#pcapkit.protocols.schema.application.httpv2.SettingsFrame">[docs]</a><span class="nd">@schema_final</span>
-<span class="k">class</span> <span class="nc">SettingsFrame</span><span class="p">(</span><span class="n">FrameType</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">SettingsFrame</span><span class="p">(</span><span class="n">FrameType</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">Enum_Frame</span><span class="o">.</span><span class="n">SETTINGS</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for HTTP/2 ``SETTINGS`` frames.&quot;&quot;&quot;</span>
 
 <div class="viewcode-block" id="SettingsFrame.Flags"><a class="viewcode-back" href="../../../../../pcapkit/protocols/application/httpv2.html#pcapkit.protocols.schema.application.httpv2.SettingsFrame.Flags">[docs]</a>    <span class="k">class</span> <span class="nc">Flags</span><span class="p">(</span><span class="n">FrameType</span><span class="o">.</span><span class="n">Flags</span><span class="p">):</span>
@@ -631,7 +633,7 @@
 
 
 <div class="viewcode-block" id="PushPromiseFrame"><a class="viewcode-back" href="../../../../../pcapkit/protocols/application/httpv2.html#pcapkit.protocols.schema.application.httpv2.PushPromiseFrame">[docs]</a><span class="nd">@schema_final</span>
-<span class="k">class</span> <span class="nc">PushPromiseFrame</span><span class="p">(</span><span class="n">FrameType</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">PushPromiseFrame</span><span class="p">(</span><span class="n">FrameType</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">Enum_Frame</span><span class="o">.</span><span class="n">PUSH_PROMISE</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for HTTP/2 ``PUSH_PROMISE`` frames.&quot;&quot;&quot;</span>
 
 <div class="viewcode-block" id="PushPromiseFrame.Flags"><a class="viewcode-back" href="../../../../../pcapkit/protocols/application/httpv2.html#pcapkit.protocols.schema.application.httpv2.PushPromiseFrame.Flags">[docs]</a>    <span class="k">class</span> <span class="nc">Flags</span><span class="p">(</span><span class="n">FrameType</span><span class="o">.</span><span class="n">Flags</span><span class="p">):</span>
@@ -664,7 +666,7 @@
 
 
 <div class="viewcode-block" id="PingFrame"><a class="viewcode-back" href="../../../../../pcapkit/protocols/application/httpv2.html#pcapkit.protocols.schema.application.httpv2.PingFrame">[docs]</a><span class="nd">@schema_final</span>
-<span class="k">class</span> <span class="nc">PingFrame</span><span class="p">(</span><span class="n">FrameType</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">PingFrame</span><span class="p">(</span><span class="n">FrameType</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">Enum_Frame</span><span class="o">.</span><span class="n">PING</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for HTTP/2 ``PING`` frames.&quot;&quot;&quot;</span>
 
 <div class="viewcode-block" id="PingFrame.Flags"><a class="viewcode-back" href="../../../../../pcapkit/protocols/application/httpv2.html#pcapkit.protocols.schema.application.httpv2.PingFrame.Flags">[docs]</a>    <span class="k">class</span> <span class="nc">Flags</span><span class="p">(</span><span class="n">FrameType</span><span class="o">.</span><span class="n">Flags</span><span class="p">):</span>
@@ -680,7 +682,7 @@
 
 
 <div class="viewcode-block" id="GoawayFrame"><a class="viewcode-back" href="../../../../../pcapkit/protocols/application/httpv2.html#pcapkit.protocols.schema.application.httpv2.GoawayFrame">[docs]</a><span class="nd">@schema_final</span>
-<span class="k">class</span> <span class="nc">GoawayFrame</span><span class="p">(</span><span class="n">FrameType</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">GoawayFrame</span><span class="p">(</span><span class="n">FrameType</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">Enum_Frame</span><span class="o">.</span><span class="n">GOAWAY</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for HTTP/2 ``GOAWAY`` frames.&quot;&quot;&quot;</span>
 
     <span class="c1">#: Last stream ID.</span>
@@ -697,7 +699,7 @@
 
 
 <div class="viewcode-block" id="WindowUpdateFrame"><a class="viewcode-back" href="../../../../../pcapkit/protocols/application/httpv2.html#pcapkit.protocols.schema.application.httpv2.WindowUpdateFrame">[docs]</a><span class="nd">@schema_final</span>
-<span class="k">class</span> <span class="nc">WindowUpdateFrame</span><span class="p">(</span><span class="n">FrameType</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">WindowUpdateFrame</span><span class="p">(</span><span class="n">FrameType</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">Enum_Frame</span><span class="o">.</span><span class="n">WINDOW_UPDATE</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for HTTP/2 ``WINDOW_UPDATE`` frames.&quot;&quot;&quot;</span>
 
     <span class="c1">#: Window size increment.</span>
@@ -710,7 +712,7 @@
 
 
 <div class="viewcode-block" id="ContinuationFrame"><a class="viewcode-back" href="../../../../../pcapkit/protocols/application/httpv2.html#pcapkit.protocols.schema.application.httpv2.ContinuationFrame">[docs]</a><span class="nd">@schema_final</span>
-<span class="k">class</span> <span class="nc">ContinuationFrame</span><span class="p">(</span><span class="n">FrameType</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">ContinuationFrame</span><span class="p">(</span><span class="n">FrameType</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">Enum_Frame</span><span class="o">.</span><span class="n">CONTINUATION</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for HTTP/2 ``CONTINUATION`` frames.&quot;&quot;&quot;</span>
 
 <div class="viewcode-block" id="ContinuationFrame.Flags"><a class="viewcode-back" href="../../../../../pcapkit/protocols/application/httpv2.html#pcapkit.protocols.schema.application.httpv2.ContinuationFrame.Flags">[docs]</a>    <span class="k">class</span> <span class="nc">Flags</span><span class="p">(</span><span class="n">FrameType</span><span class="o">.</span><span class="n">Flags</span><span class="p">):</span>
@@ -723,21 +725,6 @@
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
         <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fragment</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
-
-
-<span class="c1">#: DefaultDict[Enum_Frame, Type[FrameType]]: Mapping of HTTP/2 frame type numbers to schemas.</span>
-<span class="n">MAP_HTTP_FRAME</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">defaultdict</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="n">UnassignedFrame</span><span class="p">,</span> <span class="p">{</span>
-    <span class="n">Enum_Frame</span><span class="o">.</span><span class="n">DATA</span><span class="p">:</span> <span class="n">DataFrame</span><span class="p">,</span>
-    <span class="n">Enum_Frame</span><span class="o">.</span><span class="n">HEADERS</span><span class="p">:</span> <span class="n">HeadersFrame</span><span class="p">,</span>
-    <span class="n">Enum_Frame</span><span class="o">.</span><span class="n">PRIORITY</span><span class="p">:</span> <span class="n">PriorityFrame</span><span class="p">,</span>
-    <span class="n">Enum_Frame</span><span class="o">.</span><span class="n">RST_STREAM</span><span class="p">:</span> <span class="n">RSTStreamFrame</span><span class="p">,</span>
-    <span class="n">Enum_Frame</span><span class="o">.</span><span class="n">SETTINGS</span><span class="p">:</span> <span class="n">SettingsFrame</span><span class="p">,</span>
-    <span class="n">Enum_Frame</span><span class="o">.</span><span class="n">PUSH_PROMISE</span><span class="p">:</span> <span class="n">PushPromiseFrame</span><span class="p">,</span>
-    <span class="n">Enum_Frame</span><span class="o">.</span><span class="n">PING</span><span class="p">:</span> <span class="n">PingFrame</span><span class="p">,</span>
-    <span class="n">Enum_Frame</span><span class="o">.</span><span class="n">GOAWAY</span><span class="p">:</span> <span class="n">GoawayFrame</span><span class="p">,</span>
-    <span class="n">Enum_Frame</span><span class="o">.</span><span class="n">WINDOW_UPDATE</span><span class="p">:</span> <span class="n">WindowUpdateFrame</span><span class="p">,</span>
-    <span class="n">Enum_Frame</span><span class="o">.</span><span class="n">CONTINUATION</span><span class="p">:</span> <span class="n">ContinuationFrame</span><span class="p">,</span>
-<span class="p">})</span>  <span class="c1"># type: DefaultDict[Enum_Frame | int, Type[FrameType]]</span>
 </pre></div>
         </article>
       </div>
