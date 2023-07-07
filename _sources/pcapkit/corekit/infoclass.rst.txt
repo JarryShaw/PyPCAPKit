@@ -15,6 +15,9 @@ in :pep:`557`.
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
+   .. automethod:: from_dict
+   .. automethod:: to_dict
+
    .. automethod:: __post_init__
 
    .. autoattribute:: __additional__
@@ -23,3 +26,13 @@ in :pep:`557`.
       :no-value:
 
 .. autodecorator:: pcapkit.corekit.infoclass.info_final
+
+Meta Classes
+------------
+
+.. autoclass:: pcapkit.corekit.infoclass.InfoMeta
+   :members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.

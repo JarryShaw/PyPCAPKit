@@ -347,6 +347,7 @@
 
 <span class="kn">import</span> <span class="nn">base64</span>
 <span class="kn">import</span> <span class="nn">collections</span>
+<span class="kn">import</span> <span class="nn">collections.abc</span>
 <span class="kn">import</span> <span class="nn">io</span>
 <span class="kn">import</span> <span class="nn">struct</span>
 <span class="kn">import</span> <span class="nn">sys</span>
@@ -368,7 +369,7 @@
                                             <span class="n">UInt8Field</span><span class="p">,</span> <span class="n">UInt16Field</span><span class="p">,</span> <span class="n">UInt32Field</span><span class="p">,</span> <span class="n">UInt64Field</span><span class="p">)</span>
 <span class="kn">from</span> <span class="nn">pcapkit.corekit.fields.strings</span> <span class="kn">import</span> <span class="n">BitField</span><span class="p">,</span> <span class="n">BytesField</span><span class="p">,</span> <span class="n">PaddingField</span><span class="p">,</span> <span class="n">StringField</span>
 <span class="kn">from</span> <span class="nn">pcapkit.corekit.multidict</span> <span class="kn">import</span> <span class="n">MultiDict</span><span class="p">,</span> <span class="n">OrderedMultiDict</span>
-<span class="kn">from</span> <span class="nn">pcapkit.protocols.schema.schema</span> <span class="kn">import</span> <span class="n">Schema</span><span class="p">,</span> <span class="n">schema_final</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.schema.schema</span> <span class="kn">import</span> <span class="n">EnumSchema</span><span class="p">,</span> <span class="n">Schema</span><span class="p">,</span> <span class="n">schema_final</span>
 <span class="kn">from</span> <span class="nn">pcapkit.utilities.exceptions</span> <span class="kn">import</span> <span class="n">FieldValueError</span><span class="p">,</span> <span class="n">ProtocolError</span><span class="p">,</span> <span class="n">stacklevel</span>
 <span class="kn">from</span> <span class="nn">pcapkit.utilities.logging</span> <span class="kn">import</span> <span class="n">SPHINX_TYPE_CHECKING</span>
 <span class="kn">from</span> <span class="nn">pcapkit.utilities.warnings</span> <span class="kn">import</span> <span class="n">ProtocolWarning</span><span class="p">,</span> <span class="n">warn</span>
@@ -403,7 +404,7 @@
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
     <span class="kn">from</span> <span class="nn">ipaddress</span> <span class="kn">import</span> <span class="n">IPv4Address</span><span class="p">,</span> <span class="n">IPv4Interface</span><span class="p">,</span> <span class="n">IPv6Address</span><span class="p">,</span> <span class="n">IPv6Interface</span>
-    <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">DefaultDict</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Type</span>
+    <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">DefaultDict</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Type</span>
 
     <span class="kn">from</span> <span class="nn">typing_extensions</span> <span class="kn">import</span> <span class="n">Literal</span><span class="p">,</span> <span class="n">Self</span>
 
@@ -535,11 +536,11 @@
 
 <span class="sd">    See Also:</span>
 <span class="sd">        * :class:`pcapkit.const.pcapng.block_type.BlockType`</span>
-<span class="sd">        * :data:`pcapkit.protocols.schema.misc.pcapng.MAP_PCAPNG_BLOCK`</span>
+<span class="sd">        * :class:`pcapkit.protocols.schema.misc.pcapng.BlockType`</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">block_type</span> <span class="o">=</span> <span class="n">packet</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span>  <span class="c1"># type: Enum_BlockType</span>
-    <span class="n">schema</span> <span class="o">=</span> <span class="n">MAP_PCAPNG_BLOCK</span><span class="p">[</span><span class="n">block_type</span><span class="p">]</span>
+    <span class="n">schema</span> <span class="o">=</span> <span class="n">BlockType</span><span class="o">.</span><span class="n">registry</span><span class="p">[</span><span class="n">block_type</span><span class="p">]</span>
     <span class="k">return</span> <span class="n">SchemaField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="n">packet</span><span class="p">[</span><span class="s1">&#39;__length__&#39;</span><span class="p">],</span> <span class="n">schema</span><span class="o">=</span><span class="n">schema</span><span class="p">)</span></div>
 
 
@@ -559,17 +560,14 @@
 <span class="sd">          wrapped :class:`~pcapkit.protocols.schema.misc.pcapng.DSBSecrets`</span>
 <span class="sd">          subclass instance.</span>
 
+<span class="sd">    See Also:</span>
+<span class="sd">        * :class:`pcapkit.const.pcapng.secrets_type.Secrets_Type`</span>
+<span class="sd">        * :class:`pcapkit.protocols.schema.misc.pcapng.DSBSecrets`</span>
+
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">secrets_type</span> <span class="o">=</span> <span class="n">packet</span><span class="p">[</span><span class="s1">&#39;secrets_type&#39;</span><span class="p">]</span>  <span class="c1"># type: int</span>
-    <span class="k">if</span> <span class="n">secrets_type</span> <span class="o">==</span> <span class="n">Enum_SecretsType</span><span class="o">.</span><span class="n">TLS_Key_Log</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">SchemaField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="n">packet</span><span class="p">[</span><span class="s1">&#39;secrets_length&#39;</span><span class="p">],</span> <span class="n">schema</span><span class="o">=</span><span class="n">TLSKeyLog</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">secrets_type</span> <span class="o">==</span> <span class="n">Enum_SecretsType</span><span class="o">.</span><span class="n">WireGuard_Key_Log</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">SchemaField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="n">packet</span><span class="p">[</span><span class="s1">&#39;secrets_length&#39;</span><span class="p">],</span> <span class="n">schema</span><span class="o">=</span><span class="n">WireGuardKeyLog</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">secrets_type</span> <span class="o">==</span> <span class="n">Enum_SecretsType</span><span class="o">.</span><span class="n">ZigBee_NWK_Key</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">SchemaField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="n">packet</span><span class="p">[</span><span class="s1">&#39;secrets_length&#39;</span><span class="p">],</span> <span class="n">schema</span><span class="o">=</span><span class="n">ZigBeeNWKKey</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">secrets_type</span> <span class="o">==</span> <span class="n">Enum_SecretsType</span><span class="o">.</span><span class="n">ZigBee_APS_Key</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">SchemaField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="n">packet</span><span class="p">[</span><span class="s1">&#39;secrets_length&#39;</span><span class="p">],</span> <span class="n">schema</span><span class="o">=</span><span class="n">ZigBeeAPSKey</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">SchemaField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="n">packet</span><span class="p">[</span><span class="s1">&#39;secrets_length&#39;</span><span class="p">],</span> <span class="n">schema</span><span class="o">=</span><span class="n">UnknownSecrets</span><span class="p">)</span></div>
+    <span class="n">schema</span> <span class="o">=</span> <span class="n">DSBSecrets</span><span class="o">.</span><span class="n">registry</span><span class="p">[</span><span class="n">secrets_type</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">SchemaField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="n">packet</span><span class="p">[</span><span class="s1">&#39;secrets_length&#39;</span><span class="p">],</span> <span class="n">schema</span><span class="o">=</span><span class="n">schema</span><span class="p">)</span></div>
 
 
 <span class="k">class</span> <span class="nc">OptionEnumField</span><span class="p">(</span><span class="n">EnumField</span><span class="p">):</span>
@@ -649,8 +647,10 @@
         <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_BlockType&#39;</span><span class="p">,</span> <span class="n">block</span><span class="p">:</span> <span class="s1">&#39;BlockType | bytes&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
 
 
-<div class="viewcode-block" id="BlockType"><a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.schema.misc.pcapng.BlockType">[docs]</a><span class="k">class</span> <span class="nc">BlockType</span><span class="p">(</span><span class="n">Schema</span><span class="p">):</span>
+<div class="viewcode-block" id="BlockType"><a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.schema.misc.pcapng.BlockType">[docs]</a><span class="k">class</span> <span class="nc">BlockType</span><span class="p">(</span><span class="n">EnumSchema</span><span class="p">[</span><span class="n">Enum_BlockType</span><span class="p">]):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for PCAP-NG file blocks.&quot;&quot;&quot;</span>
+
+    <span class="n">__enum__</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">defaultdict</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="n">UnknownBlock</span><span class="p">)</span>
 
 <div class="viewcode-block" id="BlockType.post_process"><a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.schema.misc.pcapng.BlockType.post_process">[docs]</a>    <span class="k">def</span> <span class="nf">post_process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">&#39;dict[str, Any]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Schema&#39;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Revise ``schema`` data after unpacking process.</span>
@@ -693,8 +693,91 @@
         <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">body</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">,</span> <span class="n">length2</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
 
 
-<div class="viewcode-block" id="Option"><a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.schema.misc.pcapng.Option">[docs]</a><span class="k">class</span> <span class="nc">Option</span><span class="p">(</span><span class="n">Schema</span><span class="p">):</span>
+<div class="viewcode-block" id="Option"><a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.schema.misc.pcapng.Option">[docs]</a><span class="k">class</span> <span class="nc">Option</span><span class="p">(</span><span class="n">EnumSchema</span><span class="p">[</span><span class="n">Enum_OptionType</span><span class="p">]):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for PCAP-NG file options.&quot;&quot;&quot;</span>
+
+    <span class="n">__additional__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;__enum__&#39;</span><span class="p">,</span> <span class="s1">&#39;__namespace__&#39;</span><span class="p">]</span>
+    <span class="n">__excluded__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;__enum__&#39;</span><span class="p">,</span> <span class="s1">&#39;__namespace__&#39;</span><span class="p">]</span>
+
+    <span class="c1">#: Namespace of PCAP-NG option type numbers.</span>
+    <span class="n">__namespace__</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># type: ignore[assignment]</span>
+    <span class="c1">#: Mapping of PCAP-NG option type numbers to schemas.</span>
+    <span class="n">__enum__</span><span class="p">:</span> <span class="s1">&#39;DefaultDict[str, DefaultDict[Enum_OptionType, Type[Option]]]&#39;</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">defaultdict</span><span class="p">(</span>
+        <span class="k">lambda</span><span class="p">:</span> <span class="n">Option</span><span class="o">.</span><span class="n">registry</span><span class="p">[</span><span class="s1">&#39;opt&#39;</span><span class="p">],</span> <span class="p">{</span>
+            <span class="s1">&#39;opt&#39;</span><span class="p">:</span> <span class="n">collections</span><span class="o">.</span><span class="n">defaultdict</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="n">UnknownOption</span><span class="p">),</span>
+            <span class="s1">&#39;if&#39;</span><span class="p">:</span> <span class="n">collections</span><span class="o">.</span><span class="n">defaultdict</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="n">UnknownOption</span><span class="p">),</span>
+            <span class="s1">&#39;epb&#39;</span><span class="p">:</span> <span class="n">collections</span><span class="o">.</span><span class="n">defaultdict</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="n">UnknownOption</span><span class="p">),</span>
+            <span class="s1">&#39;ns&#39;</span><span class="p">:</span> <span class="n">collections</span><span class="o">.</span><span class="n">defaultdict</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="n">UnknownOption</span><span class="p">),</span>
+            <span class="s1">&#39;isb&#39;</span><span class="p">:</span> <span class="n">collections</span><span class="o">.</span><span class="n">defaultdict</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="n">UnknownOption</span><span class="p">),</span>
+            <span class="s1">&#39;dsb&#39;</span><span class="p">:</span> <span class="n">collections</span><span class="o">.</span><span class="n">defaultdict</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="n">UnknownOption</span><span class="p">),</span>
+            <span class="s1">&#39;pack&#39;</span><span class="p">:</span> <span class="n">collections</span><span class="o">.</span><span class="n">defaultdict</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="n">UnknownOption</span><span class="p">),</span>
+        <span class="p">},</span>
+    <span class="p">)</span>
+
+<div class="viewcode-block" id="Option.__init_subclass__"><a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.schema.misc.pcapng.Option.__init_subclass__">[docs]</a>    <span class="k">def</span> <span class="nf">__init_subclass__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">namespace</span><span class="p">:</span> <span class="s1">&#39;Optional[str]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                          <span class="n">code</span><span class="p">:</span> <span class="s1">&#39;Optional[Enum_OptionType | Iterable[Enum_OptionType]]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Register option type to :attr:`__enum__` mapping.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            namespace: Namespace of option type enumeration. If not given, the value</span>
+<span class="sd">                will be inferred from the option type code.</span>
+<span class="sd">            code: Option type code. It can be either a single option type enumeration</span>
+<span class="sd">                or a list of option type enumerations.</span>
+
+<span class="sd">        If ``code`` is provided, the subclass will be registered to the</span>
+<span class="sd">        :attr:`__enum__` mapping with the given ``code``. If ``code`` is</span>
+<span class="sd">        not given, the subclass will not be registered.</span>
+
+<span class="sd">        Examples:</span>
+
+<span class="sd">            .. code-block:: python</span>
+
+<span class="sd">               from pcapkit.const.pcapng.option_type import OptionType as Enum_OptionType</span>
+<span class="sd">               from pcapkit.protocols.schema.misc.pcapng improt Option</span>
+
+<span class="sd">               class NewOption(Option, namespace=&#39;opt&#39;, code=Enum_OptionType.opt_new):</span>
+<span class="sd">                   ...</span>
+
+<span class="sd">        See Also:</span>
+<span class="sd">            - :class:`pcapkit.const.pcapng.option_type.OptionType`</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">namespace</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">cls</span><span class="o">.</span><span class="n">__namespace__</span> <span class="o">=</span> <span class="n">namespace</span>
+
+        <span class="k">if</span> <span class="n">code</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">namespace</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">namespace</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">&#39;Optional[str]&#39;</span><span class="p">,</span> <span class="bp">cls</span><span class="o">.</span><span class="n">__namespace__</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">Enum_OptionType</span><span class="p">):</span>
+                <span class="k">for</span> <span class="n">_code</span> <span class="ow">in</span> <span class="n">code</span><span class="p">:</span>
+                    <span class="n">Option</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">_code</span><span class="p">,</span> <span class="bp">cls</span><span class="p">,</span> <span class="n">namespace</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">Option</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="bp">cls</span><span class="p">,</span> <span class="n">namespace</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__init_subclass__</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="Option.register"><a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.schema.misc.pcapng.Option.register">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">register</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">&#39;Enum_OptionType&#39;</span><span class="p">,</span> <span class="bp">cls</span><span class="p">:</span> <span class="s1">&#39;Type[Option]&#39;</span><span class="p">,</span> <span class="n">ns</span><span class="p">:</span> <span class="s1">&#39;Optional[str]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Register option type to :attr:`__enum__` mapping.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            code: Option type code.</span>
+<span class="sd">            cls: Option type schema.</span>
+<span class="sd">            ns: Namespace of option type enumeration. If not given, the value</span>
+<span class="sd">                will be inferred from the option type code.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">ns</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">ns</span> <span class="o">=</span> <span class="n">code</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">ns</span> <span class="o">==</span> <span class="s1">&#39;opt&#39;</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">Option</span><span class="o">.</span><span class="n">registry</span><span class="p">:</span>
+                <span class="n">Option</span><span class="o">.</span><span class="n">registry</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="n">code</span><span class="p">]</span> <span class="o">=</span> <span class="bp">cls</span>
+        <span class="k">elif</span> <span class="n">ns</span> <span class="ow">in</span> <span class="n">Option</span><span class="o">.</span><span class="n">registry</span><span class="p">:</span>
+            <span class="n">Option</span><span class="o">.</span><span class="n">registry</span><span class="p">[</span><span class="n">ns</span><span class="p">][</span><span class="n">code</span><span class="p">]</span> <span class="o">=</span> <span class="bp">cls</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">Option</span><span class="o">.</span><span class="n">registry</span><span class="p">[</span><span class="n">ns</span><span class="p">]</span> <span class="o">=</span> <span class="n">Option</span><span class="o">.</span><span class="n">registry</span><span class="p">[</span><span class="s1">&#39;opt&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+            <span class="n">Option</span><span class="o">.</span><span class="n">registry</span><span class="p">[</span><span class="n">ns</span><span class="p">][</span><span class="n">code</span><span class="p">]</span> <span class="o">=</span> <span class="bp">cls</span></div>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
         <span class="c1">#: Option type.</span>
@@ -703,7 +786,7 @@
         <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span></div>
 
 
-<div class="viewcode-block" id="_OPT_Option"><a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.schema.misc.pcapng._OPT_Option">[docs]</a><span class="k">class</span> <span class="nc">_OPT_Option</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+<div class="viewcode-block" id="_OPT_Option"><a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.schema.misc.pcapng._OPT_Option">[docs]</a><span class="k">class</span> <span class="nc">_OPT_Option</span><span class="p">(</span><span class="n">Option</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="s1">&#39;opt&#39;</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for ``opt_*`` options.&quot;&quot;&quot;</span>
 
     <span class="c1">#: Option type.</span>
@@ -726,7 +809,7 @@
 
 
 <div class="viewcode-block" id="EndOfOption"><a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.schema.misc.pcapng.EndOfOption">[docs]</a><span class="nd">@schema_final</span>
-<span class="k">class</span> <span class="nc">EndOfOption</span><span class="p">(</span><span class="n">_OPT_Option</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">EndOfOption</span><span class="p">(</span><span class="n">_OPT_Option</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">Enum_OptionType</span><span class="o">.</span><span class="n">opt_endofopt</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for PCAP-NG file ``opt_endofopt`` options.&quot;&quot;&quot;</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
@@ -734,7 +817,7 @@
 
 
 <div class="viewcode-block" id="CommentOption"><a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.schema.misc.pcapng.CommentOption">[docs]</a><span class="nd">@schema_final</span>
-<span class="k">class</span> <span class="nc">CommentOption</span><span class="p">(</span><span class="n">_OPT_Option</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">CommentOption</span><span class="p">(</span><span class="n">_OPT_Option</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">Enum_OptionType</span><span class="o">.</span><span class="n">opt_comment</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for PCAP-NG file ``opt_comment`` options.&quot;&quot;&quot;</span>
 
     <span class="c1">#: Comment text.</span>
@@ -747,7 +830,10 @@
 
 
 <div class="viewcode-block" id="CustomOption"><a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.schema.misc.pcapng.CustomOption">[docs]</a><span class="nd">@schema_final</span>
-<span class="k">class</span> <span class="nc">CustomOption</span><span class="p">(</span><span class="n">_OPT_Option</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">CustomOption</span><span class="p">(</span><span class="n">_OPT_Option</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="p">[</span><span class="n">Enum_OptionType</span><span class="o">.</span><span class="n">opt_custom_2988</span><span class="p">,</span>
+                                      <span class="n">Enum_OptionType</span><span class="o">.</span><span class="n">opt_custom_2989</span><span class="p">,</span>
+                                      <span class="n">Enum_OptionType</span><span class="o">.</span><span class="n">opt_custom_19372</span><span class="p">,</span>
+                                      <span class="n">Enum_OptionType</span><span class="o">.</span><span class="n">opt_custom_19373</span><span class="p">]):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for PCAP-NG file ``opt_custom`` options.&quot;&quot;&quot;</span>
 
     <span class="c1">#: Private enterprise number (PEN).</span>
@@ -762,7 +848,7 @@
 
 
 <div class="viewcode-block" id="SectionHeaderBlock"><a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.schema.misc.pcapng.SectionHeaderBlock">[docs]</a><span class="nd">@schema_final</span>
-<span class="k">class</span> <span class="nc">SectionHeaderBlock</span><span class="p">(</span><span class="n">BlockType</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">SectionHeaderBlock</span><span class="p">(</span><span class="n">BlockType</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">Enum_BlockType</span><span class="o">.</span><span class="n">Section_Header_Block</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for PCAP-NG Section Header Block (SHB).&quot;&quot;&quot;</span>
 
     <span class="c1">#: Fast forward field to test the byteorder.</span>
@@ -784,14 +870,7 @@
         <span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">&#39;length&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="mi">28</span><span class="p">,</span>
         <span class="n">base_schema</span><span class="o">=</span><span class="n">_OPT_Option</span><span class="p">,</span>
         <span class="n">type_name</span><span class="o">=</span><span class="s1">&#39;type&#39;</span><span class="p">,</span>
-        <span class="n">registry</span><span class="o">=</span><span class="n">collections</span><span class="o">.</span><span class="n">defaultdict</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="n">UnknownOption</span><span class="p">,</span> <span class="p">{</span>  <span class="c1"># type: ignore[arg-type]</span>
-            <span class="n">Enum_OptionType</span><span class="o">.</span><span class="n">opt_endofopt</span><span class="p">:</span> <span class="n">EndOfOption</span><span class="p">,</span>
-            <span class="n">Enum_OptionType</span><span class="o">.</span><span class="n">opt_comment</span><span class="p">:</span> <span class="n">CommentOption</span><span class="p">,</span>
-            <span class="n">Enum_OptionType</span><span class="o">.</span><span class="n">opt_custom_2988</span><span class="p">:</span> <span class="n">CustomOption</span><span class="p">,</span>
-            <span class="n">Enum_OptionType</span><span class="o">.</span><span class="n">opt_custom_2989</span><span class="p">:</span> <span class="n">CustomOption</span><span class="p">,</span>
-            <span class="n">Enum_OptionType</span><span class="o">.</span><span class="n">opt_custom_19372</span><span class="p">:</span> <span class="n">CustomOption</span><span class="p">,</span>
-            <span class="n">Enum_OptionType</span><span class="o">.</span><span class="n">opt_custom_19373</span><span class="p">:</span> <span class="n">CustomOption</span><span class="p">,</span>
-        <span class="p">}),</span>
+        <span class="n">registry</span><span class="o">=</span><span class="n">Option</span><span class="o">.</span><span class="n">registry</span><span class="p">[</span><span class="s1">&#39;opt&#39;</span><span class="p">],</span>
         <span class="n">eool</span><span class="o">=</span><span class="n">Enum_OptionType</span><span class="o">.</span><span class="n">opt_endofopt</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="c1">#: Padding.</span>
@@ -853,7 +932,7 @@
                      <span class="n">length2</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
 
 
-<div class="viewcode-block" id="_IF_Option"><a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.schema.misc.pcapng._IF_Option">[docs]</a><span class="k">class</span> <span class="nc">_IF_Option</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+<div class="viewcode-block" id="_IF_Option"><a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.schema.misc.pcapng._IF_Option">[docs]</a><span class="k">class</span> <span class="nc">_IF_Option</span><span class="p">(</span><span class="n">Option</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="s1">&#39;if&#39;</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for ``if_*`` options.&quot;&quot;&quot;</span>
 
     <span class="c1">#: Option type.</span>
@@ -863,7 +942,7 @@
 
 
 <div class="viewcode-block" id="IF_NameOption"><a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.schema.misc.pcapng.IF_NameOption">[docs]</a><span class="nd">@schema_final</span>
-<span class="k">class</span> <span class="nc">IF_NameOption</span><span class="p">(</span><span class="n">_IF_Option</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">IF_NameOption</span><span class="p">(</span><span class="n">_IF_Option</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">Enum_OptionType</span><span class="o">.</span><span class="n">if_name</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for PCAP-NG file ``if_name`` options.&quot;&quot;&quot;</span>
 
     <span class="c1">#: Interface name.</span>
@@ -876,7 +955,7 @@
 
 
 <div class="viewcode-block" id="IF_DescriptionOption"><a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.schema.misc.pcapng.IF_DescriptionOption">[docs]</a><span class="nd">@schema_final</span>
-<span class="k">class</span> <span class="nc">IF_DescriptionOption</span><span class="p">(</span><span class="n">_IF_Option</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">IF_DescriptionOption</span><span class="p">(</span><span class="n">_IF_Option</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">Enum_OptionType</span><span class="o">.</span><span class="n">if_description</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for PCAP-NG file ``if_description`` options.&quot;&quot;&quot;</span>
 
     <span class="c1">#: Interface description.</span>
@@ -889,7 +968,7 @@
 
 
 <div class="viewcode-block" id="IF_IPv4AddrOption"><a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.schema.misc.pcapng.IF_IPv4AddrOption">[docs]</a><span class="nd">@schema_final</span>
-<span class="k">class</span> <span class="nc">IF_IPv4AddrOption</span><span class="p">(</span><span class="n">_IF_Option</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">IF_IPv4AddrOption</span><span class="p">(</span><span class="n">_IF_Option</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">Enum_OptionType</span><span class="o">.</span><span class="n">if_IPv4addr</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for PCAP-NG file ``if_IPv4addr`` options.&quot;&quot;&quot;</span>
 
     <span class="c1">#: IPv4 interface.</span>
@@ -902,7 +981,7 @@
 
 
 <div class="viewcode-block" id="IF_IPv6AddrOption"><a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.schema.misc.pcapng.IF_IPv6AddrOption">[docs]</a><span class="nd">@schema_final</span>
-<span class="k">class</span> <span class="nc">IF_IPv6AddrOption</span><span class="p">(</span><span class="n">_IF_Option</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">IF_IPv6AddrOption</span><span class="p">(</span><span class="n">_IF_Option</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">Enum_OptionType</span><span class="o">.</span><span class="n">if_IPv6addr</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for PCAP-NG file ``if_IPv6addr`` options.&quot;&quot;&quot;</span>
 
     <span class="c1">#: IPv6 interface.</span>
@@ -915,7 +994,7 @@
 
 
 <div class="viewcode-block" id="IF_MACAddrOption"><a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.schema.misc.pcapng.IF_MACAddrOption">[docs]</a><span class="nd">@schema_final</span>
-<span class="k">class</span> <span class="nc">IF_MACAddrOption</span><span class="p">(</span><span class="n">_IF_Option</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">IF_MACAddrOption</span><span class="p">(</span><span class="n">_IF_Option</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">Enum_OptionType</span><span class="o">.</span><span class="n">if_MACaddr</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for PCAP-NG file ``if_MACaddr`` options.&quot;&quot;&quot;</span>
 
     <span class="c1">#: MAC interface.</span>
@@ -928,7 +1007,7 @@
 
 
 <div class="viewcode-block" id="IF_EUIAddrOption"><a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.schema.misc.pcapng.IF_EUIAddrOption">[docs]</a><span class="nd">@schema_final</span>
-<span class="k">class</span> <span class="nc">IF_EUIAddrOption</span><span class="p">(</span><span class="n">_IF_Option</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">IF_EUIAddrOption</span><span class="p">(</span><span class="n">_IF_Option</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">Enum_OptionType</span><span class="o">.</span><span class="n">if_EUIaddr</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for PCAP-NG file ``if_EUIaddr`` options.&quot;&quot;&quot;</span>
 
     <span class="c1">#: EUI interface.</span>
@@ -941,7 +1020,7 @@
 
 
 <div class="viewcode-block" id="IF_SpeedOption"><a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.schema.misc.pcapng.IF_SpeedOption">[docs]</a><span class="nd">@schema_final</span>
-<span class="k">class</span> <span class="nc">IF_SpeedOption</span><span class="p">(</span><span class="n">_IF_Option</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">IF_SpeedOption</span><span class="p">(</span><span class="n">_IF_Option</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">Enum_OptionType</span><span class="o">.</span><span class="n">if_speed</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for PCAP-NG file ``if_speed`` options.&quot;&quot;&quot;</span>
 
     <span class="c1">#: Interface speed, in bits per second.</span>
@@ -954,7 +1033,7 @@
 
 
 <div class="viewcode-block" id="IF_TSResolOption"><a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.schema.misc.pcapng.IF_TSResolOption">[docs]</a><span class="nd">@schema_final</span>
-<span class="k">class</span> <span class="nc">IF_TSResolOption</span><span class="p">(</span><span class="n">_IF_Option</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">IF_TSResolOption</span><span class="p">(</span><span class="n">_IF_Option</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">Enum_OptionType</span><span class="o">.</span><span class="n">if_tsresol</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for PCAP-NG file ``if_tsresol`` options.&quot;&quot;&quot;</span>
 
     <span class="c1">#: Interface timestamp resolution, in units per second.</span>
@@ -987,7 +1066,7 @@
 
 
 <div class="viewcode-block" id="IF_TZoneOption"><a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.schema.misc.pcapng.IF_TZoneOption">[docs]</a><span class="nd">@schema_final</span>
-<span class="k">class</span> <span class="nc">IF_TZoneOption</span><span class="p">(</span><span class="n">_IF_Option</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">IF_TZoneOption</span><span class="p">(</span><span class="n">_IF_Option</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">Enum_OptionType</span><span class="o">.</span><span class="n">if_tzone</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for PCAP-NG file ``if_tzone`` options.&quot;&quot;&quot;</span>
 
     <span class="c1">#: Interface time zone (as in seconds difference from GMT).</span>
@@ -1000,7 +1079,7 @@
 
 
 <div class="viewcode-block" id="IF_FilterOption"><a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.schema.misc.pcapng.IF_FilterOption">[docs]</a><span class="nd">@schema_final</span>
-<span class="k">class</span> <span class="nc">IF_FilterOption</span><span class="p">(</span><span class="n">_IF_Option</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">IF_FilterOption</span><span class="p">(</span><span class="n">_IF_Option</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">Enum_OptionType</span><span class="o">.</span><span class="n">if_filter</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for PCAP-NG file ``if_filter`` options.&quot;&quot;&quot;</span>
 
     <span class="c1">#: Filter code.</span>
@@ -1015,7 +1094,7 @@
 
 
 <div class="viewcode-block" id="IF_OSOption"><a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.schema.misc.pcapng.IF_OSOption">[docs]</a><span class="nd">@schema_final</span>
-<span class="k">class</span> <span class="nc">IF_OSOption</span><span class="p">(</span><span class="n">_IF_Option</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">IF_OSOption</span><span class="p">(</span><span class="n">_IF_Option</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">Enum_OptionType</span><span class="o">.</span><span class="n">if_os</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for PCAP-NG file ``if_os`` options.&quot;&quot;&quot;</span>
 
     <span class="c1">#: OS information.</span>
@@ -1028,7 +1107,7 @@
 
 
 <div class="viewcode-block" id="IF_FCSLenOption"><a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.schema.misc.pcapng.IF_FCSLenOption">[docs]</a><span class="nd">@schema_final</span>
-<span class="k">class</span> <span class="nc">IF_FCSLenOption</span><span class="p">(</span><span class="n">_IF_Option</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">IF_FCSLenOption</span><span class="p">(</span><span class="n">_IF_Option</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">Enum_OptionType</span><span class="o">.</span><span class="n">if_fcslen</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for PCAP-NG file ``if_fcslen`` options.&quot;&quot;&quot;</span>
 
     <span class="c1">#: FCS length.</span>
@@ -1041,7 +1120,7 @@
 
 
 <div class="viewcode-block" id="IF_TSOffsetOption"><a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.schema.misc.pcapng.IF_TSOffsetOption">[docs]</a><span class="nd">@schema_final</span>
-<span class="k">class</span> <span class="nc">IF_TSOffsetOption</span><span class="p">(</span><span class="n">_IF_Option</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">IF_TSOffsetOption</span><span class="p">(</span><span class="n">_IF_Option</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">Enum_OptionType</span><span class="o">.</span><span class="n">if_tsoffset</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for PCAP-NG file ``if_tsoffset`` options.&quot;&quot;&quot;</span>
 
     <span class="c1">#: Timestamp offset (in seconds).</span>
@@ -1054,7 +1133,7 @@
 
 
 <div class="viewcode-block" id="IF_HardwareOption"><a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.schema.misc.pcapng.IF_HardwareOption">[docs]</a><span class="nd">@schema_final</span>
-<span class="k">class</span> <span class="nc">IF_HardwareOption</span><span class="p">(</span><span class="n">_IF_Option</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">IF_HardwareOption</span><span class="p">(</span><span class="n">_IF_Option</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">Enum_OptionType</span><span class="o">.</span><span class="n">if_hardware</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for PCAP-NG file ``if_hardware`` options.&quot;&quot;&quot;</span>
 
     <span class="c1">#: Hardware information.</span>
@@ -1067,7 +1146,7 @@
 
 
 <div class="viewcode-block" id="IF_TxSpeedOption"><a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.schema.misc.pcapng.IF_TxSpeedOption">[docs]</a><span class="nd">@schema_final</span>
-<span class="k">class</span> <span class="nc">IF_TxSpeedOption</span><span class="p">(</span><span class="n">_IF_Option</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">IF_TxSpeedOption</span><span class="p">(</span><span class="n">_IF_Option</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">Enum_OptionType</span><span class="o">.</span><span class="n">if_txspeed</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for PCAP-NG file ``if_txspeed`` options.&quot;&quot;&quot;</span>
 
     <span class="c1">#: Interface transmit speed, in bits per second.</span>
@@ -1080,7 +1159,7 @@
 
 
 <div class="viewcode-block" id="IF_RxSpeedOption"><a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.schema.misc.pcapng.IF_RxSpeedOption">[docs]</a><span class="nd">@schema_final</span>
-<span class="k">class</span> <span class="nc">IF_RxSpeedOption</span><span class="p">(</span><span class="n">_IF_Option</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">IF_RxSpeedOption</span><span class="p">(</span><span class="n">_IF_Option</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">Enum_OptionType</span><span class="o">.</span><span class="n">if_rxspeed</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for PCAP-NG file ``if_rxspeed`` options.&quot;&quot;&quot;</span>
 
     <span class="c1">#: Interface receive speed, in bits per second.</span>
@@ -1093,7 +1172,7 @@
 
 
 <div class="viewcode-block" id="InterfaceDescriptionBlock"><a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.schema.misc.pcapng.InterfaceDescriptionBlock">[docs]</a><span class="nd">@schema_final</span>
-<span class="k">class</span> <span class="nc">InterfaceDescriptionBlock</span><span class="p">(</span><span class="n">BlockType</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">InterfaceDescriptionBlock</span><span class="p">(</span><span class="n">BlockType</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">Enum_BlockType</span><span class="o">.</span><span class="n">Interface_Description_Block</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for PCAP-NG Interface Description Block (IDB).&quot;&quot;&quot;</span>
 
     <span class="c1">#: Block total length.</span>
@@ -1109,30 +1188,7 @@
         <span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">&#39;length&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="mi">20</span><span class="p">,</span>
         <span class="n">base_schema</span><span class="o">=</span><span class="n">_IF_Option</span><span class="p">,</span>
         <span class="n">type_name</span><span class="o">=</span><span class="s1">&#39;type&#39;</span><span class="p">,</span>
-        <span class="n">registry</span><span class="o">=</span><span class="n">collections</span><span class="o">.</span><span class="n">defaultdict</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="n">UnknownOption</span><span class="p">,</span> <span class="p">{</span>  <span class="c1"># type: ignore[arg-type]</span>
-            <span class="n">Enum_OptionType</span><span class="o">.</span><span class="n">opt_endofopt</span><span class="p">:</span> <span class="n">EndOfOption</span><span class="p">,</span>
-            <span class="n">Enum_OptionType</span><span class="o">.</span><span class="n">opt_comment</span><span class="p">:</span> <span class="n">CommentOption</span><span class="p">,</span>
-            <span class="n">Enum_OptionType</span><span class="o">.</span><span class="n">opt_custom_2988</span><span class="p">:</span> <span class="n">CustomOption</span><span class="p">,</span>
-            <span class="n">Enum_OptionType</span><span class="o">.</span><span class="n">opt_custom_2989</span><span class="p">:</span> <span class="n">CustomOption</span><span class="p">,</span>
-            <span class="n">Enum_OptionType</span><span class="o">.</span><span class="n">opt_custom_19372</span><span class="p">:</span> <span class="n">CustomOption</span><span class="p">,</span>
-            <span class="n">Enum_OptionType</span><span class="o">.</span><span class="n">opt_custom_19373</span><span class="p">:</span> <span class="n">CustomOption</span><span class="p">,</span>
-            <span class="n">Enum_OptionType</span><span class="o">.</span><span class="n">if_name</span><span class="p">:</span> <span class="n">IF_NameOption</span><span class="p">,</span>
-            <span class="n">Enum_OptionType</span><span class="o">.</span><span class="n">if_description</span><span class="p">:</span> <span class="n">IF_DescriptionOption</span><span class="p">,</span>
-            <span class="n">Enum_OptionType</span><span class="o">.</span><span class="n">if_IPv4addr</span><span class="p">:</span> <span class="n">IF_IPv4AddrOption</span><span class="p">,</span>
-            <span class="n">Enum_OptionType</span><span class="o">.</span><span class="n">if_IPv6addr</span><span class="p">:</span> <span class="n">IF_IPv6AddrOption</span><span class="p">,</span>
-            <span class="n">Enum_OptionType</span><span class="o">.</span><span class="n">if_MACaddr</span><span class="p">:</span> <span class="n">IF_MACAddrOption</span><span class="p">,</span>
-            <span class="n">Enum_OptionType</span><span class="o">.</span><span class="n">if_EUIaddr</span><span class="p">:</span> <span class="n">IF_EUIAddrOption</span><span class="p">,</span>
-            <span class="n">Enum_OptionType</span><span class="o">.</span><span class="n">if_speed</span><span class="p">:</span> <span class="n">IF_SpeedOption</span><span class="p">,</span>
-            <span class="n">Enum_OptionType</span><span class="o">.</span><span class="n">if_tsresol</span><span class="p">:</span> <span class="n">IF_TSResolOption</span><span class="p">,</span>
-            <span class="n">Enum_OptionType</span><span class="o">.</span><span class="n">if_tzone</span><span class="p">:</span> <span class="n">IF_TZoneOption</span><span class="p">,</span>
-            <span class="n">Enum_OptionType</span><span class="o">.</span><span class="n">if_filter</span><span class="p">:</span> <span class="n">IF_FilterOption</span><span class="p">,</span>
-            <span class="n">Enum_OptionType</span><span class="o">.</span><span class="n">if_os</span><span class="p">:</span> <span class="n">IF_OSOption</span><span class="p">,</span>
-            <span class="n">Enum_OptionType</span><span class="o">.</span><span class="n">if_fcslen</span><span class="p">:</span> <span class="n">IF_FCSLenOption</span><span class="p">,</span>
-            <span class="n">Enum_OptionType</span><span class="o">.</span><span class="n">if_tsoffset</span><span class="p">:</span> <span class="n">IF_TSOffsetOption</span><span class="p">,</span>
-            <span class="n">Enum_OptionType</span><span class="o">.</span><span class="n">if_hardware</span><span class="p">:</span> <span class="n">IF_HardwareOption</span><span class="p">,</span>
-            <span class="n">Enum_OptionType</span><span class="o">.</span><span class="n">if_txspeed</span><span class="p">:</span> <span class="n">IF_TxSpeedOption</span><span class="p">,</span>
-            <span class="n">Enum_OptionType</span><span class="o">.</span><span class="n">if_rxspeed</span><span class="p">:</span> <span class="n">IF_RxSpeedOption</span><span class="p">,</span>
-        <span class="p">}),</span>
+        <span class="n">registry</span><span class="o">=</span><span class="n">Option</span><span class="o">.</span><span class="n">registry</span><span class="p">[</span><span class="s1">&#39;if&#39;</span><span class="p">],</span>
         <span class="n">eool</span><span class="o">=</span><span class="n">Enum_OptionType</span><span class="o">.</span><span class="n">opt_endofopt</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="c1">#: Padding.</span>
@@ -1145,7 +1201,7 @@
                      <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;list[Option | bytes] | bytes&#39;</span><span class="p">,</span> <span class="n">length2</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
 
 
-<div class="viewcode-block" id="_EPB_Option"><a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.schema.misc.pcapng._EPB_Option">[docs]</a><span class="k">class</span> <span class="nc">_EPB_Option</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+<div class="viewcode-block" id="_EPB_Option"><a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.schema.misc.pcapng._EPB_Option">[docs]</a><span class="k">class</span> <span class="nc">_EPB_Option</span><span class="p">(</span><span class="n">Option</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="s1">&#39;epb&#39;</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for ``epb_*`` options.&quot;&quot;&quot;</span>
 
     <span class="c1">#: Option type.</span>
@@ -1155,7 +1211,7 @@
 
 
 <div class="viewcode-block" id="EPB_FlagsOption"><a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.schema.misc.pcapng.EPB_FlagsOption">[docs]</a><span class="nd">@schema_final</span>
-<span class="k">class</span> <span class="nc">EPB_FlagsOption</span><span class="p">(</span><span class="n">_EPB_Option</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">EPB_FlagsOption</span><span class="p">(</span><span class="n">_EPB_Option</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">Enum_OptionType</span><span class="o">.</span><span class="n">epb_flags</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for PCAP-NG ``epb_flags`` options.&quot;&quot;&quot;</span>
 
     <span class="c1">#: Flags.</span>
@@ -1180,7 +1236,7 @@
 
 
 <div class="viewcode-block" id="EPB_HashOption"><a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.schema.misc.pcapng.EPB_HashOption">[docs]</a><span class="nd">@schema_final</span>
-<span class="k">class</span> <span class="nc">EPB_HashOption</span><span class="p">(</span><span class="n">_EPB_Option</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">EPB_HashOption</span><span class="p">(</span><span class="n">_EPB_Option</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">Enum_OptionType</span><span class="o">.</span><span class="n">epb_hash</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for PCAP-NG ``epb_hash`` options.&quot;&quot;&quot;</span>
 
     <span class="c1">#: Hash algorithm.</span>
@@ -1195,7 +1251,7 @@
 
 
 <div class="viewcode-block" id="EPB_DropCountOption"><a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.schema.misc.pcapng.EPB_DropCountOption">[docs]</a><span class="nd">@schema_final</span>
-<span class="k">class</span> <span class="nc">EPB_DropCountOption</span><span class="p">(</span><span class="n">_EPB_Option</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">EPB_DropCountOption</span><span class="p">(</span><span class="n">_EPB_Option</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">Enum_OptionType</span><span class="o">.</span><span class="n">epb_dropcount</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for PCAP-NG ``epb_dropcount`` options.&quot;&quot;&quot;</span>
 
     <span class="c1">#: Number of packets dropped by the interface.</span>
@@ -1208,7 +1264,7 @@
 
 
 <div class="viewcode-block" id="EPB_PacketIDOption"><a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.schema.misc.pcapng.EPB_PacketIDOption">[docs]</a><span class="nd">@schema_final</span>
-<span class="k">class</span> <span class="nc">EPB_PacketIDOption</span><span class="p">(</span><span class="n">_EPB_Option</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">EPB_PacketIDOption</span><span class="p">(</span><span class="n">_EPB_Option</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">Enum_OptionType</span><span class="o">.</span><span class="n">epb_packetid</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for PCAP-NG ``epb_packetid`` options.&quot;&quot;&quot;</span>
 
     <span class="c1">#: Packet ID.</span>
@@ -1221,7 +1277,7 @@
 
 
 <div class="viewcode-block" id="EPB_QueueOption"><a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.schema.misc.pcapng.EPB_QueueOption">[docs]</a><span class="nd">@schema_final</span>
-<span class="k">class</span> <span class="nc">EPB_QueueOption</span><span class="p">(</span><span class="n">_EPB_Option</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">EPB_QueueOption</span><span class="p">(</span><span class="n">_EPB_Option</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">Enum_OptionType</span><span class="o">.</span><span class="n">epb_queue</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for PCAP-NG ``epb_queue`` options.&quot;&quot;&quot;</span>
 
     <span class="c1">#: Queue ID.</span>
@@ -1234,7 +1290,7 @@
 
 
 <div class="viewcode-block" id="EPB_VerdictOption"><a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.schema.misc.pcapng.EPB_VerdictOption">[docs]</a><span class="nd">@schema_final</span>
-<span class="k">class</span> <span class="nc">EPB_VerdictOption</span><span class="p">(</span><span class="n">_EPB_Option</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">EPB_VerdictOption</span><span class="p">(</span><span class="n">_EPB_Option</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">Enum_OptionType</span><span class="o">.</span><span class="n">epb_verdict</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for PCAP-NG ``epb_verdict`` options.&quot;&quot;&quot;</span>
 
     <span class="c1">#: Verdict type.</span>
@@ -1249,7 +1305,7 @@
 
 
 <div class="viewcode-block" id="EnhancedPacketBlock"><a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.schema.misc.pcapng.EnhancedPacketBlock">[docs]</a><span class="nd">@schema_final</span>
-<span class="k">class</span> <span class="nc">EnhancedPacketBlock</span><span class="p">(</span><span class="n">BlockType</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">EnhancedPacketBlock</span><span class="p">(</span><span class="n">BlockType</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">Enum_BlockType</span><span class="o">.</span><span class="n">Enhanced_Packet_Block</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for PCAP-NG Enhanced Packet Block (EPB).&quot;&quot;&quot;</span>
 
     <span class="n">__payload__</span> <span class="o">=</span> <span class="s1">&#39;packet_data&#39;</span>
@@ -1275,20 +1331,7 @@
         <span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">&#39;length&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="mi">32</span> <span class="o">-</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">&#39;captured_len&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">pkt</span><span class="p">[</span><span class="s1">&#39;padding_data&#39;</span><span class="p">]),</span>
         <span class="n">base_schema</span><span class="o">=</span><span class="n">_EPB_Option</span><span class="p">,</span>
         <span class="n">type_name</span><span class="o">=</span><span class="s1">&#39;type&#39;</span><span class="p">,</span>
-        <span class="n">registry</span><span class="o">=</span><span class="n">collections</span><span class="o">.</span><span class="n">defaultdict</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="n">UnknownOption</span><span class="p">,</span> <span class="p">{</span>  <span class="c1"># type: ignore[arg-type]</span>
-            <span class="n">Enum_OptionType</span><span class="o">.</span><span class="n">opt_endofopt</span><span class="p">:</span> <span class="n">EndOfOption</span><span class="p">,</span>
-            <span class="n">Enum_OptionType</span><span class="o">.</span><span class="n">opt_comment</span><span class="p">:</span> <span class="n">CommentOption</span><span class="p">,</span>
-            <span class="n">Enum_OptionType</span><span class="o">.</span><span class="n">opt_custom_2988</span><span class="p">:</span> <span class="n">CustomOption</span><span class="p">,</span>
-            <span class="n">Enum_OptionType</span><span class="o">.</span><span class="n">opt_custom_2989</span><span class="p">:</span> <span class="n">CustomOption</span><span class="p">,</span>
-            <span class="n">Enum_OptionType</span><span class="o">.</span><span class="n">opt_custom_19372</span><span class="p">:</span> <span class="n">CustomOption</span><span class="p">,</span>
-            <span class="n">Enum_OptionType</span><span class="o">.</span><span class="n">opt_custom_19373</span><span class="p">:</span> <span class="n">CustomOption</span><span class="p">,</span>
-            <span class="n">Enum_OptionType</span><span class="o">.</span><span class="n">epb_flags</span><span class="p">:</span> <span class="n">EPB_FlagsOption</span><span class="p">,</span>
-            <span class="n">Enum_OptionType</span><span class="o">.</span><span class="n">epb_hash</span><span class="p">:</span> <span class="n">EPB_HashOption</span><span class="p">,</span>
-            <span class="n">Enum_OptionType</span><span class="o">.</span><span class="n">epb_dropcount</span><span class="p">:</span> <span class="n">EPB_DropCountOption</span><span class="p">,</span>
-            <span class="n">Enum_OptionType</span><span class="o">.</span><span class="n">epb_packetid</span><span class="p">:</span> <span class="n">EPB_PacketIDOption</span><span class="p">,</span>
-            <span class="n">Enum_OptionType</span><span class="o">.</span><span class="n">epb_queue</span><span class="p">:</span> <span class="n">EPB_QueueOption</span><span class="p">,</span>
-            <span class="n">Enum_OptionType</span><span class="o">.</span><span class="n">epb_verdict</span><span class="p">:</span> <span class="n">EPB_VerdictOption</span><span class="p">,</span>
-        <span class="p">}),</span>
+        <span class="n">registry</span><span class="o">=</span><span class="n">Option</span><span class="o">.</span><span class="n">registry</span><span class="p">[</span><span class="s1">&#39;epb&#39;</span><span class="p">],</span>
         <span class="n">eool</span><span class="o">=</span><span class="n">Enum_OptionType</span><span class="o">.</span><span class="n">opt_endofopt</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="c1">#: Padding.</span>
@@ -1304,7 +1347,7 @@
 
 
 <div class="viewcode-block" id="SimplePacketBlock"><a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.schema.misc.pcapng.SimplePacketBlock">[docs]</a><span class="nd">@schema_final</span>
-<span class="k">class</span> <span class="nc">SimplePacketBlock</span><span class="p">(</span><span class="n">BlockType</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">SimplePacketBlock</span><span class="p">(</span><span class="n">BlockType</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">Enum_BlockType</span><span class="o">.</span><span class="n">Simple_Packet_Block</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for PCAP-NG Simple Packet Block (SPB).&quot;&quot;&quot;</span>
 
     <span class="n">__payload__</span> <span class="o">=</span> <span class="s1">&#39;packet_data&#39;</span>
@@ -1327,8 +1370,10 @@
                      <span class="n">length2</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
 
 
-<div class="viewcode-block" id="NameResolutionRecord"><a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.schema.misc.pcapng.NameResolutionRecord">[docs]</a><span class="k">class</span> <span class="nc">NameResolutionRecord</span><span class="p">(</span><span class="n">Schema</span><span class="p">):</span>
+<div class="viewcode-block" id="NameResolutionRecord"><a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.schema.misc.pcapng.NameResolutionRecord">[docs]</a><span class="k">class</span> <span class="nc">NameResolutionRecord</span><span class="p">(</span><span class="n">EnumSchema</span><span class="p">[</span><span class="n">Enum_RecordType</span><span class="p">]):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for PCAP-NG NRB records.&quot;&quot;&quot;</span>
+
+    <span class="n">__enum__</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">defaultdict</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="n">UnknownRecord</span><span class="p">)</span>
 
     <span class="c1">#: Record type.</span>
     <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_RecordType&#39;</span> <span class="o">=</span> <span class="n">EnumField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="n">Enum_RecordType</span><span class="p">,</span> <span class="n">callback</span><span class="o">=</span><span class="n">byteorder_callback</span><span class="p">)</span>
@@ -1350,7 +1395,7 @@
 
 
 <div class="viewcode-block" id="EndRecord"><a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.schema.misc.pcapng.EndRecord">[docs]</a><span class="nd">@schema_final</span>
-<span class="k">class</span> <span class="nc">EndRecord</span><span class="p">(</span><span class="n">NameResolutionRecord</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">EndRecord</span><span class="p">(</span><span class="n">NameResolutionRecord</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">Enum_RecordType</span><span class="o">.</span><span class="n">nrb_record_end</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for PCAP-NG ``nrb_record_end`` records.&quot;&quot;&quot;</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
@@ -1358,7 +1403,7 @@
 
 
 <div class="viewcode-block" id="IPv4Record"><a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.schema.misc.pcapng.IPv4Record">[docs]</a><span class="nd">@schema_final</span>
-<span class="k">class</span> <span class="nc">IPv4Record</span><span class="p">(</span><span class="n">NameResolutionRecord</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">IPv4Record</span><span class="p">(</span><span class="n">NameResolutionRecord</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">Enum_RecordType</span><span class="o">.</span><span class="n">nrb_record_ipv4</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for PCAP-NG NRB ``nrb_record_ipv4`` records.&quot;&quot;&quot;</span>
 
     <span class="c1">#: IPv4 address.</span>
@@ -1389,7 +1434,7 @@
 
 
 <div class="viewcode-block" id="IPv6Record"><a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.schema.misc.pcapng.IPv6Record">[docs]</a><span class="nd">@schema_final</span>
-<span class="k">class</span> <span class="nc">IPv6Record</span><span class="p">(</span><span class="n">NameResolutionRecord</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">IPv6Record</span><span class="p">(</span><span class="n">NameResolutionRecord</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">Enum_RecordType</span><span class="o">.</span><span class="n">nrb_record_ipv6</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for PCAP-NG NRB ``nrb_record_ipv4`` records.&quot;&quot;&quot;</span>
 
     <span class="c1">#: IPv4 address.</span>
@@ -1419,7 +1464,7 @@
         <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Enum_RecordType&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">ip</span><span class="p">:</span> <span class="s1">&#39;IPv6Address | str | bytes | int&#39;</span><span class="p">,</span> <span class="n">resol</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
 
 
-<div class="viewcode-block" id="_NS_Option"><a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.schema.misc.pcapng._NS_Option">[docs]</a><span class="k">class</span> <span class="nc">_NS_Option</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+<div class="viewcode-block" id="_NS_Option"><a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.schema.misc.pcapng._NS_Option">[docs]</a><span class="k">class</span> <span class="nc">_NS_Option</span><span class="p">(</span><span class="n">Option</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="s1">&#39;ns&#39;</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for ``ns_*`` options.&quot;&quot;&quot;</span>
 
     <span class="c1">#: Option type.</span>
@@ -1429,7 +1474,7 @@
 
 
 <div class="viewcode-block" id="NS_DNSNameOption"><a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.schema.misc.pcapng.NS_DNSNameOption">[docs]</a><span class="nd">@schema_final</span>
-<span class="k">class</span> <span class="nc">NS_DNSNameOption</span><span class="p">(</span><span class="n">_NS_Option</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">NS_DNSNameOption</span><span class="p">(</span><span class="n">_NS_Option</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">Enum_OptionType</span><span class="o">.</span><span class="n">ns_dnsname</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for PCAP-NG ``ns_dnsname`` option.&quot;&quot;&quot;</span>
 
     <span class="c1">#: DNS name.</span>
@@ -1440,7 +1485,7 @@
 
 
 <div class="viewcode-block" id="NS_DNSIP4AddrOption"><a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.schema.misc.pcapng.NS_DNSIP4AddrOption">[docs]</a><span class="nd">@schema_final</span>
-<span class="k">class</span> <span class="nc">NS_DNSIP4AddrOption</span><span class="p">(</span><span class="n">_NS_Option</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">NS_DNSIP4AddrOption</span><span class="p">(</span><span class="n">_NS_Option</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">Enum_OptionType</span><span class="o">.</span><span class="n">ns_dnsIP4addr</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for PCAP-NG ``ns_dnsIP4addr`` option.&quot;&quot;&quot;</span>
 
     <span class="c1">#: IPv4 address.</span>
@@ -1451,7 +1496,7 @@
 
 
 <div class="viewcode-block" id="NS_DNSIP6AddrOption"><a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.schema.misc.pcapng.NS_DNSIP6AddrOption">[docs]</a><span class="nd">@schema_final</span>
-<span class="k">class</span> <span class="nc">NS_DNSIP6AddrOption</span><span class="p">(</span><span class="n">_NS_Option</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">NS_DNSIP6AddrOption</span><span class="p">(</span><span class="n">_NS_Option</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">Enum_OptionType</span><span class="o">.</span><span class="n">ns_dnsIP6addr</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for PCAP-NG ``ns_dnsIP6addr`` option.&quot;&quot;&quot;</span>
 
     <span class="c1">#: IPv6 address.</span>
@@ -1462,7 +1507,7 @@
 
 
 <div class="viewcode-block" id="NameResolutionBlock"><a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.schema.misc.pcapng.NameResolutionBlock">[docs]</a><span class="nd">@schema_final</span>
-<span class="k">class</span> <span class="nc">NameResolutionBlock</span><span class="p">(</span><span class="n">BlockType</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">NameResolutionBlock</span><span class="p">(</span><span class="n">BlockType</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">Enum_BlockType</span><span class="o">.</span><span class="n">Name_Resolution_Block</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for PCAP-NG Name Resolution Block (NRB).&quot;&quot;&quot;</span>
 
     <span class="c1">#: Record total length.</span>
@@ -1472,11 +1517,7 @@
         <span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">&#39;length&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="mi">12</span><span class="p">,</span>
         <span class="n">base_schema</span><span class="o">=</span><span class="n">NameResolutionRecord</span><span class="p">,</span>
         <span class="n">type_name</span><span class="o">=</span><span class="s1">&#39;type&#39;</span><span class="p">,</span>
-        <span class="n">registry</span><span class="o">=</span><span class="n">collections</span><span class="o">.</span><span class="n">defaultdict</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="n">UnknownRecord</span><span class="p">,</span> <span class="p">{</span>  <span class="c1"># type: ignore[arg-type]</span>
-            <span class="n">Enum_RecordType</span><span class="o">.</span><span class="n">nrb_record_end</span><span class="p">:</span> <span class="n">EndRecord</span><span class="p">,</span>
-            <span class="n">Enum_RecordType</span><span class="o">.</span><span class="n">nrb_record_ipv4</span><span class="p">:</span> <span class="n">IPv4Record</span><span class="p">,</span>
-            <span class="n">Enum_RecordType</span><span class="o">.</span><span class="n">nrb_record_ipv6</span><span class="p">:</span> <span class="n">IPv6Record</span><span class="p">,</span>
-        <span class="p">}),</span>
+        <span class="n">registry</span><span class="o">=</span><span class="n">NameResolutionRecord</span><span class="o">.</span><span class="n">registry</span><span class="p">,</span>
         <span class="n">eool</span><span class="o">=</span><span class="n">Enum_RecordType</span><span class="o">.</span><span class="n">nrb_record_end</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="c1">#: Options.</span>
@@ -1484,17 +1525,7 @@
         <span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">&#39;__option_padding__&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="mi">4</span> <span class="k">if</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">&#39;__option_padding__&#39;</span><span class="p">]</span> <span class="k">else</span> <span class="mi">0</span><span class="p">,</span>
         <span class="n">base_schema</span><span class="o">=</span><span class="n">_NS_Option</span><span class="p">,</span>
         <span class="n">type_name</span><span class="o">=</span><span class="s1">&#39;type&#39;</span><span class="p">,</span>
-        <span class="n">registry</span><span class="o">=</span><span class="n">collections</span><span class="o">.</span><span class="n">defaultdict</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="n">UnknownOption</span><span class="p">,</span> <span class="p">{</span>  <span class="c1"># type: ignore[arg-type]</span>
-            <span class="n">Enum_OptionType</span><span class="o">.</span><span class="n">opt_endofopt</span><span class="p">:</span> <span class="n">EndOfOption</span><span class="p">,</span>
-            <span class="n">Enum_OptionType</span><span class="o">.</span><span class="n">opt_comment</span><span class="p">:</span> <span class="n">CommentOption</span><span class="p">,</span>
-            <span class="n">Enum_OptionType</span><span class="o">.</span><span class="n">opt_custom_2988</span><span class="p">:</span> <span class="n">CustomOption</span><span class="p">,</span>
-            <span class="n">Enum_OptionType</span><span class="o">.</span><span class="n">opt_custom_2989</span><span class="p">:</span> <span class="n">CustomOption</span><span class="p">,</span>
-            <span class="n">Enum_OptionType</span><span class="o">.</span><span class="n">opt_custom_19372</span><span class="p">:</span> <span class="n">CustomOption</span><span class="p">,</span>
-            <span class="n">Enum_OptionType</span><span class="o">.</span><span class="n">opt_custom_19373</span><span class="p">:</span> <span class="n">CustomOption</span><span class="p">,</span>
-            <span class="n">Enum_OptionType</span><span class="o">.</span><span class="n">ns_dnsname</span><span class="p">:</span> <span class="n">NS_DNSNameOption</span><span class="p">,</span>
-            <span class="n">Enum_OptionType</span><span class="o">.</span><span class="n">ns_dnsIP4addr</span><span class="p">:</span> <span class="n">NS_DNSIP4AddrOption</span><span class="p">,</span>
-            <span class="n">Enum_OptionType</span><span class="o">.</span><span class="n">ns_dnsIP6addr</span><span class="p">:</span> <span class="n">NS_DNSIP6AddrOption</span><span class="p">,</span>
-        <span class="p">}),</span>
+        <span class="n">registry</span><span class="o">=</span><span class="n">Option</span><span class="o">.</span><span class="n">registry</span><span class="p">[</span><span class="s1">&#39;ns&#39;</span><span class="p">],</span>
         <span class="n">eool</span><span class="o">=</span><span class="n">Enum_OptionType</span><span class="o">.</span><span class="n">opt_endofopt</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="c1">#: Padding.</span>
@@ -1538,7 +1569,7 @@
                      <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;list[Option | bytes] | bytes&#39;</span><span class="p">,</span> <span class="n">length2</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
 
 
-<div class="viewcode-block" id="_ISB_Option"><a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.schema.misc.pcapng._ISB_Option">[docs]</a><span class="k">class</span> <span class="nc">_ISB_Option</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+<div class="viewcode-block" id="_ISB_Option"><a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.schema.misc.pcapng._ISB_Option">[docs]</a><span class="k">class</span> <span class="nc">_ISB_Option</span><span class="p">(</span><span class="n">Option</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="s1">&#39;isb&#39;</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for ``isb_*`` options.&quot;&quot;&quot;</span>
 
     <span class="c1">#: Option type.</span>
@@ -1548,7 +1579,7 @@
 
 
 <div class="viewcode-block" id="ISB_StartTimeOption"><a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.schema.misc.pcapng.ISB_StartTimeOption">[docs]</a><span class="nd">@schema_final</span>
-<span class="k">class</span> <span class="nc">ISB_StartTimeOption</span><span class="p">(</span><span class="n">_ISB_Option</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">ISB_StartTimeOption</span><span class="p">(</span><span class="n">_ISB_Option</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">Enum_OptionType</span><span class="o">.</span><span class="n">isb_starttime</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for PCAP-NG ``isb_starttime`` option.&quot;&quot;&quot;</span>
 
     <span class="c1">#: Timestamp (higher 32 bits).</span>
@@ -1561,7 +1592,7 @@
 
 
 <div class="viewcode-block" id="ISB_EndTimeOption"><a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.schema.misc.pcapng.ISB_EndTimeOption">[docs]</a><span class="nd">@schema_final</span>
-<span class="k">class</span> <span class="nc">ISB_EndTimeOption</span><span class="p">(</span><span class="n">_ISB_Option</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">ISB_EndTimeOption</span><span class="p">(</span><span class="n">_ISB_Option</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">Enum_OptionType</span><span class="o">.</span><span class="n">isb_endtime</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for PCAP-NG ``isb_endtime`` option.&quot;&quot;&quot;</span>
 
     <span class="c1">#: Timestamp (higher 32 bits).</span>
@@ -1574,7 +1605,7 @@
 
 
 <div class="viewcode-block" id="ISB_IFRecvOption"><a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.schema.misc.pcapng.ISB_IFRecvOption">[docs]</a><span class="nd">@schema_final</span>
-<span class="k">class</span> <span class="nc">ISB_IFRecvOption</span><span class="p">(</span><span class="n">_ISB_Option</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">ISB_IFRecvOption</span><span class="p">(</span><span class="n">_ISB_Option</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">Enum_OptionType</span><span class="o">.</span><span class="n">isb_ifrecv</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for PCAP-NG ``isb_ifrecv`` option.&quot;&quot;&quot;</span>
 
     <span class="c1">#: Number of packets received.</span>
@@ -1585,7 +1616,7 @@
 
 
 <div class="viewcode-block" id="ISB_IFDropOption"><a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.schema.misc.pcapng.ISB_IFDropOption">[docs]</a><span class="nd">@schema_final</span>
-<span class="k">class</span> <span class="nc">ISB_IFDropOption</span><span class="p">(</span><span class="n">_ISB_Option</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">ISB_IFDropOption</span><span class="p">(</span><span class="n">_ISB_Option</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">Enum_OptionType</span><span class="o">.</span><span class="n">isb_ifdrop</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for PCAP-NG ``isb_ifdrop`` option.&quot;&quot;&quot;</span>
 
     <span class="c1">#: Number of packets dropped.</span>
@@ -1596,7 +1627,7 @@
 
 
 <div class="viewcode-block" id="ISB_FilterAcceptOption"><a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.schema.misc.pcapng.ISB_FilterAcceptOption">[docs]</a><span class="nd">@schema_final</span>
-<span class="k">class</span> <span class="nc">ISB_FilterAcceptOption</span><span class="p">(</span><span class="n">_ISB_Option</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">ISB_FilterAcceptOption</span><span class="p">(</span><span class="n">_ISB_Option</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">Enum_OptionType</span><span class="o">.</span><span class="n">isb_filteraccept</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for PCAP-NG ``isb_filteraccept`` option.&quot;&quot;&quot;</span>
 
     <span class="c1">#: Number of packets accepted by filter.</span>
@@ -1607,7 +1638,7 @@
 
 
 <div class="viewcode-block" id="ISB_OSDropOption"><a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.schema.misc.pcapng.ISB_OSDropOption">[docs]</a><span class="nd">@schema_final</span>
-<span class="k">class</span> <span class="nc">ISB_OSDropOption</span><span class="p">(</span><span class="n">_ISB_Option</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">ISB_OSDropOption</span><span class="p">(</span><span class="n">_ISB_Option</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">Enum_OptionType</span><span class="o">.</span><span class="n">isb_osdrop</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for PCAP-NG ``isb_osdrop`` option.&quot;&quot;&quot;</span>
 
     <span class="c1">#: Number of packets dropped by OS.</span>
@@ -1618,7 +1649,7 @@
 
 
 <div class="viewcode-block" id="ISB_UsrDelivOption"><a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.schema.misc.pcapng.ISB_UsrDelivOption">[docs]</a><span class="nd">@schema_final</span>
-<span class="k">class</span> <span class="nc">ISB_UsrDelivOption</span><span class="p">(</span><span class="n">_ISB_Option</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">ISB_UsrDelivOption</span><span class="p">(</span><span class="n">_ISB_Option</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">Enum_OptionType</span><span class="o">.</span><span class="n">isb_usrdeliv</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for PCAP-NG ``isb_usrdeliv`` option.&quot;&quot;&quot;</span>
 
     <span class="c1">#: Number of packets delivered to user.</span>
@@ -1645,21 +1676,7 @@
         <span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">&#39;length&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="mi">20</span><span class="p">,</span>
         <span class="n">base_schema</span><span class="o">=</span><span class="n">_ISB_Option</span><span class="p">,</span>
         <span class="n">type_name</span><span class="o">=</span><span class="s1">&#39;type&#39;</span><span class="p">,</span>
-        <span class="n">registry</span><span class="o">=</span><span class="n">collections</span><span class="o">.</span><span class="n">defaultdict</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="n">UnknownOption</span><span class="p">,</span> <span class="p">{</span>  <span class="c1"># type: ignore[arg-type]</span>
-            <span class="n">Enum_OptionType</span><span class="o">.</span><span class="n">opt_endofopt</span><span class="p">:</span> <span class="n">EndOfOption</span><span class="p">,</span>
-            <span class="n">Enum_OptionType</span><span class="o">.</span><span class="n">opt_comment</span><span class="p">:</span> <span class="n">CommentOption</span><span class="p">,</span>
-            <span class="n">Enum_OptionType</span><span class="o">.</span><span class="n">opt_custom_2988</span><span class="p">:</span> <span class="n">CustomOption</span><span class="p">,</span>
-            <span class="n">Enum_OptionType</span><span class="o">.</span><span class="n">opt_custom_2989</span><span class="p">:</span> <span class="n">CustomOption</span><span class="p">,</span>
-            <span class="n">Enum_OptionType</span><span class="o">.</span><span class="n">opt_custom_19372</span><span class="p">:</span> <span class="n">CustomOption</span><span class="p">,</span>
-            <span class="n">Enum_OptionType</span><span class="o">.</span><span class="n">opt_custom_19373</span><span class="p">:</span> <span class="n">CustomOption</span><span class="p">,</span>
-            <span class="n">Enum_OptionType</span><span class="o">.</span><span class="n">isb_starttime</span><span class="p">:</span> <span class="n">ISB_StartTimeOption</span><span class="p">,</span>
-            <span class="n">Enum_OptionType</span><span class="o">.</span><span class="n">isb_endtime</span><span class="p">:</span> <span class="n">ISB_EndTimeOption</span><span class="p">,</span>
-            <span class="n">Enum_OptionType</span><span class="o">.</span><span class="n">isb_ifrecv</span><span class="p">:</span> <span class="n">ISB_IFRecvOption</span><span class="p">,</span>
-            <span class="n">Enum_OptionType</span><span class="o">.</span><span class="n">isb_ifdrop</span><span class="p">:</span> <span class="n">ISB_IFDropOption</span><span class="p">,</span>
-            <span class="n">Enum_OptionType</span><span class="o">.</span><span class="n">isb_filteraccept</span><span class="p">:</span> <span class="n">ISB_FilterAcceptOption</span><span class="p">,</span>
-            <span class="n">Enum_OptionType</span><span class="o">.</span><span class="n">isb_osdrop</span><span class="p">:</span> <span class="n">ISB_OSDropOption</span><span class="p">,</span>
-            <span class="n">Enum_OptionType</span><span class="o">.</span><span class="n">isb_usrdeliv</span><span class="p">:</span> <span class="n">ISB_UsrDelivOption</span><span class="p">,</span>
-        <span class="p">}),</span>
+        <span class="n">registry</span><span class="o">=</span><span class="n">Option</span><span class="o">.</span><span class="n">registry</span><span class="p">[</span><span class="s1">&#39;isb&#39;</span><span class="p">],</span>
         <span class="n">eool</span><span class="o">=</span><span class="n">Enum_OptionType</span><span class="o">.</span><span class="n">opt_endofopt</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="c1">#: Padding.</span>
@@ -1674,7 +1691,7 @@
 
 
 <div class="viewcode-block" id="SystemdJournalExportBlock"><a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.schema.misc.pcapng.SystemdJournalExportBlock">[docs]</a><span class="nd">@schema_final</span>
-<span class="k">class</span> <span class="nc">SystemdJournalExportBlock</span><span class="p">(</span><span class="n">BlockType</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">SystemdJournalExportBlock</span><span class="p">(</span><span class="n">BlockType</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">Enum_BlockType</span><span class="o">.</span><span class="n">systemd_Journal_Export_Block</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for PCAP-NG :manpage:`systemd(1)` Journal Export Block.&quot;&quot;&quot;</span>
 
     <span class="c1">#: Block total length.</span>
@@ -1726,8 +1743,10 @@
         <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">entry</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">,</span> <span class="n">length2</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
 
 
-<div class="viewcode-block" id="DSBSecrets"><a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.schema.misc.pcapng.DSBSecrets">[docs]</a><span class="k">class</span> <span class="nc">DSBSecrets</span><span class="p">(</span><span class="n">Schema</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for DSB secrets data.&quot;&quot;&quot;</span></div>
+<div class="viewcode-block" id="DSBSecrets"><a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.schema.misc.pcapng.DSBSecrets">[docs]</a><span class="k">class</span> <span class="nc">DSBSecrets</span><span class="p">(</span><span class="n">EnumSchema</span><span class="p">[</span><span class="n">Enum_SecretsType</span><span class="p">]):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for DSB secrets data.&quot;&quot;&quot;</span>
+
+    <span class="n">__enum__</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">defaultdict</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="n">UnknownSecrets</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="UnknownSecrets"><a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.schema.misc.pcapng.UnknownSecrets">[docs]</a><span class="nd">@schema_final</span>
@@ -1742,7 +1761,7 @@
 
 
 <div class="viewcode-block" id="TLSKeyLog"><a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.schema.misc.pcapng.TLSKeyLog">[docs]</a><span class="nd">@schema_final</span>
-<span class="k">class</span> <span class="nc">TLSKeyLog</span><span class="p">(</span><span class="n">DSBSecrets</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">TLSKeyLog</span><span class="p">(</span><span class="n">DSBSecrets</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">Enum_SecretsType</span><span class="o">.</span><span class="n">TLS_Key_Log</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for TLS Key Log secrets data.&quot;&quot;&quot;</span>
 
     <span class="c1">#: TLS key log data.</span>
@@ -1781,7 +1800,7 @@
 
 
 <div class="viewcode-block" id="WireGuardKeyLog"><a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.schema.misc.pcapng.WireGuardKeyLog">[docs]</a><span class="nd">@schema_final</span>
-<span class="k">class</span> <span class="nc">WireGuardKeyLog</span><span class="p">(</span><span class="n">DSBSecrets</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">WireGuardKeyLog</span><span class="p">(</span><span class="n">DSBSecrets</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">Enum_SecretsType</span><span class="o">.</span><span class="n">WireGuard_Key_Log</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for WireGuard Key Log secrets data.&quot;&quot;&quot;</span>
 
     <span class="c1">#: WireGuard key log data.</span>
@@ -1821,7 +1840,7 @@
 
 
 <div class="viewcode-block" id="ZigBeeNWKKey"><a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.schema.misc.pcapng.ZigBeeNWKKey">[docs]</a><span class="nd">@schema_final</span>
-<span class="k">class</span> <span class="nc">ZigBeeNWKKey</span><span class="p">(</span><span class="n">DSBSecrets</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">ZigBeeNWKKey</span><span class="p">(</span><span class="n">DSBSecrets</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">Enum_SecretsType</span><span class="o">.</span><span class="n">ZigBee_NWK_Key</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for ZigBee NWK Key and ZigBee PANID secrets data.&quot;&quot;&quot;</span>
 
     <span class="c1">#: AES-128 NKW key.</span>
@@ -1836,7 +1855,7 @@
 
 
 <div class="viewcode-block" id="ZigBeeAPSKey"><a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.schema.misc.pcapng.ZigBeeAPSKey">[docs]</a><span class="nd">@schema_final</span>
-<span class="k">class</span> <span class="nc">ZigBeeAPSKey</span><span class="p">(</span><span class="n">DSBSecrets</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">ZigBeeAPSKey</span><span class="p">(</span><span class="n">DSBSecrets</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">Enum_SecretsType</span><span class="o">.</span><span class="n">ZigBee_APS_Key</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for ZigBee APS Key secrets data.&quot;&quot;&quot;</span>
 
     <span class="c1">#: AES-128 APS key.</span>
@@ -1854,7 +1873,7 @@
         <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">,</span> <span class="n">panid</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">addr_low</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">addr_high</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
 
 
-<span class="k">class</span> <span class="nc">_DSB_Option</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">_DSB_Option</span><span class="p">(</span><span class="n">Option</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="s1">&#39;dsb&#39;</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for ``dsb_*`` options.&quot;&quot;&quot;</span>
 
     <span class="c1">#: Option type.</span>
@@ -1864,7 +1883,7 @@
 
 
 <div class="viewcode-block" id="DecryptionSecretsBlock"><a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.schema.misc.pcapng.DecryptionSecretsBlock">[docs]</a><span class="nd">@schema_final</span>
-<span class="k">class</span> <span class="nc">DecryptionSecretsBlock</span><span class="p">(</span><span class="n">BlockType</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">DecryptionSecretsBlock</span><span class="p">(</span><span class="n">BlockType</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">Enum_BlockType</span><span class="o">.</span><span class="n">Decryption_Secrets_Block</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for PCAP-NG Decryption Secrets Block (DSB).&quot;&quot;&quot;</span>
 
     <span class="c1">#: Block total length.</span>
@@ -1884,14 +1903,7 @@
         <span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">&#39;length&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="mi">20</span> <span class="o">-</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">&#39;secrets_length&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">pkt</span><span class="p">[</span><span class="s1">&#39;padding_data&#39;</span><span class="p">]),</span>
         <span class="n">base_schema</span><span class="o">=</span><span class="n">_DSB_Option</span><span class="p">,</span>
         <span class="n">type_name</span><span class="o">=</span><span class="s1">&#39;type&#39;</span><span class="p">,</span>
-        <span class="n">registry</span><span class="o">=</span><span class="n">collections</span><span class="o">.</span><span class="n">defaultdict</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="n">UnknownOption</span><span class="p">,</span> <span class="p">{</span>  <span class="c1"># type: ignore[arg-type]</span>
-            <span class="n">Enum_OptionType</span><span class="o">.</span><span class="n">opt_endofopt</span><span class="p">:</span> <span class="n">EndOfOption</span><span class="p">,</span>
-            <span class="n">Enum_OptionType</span><span class="o">.</span><span class="n">opt_comment</span><span class="p">:</span> <span class="n">CommentOption</span><span class="p">,</span>
-            <span class="n">Enum_OptionType</span><span class="o">.</span><span class="n">opt_custom_2988</span><span class="p">:</span> <span class="n">CustomOption</span><span class="p">,</span>
-            <span class="n">Enum_OptionType</span><span class="o">.</span><span class="n">opt_custom_2989</span><span class="p">:</span> <span class="n">CustomOption</span><span class="p">,</span>
-            <span class="n">Enum_OptionType</span><span class="o">.</span><span class="n">opt_custom_19372</span><span class="p">:</span> <span class="n">CustomOption</span><span class="p">,</span>
-            <span class="n">Enum_OptionType</span><span class="o">.</span><span class="n">opt_custom_19373</span><span class="p">:</span> <span class="n">CustomOption</span><span class="p">,</span>
-        <span class="p">}),</span>
+        <span class="n">registry</span><span class="o">=</span><span class="n">Option</span><span class="o">.</span><span class="n">registry</span><span class="p">[</span><span class="s1">&#39;dsb&#39;</span><span class="p">],</span>
         <span class="n">eool</span><span class="o">=</span><span class="n">Enum_OptionType</span><span class="o">.</span><span class="n">opt_endofopt</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="c1">#: Padding.</span>
@@ -1906,7 +1918,8 @@
 
 
 <div class="viewcode-block" id="CustomBlock"><a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.schema.misc.pcapng.CustomBlock">[docs]</a><span class="nd">@schema_final</span>
-<span class="k">class</span> <span class="nc">CustomBlock</span><span class="p">(</span><span class="n">BlockType</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">CustomBlock</span><span class="p">(</span><span class="n">BlockType</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="p">[</span><span class="n">Enum_BlockType</span><span class="o">.</span><span class="n">Custom_Block_that_rewriters_can_copy_into_new_files</span><span class="p">,</span>
+                                   <span class="n">Enum_BlockType</span><span class="o">.</span><span class="n">Custom_Block_that_rewriters_should_not_copy_into_new_files</span><span class="p">]):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for PCAP-NG Custom Block (CB).&quot;&quot;&quot;</span>
 
     <span class="c1">#: Block total length.</span>
@@ -1924,7 +1937,7 @@
         <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">pen</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">,</span> <span class="n">length2</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
 
 
-<div class="viewcode-block" id="_PACK_Option"><a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.schema.misc.pcapng._PACK_Option">[docs]</a><span class="k">class</span> <span class="nc">_PACK_Option</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
+<div class="viewcode-block" id="_PACK_Option"><a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.schema.misc.pcapng._PACK_Option">[docs]</a><span class="k">class</span> <span class="nc">_PACK_Option</span><span class="p">(</span><span class="n">Option</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="s1">&#39;pack&#39;</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for ``pack_*`` options.&quot;&quot;&quot;</span>
 
     <span class="c1">#: Option type.</span>
@@ -1934,7 +1947,7 @@
 
 
 <div class="viewcode-block" id="PACK_FlagsOption"><a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.schema.misc.pcapng.PACK_FlagsOption">[docs]</a><span class="nd">@schema_final</span>
-<span class="k">class</span> <span class="nc">PACK_FlagsOption</span><span class="p">(</span><span class="n">_PACK_Option</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">PACK_FlagsOption</span><span class="p">(</span><span class="n">_PACK_Option</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">Enum_OptionType</span><span class="o">.</span><span class="n">pack_flags</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for PCAP-NG ``pack_flags`` options.&quot;&quot;&quot;</span>
 
     <span class="c1">#: Flags.</span>
@@ -1959,7 +1972,7 @@
 
 
 <div class="viewcode-block" id="PACK_HashOption"><a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.schema.misc.pcapng.PACK_HashOption">[docs]</a><span class="nd">@schema_final</span>
-<span class="k">class</span> <span class="nc">PACK_HashOption</span><span class="p">(</span><span class="n">_PACK_Option</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">PACK_HashOption</span><span class="p">(</span><span class="n">_PACK_Option</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">Enum_OptionType</span><span class="o">.</span><span class="n">pack_hash</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for PCAP-NG ``pack_hash`` options.&quot;&quot;&quot;</span>
 
     <span class="c1">#: Hash algorithm.</span>
@@ -1974,7 +1987,7 @@
 
 
 <div class="viewcode-block" id="PacketBlock"><a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.schema.misc.pcapng.PacketBlock">[docs]</a><span class="nd">@schema_final</span>
-<span class="k">class</span> <span class="nc">PacketBlock</span><span class="p">(</span><span class="n">BlockType</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">PacketBlock</span><span class="p">(</span><span class="n">BlockType</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">Enum_BlockType</span><span class="o">.</span><span class="n">Packet_Block</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Header schema for PCAP-NG Packet Block (obsolete).&quot;&quot;&quot;</span>
 
     <span class="n">__payload__</span> <span class="o">=</span> <span class="s1">&#39;packet_data&#39;</span>
@@ -2002,16 +2015,7 @@
         <span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">&#39;length&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="mi">32</span> <span class="o">-</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">&#39;captured_length&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">pkt</span><span class="p">[</span><span class="s1">&#39;padding_data&#39;</span><span class="p">]),</span>
         <span class="n">base_schema</span><span class="o">=</span><span class="n">_PACK_Option</span><span class="p">,</span>
         <span class="n">type_name</span><span class="o">=</span><span class="s1">&#39;type&#39;</span><span class="p">,</span>
-        <span class="n">registry</span><span class="o">=</span><span class="n">collections</span><span class="o">.</span><span class="n">defaultdict</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="n">UnknownOption</span><span class="p">,</span> <span class="p">{</span>  <span class="c1"># type: ignore[arg-type]</span>
-            <span class="n">Enum_OptionType</span><span class="o">.</span><span class="n">opt_endofopt</span><span class="p">:</span> <span class="n">EndOfOption</span><span class="p">,</span>
-            <span class="n">Enum_OptionType</span><span class="o">.</span><span class="n">opt_comment</span><span class="p">:</span> <span class="n">CommentOption</span><span class="p">,</span>
-            <span class="n">Enum_OptionType</span><span class="o">.</span><span class="n">opt_custom_2988</span><span class="p">:</span> <span class="n">CustomOption</span><span class="p">,</span>
-            <span class="n">Enum_OptionType</span><span class="o">.</span><span class="n">opt_custom_2989</span><span class="p">:</span> <span class="n">CustomOption</span><span class="p">,</span>
-            <span class="n">Enum_OptionType</span><span class="o">.</span><span class="n">opt_custom_19372</span><span class="p">:</span> <span class="n">CustomOption</span><span class="p">,</span>
-            <span class="n">Enum_OptionType</span><span class="o">.</span><span class="n">opt_custom_19373</span><span class="p">:</span> <span class="n">CustomOption</span><span class="p">,</span>
-            <span class="n">Enum_OptionType</span><span class="o">.</span><span class="n">pack_flags</span><span class="p">:</span> <span class="n">EPB_FlagsOption</span><span class="p">,</span>
-            <span class="n">Enum_OptionType</span><span class="o">.</span><span class="n">pack_hash</span><span class="p">:</span> <span class="n">EPB_HashOption</span><span class="p">,</span>
-        <span class="p">}),</span>
+        <span class="n">registry</span><span class="o">=</span><span class="n">Option</span><span class="o">.</span><span class="n">registry</span><span class="p">[</span><span class="s1">&#39;pack&#39;</span><span class="p">],</span>
         <span class="n">eool</span><span class="o">=</span><span class="n">Enum_OptionType</span><span class="o">.</span><span class="n">opt_endofopt</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="c1">#: Padding.</span>
@@ -2024,29 +2028,6 @@
                      <span class="n">timestamp_high</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">timestamp_low</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">captured_length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span>
                      <span class="n">original_length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">packet_data</span><span class="p">:</span> <span class="s1">&#39;bytes | Protocol | Schema&#39;</span><span class="p">,</span>
                      <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;list[Option | bytes] | bytes&#39;</span><span class="p">,</span> <span class="n">length2</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span></div>
-
-
-<span class="c1">#: DefaultDict[Enum_BlockType, Type[BlockType]]: Mapping of PCAP-NG block type numbers to schemas.</span>
-<span class="n">MAP_PCAPNG_BLOCK</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">defaultdict</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="n">UnknownBlock</span><span class="p">,</span> <span class="p">{</span>
-    <span class="n">Enum_BlockType</span><span class="o">.</span><span class="n">Section_Header_Block</span><span class="p">:</span> <span class="n">SectionHeaderBlock</span><span class="p">,</span>
-    <span class="n">Enum_BlockType</span><span class="o">.</span><span class="n">Interface_Description_Block</span><span class="p">:</span> <span class="n">InterfaceDescriptionBlock</span><span class="p">,</span>
-    <span class="n">Enum_BlockType</span><span class="o">.</span><span class="n">Enhanced_Packet_Block</span><span class="p">:</span> <span class="n">EnhancedPacketBlock</span><span class="p">,</span>
-    <span class="n">Enum_BlockType</span><span class="o">.</span><span class="n">Simple_Packet_Block</span><span class="p">:</span> <span class="n">SimplePacketBlock</span><span class="p">,</span>
-    <span class="n">Enum_BlockType</span><span class="o">.</span><span class="n">Name_Resolution_Block</span><span class="p">:</span> <span class="n">NameResolutionBlock</span><span class="p">,</span>
-    <span class="n">Enum_BlockType</span><span class="o">.</span><span class="n">systemd_Journal_Export_Block</span><span class="p">:</span> <span class="n">SystemdJournalExportBlock</span><span class="p">,</span>
-    <span class="n">Enum_BlockType</span><span class="o">.</span><span class="n">Decryption_Secrets_Block</span><span class="p">:</span> <span class="n">DecryptionSecretsBlock</span><span class="p">,</span>
-    <span class="n">Enum_BlockType</span><span class="o">.</span><span class="n">Custom_Block_that_rewriters_can_copy_into_new_files</span><span class="p">:</span> <span class="n">CustomBlock</span><span class="p">,</span>
-    <span class="n">Enum_BlockType</span><span class="o">.</span><span class="n">Custom_Block_that_rewriters_should_not_copy_into_new_files</span><span class="p">:</span> <span class="n">CustomBlock</span><span class="p">,</span>
-    <span class="n">Enum_BlockType</span><span class="o">.</span><span class="n">Packet_Block</span><span class="p">:</span> <span class="n">PacketBlock</span><span class="p">,</span>
-<span class="p">})</span>  <span class="c1"># type: DefaultDict[Enum_BlockType | int, Type[BlockType]]</span>
-
-<span class="c1">#: DefaultDict[Enum_SecretsType, Type[DSBSecrets]]: Mapping of PCAP-NG description secrets type numbers to schemas.</span>
-<span class="n">MAP_DSB_SECRETS</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">defaultdict</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="n">UnknownSecrets</span><span class="p">,</span> <span class="p">{</span>
-    <span class="n">Enum_SecretsType</span><span class="o">.</span><span class="n">TLS_Key_Log</span><span class="p">:</span> <span class="n">TLSKeyLog</span><span class="p">,</span>
-    <span class="n">Enum_SecretsType</span><span class="o">.</span><span class="n">WireGuard_Key_Log</span><span class="p">:</span> <span class="n">WireGuardKeyLog</span><span class="p">,</span>
-    <span class="n">Enum_SecretsType</span><span class="o">.</span><span class="n">ZigBee_NWK_Key</span><span class="p">:</span> <span class="n">ZigBeeNWKKey</span><span class="p">,</span>
-    <span class="n">Enum_SecretsType</span><span class="o">.</span><span class="n">ZigBee_APS_Key</span><span class="p">:</span> <span class="n">ZigBeeAPSKey</span><span class="p">,</span>
-<span class="p">})</span>  <span class="c1"># type: DefaultDict[Enum_SecretsType | int, Type[DSBSecrets]]</span>
 </pre></div>
         </article>
       </div>

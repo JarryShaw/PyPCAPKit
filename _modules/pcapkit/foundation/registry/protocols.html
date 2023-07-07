@@ -375,10 +375,13 @@
 <span class="kn">from</span> <span class="nn">pcapkit.protocols.schema.internet.mh</span> <span class="kn">import</span> <span class="n">MAP_MH_DATA</span>
 <span class="kn">from</span> <span class="nn">pcapkit.protocols.schema.internet.mh</span> <span class="kn">import</span> <span class="n">CGAParameter</span> <span class="k">as</span> <span class="n">Schema_MH_CGAParameter</span>
 <span class="kn">from</span> <span class="nn">pcapkit.protocols.schema.internet.mh</span> <span class="kn">import</span> <span class="n">Packet</span> <span class="k">as</span> <span class="n">Schema_MH_Packet</span>
-<span class="kn">from</span> <span class="nn">pcapkit.protocols.schema.misc.pcapng</span> <span class="kn">import</span> <span class="n">MAP_DSB_SECRETS</span><span class="p">,</span> <span class="n">MAP_PCAPNG_BLOCK</span>
 <span class="kn">from</span> <span class="nn">pcapkit.protocols.schema.misc.pcapng</span> <span class="kn">import</span> <span class="n">BlockType</span> <span class="k">as</span> <span class="n">Schema_PCAPNG_BlockType</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.schema.misc.pcapng</span> <span class="kn">import</span> <span class="n">DSBSecrets</span> <span class="k">as</span> <span class="n">Schema_PCAPNG_DSBSecrets</span>
 <span class="kn">from</span> <span class="nn">pcapkit.protocols.schema.misc.pcapng</span> <span class="kn">import</span> \
     <span class="n">NameResolutionBlock</span> <span class="k">as</span> <span class="n">Schema_PCAPNG_NameResolutionBlock</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.schema.misc.pcapng</span> <span class="kn">import</span> \
+    <span class="n">NameResolutionRecord</span> <span class="k">as</span> <span class="n">Schema_PCAPNG_NameResolutionRecord</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.schema.misc.pcapng</span> <span class="kn">import</span> <span class="n">Option</span> <span class="k">as</span> <span class="n">Schema_PCAPNG_Option</span>
 <span class="kn">from</span> <span class="nn">pcapkit.protocols.schema.transport.tcp</span> <span class="kn">import</span> <span class="n">MAP_MPTCP_DATA</span>
 <span class="kn">from</span> <span class="nn">pcapkit.protocols.schema.transport.tcp</span> <span class="kn">import</span> <span class="n">TCP</span> <span class="k">as</span> <span class="n">Schema_TCP</span>
 <span class="kn">from</span> <span class="nn">pcapkit.protocols.transport.tcp</span> <span class="kn">import</span> <span class="n">TCP</span>
@@ -446,10 +449,6 @@
     <span class="kn">from</span> <span class="nn">pcapkit.protocols.schema.internet.mh</span> <span class="kn">import</span> <span class="n">CGAExtension</span> <span class="k">as</span> <span class="n">Schema_MH_CGAExtension</span>
     <span class="kn">from</span> <span class="nn">pcapkit.protocols.schema.internet.mh</span> <span class="kn">import</span> <span class="n">Option</span> <span class="k">as</span> <span class="n">Schema_MH_Option</span>
     <span class="kn">from</span> <span class="nn">pcapkit.protocols.schema.internet.mh</span> <span class="kn">import</span> <span class="n">Packet</span> <span class="k">as</span> <span class="n">Schema_MH_Packet</span>
-    <span class="kn">from</span> <span class="nn">pcapkit.protocols.schema.misc.pcapng</span> <span class="kn">import</span> <span class="n">DSBSecrets</span> <span class="k">as</span> <span class="n">Schema_PCAPNG_DSBSecrets</span>
-    <span class="kn">from</span> <span class="nn">pcapkit.protocols.schema.misc.pcapng</span> <span class="kn">import</span> \
-        <span class="n">NameResolutionRecord</span> <span class="k">as</span> <span class="n">Schema_PCAPNG_NameResolutionRecord</span>
-    <span class="kn">from</span> <span class="nn">pcapkit.protocols.schema.misc.pcapng</span> <span class="kn">import</span> <span class="n">Option</span> <span class="k">as</span> <span class="n">Schema_PCAPNG_Option</span>
     <span class="kn">from</span> <span class="nn">pcapkit.protocols.schema.transport.tcp</span> <span class="kn">import</span> <span class="n">MPTCP</span> <span class="k">as</span> <span class="n">Schema_TCP_MPTCP</span>
     <span class="kn">from</span> <span class="nn">pcapkit.protocols.schema.transport.tcp</span> <span class="kn">import</span> <span class="n">Option</span> <span class="k">as</span> <span class="n">Schema_TCP_Option</span>
     <span class="kn">from</span> <span class="nn">pcapkit.protocols.transport.tcp</span> <span class="kn">import</span> <span class="n">MPOptionConstructor</span> <span class="k">as</span> <span class="n">TCP_MPOptionConstructor</span>
@@ -1072,7 +1071,7 @@
 
     <span class="n">PCAPNG</span><span class="o">.</span><span class="n">register_block</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">meth</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">schema</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">MAP_PCAPNG_BLOCK</span><span class="p">[</span><span class="n">code</span><span class="p">]</span> <span class="o">=</span> <span class="n">schema</span>
+        <span class="n">Schema_PCAPNG_BlockType</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">schema</span><span class="p">)</span>
     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;registered PCAP-NG block parser: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">code</span><span class="o">.</span><span class="n">name</span><span class="p">)</span></div>
 
 
@@ -1097,10 +1096,7 @@
 
     <span class="n">PCAPNG</span><span class="o">.</span><span class="n">register_option</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">meth</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">schema</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">for</span> <span class="n">subclass</span> <span class="ow">in</span> <span class="n">Schema_PCAPNG_BlockType</span><span class="o">.</span><span class="n">__subclasses__</span><span class="p">():</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">subclass</span><span class="p">,</span> <span class="s1">&#39;options&#39;</span><span class="p">):</span>
-                <span class="k">continue</span>
-            <span class="n">cast</span><span class="p">(</span><span class="s1">&#39;OptionField[Schema_PCAPNG_Option]&#39;</span><span class="p">,</span> <span class="n">subclass</span><span class="o">.</span><span class="n">options</span><span class="p">)</span><span class="o">.</span><span class="n">registry</span><span class="p">[</span><span class="n">code</span><span class="p">]</span> <span class="o">=</span> <span class="n">schema</span>
+        <span class="n">Schema_PCAPNG_Option</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">schema</span><span class="p">)</span>
     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;registered PCAP-NG option parser: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">code</span><span class="o">.</span><span class="n">name</span><span class="p">)</span></div>
 
 
@@ -1126,7 +1122,7 @@
 
     <span class="n">PCAPNG</span><span class="o">.</span><span class="n">register_record</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">meth</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">schema</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">cast</span><span class="p">(</span><span class="s1">&#39;OptionField[Schema_PCAPNG_NameResolutionRecord]&#39;</span><span class="p">,</span> <span class="n">Schema_PCAPNG_NameResolutionBlock</span><span class="o">.</span><span class="n">records</span><span class="p">)</span><span class="o">.</span><span class="n">registry</span><span class="p">[</span><span class="n">code</span><span class="p">]</span> <span class="o">=</span> <span class="n">schema</span>
+        <span class="n">Schema_PCAPNG_NameResolutionRecord</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">schema</span><span class="p">)</span>
     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;registered PCAP-NG name resolution record parser: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">code</span><span class="o">.</span><span class="n">name</span><span class="p">)</span></div>
 
 
@@ -1151,7 +1147,7 @@
 
     <span class="n">PCAPNG</span><span class="o">.</span><span class="n">register_secrets</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">meth</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">schema</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">MAP_DSB_SECRETS</span><span class="p">[</span><span class="n">code</span><span class="p">]</span> <span class="o">=</span> <span class="n">schema</span>
+        <span class="n">Schema_PCAPNG_DSBSecrets</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">schema</span><span class="p">)</span>
     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;registered PCAP-NG decryption secrets parser: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">code</span><span class="o">.</span><span class="n">name</span><span class="p">)</span></div>
 </pre></div>
         </article>

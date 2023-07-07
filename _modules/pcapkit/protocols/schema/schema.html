@@ -344,11 +344,12 @@
 <span></span><span class="c1"># -*- coding: utf-8 -*-</span>
 <span class="sd">&quot;&quot;&quot;schema for protocol headers&quot;&quot;&quot;</span>
 
+<span class="kn">import</span> <span class="nn">abc</span>
 <span class="kn">import</span> <span class="nn">collections</span>
 <span class="kn">import</span> <span class="nn">collections.abc</span>
 <span class="kn">import</span> <span class="nn">io</span>
 <span class="kn">import</span> <span class="nn">itertools</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">Generic</span><span class="p">,</span> <span class="n">TypeVar</span><span class="p">,</span> <span class="n">cast</span><span class="p">,</span> <span class="n">final</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Generic</span><span class="p">,</span> <span class="n">TypeVar</span><span class="p">,</span> <span class="n">cast</span><span class="p">,</span> <span class="n">final</span>
 
 <span class="kn">from</span> <span class="nn">pcapkit.corekit.fields.collections</span> <span class="kn">import</span> <span class="n">ListField</span><span class="p">,</span> <span class="n">OptionField</span>
 <span class="kn">from</span> <span class="nn">pcapkit.corekit.fields.field</span> <span class="kn">import</span> <span class="n">NoValue</span><span class="p">,</span> <span class="n">_Field</span>
@@ -362,13 +363,15 @@
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
     <span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">OrderedDict</span>
-    <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">IO</span><span class="p">,</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">Iterator</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Type</span>
+    <span class="kn">from</span> <span class="nn">enum</span> <span class="kn">import</span> <span class="n">Enum</span>
+    <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">IO</span><span class="p">,</span> <span class="n">Any</span><span class="p">,</span> <span class="n">DefaultDict</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">Iterator</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Type</span>
 
     <span class="kn">from</span> <span class="nn">typing_extensions</span> <span class="kn">import</span> <span class="n">Self</span>
 
-<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Schema&#39;</span><span class="p">,</span> <span class="s1">&#39;schema_final&#39;</span><span class="p">]</span>
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Schema&#39;</span><span class="p">,</span> <span class="s1">&#39;EnumSchema&#39;</span><span class="p">,</span> <span class="s1">&#39;schema_final&#39;</span><span class="p">]</span>
 
 <span class="n">VT</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s1">&#39;VT&#39;</span><span class="p">)</span>
+<span class="n">ET</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s1">&#39;ET&#39;</span><span class="p">,</span> <span class="n">bound</span><span class="o">=</span><span class="s1">&#39;Enum&#39;</span><span class="p">)</span>
 <span class="n">ST</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s1">&#39;ST&#39;</span><span class="p">,</span> <span class="n">bound</span><span class="o">=</span><span class="s1">&#39;Type[Schema]&#39;</span><span class="p">)</span>
 
 
@@ -408,50 +411,8 @@
     <span class="bp">cls</span><span class="o">.</span><span class="n">__builtin__</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">temp</span><span class="p">)</span>
     <span class="bp">cls</span><span class="o">.</span><span class="n">__excluded__</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">__builtin__</span><span class="p">)</span>
 
-    <span class="n">args_</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: list[str]</span>
-    <span class="n">dict_</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: list[str]</span>
-
-    <span class="n">cls_fields</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: list[tuple[str, _Field]]</span>
-    <span class="k">for</span> <span class="n">cls_</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="n">mro</span><span class="p">():</span>
-        <span class="c1"># NOTE: We skip the ``Schema`` class itself, to avoid superclass</span>
-        <span class="c1"># type annotations being considered.</span>
-        <span class="k">if</span> <span class="n">cls_</span> <span class="ow">is</span> <span class="n">Schema</span><span class="p">:</span>
-            <span class="k">break</span>
-
-        <span class="c1"># NOTE: We iterate in reversed order to ensure that the type</span>
-        <span class="c1"># annotations of the superclasses are considered first.</span>
-        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="nb">reversed</span><span class="p">(</span><span class="n">cls_</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
-            <span class="c1"># NOTE: We skip duplicated annotations to avoid duplicate</span>
-            <span class="c1"># argument in function definition.</span>
-            <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">args_</span><span class="p">:</span>
-                <span class="k">continue</span>
-
-            <span class="c1"># NOTE: We only consider the fields that are instances of</span>
-            <span class="c1"># the ``_Field`` class.</span>
-            <span class="n">field</span> <span class="o">=</span> <span class="n">cls_</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="n">_Field</span><span class="p">):</span>
-                <span class="k">continue</span>
-
-            <span class="c1"># NOTE: We need to consider the case where the field itself</span>
-            <span class="c1"># is optional, i.e., the field is not required to be present</span>
-            <span class="c1"># in the protocol header.</span>
-            <span class="n">args_</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s1">=NoValue&#39;</span><span class="p">)</span>
-            <span class="n">dict_</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s1">=</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
-
-            <span class="n">field</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">key</span>
-            <span class="n">cls_fields</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">key</span><span class="p">,</span> <span class="n">field</span><span class="p">))</span>
-
-    <span class="c1"># NOTE: We reverse the two lists such that the order of the</span>
-    <span class="c1"># arguments is the same as the order of the field definition,</span>
-    <span class="c1"># i.e., from the most base class to the most derived class.</span>
-    <span class="n">args_</span><span class="o">.</span><span class="n">reverse</span><span class="p">()</span>
-    <span class="n">dict_</span><span class="o">.</span><span class="n">reverse</span><span class="p">()</span>
-
-    <span class="c1"># NOTE: We also reverse the field list such that the order</span>
-    <span class="c1"># can be preserved in the :class:`~collections.OrderedDict`</span>
-    <span class="c1"># instance.</span>
-    <span class="n">cls_fields</span><span class="o">.</span><span class="n">reverse</span><span class="p">()</span>
-    <span class="bp">cls</span><span class="o">.</span><span class="n">__fields__</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">OrderedDict</span><span class="p">(</span><span class="n">cls_fields</span><span class="p">)</span>
+    <span class="n">args_</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s1">=NoValue&#39;</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="n">__fields__</span><span class="p">]</span>
+    <span class="n">dict_</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s1">=</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s1">&#39;</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="n">__fields__</span><span class="p">]</span>
 
     <span class="c1"># NOTE: We shall only attempt to generate ``__init__`` method</span>
     <span class="c1"># if the class does not define such method.</span>
@@ -491,7 +452,83 @@
     <span class="k">return</span> <span class="n">final</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="Schema"><a class="viewcode-back" href="../../../../pcapkit/protocols/index.html#pcapkit.protocols.schema.schema.Schema">[docs]</a><span class="k">class</span> <span class="nc">Schema</span><span class="p">(</span><span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">VT</span><span class="p">],</span> <span class="n">Generic</span><span class="p">[</span><span class="n">VT</span><span class="p">]):</span>
+<div class="viewcode-block" id="SchemaMeta"><a class="viewcode-back" href="../../../../pcapkit/protocols/index.html#pcapkit.protocols.schema.schema.SchemaMeta">[docs]</a><span class="k">class</span> <span class="nc">SchemaMeta</span><span class="p">(</span><span class="n">abc</span><span class="o">.</span><span class="n">ABCMeta</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Meta class to add dynamic support to :class:`Schema`.</span>
+
+<span class="sd">    This meta class is used to generate necessary attributes for the</span>
+<span class="sd">    :class:`Schema` class. It can be useful to reduce runtime generation</span>
+<span class="sd">    cost as well as caching already generated attributes.</span>
+
+<span class="sd">    * :attr:`Schema.__fields__` is a dictionary of field names and their</span>
+<span class="sd">      corresponding :class:`~pcapkit.corekit.fields.field.Field` objects,</span>
+<span class="sd">      which are used to define and parse the protocol headers. The field</span>
+<span class="sd">      dictionary will automatically be populated from the class attributes</span>
+<span class="sd">      of the :class:`Schema` class, and the field names will be the same</span>
+<span class="sd">      as the attribute names.</span>
+
+<span class="sd">      .. seealso::</span>
+
+<span class="sd">         This is implemented thru setting up the initial field dictionary</span>
+<span class="sd">         in the :meth:`__prepare__` method, and then inherit the field</span>
+<span class="sd">         dictionaries from the base classes.</span>
+
+<span class="sd">         Later, during the class creation, the :meth:`Field.__set_name__`</span>
+<span class="sd">         method will be called to set the field name for each field object,</span>
+<span class="sd">         as well as to add the field object to the field dictionary.</span>
+
+<span class="sd">    * :attr:`Schema.__additional__` and :attr:`Schema.__excluded__` are</span>
+<span class="sd">      lists of additional and excluded field names, which are used to</span>
+<span class="sd">      determine certain names to be included or excluded from the field</span>
+<span class="sd">      dictionary. They will be automatically populated from the class</span>
+<span class="sd">      attributes of the :class:`Schema` class and its base classes.</span>
+
+<span class="sd">      .. note::</span>
+
+<span class="sd">         This is implemented thru the :meth:`__new__` method, which will</span>
+<span class="sd">         inherit the additional and excluded field names from the base</span>
+<span class="sd">         classes, as well as populating the additional and excluded field</span>
+<span class="sd">         from the subclass attributes.</span>
+
+<span class="sd">         .. code-block:: python</span>
+
+<span class="sd">            class A(Schema):</span>
+<span class="sd">                __additional__ = [&#39;a&#39;, &#39;b&#39;]</span>
+
+<span class="sd">            class B(A):</span>
+<span class="sd">                __additional__ = [&#39;c&#39;, &#39;d&#39;]</span>
+
+<span class="sd">            class C(B):</span>
+<span class="sd">                __additional__ = [&#39;e&#39;, &#39;f&#39;]</span>
+
+<span class="sd">            print(A.__additional__)  # [&#39;a&#39;, &#39;b&#39;]</span>
+<span class="sd">            print(B.__additional__)  # [&#39;a&#39;, &#39;b&#39;, &#39;c&#39;, &#39;d&#39;]</span>
+<span class="sd">            print(C.__additional__)  # [&#39;a&#39;, &#39;b&#39;, &#39;c&#39;, &#39;d&#39;, &#39;e&#39;, &#39;f&#39;]</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="fm">__prepare__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">,</span> <span class="n">bases</span><span class="p">:</span> <span class="s1">&#39;tuple[type, ...]&#39;</span><span class="p">,</span> <span class="o">/</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Mapping[str, object]&#39;</span><span class="p">:</span>
+        <span class="n">fields</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">OrderedDict</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">base</span> <span class="ow">in</span> <span class="n">bases</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">base</span><span class="p">,</span> <span class="s1">&#39;__fields__&#39;</span><span class="p">):</span>
+                <span class="n">fields</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">base</span><span class="o">.</span><span class="n">__fields__</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">collections</span><span class="o">.</span><span class="n">OrderedDict</span><span class="p">(</span><span class="n">__fields__</span><span class="o">=</span><span class="n">fields</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">,</span> <span class="n">bases</span><span class="p">:</span> <span class="s1">&#39;tuple[type, ...]&#39;</span><span class="p">,</span> <span class="n">attrs</span><span class="p">:</span> <span class="s1">&#39;dict[str, Any]&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Type[Schema]&#39;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="s1">&#39;__additional__&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">attrs</span><span class="p">:</span>
+            <span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;__additional__&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="s1">&#39;__excluded__&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">attrs</span><span class="p">:</span>
+            <span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;__excluded__&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">for</span> <span class="n">base</span> <span class="ow">in</span> <span class="n">bases</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">base</span><span class="p">,</span> <span class="s1">&#39;__additional__&#39;</span><span class="p">):</span>
+                <span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;__additional__&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">name</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">base</span><span class="o">.</span><span class="n">__additional__</span> <span class="k">if</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;__additional__&#39;</span><span class="p">])</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">base</span><span class="p">,</span> <span class="s1">&#39;__excluded__&#39;</span><span class="p">):</span>
+                <span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;__excluded__&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">name</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">base</span><span class="o">.</span><span class="n">__excluded__</span> <span class="k">if</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;__excluded__&#39;</span><span class="p">])</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">bases</span><span class="p">,</span> <span class="n">attrs</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>  <span class="c1"># type: ignore[return-value]</span></div>
+
+
+<div class="viewcode-block" id="Schema"><a class="viewcode-back" href="../../../../pcapkit/protocols/index.html#pcapkit.protocols.schema.schema.Schema">[docs]</a><span class="k">class</span> <span class="nc">Schema</span><span class="p">(</span><span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">VT</span><span class="p">],</span> <span class="n">Generic</span><span class="p">[</span><span class="n">VT</span><span class="p">],</span> <span class="n">metaclass</span><span class="o">=</span><span class="n">SchemaMeta</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Schema for protocol headers.&quot;&quot;&quot;</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
@@ -946,6 +983,85 @@
 
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span></div></div>
+
+
+<div class="viewcode-block" id="EnumMeta"><a class="viewcode-back" href="../../../../pcapkit/protocols/index.html#pcapkit.protocols.schema.schema.EnumMeta">[docs]</a><span class="k">class</span> <span class="nc">EnumMeta</span><span class="p">(</span><span class="n">SchemaMeta</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Meta class to add dynamic support for :class:`EnumSchema`.</span>
+
+<span class="sd">    This meta class is used to generate necessary attributes for the</span>
+<span class="sd">    :class:`SchemaMeta` class. It can be useful to reduce runtime generation</span>
+<span class="sd">    cost as well as caching already generated attributes.</span>
+
+<span class="sd">    * :attr:`~EnumSchema.registry` is added to subclasses as an *immutable*</span>
+<span class="sd">      proxy (similar to :class:`property`, but on class variables) to the</span>
+<span class="sd">      :attr:`~EnumSchema.__enum__` mapping.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">registry</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DefaultDict[ET, Type[EnumSchema]]&#39;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Mapping of enumeration numbers to schemas.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">__enum__</span>  <span class="c1"># type: ignore[attr-defined]</span></div>
+
+
+<div class="viewcode-block" id="EnumSchema"><a class="viewcode-back" href="../../../../pcapkit/protocols/index.html#pcapkit.protocols.schema.schema.EnumSchema">[docs]</a><span class="k">class</span> <span class="nc">EnumSchema</span><span class="p">(</span><span class="n">Schema</span><span class="p">,</span> <span class="n">Generic</span><span class="p">[</span><span class="n">ET</span><span class="p">],</span> <span class="n">metaclass</span><span class="o">=</span><span class="n">EnumMeta</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;:class:`Schema` with enumeration mapping support.</span>
+
+<span class="sd">    .. code-block:: python</span>
+
+<span class="sd">        from pcapkit.const.pcapng.block_type import BlockType as Enum_BlockType</span>
+<span class="sd">        from pcapkit.protocols.schema.misc.pcapng improt BlockType</span>
+
+
+<span class="sd">        class NewBlock(BlockType, code=Enum_BlockType.New_Block):</span>
+<span class="sd">            ...</span>
+
+
+<span class="sd">        # NewBlock is now registered to BlockType.registry</span>
+<span class="sd">        # alternatively, you can use the BlockType.register() method</span>
+<span class="sd">        print(BlockType.registry[Enum_BlockType.New_Block] is NewBlock)  # True</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">__additional__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;__enum__&#39;</span><span class="p">]</span>
+    <span class="n">__excluded__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;__enum__&#39;</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+        <span class="c1">#: Mapping of enumeration numbers to schemas (**internal use only**).</span>
+        <span class="n">__enum__</span><span class="p">:</span> <span class="s1">&#39;DefaultDict[ET, Type[Self]]&#39;</span>
+        <span class="c1">#: Mapping of enumeration numbers to schemas.</span>
+        <span class="n">registry</span><span class="p">:</span> <span class="s1">&#39;DefaultDict[ET, Type[Self]]&#39;</span>
+
+<div class="viewcode-block" id="EnumSchema.__init_subclass__"><a class="viewcode-back" href="../../../../pcapkit/protocols/index.html#pcapkit.protocols.schema.schema.EnumSchema.__init_subclass__">[docs]</a>    <span class="k">def</span> <span class="nf">__init_subclass__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">&#39;Optional[ET | Iterable[ET]]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Register enumeration to :attr:`registry` mapping.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            code: Enumeration code. It can be either a single enumeration</span>
+<span class="sd">                or a list of enumerations.</span>
+
+<span class="sd">        If ``code`` is provided, the subclass will be registered to the</span>
+<span class="sd">        :attr:`registry` mapping with the given ``code``. If ``code`` is</span>
+<span class="sd">        not given, the subclass will not be registered.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">code</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">collections</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Iterable</span><span class="p">):</span>
+                <span class="k">for</span> <span class="n">_code</span> <span class="ow">in</span> <span class="n">code</span><span class="p">:</span>
+                    <span class="bp">cls</span><span class="o">.</span><span class="n">__enum__</span><span class="p">[</span><span class="n">_code</span><span class="p">]</span> <span class="o">=</span> <span class="bp">cls</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">cls</span><span class="o">.</span><span class="n">__enum__</span><span class="p">[</span><span class="n">code</span><span class="p">]</span> <span class="o">=</span> <span class="bp">cls</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__init_subclass__</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="EnumSchema.register"><a class="viewcode-back" href="../../../../pcapkit/protocols/index.html#pcapkit.protocols.schema.schema.EnumSchema.register">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">register</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">&#39;ET&#39;</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">&#39;Type[Self]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Register enumetaion to :attr:`__enum__` mapping.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            code: Enumetaion code.</span>
+<span class="sd">            schema: Enumetaion schema.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">cls</span><span class="o">.</span><span class="n">__enum__</span><span class="p">[</span><span class="n">code</span><span class="p">]</span> <span class="o">=</span> <span class="n">schema</span></div></div>
 </pre></div>
         </article>
       </div>
