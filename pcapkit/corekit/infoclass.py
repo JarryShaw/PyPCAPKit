@@ -10,6 +10,7 @@ designed to work alike :func:`dataclasses.dataclass` as introduced
 in :pep:`557`.
 
 """
+import abc
 import collections.abc
 import enum
 import itertools
@@ -140,7 +141,59 @@ def info_final(cls: 'ST', *, _finalised: 'bool' = True) -> 'ST':
     return final(cls)
 
 
-class Info(Mapping[str, VT], Generic[VT]):
+class InfoMeta(abc.ABCMeta):
+    """Meta class to add dynamic support to :class:`Info`.
+
+    This meta class is used to generate necessary attributes for the
+    :class:`Info` class. It can be useful to reduce runtime generation
+    cost as well as caching already generated attributes.
+
+    * :attr:`Info.__additional__` and :attr:`Info.__excluded__` are
+      lists of additional and excluded field names, which are used to
+      determine certain names to be included or excluded from the field
+      dictionary. They will be automatically populated from the class
+      attributes of the :class:`Info` class and its base classes.
+
+      .. note::
+
+         This is implemented thru the :meth:`__new__` method, which will
+         inherit the additional and excluded field names from the base
+         classes, as well as populating the additional and excluded field
+         from the subclass attributes.
+
+         .. code-block:: python
+
+            class A(Info):
+                __additional__ = ['a', 'b']
+
+            class B(A):
+                __additional__ = ['c', 'd']
+
+            class C(B):
+                __additional__ = ['e', 'f']
+
+            print(A.__additional__)  # ['a', 'b']
+            print(B.__additional__)  # ['a', 'b', 'c', 'd']
+            print(C.__additional__)  # ['a', 'b', 'c', 'd', 'e', 'f']
+
+    """
+
+    def __new__(cls, name: 'str', bases: 'tuple[type, ...]', attrs: 'dict[str, Any]', **kwargs: 'Any') -> 'Type[Info]':
+        if '__additional__' not in attrs:
+            attrs['__additional__'] = []
+        if '__excluded__' not in attrs:
+            attrs['__excluded__'] = []
+
+        for base in bases:
+            if hasattr(base, '__additional__'):
+                attrs['__additional__'].extend(
+                    name for name in base.__additional__ if name not in attrs['__additional__'])
+            if hasattr(base, '__excluded__'):
+                attrs['__excluded__'].extend(name for name in base.__excluded__ if name not in attrs['__excluded__'])
+        return super().__new__(cls, name, bases, attrs, **kwargs)  # type: ignore[return-value]
+
+
+class Info(Mapping[str, VT], Generic[VT], metaclass=InfoMeta):
     """Turn dictionaries into :obj:`object` like instances.
 
     * :class:`Info` objects inherit from :obj:`dict` type
