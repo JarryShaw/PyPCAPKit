@@ -24,12 +24,13 @@ from pcapkit.const.hip.suite import Suite as Enum_Suite
 from pcapkit.const.hip.transport import Transport as Enum_Transport
 from pcapkit.const.reg.transtype import TransType as Enum_TransType
 from pcapkit.corekit.fields.collections import ListField, OptionField
+from pcapkit.corekit.fields.field import NoValue
 from pcapkit.corekit.fields.ipaddress import IPv6AddressField
 from pcapkit.corekit.fields.misc import ConditionalField, PayloadField, SchemaField, SwitchField
 from pcapkit.corekit.fields.numbers import (EnumField, NumberField, UInt8Field, UInt16Field,
                                             UInt32Field)
 from pcapkit.corekit.fields.strings import BitField, BytesField, PaddingField
-from pcapkit.protocols.schema.schema import Schema, schema_final
+from pcapkit.protocols.schema.schema import EnumSchema, Schema, schema_final
 from pcapkit.utilities.exceptions import FieldValueError
 from pcapkit.utilities.logging import SPHINX_TYPE_CHECKING
 from pcapkit.utilities.warnings import ProtocolWarning, warn
@@ -60,7 +61,7 @@ __all__ = [
 
 if TYPE_CHECKING:
     from ipaddress import IPv6Address
-    from typing import Any, Optional
+    from typing import Any, Optional, Type
 
     from pcapkit.corekit.fields.field import _Field as Field
     from pcapkit.protocols.data.internet.hip import EncryptedParameter as Data_EncryptedParameter
@@ -157,17 +158,17 @@ def host_id_hi_selector(pkt: 'dict[str, Any]') -> 'Field':
           :class:`~pcapkit.protocols.schema.internet.hip.EdDSACurveHostIdentity` instance.
 
     """
-    if pkt['algorithm'] == Enum_HIAlgorithm.ECDSA:
-        return SchemaField(length=pkt['hi_len'], schema=ECDSACurveHostIdentity)
-    if pkt['algorithm'] == Enum_HIAlgorithm.ECDSA_LOW:
-        return SchemaField(length=pkt['hi_len'], schema=ECDSALowCurveHostIdentity)
-    if pkt['algorithm'] == Enum_HIAlgorithm.EdDSA:
-        return SchemaField(length=pkt['hi_len'], schema=EdDSACurveHostIdentity)
-    return BytesField(length=pkt['hi_len'])
+    algo = pkt['algorithm']
+    schema = HostIdentity.registry[algo]
+    if schema is NoValue:
+        return BytesField(length=pkt['hi_len'])
+    return SchemaField(length=pkt['hi_len'], schema=schema)
 
 
-class Parameter(Schema):
+class Parameter(EnumSchema[Enum_Parameter]):
     """Base schema for HIP parameters."""
+
+    __enum__ = collections.defaultdict(lambda: UnassignedParameter)
 
     #: Parameter type.
     type: 'Enum_Parameter' = EnumField(length=2, namespace=Enum_Parameter)
@@ -189,7 +190,7 @@ class UnassignedParameter(Parameter):
 
 
 @schema_final
-class ESPInfoParameter(Parameter):
+class ESPInfoParameter(Parameter, code=Enum_Parameter.ESP_INFO):
     """Header schema for HIP ``ESP_INFO`` parameters."""
 
     #: Reserved.
@@ -209,7 +210,7 @@ class ESPInfoParameter(Parameter):
 
 
 @schema_final
-class R1CounterParameter(Parameter):
+class R1CounterParameter(Parameter, code=Enum_Parameter.R1_COUNTER):
     """Header schema for HIP ``R1_COUNTER`` parameters."""
 
     #: Reserved.
@@ -252,7 +253,7 @@ class Locator(Schema):
 
 
 @schema_final
-class LocatorSetParameter(Parameter):
+class LocatorSetParameter(Parameter, code=Enum_Parameter.LOCATOR_SET):
     """Header schema for HIP ``LOCATOR_SET`` parameters."""
 
     #: List of locators.
@@ -281,7 +282,7 @@ class LocatorData(Schema):
 
 
 @schema_final
-class PuzzleParameter(Parameter):
+class PuzzleParameter(Parameter, code=Enum_Parameter.PUZZLE):
     """Header schema for HIP ``PUZZLE`` parameters."""
 
     #: Numeric index.
@@ -301,7 +302,7 @@ class PuzzleParameter(Parameter):
 
 
 @schema_final
-class SolutionParameter(Parameter):
+class SolutionParameter(Parameter, code=Enum_Parameter.SOLUTION):
     """Header schema for HIP ``SOLUTION`` parameters."""
 
     #: Numeric index.
@@ -323,7 +324,7 @@ class SolutionParameter(Parameter):
 
 
 @schema_final
-class SEQParameter(Parameter):
+class SEQParameter(Parameter, code=Enum_Parameter.SEQ):
     """Header schema for HIP ``SEQ`` parameters."""
 
     #: Update ID.
@@ -336,7 +337,7 @@ class SEQParameter(Parameter):
 
 
 @schema_final
-class ACKParameter(Parameter):
+class ACKParameter(Parameter, code=Enum_Parameter.ACK):
     """Header schema for HIP ``ACK`` parameters."""
 
     #: Update ID.
@@ -352,7 +353,7 @@ class ACKParameter(Parameter):
 
 
 @schema_final
-class DHGroupListParameter(Parameter):
+class DHGroupListParameter(Parameter, code=Enum_Parameter.DH_GROUP_LIST):
     """Header schema for HIP ``DH_GROUP_LIST`` parameters."""
 
     #: List of DH groups.
@@ -368,7 +369,7 @@ class DHGroupListParameter(Parameter):
 
 
 @schema_final
-class DiffieHellmanParameter(Parameter):
+class DiffieHellmanParameter(Parameter, code=Enum_Parameter.DIFFIE_HELLMAN):
     """Header schema for HIP ``DIFFIE_HELLMAN`` parameters."""
 
     #: Diffie-Hellman group.
@@ -386,7 +387,7 @@ class DiffieHellmanParameter(Parameter):
 
 
 @schema_final
-class HIPTransformParameter(Parameter):
+class HIPTransformParameter(Parameter, code=Enum_Parameter.HIP_TRANSFORM):
     """Header schema for HIP ``TRANSFORM`` parameters."""
 
     #: Suite IDs.
@@ -402,7 +403,7 @@ class HIPTransformParameter(Parameter):
 
 
 @schema_final
-class HIPCipherParameter(Parameter):
+class HIPCipherParameter(Parameter, code=Enum_Parameter.HIP_CIPHER):
     """Header schema for HIP ``CIPHER`` parameters."""
 
     #: Cipher IDs.
@@ -418,7 +419,7 @@ class HIPCipherParameter(Parameter):
 
 
 @schema_final
-class NATTraversalModeParameter(Parameter):
+class NATTraversalModeParameter(Parameter, code=Enum_Parameter.NAT_TRAVERSAL_MODE):
     """Header schema for HIP ``NAT_TRAVERSAL_MODE`` parameters."""
 
     #: Reserved.
@@ -436,7 +437,7 @@ class NATTraversalModeParameter(Parameter):
 
 
 @schema_final
-class TransactionPacingParameter(Parameter):
+class TransactionPacingParameter(Parameter, code=Enum_Parameter.TRANSACTION_PACING):
     """Header schema for HIP ``TRANSACTION_PACING`` parameters."""
 
     #: Transaction pacing.
@@ -449,7 +450,7 @@ class TransactionPacingParameter(Parameter):
 
 
 @schema_final
-class EncryptedParameter(Parameter):
+class EncryptedParameter(Parameter, code=Enum_Parameter.ENCRYPTED):
     """Header schema for HIP ``ENCRYPTED`` parameters."""
 
     #: Reserved.
@@ -529,7 +530,7 @@ class EncryptedParameter(Parameter):
 
 
 @schema_final
-class HostIDParameter(Parameter):
+class HostIDParameter(Parameter, code=Enum_Parameter.HOST_ID):
     """Header schema for HIP ``HOST_ID`` parameters."""
 
     #: Host ID length.
@@ -557,12 +558,14 @@ class HostIDParameter(Parameter):
                      di: 'bytes') -> 'None': ...
 
 
-class HostIdentity(Schema):
+class HostIdentity(EnumSchema[Enum_HIAlgorithm]):
     """Host identity schema."""
+
+    __enum__ = collections.defaultdict(lambda: cast('Type[HostIdentity]', NoValue))
 
 
 @schema_final
-class ECDSACurveHostIdentity(HostIdentity):
+class ECDSACurveHostIdentity(HostIdentity, code=Enum_HIAlgorithm.ECDSA):
     """Host identity schema with ECDSA curve."""
 
     #: Algorithm curve type.
@@ -575,7 +578,7 @@ class ECDSACurveHostIdentity(HostIdentity):
 
 
 @schema_final
-class ECDSALowCurveHostIdentity(HostIdentity):
+class ECDSALowCurveHostIdentity(HostIdentity, code=Enum_HIAlgorithm.ECDSA_LOW):
     """Host identity schema with ECDSA_LOW curve."""
 
     #: Algorithm curve type.
@@ -588,7 +591,7 @@ class ECDSALowCurveHostIdentity(HostIdentity):
 
 
 @schema_final
-class EdDSACurveHostIdentity(HostIdentity):
+class EdDSACurveHostIdentity(HostIdentity, code=Enum_HIAlgorithm.EdDSA):
     """Host identity schema with EdDSA curve."""
 
     #: Algorithm curve type.
@@ -601,7 +604,7 @@ class EdDSACurveHostIdentity(HostIdentity):
 
 
 @schema_final
-class HITSuiteListParameter(Parameter):
+class HITSuiteListParameter(Parameter, code=Enum_Parameter.HIT_SUITE_LIST):
     """Header schema for HIP ``HIT_SUITE_LIST`` parameters."""
 
     #: HIT suite IDs.
@@ -617,7 +620,7 @@ class HITSuiteListParameter(Parameter):
 
 
 @schema_final
-class CertParameter(Parameter):
+class CertParameter(Parameter, code=Enum_Parameter.CERT):
     """Header schema for HIP ``CERT`` parameters."""
 
     #: Certificate group.
@@ -639,7 +642,7 @@ class CertParameter(Parameter):
 
 
 @schema_final
-class NotificationParameter(Parameter):
+class NotificationParameter(Parameter, code=Enum_Parameter.NOTIFICATION):
     """Header schema for HIP ``NOTIFICATION`` parameters."""
 
     #: Reserved.
@@ -656,7 +659,7 @@ class NotificationParameter(Parameter):
 
 
 @schema_final
-class EchoRequestSignedParameter(Parameter):
+class EchoRequestSignedParameter(Parameter, code=Enum_Parameter.ECHO_REQUEST_SIGNED):
     """Header schema for HIP ``ECHO_REQUEST_SIGNED`` parameters."""
 
     #: Opaque data.
@@ -669,7 +672,7 @@ class EchoRequestSignedParameter(Parameter):
 
 
 @schema_final
-class RegInfoParameter(Parameter):
+class RegInfoParameter(Parameter, code=Enum_Parameter.REG_INFO):
     """Header schema for HIP ``REG_INFO`` parameters."""
 
     #: Minimum lifetime.
@@ -690,7 +693,7 @@ class RegInfoParameter(Parameter):
 
 
 @schema_final
-class RegRequestParameter(Parameter):
+class RegRequestParameter(Parameter, code=Enum_Parameter.REG_REQUEST):
     """Header schema for HIP ``REG_REQUEST`` parameters."""
 
     #: Lifetime.
@@ -708,7 +711,7 @@ class RegRequestParameter(Parameter):
 
 
 @schema_final
-class RegResponseParameter(Parameter):
+class RegResponseParameter(Parameter, code=Enum_Parameter.REG_RESPONSE):
     """Header schema for HIP ``REG_RESPONSE`` parameters."""
 
     #: Lifetime.
@@ -726,7 +729,7 @@ class RegResponseParameter(Parameter):
 
 
 @schema_final
-class RegFailedParameter(Parameter):
+class RegFailedParameter(Parameter, code=Enum_Parameter.REG_FAILED):
     """Header schema for HIP ``REG_FAILED`` parameters."""
 
     #: Lifetime.
@@ -744,7 +747,7 @@ class RegFailedParameter(Parameter):
 
 
 @schema_final
-class RegFromParameter(Parameter):
+class RegFromParameter(Parameter, code=Enum_Parameter.REG_FROM):
     """Header schema for HIP ``REG_FROM`` parameters."""
 
     #: Port.
@@ -761,7 +764,7 @@ class RegFromParameter(Parameter):
 
 
 @schema_final
-class EchoResponseSignedParameter(Parameter):
+class EchoResponseSignedParameter(Parameter, code=Enum_Parameter.ECHO_RESPONSE_SIGNED):
     """Header schema for HIP ``ECHO_RESPONSE_SIGNED`` parameters."""
 
     #: Opaque data.
@@ -774,7 +777,7 @@ class EchoResponseSignedParameter(Parameter):
 
 
 @schema_final
-class TransportFormatListParameter(Parameter):
+class TransportFormatListParameter(Parameter, code=Enum_Parameter.TRANSPORT_FORMAT_LIST):
     """Header schema for HIP ``TRANSPORT_FORMAT_LIST`` parameters."""
 
     #: Transport formats.
@@ -790,7 +793,7 @@ class TransportFormatListParameter(Parameter):
 
 
 @schema_final
-class ESPTransformParameter(Parameter):
+class ESPTransformParameter(Parameter, code=Enum_Parameter.ESP_TRANSFORM):
     """Header schema for HIP ``ESP_TRANSFORM`` parameters."""
 
     #: Reserved.
@@ -808,7 +811,7 @@ class ESPTransformParameter(Parameter):
 
 
 @schema_final
-class SeqDataParameter(Parameter):
+class SeqDataParameter(Parameter, code=Enum_Parameter.SEQ_DATA):
     """Header schema for HIP ``SEQ_DATA`` parameters."""
 
     #: Sequence number.
@@ -821,7 +824,7 @@ class SeqDataParameter(Parameter):
 
 
 @schema_final
-class AckDataParameter(Parameter):
+class AckDataParameter(Parameter, code=Enum_Parameter.ACK_DATA):
     """Header schema for HIP ``ACK_DATA`` parameters."""
 
     #: Acked sequence number.
@@ -837,7 +840,7 @@ class AckDataParameter(Parameter):
 
 
 @schema_final
-class PayloadMICParameter(Parameter):
+class PayloadMICParameter(Parameter, code=Enum_Parameter.PAYLOAD_MIC):
     """Header schema for HIP ``PAYLOAD_MIC`` parameters."""
 
     #: Next header.
@@ -856,7 +859,7 @@ class PayloadMICParameter(Parameter):
 
 
 @schema_final
-class TransactionIDParameter(Parameter):
+class TransactionIDParameter(Parameter, code=Enum_Parameter.TRANSACTION_ID):
     """Header schema for HIP ``TRANSACTION_ID`` parameters."""
 
     #: Transaction ID.
@@ -869,7 +872,7 @@ class TransactionIDParameter(Parameter):
 
 
 @schema_final
-class OverlayIDParameter(Parameter):
+class OverlayIDParameter(Parameter, code=Enum_Parameter.OVERLAY_ID):
     """Header schema for HIP ``OVERLAY_ID`` parameters."""
 
     #: Overlay ID.
@@ -882,7 +885,7 @@ class OverlayIDParameter(Parameter):
 
 
 @schema_final
-class RouteDstParameter(Parameter):
+class RouteDstParameter(Parameter, code=Enum_Parameter.ROUTE_DST):
     """Header schema for HIP ``ROUTE_DST`` parameters."""
 
     #: Flags.
@@ -905,7 +908,7 @@ class RouteDstParameter(Parameter):
 
 
 @schema_final
-class HIPTransportModeParameter(Parameter):
+class HIPTransportModeParameter(Parameter, code=Enum_Parameter.HIP_TRANSPORT_MODE):
     """Header schema for HIP ``HIP_TRANSPORT_MODE`` parameters."""
 
     #: Port.
@@ -923,7 +926,7 @@ class HIPTransportModeParameter(Parameter):
 
 
 @schema_final
-class HIPMACParameter(Parameter):
+class HIPMACParameter(Parameter, code=Enum_Parameter.HIP_MAC):
     """Header schema for HIP ``HIP_MAC`` parameters."""
 
     #: HMAC value.
@@ -936,7 +939,7 @@ class HIPMACParameter(Parameter):
 
 
 @schema_final
-class HIPMAC2Parameter(Parameter):
+class HIPMAC2Parameter(Parameter, code=Enum_Parameter.HIP_MAC_2):
     """Header schema for HIP ``HIP_MAC_2`` parameters."""
 
     #: HMAC value.
@@ -949,7 +952,7 @@ class HIPMAC2Parameter(Parameter):
 
 
 @schema_final
-class HIPSignature2Parameter(Parameter):
+class HIPSignature2Parameter(Parameter, code=Enum_Parameter.HIP_SIGNATURE_2):
     """Header schema for HIP ``HIP_SIGNATURE_2`` parameters."""
 
     #: Signature algorithm.
@@ -964,7 +967,7 @@ class HIPSignature2Parameter(Parameter):
 
 
 @schema_final
-class HIPSignatureParameter(Parameter):
+class HIPSignatureParameter(Parameter, code=Enum_Parameter.HIP_SIGNATURE):
     """Header schema for HIP ``HIP_SIGNATURE`` parameters."""
 
     #: Signature algorithm.
@@ -979,7 +982,7 @@ class HIPSignatureParameter(Parameter):
 
 
 @schema_final
-class EchoRequestUnsignedParameter(Parameter):
+class EchoRequestUnsignedParameter(Parameter, code=Enum_Parameter.ECHO_REQUEST_UNSIGNED):
     """Header schema for HIP ``ECHO_REQUEST_UNSIGNED`` parameters."""
 
     #: Opaque data.
@@ -992,7 +995,7 @@ class EchoRequestUnsignedParameter(Parameter):
 
 
 @schema_final
-class EchoResponseUnsignedParameter(Parameter):
+class EchoResponseUnsignedParameter(Parameter, code=Enum_Parameter.ECHO_RESPONSE_UNSIGNED):
     """Header schema for HIP ``ECHO_RESPONSE_UNSIGNED`` parameters."""
 
     #: Opaque data.
@@ -1005,7 +1008,7 @@ class EchoResponseUnsignedParameter(Parameter):
 
 
 @schema_final
-class RelayFromParameter(Parameter):
+class RelayFromParameter(Parameter, code=Enum_Parameter.RELAY_FROM):
     """Header schema for HIP ``RELAY_FROM`` parameters."""
 
     #: Port.
@@ -1022,7 +1025,7 @@ class RelayFromParameter(Parameter):
 
 
 @schema_final
-class RelayToParameter(Parameter):
+class RelayToParameter(Parameter, code=Enum_Parameter.RELAY_TO):
     """Header schema for HIP ``RELAY_TO`` parameters."""
 
     #: Port.
@@ -1039,7 +1042,7 @@ class RelayToParameter(Parameter):
 
 
 @schema_final
-class OverlayTTLParameter(Parameter):
+class OverlayTTLParameter(Parameter, code=Enum_Parameter.OVERLAY_TTL):
     """Header schema for HIP ``OVERLAY_TTL`` parameters."""
 
     #: TTL value.
@@ -1054,7 +1057,7 @@ class OverlayTTLParameter(Parameter):
 
 
 @schema_final
-class RouteViaParameter(Parameter):
+class RouteViaParameter(Parameter, code=Enum_Parameter.ROUTE_VIA):
     """Header schema for HIP ``ROUTE_VIA`` parameters."""
 
     #: Flags.
@@ -1077,7 +1080,7 @@ class RouteViaParameter(Parameter):
 
 
 @schema_final
-class FromParameter(Parameter):
+class FromParameter(Parameter, code=Enum_Parameter.FROM):
     """Header schema for HIP ``FROM`` parameters."""
 
     #: Address.
@@ -1090,7 +1093,7 @@ class FromParameter(Parameter):
 
 
 @schema_final
-class RVSHMACParameter(Parameter):
+class RVSHMACParameter(Parameter, code=Enum_Parameter.RVS_HMAC):
     """Header schema for HIP ``RVS_HMAC`` parameters."""
 
     #: HMAC value.
@@ -1103,7 +1106,7 @@ class RVSHMACParameter(Parameter):
 
 
 @schema_final
-class ViaRVSParameter(Parameter):
+class ViaRVSParameter(Parameter, code=Enum_Parameter.VIA_RVS):
     """Header schema for HIP ``VIA_RVS`` parameters."""
 
     #: Address.
@@ -1119,7 +1122,7 @@ class ViaRVSParameter(Parameter):
 
 
 @schema_final
-class RelayHMACParameter(Parameter):
+class RelayHMACParameter(Parameter, code=Enum_Parameter.RELAY_HMAC):
     """Header schema for HIP ``RELAY_HMAC`` parameters."""
 
     #: HMAC value.
@@ -1173,55 +1176,7 @@ class HIP(Schema):
         length=lambda pkt: (pkt['len'] - 4) * 8,
         base_schema=Parameter,
         type_name='type',
-        registry=collections.defaultdict(lambda: UnassignedParameter, {
-            Enum_Parameter.ESP_INFO: ESPInfoParameter,
-            Enum_Parameter.R1_COUNTER: R1CounterParameter,
-            Enum_Parameter.LOCATOR_SET: LocatorSetParameter,
-            Enum_Parameter.PUZZLE: PuzzleParameter,
-            Enum_Parameter.SOLUTION: SolutionParameter,
-            Enum_Parameter.SEQ: SEQParameter,
-            Enum_Parameter.ACK: ACKParameter,
-            Enum_Parameter.DH_GROUP_LIST: DHGroupListParameter,
-            Enum_Parameter.DIFFIE_HELLMAN: DiffieHellmanParameter,
-            Enum_Parameter.HIP_TRANSFORM: HIPTransformParameter,
-            Enum_Parameter.HIP_CIPHER: HIPCipherParameter,
-            Enum_Parameter.NAT_TRAVERSAL_MODE: NATTraversalModeParameter,
-            Enum_Parameter.TRANSACTION_PACING: TransactionPacingParameter,
-            Enum_Parameter.ENCRYPTED: EncryptedParameter,
-            Enum_Parameter.HOST_ID: HostIDParameter,
-            Enum_Parameter.HIT_SUITE_LIST: HITSuiteListParameter,
-            Enum_Parameter.CERT: CertParameter,
-            Enum_Parameter.NOTIFICATION: NotificationParameter,
-            Enum_Parameter.ECHO_REQUEST_SIGNED: EchoRequestSignedParameter,
-            Enum_Parameter.REG_INFO: RegInfoParameter,
-            Enum_Parameter.REG_REQUEST: RegRequestParameter,
-            Enum_Parameter.REG_FAILED: RegFailedParameter,
-            Enum_Parameter.REG_FROM: RegFromParameter,
-            Enum_Parameter.ECHO_RESPONSE_SIGNED: EchoResponseSignedParameter,
-            Enum_Parameter.TRANSPORT_FORMAT_LIST: TransportFormatListParameter,
-            Enum_Parameter.ESP_TRANSFORM: ESPTransformParameter,
-            Enum_Parameter.SEQ_DATA: SeqDataParameter,
-            Enum_Parameter.ACK_DATA: AckDataParameter,
-            Enum_Parameter.PAYLOAD_MIC: PayloadMICParameter,
-            Enum_Parameter.TRANSACTION_ID: TransactionIDParameter,
-            Enum_Parameter.OVERLAY_ID: OverlayIDParameter,
-            Enum_Parameter.ROUTE_DST: RouteDstParameter,
-            Enum_Parameter.HIP_TRANSPORT_MODE: HIPTransportModeParameter,
-            Enum_Parameter.HIP_MAC: HIPMACParameter,
-            Enum_Parameter.HIP_MAC_2: HIPMAC2Parameter,
-            Enum_Parameter.HIP_SIGNATURE_2: HIPSignature2Parameter,
-            Enum_Parameter.HIP_SIGNATURE: HIPSignatureParameter,
-            Enum_Parameter.ECHO_REQUEST_UNSIGNED: EchoRequestUnsignedParameter,
-            Enum_Parameter.ECHO_RESPONSE_UNSIGNED: EchoResponseUnsignedParameter,
-            Enum_Parameter.RELAY_FROM: RelayFromParameter,
-            Enum_Parameter.RELAY_TO: RelayToParameter,
-            Enum_Parameter.OVERLAY_TTL: OverlayTTLParameter,
-            Enum_Parameter.ROUTE_VIA: RouteViaParameter,
-            Enum_Parameter.FROM: FromParameter,
-            Enum_Parameter.RVS_HMAC: RVSHMACParameter,
-            Enum_Parameter.VIA_RVS: ViaRVSParameter,
-            Enum_Parameter.RELAY_HMAC: RelayHMACParameter,
-        }),
+        registry=Parameter.registry,
     )
     #: Payload.
     payload: 'bytes' = PayloadField()

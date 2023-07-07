@@ -24,7 +24,7 @@ from pcapkit.protocols.misc.pcap.frame import Frame
 from pcapkit.protocols.misc.pcapng import PCAPNG
 from pcapkit.protocols.protocol import Protocol
 from pcapkit.protocols.schema.application.httpv2 import FrameType as Schema_HTTP_FrameType
-from pcapkit.protocols.schema.internet.hip import HIP as Schema_HIP
+from pcapkit.protocols.schema.internet.hip import Parameter as Schema_HIP_Parameter
 from pcapkit.protocols.schema.internet.hopopt import HOPOPT as Schema_HOPOPT
 from pcapkit.protocols.schema.internet.ipv4 import IPv4 as Schema_IPv4
 from pcapkit.protocols.schema.internet.ipv6_opts import IPv6_Opts as Schema_IPv6_Opts
@@ -94,7 +94,6 @@ if TYPE_CHECKING:
     from pcapkit.protocols.misc.pcapng import RecordParser as PCAPNG_RecordParser
     from pcapkit.protocols.misc.pcapng import SecretsConstructor as PCAPNG_SecretsConstructor
     from pcapkit.protocols.misc.pcapng import SecretsParser as PCAPNG_SecretsParser
-    from pcapkit.protocols.schema.internet.hip import Parameter as Schema_HIP_Parameter
     from pcapkit.protocols.schema.internet.hopopt import Option as Schema_HOPOPT_Option
     from pcapkit.protocols.schema.internet.ipv4 import Option as Schema_IPv4_Option
     from pcapkit.protocols.schema.internet.ipv6_opts import Option as Schema_IPv6_Opts_Option
@@ -361,7 +360,7 @@ def register_hip_parameter(code: 'HIP_Parameter', meth: 'str | tuple[HIP_Paramet
 
     HIP.register_parameter(code, meth)
     if schema is not None:
-        cast('OptionField[Schema_HIP_Parameter]', Schema_HIP.param).registry[code] = schema
+        Schema_HIP_Parameter.register(code, schema)
     logger.info('registered HIP parameter parser: %s', code.name)
 
 
