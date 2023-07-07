@@ -33,19 +33,19 @@ from pcapkit.protocols.schema.internet.mh import MAP_MH_DATA
 from pcapkit.protocols.schema.internet.mh import CGAParameter as Schema_MH_CGAParameter
 from pcapkit.protocols.schema.internet.mh import Packet as Schema_MH_Packet
 from pcapkit.protocols.schema.misc.pcapng import BlockType as Schema_PCAPNG_BlockType
+from pcapkit.protocols.schema.misc.pcapng import DSBSecrets as Schema_PCAPNG_DSBSecrets
 from pcapkit.protocols.schema.misc.pcapng import \
     NameResolutionBlock as Schema_PCAPNG_NameResolutionBlock
+from pcapkit.protocols.schema.misc.pcapng import \
+    NameResolutionRecord as Schema_PCAPNG_NameResolutionRecord
+from pcapkit.protocols.schema.misc.pcapng import Option as Schema_PCAPNG_Option
 from pcapkit.protocols.schema.transport.tcp import MAP_MPTCP_DATA
 from pcapkit.protocols.schema.transport.tcp import TCP as Schema_TCP
 from pcapkit.protocols.transport.tcp import TCP
 from pcapkit.protocols.transport.udp import UDP
 from pcapkit.utilities.exceptions import RegistryError
 from pcapkit.utilities.logging import logger
-from pcapkit.protocols.schema.misc.pcapng import DSBSecrets as Schema_PCAPNG_DSBSecrets
-from pcapkit.protocols.schema.misc.pcapng import Option as Schema_PCAPNG_Option
 
-from pcapkit.protocols.schema.misc.pcapng import \
-    NameResolutionRecord as Schema_PCAPNG_NameResolutionRecord
 if TYPE_CHECKING:
     from typing import Optional, Type
 

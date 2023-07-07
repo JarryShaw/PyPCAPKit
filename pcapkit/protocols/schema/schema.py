@@ -21,7 +21,7 @@ from pcapkit.utilities.warnings import SchemaWarning, UnknownFieldWarning, warn
 if TYPE_CHECKING:
     from collections import OrderedDict
     from enum import Enum
-    from typing import IO, Any, Iterable, Iterator, Optional, Type, DefaultDict
+    from typing import IO, Any, DefaultDict, Iterable, Iterator, Optional, Type
 
     from typing_extensions import Self
 

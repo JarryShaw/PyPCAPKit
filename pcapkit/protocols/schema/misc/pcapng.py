@@ -61,7 +61,7 @@ __all__ = [
 
 if TYPE_CHECKING:
     from ipaddress import IPv4Address, IPv4Interface, IPv6Address, IPv6Interface
-    from typing import Any, Callable, DefaultDict, Optional, Type, Iterable
+    from typing import Any, Callable, DefaultDict, Iterable, Optional, Type
 
     from typing_extensions import Literal, Self
 
