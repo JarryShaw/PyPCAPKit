@@ -56,7 +56,7 @@ class ListField(_Field[List[_TL]], Generic[_TL]):
     def __init__(self, length: 'int | Callable[[dict[str, Any]], int]' = lambda _: -1,
                  item_type: 'Optional[_Field]' = None,
                  callback: 'Callable[[Self, dict[str, Any]], None]' = lambda *_: None) -> 'None':
-        self._name = '<list>'
+        #self._name = '<list>'
         self._callback = callback
         self._item_type = item_type
 
@@ -213,7 +213,7 @@ class OptionField(ListField, Generic[_TS]):
                  eool: 'Optional[int | StdlibEnum | AenumEnum]' = None,
                  callback: 'Callable[[Self, dict[str, Any]], None]' = lambda *_: None) -> 'None':
         super().__init__(length, None, callback)
-        self._name = '<option>'
+        #self._name = '<option>'
         self._eool = eool
         self._option_padding = 0
 

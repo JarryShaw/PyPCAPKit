@@ -47,7 +47,39 @@ Header Schema
    .. autoattribute:: __excluded__
       :no-value:
 
+.. autoclass:: pcapkit.protocols.schema.schema.EnumSchema
+   :members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
+   .. autoattribute:: registry
+   .. automethod:: register
+
+   .. automethod:: __init_subclass__
+   .. autoattribute:: __enum__
+
 .. autodecorator:: pcapkit.protocols.schema.schema.schema_final
+
+Meta Classes
+~~~~~~~~~~~~
+
+.. autoclass:: pcapkit.protocols.schema.schema.SchemaMeta
+   :members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
+.. autoclass:: pcapkit.protocols.schema.schema.EnumMeta
+   :members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
+   .. autoproperty:: registry
 
 Data Model
 ----------

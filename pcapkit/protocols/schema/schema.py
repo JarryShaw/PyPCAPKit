@@ -1,11 +1,13 @@
 # -*- coding: utf-8 -*-
 """schema for protocol headers"""
 
+import abc
 import collections
 import collections.abc
 import io
 import itertools
-from typing import TYPE_CHECKING, Generic, TypeVar, cast, final
+from typing import TYPE_CHECKING, Any, Generic, TypeVar, cast, final
+import weakref
 
 from pcapkit.corekit.fields.collections import ListField, OptionField
 from pcapkit.corekit.fields.field import NoValue, _Field
@@ -19,13 +21,15 @@ from pcapkit.utilities.warnings import SchemaWarning, UnknownFieldWarning, warn
 
 if TYPE_CHECKING:
     from collections import OrderedDict
-    from typing import IO, Any, Iterable, Iterator, Optional, Type
+    from enum import Enum
+    from typing import IO, Any, Iterable, Iterator, Optional, Type, DefaultDict
 
     from typing_extensions import Self
 
-__all__ = ['Schema', 'schema_final']
+__all__ = ['Schema', 'EnumSchema', 'schema_final']
 
 VT = TypeVar('VT')
+ET = TypeVar('ET', bound='Enum')
 ST = TypeVar('ST', bound='Type[Schema]')
 
 
@@ -65,50 +69,8 @@ def schema_final(cls: 'ST', *, _finalised: 'bool' = True) -> 'ST':
     cls.__builtin__ = set(temp)
     cls.__excluded__.extend(cls.__builtin__)
 
-    args_ = []  # type: list[str]
-    dict_ = []  # type: list[str]
-
-    cls_fields = []  # type: list[tuple[str, _Field]]
-    for cls_ in cls.mro():
-        # NOTE: We skip the ``Schema`` class itself, to avoid superclass
-        # type annotations being considered.
-        if cls_ is Schema:
-            break
-
-        # NOTE: We iterate in reversed order to ensure that the type
-        # annotations of the superclasses are considered first.
-        for key in reversed(cls_.__dict__.keys()):
-            # NOTE: We skip duplicated annotations to avoid duplicate
-            # argument in function definition.
-            if key in args_:
-                continue
-
-            # NOTE: We only consider the fields that are instances of
-            # the ``_Field`` class.
-            field = cls_.__dict__[key]
-            if not isinstance(field, _Field):
-                continue
-
-            # NOTE: We need to consider the case where the field itself
-            # is optional, i.e., the field is not required to be present
-            # in the protocol header.
-            args_.append(f'{key}=NoValue')
-            dict_.append(f'{key}={key}')
-
-            field.name = key
-            cls_fields.append((key, field))
-
-    # NOTE: We reverse the two lists such that the order of the
-    # arguments is the same as the order of the field definition,
-    # i.e., from the most base class to the most derived class.
-    args_.reverse()
-    dict_.reverse()
-
-    # NOTE: We also reverse the field list such that the order
-    # can be preserved in the :class:`~collections.OrderedDict`
-    # instance.
-    cls_fields.reverse()
-    cls.__fields__ = collections.OrderedDict(cls_fields)
+    args_ = [f'{key}=NoValue' for key in cls.__fields__]
+    dict_ = [f'{key}={key}' for key in cls.__fields__]
 
     # NOTE: We shall only attempt to generate ``__init__`` method
     # if the class does not define such method.
@@ -148,7 +110,83 @@ def schema_final(cls: 'ST', *, _finalised: 'bool' = True) -> 'ST':
     return final(cls)
 
 
-class Schema(Mapping[str, VT], Generic[VT]):
+class SchemaMeta(abc.ABCMeta):
+    """Meta class to add dynamic support to :class:`Schema`.
+
+    This meta class is used to generate necessary attributes for the
+    :class:`Schema` class. It can be useful to reduce runtime generation
+    cost as well as caching already generated attributes.
+
+    * :attr:`Schema.__fields__` is a dictionary of field names and their
+      corresponding :class:`~pcapkit.corekit.fields.field.Field` objects,
+      which are used to define and parse the protocol headers. The field
+      dictionary will automatically be populated from the class attributes
+      of the :class:`Schema` class, and the field names will be the same
+      as the attribute names.
+
+      .. seealso::
+
+         This is implemented thru setting up the initial field dictionary
+         in the :meth:`__prepare__` method, and then inherit the field
+         dictionaries from the base classes.
+
+         Later, during the class creation, the :meth:`Field.__set_name__`
+         method will be called to set the field name for each field object,
+         as well as to add the field object to the field dictionary.
+
+    * :attr:`Schema.__additional__` and :attr:`Schema.__excluded__` are
+      lists of additional and excluded field names, which are used to
+      determine certain names to be included or excluded from the field
+      dictionary. They will be automatically populated from the class
+      attributes of the :class:`Schema` class and its base classes.
+
+      .. note::
+
+         This is implemented thru the :meth:`__new__` method, which will
+         inherit the additional and excluded field names from the base
+         classes, as well as populating the additional and excluded field
+         from the subclass attributes.
+
+         .. code-block:: python
+
+            class A(Schema):
+                __additional__ = ['a', 'b']
+
+            class B(A):
+                __additional__ = ['c', 'd']
+
+            class C(B):
+                __additional__ = ['e', 'f']
+
+            print(A.__additional__)  # ['a', 'b']
+            print(B.__additional__)  # ['a', 'b', 'c', 'd']
+            print(C.__additional__)  # ['a', 'b', 'c', 'd', 'e', 'f']
+
+    """
+
+    @classmethod
+    def __prepare__(cls, name: 'str', bases: 'tuple[type, ...]', /, **kwds: 'Any') -> 'Mapping[str, object]':
+        fields = collections.OrderedDict()
+        for base in bases:
+            if hasattr(base, '__fields__'):
+                fields.update(base.__fields__)
+        return collections.OrderedDict(__fields__=fields)
+
+    def __new__(cls, name: 'str', bases: 'tuple[type, ...]', attrs: 'dict[str, Any]', **kwargs: 'Any') -> 'Type[Schema]':
+        if '__additional__' not in attrs:
+            attrs['__additional__'] = []
+        if '__excluded__' not in attrs:
+            attrs['__excluded__'] = []
+
+        for base in bases:
+            if hasattr(base, '__additional__'):
+                attrs['__additional__'].extend(name for name in base.__additional__ if name not in attrs['__additional__'])
+            if hasattr(base, '__excluded__'):
+                attrs['__excluded__'].extend(name for name in base.__excluded__ if name not in attrs['__excluded__'])
+        return super().__new__(cls, name, bases, attrs, **kwargs)  # type: ignore[return-value]
+
+
+class Schema(Mapping[str, VT], Generic[VT], metaclass=SchemaMeta):
     """Schema for protocol headers."""
 
     if TYPE_CHECKING:
@@ -603,3 +641,78 @@ class Schema(Mapping[str, VT], Generic[VT]):
 
         """
         return self
+
+
+class EnumMeta(SchemaMeta):
+    """Meta class to add dynamic support for :class:`EnumSchema`.
+
+    * :attr:`~EnumSchema.registry` is added to subclasses as an *immutable*
+      proxy (similar to :class:`property`, but on class variables) to the
+      :attr:`~EnumSchema.__enum__` mapping.
+
+    """
+
+    @property
+    def registry(cls) -> 'DefaultDict[ET, Type[EnumSchema]]':
+        """Mapping of enumeration numbers to schemas."""
+        return cls.__enum__  # type: ignore[attr-defined]
+
+
+class EnumSchema(Schema, Generic[ET], metaclass=EnumMeta):
+    """:class:`Schema` with enumeration mapping support.
+
+    .. code-block:: python
+
+        from pcapkit.const.pcapng.block_type import BlockType as Enum_BlockType
+        from pcapkit.protocols.schema.misc.pcapng improt BlockType
+
+
+        class NewBlock(BlockType, code=Enum_BlockType.New_Block):
+            ...
+
+
+        # NewBlock is now registered to BlockType.registry
+        # alternatively, you can use the BlockType.register() method
+        print(BlockType.registry[Enum_BlockType.New_Block] is NewBlock)  # True
+
+    """
+
+    __additional__ = ['__enum__']
+    __excluded__ = ['__enum__']
+
+    if TYPE_CHECKING:
+        #: Mapping of enumeration numbers to schemas (**internal use only**).
+        __enum__: 'DefaultDict[ET, Type[Self]]'
+        #: Mapping of enumeration numbers to schemas.
+        registry: 'DefaultDict[ET, Type[Self]]'
+
+    def __init_subclass__(cls, *, code: 'Optional[ET | Iterable[ET]]' = None) -> 'None':
+        """Register enumeration to :attr:`registry` mapping.
+
+        Args:
+            code: Enumeration code. It can be either a single enumeration
+                or a list of enumerations.
+
+        If ``code`` is provided, the subclass will be registered to the
+        :attr:`registry` mapping with the given ``code``. If ``code`` is
+        not given, the subclass will not be registered.
+
+        """
+        if code is not None:
+            if isinstance(code, collections.abc.Iterable):
+                for _code in code:
+                    cls.__enum__[_code] = cls
+            else:
+                cls.__enum__[code] = cls
+        super().__init_subclass__()
+
+    @classmethod
+    def register(cls, code: 'ET', schema: 'Type[Self]') -> 'None':
+        """Register enumetaion to :attr:`__enum__` mapping.
+
+        Args:
+            code: Enumetaion code.
+            schema: Enumetaion schema.
+
+        """
+        cls.__enum__[code] = schema

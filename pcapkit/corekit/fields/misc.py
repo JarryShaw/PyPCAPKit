@@ -273,7 +273,7 @@ class PayloadField(_Field[_TP]):
                  default: '_TP | NoValueType | bytes' = NoValue,
                  protocol: 'Optional[Type[_TP]]' = None,
                  callback: 'Callable[[Self, dict[str, Any]], None]' = lambda *_: None) -> 'None':
-        self._name = '<payload>'
+        #self._name = '<payload>'
         self._default = default  # type: ignore[assignment]
         self._protocol = protocol  # type: ignore[assignment]
         self._callback = callback
@@ -409,7 +409,7 @@ class SwitchField(_Field[_TC]):
         return self._field
 
     def __init__(self, selector: 'Callable[[dict[str, Any]], _Field[_TC]]' = lambda _: NoValueField()) -> 'None':  # type: ignore[assignment,return-value]
-        self._name = '<switch>'
+        #self._name = '<switch>'
         self._field = cast('_Field[_TC]', NoValueField())
         self._selector = selector
 
@@ -527,7 +527,7 @@ class SchemaField(_Field[_TS]):
                  default: '_TS | NoValueType | bytes' = NoValue,
                  packet: 'Optional[dict[str, Any]]' = None,
                  callback: 'Callable[[Self, dict[str, Any]], None]' = lambda *_: None) -> 'None':
-        self._name = '<schema>'
+        #self._name = '<schema>'
         self._callback = callback
 
         if packet is None:
@@ -679,7 +679,7 @@ class ForwardMatchField(_Field[_TC]):
         return self._field
 
     def __init__(self, field: '_Field[_TC]') -> 'None':
-        self._name = '<forward_match>'
+        #self._name = '<forward_match>'
         self._field = field
 
     def __call__(self, packet: 'dict[str, Any]') -> 'Self':

@@ -16,6 +16,8 @@ if TYPE_CHECKING:
 
     from typing_extensions import Literal, Self
 
+    from pcapkit.protocols.schema.schema import Schema
+
 _T = TypeVar('_T')
 
 
@@ -109,7 +111,9 @@ class _Field(Generic[_T], metaclass=abc.ABCMeta):
 
     # NOTE: This method is created as a placeholder for the necessary attributes.
     def __init__(self, *args: 'Any', **kwargs: 'Any') -> 'None':
-        self._name = f'<{type(self).__name__[:-5].lower()}>'
+        if not hasattr(self, '_name'):
+            self._name = f'<{type(self).__name__[:-5].lower()}>'
+
         self._default = NoValue
         self._template = '0s'
         self._callback = lambda *_: None
@@ -118,6 +122,14 @@ class _Field(Generic[_T], metaclass=abc.ABCMeta):
         if not self.name.isidentifier():
             return f'<{self.__class__.__name__}>'
         return f'<{self.__class__.__name__} {self.name}>'
+
+    def __set_name__(self, owner: 'Schema', name: 'str') -> 'None':
+        # Update field list (if applicable)
+        if hasattr(owner, '__fields__'):
+            owner.__fields__[name] = self
+
+        # Set field name
+        self.name = name
 
     def pre_process(self, value: '_T', packet: 'dict[str, Any]') -> 'Any':  # pylint: disable=unused-argument
         """Process field value before construction (packing).
@@ -204,7 +216,10 @@ class Field(_Field[_T], Generic[_T]):
     def __init__(self, length: 'int | Callable[[dict[str, Any]], int]',
                  default: '_T | NoValueType' = NoValue,
                  callback: 'Callable[[Self, dict[str, Any]], None]' = lambda *_: None) -> 'None':
-        self._name = '<unknown>'
+        #self._name = '<unknown>'
+        if not hasattr(self, '_name'):
+            self._name = f'<{type(self).__name__[:-5].lower()}>'
+
         self._default = default
         self._callback = callback
 
