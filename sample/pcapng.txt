@@ -20,20 +20,20 @@ Interface Description 1
   |-- linktype -> LinkType::ETHERNET [1]
   |-- snaplen -> 65535
   |-- options 
-        |-- OptionType::if_tsresol [9_if_tsresol] 
+        |-- OptionType::if_tsresol [if_tsresol [9]] 
         |     |--> --
         |     |-- type 
-        |     |     |-- enum -> OptionType::if_tsresol [9_if_tsresol]
+        |     |     |-- enum -> OptionType::if_tsresol [if_tsresol [9]]
         |     |     |-- opt_name -> if_tsresol
         |     |     |-- opt_value -> 9
         |     |-- length -> 1
         |     |-- resolution -> 1000000
-        |-- OptionType::opt_endofopt [0_opt_endofopt] 
+        |-- OptionType::opt_endofopt [opt_endofopt [0]] 
               |--> --
               |-- type 
               |     |-- enum 
-              |     |     |--> OptionType::opt_endofopt
-              |     |          [0_opt_endofopt]
+              |     |     |--> OptionType::opt_endofopt [opt_endofopt
+              |     |          [0]]
               |     |-- opt_name -> opt_endofopt
               |     |-- opt_value -> 0
               |-- length -> 0
@@ -76,8 +76,16 @@ Frame 1
   |           |-- src -> 0.0.0.0
   |           |-- dst -> 255.255.255.255
   |           |-- udp 
-  |                 |-- srcport -> 68
-  |                 |-- dstport -> 67
+  |                 |-- srcport 
+  |                 |     |-- enum -> AppType::bootpc [bootpc [68 - tcp|udp]]
+  |                 |     |-- svc -> bootpc
+  |                 |     |-- port -> 68
+  |                 |     |-- proto -> TransportProtocol::tcp|udp [3]
+  |                 |-- dstport 
+  |                 |     |-- enum -> AppType::bootps [bootps [67 - tcp|udp]]
+  |                 |     |-- svc -> bootps
+  |                 |     |-- port -> 67
+  |                 |     |-- proto -> TransportProtocol::tcp|udp [3]
   |                 |-- len -> 280
   |                 |-- checksum -> 59 1f
   |                 |-- raw 
@@ -141,8 +149,16 @@ Frame 2
   |           |-- src -> 192.168.0.1
   |           |-- dst -> 192.168.0.10
   |           |-- udp 
-  |                 |-- srcport -> 67
-  |                 |-- dstport -> 68
+  |                 |-- srcport 
+  |                 |     |-- enum -> AppType::bootps [bootps [67 - tcp|udp]]
+  |                 |     |-- svc -> bootps
+  |                 |     |-- port -> 67
+  |                 |     |-- proto -> TransportProtocol::tcp|udp [3]
+  |                 |-- dstport 
+  |                 |     |-- enum -> AppType::bootpc [bootpc [68 - tcp|udp]]
+  |                 |     |-- svc -> bootpc
+  |                 |     |-- port -> 68
+  |                 |     |-- proto -> TransportProtocol::tcp|udp [3]
   |                 |-- len -> 308
   |                 |-- checksum -> 22 33
   |                 |-- raw 
@@ -208,8 +224,16 @@ Frame 3
   |           |-- src -> 0.0.0.0
   |           |-- dst -> 255.255.255.255
   |           |-- udp 
-  |                 |-- srcport -> 68
-  |                 |-- dstport -> 67
+  |                 |-- srcport 
+  |                 |     |-- enum -> AppType::bootpc [bootpc [68 - tcp|udp]]
+  |                 |     |-- svc -> bootpc
+  |                 |     |-- port -> 68
+  |                 |     |-- proto -> TransportProtocol::tcp|udp [3]
+  |                 |-- dstport 
+  |                 |     |-- enum -> AppType::bootps [bootps [67 - tcp|udp]]
+  |                 |     |-- svc -> bootps
+  |                 |     |-- port -> 67
+  |                 |     |-- proto -> TransportProtocol::tcp|udp [3]
   |                 |-- len -> 280
   |                 |-- checksum -> 9f bd
   |                 |-- raw 
@@ -273,8 +297,16 @@ Frame 4
   |           |-- src -> 192.168.0.1
   |           |-- dst -> 192.168.0.10
   |           |-- udp 
-  |                 |-- srcport -> 67
-  |                 |-- dstport -> 68
+  |                 |-- srcport 
+  |                 |     |-- enum -> AppType::bootps [bootps [67 - tcp|udp]]
+  |                 |     |-- svc -> bootps
+  |                 |     |-- port -> 67
+  |                 |     |-- proto -> TransportProtocol::tcp|udp [3]
+  |                 |-- dstport 
+  |                 |     |-- enum -> AppType::bootpc [bootpc [68 - tcp|udp]]
+  |                 |     |-- svc -> bootpc
+  |                 |     |-- port -> 68
+  |                 |     |-- proto -> TransportProtocol::tcp|udp [3]
   |                 |-- len -> 308
   |                 |-- checksum -> df db
   |                 |-- raw 
